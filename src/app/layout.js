@@ -12,13 +12,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Antic Body",
+  title: "Antique Body",
   description: "Strength of the Ancients",
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
   },
   manifest: "/manifest.json",
-  themeColor: "#FF7800",
 };
 
 export default function RootLayout({ children }) {
@@ -27,7 +26,6 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#FF7800" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
