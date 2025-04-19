@@ -21,7 +21,7 @@ export default function LoginPage() {
 
         <div className="logo">
           <h1>
-            ANTIC <span>BODY</span>
+            ANTIQUE <span>BODY</span>
           </h1>
           <div className="logo-tagline">STRENGTH OF THE ANCIENTS</div>
         </div>
