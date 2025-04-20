@@ -6,22 +6,21 @@ import AudioPlayButton from "../components/custom/AudioPlayButton";
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex items-center justify-center relative">
+    <main className="min-h-screen flex flex-col items-center justify-center relative">
       {/* Background with all artifacts enabled */}
       <Background />
 
-      {/* Audio player component */}
-      <AudioPlayButton audioSrc="/audio/gladiator-theme.mp3" />
-
       <div className="z-10 relative text-white text-center p-6 rounded-lg backdrop-blur-sm">
-        <h1 className="text-3xl font-bold mb-4">
-          ANTIQUE <span className="text-[#FF7800]">BODY</span>
+        <h1 className="text-7xl mb-4 spartacus-font">
+          ANTIQUE <span className="text-[#FF7800] ">BODY</span>
         </h1>
-        <p>
+        <p className="text-lg spartacus-font">
           Your antique-themed UI is ready. Navigate to the login page for a
           complete example.
         </p>
       </div>
+      {/* Audio player component */}
+      <AudioPlayButton audioSrc="/audio/gladiator-theme.mp3" />
     </main>
   );
 }

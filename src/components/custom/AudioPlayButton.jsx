@@ -1,19 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 
 export default function AudioPlayButton({ audioSrc }) {
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
-
-  useEffect(() => {
-    // Attempt autoplay when component mounts
-    if (audioRef.current) {
-      audioRef.current.play().catch((error) => {
-        console.log("Autoplay prevented:", error);
-      });
-    }
-  }, []);
 
   const toggleAudio = () => {
     if (audioRef.current) {
@@ -34,7 +25,6 @@ export default function AudioPlayButton({ audioSrc }) {
       <audio
         ref={audioRef}
         src={audioSrc}
-        autoPlay
         loop
         className="cursor-pointer"
         onPlay={() => setIsPlaying(true)}
@@ -44,7 +34,7 @@ export default function AudioPlayButton({ audioSrc }) {
       {/* Audio control button */}
       <button
         onClick={toggleAudio}
-        className="fixed bottom-6 right-6 z-20 bg-gradient-to-r from-[#b87333] to-[#ffd700] p-3 rounded-full shadow-lg hover:scale-105 transition-transform duration-300 focus:outline-none border-2 border-[#ff7800]"
+        className="z-20 bg-gradient-to-r from-[#b87333] to-[#ffd700] p-3 rounded-full shadow-lg hover:scale-105 transition-transform duration-300 focus:outline-none border-2 border-[#ff7800] cursor-pointer"
         aria-label={
           isPlaying ? "Pause gladiator music" : "Play gladiator music"
         }
@@ -52,7 +42,7 @@ export default function AudioPlayButton({ audioSrc }) {
         {isPlaying ? (
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-black"
+            className="h-10 w-10 text-black"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -67,7 +57,7 @@ export default function AudioPlayButton({ audioSrc }) {
         ) : (
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-black"
+            className="h-10 w-10 text-black"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
