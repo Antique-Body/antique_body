@@ -1,5 +1,8 @@
+"use client";
+
 import React from "react";
 import Background from "../components/background";
+import AudioPlayButton from "../components/custom/AudioPlayButton";
 
 export default function Home() {
   return (
@@ -7,7 +10,10 @@ export default function Home() {
       {/* Background with all artifacts enabled */}
       <Background />
 
-      <div className="z-10 relative text-white text-center p-6  rounded-lg backdrop-blur-sm">
+      {/* Audio player component */}
+      <AudioPlayButton audioSrc="/audio/gladiator-theme.mp3" />
+
+      <div className="z-10 relative text-white text-center p-6 rounded-lg backdrop-blur-sm">
         <h1 className="text-3xl font-bold mb-4">
           ANTIQUE <span className="text-[#FF7800]">BODY</span>
         </h1>
