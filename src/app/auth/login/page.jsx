@@ -1,9 +1,43 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Background from "@/components/background";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result.error) {
+        setError("Invalid email or password");
+      } else {
+        router.push("/");
+      }
+    } catch (error) {
+      setError("An error occurred during login");
+      console.error("Login error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <main className="min-h-screen flex items-center justify-center relative bg-[#0a0a0a] text-white">
       <Background
@@ -27,7 +61,7 @@ export default function LoginPage() {
 
         {/* Logo */}
         <div className="text-center mb-[30px] flex flex-col items-center">
-          <h1 className="text-[28px] font-bold tracking-[2px] relative inline-block overflow-hidden after:content-[''] after:absolute after:w-1/2 after:h-[2px] after:bg-gradient-to-r after:from-transparent after:via-[#ff7800] after:to-transparent after:bottom-[-8px] after:left-1/4">
+          <h1 className="text-[28px] font-bold tracking-[2px] spartacus-font relative inline-block overflow-hidden after:content-[''] after:absolute after:w-1/2 after:h-[2px] after:bg-gradient-to-r after:from-transparent after:via-[#ff7800] after:to-transparent after:bottom-[-8px] after:left-1/4">
             ANTIQUE <span className="text-[#ff7800]">BODY</span>
           </h1>
           <div className="text-[12px] font-normal tracking-[2px] text-[#777] mt-[5px] uppercase">
@@ -35,21 +69,61 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex mb-[25px] relative z-[1]">
-          <div className="flex-1 text-center py-3 px-0 cursor-pointer transition-all duration-300 font-medium text-[#ff7800]">
-            TRAINER
-          </div>
-          <div className="flex-1 text-center py-3 px-0 cursor-pointer transition-all duration-300 font-medium text-[#777]">
-            USER
-          </div>
-          <div className="absolute bottom-0 left-0 w-1/2 h-[3px] bg-[#ff7800] transition-all duration-300 ease-[cubic-bezier(0.68,-0.55,0.27,1.55)]"></div>
-        </div>
+        {/* Login Form */}
+        <form onSubmit={handleSubmit}>
+          {error && (
+            <div className="mb-4 text-red-500 text-center text-sm">{error}</div>
+          )}
 
-        <p className="text-center text-sm text-gray-400 mt-4">
-          Login page placeholder - complete version will be implemented in the
-          LoginContainer and LoginForm components
-        </p>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1" htmlFor="email">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full p-2 bg-[#1a1a1a] border border-[#333] rounded focus:outline-none focus:border-[#ff7800] text-white"
+              required
+            />
+          </div>
+
+          <div className="mb-6">
+            <label
+              className="block text-sm font-medium mb-1"
+              htmlFor="password"
+            >
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full p-2 bg-[#1a1a1a] border border-[#333] rounded focus:outline-none focus:border-[#ff7800] text-white"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-[#ff7800] to-[#ff5f00] py-2 rounded font-medium text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 disabled:opacity-50"
+          >
+            {loading ? "Logging in..." : "LOGIN"}
+          </button>
+
+          <p className="mt-4 text-center text-sm">
+            Don't have an account?{" "}
+            <Link
+              href="/auth/register"
+              className="text-[#ff7800] hover:underline"
+            >
+              Register
+            </Link>
+          </p>
+        </form>
       </div>
 
       {/* Add keyframe animations */}
