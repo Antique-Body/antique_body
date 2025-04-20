@@ -1,36 +1,99 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Antique Body
 
-## Getting Started
+A Next.js application with authentication, MySQL database, and Prisma ORM.
 
-First, run the development server:
+## Setup Guide
+
+### 1. MySQL Server Setup
+
+1. Download and install MySQL Server from [MySQL Downloads](https://dev.mysql.com/downloads/mysql/)
+2. Follow the installation instructions for your operating system
+3. Make sure the MySQL service is running
+
+### 2. Create Database
+
+1. Open terminal/command prompt
+2. Connect to MySQL with:
+   ```bash
+   mysql -u root -p
+   ```
+3. Enter your password when prompted
+4. Create a new database:
+   ```sql
+   CREATE DATABASE antique_body;
+   ```
+5. Exit MySQL:
+   ```sql
+   EXIT;
+   ```
+
+### 3. Project Setup
+
+1. Install project dependencies:
+   ```bash
+   npm install
+   ```
+
+### 4. Prisma Setup
+
+1. Initialize Prisma:
+
+   ```bash
+   npx prisma init
+   ```
+
+2. Configure the database connection in the `.env` file:
+
+   ```
+   DATABASE_URL="mysql://root:password@localhost:3306/antique_body"
+   ```
+
+   Replace `password` with your MySQL password
+
+3. Run Prisma migrations:
+
+   ```bash
+   npx prisma migrate dev --name init
+   ```
+
+4. Open Prisma Studio to manage your database:
+   ```bash
+   npx prisma studio
+   ```
+
+### 5. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Project Documentation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+For detailed information about the project architecture, features, and development guidelines, refer to the [official project documentation](https://docs.google.com/document/d/1uhMHEOEpmGGR_CIzmqTFkvjIex92ZNdqMljhpRSzTG8/edit?tab=t.0).
 
-## Learn More
+## Pull Request Guidelines
 
-To learn more about Next.js, take a look at the following resources:
+### Naming Convention
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+All pull requests should follow this naming pattern:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+WPR/[issue-number]-name_of_feature
+```
 
-## Deploy on Vercel
+Example:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+WPR/1-user_authentication
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Technologies
+
+- [Next.js](https://nextjs.org/)
+- [NextAuth.js](https://next-auth.js.org/)
+- [Prisma](https://www.prisma.io/)
+- [MySQL](https://www.mysql.com/)
+- [React](https://react.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
