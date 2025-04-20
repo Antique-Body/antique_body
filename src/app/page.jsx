@@ -11,10 +11,10 @@ export default function Home() {
       <Background />
 
       <div className="z-10 relative text-white text-center p-6 rounded-lg backdrop-blur-sm">
-        <h1 className="text-7xl mb-4 spartacus-font">
+        <h1 className="text-7xl mb-4">
           ANTIQUE <span className="text-[#FF7800] ">BODY</span>
         </h1>
-        <p className="text-lg spartacus-font">
+        <p className="text-lg">
           Your antique-themed UI is ready. Navigate to the login page for a
           complete example.
         </p>
