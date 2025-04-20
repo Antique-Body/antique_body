@@ -10,7 +10,7 @@ export default function Home() {
       {/* Background with all artifacts enabled */}
       <Background />
 
-      <div className="z-10 relative text-white text-center p-6 rounded-lg backdrop-blur-sm">
+      <div className="spartacus-font z-10 relative text-white text-center p-6 rounded-lg backdrop-blur-sm">
         <h1 className="text-7xl mb-4">
           ANTIQUE <span className="text-[#FF7800] ">BODY</span>
         </h1>
