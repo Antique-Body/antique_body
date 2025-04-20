@@ -1,0 +1,232 @@
+// This is your Prisma schema file, [EXAMPLE -> HOW SHOULD YOU WRITE IT]
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for regular users/clients
+model User {
+  id              String    @id @default(cuid())
+  name            String
+  email           String    @unique
+  password        String
+  profileImage    String?
+  dateOfBirth     DateTime?
+  height          Float?
+  weight          Float?
+  goalWeight      Float?
+  fitnessLevel    FitnessLevel?
+  bio             String?
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  workoutPlans    WorkoutPlan[]
+  workoutSessions WorkoutSession[]
+  progressPhotos  ProgressPhoto[]
+  measurements    Measurement[]
+}
+
+// Trainer model
+model Trainer {
+  id              String   @id @default(cuid())
+  name            String
+  email           String   @unique
+  password        String
+  profileImage    String?
+  specialization  String[]
+  certification   String[]
+  experience      Int? // Years of experience
+  bio             String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  workoutPlans    WorkoutPlan[]
+  clients         ClientTrainer[]
+}
+
+// Join table for many-to-many relationship between clients and trainers
+model ClientTrainer {
+  id        String   @id @default(cuid())
+  userId    String
+  trainerId String
+  startDate DateTime @default(now())
+  endDate   DateTime?
+  
+  // Relations
+  trainer   Trainer  @relation(fields: [trainerId], references: [id])
+  
+  @@unique([userId, trainerId])
+}
+
+// Workout Plan created by trainers for users
+model WorkoutPlan {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  userId      String
+  trainerId   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  user        User     @relation(fields: [userId], references: [id])
+  trainer     Trainer? @relation(fields: [trainerId], references: [id])
+  workouts    Workout[]
+}
+
+// Individual workout within a plan
+model Workout {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  duration     Int?     // In minutes
+  workoutPlanId String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relations
+  workoutPlan   WorkoutPlan @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade)
+  exercises     WorkoutExercise[]
+  sessions      WorkoutSession[]
+}
+
+// Exercise database
+model Exercise {
+  id              String        @id @default(cuid())
+  name            String        @unique
+  description     String?
+  muscleGroups    MuscleGroup[] 
+  equipment       Equipment[]
+  difficultyLevel DifficultyLevel
+  instructions    String?
+  videoUrl        String?
+  imageUrl        String?
+  
+  // Relations
+  workoutExercises WorkoutExercise[]
+}
+
+// Join table for workouts and exercises
+model WorkoutExercise {
+  id         String   @id @default(cuid())
+  workoutId  String
+  exerciseId String
+  sets       Int?     @default(3)
+  reps       Int?
+  duration   Int?     // In seconds (for timed exercises)
+  restTime   Int?     // In seconds
+  notes      String?
+  
+  // Relations
+  workout    Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+}
+
+// Record of user performing a workout
+model WorkoutSession {
+  id          String   @id @default(cuid())
+  userId      String
+  workoutId   String
+  date        DateTime @default(now())
+  duration    Int?     // In minutes
+  feedback    String?
+  rating      Int?     // 1-5 star rating
+  
+  // Relations
+  user        User     @relation(fields: [userId], references: [id])
+  workout     Workout  @relation(fields: [workoutId], references: [id])
+  exercises   ExerciseLog[]
+}
+
+// Log of exercise performance in a workout session
+model ExerciseLog {
+  id                String   @id @default(cuid())
+  workoutSessionId  String
+  exerciseId        String
+  sets              Int
+  reps              Int?
+  weight            Float?
+  duration          Int?     // In seconds
+  notes             String?
+  createdAt         DateTime @default(now())
+  
+  // Relations
+  workoutSession    WorkoutSession @relation(fields: [workoutSessionId], references: [id], onDelete: Cascade)
+}
+
+// User body measurements for progress tracking
+model Measurement {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @default(now())
+  weight    Float?
+  chest     Float?
+  waist     Float?
+  hips      Float?
+  biceps    Float?
+  thighs    Float?
+  notes     String?
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+// Progress photos
+model ProgressPhoto {
+  id        String   @id @default(cuid())
+  userId    String
+  imageUrl  String
+  date      DateTime @default(now())
+  notes     String?
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+// Enums
+enum FitnessLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  ELITE
+}
+
+enum DifficultyLevel {
+  EASY
+  MEDIUM
+  HARD
+  EXPERT
+}
+
+enum MuscleGroup {
+  CHEST
+  BACK
+  SHOULDERS
+  BICEPS
+  TRICEPS
+  LEGS
+  GLUTES
+  CORE
+  FULL_BODY
+}
+
+enum Equipment {
+  NONE
+  DUMBBELLS
+  BARBELL
+  KETTLEBELL
+  RESISTANCE_BANDS
+  CABLE_MACHINE
+  BODYWEIGHT
+  CARDIO_MACHINE
+}
