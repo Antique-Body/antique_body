@@ -95,11 +95,7 @@ const Home = () => {
         />
 
         <div className="mt-4 flex w-full">
-          <ProgressBar
-            currentStep={currentStep}
-            totalSteps={TOTAL_STEPS}
-            className="mt-10"
-          />
+          <ProgressBar currentStep={currentStep} totalSteps={TOTAL_STEPS} />
         </div>
       </div>
 
