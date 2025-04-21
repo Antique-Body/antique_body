@@ -1,0 +1,57 @@
+import React from "react";
+
+const BrandLogo = ({ size = "medium" }) => {
+  const sizes = {
+    small: "w-6 h-6",
+    medium: "w-10 h-10",
+    large: "w-16 h-16",
+  };
+
+  return (
+    <div className="flex items-center justify-center gap-3">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 400 400"
+        className={sizes[size]}>
+        <defs>
+          <linearGradient
+            id="orangeGradient"
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="100%">
+            <stop
+              offset="0%"
+              style={{ stopColor: "#FF7800", stopOpacity: 1 }}
+            />
+            <stop
+              offset="100%"
+              style={{ stopColor: "#FF9A00", stopOpacity: 1 }}
+            />
+          </linearGradient>
+        </defs>
+        <g transform="translate(200, 200) scale(0.8)">
+          <path
+            d="M-10,-60 C-5,-65 5,-65 10,-60 C15,-55 15,-45 10,-40 C5,-35 -5,-35 -10,-40 C-15,-45 -15,-55 -10,-60 Z
+                M0,-35 L-10,-10 L-40,-20 C-45,-15 -50,-5 -45,5 C-40,10 -30,5 -20,0 L-10,5 L-15,50 L10,60 L15,5 L30,0
+                C40,5 50,0 45,-10 C40,-20 30,-20 20,-15 L0,-35 Z"
+            fill="url(#orangeGradient)"
+          />
+          <circle
+            cx="-40"
+            cy="-5"
+            r="10"
+            fill="#000"
+            stroke="#FF7800"
+            strokeWidth="1"
+          />
+        </g>
+      </svg>
+      <h2 className="text-2xl font-bold">
+        ANTIC <span className="text-[#FF7800]">BODY</span>
+      </h2>
+    </div>
+  );
+};
+
+export default BrandLogo;
