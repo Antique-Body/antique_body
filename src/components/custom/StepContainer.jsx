@@ -1,6 +1,6 @@
 import React from "react";
 
-const StepContainer = ({ currentStep, stepNumber, title, emoji, children }) => {
+export const StepContainer = ({ currentStep, stepNumber, title, emoji, children }) => {
   return (
     <div
       className={`${
@@ -15,5 +15,3 @@ const StepContainer = ({ currentStep, stepNumber, title, emoji, children }) => {
     </div>
   );
 };
-
-export default StepContainer;

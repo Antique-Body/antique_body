@@ -1,6 +1,6 @@
 import React from "react";
 
-const SelectionCard = ({
+export const SelectionCard = ({
   selected,
   onClick,
   emoji,
@@ -18,24 +18,18 @@ const SelectionCard = ({
       onClick={onClick}
       style={{
         boxShadow: selected ? "0 0 20px rgba(255, 120, 0, 0.2)" : "none",
+        backgroundImage: bgImage ? `url(${bgImage})` : "none",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
       }}>
       {bgImage && (
-        <div
-          className="absolute top-0 left-0 w-full h-3/5 bg-contain bg-center bg-no-repeat opacity-20"
-          style={{
-            filter: "blur(2px)",
-            backgroundImage: `url("${bgImage}")`,
-          }}></div>
+        <div className="absolute inset-0 bg-black bg-opacity-50 z-0"></div>
       )}
-      <div className={`${bgImage ? "relative z-10 pt-14" : ""}`}>
-        <div className="text-3xl mb-2">{emoji}</div>
-        <h3 className="text-lg font-semibold mb-2">{title}</h3>
-        {description && (
-          <p className="text-sm text-[#aaa] leading-snug">{description}</p>
-        )}
+      <div className="relative z-10 flex flex-col items-center justify-center h-full">
+        <div className="text-4xl mb-3">{emoji}</div>
+        <h3 className="text-lg font-bold mb-2">{title}</h3>
+        <p className="text-sm text-[#aaa]">{description}</p>
       </div>
     </div>
   );
 };
-
-export default SelectionCard;
