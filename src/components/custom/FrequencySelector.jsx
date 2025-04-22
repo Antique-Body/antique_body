@@ -1,16 +1,14 @@
 import React from "react";
-import { CheckIcon } from "./Icons";
+import { CheckIcon } from "@components/common";
 
-const FrequencySelector = ({ selectedFrequency, onSelect }) => {
+export const FrequencySelector = ({ selectedFrequency, onSelect }) => {
   return (
     <div className="grid grid-cols-3 gap-3">
       {[1, 2, 3, 4, 5, 6, 7].map((num) => (
         <div
           key={num}
           className={`relative bg-[rgba(20,20,20,0.8)] border-2 ${
-            selectedFrequency === num
-              ? "border-[#FF7800]"
-              : "border-[#222]"
+            selectedFrequency === num ? "border-[#FF7800]" : "border-[#222]"
           } rounded-xl py-4 px-2 cursor-pointer transition-all duration-300 flex flex-col items-center text-center hover:translate-y-[-3px] hover:border-[#FF7800] hover:shadow-[0_5px_15px_rgba(255,120,0,0.15)]`}
           onClick={() => onSelect(num)}
           style={{
@@ -20,12 +18,12 @@ const FrequencySelector = ({ selectedFrequency, onSelect }) => {
                 : "none",
           }}>
           <div className="font-bold text-2xl">{num}</div>
-          <p className="text-xs text-[#aaa] mt-1">
-            {num === 1 ? "day" : "days"}/week
-          </p>
+          <div className="text-xs text-[#aaa] mt-1">
+            {num === 1 ? "time" : "times"} per week
+          </div>
           {selectedFrequency === num && (
-            <div className="absolute top-2 right-2">
-              <CheckIcon size={16} className="text-[#FF7800]" />
+            <div className="absolute top-2 right-2 text-[#FF7800]">
+              <CheckIcon />
             </div>
           )}
         </div>
@@ -33,5 +31,3 @@ const FrequencySelector = ({ selectedFrequency, onSelect }) => {
     </div>
   );
 };
-
-export default FrequencySelector; 

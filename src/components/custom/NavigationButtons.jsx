@@ -1,15 +1,14 @@
 import React from "react";
-import Button from "./Button";
-import { ArrowLeft, ArrowRight } from "./Icons";
+import { Button, ArrowLeft, ArrowRight } from "@components/common";
 
-const NavigationButtons = ({
+export const NavigationButtons = ({
   currentStep,
   totalSteps,
   onPrevStep,
   onNextStep,
   onStartTraining,
   isCurrentStepSelected,
-  canFinish
+  canFinish,
 }) => {
   return (
     <div className="w-full flex justify-between items-center gap-4 mt-6">
@@ -29,25 +28,19 @@ const NavigationButtons = ({
         <Button
           onClick={onNextStep}
           disabled={!isCurrentStepSelected}
-          primary={isCurrentStepSelected}
-          className="px-8 py-3"
-          style={{ minWidth: "120px" }}>
+          className="min-w-[120px]"
+          rightIcon={<ArrowRight size={18} />}>
           Next
-          <ArrowRight size={18} className="ml-2" />
         </Button>
       ) : (
         <Button
           onClick={onStartTraining}
           disabled={!canFinish}
-          primary={canFinish}
-          className="px-8 py-3"
-          style={{ minWidth: "120px" }}>
-          Get Started
-          <ArrowRight size={18} className="ml-2" />
+          className="min-w-[120px]"
+          rightIcon={<ArrowRight size={18} />}>
+          Start Training
         </Button>
       )}
     </div>
   );
 };
-
-export default NavigationButtons; 

@@ -1,6 +1,6 @@
 import React from "react";
 
-const WelcomeCard = ({ title, subtitle, icon }) => {
+export const WelcomeCard = ({ title, subtitle, icon }) => {
   return (
     <div
       className="bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] rounded-2xl p-6 mb-8 shadow-lg relative overflow-hidden border border-[#222] w-full text-center min-h-max
@@ -18,12 +18,10 @@ const WelcomeCard = ({ title, subtitle, icon }) => {
       <div
         className="relative inline-block mt-2 mb-1 w-[60px] h-[60px] bg-gradient-to-br from-[#FF7800] to-[#FF9A00] rounded-full flex justify-center items-center"
         style={{
-          boxShadow: "0 5px 10px rgba(255, 120, 0, 0.3)",
+          boxShadow: "0 5px 15px rgba(255, 120, 0, 0.3)",
         }}>
         {icon}
       </div>
     </div>
   );
 };
-
-export default WelcomeCard;

@@ -1,15 +1,17 @@
 "use client";
 import React from "react";
-import BrandLogo from "../components/common/BrandLogo";
-import WelcomeCard from "../components/common/WelcomeCard";
-import StepContainer from "../components/common/StepContainer";
-import SelectionCard from "../components/common/SelectionCard";
-import ProgressBar from "../components/common/ProgressBar";
-import DecoratedBackground from "../components/common/DecoratedBackground";
-import FrequencySelector from "../components/common/FrequencySelector";
-import NavigationButtons from "../components/common/NavigationButtons";
-import { TOTAL_STEPS, stepConfig } from "./utils/stepConfig";
-import { useWorkoutForm } from "./hooks/useWorkoutForm";
+import { ProgressBar } from "@components/common";
+import {
+  BrandLogo,
+  WelcomeCard,
+  StepContainer,
+  SelectionCard,
+  DecoratedBackground,
+  FrequencySelector,
+  NavigationButtons,
+} from "@components/custom";
+import { TOTAL_STEPS, stepConfig } from "@utils";
+import { useWorkoutForm } from "@hooks/useWorkoutForm";
 
 const Home = () => {
   const {
@@ -95,7 +97,11 @@ const Home = () => {
         />
 
         <div className="mt-4 flex w-full">
-          <ProgressBar currentStep={currentStep} totalSteps={TOTAL_STEPS} />
+          <ProgressBar
+            value={currentStep}
+            maxValue={TOTAL_STEPS}
+            label="Step"
+          />
         </div>
       </div>
 

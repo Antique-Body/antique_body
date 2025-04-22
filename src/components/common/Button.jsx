@@ -1,6 +1,6 @@
 import React from "react";
 
-const Button = ({
+export const Button = ({
   onClick,
   disabled,
   children,
@@ -30,5 +30,3 @@ const Button = ({
     </button>
   );
 };
-
-export default Button;
