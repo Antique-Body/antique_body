@@ -10,7 +10,7 @@ import {
   FrequencySelector,
   NavigationButtons,
 } from "@components/custom";
-import { TOTAL_STEPS, stepConfig } from "@utils";
+import { TOTAL_STEPS, stepConfig } from "./utils/index";
 import { useWorkoutForm } from "@hooks/useWorkoutForm";
 
 const Home = () => {
