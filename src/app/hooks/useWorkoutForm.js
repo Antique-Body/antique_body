@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TOTAL_STEPS, stepConfig } from "@utils";
+import { TOTAL_STEPS, stepConfig } from "../utils";
 
 export const useWorkoutForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
