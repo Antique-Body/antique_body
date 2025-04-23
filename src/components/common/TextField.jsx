@@ -26,7 +26,7 @@ export const TextField = ({
         type={type}
         placeholder={placeholder}
         {...register(name, rules)}
-        className={`w-full p-2 bg-[#1a1a1a] border border-[#333] rounded focus:outline-none focus:border-[#ff7800] text-white ${className}`}
+        className={`w-full p-2 bg-[#1a1a1a] border border-[#333] rounded focus:outline-none focus:border-[#ff7800] text-white cursor-pointer ${className}`}
         required={required}
       />
       {error && <p className="text-sm text-red-500">{error.message}</p>}

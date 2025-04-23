@@ -13,7 +13,7 @@ export const Button = ({
   ...props
 }) => {
   const baseStyles =
-    "px-6 py-2 rounded font-medium transition-all duration-300 disabled:opacity-50";
+    "px-6 py-2 rounded font-medium transition-all duration-300 disabled:opacity-50 cursor-pointer hover:scale-[1.02]";
 
   const variants = {
     primary:
