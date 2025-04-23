@@ -156,7 +156,11 @@ export const SpinnerIcon = ({ size = 24, className = "", ...props }) => (
 );
 
 // Greek Theme Icons
-export const TrainerIcon = ({ className = "h-12 w-12", fill = "currentColor", ...props }) => (
+export const TrainerIcon = ({
+  className = "h-12 w-12",
+  fill = "currentColor",
+  ...props
+}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 100 100"
@@ -169,7 +173,11 @@ export const TrainerIcon = ({ className = "h-12 w-12", fill = "currentColor", ..
   </svg>
 );
 
-export const ClientIcon = ({ className = "h-12 w-12", fill = "currentColor", ...props }) => (
+export const ClientIcon = ({
+  className = "h-12 w-12",
+  fill = "currentColor",
+  ...props
+}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 100 100"
@@ -183,7 +191,11 @@ export const ClientIcon = ({ className = "h-12 w-12", fill = "currentColor", ...
   </svg>
 );
 
-export const SoloIcon = ({ className = "h-12 w-12", fill = "currentColor", ...props }) => (
+export const SoloIcon = ({
+  className = "h-12 w-12",
+  fill = "currentColor",
+  ...props
+}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 100 100"
@@ -200,7 +212,11 @@ export const SoloIcon = ({ className = "h-12 w-12", fill = "currentColor", ...pr
 );
 
 // Greek Artefacts
-export const ParthenonIcon = ({ className = "", fill = "currentColor", ...props }) => (
+export const ParthenonIcon = ({
+  className = "",
+  fill = "currentColor",
+  ...props
+}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 200 80"
@@ -211,15 +227,35 @@ export const ParthenonIcon = ({ className = "", fill = "currentColor", ...props 
   </svg>
 );
 
-export const ColosseumIcon = ({ className = "", fill = "currentColor", ...props }) => (
+export const ColosseumIcon = ({
+  className = "",
+  fill = "currentColor",
+  ...props
+}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 200 100"
     className={className}
     fill={fill}
     {...props}>
-    <ellipse cx="100" cy="60" rx="80" ry="30" fill="none" stroke="currentColor" strokeWidth="3" />
-    <ellipse cx="100" cy="60" rx="65" ry="25" fill="none" stroke="currentColor" strokeWidth="2" />
+    <ellipse
+      cx="100"
+      cy="60"
+      rx="80"
+      ry="30"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+    />
+    <ellipse
+      cx="100"
+      cy="60"
+      rx="65"
+      ry="25"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
     <path
       d="M35,60 L35,40 M45,60 L45,35 M55,60 L55,30 M65,60 L65,28 M75,60 L75,25 M85,60 L85,24 M95,60 L95,23 M105,60 L105,23 M115,60 L115,24 M125,60 L125,25 M135,60 L135,28 M145,60 L145,30 M155,60 L155,35 M165,60 L165,40"
       stroke="currentColor"
@@ -229,7 +265,11 @@ export const ColosseumIcon = ({ className = "", fill = "currentColor", ...props 
   </svg>
 );
 
-export const VaseIcon = ({ className = "", fill = "currentColor", ...props }) => (
+export const VaseIcon = ({
+  className = "",
+  fill = "currentColor",
+  ...props
+}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 80 100"
@@ -245,7 +285,11 @@ export const VaseIcon = ({ className = "", fill = "currentColor", ...props }) =>
   </svg>
 );
 
-export const ColumnIcon = ({ className = "", fill = "currentColor", ...props }) => (
+export const ColumnIcon = ({
+  className = "",
+  fill = "currentColor",
+  ...props
+}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 80 120"
@@ -261,7 +305,11 @@ export const ColumnIcon = ({ className = "", fill = "currentColor", ...props }) 
   </svg>
 );
 
-export const RunnerIcon = ({ className = "", fill = "currentColor", ...props }) => (
+export const RunnerIcon = ({
+  className = "",
+  fill = "currentColor",
+  ...props
+}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 80 120"
@@ -272,7 +320,11 @@ export const RunnerIcon = ({ className = "", fill = "currentColor", ...props }) 
   </svg>
 );
 
-export const DiscusIcon = ({ className = "", fill = "currentColor", ...props }) => (
+export const DiscusIcon = ({
+  className = "",
+  fill = "currentColor",
+  ...props
+}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 100 100"
@@ -285,7 +337,11 @@ export const DiscusIcon = ({ className = "", fill = "currentColor", ...props }) 
 );
 
 // Brand Icons
-export const BrandLogoIcon = ({ size = "medium", className = "", ...props }) => {
+export const BrandLogoIcon = ({
+  size = "medium",
+  className = "",
+  ...props
+}) => {
   const sizes = {
     small: "w-6 h-6",
     medium: "w-10 h-10",
@@ -346,7 +402,9 @@ export const GreekLoaderIcon = ({ size = "lg", className = "", ...props }) => {
   };
 
   return (
-    <div className={`${sizeClasses[size]} relative mx-auto ${className}`} {...props}>
+    <div
+      className={`${sizeClasses[size]} relative mx-auto ${className}`}
+      {...props}>
       <svg
         className="animate-spin"
         xmlns="http://www.w3.org/2000/svg"
@@ -401,7 +459,7 @@ export const GreekPatternBorder = ({ position = "top", isVisible = true }) => {
     <div
       className={`absolute ${position}-0 left-0 right-0 h-3 bg-repeat-x transition-all duration-500 ${
         isVisible ? "opacity-100" : "opacity-30"
-      } ${position === "bottom" ? "rotate-180" : ""}`}
+      } ${position === "bottom" ? "rotate-180 bottom-0" : ""}`}
       style={{
         backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='12' viewBox='0 0 40 12'%3E%3Cpath d='M0,8 C2,5 5,5 8,8 C11,11 14,11 17,8 C20,5 23,5 26,8 C29,11 32,11 35,8 C38,5 40,5 40,8 L40,12 L0,12 Z' fill='%23ff7800'/%3E%3C/svg%3E")`,
         backgroundSize: "40px 12px",

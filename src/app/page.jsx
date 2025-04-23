@@ -1,25 +1,7 @@
 "use client";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import Background from "@/components/background";
 
 export default function Home() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (status === "authenticated") {
-      if (session.user.role === "TRAINER") {
-        router.push("/trainer-dashboard");
-      } else if (session.user.role === "SOLO") {
-        router.push("/user-dashboard");
-      } else {
-        router.push("/select-role");
-      }
-    }
-  }, [status, session, router]);
-
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white relative">
       <Background
@@ -31,9 +13,6 @@ export default function Home() {
         vase={false}
       />
 
-      {/* Login Button */}
-
-      {/* Main Content */}
       <div className="relative z-10 max-w-4xl mx-auto px-5 py-20 text-center">
         <h1 className="text-5xl font-bold mb-6 spartacus-font">
           Welcome to <span className="text-[#ff7800]">ANTIQUE BODY</span>
@@ -67,8 +46,7 @@ export default function Home() {
               Ancient Wisdom
             </h3>
             <p className="text-gray-300">
-              Incorporate time-tested training methods from ancient
-              civilizations
+              Incorporate time-tested training methods from ancient civilizations
             </p>
           </div>
         </div>

@@ -2,22 +2,16 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Background from "@/components/background";
 import RoleCardCompact from "@/components/custom/RoleCardCompact";
 import { FullScreenLoader } from "@/components/custom/FullScreenLoader";
 
 export default function SelectRole() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState(null);
-
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/login");
-    }
-  }, [status, router]);
 
   const handleRoleSelection = async (role) => {
     if (!session?.user?.email) return;
@@ -50,10 +44,6 @@ export default function SelectRole() {
       setLoading(false);
     }
   };
-
-  if (status === "loading") {
-    return <FullScreenLoader />;
-  }
 
   // Journey text mapping to make it more thematic
   const journeyText = {
