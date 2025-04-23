@@ -1,119 +1,93 @@
 "use client";
-import React from "react";
-import { ProgressBar } from "@components/common";
-import {
-  BrandLogo,
-  WelcomeCard,
-  StepContainer,
-  SelectionCard,
-  DecoratedBackground,
-  FrequencySelector,
-  NavigationButtons,
-} from "@components/custom";
-import { TOTAL_STEPS, stepConfig } from "./utils/index";
-import { useWorkoutForm } from "@hooks/useWorkoutForm";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import Background from "@/components/background";
 
-const Home = () => {
-  const {
-    currentStep,
-    userSelections,
-    handleSelection,
-    goToNextStep,
-    goToPrevStep,
-    startTraining,
-    isCurrentStepSelected,
-    canFinish,
-  } = useWorkoutForm();
+export default function Home() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      if (session.user.role === "TRAINER") {
+        router.push("/trainer-dashboard");
+      } else if (session.user.role === "SOLO") {
+        router.push("/user-dashboard");
+      } else {
+        router.push("/select-role");
+      }
+    }
+  }, [status, session, router]);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white overflow-x-hidden relative">
-      <DecoratedBackground />
+    <main className="min-h-screen bg-[#0a0a0a] text-white relative">
+      <Background
+        parthenon={true}
+        runner={true}
+        discus={true}
+        colosseum={true}
+        column={false}
+        vase={false}
+      />
 
-      <div className="max-w-[550px] mx-auto px-5 py-5 relative z-20 h-screen flex flex-col items-center overflow-y-auto">
-        <header className="mb-8 pt-3 w-full text-center">
-          <BrandLogo />
-        </header>
+      {/* Login Button */}
 
-        <WelcomeCard
-          title={<>Let's create your workout plan </>}
-          subtitle="Answer a few questions to get started"
-          icon={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="26"
-              height="26"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round">
-              <path d="M8 3v3a2 2 0 0 1-2 2H3"></path>
-              <path d="M21 8h-3a2 2 0 0 1-2-2V3"></path>
-              <path d="M3 16h3a2 2 0 0 1 2 2v3"></path>
-              <path d="M16 21v-3a2 2 0 0 1 2-2h3"></path>
-            </svg>
-          }
-        />
+      {/* Main Content */}
+      <div className="relative z-10 max-w-4xl mx-auto px-5 py-20 text-center">
+        <h1 className="text-5xl font-bold mb-6 spartacus-font">
+          Welcome to <span className="text-[#ff7800]">ANTIQUE BODY</span>
+        </h1>
 
-        {stepConfig.map((step) => (
-          <StepContainer
-            key={step.stepNumber}
-            currentStep={currentStep}
-            stepNumber={step.stepNumber}
-            title={step.title}
-            emoji={step.emoji}>
-            {step.isFrequencyStep ? (
-              <FrequencySelector
-                selectedFrequency={userSelections.frequency}
-                onSelect={(value) => handleSelection("frequency", value)}
-              />
-            ) : (
-              <div className="grid grid-cols-2 gap-4">
-                {step.options.map((option) => (
-                  <SelectionCard
-                    key={option.value}
-                    selected={userSelections[step.field] === option.value}
-                    onClick={() => handleSelection(step.field, option.value)}
-                    emoji={option.emoji}
-                    title={option.title}
-                    description={option.description}
-                    bgImage={option.bgImage}
-                  />
-                ))}
-              </div>
-            )}
-          </StepContainer>
-        ))}
+        <div className="text-xl mb-8 text-gray-300">
+          Your personalized fitness journey inspired by ancient wisdom
+        </div>
 
-        <NavigationButtons
-          currentStep={currentStep}
-          totalSteps={TOTAL_STEPS}
-          onPrevStep={goToPrevStep}
-          onNextStep={goToNextStep}
-          onStartTraining={startTraining}
-          isCurrentStepSelected={isCurrentStepSelected()}
-          canFinish={canFinish()}
-        />
+        <div className="grid md:grid-cols-3 gap-8 mb-12">
+          <div className="bg-[#1a1a1a] p-6 rounded-lg border border-[#333]">
+            <h3 className="text-xl font-semibold mb-3 text-[#ff7800]">
+              Personalized Training
+            </h3>
+            <p className="text-gray-300">
+              Get a custom workout plan tailored to your goals and fitness level
+            </p>
+          </div>
 
-        <div className="mt-4 flex w-full">
-          <ProgressBar
-            value={currentStep}
-            maxValue={TOTAL_STEPS}
-            label="Step"
-          />
+          <div className="bg-[#1a1a1a] p-6 rounded-lg border border-[#333]">
+            <h3 className="text-xl font-semibold mb-3 text-[#ff7800]">
+              Expert Guidance
+            </h3>
+            <p className="text-gray-300">
+              Access professional trainers and track your progress
+            </p>
+          </div>
+
+          <div className="bg-[#1a1a1a] p-6 rounded-lg border border-[#333]">
+            <h3 className="text-xl font-semibold mb-3 text-[#ff7800]">
+              Ancient Wisdom
+            </h3>
+            <p className="text-gray-300">
+              Incorporate time-tested training methods from ancient
+              civilizations
+            </p>
+          </div>
+        </div>
+
+        <div className="space-x-4">
+          <a
+            href="/auth/register"
+            className="bg-gradient-to-r from-[#ff7800] to-[#ff5f00] px-8 py-3 rounded font-medium text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300">
+            Get Started
+          </a>
+          <a
+            href="/auth/login"
+            className="border border-[#ff7800] px-8 py-3 rounded font-medium text-white hover:bg-[#ff7800] transition-all duration-300">
+            Learn More
+          </a>
         </div>
       </div>
 
       <style jsx global>{`
-        @keyframes shimmer {
-          0% {
-            background-position: 0% 0%;
-          }
-          100% {
-            background-position: 200% 0%;
-          }
-        }
         @keyframes fadeIn {
           from {
             opacity: 0;
@@ -125,8 +99,6 @@ const Home = () => {
           }
         }
       `}</style>
-    </div>
+    </main>
   );
-};
-
-export default Home;
+}

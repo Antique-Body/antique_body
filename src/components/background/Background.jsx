@@ -1,10 +1,12 @@
 import React from "react";
-import Parthenon from "./artefacts/Parthenon";
-import Runner from "./artefacts/Runner";
-import Discus from "./artefacts/Discus";
-import Colosseum from "./artefacts/Colosseum";
-import Column from "./artefacts/Column";
-import Vase from "./artefacts/Vase";
+import {
+  ParthenonIcon,
+  RunnerIcon,
+  DiscusIcon,
+  ColosseumIcon,
+  ColumnIcon,
+  VaseIcon,
+} from "@/components/common/Icons";
 import "./background.css";
 
 const Background = ({
@@ -18,12 +20,36 @@ const Background = ({
 }) => {
   return (
     <div className={`background-shapes ${className}`}>
-      {parthenon && <Parthenon />}
-      {runner && <Runner />}
-      {discus && <Discus />}
-      {colosseum && <Colosseum />}
-      {column && <Column />}
-      {vase && <Vase />}
+      {parthenon && (
+        <div className="ancient-building parthenon">
+          <ParthenonIcon className="w-[200px] h-[80px]" />
+        </div>
+      )}
+      {runner && (
+        <div className="olympian runner">
+          <RunnerIcon className="w-[80px] h-[120px]" />
+        </div>
+      )}
+      {discus && (
+        <div className="olympian discus">
+          <DiscusIcon className="w-[100px] h-[100px]" />
+        </div>
+      )}
+      {colosseum && (
+        <div className="ancient-building colosseum">
+          <ColosseumIcon className="w-[200px] h-[100px]" />
+        </div>
+      )}
+      {column && (
+        <div className="ancient-building column">
+          <ColumnIcon className="w-[80px] h-[120px]" />
+        </div>
+      )}
+      {vase && (
+        <div className="ancient-building vase">
+          <VaseIcon className="w-[80px] h-[100px]" />
+        </div>
+      )}
     </div>
   );
 };

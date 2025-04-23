@@ -15,7 +15,7 @@
   opacity: 0.4;
   filter: brightness(0) saturate(100%) invert(56%) sepia(83%) saturate(1500%)
     hue-rotate(360deg) brightness(100%) contrast(106%);
-  transition: opacity 0.8s ease, transform 1.2s ease;
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Animation keyframes */
@@ -31,44 +31,44 @@
 @keyframes fadeInLeft {
   0% {
     opacity: 0;
-    transform: translateX(-30px) translateY(20%);
+    transform: translateX(-50px) translateY(20%) scale(0.95);
   }
   100% {
     opacity: 0.4;
-    transform: translateX(0) translateY(20%);
+    transform: translateX(0) translateY(20%) scale(1);
   }
 }
 
 @keyframes fadeInRight {
   0% {
     opacity: 0;
-    transform: translateX(30px) translateY(30%);
+    transform: translateX(50px) translateY(30%) scale(0.95);
   }
   100% {
     opacity: 0.4;
-    transform: translateX(0) translateY(30%);
+    transform: translateX(0) translateY(30%) scale(1);
   }
 }
 
 @keyframes fadeInDown {
   0% {
     opacity: 0;
-    transform: translateX(-50%) translateY(-60%);
+    transform: translateX(-50%) translateY(-80%) scale(0.95);
   }
   100% {
     opacity: 0.4;
-    transform: translateX(-50%) translateY(-40%);
+    transform: translateX(-50%) translateY(-40%) scale(1);
   }
 }
 
 @keyframes fadeInUp {
   0% {
     opacity: 0;
-    transform: translateX(-50%) translateY(60%);
+    transform: translateX(-50%) translateY(80%) scale(0.95);
   }
   100% {
     opacity: 0.4;
-    transform: translateX(-50%) translateY(40%);
+    transform: translateX(-50%) translateY(40%) scale(1);
   }
 }
 
@@ -79,7 +79,7 @@
   top: 0;
   left: 50%;
   transform: translateX(-50%) translateY(-40%);
-  animation: fadeInDown 1.5s ease forwards;
+  animation: fadeInDown 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 /* Runner near Parthenon */
@@ -89,7 +89,7 @@
   top: 0;
   left: 30%;
   transform: translateY(20%);
-  animation: fadeInLeft 1.8s ease forwards;
+  animation: fadeInLeft 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 /* Discus thrower near Parthenon */
@@ -99,7 +99,7 @@
   top: 0;
   right: 30%;
   transform: translateY(30%);
-  animation: fadeInRight 1.8s ease forwards;
+  animation: fadeInRight 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 /* Colosseum at bottom */
@@ -109,7 +109,7 @@
   bottom: 0;
   left: 50%;
   transform: translateX(-50%) translateY(40%);
-  animation: fadeInUp 1.5s ease forwards;
+  animation: fadeInUp 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 /* Greek column near Colosseum */
@@ -119,7 +119,7 @@
   bottom: 0;
   left: 30%;
   transform: translateY(-30%);
-  animation: fadeInLeft 1.8s ease forwards;
+  animation: fadeInLeft 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 /* Greek vase near Colosseum */
@@ -129,11 +129,13 @@
   bottom: 0;
   right: 30%;
   transform: translateY(-20%);
-  animation: fadeInRight 1.8s ease forwards;
+  animation: fadeInRight 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 /* Hover effects for background elements */
 .ancient-building:hover,
 .olympian:hover {
   opacity: 0.7;
+  transform: scale(1.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }

@@ -1,32 +1,44 @@
+"use client";
 import React from "react";
+import { cn } from "@/lib/utils";
 
 export const Button = ({
-  onClick,
-  disabled,
   children,
+  className,
   variant = "primary",
-  className = "",
+  loading = false,
+  disabled = false,
   leftIcon,
   rightIcon,
+  ...props
 }) => {
-  const baseStyle =
-    "px-8 py-3 rounded-xl transition-all flex items-center justify-center";
+  const baseStyles =
+    "px-6 py-2 rounded font-medium transition-all duration-300 disabled:opacity-50";
 
   const variants = {
-    primary: disabled
-      ? "bg-[#333] text-[#888] cursor-not-allowed"
-      : "bg-gradient-to-r from-[#FF7800] to-[#FF9A00] hover:shadow-[0_5px_15px_rgba(255,120,0,0.3)] hover:translate-y-[-2px]",
-    secondary: "bg-[#111] border border-[#333] hover:border-[#444] text-white",
+    primary:
+      "bg-gradient-to-r from-[#ff7800] to-[#ff5f00] text-white hover:from-[#ff5f00] hover:to-[#ff7800]",
+    outline: "border border-[#ff7800] text-white hover:bg-[#ff7800]",
+    secondary:
+      "bg-[#1a1a1a] text-white border border-[#333] hover:border-[#ff7800]",
   };
 
   return (
     <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`${baseStyle} ${variants[variant]} ${className}`}>
-      {leftIcon && <span className="mr-2">{leftIcon}</span>}
-      {children}
-      {rightIcon && <span className="ml-2">{rightIcon}</span>}
+      className={cn(baseStyles, variants[variant], className)}
+      disabled={disabled || loading}
+      {...props}>
+      {loading ? (
+        <div className="flex items-center justify-center">
+          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      ) : (
+        <div className="flex items-center justify-center gap-2">
+          {leftIcon && <span className="flex-shrink-0">{leftIcon}</span>}
+          {children}
+          {rightIcon && <span className="flex-shrink-0">{rightIcon}</span>}
+        </div>
+      )}
     </button>
   );
 };
