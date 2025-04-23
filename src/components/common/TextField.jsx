@@ -12,14 +12,16 @@ export const TextField = ({
   required = false,
   className = "",
   placeholder = "",
+  subLabel = "",
 }) => {
   return (
     <div className="mb-4">
       {label && (
-        <label className="block text-sm font-medium mb-1" htmlFor={id}>
+        <label className="block text-gray-300 mb-2" htmlFor={id}>
           {label}
         </label>
       )}
+      {subLabel && <p className="text-sm text-gray-400 mb-2">{subLabel}</p>}
       <input
         id={id}
         name={name}
