@@ -3,8 +3,7 @@ import React from "react";
 export const WelcomeCard = ({ title, subtitle, icon }) => {
   return (
     <div
-      className="bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] rounded-2xl p-6 mb-8 shadow-lg relative overflow-hidden border border-[#222] w-full text-center min-h-max
-      "
+      className="bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] rounded-2xl p-6 mb-8 shadow-lg relative overflow-hidden border border-[#222] w-full text-center min-h-max cursor-pointer"
       style={{
         boxShadow: "0 10px 20px rgba(0, 0, 0, 0.3)",
       }}>

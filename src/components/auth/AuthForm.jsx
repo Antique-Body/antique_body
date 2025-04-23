@@ -121,7 +121,7 @@ export const AuthForm = ({
           <Button
             onClick={handleGoogleSignIn}
             variant="outline"
-            className="mt-6 w-full"
+            className="mt-6 w-full bg-white text-[#1a1a1a] hover:bg-gray-100 hover:scale-[1.02] transition-all duration-200"
             leftIcon={<GoogleIcon />}>
             Sign in with Google
           </Button>
