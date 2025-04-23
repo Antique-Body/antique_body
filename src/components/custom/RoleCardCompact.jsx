@@ -70,10 +70,6 @@ const RoleCardCompact = ({
           {role.toLowerCase()}
         </span>
       </div>
-      <GreekPatternBorder
-        position="bottom"
-        isVisible={isSelected || isHovered}
-      />
 
       {special && (
         <div className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full transform rotate-12">
@@ -84,6 +80,10 @@ const RoleCardCompact = ({
       {isSelected && (
         <div className="absolute inset-0 rounded-xl bg-orange-500 opacity-20 blur-xl -z-10"></div>
       )}
+      <GreekPatternBorder
+        position="bottom"
+        isVisible={isSelected || isHovered}
+      />
     </div>
   );
 };

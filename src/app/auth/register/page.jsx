@@ -17,7 +17,6 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      // First, create the user through the registration endpoint
       const registerResponse = await fetch("/api/register", {
         method: "POST",
         headers: {
