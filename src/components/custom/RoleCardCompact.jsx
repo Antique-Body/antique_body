@@ -62,7 +62,7 @@ const RoleCardCompact = ({
           {description}
         </p>
         <span
-          className={`mt-4 inline-block px-4 py-2 rounded-full text-base font-bold capitalize tracking-wider transition-all duration-300 ${
+          className={`mt-4 inline-block px-4 py-2 rounded-md text-base font-bold capitalize tracking-wider transition-all duration-300 ${
             isSelected
               ? "bg-orange-400 bg-opacity-30 text-white shadow-inner border border-orange-300 border-opacity-40 backdrop-blur-sm"
               : "bg-gradient-to-r from-zinc-800 to-zinc-900 text-orange-400 border border-orange-500 border-opacity-40 hover:border-orange-400 hover:text-orange-300 hover:shadow-lg hover:shadow-orange-500/20"
