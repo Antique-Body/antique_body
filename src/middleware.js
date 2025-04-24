@@ -7,6 +7,7 @@ export async function middleware(request) {
 
   // Definiranje ruta i uloga
   const publicRoutes = ["/", "/auth/login", "/auth/register"];
+  const protectedPrefixes = ["/user-dashboard", "/trainer-dashboard", "/client-dashboard", "/admin-dashboard"];
   const isPublicRoute = publicRoutes.includes(pathname);
   const isRoleSelectionRoute = pathname === "/select-role";
   const userRole = token?.role?.toLowerCase();
@@ -16,6 +17,24 @@ export async function middleware(request) {
     admin: "/admin-dashboard",
     user: "/user-dashboard"
   };
+
+  // Provjeri je li ruta pod nekim zaštićenim prefiksom
+  const matchesProtectedPrefix = protectedPrefixes.some(prefix => 
+    pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+
+  // Provjeri je li ruta jedna od poznatih ruta
+  const isKnownRoute = isPublicRoute || isRoleSelectionRoute || matchesProtectedPrefix;
+
+  // Rukovanje nepostojecim rutama - ako ruta nije poznata
+  if (!isKnownRoute) {
+    // Ako korisnik ima ulogu, preusmeri na odgovarajući dashboard
+    if (userRole && dashboardUrls[userRole]) {
+      return NextResponse.redirect(new URL(dashboardUrls[userRole], request.url));
+    }
+    // Ako korisnik nije prijavljen, preusmeri na početnu stranicu
+    return NextResponse.redirect(new URL("/", request.url));
+  }
 
   // 1. Korisnik nije autentificiran
   if (!token) {
@@ -50,16 +69,7 @@ export async function middleware(request) {
   return NextResponse.next();
 }
 
-// Konfiguracija za middleware
+// Konfiguracija za middleware - uhvati SVE rute
 export const config = {
-  matcher: [
-    "/",
-    "/auth/login",
-    "/auth/register",
-    "/select-role",
-    "/user-dashboard/:path*",
-    "/trainer-dashboard/:path*",
-    "/client-dashboard/:path*",
-    "/admin-dashboard/:path*",
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|public).*)"],
 };
