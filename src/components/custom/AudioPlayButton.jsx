@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 export default function AudioPlayButton({ audioSrc }) {
   const audioRef = useRef(null);
