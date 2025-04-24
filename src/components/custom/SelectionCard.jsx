@@ -9,6 +9,7 @@ export const SelectionCard = ({
   bgImage,
   className = "",
   aspect = "aspect-[4/3]",
+  icon
 }) => {
   return (
     <div
@@ -26,7 +27,7 @@ export const SelectionCard = ({
         <div className="absolute inset-0 bg-black bg-opacity-50 z-0"></div>
       )}
       <div className="relative z-10 flex flex-col items-center justify-center h-full">
-        <div className="text-4xl mb-3">{emoji}</div>
+        <div className="text-4xl mb-3">{icon}</div>
         <h3 className="text-lg font-bold mb-2">{title}</h3>
         <p className="text-sm text-[#aaa]">{description}</p>
       </div>
