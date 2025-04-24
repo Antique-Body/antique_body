@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, memo, useCallback } from "react";
 import {
   TrainerIcon,
   ClientIcon,
-  SoloIcon,
   GreekPatternBorder,
+  UserIcon,
+  AdminIcon
 } from "@/components/common/Icons";
 
-const ROLE_ICONS = {
-  TRAINER: TrainerIcon,
-  CLIENT: ClientIcon,
-  SOLO: SoloIcon,
+const roleIcons = {
+  trainer: TrainerIcon,
+  client: ClientIcon,
+  user: UserIcon,
+  admin: AdminIcon
 };
 
 const RoleCardCompact = ({
@@ -21,8 +23,27 @@ const RoleCardCompact = ({
   loading,
   special,
 }) => {
-  const Icon = ROLE_ICONS[role];
   const [isHovered, setIsHovered] = useState(false);
+  const Icon = roleIcons[role];
+
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+  }, []);
+
+  const handleClick = useCallback(() => {
+    if (!loading) {
+      onClick();
+    }
+  }, [loading, onClick]);
+
+  if (!Icon) {
+    console.error(`No icon found for role: ${role}`);
+    return null;
+  }
 
   return (
     <div
@@ -33,9 +54,10 @@ const RoleCardCompact = ({
           ? "bg-gradient-to-br from-zinc-800 to-zinc-900 text-orange-500 border-2 border-orange-500"
           : "bg-gradient-to-br from-zinc-800 to-zinc-900 text-orange-500 hover:border-orange-400 border border-zinc-700"
       }`}
-      onClick={onClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}>
+      onClick={handleClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{ willChange: 'transform, opacity' }}>
       <GreekPatternBorder isVisible={isSelected || isHovered} />
       <div className="flex flex-col items-center relative z-10">
         <div
@@ -88,4 +110,5 @@ const RoleCardCompact = ({
   );
 };
 
-export default RoleCardCompact;
+// Use memo to prevent unnecessary re-renders
+export default memo(RoleCardCompact);

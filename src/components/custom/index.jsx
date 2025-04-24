@@ -11,3 +11,4 @@ export { GreekButton } from "@components/custom/GreekButton";
 export { GreekLoader } from "@components/custom/GreekLoader";
 export { RoleCardCompact } from "@components/custom/RoleCardCompact";
 export { Card } from "@components/custom/Card";
+export {Modal } from "@components/custom/Modal";
