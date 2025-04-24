@@ -1,10 +1,14 @@
-import React from "react";
-import Parthenon from "./artefacts/Parthenon";
-import Runner from "./artefacts/Runner";
-import Discus from "./artefacts/Discus";
-import Colosseum from "./artefacts/Colosseum";
-import Column from "./artefacts/Column";
-import Vase from "./artefacts/Vase";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import {
+  ParthenonIcon,
+  RunnerIcon,
+  DiscusIcon,
+  ColosseumIcon,
+  ColumnIcon,
+  VaseIcon,
+} from "@/components/common/Icons";
 import "./background.css";
 
 const Background = ({
@@ -16,16 +20,55 @@ const Background = ({
   vase = true,
   className = "",
 }) => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    // Trigger animations after component mount
+    setIsVisible(true);
+  }, []);
+
   return (
-    <div className={`background-shapes ${className}`}>
-      {parthenon && <Parthenon />}
-      {runner && <Runner />}
-      {discus && <Discus />}
-      {colosseum && <Colosseum />}
-      {column && <Column />}
-      {vase && <Vase />}
+    <div
+      className={`background-shapes ${className} ${
+        isVisible ? "visible" : ""
+      }`}>
+      {parthenon && (
+        <div
+          className="ancient-building parthenon"
+          style={{ "--delay": "0.1s" }}>
+          <ParthenonIcon className="w-full h-full" />
+        </div>
+      )}
+      {runner && (
+        <div className="olympian runner" style={{ "--delay": "0.3s" }}>
+          <RunnerIcon className="w-full h-full" />
+        </div>
+      )}
+      {discus && (
+        <div className="olympian discus" style={{ "--delay": "0.5s" }}>
+          <DiscusIcon className="w-full h-full" />
+        </div>
+      )}
+      {colosseum && (
+        <div
+          className="ancient-building colosseum"
+          style={{ "--delay": "0.2s" }}>
+          <ColosseumIcon className="w-full h-full" />
+        </div>
+      )}
+      {column && (
+        <div className="ancient-building column" style={{ "--delay": "0.4s" }}>
+          <ColumnIcon className="w-full h-full" />
+        </div>
+      )}
+      {vase && (
+        <div className="ancient-building vase" style={{ "--delay": "0.6s" }}>
+          <VaseIcon className="w-full h-full" />
+        </div>
+      )}
     </div>
   );
 };
 
-export default Background;
+// Memoriranje komponente za prevenciju nepotrebnih renderovanja
+export default React.memo(Background);
