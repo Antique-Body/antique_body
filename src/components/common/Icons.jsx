@@ -487,3 +487,44 @@ export const AdminIcon = ({
     <path d="M40,85 L60,85 L60,95 L40,95 Z" />
   </svg>
 );
+
+
+export const CloseIcon = ({ size = 24, className = "", ...props }) => (
+  <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      {...props}
+  >
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+  </svg>
+);
+
+export const IconButton = ({
+  icon: Icon,
+  onClick,
+  className = "",
+  size = 24,
+  hoverColor = "text-orange-500",
+  defaultColor = "text-zinc-400",
+  hoverBg = "hover:bg-zinc-700/30",
+  ...props
+}) => {
+  return (
+      <button
+          onClick={onClick}
+          className={`${defaultColor} hover:${hoverColor} cursor-pointer p-2 rounded-full ${hoverBg} ${className}`}
+          {...props}
+      >
+          {typeof Icon === "function" ? <Icon size={size} /> : Icon}
+      </button>
+  );
+};
