@@ -1,15 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import {
-  ParthenonIcon,
-  RunnerIcon,
-  DiscusIcon,
-  ColosseumIcon,
-  ColumnIcon,
-  VaseIcon,
-} from "@/components/common/Icons";
+import React, { useEffect, useState, lazy, Suspense } from "react";
 import "./background.css";
+
+// Lazy load icons to reduce initial bundle size
+const ParthenonIcon = lazy(() => import("@/components/common/Icons").then(mod => ({ default: mod.ParthenonIcon })));
+const RunnerIcon = lazy(() => import("@/components/common/Icons").then(mod => ({ default: mod.RunnerIcon })));
+const DiscusIcon = lazy(() => import("@/components/common/Icons").then(mod => ({ default: mod.DiscusIcon })));
+const ColosseumIcon = lazy(() => import("@/components/common/Icons").then(mod => ({ default: mod.ColosseumIcon })));
+const ColumnIcon = lazy(() => import("@/components/common/Icons").then(mod => ({ default: mod.ColumnIcon })));
+const VaseIcon = lazy(() => import("@/components/common/Icons").then(mod => ({ default: mod.VaseIcon })));
+
+// Simple placeholder for icons while loading
+const IconPlaceholder = () => <div className="w-full h-full bg-transparent" />;
 
 const Background = ({
   parthenon = true,
@@ -23,8 +26,12 @@ const Background = ({
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Trigger animations after component mount
-    setIsVisible(true);
+    // Use requestAnimationFrame for smoother animation start
+    const frameId = requestAnimationFrame(() => {
+      setIsVisible(true);
+    });
+    
+    return () => cancelAnimationFrame(frameId);
   }, []);
 
   return (
@@ -36,34 +43,46 @@ const Background = ({
         <div
           className="ancient-building parthenon"
           style={{ "--delay": "0.1s" }}>
-          <ParthenonIcon className="w-full h-full" />
+          <Suspense fallback={<IconPlaceholder />}>
+            <ParthenonIcon className="w-full h-full" />
+          </Suspense>
         </div>
       )}
       {runner && (
         <div className="olympian runner" style={{ "--delay": "0.3s" }}>
-          <RunnerIcon className="w-full h-full" />
+          <Suspense fallback={<IconPlaceholder />}>
+            <RunnerIcon className="w-full h-full" />
+          </Suspense>
         </div>
       )}
       {discus && (
         <div className="olympian discus" style={{ "--delay": "0.5s" }}>
-          <DiscusIcon className="w-full h-full" />
+          <Suspense fallback={<IconPlaceholder />}>
+            <DiscusIcon className="w-full h-full" />
+          </Suspense>
         </div>
       )}
       {colosseum && (
         <div
           className="ancient-building colosseum"
           style={{ "--delay": "0.2s" }}>
-          <ColosseumIcon className="w-full h-full" />
+          <Suspense fallback={<IconPlaceholder />}>
+            <ColosseumIcon className="w-full h-full" />
+          </Suspense>
         </div>
       )}
       {column && (
         <div className="ancient-building column" style={{ "--delay": "0.4s" }}>
-          <ColumnIcon className="w-full h-full" />
+          <Suspense fallback={<IconPlaceholder />}>
+            <ColumnIcon className="w-full h-full" />
+          </Suspense>
         </div>
       )}
       {vase && (
         <div className="ancient-building vase" style={{ "--delay": "0.6s" }}>
-          <VaseIcon className="w-full h-full" />
+          <Suspense fallback={<IconPlaceholder />}>
+            <VaseIcon className="w-full h-full" />
+          </Suspense>
         </div>
       )}
     </div>

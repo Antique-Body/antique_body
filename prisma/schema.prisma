@@ -11,8 +11,10 @@ datasource db {
 }
 
 enum UserRole {
-  TRAINER
-  SOLO
+  trainer
+  client
+  user
+  admin
 }
 
 // Simple User model for authentication
