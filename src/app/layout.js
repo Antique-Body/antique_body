@@ -1,6 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import AuthProvider from "@/components/auth/Provider";
+import AuthProvider from "@/components/auth/AuthProvider";
 import Navbar from "@/components/custom/Navbar";
 
 const geistSans = Geist({
@@ -28,10 +28,16 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="manifest" href="/manifest.json" />
+        <link
+          rel="preload"
+          href="/font/spartacus-font/Spartacus-KVdLp.ttf"
+          as="font"
+          type="font/ttf"
+          crossOrigin="anonymous"
+        />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
           <Navbar />
           {children}
