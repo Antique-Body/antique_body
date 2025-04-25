@@ -48,59 +48,76 @@ export const authOptions = {
           id: user.id,
           name: user.name,
           email: user.email,
-          role: user.role,
+          role: user.role?.toLowerCase(),
         };
       },
     }),
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
+      
       if (account?.provider === "google") {
         const existingUser = await prisma.user.findUnique({
           where: { email: user.email },
         });
 
         if (!existingUser) {
-          // Create new user if they don't exist
-          await prisma.user.create({
+          // Create new user with default role
+          const newUser = await prisma.user.create({
             data: {
               name: user.name,
               email: user.email,
-              // Password is not required for Google users
+              role: null,
             },
           });
+          
+          // Update the user object with the role
+          user.role = newUser.role?.toLowerCase();
+        } else {
+          // Update the user object with existing user's role
+          user.role = existingUser.role?.toLowerCase();
         }
       }
+      
       return true;
     },
     async session({ session, token }) {
+
+      
       if (token) {
         session.user.id = token.id;
-        session.user.role = token.role;
+        session.user.role = token.role?.toLowerCase();
       }
+      
       return session;
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger, session }) {
+
+      
+      // Handle session update
+      if (trigger === "update" && session?.role) {
+        token.role = session.role?.toLowerCase();
+      }
+      
+      // Handle initial sign in
       if (user) {
         token.id = user.id;
-        token.role = user.role;
+        token.role = user.role?.toLowerCase();
       }
+      
       return token;
     },
   },
   pages: {
     signIn: "/auth/login",
-    signOut: "/",
-    error: "/auth/login",
-    newUser: "/select-role", // Redirect to role selection after first sign in
+    signOut: "/auth/logout",
+    error: "/auth/error",
   },
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);
-
 export { handler as GET, handler as POST };

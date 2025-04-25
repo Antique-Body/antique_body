@@ -5,55 +5,71 @@ export async function middleware(request) {
   const token = await getToken({ req: request });
   const { pathname } = request.nextUrl;
 
-  // Public routes that don't require authentication
+  // Definiranje ruta i uloga
   const publicRoutes = ["/", "/auth/login", "/auth/register"];
+  const protectedPrefixes = ["/user-dashboard", "/trainer-dashboard", "/client-dashboard", "/admin-dashboard"];
   const isPublicRoute = publicRoutes.includes(pathname);
+  const isRoleSelectionRoute = pathname === "/select-role";
+  const userRole = token?.role?.toLowerCase();
+  const dashboardUrls = {
+    trainer: "/trainer-dashboard",
+    client: "/client-dashboard",
+    admin: "/admin-dashboard",
+    user: "/user-dashboard"
+  };
 
-  // Protected routes that require authentication
-  const protectedRoutes = [
-    "/select-role",
-    "/user-dashboard",
-    "/trainer-dashboard",
-    "/workout-plan",
-  ];
-  const isProtectedRoute = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
+  // Provjeri je li ruta pod nekim zaštićenim prefiksom
+  const matchesProtectedPrefix = protectedPrefixes.some(prefix => 
+    pathname === prefix || pathname.startsWith(`${prefix}/`)
   );
 
-  // If user is not authenticated and trying to access a protected route
-  if (!token && isProtectedRoute) {
-    return NextResponse.redirect(new URL("/auth/login", request.url));
+  // Provjeri je li ruta jedna od poznatih ruta
+  const isKnownRoute = isPublicRoute || isRoleSelectionRoute || matchesProtectedPrefix;
+
+  // Rukovanje nepostojecim rutama - ako ruta nije poznata
+  if (!isKnownRoute) {
+    // Ako korisnik ima ulogu, preusmeri na odgovarajući dashboard
+    if (userRole && dashboardUrls[userRole]) {
+      return NextResponse.redirect(new URL(dashboardUrls[userRole], request.url));
+    }
+    // Ako korisnik nije prijavljen, preusmeri na početnu stranicu
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // If user is authenticated and trying to access public routes
-  if (token && isPublicRoute) {
-    // Redirect based on user role
-    if (token.role === "TRAINER") {
-      return NextResponse.redirect(new URL("/trainer-dashboard", request.url));
-    } else if (token.role === "SOLO") {
-      return NextResponse.redirect(new URL("/user-dashboard", request.url));
-    } else {
-      return NextResponse.redirect(new URL("/select-role", request.url));
+  // 1. Korisnik nije autentificiran
+  if (!token) {
+    return isPublicRoute 
+      ? NextResponse.next() 
+      : NextResponse.redirect(new URL("/auth/login", request.url));
+  }
+
+  // 2. Korisnik je autentificiran ali pokušava pristupiti javnim rutama ili odabiru uloge
+  if (userRole && (isPublicRoute || isRoleSelectionRoute)) {
+    const dashboardUrl = dashboardUrls[userRole];
+    if (dashboardUrl) {
+      return NextResponse.redirect(new URL(dashboardUrl, request.url));
     }
   }
 
-  // If user is authenticated but doesn't have a role and trying to access protected routes
-  if (token && !token.role && isProtectedRoute && pathname !== "/select-role") {
+  // 3. Korisnik nema ulogu, a pokušava pristupiti zaštićenim rutama
+  if (!userRole && !isPublicRoute && !isRoleSelectionRoute) {
     return NextResponse.redirect(new URL("/select-role", request.url));
   }
 
+  // 4. Provjera pristupa specifičnim dashboard rutama
+  if (userRole) {
+    for (const [role, url] of Object.entries(dashboardUrls)) {
+      if (pathname.startsWith(url) && userRole !== role) {
+        return NextResponse.redirect(new URL(dashboardUrls[userRole] || "/select-role", request.url));
+      }
+    }
+  }
+
+  // Dozvoli pristup traženoj ruti
   return NextResponse.next();
 }
 
-// Configure which routes should be handled by the middleware
+// Konfiguracija za middleware - uhvati SVE rute
 export const config = {
-  matcher: [
-    "/",
-    "/auth/login",
-    "/auth/register",
-    "/select-role",
-    "/user-dashboard/:path*",
-    "/trainer-dashboard/:path*",
-    "/workout-plan/:path*",
-  ],
-}; 
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|public).*)"],
+};

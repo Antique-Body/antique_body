@@ -28,17 +28,10 @@ export default function LoginPage() {
         throw new Error(result.error);
       }
 
-      const userResponse = await fetch("/api/users/me");
-      const userData = await userResponse.json();
-
-      if (!userData.role) {
-        router.push("/select-role");
-      } else {
-        router.push(
-          userData.role === "TRAINER" ? "/trainer-dashboard" : "/user-dashboard"
-        );
-      }
+      // Let the middleware handle the redirect based on user role
+      router.push("/");
     } catch (err) {
+      console.error("Login - Error:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -46,7 +39,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center relative bg-[#0a0a0a] text-white">
+    <main className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#161616] text-white relative">
       <Background
         parthenon={true}
         runner={true}
@@ -56,34 +49,34 @@ export default function LoginPage() {
         vase={false}
       />
 
-      <Card topBorderColor="#ff7800">
-        <div className="text-center mb-[20px] flex flex-col items-center">
-          <h1 className="text-[28px] font-bold tracking-[2px] spartacus-font relative inline-block overflow-hidden after:content-[''] after:absolute after:w-1/2 after:h-[2px] after:bg-gradient-to-r after:from-transparent after:via-[#ff7800] after:to-transparent after:bottom-[-8px] after:left-1/4">
-            ANTIQUE <span className="text-[#ff7800]">BODY</span>
+      <div className="relative z-10 flex items-center justify-center min-h-screen">
+        <Card className="w-full max-w-md p-8 bg-zinc-900/80 backdrop-blur-md border border-zinc-800 rounded-xl shadow-2xl">
+          <h1 className="text-3xl font-bold mb-6 text-center spartacus-font text-[#ff7800]">
+            Welcome Back
           </h1>
-          <div className="text-[12px] font-normal tracking-[2px] text-[#777] mt-[5px] uppercase">
-            WELCOME BACK
-          </div>
-        </div>
+          <p className="text-gray-400 mb-8 text-center">
+            Sign in to continue your fitness journey
+          </p>
 
-        <div>
           <AuthForm
             onSubmit={handleSubmit}
             loading={loading}
             error={error}
             isLogin={true}
           />
-        </div>
 
-        <p className="mt-4 text-center text-sm">
-          Don't have an account?{" "}
-          <Link
-            href="/auth/register"
-            className="text-[#ff7800] hover:underline">
-            Register
-          </Link>
-        </p>
-      </Card>
+          <div className="mt-6 text-center">
+            <p className="text-gray-400">
+              Don't have an account?{" "}
+              <Link
+                href="/auth/register"
+                className="text-[#ff7800] hover:text-[#ff5f00] transition-colors">
+                Register
+              </Link>
+            </p>
+          </div>
+        </Card>
+      </div>
     </main>
   );
 }

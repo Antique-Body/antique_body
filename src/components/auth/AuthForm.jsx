@@ -18,9 +18,11 @@ export const AuthForm = ({
     formState: { errors },
   } = useForm();
 
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     signIn("google", { callbackUrl: "/select-role" });
-  };
+};
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

@@ -12,26 +12,6 @@ export const TOTAL_STEPS = 6;
 export const stepConfig = [
   {
     stepNumber: 1,
-    title: "How do you want to train?",
-    emoji: "🔸",
-    field: "trainingType",
-    options: [
-      {
-        value: "trainer",
-        emoji: "👨‍🏫",
-        title: "With a Trainer",
-        description: "Follow your coach's custom plan",
-      },
-      {
-        value: "alone",
-        emoji: "💪",
-        title: "By Myself",
-        description: "Choose your own pace",
-      },
-    ],
-  },
-  {
-    stepNumber: 2,
     title: "Where will you be training?",
     emoji: "🌍",
     field: "environment",
@@ -51,7 +31,7 @@ export const stepConfig = [
     ],
   },
   {
-    stepNumber: 3,
+    stepNumber: 2,
     title: "What equipment do you have?",
     emoji: "🛠️",
     field: "equipment",
@@ -73,7 +53,7 @@ export const stepConfig = [
     ],
   },
   {
-    stepNumber: 4,
+    stepNumber: 3,
     title: "How long have you been training?",
     emoji: "⏱️",
     field: "experience",
@@ -109,7 +89,7 @@ export const stepConfig = [
     ],
   },
   {
-    stepNumber: 5,
+    stepNumber: 4,
     title: "What's your main goal?",
     emoji: "🎯",
     field: "goal",
@@ -145,7 +125,7 @@ export const stepConfig = [
     ],
   },
   {
-    stepNumber: 6,
+    stepNumber: 5,
     title: "How many times per week will you train?",
     emoji: "📅",
     field: "frequency",

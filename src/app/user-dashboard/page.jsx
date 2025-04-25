@@ -61,7 +61,9 @@ const UserDashboard = () => {
             currentStep={currentStep}
             stepNumber={step.stepNumber}
             title={step.title}
-            emoji={step.emoji}>
+            emoji={step.emoji}
+            icon={step.icon}
+            >
             {step.isFrequencyStep ? (
               <FrequencySelector
                 selectedFrequency={userSelections.frequency}
@@ -74,6 +76,7 @@ const UserDashboard = () => {
                     key={option.value}
                     selected={userSelections[step.field] === option.value}
                     onClick={() => handleSelection(step.field, option.value)}
+                    icon={option.icon}
                     emoji={option.emoji}
                     title={option.title}
                     description={option.description}
