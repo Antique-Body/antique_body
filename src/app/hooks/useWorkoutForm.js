@@ -51,7 +51,9 @@ export const useWorkoutForm = () => {
   };
 
   const isCurrentStepSelected = () => {
-    const currentStepConfig = stepConfig.find(step => step.stepNumber === currentStep);
+    const currentStepConfig = stepConfig.find(
+      (step) => step.stepNumber === currentStep
+    );
     return userSelections[currentStepConfig.field] !== null;
   };
 
@@ -65,6 +67,6 @@ export const useWorkoutForm = () => {
     goToPrevStep,
     startTraining,
     isCurrentStepSelected,
-    canFinish
+    canFinish,
   };
-}; 
+};

@@ -1,5 +1,4 @@
-import React from "react";
-import { Button, ArrowLeft, ArrowRight } from "@components/common";
+import { ArrowLeft, ArrowRight, Button } from "@components/common";
 
 export const NavigationButtons = ({
   currentStep,
