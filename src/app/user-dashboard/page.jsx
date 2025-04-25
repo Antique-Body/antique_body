@@ -1,17 +1,16 @@
 "use client";
-import React from "react";
+import Background from "@/components/background";
 import { ProgressBar } from "@components/common";
 import {
   BrandLogo,
-  WelcomeCard,
-  StepContainer,
-  SelectionCard,
   FrequencySelector,
   NavigationButtons,
+  SelectionCard,
+  StepContainer,
+  WelcomeCard,
 } from "@components/custom";
-import { TOTAL_STEPS, stepConfig } from "../utils/index";
 import { useWorkoutForm } from "@hooks/useWorkoutForm";
-import Background from "@/components/background";
+import { TOTAL_STEPS, stepConfig } from "../utils/index";
 
 const UserDashboard = () => {
   const {

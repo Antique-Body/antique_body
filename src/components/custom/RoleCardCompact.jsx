@@ -1,17 +1,16 @@
-import React, { useState, memo, useCallback } from "react";
 import {
-  TrainerIcon,
+  AdminIcon,
   ClientIcon,
   GreekPatternBorder,
   UserIcon,
-  AdminIcon
 } from "@/components/common/Icons";
+import { memo, useCallback, useState } from "react";
 
 const roleIcons = {
   trainer: TrainerIcon,
   client: ClientIcon,
   user: UserIcon,
-  admin: AdminIcon
+  admin: AdminIcon,
 };
 
 const RoleCardCompact = ({
@@ -57,7 +56,7 @@ const RoleCardCompact = ({
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      style={{ willChange: 'transform, opacity' }}>
+      style={{ willChange: "transform, opacity" }}>
       <GreekPatternBorder isVisible={isSelected || isHovered} />
       <div className="flex flex-col items-center relative z-10">
         <div

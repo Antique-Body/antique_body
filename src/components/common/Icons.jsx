@@ -1,5 +1,3 @@
-import React from "react";
-
 // Navigation Icons
 export const ArrowLeft = ({ size = 18, className = "", ...props }) => (
   <svg

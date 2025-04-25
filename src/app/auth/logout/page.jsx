@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import Background from "@/components/background";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import Background from "@/components/background";
+import { useEffect } from "react";
 
 export default function LogoutPage() {
   const router = useRouter();

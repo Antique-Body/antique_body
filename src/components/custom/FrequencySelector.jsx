@@ -1,4 +1,3 @@
-import React from "react";
 import { CheckIcon } from "@components/common";
 
 export const FrequencySelector = ({ selectedFrequency, onSelect }) => {
