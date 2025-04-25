@@ -29,8 +29,8 @@ const UserDashboard = () => {
       <Background />
 
       <div className="max-w-[550px] mx-auto px-5 py-5 relative z-20 h-screen flex flex-col items-center overflow-y-auto">
-        <header className="mb-8 pt-3 w-full text-center">
-          <BrandLogo />
+        <header className="pt-10  w-full text-center justify-center">
+          <BrandLogo />{" "}
         </header>
 
         <WelcomeCard
@@ -62,8 +62,7 @@ const UserDashboard = () => {
             stepNumber={step.stepNumber}
             title={step.title}
             emoji={step.emoji}
-            icon={step.icon}
-            >
+            icon={step.icon}>
             {step.isFrequencyStep ? (
               <FrequencySelector
                 selectedFrequency={userSelections.frequency}
