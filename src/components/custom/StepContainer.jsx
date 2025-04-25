@@ -1,6 +1,10 @@
-import React from "react";
-
-export const StepContainer = ({ currentStep, stepNumber, title, emoji, children }) => {
+export const StepContainer = ({
+  currentStep,
+  stepNumber,
+  title,
+  emoji,
+  children,
+}) => {
   return (
     <div
       className={`${

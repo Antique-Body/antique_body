@@ -1,5 +1,4 @@
-import React from "react";
-import { SpinnerIcon, GreekPatternIcon } from "../common/Icons";
+import { GreekPatternIcon, SpinnerIcon } from "../common/Icons";
 
 export function GreekButton({
   children,

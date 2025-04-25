@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 export default function AudioPlayButton({ audioSrc }) {
   const audioRef = useRef(null);
@@ -37,16 +37,14 @@ export default function AudioPlayButton({ audioSrc }) {
         className="z-20 bg-gradient-to-r from-[#b87333] to-[#ffd700] p-3 rounded-full shadow-lg hover:scale-105 transition-transform duration-300 focus:outline-none border-2 border-[#ff7800] cursor-pointer"
         aria-label={
           isPlaying ? "Pause gladiator music" : "Play gladiator music"
-        }
-      >
+        }>
         {isPlaying ? (
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-10 w-10 text-black"
             fill="none"
             viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
+            stroke="currentColor">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -60,8 +58,7 @@ export default function AudioPlayButton({ audioSrc }) {
             className="h-10 w-10 text-black"
             fill="none"
             viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
+            stroke="currentColor">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"

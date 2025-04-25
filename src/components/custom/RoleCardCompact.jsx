@@ -1,10 +1,10 @@
-import React, { useState } from "react";
 import {
-  TrainerIcon,
   ClientIcon,
-  SoloIcon,
   GreekPatternBorder,
+  SoloIcon,
+  TrainerIcon,
 } from "@/components/common/Icons";
+import { useState } from "react";
 
 const ROLE_ICONS = {
   TRAINER: TrainerIcon,

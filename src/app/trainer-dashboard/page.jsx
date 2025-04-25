@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import Background from "@/components/background";
 
 const TrainerDashboard = () => {
@@ -14,4 +13,4 @@ const TrainerDashboard = () => {
   );
 };
 
-export default TrainerDashboard; 
+export default TrainerDashboard;

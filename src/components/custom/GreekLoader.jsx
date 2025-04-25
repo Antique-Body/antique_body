@@ -1,4 +1,3 @@
-import React from "react";
 import { GreekLoaderIcon } from "../common/Icons";
 
 export function GreekLoader({ size = "lg", text = "" }) {
