@@ -61,7 +61,47 @@ A Next.js application with authentication, MySQL database, and Prisma ORM.
    npx prisma studio
    ```
 
-### 5. Run Development Server
+### 5. VSCode Settings (Recommended)
+
+To avoid code style conflicts and ensure a consistent development experience across the team, create a .vscode/settings.json file in your project root with the following content:
+
+ ```bash
+{
+  "editor.formatOnSave": true,
+  "files.autoSave": "afterDelay",
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "eslint.validate": ["typescript", "typescriptreact"],
+  "[typescript]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "[typescriptreact]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[php]": {
+    "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
+  }
+}
+   ```
+📁 Folder structure:
+
+```bash
+/project-root
+  ├── antique_body/
+  └── .vscode/
+        └── settings.json
+```
+
+### 6. Run Development Server
 
 ```bash
 npm run dev
