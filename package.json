@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "migrate": "npx prisma migrate deploy",
+    "migrate:create": "npx prisma migrate dev --name ab-migration"
   },
   "dependencies": {
     "@prisma/client": "^6.6.0",
