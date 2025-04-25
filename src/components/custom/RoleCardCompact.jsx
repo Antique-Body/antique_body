@@ -1,11 +1,11 @@
 import React, { useState, memo, useCallback } from "react";
 import {
-  TrainerIcon,
   ClientIcon,
   GreekPatternBorder,
-  UserIcon,
-  AdminIcon
+  SoloIcon,
+  TrainerIcon,
 } from "@/components/common/Icons";
+import { useState } from "react";
 
 const roleIcons = {
   trainer: TrainerIcon,

@@ -1,6 +1,14 @@
 "use client";
 
 import React, { useEffect, useState, lazy, Suspense } from "react";
+import {
+  ColosseumIcon,
+  ColumnIcon,
+  DiscusIcon,
+  ParthenonIcon,
+  RunnerIcon,
+  VaseIcon,
+} from "@/components/common/Icons";
 import "./background.css";
 
 // Lazy load icons to reduce initial bundle size
