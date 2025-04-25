@@ -1,12 +1,13 @@
 "use client";
 
-import Background from "@/components/background";
 import { FullScreenLoader } from "@/components/custom/FullScreenLoader";
+import Modal from "@/components/custom/Modal";
 import RoleCardCompact from "@/components/custom/RoleCardCompact";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { RoleCardCompact, FullScreenLoader } from "@/components";
+import { Suspense, lazy, useCallback, useMemo, useState } from "react";
+
+const LazyBackground = lazy(() => import("@/components/background/Background"));
 
 const ROLE_TITLES = {
   trainer: "Preparing your Trainer Journey",
@@ -22,12 +23,10 @@ const ROLE_DESCRIPTIONS = {
   admin: "an Admin",
 };
 
-const ROLE_REDIRECTS = {
-  trainer: "/trainer-dashboard",
-  client: "/client-dashboard",
-  user: "/user/training-setup",
-  admin: "/admin-dashboard",
-};
+// Simple placeholder for Background while loading
+const BackgroundPlaceholder = () => (
+  <div className="fixed inset-0 bg-gradient-to-b from-[#0a0a0a] to-[#161616]" />
+);
 
 export default function SelectRole() {
   const { data: session, update } = useSession();
@@ -58,6 +57,7 @@ export default function SelectRole() {
     setSelectedRole(pendingRole);
     setLoading(true);
     setError(null);
+
 
     try {
       // Koristimo PATCH metodu umesto POST jer vaš API koristi PATCH
@@ -106,9 +106,11 @@ export default function SelectRole() {
     setError(null);
   }, []);
 
+  // Memoize role cards to prevent unnecessary re-renders
   const roleCards = useMemo(
     () => (
       <>
+        {/* Top row with Trainer and Client */}
         <div className="grid md:grid-cols-2 gap-5">
           <RoleCardCompact
             title="Become a Trainer"
@@ -128,7 +130,17 @@ export default function SelectRole() {
             isSelected={selectedRole === "client"}
           />
         </div>
+          <RoleCardCompact
+            title="Train with a Coach"
+            description="Connect with professional trainers who will guide your fitness journey, providing personalized workouts and nutrition advice."
+            role="client"
+            onClick={() => handleRoleClick("client")}
+            loading={loading && selectedRole === "client"}
+            isSelected={selectedRole === "client"}
+          />
+        </div>
 
+        {/* Bottom row with Solo option */}
         <div className="max-w-md mx-auto w-full">
           <RoleCardCompact
             title="Custom Workout Plan"
@@ -137,6 +149,7 @@ export default function SelectRole() {
             onClick={() => handleRoleClick("user")}
             loading={loading && selectedRole === "user"}
             isSelected={selectedRole === "user"}
+            special={true}
           />
         </div>
       </>
@@ -159,13 +172,19 @@ export default function SelectRole() {
         </div>
       )}
 
-      <div className="flex flex-col gap-6 max-w-3xl mx-auto">{roleCards}</div>
+        <div className="flex flex-col gap-6 max-w-3xl mx-auto">{roleCards}</div>
+      </div>
 
       <Modal
         isOpen={isModalOpen}
         onClose={closeModal}
         onConfirm={handleConfirmRole}
         title="Confirm Your Path"
+        message={
+          pendingRole
+            ? `Are you sure you want to continue as ${ROLE_DESCRIPTIONS[pendingRole]}?`
+            : ""
+        }
         message={
           pendingRole
             ? `Are you sure you want to continue as ${ROLE_DESCRIPTIONS[pendingRole]}?`
@@ -184,3 +203,4 @@ export default function SelectRole() {
     </div>
   );
 }
+
