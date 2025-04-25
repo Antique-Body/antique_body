@@ -335,42 +335,96 @@ export const DiscusIcon = ({
 );
 
 // Brand Icons
+
 export const BrandLogoIcon = ({
-  size = "medium",
-  className = "",
+  className = "h-80 w-80",
+  fill = "currentColor",
   ...props
-}) => {
-  const sizes = {
-    small: "w-6 h-6",
-    medium: "w-10 h-10",
-    large: "w-16 h-16",
-  };
+}) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 400 400"
+    width="160"
+    height="160">
+    {/* Gradient definitions */}
+    <defs>
+      <linearGradient id="orangeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style={{ stopColor: "#FF7800", stopOpacity: 1 }} />
+        <stop offset="100%" style={{ stopColor: "#FF9A00", stopOpacity: 1 }} />
+      </linearGradient>
 
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 400 400"
-      className={`${sizes[size]} ${className}`}
-      {...props}>
-      <defs>
-        <linearGradient id="orangeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#FF7800" />
-          <stop offset="100%" stopColor="#FF9A00" />
-        </linearGradient>
-      </defs>
-      <path
-        fill="url(#orangeGradient)"
-        d="M200 0C89.5 0 0 89.5 0 200s89.5 200 200 200 200-89.5 200-200S310.5 0 200 0zm0 360c-88.4 0-160-71.6-160-160S111.6 40 200 40s160 71.6 160 160-71.6 160-160 160z"
-      />
-      <path
-        fill="url(#orangeGradient)"
-        d="M200 80c-66.3 0-120 53.7-120 120s53.7 120 120 120 120-53.7 120-120-53.7-120-120-120zm0 200c-44.2 0-80-35.8-80-80s35.8-80 80-80 80 35.8 80 80-35.8 80-80 80z"
-      />
-      <circle fill="url(#orangeGradient)" cx="200" cy="200" r="40" />
-    </svg>
-  );
-};
+      <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style={{ stopColor: "#0A0A0A", stopOpacity: 1 }} />
+        <stop offset="100%" style={{ stopColor: "#1A1A1A", stopOpacity: 1 }} />
+      </linearGradient>
+    </defs>
 
+    {/* Ancient discobolus silhouette (inspired by Myron) */}
+    <path
+      d="M190,120
+       C195,115 205,115 210,120
+       C215,125 215,135 210,140
+       C205,145 195,145 190,140
+       C185,135 185,125 190,120 Z
+
+       M200,145
+       L190,170
+       L160,160
+       C155,165 150,175 155,185
+       C160,190 170,185 180,180
+       L190,185
+       L185,230
+       L210,240
+       L215,185
+       L230,180
+       C240,185 250,180 245,170
+       C240,160 230,160 220,165
+       L200,145 Z"
+      fill="url(#orangeGradient)"
+    />
+
+    {/* Disc */}
+    <circle
+      cx="160"
+      cy="175"
+      r="10"
+      fill="#000"
+      stroke="#FF7800"
+      strokeWidth="1"
+    />
+
+    {/* Decorative lines */}
+    <line
+      x1="150"
+      y1="280"
+      x2="250"
+      y2="280"
+      stroke="#FF7800"
+      strokeWidth="2"
+    />
+    <line
+      x1="175"
+      y1="290"
+      x2="225"
+      y2="290"
+      stroke="#FF7800"
+      strokeWidth="1.5"
+    />
+    <path
+      d="M150,285 C175,275 225,275 250,285"
+      stroke="#FF7800"
+      strokeWidth="1"
+      fill="none"
+    />
+    <path
+      d="M175,295 C188,300 212,300 225,295"
+      stroke="#FF9A00"
+      strokeWidth="0.8"
+      fill="none"
+      opacity="0.7"
+    />
+  </svg>
+);
 export const GoogleIcon = ({ size = 24, className = "", ...props }) => (
   <svg className={`w-5 h-5 ${className}`} viewBox="0 0 24 24" {...props}>
     <path
@@ -486,23 +540,21 @@ export const AdminIcon = ({
   </svg>
 );
 
-
 export const CloseIcon = ({ size = 24, className = "", ...props }) => (
   <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      {...props}
-  >
-      <line x1="18" y1="6" x2="6" y2="18"></line>
-      <line x1="6" y1="6" x2="18" y2="18"></line>
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    {...props}>
+    <line x1="18" y1="6" x2="6" y2="18"></line>
+    <line x1="6" y1="6" x2="18" y2="18"></line>
   </svg>
 );
 
@@ -517,12 +569,11 @@ export const IconButton = ({
   ...props
 }) => {
   return (
-      <button
-          onClick={onClick}
-          className={`${defaultColor} hover:${hoverColor} cursor-pointer p-2 rounded-full ${hoverBg} ${className}`}
-          {...props}
-      >
-          {typeof Icon === "function" ? <Icon size={size} /> : Icon}
-      </button>
+    <button
+      onClick={onClick}
+      className={`${defaultColor} hover:${hoverColor} cursor-pointer p-2 rounded-full ${hoverBg} ${className}`}
+      {...props}>
+      {typeof Icon === "function" ? <Icon size={size} /> : Icon}
+    </button>
   );
 };

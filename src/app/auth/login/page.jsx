@@ -50,10 +50,11 @@ export default function LoginPage() {
       />
 
       <div className="relative z-10 flex items-center justify-center min-h-screen">
-        <Card className="w-full max-w-md p-8 bg-zinc-900/80 backdrop-blur-md border border-zinc-800 rounded-xl shadow-2xl">
-          <h1 className="text-3xl font-bold mb-6 text-center spartacus-font text-[#ff7800]">
-            Welcome Back
-          </h1>
+        <Card
+          className="w-full max-w-md p-8 bg-zinc-900/80 backdrop-blur-md border border-zinc-800 rounded-xl shadow-2xl"
+          borderTop={true}
+          showLogo={true}
+          logoTagline="STRENGTH OF THE ANCIENTS">
           <p className="text-gray-400 mb-8 text-center">
             Sign in to continue your fitness journey
           </p>
