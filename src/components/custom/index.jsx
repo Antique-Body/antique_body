@@ -1,6 +1,7 @@
 export { AudioPlayButton } from "@components/custom/AudioPlayButton";
 export { BrandLogo } from "@components/custom/BrandLogo";
 export { Card } from "@components/custom/Card";
+export { FormCard } from "@components/custom/FormCard";
 export { FrequencySelector } from "@components/custom/FrequencySelector";
 export { FullScreenLoader } from "@components/custom/FullScreenLoader";
 export { GreekLoader } from "@components/custom/GreekLoader";

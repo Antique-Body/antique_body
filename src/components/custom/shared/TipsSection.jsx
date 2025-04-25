@@ -1,0 +1,112 @@
+import React from "react";
+
+/**
+ * Tips section component with motivational quotes and tips based on registration step
+ */
+export const TipsSection = ({ step, userType = "client" }) => {
+    const quotes = {
+        client: [
+            {
+                quote: "The only bad workout is the one that didn't happen.",
+                author: "Unknown",
+            },
+            {
+                quote: "Fitness is not about being better than someone else. It's about being better than you used to be.",
+                author: "Khloe Kardashian",
+            },
+            {
+                quote: "The difference between try and triumph is just a little umph!",
+                author: "Marvin Phillips",
+            },
+            {
+                quote: "The body achieves what the mind believes.",
+                author: "Napoleon Hill",
+            },
+            {
+                quote: "You don't have to be great to start, but you have to start to be great.",
+                author: "Zig Ziglar",
+            },
+        ],
+    };
+
+    // Pick a random quote based on user type
+    const userQuotes = quotes[userType] || quotes.client;
+    const randomQuote = userQuotes[Math.floor(Math.random() * userQuotes.length)];
+
+    // Steps for trainers
+    const renderTrainerTips = () => {
+        switch (step) {
+            case 1:
+                return (
+                    <div className="space-y-2">
+                        <p>✓ Use your full professional name as it will appear to clients</p>
+                        <p>✓ Be specific about your experience level - honesty builds trust</p>
+                        <p>✓ Your bio should highlight your training philosophy and approach</p>
+                        <p>✓ Location details help match you with nearby clients</p>
+                    </div>
+                );
+            case 2:
+                return (
+                    <div className="space-y-2">
+                        <p>✓ List all relevant certifications - these build credibility</p>
+                        <p>✓ Your specialty helps clients find trainers with specific expertise</p>
+                        <p>✓ Include certification numbers if applicable for verification</p>
+                        <p>✓ Consider adding specialized training methods you're certified in</p>
+                    </div>
+                );
+            case 3:
+                return (
+                    <div className="space-y-2">
+                        <p>✓ List all locations where you're available to train clients</p>
+                        <p>✓ Select all activities you're qualified to coach</p>
+                        <p>✓ Being specific about sports expertise helps match with the right clients</p>
+                        <p>✓ Consider adding online training if you offer virtual sessions</p>
+                    </div>
+                );
+            case 4:
+                return (
+                    <div className="space-y-2">
+                        <p>✓ Use a professional headshot that clearly shows your face</p>
+                        <p>✓ Ensure your contact details are accurate and professional</p>
+                        <p>✓ Consider which email and phone number clients will use to reach you</p>
+                        <p>✓ Double-check all information before completing your profile</p>
+                    </div>
+                );
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <div className="text-center max-w-2xl mx-auto mt-8 mb-4">
+            {userType === "trainer" ? (
+                <div className="mb-6 bg-[rgba(20,20,20,0.8)] rounded-xl p-6 border border-[#222] shadow-lg text-left">
+                    <h3 className="text-xl font-medium mb-4 flex items-center gap-2 text-[#FF6B00]">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        Profile Setup Tips
+                    </h3>
+                    <div className="space-y-4 text-gray-300">{renderTrainerTips()}</div>
+                </div>
+            ) : (
+                <div>
+                    <blockquote className="text-lg text-gray-300 italic">"{randomQuote.quote}"</blockquote>
+                    <p className="text-[#FF6B00] mt-2">- {randomQuote.author}</p>
+                </div>
+            )}
+        </div>
+    );
+};
