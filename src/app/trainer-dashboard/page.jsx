@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import React from "react";
 import { TrainerProfile } from "@/components/custom/trainer/dashboard";
 
 import { BackgroundShapes } from "@/components/custom/shared";
@@ -303,5 +302,4 @@ const TrainerDashboard = () => {
         </div>
     );
 };
-
 export default TrainerDashboard;

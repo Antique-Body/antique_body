@@ -5,7 +5,7 @@ import Modal from "@/components/custom/Modal";
 import RoleCardCompact from "@/components/custom/RoleCardCompact";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Suspense, lazy, useCallback, useMemo, useState } from "react";
+import { lazy, useCallback, useMemo, useState } from "react";
 
 const LazyBackground = lazy(() => import("@/components/background/Background"));
 
@@ -22,11 +22,6 @@ const ROLE_DESCRIPTIONS = {
   user: "a User",
   admin: "an Admin",
 };
-
-// Simple placeholder for Background while loading
-const BackgroundPlaceholder = () => (
-  <div className="fixed inset-0 bg-gradient-to-b from-[#0a0a0a] to-[#161616]" />
-);
 
 export default function SelectRole() {
   const { data: session, update } = useSession();
@@ -132,17 +127,6 @@ export default function SelectRole() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#161616] text-white relative">
-      <Suspense fallback={<BackgroundPlaceholder />}>
-        <LazyBackground
-          parthenon={true}
-          runner={true}
-          discus={true}
-          colosseum={true}
-          column={false}
-          vase={false}
-        />
-      </Suspense>
-
       <div className="relative z-10 max-w-4xl mx-auto px-4 py-12 text-center">
         <h1 className="text-4xl font-bold mb-6 spartacus-font text-[#ff7800]">
           Choose Your Path

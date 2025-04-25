@@ -1,23 +1,37 @@
 "use client";
 
-import React, { useEffect, useState, lazy, Suspense } from "react";
-import {
-  ColosseumIcon,
-  ColumnIcon,
-  DiscusIcon,
-  ParthenonIcon,
-  RunnerIcon,
-  VaseIcon,
-} from "@/components/common/Icons";
+import React, { Suspense, lazy, useEffect, useState } from "react";
 import "./background.css";
 
 // Lazy load icons to reduce initial bundle size
-const ParthenonIcon = lazy(() => import("@/components/common/Icons").then(mod => ({ default: mod.ParthenonIcon })));
-const RunnerIcon = lazy(() => import("@/components/common/Icons").then(mod => ({ default: mod.RunnerIcon })));
-const DiscusIcon = lazy(() => import("@/components/common/Icons").then(mod => ({ default: mod.DiscusIcon })));
-const ColosseumIcon = lazy(() => import("@/components/common/Icons").then(mod => ({ default: mod.ColosseumIcon })));
-const ColumnIcon = lazy(() => import("@/components/common/Icons").then(mod => ({ default: mod.ColumnIcon })));
-const VaseIcon = lazy(() => import("@/components/common/Icons").then(mod => ({ default: mod.VaseIcon })));
+const ParthenonIcon = lazy(() =>
+  import("@/components/common/Icons").then((mod) => ({
+    default: mod.ParthenonIcon,
+  }))
+);
+const RunnerIcon = lazy(() =>
+  import("@/components/common/Icons").then((mod) => ({
+    default: mod.RunnerIcon,
+  }))
+);
+const DiscusIcon = lazy(() =>
+  import("@/components/common/Icons").then((mod) => ({
+    default: mod.DiscusIcon,
+  }))
+);
+const ColosseumIcon = lazy(() =>
+  import("@/components/common/Icons").then((mod) => ({
+    default: mod.ColosseumIcon,
+  }))
+);
+const ColumnIcon = lazy(() =>
+  import("@/components/common/Icons").then((mod) => ({
+    default: mod.ColumnIcon,
+  }))
+);
+const VaseIcon = lazy(() =>
+  import("@/components/common/Icons").then((mod) => ({ default: mod.VaseIcon }))
+);
 
 // Simple placeholder for icons while loading
 const IconPlaceholder = () => <div className="w-full h-full bg-transparent" />;
@@ -38,7 +52,7 @@ const Background = ({
     const frameId = requestAnimationFrame(() => {
       setIsVisible(true);
     });
-    
+
     return () => cancelAnimationFrame(frameId);
   }, []);
 
