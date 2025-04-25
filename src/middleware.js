@@ -78,5 +78,5 @@ export async function middleware(request) {
 
 // Configure middleware to run on all routes except static files and API routes
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|public).*)"],
+    matcher: ["/((?!api|_next/static|_next/image|favicon.ico|public).*)"],
 };
