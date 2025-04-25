@@ -1,13 +1,5 @@
 "use client";
 
-import {
-  ColosseumIcon,
-  ColumnIcon,
-  DiscusIcon,
-  ParthenonIcon,
-  RunnerIcon,
-  VaseIcon,
-} from "@/components/common/Icons";
 import React, { Suspense, lazy, useEffect, useState } from "react";
 import "./background.css";
 

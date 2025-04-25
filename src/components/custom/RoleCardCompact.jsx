@@ -2,6 +2,7 @@ import {
   AdminIcon,
   ClientIcon,
   GreekPatternBorder,
+  TrainerIcon,
   UserIcon,
 } from "@/components/common/Icons";
 import { memo, useCallback, useState } from "react";
