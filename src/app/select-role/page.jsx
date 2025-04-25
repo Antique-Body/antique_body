@@ -1,17 +1,12 @@
 "use client";
 
-import Background from "@/components/background";
 import { FullScreenLoader } from "@/components/custom/FullScreenLoader";
+import Modal from "@/components/custom/Modal";
 import RoleCardCompact from "@/components/custom/RoleCardCompact";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState, useCallback, useMemo, lazy, Suspense } from "react";
-import Background from "@/components/background/Background";
-import RoleCardCompact from "@/components/custom/RoleCardCompact";
-import { FullScreenLoader } from "@/components/custom/FullScreenLoader";
-import Modal from "@/components/custom/Modal";
+import { Suspense, lazy, useCallback, useMemo, useState } from "react";
 
-// Lazy load the Background component to reduce initial bundle size
 const LazyBackground = lazy(() => import("@/components/background/Background"));
 
 const ROLE_TITLES = {
@@ -29,7 +24,9 @@ const ROLE_DESCRIPTIONS = {
 };
 
 // Simple placeholder for Background while loading
-const BackgroundPlaceholder = () => <div className="fixed inset-0 bg-gradient-to-b from-[#0a0a0a] to-[#161616]" />;
+const BackgroundPlaceholder = () => (
+  <div className="fixed inset-0 bg-gradient-to-b from-[#0a0a0a] to-[#161616]" />
+);
 
 export default function SelectRole() {
   const { data: session, update } = useSession();
@@ -53,7 +50,7 @@ export default function SelectRole() {
     setSelectedRole(pendingRole);
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await fetch("/api/users/update-role", {
         method: "POST",
@@ -92,43 +89,46 @@ export default function SelectRole() {
   }, []);
 
   // Memoize role cards to prevent unnecessary re-renders
-  const roleCards = useMemo(() => (
-    <>
-      {/* Top row with Trainer and Client */}
-      <div className="grid md:grid-cols-2 gap-5">
-        <RoleCardCompact
-          title="Become a Trainer"
-          description="Create your trainer profile, acquire clients, and track their progress. Share your expertise and help others achieve their fitness goals."
-          role="trainer"
-          onClick={() => handleRoleClick("trainer")}
-          loading={loading && selectedRole === "trainer"}
-          isSelected={selectedRole === "trainer"}
-        />
+  const roleCards = useMemo(
+    () => (
+      <>
+        {/* Top row with Trainer and Client */}
+        <div className="grid md:grid-cols-2 gap-5">
+          <RoleCardCompact
+            title="Become a Trainer"
+            description="Create your trainer profile, acquire clients, and track their progress. Share your expertise and help others achieve their fitness goals."
+            role="trainer"
+            onClick={() => handleRoleClick("trainer")}
+            loading={loading && selectedRole === "trainer"}
+            isSelected={selectedRole === "trainer"}
+          />
 
-        <RoleCardCompact
-          title="Train with a Coach"
-          description="Connect with professional trainers who will guide your fitness journey, providing personalized workouts and nutrition advice."
-          role="client"
-          onClick={() => handleRoleClick("client")}
-          loading={loading && selectedRole === "client"}
-          isSelected={selectedRole === "client"}
-        />
-      </div>
+          <RoleCardCompact
+            title="Train with a Coach"
+            description="Connect with professional trainers who will guide your fitness journey, providing personalized workouts and nutrition advice."
+            role="client"
+            onClick={() => handleRoleClick("client")}
+            loading={loading && selectedRole === "client"}
+            isSelected={selectedRole === "client"}
+          />
+        </div>
 
-      {/* Bottom row with Solo option */}
-      <div className="max-w-md mx-auto w-full">
-        <RoleCardCompact
-          title="Custom Workout Plan"
-          description="Get a personalized workout plan based on your preferences, fitness level, and goals. Train independently with AI-generated exercises."
-          role="user"
-          onClick={() => handleRoleClick("user")}
-          loading={loading && selectedRole === "user"}
-          isSelected={selectedRole === "user"}
-          special={true}
-        />
-      </div>
-    </>
-  ), [handleRoleClick, loading, selectedRole]);
+        {/* Bottom row with Solo option */}
+        <div className="max-w-md mx-auto w-full">
+          <RoleCardCompact
+            title="Custom Workout Plan"
+            description="Get a personalized workout plan based on your preferences, fitness level, and goals. Train independently with AI-generated exercises."
+            role="user"
+            onClick={() => handleRoleClick("user")}
+            loading={loading && selectedRole === "user"}
+            isSelected={selectedRole === "user"}
+            special={true}
+          />
+        </div>
+      </>
+    ),
+    [handleRoleClick, loading, selectedRole]
+  );
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#161616] text-white relative">
@@ -157,9 +157,7 @@ export default function SelectRole() {
           </div>
         )}
 
-        <div className="flex flex-col gap-6 max-w-3xl mx-auto">
-          {roleCards}
-        </div>
+        <div className="flex flex-col gap-6 max-w-3xl mx-auto">{roleCards}</div>
       </div>
 
       {/* Confirmation Modal */}
@@ -168,7 +166,11 @@ export default function SelectRole() {
         onClose={closeModal}
         onConfirm={handleConfirmRole}
         title="Confirm Your Path"
-        message={pendingRole ? `Are you sure you want to continue as ${ROLE_DESCRIPTIONS[pendingRole]}?` : ""}
+        message={
+          pendingRole
+            ? `Are you sure you want to continue as ${ROLE_DESCRIPTIONS[pendingRole]}?`
+            : ""
+        }
         confirmButtonText="Continue"
         cancelButtonText="Cancel"
         confirmButtonColor="bg-[#ff7800] hover:bg-[#e66e00]"
