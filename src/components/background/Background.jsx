@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
 import {
-  ParthenonIcon,
-  RunnerIcon,
-  DiscusIcon,
   ColosseumIcon,
   ColumnIcon,
+  DiscusIcon,
+  ParthenonIcon,
+  RunnerIcon,
   VaseIcon,
 } from "@/components/common/Icons";
+import React, { useEffect, useState } from "react";
 import "./background.css";
 
 const Background = ({

@@ -1,11 +1,11 @@
 "use client";
 
+import Background from "@/components/background";
+import { FullScreenLoader } from "@/components/custom/FullScreenLoader";
+import RoleCardCompact from "@/components/custom/RoleCardCompact";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Background from "@/components/background";
-import RoleCardCompact from "@/components/custom/RoleCardCompact";
-import { FullScreenLoader } from "@/components/custom/FullScreenLoader";
 
 export default function SelectRole() {
   const { data: session } = useSession();

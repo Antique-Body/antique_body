@@ -1,4 +1,3 @@
-import React from "react";
 import { BrandLogoIcon } from "../common/Icons";
 
 export const BrandLogo = ({ size = "medium" }) => {

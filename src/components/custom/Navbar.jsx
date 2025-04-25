@@ -1,7 +1,7 @@
 "use client";
-import { useSession, signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Navbar() {
@@ -15,9 +15,10 @@ export default function Navbar() {
 
   useEffect(() => {
     // Check if current path is login or register
-    const authPageCheck = pathname?.includes("/auth/login") || pathname?.includes("/auth/register");
+    const authPageCheck =
+      pathname?.includes("/auth/login") || pathname?.includes("/auth/register");
     setIsAuthPage(authPageCheck);
-    
+
     // Set authentication state
     setIsAuthenticated(status === "authenticated");
     setIsLoading(status === "loading");
@@ -48,7 +49,10 @@ export default function Navbar() {
 
   return (
     <nav className="fixed top-0 right-0 z-50 p-4 flex justify-end w-full">
-      <div className={`transition-all duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+      <div
+        className={`transition-all duration-500 ${
+          isVisible ? "opacity-100" : "opacity-0"
+        }`}>
         {isAuthenticated ? (
           <div className="flex items-center gap-4">
             <span className="text-white text-sm">

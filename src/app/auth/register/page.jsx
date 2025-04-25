@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { AuthForm } from "@/components/auth/AuthForm";
 import Background from "@/components/background";
-import { signIn } from "next-auth/react";
 import { Card } from "@/components/custom/index";
+import { signIn } from "next-auth/react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function RegisterPage() {
   const router = useRouter();

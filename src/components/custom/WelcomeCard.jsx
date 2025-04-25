@@ -1,5 +1,3 @@
-import React from "react";
-
 export const WelcomeCard = ({ title, subtitle, icon }) => {
   return (
     <div
