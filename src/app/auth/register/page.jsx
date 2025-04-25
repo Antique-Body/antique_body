@@ -42,8 +42,10 @@ export default function RegisterPage() {
         throw new Error(result.error);
       }
 
-      router.push("/select-role");
+      // Let the middleware handle the redirect based on user role
+      router.push("/");
     } catch (err) {
+      console.error("Register - Error:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -51,7 +53,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center relative bg-[#0a0a0a] text-white">
+    <main className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#161616] text-white relative">
       <Background
         parthenon={true}
         runner={true}
@@ -60,33 +62,35 @@ export default function RegisterPage() {
         column={false}
         vase={false}
       />
-      <Card topBorderColor="#ff7800">
-        {/* Logo */}
-        <div className="text-center mb-[20px] flex flex-col items-center">
-          <h1 className="text-[28px] font-bold tracking-[2px] spartacus-font relative inline-block overflow-hidden after:content-[''] after:absolute after:w-1/2 after:h-[2px] after:bg-gradient-to-r after:from-transparent after:via-[#ff7800] after:to-transparent after:bottom-[-8px] after:left-1/4">
-            ANTIQUE <span className="text-[#ff7800]">BODY</span>
-          </h1>
-          <div className="text-[12px] font-normal tracking-[2px] text-[#777] mt-[5px] uppercase">
-            CREATE YOUR ACCOUNT
-          </div>
-        </div>
 
-        <div>
+      <div className="relative z-10 flex items-center justify-center min-h-screen">
+        <Card className="w-full max-w-md p-8 bg-zinc-900/80 backdrop-blur-md border border-zinc-800 rounded-xl shadow-2xl">
+          <h1 className="text-3xl font-bold mb-6 text-center spartacus-font text-[#ff7800]">
+            Create Account
+          </h1>
+          <p className="text-gray-400 mb-8 text-center">
+            Join our fitness community and start your journey today
+          </p>
+
           <AuthForm
             onSubmit={handleSubmit}
             loading={loading}
             error={error}
             isLogin={false}
           />
-        </div>
 
-        <p className="mt-4 text-center text-sm">
-          Already have an account?{" "}
-          <Link href="/auth/login" className="text-[#ff7800] hover:underline">
-            Log in
-          </Link>
-        </p>
-      </Card>
+          <div className="mt-6 text-center">
+            <p className="text-gray-400">
+              Already have an account?{" "}
+              <Link
+                href="/auth/login"
+                className="text-[#ff7800] hover:text-[#ff5f00] transition-colors">
+                Sign In
+              </Link>
+            </p>
+          </div>
+        </Card>
+      </div>
     </main>
   );
 }

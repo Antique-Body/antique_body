@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, UserRole } from "@prisma/client";
 
 const prisma = new PrismaClient();
+
+// Define valid roles based on the Prisma schema
+const VALID_ROLES = Object.values(UserRole);
 
 export async function POST(req) {
   try {
@@ -18,7 +21,6 @@ export async function POST(req) {
 
     const { email, role } = await req.json();
 
-    // Verify that the email matches the session user's email
     if (email !== session.user.email) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -26,17 +28,35 @@ export async function POST(req) {
       );
     }
 
-    // Update the user's role
+    // Validate role
+    const normalizedRole = role.toLowerCase();
+    if (!role || !VALID_ROLES.includes(normalizedRole)) {
+      return NextResponse.json(
+        { error: "Invalid role. Must be one of: " + VALID_ROLES.join(", ") },
+        { status: 400 }
+      );
+    }
+
+    // Update the user's role using Prisma's type-safe update method
     const updatedUser = await prisma.user.update({
       where: { email },
-      data: { role },
+      data: { role: normalizedRole },
     });
 
     return NextResponse.json(updatedUser);
   } catch (error) {
     console.error("Error updating role:", error);
+    
+    // Handle specific Prisma errors
+    if (error.code === "P2025") {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+    
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error", details: error.message },
       { status: 500 }
     );
   }
