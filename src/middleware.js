@@ -1,51 +1,63 @@
-import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { NextResponse } from "next/server";
 
 export async function middleware(request) {
-  const token = await getToken({ req: request });
-  const { pathname } = request.nextUrl;
-  const userRole = token?.role?.toLowerCase();
+    const token = await getToken({ req: request });
+    const { pathname } = request.nextUrl;
 
-  // Public routes that don't require authentication
-  const publicPaths = ["/", "/auth/login", "/auth/register", "/auth/reset-password", "/auth/verify-email"];
-  
-  // Check if the current path starts with any of the public paths
-  const isPublicRoute = publicPaths.some(path => pathname === path || pathname.startsWith(`${path}?`));
+    // Definiranje ruta i uloga
+    const publicRoutes = ["/", "/auth/login", "/auth/register"];
+    const protectedPrefixes = [
+        "/user-dashboard",
+        "/trainer-registration",
+        "/trainer/personal-details",
+        "/trainer/dashboard",
+        "/client/personal-details",
+        "/client/dashboard",
+        "/admin-dashboard",
+    ];
+    const isPublicRoute = publicRoutes.includes(pathname);
+    const isRoleSelectionRoute = pathname === "/select-role";
+    const userRole = token?.role?.toLowerCase();
+    const dashboardUrls = {
+        trainer: "/trainer/personal-details",
+        client: "/client/personal-details",
+        admin: "/admin-dashboard",
+        user: "/user-dashboard",
+    };
 
-  // Handle routes for verification and reset password that have query parameters
-  if (pathname.startsWith("/auth/reset-password") || pathname.startsWith("/auth/verify-email")) {
-    return NextResponse.next();
-  }
+    // Provjeri je li ruta pod nekim zaštićenim prefiksom
+    const matchesProtectedPrefix = protectedPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 
-  // 1. Handle public routes
-  if (isPublicRoute) {
-    return NextResponse.next();
-  }
+    // Provjeri je li ruta jedna od poznatih ruta
+    const isKnownRoute = isPublicRoute || isRoleSelectionRoute || matchesProtectedPrefix;
 
-  // 2. Handle unauthenticated users
-  if (!token) {
-    return NextResponse.redirect(new URL("/auth/login", request.url));
-  }
-
-  // 3. Handle users without a role
-  if (!userRole) {
-    if (pathname !== "/select-role") {
-      return NextResponse.redirect(new URL("/select-role", request.url));
+    // Rukovanje nepostojecim rutama - ako ruta nije poznata
+    if (!isKnownRoute) {
+        // Ako korisnik ima ulogu, preusmeri na odgovarajući dashboard
+        if (userRole && dashboardUrls[userRole]) {
+            return NextResponse.redirect(new URL(dashboardUrls[userRole], request.url));
+        }
+        // Ako korisnik nije prijavljen, preusmeri na početnu stranicu
+        return NextResponse.redirect(new URL("/", request.url));
     }
-    return NextResponse.next();
-  }
 
-  // 4. Role-based routing
-  if (userRole === "trainer") {
-    if (pathname !== "/trainer/dashboard") {
-      return NextResponse.redirect(new URL("/trainer/dashboard", request.url));
+    // 1. Korisnik nije autentificiran
+    if (!token) {
+        return isPublicRoute ? NextResponse.next() : NextResponse.redirect(new URL("/auth/login", request.url));
     }
-    return NextResponse.next();
-  }
 
-  if (userRole === "client") {
-    if (pathname !== "/client/dashboard") {
-      return NextResponse.redirect(new URL("/client/dashboard", request.url));
+    // 2. Korisnik je autentificiran ali pokušava pristupiti javnim rutama ili odabiru uloge
+    if (userRole && (isPublicRoute || isRoleSelectionRoute)) {
+        const dashboardUrl = dashboardUrls[userRole];
+        if (dashboardUrl) {
+            return NextResponse.redirect(new URL(dashboardUrl, request.url));
+        }
+    }
+
+    // 3. Korisnik nema ulogu, a pokušava pristupiti zaštićenim rutama
+    if (!userRole && !isPublicRoute && !isRoleSelectionRoute) {
+        return NextResponse.redirect(new URL("/select-role", request.url));
     }
     return NextResponse.next();
   }

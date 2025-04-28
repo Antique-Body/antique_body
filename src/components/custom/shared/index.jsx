@@ -1,6 +1,7 @@
-export { BasicInfoStep } from "./BasicInfoStep";
-export { ProfileAndContactStep } from "./ProfileAndContactStep";
-export { TipsSection } from "./TipsSection";
-export { DashboardTabs } from "./DashboardTabs";
 export { BackgroundShapes } from "../BackgroundShapes";
+export { DashboardTabs } from "./DashboardTabs";
+export { PersonalDetailsStep } from "./PersonalDetailsStep";
+export { ProfileContactStep } from "./ProfileContactStep";
 export { StatCard } from "./StatCard";
+export { TipsSection } from "./TipsSection";
+export { UserProfile } from "./UserProfile";
