@@ -1,7 +1,6 @@
 "use client";
 import { AntiqueBodyLogo } from "@/components/custom/BrandLogo";
 import { ClientProfile } from "@/components/custom/client/dashboard/components";
-
 import {
     MessagesTab,
     NutritionTab,
@@ -11,6 +10,7 @@ import {
     TrainingsTab,
     TrainWithCoachTab,
 } from "@/components/custom/client/dashboard/tabs";
+
 import { BackgroundShapes, DashboardTabs } from "@/components/custom/shared";
 import { useState } from "react";
 

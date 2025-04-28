@@ -1,17 +1,13 @@
 "use client";
-
-import { TrainerProfile } from "@/app/trainer/dashboard/components";
-import { useState } from "react";
-
-import { ClientsTab, MessagesTab, NewClientsTab, PlansTab, SessionsTab } from "@/app/trainer/dashboard/tabs";
 import { AntiqueBodyLogo } from "@/components/custom/BrandLogo";
 import { BackgroundShapes, DashboardTabs } from "@/components/custom/shared";
-import { ClientModal, SessionModal } from "@/components/custom/trainer/dashboard/modals";
+import { ClientModal, TrainerProfile } from "@/components/custom/trainer/dashboard/components";
+import { ClientsTab, MessagesTab, NewClientsTab, PlansTab, SessionsTab } from "@/components/custom/trainer/dashboard/tabs";
+import { useState } from "react";
 
-import { CreatePlanModal } from "@/components/custom/trainer/dashboard/modals";
-
+import { CreatePlanModal } from "@/components/custom/trainer/dashboard/components";
 const TrainerDashboard = () => {
-    const [activeTab, setActiveTab] = useState("clients");
+    const [activeTab, setActiveTab] = useState("newClients");
     const [showClientModal, setShowClientModal] = useState(false);
     const [showCreatePlanModal, setShowCreatePlanModal] = useState(false);
     const [showSessionModal, setShowSessionModal] = useState(false);
@@ -245,6 +241,7 @@ const TrainerDashboard = () => {
     // Get the count of unread messages
     const unreadMessagesCount = trainerData.messages.filter((m) => m.unread).length;
     const tabsConfig = [
+        { id: "newClients", label: "New Clients" },
         { id: "clients", label: "Clients" },
         { id: "sessions", label: "Sessions" },
         { id: "messages", label: "Messages", badgeCount: unreadMessagesCount },

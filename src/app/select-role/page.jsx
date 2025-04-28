@@ -1,8 +1,8 @@
 "use client";
 
+import { Modal } from "@/components/common";
+import { RoleCardCompact } from "@/components/custom";
 import { FullScreenLoader } from "@/components/custom/FullScreenLoader";
-import Modal from "@/components/custom/Modal";
-import RoleCardCompact from "@/components/custom/RoleCardCompact";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Suspense, lazy, useCallback, useMemo, useState } from "react";
