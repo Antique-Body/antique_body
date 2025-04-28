@@ -1,6 +1,7 @@
-export { MessagesTab } from "./MessagesTab";
-export { NutritionTab } from "./NutritionTab";
-export { OverviewTab } from "./OverviewTab";
-export { ProgramTab } from "./ProgramTab";
-export { ProgressTab } from "./ProgressTab";
-export { TrainingsTab } from "./TrainingsTab";
+export { MessagesTab } from "./messages/MessagesTab";
+export { NutritionTab } from "./nutrition/NutritionTab";
+export { OverviewTab } from "./overview/OverviewTab";
+export { ProgramTab } from "./program/ProgramTab";
+export { ProgressTab } from "./progress/ProgressTab";
+export { TrainingsTab } from "./trainings/TrainingsTab";
+export { TrainWithCoachTab } from "./trainwithcoach/TrainWithCoachTab";

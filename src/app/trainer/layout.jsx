@@ -1,9 +1,11 @@
-export default function TrainerLayout({ children }) {
-  return (
-    <div>
-      <Navbar />
+import { Navbar } from "@/components/custom";
 
-      <main>{children}</main>
-    </div>
-  );
+export default function TrainerLayout({ children }) {
+    return (
+        <div>
+            <Navbar />
+
+            <main>{children}</main>
+        </div>
+    );
 }

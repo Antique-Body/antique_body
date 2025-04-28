@@ -1,7 +1,7 @@
 "use client";
 
 import { AdminIcon, ClientIcon, GreekPatternBorder, TrainerIcon, UserIcon } from "@/components/common/Icons";
-import { memo, useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 
 const roleIcons = {
     trainer: TrainerIcon,
@@ -10,7 +10,7 @@ const roleIcons = {
     admin: AdminIcon,
 };
 
-const RoleCardCompact = ({ role, isSelected, onClick, title, description, loading, special }) => {
+export const RoleCardCompact = ({ role, isSelected, onClick, title, description, loading, special }) => {
     const [isHovered, setIsHovered] = useState(false);
     const Icon = roleIcons[role];
 
@@ -89,6 +89,3 @@ const RoleCardCompact = ({ role, isSelected, onClick, title, description, loadin
         </div>
     );
 };
-
-// Use memo to prevent unnecessary re-renders
-export default memo(RoleCardCompact);
