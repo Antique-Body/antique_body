@@ -8,7 +8,7 @@ import {
 } from "@/components/common/Icons";
 import { memo } from "react";
 
-const Modal = ({
+export const Modal = memo(({
   isOpen,
   onClose,
   onConfirm,
@@ -65,5 +65,4 @@ const Modal = ({
       </div>
     </div>
   );
-};
-export default memo(Modal);
+});
