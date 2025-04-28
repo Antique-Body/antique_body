@@ -1,5 +1,5 @@
+import { stepConfig, TOTAL_STEPS } from "@/app/utils";
 import { useState } from "react";
-import { TOTAL_STEPS, stepConfig } from "../utils";
 
 export const useWorkoutForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -31,25 +31,6 @@ export const useWorkoutForm = () => {
     }
   };
 
-  const startTraining = () => {
-    alert(
-      "Starting workout with: " +
-        "\nTraining type: " +
-        userSelections.trainingType +
-        "\nEnvironment: " +
-        userSelections.environment +
-        "\nEquipment: " +
-        userSelections.equipment +
-        "\nExperience: " +
-        userSelections.experience +
-        "\nGoal: " +
-        userSelections.goal +
-        "\nFrequency: " +
-        userSelections.frequency +
-        " times per week"
-    );
-  };
-
   const isCurrentStepSelected = () => {
     const currentStepConfig = stepConfig.find(
       (step) => step.stepNumber === currentStep
@@ -65,7 +46,6 @@ export const useWorkoutForm = () => {
     handleSelection,
     goToNextStep,
     goToPrevStep,
-    startTraining,
     isCurrentStepSelected,
     canFinish,
   };

@@ -4,7 +4,7 @@ export { Card } from "@components/custom/Card";
 export { FrequencySelector } from "@components/custom/FrequencySelector";
 export { FullScreenLoader } from "@components/custom/FullScreenLoader";
 export { GreekLoader } from "@components/custom/GreekLoader";
-export { Modal } from "@components/custom/Modal";
+export { MeasurementsInput } from "@components/custom/MeasurementsInput";
 export { Navbar } from "@components/custom/Navbar";
 export { NavigationButtons } from "@components/custom/NavigationButtons";
 export { RoleCardCompact } from "@components/custom/RoleCardCompact";

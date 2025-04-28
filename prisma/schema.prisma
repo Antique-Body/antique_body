@@ -17,6 +17,30 @@ enum UserRole {
   admin
 }
 
+enum TrainingEnvironment {
+  gym
+  outside
+}
+
+enum EquipmentType {
+  with_equipment
+  no_equipment
+}
+
+enum ExperienceLevel {
+  beginner
+  intermediate
+  advanced
+  expert
+}
+
+enum TrainingGoal {
+  strength
+  muscle
+  lose_weight
+  endurance
+}
+
 // Simple User model for authentication
 model User {
   id                String    @id @default(cuid())
@@ -29,6 +53,10 @@ model User {
   updatedAt         DateTime  @updatedAt
   accounts          Account[]
   sessions          Session[]
+  preferences       UserPreferences?
+
+  @@index([email])
+  @@index([role])
 }
 
 // NextAuth models
@@ -49,6 +77,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
@@ -57,6 +86,8 @@ model Session {
   userId        String
   expires       DateTime
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model VerificationToken {
@@ -65,4 +96,26 @@ model VerificationToken {
   expires       DateTime
 
   @@unique([identifier, token])
+}
+
+model UserPreferences {
+  id              String            @id @default(cuid())
+  userId          String            @unique
+  environment     TrainingEnvironment
+  equipment       EquipmentType
+  experience      ExperienceLevel
+  goal            TrainingGoal
+  frequency       Int               @db.Int
+  weight          Float             // Weight in kg
+  height          Float             // Height in cm
+  bmi             Float             // BMI value
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([environment])
+  @@index([equipment])
+  @@index([experience])
+  @@index([goal])
+  @@index([frequency])
 } 
