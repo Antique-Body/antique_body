@@ -1,10 +1,10 @@
-import NextAuth from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaClient } from "@prisma/client";
 import { compare } from "bcrypt";
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 
-const prisma = new PrismaClient();
+const prismaClient = new PrismaClient();
 
 export const authOptions = {
   providers: [
@@ -23,8 +23,9 @@ export const authOptions = {
           throw new Error("Missing credentials");
         }
 
-        const user = await prisma.user.findUnique({
+        const user = await prismaClient.user.findUnique({
           where: { email: credentials.email },
+          include: { preferences: true }
         });
 
         if (!user) {
@@ -49,62 +50,71 @@ export const authOptions = {
           name: user.name,
           email: user.email,
           role: user.role?.toLowerCase(),
+          hasCompletedTrainingSetup: !!user.preferences
         };
       },
     }),
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
-      
       if (account?.provider === "google") {
-        const existingUser = await prisma.user.findUnique({
+        const existingUser = await prismaClient.user.findUnique({
           where: { email: user.email },
+          include: { preferences: true }
         });
 
         if (!existingUser) {
           // Create new user with default role
-          const newUser = await prisma.user.create({
+          const newUser = await prismaClient.user.create({
             data: {
               name: user.name,
               email: user.email,
               role: null,
             },
           });
-          
+
           // Update the user object with the role
           user.role = newUser.role?.toLowerCase();
+          user.hasCompletedTrainingSetup = false;
         } else {
           // Update the user object with existing user's role
           user.role = existingUser.role?.toLowerCase();
+          user.hasCompletedTrainingSetup = !!existingUser.preferences;
         }
       }
-      
+
       return true;
     },
     async session({ session, token }) {
-
-      
       if (token) {
         session.user.id = token.id;
         session.user.role = token.role?.toLowerCase();
+        session.user.hasCompletedTrainingSetup = token.hasCompletedTrainingSetup;
       }
-      
+
       return session;
     },
     async jwt({ token, user, account, trigger, session }) {
-
-      
       // Handle session update
-      if (trigger === "update" && session?.role) {
-        token.role = session.role?.toLowerCase();
+      if (trigger === "update" && session) {
+        // Ažuriraj role ako je dostupan u session objektu
+        if (session.role) {
+          token.role = session.role.toLowerCase();
+        }
+        
+        // Ažuriraj hasCompletedTrainingSetup ako je dostupan u session objektu
+        if (session.hasCompletedTrainingSetup !== undefined) {
+          token.hasCompletedTrainingSetup = session.hasCompletedTrainingSetup;
+        }
       }
-      
+
       // Handle initial sign in
       if (user) {
         token.id = user.id;
         token.role = user.role?.toLowerCase();
+        token.hasCompletedTrainingSetup = user.hasCompletedTrainingSetup;
       }
-      
+
       return token;
     },
   },

@@ -22,7 +22,7 @@ export const Card = ({
 }) => {
   return (
     <div
-      className={`relative z-10 backdrop-blur-sm overflow-hidden ${className}`}
+      className={`relative z-10 backdrop-blur-sm overflow-hidden flex flex-col items-center text-center ${className} min-h-max`}
       style={{
         width: width,
         maxWidth: maxWidth,

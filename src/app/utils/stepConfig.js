@@ -37,14 +37,14 @@ export const stepConfig = [
     field: "equipment",
     options: [
       {
-        value: "with-equipment",
+        value: "with_equipment",
         emoji: "🏋️‍♂️",
         title: "With Equipment",
         description: "Dumbbells, resistance bands, etc.",
         icon: <ColumnIcon className="w-12 h-12" />,
       },
       {
-        value: "no-equipment",
+        value: "no_equipment",
         emoji: "🧘",
         title: "Bodyweight Only",
         description: "No equipment needed",
@@ -109,7 +109,7 @@ export const stepConfig = [
         icon: <VaseIcon className="w-12 h-12" />,
       },
       {
-        value: "lose-weight",
+        value: "lose_weight",
         emoji: "🔥",
         title: "Lose Weight",
         description: "Burn fat & reduce weight",
@@ -130,5 +130,12 @@ export const stepConfig = [
     emoji: "📅",
     field: "frequency",
     isFrequencyStep: true,
+  },
+  {
+    stepNumber: 6,
+    title: "What are your measurements?",
+    emoji: "📏",
+    field: "measurements",
+    isMeasurementsStep: true,
   },
 ];
