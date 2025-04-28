@@ -15,7 +15,7 @@ const roleIcons = {
   admin: AdminIcon,
 };
 
-const RoleCardCompact = ({
+export const RoleCardCompact = memo(({
   role,
   isSelected,
   onClick,
@@ -109,7 +109,4 @@ const RoleCardCompact = ({
       />
     </div>
   );
-};
-
-// Use memo to prevent unnecessary re-renders
-export default memo(RoleCardCompact);
+});
