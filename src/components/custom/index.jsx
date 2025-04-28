@@ -4,6 +4,7 @@ export { FormCard } from "@components/custom/FormCard";
 export { FrequencySelector } from "@components/custom/FrequencySelector";
 export { FullScreenLoader } from "@components/custom/FullScreenLoader";
 export { GreekLoader } from "@components/custom/GreekLoader";
+export { MeasurementsInput } from "@components/custom/MeasurementsInput";
 export { Navbar } from "@components/custom/Navbar";
 export { NavigationButtons } from "@components/custom/NavigationButtons";
 export { SelectionCard } from "@components/custom/SelectionCard";

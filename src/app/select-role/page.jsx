@@ -1,7 +1,6 @@
 "use client";
 
 import { FullScreenLoader } from "@/components/custom/FullScreenLoader";
-import Modal from "@/components/custom/Modal";
 import RoleCardCompact from "@/components/custom/RoleCardCompact";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -106,11 +105,9 @@ export default function SelectRole() {
     setError(null);
   }, []);
 
-  // Memoize role cards to prevent unnecessary re-renders
   const roleCards = useMemo(
     () => (
       <>
-        {/* Top row with Trainer and Client */}
         <div className="grid md:grid-cols-2 gap-5">
           <RoleCardCompact
             title="Become a Trainer"
@@ -172,8 +169,7 @@ export default function SelectRole() {
         </div>
       )}
 
-        <div className="flex flex-col gap-6 max-w-3xl mx-auto">{roleCards}</div>
-      </div>
+      <div className="flex flex-col gap-6 max-w-3xl mx-auto">{roleCards}</div>
 
       <Modal
         isOpen={isModalOpen}

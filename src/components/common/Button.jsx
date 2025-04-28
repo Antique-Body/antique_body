@@ -1,14 +1,14 @@
 "use client";
 import { cn } from "@/lib/utils";
 export const Button = ({
-  children,
-  className,
-  variant = "primary",
-  loading = false,
-  disabled = false,
-  leftIcon,
-  rightIcon,
-  ...props
+    children,
+    className,
+    variant = "primary",
+    loading = false,
+    disabled = false,
+    leftIcon,
+    rightIcon,
+    ...props
 }) => {
   const baseStyles =
     "px-6 py-2 rounded font-medium h-11 transition-all duration-300 disabled:opacity-50 cursor-pointer hover:scale-[1.02]";
