@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "../common/Button";
 import { GoogleIcon } from "../common/Icons";
 import { TextField } from "../common/TextField";
+import { useAuth } from "./AuthContext";
 
 export const AuthForm = ({
   onSubmit,
@@ -12,6 +13,7 @@ export const AuthForm = ({
   isLogin = true,
   googleSignIn = true,
 }) => {
+  const { isLoading: authLoading } = useAuth();
   const {
     register,
     handleSubmit,
@@ -22,10 +24,10 @@ export const AuthForm = ({
     e.preventDefault();
     e.stopPropagation();
     signIn("google", { callbackUrl: "/select-role" });
-};
+  };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 w-full">
       {error && (
         <div className="mb-4 text-red-500 text-center text-sm">{error}</div>
       )}
@@ -84,6 +86,7 @@ export const AuthForm = ({
         }}
         error={errors.password}
         required
+        autoComplete="current-password"
       />
 
       {!isLogin && (
@@ -96,12 +99,13 @@ export const AuthForm = ({
           rules={{ required: "Please confirm your password" }}
           error={errors.confirmPassword}
           required
+          autoComplete="new-password"
         />
       )}
 
       <Button
         type="submit"
-        loading={loading}
+        loading={loading || authLoading}
         className="w-full bg-gradient-to-r from-[#ff7800] to-[#ff5f00] py-2 rounded font-medium text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 disabled:opacity-50">
         {isLogin ? "SIGN IN" : "REGISTER"}
       </Button>

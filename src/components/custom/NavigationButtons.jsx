@@ -8,6 +8,7 @@ export const NavigationButtons = ({
   onStartTraining,
   isCurrentStepSelected,
   canFinish,
+  shouldShowNextStep = true,
 }) => {
   return (
     <div className="w-full flex justify-between items-center gap-4 mt-6">
@@ -26,7 +27,7 @@ export const NavigationButtons = ({
       {currentStep < totalSteps ? (
         <Button
           onClick={onNextStep}
-          disabled={!isCurrentStepSelected}
+          disabled={!isCurrentStepSelected || !shouldShowNextStep}
           className="min-w-[120px]"
           rightIcon={<ArrowRight size={18} />}>
           Next
@@ -34,7 +35,7 @@ export const NavigationButtons = ({
       ) : (
         <Button
           onClick={onStartTraining}
-          disabled={!canFinish}
+          disabled={!canFinish || !shouldShowNextStep}
           className="min-w-[120px]"
           rightIcon={<ArrowRight size={18} />}>
           Start Training
