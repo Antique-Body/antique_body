@@ -1,1 +1,0 @@
-export { TrainerProfile } from "./TrainerProfile";

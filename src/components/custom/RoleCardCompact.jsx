@@ -1,11 +1,7 @@
-import {
-  AdminIcon,
-  ClientIcon,
-  GreekPatternBorder,
-  TrainerIcon,
-  UserIcon,
-} from "@/components/common/Icons";
-import { memo, useCallback, useState } from "react";
+"use client";
+
+import React, { useState, memo, useCallback } from "react";
+import { ClientIcon, GreekPatternBorder, TrainerIcon, UserIcon, SoloIcon, AdminIcon } from "@/components/common/Icons";
 
 const roleIcons = {
   trainer: TrainerIcon,

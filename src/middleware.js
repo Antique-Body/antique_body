@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { NextResponse } from "next/server";
 
 export async function middleware(request) {
     const token = await getToken({ req: request });
@@ -10,17 +10,18 @@ export async function middleware(request) {
     const protectedPrefixes = [
         "/user-dashboard",
         "/trainer-registration",
-        "/trainer-dashboard",
-        "/client-registration",
-        "/client-dashboard",
+        "/trainer/personal-details",
+        "/trainer/dashboard",
+        "/client/personal-details",
+        "/client/dashboard",
         "/admin-dashboard",
     ];
     const isPublicRoute = publicRoutes.includes(pathname);
     const isRoleSelectionRoute = pathname === "/select-role";
     const userRole = token?.role?.toLowerCase();
     const dashboardUrls = {
-        trainer: "/trainer-registration",
-        client: "/client-registration",
+        trainer: "/trainer/personal-details",
+        client: "/client/personal-details",
         admin: "/admin-dashboard",
         user: "/user-dashboard",
     };
