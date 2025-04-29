@@ -37,15 +37,15 @@ const TrainingSetup = () => {
     shouldSkipStep,
   } = useWorkoutForm();
   const [isSaving, setIsSaving] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const [validationError, setValidationError] = useState(null);
 
-  // Redirect if already completed training setup
+  // Prefetch dashboard for faster transition
   useEffect(() => {
-    if (session?.user?.hasCompletedTrainingSetup) {
-      router.push("/user/dashboard");
-    }
-  }, [session, router]);
+    // Prefetch dashboard in background for smoother transition
+    router.prefetch("/user/dashboard");
+  }, [router]);
 
   // Validation effect
   useEffect(() => {
@@ -130,23 +130,25 @@ const TrainingSetup = () => {
         wantsRehabilitation: userSelections.hasInjury !== "no" ? userSelections.wantsRehabilitation : null
       };
 
-      const response = await fetch("/api/users/trainingSetup", {
+      // Start the fetch but don't wait for it - fire and forget
+      // This will run in the background while we redirect
+      fetch("/api/users/trainingSetup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
+      }).then(() => {
+        // Update session in background after data is saved
+        update({ hasCompletedTrainingSetup: true }).catch(err => {
+          console.error("Failed to update session:", err);
+        });
+      }).catch(err => {
+        console.error("Error saving training setup in background:", err);
       });
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to save user data");
-      }
-
-      // Update session to mark training setup as completed
-      await update({ hasCompletedTrainingSetup: true });
-
+      // Return success immediately to trigger redirection
       return true;
     } catch (error) {
-      console.error("Error saving user data:", error);
+      console.error("Error preparing training data:", error);
       setSaveError(error.message);
       return false;
     } finally {
@@ -163,14 +165,30 @@ const TrainingSetup = () => {
   // Event handlers
   const handleStartTraining = useCallback(async () => {
     try {
-      const success = await saveUserData();
-      if (success) {
-        router.push("/user/dashboard");
-      }
+      // Start showing redirect UI immediately
+      setIsRedirecting(true);
+      
+      // Save data in background
+      saveUserData()
+        .then(success => {
+          if (success) {
+            // Redirect to dashboard 
+            router.push("/user/dashboard");
+          } else {
+            // If save failed, stop showing redirect UI
+            setIsRedirecting(false);
+          }
+        })
+        .catch(error => {
+          console.error("Error in save process:", error);
+          setSaveError(error.message || "Failed to save data");
+          setIsRedirecting(false);
+        });
     } catch (error) {
       setSaveError(error.message);
+      setIsRedirecting(false);
     }
-  }, [saveUserData]);
+  }, [saveUserData, router]);
 
   const areMeasurementsValid = useCallback(() => {
     return currentStep !== 9 || userSelections.measurements?.isValid === true;
@@ -245,9 +263,22 @@ const TrainingSetup = () => {
     );
   };
 
-  // Don't render anything if training setup is completed
-  if (session?.user?.hasCompletedTrainingSetup) {
-    return null;
+  const renderLoadingState = () => {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <div className="text-white text-center">
+          <div className="mb-4">
+            {isRedirecting ? "Loading your dashboard..." : "Saving your preferences..."}
+          </div>
+          <div className="w-10 h-10 border-t-2 border-[#FF7800] rounded-full animate-spin mx-auto"></div>
+        </div>
+      </div>
+    );
+  };
+
+  // Show loading indicator while saving or redirecting
+  if (isSaving || isRedirecting) {
+    return renderLoadingState();
   }
 
   return (
@@ -304,12 +335,6 @@ const TrainingSetup = () => {
           canFinish={canFinish()}
           shouldShowNextStep={areMeasurementsValid()}
         />
-
-        {isSaving && (
-          <div className="text-sm text-gray-500 text-center mt-4">
-            Saving your preferences...
-          </div>
-        )}
 
         {renderErrorMessages()}
 

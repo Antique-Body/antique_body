@@ -39,9 +39,16 @@ const validators = {
       
       // Validate each location is a valid injury location
       const validLocations = [
-        'neck', 'shoulder_l', 'shoulder_r', 'back_upper', 'back_lower',
-        'elbow_l', 'elbow_r', 'wrist_l', 'wrist_r', 'hip_l', 'hip_r',
-        'knee_l', 'knee_r', 'ankle_l', 'ankle_r'
+        // Front View
+        'head', 'neck', 'chest', 'shoulder_l', 'shoulder_r',
+        'bicep_l', 'bicep_r', 'forearm_l', 'forearm_r',
+        'abdomen', 'hip_l', 'hip_r', 'quad_l', 'quad_r',
+        'knee_l', 'knee_r', 'ankle_l', 'ankle_r',
+        // Back View
+        'upper_back', 'lower_back', 'back_shoulder_l', 'back_shoulder_r',
+        'tricep_l', 'tricep_r', 'glute_l', 'glute_r',
+        'hamstring_l', 'hamstring_r', 'calf_back_l', 'calf_back_r',
+        'achilles_l', 'achilles_r'
       ];
       
       return locations.every(loc => 
@@ -74,6 +81,7 @@ const extractAndValidateData = (body) => {
     goal, 
     frequency,
     hasInjury,
+    injuryType,
     injuryLocations,
     wantsRehabilitation
   } = body;
@@ -94,6 +102,11 @@ const extractAndValidateData = (body) => {
   // Validate hasInjury
   if (!validators.hasInjury(hasInjury)) {
     return { error: "Invalid injury value", details: "Must be one of 'no', 'past', 'current', or 'chronic'" };
+  }
+
+  // Validate injuryType
+  if (injuryType && !validators.hasInjury(injuryType)) {
+    return { error: "Invalid injury type", details: "Must be one of 'no', 'past', 'current', or 'chronic'" };
   }
 
   // Validate wantsRehabilitation if hasInjury is true
@@ -153,7 +166,7 @@ const extractAndValidateData = (body) => {
       goal,
       frequency: parseInt(frequency, 10),
       hasInjury: hasInjuryBool,
-      injuryType: hasInjury === true ? "chronic" : hasInjury,
+      injuryType: injuryType || hasInjury,
       injuryLocations: hasInjuryBool && injuryLocations 
         ? [...new Set(injuryLocations)].sort() // Remove duplicates and sort
         : [],
