@@ -50,7 +50,7 @@ export const TextField = ({
   } text-white ${className}`;
 
   return (
-    <div className="mb-4">
+<div className={`${className}`}>
       <div className="flex justify-between items-center mb-2">
         {label && (
           <label className="block text-gray-300 font-medium" htmlFor={id || name}>
