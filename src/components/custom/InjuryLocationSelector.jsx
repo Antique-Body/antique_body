@@ -2,23 +2,24 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import bodyOutline from "../../../public/images/body-outline.png";
 
 const bodyParts = [
   { id: "neck", name: "Neck", position: { top: "5%", left: "50%" } },
-  { id: "shoulder_l", name: "Left Shoulder", position: { top: "15%", left: "35%" } },
-  { id: "shoulder_r", name: "Right Shoulder", position: { top: "15%", left: "65%" } },
+  { id: "shoulder_l", name: "Left Shoulder", position: { top: "22%", left: "38%" } },
+  { id: "shoulder_r", name: "Right Shoulder", position: { top: "22%", left: "62%" } },
   { id: "back_upper", name: "Upper Back", position: { top: "20%", left: "50%" } },
-  { id: "elbow_l", name: "Left Elbow", position: { top: "30%", left: "25%" } },
-  { id: "elbow_r", name: "Right Elbow", position: { top: "30%", left: "75%" } },
+  { id: "elbow_l", name: "Left Elbow", position: { top: "38%", left: "35%" } },
+  { id: "elbow_r", name: "Right Elbow", position: { top: "38%", left: "65%" } },
   { id: "back_lower", name: "Lower Back", position: { top: "35%", left: "50%" } },
-  { id: "wrist_l", name: "Left Wrist", position: { top: "40%", left: "20%" } },
-  { id: "wrist_r", name: "Right Wrist", position: { top: "40%", left: "80%" } },
-  { id: "hip_l", name: "Left Hip", position: { top: "45%", left: "40%" } },
-  { id: "hip_r", name: "Right Hip", position: { top: "45%", left: "60%" } },
-  { id: "knee_l", name: "Left Knee", position: { top: "60%", left: "40%" } },
-  { id: "knee_r", name: "Right Knee", position: { top: "60%", left: "60%" } },
-  { id: "ankle_l", name: "Left Ankle", position: { top: "80%", left: "40%" } },
-  { id: "ankle_r", name: "Right Ankle", position: { top: "80%", left: "60%" } },
+  { id: "wrist_l", name: "Left Wrist", position: { top: "46%", left: "32%" } },
+  { id: "wrist_r", name: "Right Wrist", position: { top: "46%", left: "68%" } },
+  { id: "hip_l", name: "Left Hip", position: { top: "50%", left: "42%" } },
+  { id: "hip_r", name: "Right Hip", position: { top: "50%", left: "58%" } },
+  { id: "knee_l", name: "Left Knee", position: { top: "70%", left: "42%" } },
+  { id: "knee_r", name: "Right Knee", position: { top: "70%", left: "58%" } },
+  { id: "ankle_l", name: "Left Ankle", position: { top: "90%", left: "40%" } },
+  { id: "ankle_r", name: "Right Ankle", position: { top: "90%", left: "60%" } },
 ];
 
 export const InjuryLocationSelector = ({ onSelect, selectedLocations = [] }) => {
@@ -50,11 +51,12 @@ export const InjuryLocationSelector = ({ onSelect, selectedLocations = [] }) => 
         <div className="relative h-full w-full flex justify-center">
           <div className="h-full relative">
             <Image
-              src="/images/body-outline.png"
+              src={bodyOutline}
               alt="Body outline"
-              width={280}
+              width='24rem'
               height={500}
               className="opacity-70"
+              priority
             />
           </div>
         </div>
