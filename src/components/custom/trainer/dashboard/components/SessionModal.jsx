@@ -1,4 +1,5 @@
-import React from "react";
+import { Button } from "@/components/common/Button";
+import { CloseXIcon } from "@/components/common/Icons";
 
 export const SessionModal = ({ session, closeSessionModal }) => {
     return (
@@ -7,25 +8,13 @@ export const SessionModal = ({ session, closeSessionModal }) => {
                 <div className="flex justify-between items-start mb-6">
                     <h3 className="text-xl font-bold">Session Details</h3>
 
-                    <button
+                    <Button
+                        variant="ghost"
                         onClick={closeSessionModal}
-                        className="text-gray-400 hover:text-white transition-colors duration-300"
+                        className="text-gray-400 hover:text-white transition-colors duration-300 p-0"
                     >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
+                        <CloseXIcon size={24} />
+                    </Button>
                 </div>
 
                 <div className="space-y-6">
@@ -34,7 +23,7 @@ export const SessionModal = ({ session, closeSessionModal }) => {
                             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#FF6B00] to-[#FF9A00] flex justify-center items-center text-white font-bold text-lg">
                                 {session?.clientName
                                     ?.split(" ")
-                                    .map((n) => n[0])
+                                    .map(n => n[0])
                                     .join("")}
                             </div>
                             <div>
@@ -45,8 +34,8 @@ export const SessionModal = ({ session, closeSessionModal }) => {
                                             session?.status === "confirmed"
                                                 ? "bg-green-500"
                                                 : session?.status === "pending"
-                                                ? "bg-yellow-500"
-                                                : "bg-red-500"
+                                                  ? "bg-yellow-500"
+                                                  : "bg-red-500"
                                         }`}
                                     ></span>
                                     <span className="text-gray-300 capitalize">{session?.status}</span>
@@ -98,12 +87,15 @@ export const SessionModal = ({ session, closeSessionModal }) => {
                     </div>
 
                     <div className="flex justify-between">
-                        <button className="py-2 px-4 border border-[#FF6B00] text-[#FF6B00] rounded-lg transition-all duration-300 hover:bg-[rgba(255,107,0,0.1)]">
+                        <Button
+                            variant="outline"
+                            className="py-2 px-4 text-[#FF6B00] transition-all duration-300 hover:bg-[rgba(255,107,0,0.1)]"
+                        >
                             Reschedule
-                        </button>
-                        <button className="py-2 px-4 bg-[#FF6B00] text-white rounded-lg transition-all duration-300 hover:bg-[#FF9A00]">
+                        </Button>
+                        <Button variant="orangeFilled" className="py-2 px-4 transition-all duration-300">
                             Complete Session
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>

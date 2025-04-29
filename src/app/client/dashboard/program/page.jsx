@@ -1,4 +1,6 @@
 "use client";
+import { Button } from "@/components/common/Button";
+import { PlusIcon } from "@/components/common/Icons";
 
 export default function ProgramPage() {
     // Sample user data
@@ -158,6 +160,12 @@ export default function ProgramPage() {
                             </div>
                         ))}
                     </div>
+                </div>
+
+                <div className="mt-6">
+                    <Button variant="orangeFilled" fullWidth leftIcon={<PlusIcon />}>
+                        Add Workout Session
+                    </Button>
                 </div>
             </div>
         </div>

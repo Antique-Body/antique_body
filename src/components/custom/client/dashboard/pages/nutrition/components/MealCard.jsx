@@ -1,3 +1,5 @@
+import { Button } from "@/components/common/Button";
+import { ChevronDownIcon, TrashIcon } from "@/components/common/Icons";
 import { useState } from "react";
 
 export const MealCard = ({ meal, onDelete }) => {
@@ -22,28 +24,16 @@ export const MealCard = ({ meal, onDelete }) => {
                             P: {meal.protein}g | C: {meal.carbs}g | F: {meal.fat}g
                         </p>
                     </div>
-                    <button
-                        onClick={(e) => {
+                    <Button
+                        variant="ghost"
+                        onClick={e => {
                             e.stopPropagation();
                             setIsExpanded(!isExpanded);
                         }}
-                        className="text-gray-400"
+                        className="text-gray-400 p-0"
                     >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className={`transition-transform ${isExpanded ? "rotate-180" : ""}`}
-                        >
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </button>
+                        <ChevronDownIcon size={20} className={`transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                    </Button>
                 </div>
             </div>
 
@@ -66,29 +56,17 @@ export const MealCard = ({ meal, onDelete }) => {
                     </div>
 
                     <div className="flex justify-end mt-3">
-                        <button
-                            onClick={(e) => {
+                        <Button
+                            variant="ghost"
+                            onClick={e => {
                                 e.stopPropagation();
                                 onDelete(meal.id);
                             }}
-                            className="text-sm text-red-500 hover:text-red-400 flex items-center gap-1"
+                            className="text-sm text-red-500 hover:text-red-400 flex items-center gap-1 p-0"
                         >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="14"
-                                height="14"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            </svg>
+                            <TrashIcon size={14} />
                             Delete Meal
-                        </button>
+                        </Button>
                     </div>
                 </div>
             )}

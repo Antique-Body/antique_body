@@ -3,6 +3,7 @@
 import Background from "@/components/background";
 import { Button, StepProgressBar } from "@/components/common";
 import { Footer } from "@/components/common/Footer";
+import { CheckIcon } from "@/components/common/Icons";
 import { AntiqueBodyLogo } from "@/components/custom/BrandLogo";
 import {
     BasicInfoStep,
@@ -114,7 +115,7 @@ const ClientRegistration = () => {
     const motivationLevelOptions = ["Need lots of encouragement", "Moderately self-motivated", "Highly self-motivated"];
 
     // Handle form input changes
-    const handleChange = (e) => {
+    const handleChange = e => {
         const { name, value } = e.target;
 
         if (name.includes(".")) {
@@ -140,7 +141,7 @@ const ClientRegistration = () => {
         if (formData[field].includes(item)) {
             setFormData({
                 ...formData,
-                [field]: formData[field].filter((i) => i !== item),
+                [field]: formData[field].filter(i => i !== item),
             });
         } else {
             setFormData({
@@ -152,13 +153,13 @@ const ClientRegistration = () => {
 
     // Handle health condition fields
     const handleHealthChange = (id, value) => {
-        const updatedFields = healthFields.map((field) => (field.id === id ? { ...field, value } : field));
+        const updatedFields = healthFields.map(field => (field.id === id ? { ...field, value } : field));
         setHealthFields(updatedFields);
 
         // Update form data
         setFormData({
             ...formData,
-            healthConditions: updatedFields.map((field) => field.value).filter((value) => value !== ""),
+            healthConditions: updatedFields.map(field => field.value).filter(value => value !== ""),
         });
     };
 
@@ -169,28 +170,28 @@ const ClientRegistration = () => {
     };
 
     // Remove health condition field
-    const removeHealthField = (id) => {
+    const removeHealthField = id => {
         if (healthFields.length > 1) {
-            const updatedFields = healthFields.filter((field) => field.id !== id);
+            const updatedFields = healthFields.filter(field => field.id !== id);
             setHealthFields(updatedFields);
 
             // Update form data
             setFormData({
                 ...formData,
-                healthConditions: updatedFields.map((field) => field.value).filter((value) => value !== ""),
+                healthConditions: updatedFields.map(field => field.value).filter(value => value !== ""),
             });
         }
     };
 
     // Handle injury fields
     const handleInjuryChange = (id, value) => {
-        const updatedFields = injuryFields.map((field) => (field.id === id ? { ...field, value } : field));
+        const updatedFields = injuryFields.map(field => (field.id === id ? { ...field, value } : field));
         setInjuryFields(updatedFields);
 
         // Update form data
         setFormData({
             ...formData,
-            injuries: updatedFields.map((field) => field.value).filter((value) => value !== ""),
+            injuries: updatedFields.map(field => field.value).filter(value => value !== ""),
         });
     };
 
@@ -201,21 +202,21 @@ const ClientRegistration = () => {
     };
 
     // Remove injury field
-    const removeInjuryField = (id) => {
+    const removeInjuryField = id => {
         if (injuryFields.length > 1) {
-            const updatedFields = injuryFields.filter((field) => field.id !== id);
+            const updatedFields = injuryFields.filter(field => field.id !== id);
             setInjuryFields(updatedFields);
 
             // Update form data
             setFormData({
                 ...formData,
-                injuries: updatedFields.map((field) => field.value).filter((value) => value !== ""),
+                injuries: updatedFields.map(field => field.value).filter(value => value !== ""),
             });
         }
     };
 
     // Handle image upload
-    const handleImageUpload = (e) => {
+    const handleImageUpload = e => {
         const file = e.target.files[0];
         if (file) {
             setFormData({
@@ -233,7 +234,7 @@ const ClientRegistration = () => {
     };
 
     // Handle form submission
-    const handleSubmit = (e) => {
+    const handleSubmit = e => {
         e.preventDefault();
         console.log("Submitting user profile data:", formData);
         // Here you would typically send data to your backend
@@ -241,14 +242,14 @@ const ClientRegistration = () => {
     };
 
     // Move to next step
-    const goToNextStep = (e) => {
+    const goToNextStep = e => {
         e.preventDefault();
         setStep(step + 1);
         window.scrollTo(0, 0);
     };
 
     // Move to previous step
-    const goToPrevStep = (e) => {
+    const goToPrevStep = e => {
         e.preventDefault();
         setStep(step - 1);
         window.scrollTo(0, 0);
@@ -346,24 +347,7 @@ const ClientRegistration = () => {
                                     Continue
                                 </Button>
                             ) : (
-                                <Button
-                                    type="submit"
-                                    rightIcon={
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="20"
-                                            height="20"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                        >
-                                            <polyline points="20 6 9 17 4 12"></polyline>
-                                        </svg>
-                                    }
-                                >
+                                <Button type="submit" rightIcon={<CheckIcon size={20} />}>
                                     Complete Profile
                                 </Button>
                             )}

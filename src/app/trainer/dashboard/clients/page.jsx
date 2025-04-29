@@ -1,4 +1,5 @@
 "use client";
+import { FormField } from "@/components/shared/FormField";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -64,6 +65,21 @@ const ClientsPage = () => {
         router.push(`/trainer/dashboard/clients/${client.id}`);
     };
 
+    const statusOptions = [
+        { value: "", label: "All Statuses" },
+        { value: "active", label: "Active" },
+        { value: "paused", label: "Paused" },
+        { value: "completed", label: "Completed" },
+    ];
+
+    const goalOptions = [
+        { value: "", label: "All Goals" },
+        { value: "Strength", label: "Strength" },
+        { value: "Weight Management", label: "Weight Management" },
+        { value: "Rehabilitation", label: "Rehabilitation" },
+        { value: "Conditioning", label: "Conditioning" },
+    ];
+
     return (
         <div>
             <h2 className="text-xl font-bold mb-4">Clients</h2>
@@ -71,35 +87,30 @@ const ClientsPage = () => {
             {/* Search and filter controls */}
             <div className="flex flex-col md:flex-row gap-3 mb-6">
                 <div className="flex-1">
-                    <input
+                    <FormField
                         type="text"
-                        placeholder="Search clients..."
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
-                        className="w-full bg-[rgba(30,30,30,0.8)] border border-[#333] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#FF6B00]"
+                        placeholder="Search clients..."
+                        className="mb-0"
                     />
                 </div>
-                <select
+                <FormField
+                    type="select"
                     value={filterStatus}
                     onChange={e => setFilterStatus(e.target.value)}
-                    className="bg-[rgba(30,30,30,0.8)] border border-[#333] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#FF6B00]"
-                >
-                    <option value="">All Statuses</option>
-                    <option value="active">Active</option>
-                    <option value="paused">Paused</option>
-                    <option value="completed">Completed</option>
-                </select>
-                <select
+                    options={statusOptions}
+                    placeholder="All Statuses"
+                    className="mb-0 min-w-[150px]"
+                />
+                <FormField
+                    type="select"
                     value={filterGoalType}
                     onChange={e => setFilterGoalType(e.target.value)}
-                    className="bg-[rgba(30,30,30,0.8)] border border-[#333] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#FF6B00]"
-                >
-                    <option value="">All Goals</option>
-                    <option value="Strength">Strength</option>
-                    <option value="Weight Management">Weight Management</option>
-                    <option value="Rehabilitation">Rehabilitation</option>
-                    <option value="Conditioning">Conditioning</option>
-                </select>
+                    options={goalOptions}
+                    placeholder="All Goals"
+                    className="mb-0 min-w-[180px]"
+                />
             </div>
 
             {/* Client list */}

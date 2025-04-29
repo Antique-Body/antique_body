@@ -1,4 +1,4 @@
-import React from "react";
+import { InfoIcon } from "../../../components/common/Icons";
 
 /**
  * Tips section component with motivational quotes and tips based on registration step
@@ -82,21 +82,7 @@ export const TipsSection = ({ step, userType = "client" }) => {
             {userType === "trainer" ? (
                 <div className="mb-6 bg-[rgba(20,20,20,0.8)] rounded-xl p-6 border border-[#222] shadow-lg text-left">
                     <h3 className="text-xl font-medium mb-4 flex items-center gap-2 text-[#FF6B00]">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="16" x2="12" y2="12"></line>
-                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                        </svg>
+                        <InfoIcon size={20} />
                         Profile Setup Tips
                     </h3>
                     <div className="space-y-4 text-gray-300">{renderTrainerTips()}</div>

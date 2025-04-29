@@ -1,4 +1,6 @@
 import { ProgressBar } from "@/components/common";
+import { Button } from "@/components/common/Button";
+import { CloseXIcon } from "@/components/common/Icons";
 import { MacroDistribution } from "@/components/custom/client/dashboard/pages/nutrition/components";
 import { useState } from "react";
 
@@ -20,41 +22,30 @@ export const NutritionHistory = ({ historyData, onClose }) => {
             <div className="bg-[rgba(20,20,20,0.95)] rounded-2xl p-6 w-full max-w-4xl border border-[#222] shadow-lg max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold">Nutrition History</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-white">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
+                    <Button variant="ghost" onClick={onClose} className="text-gray-400 hover:text-white p-0">
+                        <CloseXIcon size={20} />
+                    </Button>
                 </div>
 
                 <div className="flex mb-6">
-                    <button
-                        className={`flex-1 py-2 px-3 ${
-                            view === "weekly" ? "bg-[#FF6B00] text-white" : "bg-[#333] text-gray-300"
-                        } rounded-l-lg`}
+                    <Button
+                        className={`flex-1 py-2 px-3 rounded-l-lg rounded-r-none ${
+                            view === "weekly" ? "bg-[#FF6B00] text-white" : ""
+                        }`}
+                        variant={view === "weekly" ? "orangeFilled" : "secondary"}
                         onClick={() => setView("weekly")}
                     >
                         Last 7 Days
-                    </button>
-                    <button
-                        className={`flex-1 py-2 px-3 ${
-                            view === "monthly" ? "bg-[#FF6B00] text-white" : "bg-[#333] text-gray-300"
-                        } rounded-r-lg`}
+                    </Button>
+                    <Button
+                        className={`flex-1 py-2 px-3 rounded-r-lg rounded-l-none ${
+                            view === "monthly" ? "bg-[#FF6B00] text-white" : ""
+                        }`}
+                        variant={view === "monthly" ? "orangeFilled" : "secondary"}
                         onClick={() => setView("monthly")}
                     >
                         Monthly View
-                    </button>
+                    </Button>
                 </div>
 
                 {/* Weekly Summary */}
@@ -186,9 +177,9 @@ export const NutritionHistory = ({ historyData, onClose }) => {
                 </div>
 
                 <div className="mt-6 text-center">
-                    <button onClick={onClose} className="px-6 py-2 bg-[#FF6B00] text-white rounded-lg hover:bg-[#FF9A00]">
+                    <Button variant="orangeFilled" onClick={onClose} className="px-6 py-2">
                         Close
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

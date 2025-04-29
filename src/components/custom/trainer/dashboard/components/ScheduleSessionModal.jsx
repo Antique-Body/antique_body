@@ -1,5 +1,8 @@
 "use client";
 
+import { Button } from "@/components/common/Button";
+import { CloseXIcon } from "@/components/common/Icons";
+import { FormField } from "@/components/shared/FormField";
 import { useState } from "react";
 
 export const ScheduleSessionModal = ({ client, onClose, onSchedule }) => {
@@ -40,6 +43,16 @@ export const ScheduleSessionModal = ({ client, onClose, onSchedule }) => {
 
     const timeSlots = generateTimeSlots();
 
+    const timeOptions = [{ value: "", label: "Select time" }, ...timeSlots.map(slot => ({ value: slot, label: slot }))];
+
+    const durationOptions = [
+        { value: 30, label: "30 minutes" },
+        { value: 45, label: "45 minutes" },
+        { value: 60, label: "60 minutes" },
+        { value: 90, label: "90 minutes" },
+        { value: 120, label: "120 minutes" },
+    ];
+
     const handleSubmit = e => {
         e.preventDefault();
 
@@ -77,22 +90,9 @@ export const ScheduleSessionModal = ({ client, onClose, onSchedule }) => {
             <div className="bg-[#121212] border border-[#333] rounded-xl w-full max-w-2xl overflow-hidden relative animate-fade-in">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#FF7800] to-[#FF9A00]"></div>
 
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white p-1">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    >
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
+                <Button variant="ghost" onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white p-1">
+                    <CloseXIcon size={24} />
+                </Button>
 
                 <div className="p-6">
                     <h2 className="text-xl font-bold mb-1">Schedule Session with {client?.name}</h2>
@@ -128,36 +128,25 @@ export const ScheduleSessionModal = ({ client, onClose, onSchedule }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             {/* Time selection */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Select Time</label>
-                                <select
+                                <FormField
+                                    type="select"
+                                    label="Select Time"
                                     value={time}
                                     onChange={e => setTime(e.target.value)}
                                     required
-                                    className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-4 py-2 text-white"
-                                >
-                                    <option value="">Select time</option>
-                                    {timeSlots.map((slot, index) => (
-                                        <option key={index} value={slot}>
-                                            {slot}
-                                        </option>
-                                    ))}
-                                </select>
+                                    options={timeOptions}
+                                />
                             </div>
 
                             {/* Duration selection */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Duration</label>
-                                <select
+                                <FormField
+                                    type="select"
+                                    label="Duration"
                                     value={duration}
                                     onChange={e => setDuration(parseInt(e.target.value))}
-                                    className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-4 py-2 text-white"
-                                >
-                                    <option value="30">30 minutes</option>
-                                    <option value="45">45 minutes</option>
-                                    <option value="60">60 minutes</option>
-                                    <option value="90">90 minutes</option>
-                                    <option value="120">120 minutes</option>
-                                </select>
+                                    options={durationOptions}
+                                />
                             </div>
                         </div>
 
@@ -210,29 +199,22 @@ export const ScheduleSessionModal = ({ client, onClose, onSchedule }) => {
 
                         {/* Notes */}
                         <div className="mb-5">
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Session Notes</label>
-                            <textarea
+                            <FormField
+                                type="textarea"
+                                label="Session Notes"
                                 value={notes}
                                 onChange={e => setNotes(e.target.value)}
-                                className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-4 py-2 text-white h-20 resize-none"
                                 placeholder="Add any notes about this session..."
-                            ></textarea>
+                            />
                         </div>
 
                         <div className="flex justify-end gap-3">
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                className="px-4 py-2 border border-[#444] rounded-lg text-gray-300 hover:bg-[#333] transition-colors"
-                            >
+                            <Button type="button" variant="modalCancel" onClick={onClose}>
                                 Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                className="px-4 py-2 bg-[#FF6B00] text-white rounded-lg hover:bg-[#FF9A00] transition-colors"
-                            >
+                            </Button>
+                            <Button type="submit" variant="orangeFilled">
                                 Schedule Session
-                            </button>
+                            </Button>
                         </div>
                     </form>
                 </div>

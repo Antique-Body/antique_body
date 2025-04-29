@@ -1,3 +1,6 @@
+import { Button } from "@/components/common/Button";
+import { CloseXIcon } from "@/components/common/Icons";
+import { FormField } from "@/components/shared";
 import { useState } from "react";
 import { foodDatabase } from "../data/foodDatabase";
 
@@ -16,9 +19,7 @@ export const AddFoodModal = ({ isOpen, onClose, onAddFood }) => {
     const [isCustom, setIsCustom] = useState(false);
 
     // Filter foods based on search term
-    const filteredFoods = foodDatabase
-        .filter((food) => food.name.toLowerCase().includes(searchTerm.toLowerCase()))
-        .slice(0, 10); // Limit to 10 results
+    const filteredFoods = foodDatabase.filter(food => food.name.toLowerCase().includes(searchTerm.toLowerCase())).slice(0, 10); // Limit to 10 results
 
     const handleAddFood = () => {
         if (isCustom) {
@@ -69,58 +70,48 @@ export const AddFoodModal = ({ isOpen, onClose, onAddFood }) => {
             <div className="bg-[rgba(20,20,20,0.95)] rounded-2xl p-6 w-full max-w-md border border-[#222] shadow-lg max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold">Add Food Item</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-white">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
+                    <Button variant="ghost" onClick={onClose} className="text-gray-400 hover:text-white p-0">
+                        <CloseXIcon size={20} />
+                    </Button>
                 </div>
 
                 <div className="mb-4">
                     <div className="flex mb-3">
-                        <button
-                            className={`flex-1 py-2 px-3 ${
-                                !isCustom ? "bg-[#FF6B00] text-white" : "bg-[#333] text-gray-300"
-                            } rounded-l-lg`}
+                        <Button
+                            className={`flex-1 py-2 px-3 rounded-l-lg rounded-r-none ${
+                                !isCustom ? "bg-[#FF6B00] text-white" : ""
+                            }`}
+                            variant={!isCustom ? "orangeFilled" : "secondary"}
                             onClick={() => setIsCustom(false)}
                         >
                             Search Database
-                        </button>
-                        <button
-                            className={`flex-1 py-2 px-3 ${
-                                isCustom ? "bg-[#FF6B00] text-white" : "bg-[#333] text-gray-300"
-                            } rounded-r-lg`}
+                        </Button>
+                        <Button
+                            className={`flex-1 py-2 px-3 rounded-r-lg rounded-l-none ${
+                                isCustom ? "bg-[#FF6B00] text-white" : ""
+                            }`}
+                            variant={isCustom ? "orangeFilled" : "secondary"}
                             onClick={() => setIsCustom(true)}
                         >
                             Custom Food
-                        </button>
+                        </Button>
                     </div>
 
                     {!isCustom ? (
                         <>
-                            <input
+                            <FormField
                                 type="text"
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={e => setSearchTerm(e.target.value)}
                                 placeholder="Search foods..."
-                                className="w-full p-3 bg-[rgba(30,30,30,0.8)] border border-[#444] rounded-lg text-white mb-3"
+                                backgroundStyle="semi-transparent"
+                                className="mb-3"
                             />
 
                             {searchTerm && (
                                 <div className="mb-4 max-h-60 overflow-y-auto bg-[rgba(30,30,30,0.5)] rounded-lg border border-[#333]">
                                     {filteredFoods.length > 0 ? (
-                                        filteredFoods.map((food) => (
+                                        filteredFoods.map(food => (
                                             <div
                                                 key={food.id}
                                                 onClick={() => setSelectedFood(food)}
@@ -150,13 +141,15 @@ export const AddFoodModal = ({ isOpen, onClose, onAddFood }) => {
                                     <p className="font-medium mb-2">{selectedFood.name}</p>
                                     <div className="flex items-center gap-3 mb-2">
                                         <label className="text-gray-400">Amount:</label>
-                                        <input
+                                        <FormField
                                             type="number"
                                             min="0.25"
                                             step="0.25"
                                             value={amount}
-                                            onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
-                                            className="w-20 p-2 bg-[rgba(20,20,20,0.8)] border border-[#444] rounded text-white"
+                                            onChange={e => setAmount(parseFloat(e.target.value) || 0)}
+                                            backgroundStyle="darker"
+                                            size="small"
+                                            className="w-20 mb-0"
                                         />
                                         <span className="text-gray-400">{selectedFood.unit}</span>
                                     </div>
@@ -183,94 +176,79 @@ export const AddFoodModal = ({ isOpen, onClose, onAddFood }) => {
                         </>
                     ) : (
                         <div className="space-y-3">
-                            <div>
-                                <label className="block text-gray-400 text-sm mb-1">Food Name</label>
-                                <input
-                                    type="text"
-                                    value={customFood.name}
-                                    onChange={(e) => setCustomFood({ ...customFood, name: e.target.value })}
-                                    className="w-full p-2 bg-[rgba(30,30,30,0.8)] border border-[#444] rounded text-white"
-                                    placeholder="e.g. Chicken Breast"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-gray-400 text-sm mb-1">Amount</label>
-                                <input
-                                    type="text"
-                                    value={customFood.amount}
-                                    onChange={(e) => setCustomFood({ ...customFood, amount: e.target.value })}
-                                    className="w-full p-2 bg-[rgba(30,30,30,0.8)] border border-[#444] rounded text-white"
-                                    placeholder="e.g. 100g, 1 cup"
-                                />
-                            </div>
+                            <FormField
+                                label="Food Name"
+                                type="text"
+                                value={customFood.name}
+                                onChange={e => setCustomFood({ ...customFood, name: e.target.value })}
+                                placeholder="e.g. Chicken Breast"
+                                backgroundStyle="semi-transparent"
+                                size="small"
+                            />
+                            <FormField
+                                label="Amount"
+                                type="text"
+                                value={customFood.amount}
+                                onChange={e => setCustomFood({ ...customFood, amount: e.target.value })}
+                                placeholder="e.g. 100g, 1 cup"
+                                backgroundStyle="semi-transparent"
+                                size="small"
+                            />
                             <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="block text-gray-400 text-sm mb-1">Calories</label>
-                                    <input
-                                        type="number"
-                                        value={customFood.calories}
-                                        onChange={(e) => setCustomFood({ ...customFood, calories: e.target.value })}
-                                        className="w-full p-2 bg-[rgba(30,30,30,0.8)] border border-[#444] rounded text-white"
-                                        placeholder="kcal"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-gray-400 text-sm mb-1">Protein (g)</label>
-                                    <input
-                                        type="number"
-                                        value={customFood.protein}
-                                        onChange={(e) => setCustomFood({ ...customFood, protein: e.target.value })}
-                                        className="w-full p-2 bg-[rgba(30,30,30,0.8)] border border-[#444] rounded text-white"
-                                        placeholder="g"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-gray-400 text-sm mb-1">Carbs (g)</label>
-                                    <input
-                                        type="number"
-                                        value={customFood.carbs}
-                                        onChange={(e) => setCustomFood({ ...customFood, carbs: e.target.value })}
-                                        className="w-full p-2 bg-[rgba(30,30,30,0.8)] border border-[#444] rounded text-white"
-                                        placeholder="g"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-gray-400 text-sm mb-1">Fat (g)</label>
-                                    <input
-                                        type="number"
-                                        value={customFood.fat}
-                                        onChange={(e) => setCustomFood({ ...customFood, fat: e.target.value })}
-                                        className="w-full p-2 bg-[rgba(30,30,30,0.8)] border border-[#444] rounded text-white"
-                                        placeholder="g"
-                                    />
-                                </div>
+                                <FormField
+                                    label="Calories"
+                                    type="number"
+                                    value={customFood.calories}
+                                    onChange={e => setCustomFood({ ...customFood, calories: e.target.value })}
+                                    placeholder="kcal"
+                                    backgroundStyle="semi-transparent"
+                                    size="small"
+                                />
+                                <FormField
+                                    label="Protein (g)"
+                                    type="number"
+                                    value={customFood.protein}
+                                    onChange={e => setCustomFood({ ...customFood, protein: e.target.value })}
+                                    placeholder="g"
+                                    backgroundStyle="semi-transparent"
+                                    size="small"
+                                />
+                                <FormField
+                                    label="Carbs (g)"
+                                    type="number"
+                                    value={customFood.carbs}
+                                    onChange={e => setCustomFood({ ...customFood, carbs: e.target.value })}
+                                    placeholder="g"
+                                    backgroundStyle="semi-transparent"
+                                    size="small"
+                                />
+                                <FormField
+                                    label="Fat (g)"
+                                    type="number"
+                                    value={customFood.fat}
+                                    onChange={e => setCustomFood({ ...customFood, fat: e.target.value })}
+                                    placeholder="g"
+                                    backgroundStyle="semi-transparent"
+                                    size="small"
+                                />
                             </div>
                         </div>
                     )}
                 </div>
 
                 <div className="flex justify-end space-x-3">
-                    <button onClick={onClose} className="px-4 py-2 bg-[#333] text-white rounded hover:bg-[#444]">
+                    <Button variant="modalCancel" onClick={onClose}>
                         Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        variant="orangeFilled"
                         onClick={handleAddFood}
                         disabled={isCustom ? !customFood.name || !customFood.calories : !selectedFood}
-                        className={`px-4 py-2 ${
-                            isCustom
-                                ? !customFood.name || !customFood.calories
-                                    ? "bg-gray-600 cursor-not-allowed"
-                                    : "bg-[#FF6B00] hover:bg-[#FF9A00]"
-                                : !selectedFood
-                                ? "bg-gray-600 cursor-not-allowed"
-                                : "bg-[#FF6B00] hover:bg-[#FF9A00]"
-                        } text-white rounded`}
                     >
                         Add Food
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>
     );
 };
-

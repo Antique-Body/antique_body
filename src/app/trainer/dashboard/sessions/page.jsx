@@ -1,5 +1,7 @@
 "use client";
+import { Button } from "@/components/common/Button";
 import { ScheduleSessionModal } from "@/components/custom/trainer/dashboard/components";
+import { FormField } from "@/components/shared/FormField";
 import { useState } from "react";
 
 const SessionsPage = () => {
@@ -95,49 +97,54 @@ const SessionsPage = () => {
         setSelectedSession(null);
     };
 
+    const statusOptions = [
+        { value: "", label: "All Statuses" },
+        { value: "confirmed", label: "Confirmed" },
+        { value: "pending", label: "Pending" },
+        { value: "canceled", label: "Canceled" },
+    ];
+
+    const typeOptions = [
+        { value: "", label: "All Types" },
+        { value: "In-person", label: "In-person" },
+        { value: "Virtual", label: "Virtual" },
+    ];
+
     return (
         <div className="px-4 py-6">
             <div className="flex flex-col md:flex-row justify-between items-center mb-6">
                 <h2 className="text-xl font-bold mb-4 md:mb-0">Upcoming Sessions</h2>
 
-                <button
-                    onClick={openNewSessionModal}
-                    className="bg-[#FF6B00] text-white py-2 px-4 rounded-lg transition-all duration-300 hover:bg-[#FF8A00] flex items-center gap-2"
-                >
-                    <span className="text-xl">+</span> New Session
-                </button>
+                <Button variant="orangeFilled" onClick={openNewSessionModal} leftIcon={<span className="text-xl">+</span>}>
+                    New Session
+                </Button>
             </div>
 
             {/* Search and filter controls */}
             <div className="flex flex-col md:flex-row gap-3 mb-6">
                 <div className="flex-1">
-                    <input
+                    <FormField
                         type="text"
                         placeholder="Search sessions..."
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
-                        className="w-full bg-[rgba(30,30,30,0.8)] border border-[#333] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#FF6B00]"
+                        className="mb-0"
                     />
                 </div>
-                <select
+                <FormField
+                    type="select"
                     value={filterStatus}
                     onChange={e => setFilterStatus(e.target.value)}
-                    className="bg-[rgba(30,30,30,0.8)] border border-[#333] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#FF6B00]"
-                >
-                    <option value="">All Statuses</option>
-                    <option value="confirmed">Confirmed</option>
-                    <option value="pending">Pending</option>
-                    <option value="canceled">Canceled</option>
-                </select>
-                <select
+                    options={statusOptions}
+                    className="mb-0 min-w-[150px]"
+                />
+                <FormField
+                    type="select"
                     value={filterType}
                     onChange={e => setFilterType(e.target.value)}
-                    className="bg-[rgba(30,30,30,0.8)] border border-[#333] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#FF6B00]"
-                >
-                    <option value="">All Types</option>
-                    <option value="In-person">In-person</option>
-                    <option value="Virtual">Virtual</option>
-                </select>
+                    options={typeOptions}
+                    className="mb-0 min-w-[150px]"
+                />
             </div>
 
             {/* Sessions list */}
@@ -183,18 +190,12 @@ const SessionsPage = () => {
                                     </div>
                                 </div>
                                 <div className="flex space-x-2">
-                                    <button
-                                        onClick={() => toggleExpand(session.id)}
-                                        className="text-white/80 hover:text-white text-sm border border-[#444] px-3 py-1.5 rounded-md hover:border-[#666] transition"
-                                    >
+                                    <Button variant="subtle" size="small" onClick={() => toggleExpand(session.id)}>
                                         {expandedSessionId === session.id ? "Less" : "Details"}
-                                    </button>
-                                    <button
-                                        onClick={() => openManageSessionModal(session)}
-                                        className="bg-[#FF6B00] text-white text-sm px-3 py-1.5 rounded-md hover:bg-[#FF8A00] transition"
-                                    >
+                                    </Button>
+                                    <Button variant="orangeFilled" size="small" onClick={() => openManageSessionModal(session)}>
                                         Manage
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
 

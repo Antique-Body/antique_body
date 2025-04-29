@@ -17,34 +17,30 @@ export const BodyMetricsStep = ({ formData, onChange, handleToggle, fitnessLevel
                 <div className="mb-6">
                     <label className="block text-gray-300 mb-2">Height</label>
                     <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm text-gray-400 mb-1">Feet</label>
-                            <input
-                                type="number"
-                                name="height.feet"
-                                value={formData.height.feet}
-                                onChange={onChange}
-                                min="3"
-                                max="8"
-                                className="w-full p-3 rounded-lg bg-[#1a1a1a] border border-[#333] text-white focus:outline-none focus:border-[#FF6B00] transition"
-                                placeholder="ft"
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm text-gray-400 mb-1">Inches</label>
-                            <input
-                                type="number"
-                                name="height.inches"
-                                value={formData.height.inches}
-                                onChange={onChange}
-                                min="0"
-                                max="11"
-                                className="w-full p-3 rounded-lg bg-[#1a1a1a] border border-[#333] text-white focus:outline-none focus:border-[#FF6B00] transition"
-                                placeholder="in"
-                                required
-                            />
-                        </div>
+                        <FormField
+                            label="Feet"
+                            name="height.feet"
+                            type="number"
+                            value={formData.height.feet}
+                            onChange={onChange}
+                            min="3"
+                            max="8"
+                            placeholder="ft"
+                            required
+                            size="small"
+                        />
+                        <FormField
+                            label="Inches"
+                            name="height.inches"
+                            type="number"
+                            value={formData.height.inches}
+                            onChange={onChange}
+                            min="0"
+                            max="11"
+                            placeholder="in"
+                            required
+                            size="small"
+                        />
                     </div>
                 </div>
 
@@ -67,8 +63,8 @@ export const BodyMetricsStep = ({ formData, onChange, handleToggle, fitnessLevel
                             value={formData.targetWeight}
                             onChange={onChange}
                             placeholder="Your target weight"
+                            subLabel="(Leave blank if maintaining)"
                         />
-                        <span className="text-xs text-gray-400 mt-1 block">(Leave blank if maintaining)</span>
                     </div>
                 </div>
 
@@ -86,7 +82,7 @@ export const BodyMetricsStep = ({ formData, onChange, handleToggle, fitnessLevel
                     label="Current Fitness Level"
                     options={fitnessLevelOptions}
                     value={formData.fitnessLevel}
-                    onChange={(level) => onChange({ target: { name: "fitnessLevel", value: level } })}
+                    onChange={level => onChange({ target: { name: "fitnessLevel", value: level } })}
                     columns={2}
                 />
 
@@ -95,7 +91,7 @@ export const BodyMetricsStep = ({ formData, onChange, handleToggle, fitnessLevel
                     description="Select all that apply to you"
                     options={goalsOptions}
                     selectedValues={formData.goals}
-                    onToggle={(goal) => handleToggle("goals", goal)}
+                    onToggle={goal => handleToggle("goals", goal)}
                     required={true}
                 />
             </RegistrationStep>

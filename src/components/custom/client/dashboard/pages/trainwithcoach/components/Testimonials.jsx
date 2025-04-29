@@ -1,4 +1,4 @@
-import React from "react";
+import { Button } from "@/components/common/Button";
 
 export const Testimonials = ({ trainer, renderStars }) => {
     // Default testimonials if not provided
@@ -59,8 +59,8 @@ export const Testimonials = ({ trainer, renderStars }) => {
                     </div>
 
                     <div className="flex-1 space-y-2 w-full">
-                        {[5, 4, 3, 2, 1].map((num) => {
-                            const count = testimonials.filter((t) => Math.floor(t.rating) === num).length;
+                        {[5, 4, 3, 2, 1].map(num => {
+                            const count = testimonials.filter(t => Math.floor(t.rating) === num).length;
                             const percentage = (count / testimonials.length) * 100;
 
                             return (
@@ -82,7 +82,7 @@ export const Testimonials = ({ trainer, renderStars }) => {
 
             {/* Individual testimonials */}
             <div className="space-y-5">
-                {testimonials.map((testimonial) => (
+                {testimonials.map(testimonial => (
                     <div
                         key={testimonial.id}
                         className="bg-[rgba(30,30,30,0.8)] border border-[#444] rounded-xl p-5 hover:border-[#FF6B00] transition-all duration-300"
@@ -119,11 +119,10 @@ export const Testimonials = ({ trainer, renderStars }) => {
             <div className="bg-[rgba(255,107,0,0.1)] border border-[rgba(255,107,0,0.2)] rounded-xl p-5 text-center">
                 <h4 className="text-white font-medium mb-2">Ready to experience results?</h4>
                 <p className="text-gray-300 text-sm mb-4">Join these satisfied clients and start your fitness journey today.</p>
-                <button className="py-2.5 px-8 rounded-lg font-medium cursor-pointer transition-all duration-300 bg-[#FF6B00] text-white hover:bg-[#E66000] hover:shadow-lg hover:-translate-y-0.5">
+                <Button variant="orangeFilled" size="large">
                     Book Your First Session
-                </button>
+                </Button>
             </div>
         </div>
     );
 };
-

@@ -1,5 +1,8 @@
 "use client";
+import { Button } from "@/components/common/Button";
+import { CertificateIcon, MessageIcon, TimerIcon, UserProfileIcon } from "@/components/common/Icons";
 import { BookingSessionModal, TrainerProfileModal } from "@/components/custom/client/dashboard/pages/trainwithcoach/components";
+import { FormField } from "@/components/shared/FormField";
 import { useState } from "react";
 
 export default function TrainWithCoachPage() {
@@ -121,63 +124,61 @@ export default function TrainWithCoachPage() {
         return matchesSearch && matchesGoal && matchesSport;
     });
 
+    const goalOptions = [
+        { value: "", label: "Select Goal" },
+        { value: "professional", label: "Professional Sports" },
+        { value: "rehabilitation", label: "Rehabilitation" },
+        { value: "lifestyle", label: "Healthy Lifestyle" },
+        { value: "muscle", label: "Muscle Gain" },
+        { value: "fat-loss", label: "Fat Loss" },
+        { value: "functional", label: "Ultra Functional Body" },
+    ];
+
+    const sportOptions = [
+        { value: "", label: "Select Sport" },
+        { value: "football", label: "⚽ Football" },
+        { value: "american-football", label: "🏈 American Football" },
+        { value: "handball", label: "🤾 Handball" },
+        { value: "volleyball", label: "🏐 Volleyball" },
+        { value: "basketball", label: "🏀 Basketball" },
+        { value: "tennis", label: "🎾 Tennis" },
+        { value: "swimming", label: "🏊‍♂️ Swimming" },
+        { value: "athletics", label: "🏃‍♂️ Athletics" },
+        { value: "cycling", label: "🚴‍♂️ Cycling" },
+        { value: "golf", label: "⛳ Golf" },
+        { value: "boxing", label: "🥊 Boxing" },
+        { value: "martial-arts", label: "🥋 Martial Arts" },
+        { value: "other", label: "🏋️ Other" },
+    ];
+
     return (
         <div className="bg-[#0a0a0a] min-h-screen text-white overflow-x-hidden relative">
             <div className="w-full max-w-6xl mx-auto px-4 relative z-20">
                 <div className="bg-[rgba(20,20,20,0.95)] rounded-2xl p-4 mb-5 sticky top-3 z-30 backdrop-blur-lg border border-[#222] shadow-lg transition-all duration-300 ease-in-out hover:shadow-[0_15px_30px_-10px_rgba(255,107,0,0.2)]">
-                    <input
+                    <FormField
                         type="text"
-                        className="w-full py-3.5 px-4 bg-[rgba(30,30,30,0.8)] border border-[#333] rounded-xl text-white text-base transition-all duration-300 focus:outline-none focus:border-[#FF6B00] focus:shadow-[0_0_0_2px_rgba(255,107,0,0.2)] mb-4"
                         placeholder="Search by profession, sport, or goal..."
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
+                        className="mb-4"
                     />
 
                     <div className="flex gap-2.5 overflow-x-auto pb-1">
-                        <select
-                            className="min-w-[140px] py-2.5 px-4 bg-[rgba(30,30,30,0.8)] border border-[#333] rounded-lg text-white text-sm appearance-none pr-8 transition-all duration-300 hover:border-[#FF6B00] hover:-translate-y-px focus:outline-none focus:border-[#FF6B00]"
-                            style={{
-                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23aaaaaa' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E")`,
-                                backgroundRepeat: "no-repeat",
-                                backgroundPosition: "calc(100% - 10px) center",
-                            }}
+                        <FormField
+                            type="select"
                             value={goalFilter}
                             onChange={e => setGoalFilter(e.target.value)}
-                        >
-                            <option value="">Select Goal</option>
-                            <option value="professional">Professional Sports</option>
-                            <option value="rehabilitation">Rehabilitation</option>
-                            <option value="lifestyle">Healthy Lifestyle</option>
-                            <option value="muscle">Muscle Gain</option>
-                            <option value="fat-loss">Fat Loss</option>
-                            <option value="functional">Ultra Functional Body</option>
-                        </select>
+                            options={goalOptions}
+                            className="mb-0 min-w-[140px]"
+                        />
 
-                        <select
-                            className="min-w-[140px] py-2.5 px-4 bg-[rgba(30,30,30,0.8)] border border-[#333] rounded-lg text-white text-sm appearance-none pr-8 transition-all duration-300 hover:border-[#FF6B00] hover:-translate-y-px focus:outline-none focus:border-[#FF6B00]"
-                            style={{
-                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23aaaaaa' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E")`,
-                                backgroundRepeat: "no-repeat",
-                                backgroundPosition: "calc(100% - 10px) center",
-                            }}
+                        <FormField
+                            type="select"
                             value={sportFilter}
                             onChange={e => setSportFilter(e.target.value)}
-                        >
-                            <option value="">Select Sport</option>
-                            <option value="football">⚽ Football</option>
-                            <option value="american-football">🏈 American Football</option>
-                            <option value="handball">🤾 Handball</option>
-                            <option value="volleyball">🏐 Volleyball</option>
-                            <option value="basketball">🏀 Basketball</option>
-                            <option value="tennis">🎾 Tennis</option>
-                            <option value="swimming">🏊‍♂️ Swimming</option>
-                            <option value="athletics">🏃‍♂️ Athletics</option>
-                            <option value="cycling">🚴‍♂️ Cycling</option>
-                            <option value="golf">⛳ Golf</option>
-                            <option value="boxing">🥊 Boxing</option>
-                            <option value="martial-arts">🥋 Martial Arts</option>
-                            <option value="other">🏋️ Other</option>
-                        </select>
+                            options={sportOptions}
+                            className="mb-0 min-w-[140px]"
+                        />
                     </div>
                 </div>
 
@@ -262,20 +263,7 @@ const TrainerCard = ({ trainer, onBookSession, onViewProfile }) => {
 
             {/* Trainer photo */}
             <div className="w-24 h-24 rounded-xl bg-gradient-to-br from-[#FF6B00] to-[#FF9A00] flex-shrink-0 flex justify-center items-center text-white font-semibold text-2xl overflow-hidden self-start relative transition-transform duration-300 ease-in-out hover:scale-105">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="60"
-                    height="60"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                >
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                </svg>
+                <UserProfileIcon size={60} stroke="white" strokeWidth="1.5" />
 
                 {/* Shine effect */}
                 <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-gradient-to-b from-[rgba(255,255,255,0.1)] to-[rgba(255,255,255,0)] transform rotate-45 transition-transform duration-500 ease-in-out hover:translate-y-full"></div>
@@ -295,22 +283,7 @@ const TrainerCard = ({ trainer, onBookSession, onViewProfile }) => {
                             key={index}
                             className="bg-[rgba(255,107,0,0.15)] border border-[rgba(255,107,0,0.3)] text-[#FF6B00] py-1 px-2 rounded text-xs font-medium flex items-center gap-1 transition-all duration-300 hover:bg-[rgba(255,107,0,0.25)] hover:-translate-y-0.5"
                         >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="12"
-                                height="12"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <circle cx="12" cy="12" r="10" />
-                                <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-                                <line x1="9" y1="9" x2="9.01" y2="9" />
-                                <line x1="15" y1="9" x2="15.01" y2="9" />
-                            </svg>
+                            <CertificateIcon size={12} />
                             {cert}
                         </span>
                     ))}
@@ -330,20 +303,7 @@ const TrainerCard = ({ trainer, onBookSession, onViewProfile }) => {
                     </div>
 
                     <div className="flex items-center gap-1 text-sm text-[#ddd]">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="14"
-                            height="14"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                        </svg>
+                        <TimerIcon size={14} />
                         <span>{trainer.experience}</span>
                     </div>
 
@@ -358,39 +318,31 @@ const TrainerCard = ({ trainer, onBookSession, onViewProfile }) => {
 
                 {/* Action buttons */}
                 <div className="flex gap-2.5 flex-wrap">
-                    <button
-                        className="py-2 px-4 rounded-lg text-sm font-medium cursor-pointer transition-all duration-300 bg-transparent border border-[#FF6B00] text-[#FF6B00] hover:bg-[rgba(255,107,0,0.1)] hover:-translate-y-0.5"
+                    <Button
+                        variant="orangeOutline"
+                        size="small"
                         onClick={() => onViewProfile(trainer)}
+                        className="hover:-translate-y-0.5"
                     >
                         View Profile
-                    </button>
-                    <button
-                        className="py-2 px-4 rounded-lg text-sm font-medium cursor-pointer transition-all duration-300 bg-[#FF6B00] text-white hover:bg-[#E66000] hover:shadow-lg hover:-translate-y-0.5 hover:scale-105"
+                    </Button>
+                    <Button
+                        variant="orangeFilled"
+                        size="small"
                         onClick={() => onBookSession(trainer)}
+                        className="hover:-translate-y-0.5 hover:scale-105"
                     >
                         Book Session
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        size="small"
                         onClick={() => handleOpenChat(trainer)}
-                        className="py-2 px-4 rounded-lg text-sm font-medium cursor-pointer transition-all duration-300 bg-transparent border border-[#333] text-white hover:bg-[#333] hover:-translate-y-0.5"
+                        className="hover:-translate-y-0.5"
+                        leftIcon={<MessageIcon size={14} />}
                     >
-                        <div className="flex items-center gap-1.5">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="14"
-                                height="14"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                            </svg>
-                            Send Message
-                        </div>
-                    </button>
+                        Send Message
+                    </Button>
                 </div>
             </div>
 

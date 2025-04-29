@@ -1,4 +1,5 @@
-import React from "react";
+import { Button } from "@/components/common/Button";
+import { CloseXIcon } from "@/components/common/Icons";
 
 export const ClientModal = ({ client, setShowClientModal }) => {
     return (
@@ -9,7 +10,7 @@ export const ClientModal = ({ client, setShowClientModal }) => {
                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#FF6B00] to-[#FF9A00] flex justify-center items-center text-white font-bold text-lg">
                             {client?.name
                                 ?.split(" ")
-                                .map((n) => n[0])
+                                .map(n => n[0])
                                 .join("")}
                         </div>
                         <div>
@@ -18,25 +19,13 @@ export const ClientModal = ({ client, setShowClientModal }) => {
                         </div>
                     </div>
 
-                    <button
+                    <Button
+                        variant="ghost"
                         onClick={() => setShowClientModal(false)}
-                        className="text-gray-400 hover:text-white transition-colors duration-300"
+                        className="text-gray-400 hover:text-white"
                     >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
+                        <CloseXIcon size={24} />
+                    </Button>
                 </div>
 
                 {/* Content will be filled based on the selected client */}
@@ -79,9 +68,7 @@ export const ClientModal = ({ client, setShowClientModal }) => {
                         <p className="mt-2 text-sm">{client?.planDescription || ""}</p>
 
                         <div className="mt-4 flex justify-end">
-                            <button className="bg-[#FF6B00] text-white py-2 px-4 rounded-lg transition-all duration-300 hover:bg-[#FF9A00]">
-                                Change Plan
-                            </button>
+                            <Button variant="orangeFilled">Change Plan</Button>
                         </div>
                     </div>
 
@@ -105,12 +92,8 @@ export const ClientModal = ({ client, setShowClientModal }) => {
                     </div>
 
                     <div className="flex justify-between">
-                        <button className="py-2 px-4 border border-[#FF6B00] text-[#FF6B00] rounded-lg transition-all duration-300 hover:bg-[rgba(255,107,0,0.1)]">
-                            Send Message
-                        </button>
-                        <button className="py-2 px-4 bg-[#FF6B00] text-white rounded-lg transition-all duration-300 hover:bg-[#FF9A00]">
-                            Schedule Session
-                        </button>
+                        <Button variant="outline">Send Message</Button>
+                        <Button variant="orangeFilled">Schedule Session</Button>
                     </div>
                 </div>
             </div>

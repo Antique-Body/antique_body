@@ -1,4 +1,6 @@
 "use client";
+import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/shared";
 import { useState } from "react";
 
 const NewClientsPage = () => {
@@ -55,16 +57,17 @@ const NewClientsPage = () => {
         <div className="px-4 py-6">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold">New Client Requests</h2>
-                <input
+                <FormField
                     type="text"
                     placeholder="Search requests..."
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
-                    className="bg-[rgba(30,30,30,0.8)] border border-[#333] rounded-lg px-4 py-2 text-white w-full max-w-xs focus:outline-none focus:border-[#FF6B00]"
+                    className="w-full max-w-xs mb-0"
+                    backgroundStyle="semi-transparent"
                 />
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-5">
                 {filteredClients.length === 0 ? (
                     <div className="text-center py-8">
                         <p className="text-gray-400">No new client requests</p>
@@ -73,59 +76,58 @@ const NewClientsPage = () => {
                     filteredClients.map(client => (
                         <div
                             key={client.id}
-                            className="bg-[rgba(20,20,20,0.9)] rounded-lg overflow-hidden border border-[#333] hover:border-[#FF6B00] transition-all duration-300"
+                            className="bg-[rgba(20,20,20,0.9)] rounded-xl overflow-hidden border border-[#333] hover:border-[#FF6B00] transition-all duration-300"
                         >
-                            {/* Header with name and actions */}
-                            <div className="flex justify-between items-center bg-[rgba(30,30,30,0.9)] px-4 py-2 border-b border-[#333]">
-                                <div className="flex items-center gap-2">
-                                    <h3 className="font-semibold">{client.name}</h3>
-                                    <span className="text-xs text-gray-400">({client.requestDate})</span>
+                            {/* Header with name and date */}
+                            <div className="flex justify-between items-center bg-[rgba(30,30,30,0.9)] px-5 py-3 border-b border-[#333]">
+                                <div>
+                                    <h3 className="text-lg font-semibold">{client.name}</h3>
+                                    <p className="text-xs text-gray-400">Requested: {client.requestDate}</p>
                                 </div>
                                 <div className="flex space-x-2">
-                                    <button className="text-white/80 hover:text-white text-xs border border-[#444] px-2 py-1 rounded hover:border-[#666] transition">
+                                    <Button variant="subtle" size="small">
                                         Message
-                                    </button>
-                                    <button className="bg-[#FF6B00] text-white text-xs px-2 py-1 rounded hover:bg-[#FF8A00] transition">
+                                    </Button>
+                                    <Button variant="orangeFilled" size="small">
                                         Accept
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
 
-                            {/* Main content - more compact */}
-                            <div className="p-3">
-                                <div className="flex mb-2">
-                                    <div className="w-full">
-                                        <span className="text-xs text-white/60">Goals:</span>
-                                        <span className="text-sm ml-1">{client.goals}</span>
-                                    </div>
+                            {/* Main content */}
+                            <div className="p-5">
+                                {/* Primary info section */}
+                                <div className="mb-4 pb-4 border-b border-[#333]">
+                                    <h4 className="text-sm font-semibold text-white/90 mb-2">Training Goals</h4>
+                                    <p className="text-sm bg-[rgba(40,40,40,0.7)] px-3 py-2 rounded">{client.goals}</p>
                                 </div>
 
-                                <div className="grid grid-cols-3 gap-2 text-xs">
+                                {/* Client details in grid */}
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                                     <div>
-                                        <span className="text-white/60">Plan:</span>
-                                        <span className="ml-1">{client.plan}</span>
+                                        <h4 className="text-xs text-white/60 mb-1">Preferred Plan</h4>
+                                        <p className="text-sm font-medium">{client.plan}</p>
                                     </div>
                                     <div>
-                                        <span className="text-white/60">Location:</span>
-                                        <span className="ml-1">{client.location}</span>
+                                        <h4 className="text-xs text-white/60 mb-1">Location</h4>
+                                        <p className="text-sm font-medium">{client.location}</p>
                                     </div>
                                     <div>
-                                        <span className="text-white/60">Preference:</span>
-                                        <span className="ml-1">{client.preference}</span>
+                                        <h4 className="text-xs text-white/60 mb-1">Training Preference</h4>
+                                        <p className="text-sm font-medium">{client.preference}</p>
                                     </div>
-                                </div>
-
-                                <div className="flex mt-2 pt-2 border-t border-[#333]/50 text-xs">
-                                    <div className="flex-1">
-                                        <span className="text-white/60">Stats:</span>
-                                        <span className="ml-1">
+                                    <div>
+                                        <h4 className="text-xs text-white/60 mb-1">Physical Stats</h4>
+                                        <p className="text-sm font-medium">
                                             {client.height} / {client.weight}
-                                        </span>
+                                        </p>
                                     </div>
-                                    <div className="flex-1">
-                                        <span className="text-white/60">Notes:</span>
-                                        <span className="ml-1 italic">{client.notes}</span>
-                                    </div>
+                                </div>
+
+                                {/* Notes section */}
+                                <div className="mt-4 pt-4 border-t border-[#333]">
+                                    <h4 className="text-xs text-white/60 mb-1">Additional Notes</h4>
+                                    <p className="text-sm italic text-white/80">{client.notes}</p>
                                 </div>
                             </div>
                         </div>

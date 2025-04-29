@@ -2,20 +2,12 @@ import { StatCard, UserProfile } from "@/components/custom/shared";
 
 export const TrainerProfile = ({ trainerData }) => {
     const avatarContent = (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="80"
-            height="80"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-        </svg>
+        <span className="text-4xl">
+            {trainerData.name
+                .split(" ")
+                .map(n => n[0])
+                .join("")}
+        </span>
     );
 
     return (
@@ -36,7 +28,7 @@ export const TrainerProfile = ({ trainerData }) => {
             <StatCard
                 label="Active Clients"
                 value={trainerData.clients ? trainerData.clients.filter(c => c.status === "active").length : 0}
-                subtext={<span className="text-[#4CAF50]">+10 clients from last month</span>}
+                subtext={<span className="text-[#4CAF50]">+1 clients from last month</span>}
             />
 
             <StatCard

@@ -1,6 +1,8 @@
 "use client";
 
 import { ProgressBar } from "@/components/common";
+import { Button } from "@/components/common/Button";
+import { ArrowDown, ArrowUp, PlusIcon } from "@/components/common/Icons";
 import { useMemo } from "react";
 
 // Sport-specific metrics configuration
@@ -135,31 +137,9 @@ export const PerformanceMetrics = ({ clientType, clientGoal, progress = [], onMe
                                         className={`text-sm ${isPositive ? "text-green-400" : "text-red-400"} flex items-center`}
                                     >
                                         {isPositive ? (
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-4 w-4 mr-1"
-                                                viewBox="0 0 20 20"
-                                                fill="currentColor"
-                                            >
-                                                <path
-                                                    fillRule="evenodd"
-                                                    d="M12 7a1 1 0 01-1 1H9a1 1 0 01-1-1V6a1 1 0 011-1h2a1 1 0 011 1v1zm-2 5a1 1 0 011-1h2a1 1 0 011 1v1a1 1 0 01-1 1H11a1 1 0 01-1-1v-1zm-6-2a1 1 0 011-1h2a1 1 0 011 1v1a1 1 0 01-1 1H5a1 1 0 01-1-1v-1zm0 4a1 1 0 011-1h2a1 1 0 011 1v1a1 1 0 01-1 1H5a1 1 0 01-1-1v-1z"
-                                                    clipRule="evenodd"
-                                                />
-                                            </svg>
+                                            <ArrowUp size={16} className="mr-1" />
                                         ) : (
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-4 w-4 mr-1"
-                                                viewBox="0 0 20 20"
-                                                fill="currentColor"
-                                            >
-                                                <path
-                                                    fillRule="evenodd"
-                                                    d="M5 11a1 1 0 011-1h2a1 1 0 011 1v1a1 1 0 01-1 1H6a1 1 0 01-1-1v-1zm6-4a1 1 0 011-1h2a1 1 0 011 1v1a1 1 0 01-1 1h-2a1 1 0 01-1-1V7zM5 7a1 1 0 011-1h2a1 1 0 011 1v1a1 1 0 01-1 1H6a1 1 0 01-1-1V7zm0 4a1 1 0 011-1h2a1 1 0 011 1v1a1 1 0 01-1 1H6a1 1 0 01-1-1v-1z"
-                                                    clipRule="evenodd"
-                                                />
-                                            </svg>
+                                            <ArrowDown size={16} className="mr-1" />
                                         )}
                                         {Math.abs(progressData.percentChange).toFixed(1)}%
                                     </div>
@@ -202,13 +182,15 @@ export const PerformanceMetrics = ({ clientType, clientGoal, progress = [], onMe
                         {sortedMetrics
                             .filter(metric => !progress.some(entry => entry[metric.id] !== undefined))
                             .map(metric => (
-                                <button
+                                <Button
                                     key={metric.id}
+                                    variant="secondary"
+                                    size="small"
                                     onClick={() => onMetricAdd(metric.id)}
-                                    className="px-3 py-1 bg-[rgba(30,30,30,0.8)] border border-[#333] rounded-lg text-sm hover:border-[#FF6B00] transition-colors"
+                                    leftIcon={<PlusIcon size={12} />}
                                 >
-                                    + {metric.label}
-                                </button>
+                                    {metric.label}
+                                </Button>
                             ))}
                     </div>
                 </div>
