@@ -1,6 +1,8 @@
 "use client";
 
 import { Button, ProgressBar, TextField } from "@components/common";
+import { Card } from "@components/custom";
+
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 
 // Constants
@@ -22,9 +24,21 @@ const CONVERSION_FACTORS = {
     METRIC_TO_IMPERIAL: 2.20462,
   },
   HEIGHT: {
-    IMPERIAL_TO_METRIC: 2.54,
-    METRIC_TO_IMPERIAL: 0.393701,
+    IMPERIAL_TO_METRIC: 2.54, // inches to cm
+    METRIC_TO_IMPERIAL: 0.393701, // cm to inches
   },
+};
+
+// Validation constraints
+const CONSTRAINTS = {
+  METRIC: {
+    weight: { min: 30, max: 300 },
+    height: { min: 100, max: 250 },
+  },
+  IMPERIAL: {
+    weight: { min: 66, max: 660 },
+    height: { min: 3.3, max: 8.2 },
+  }
 };
 
 // Helper functions
@@ -41,32 +55,17 @@ const getBmiCategory = (bmi) => {
   return BMI_CATEGORIES.OBESE;
 };
 
+// Calculate BMI with the correct units
 const calculateBmi = (weight, height, unitSystem) => {
   const weightInKg = unitSystem === UNIT_SYSTEMS.METRIC ? weight : weight * CONVERSION_FACTORS.WEIGHT.IMPERIAL_TO_METRIC;
-  const heightInM = unitSystem === UNIT_SYSTEMS.METRIC ? height / 100 : height * CONVERSION_FACTORS.HEIGHT.IMPERIAL_TO_METRIC / 100;
+  
+  // For metric: height is in cm, so divide by 100 to get meters
+  // For imperial: height is in feet, convert to cm, then divide by 100 to get meters
+  const heightInM = unitSystem === UNIT_SYSTEMS.METRIC ? 
+    height / 100 : 
+    (height * 30.48) / 100; // 1 foot = 30.48 cm
   
   return weightInKg / (heightInM * heightInM);
-};
-
-const convertValue = (value, fromSystem, toSystem, type) => {
-  if (!value) return "";
-  
-  const numValue = parseFloat(value);
-  if (isNaN(numValue)) return "";
-  
-  if (fromSystem === toSystem) return value;
-  
-  if (type === "weight") {
-    return fromSystem === UNIT_SYSTEMS.METRIC
-      ? (numValue * CONVERSION_FACTORS.WEIGHT.METRIC_TO_IMPERIAL).toFixed(1)
-      : (numValue * CONVERSION_FACTORS.WEIGHT.IMPERIAL_TO_METRIC).toFixed(1);
-  } else if (type === "height") {
-    return fromSystem === UNIT_SYSTEMS.METRIC
-      ? (numValue * CONVERSION_FACTORS.HEIGHT.METRIC_TO_IMPERIAL).toFixed(1)
-      : (numValue * CONVERSION_FACTORS.HEIGHT.IMPERIAL_TO_METRIC).toFixed(1);
-  }
-  
-  return value;
 };
 
 export const MeasurementsInput = ({ onSelect }) => {
@@ -75,14 +74,17 @@ export const MeasurementsInput = ({ onSelect }) => {
   const [measurements, setMeasurements] = useState({
     weight: "",
     height: "",
+    inches: "", // For imperial system only
   });
   const [errors, setErrors] = useState({
     weight: null,
     height: null,
+    inches: null, // For imperial system only
   });
   const [touched, setTouched] = useState({
     weight: false,
     height: false,
+    inches: false, // For imperial system only
   });
   const [bmi, setBmi] = useState(null);
   const [bmiCategory, setBmiCategory] = useState(null);
@@ -94,14 +96,11 @@ export const MeasurementsInput = ({ onSelect }) => {
   const prevTouched = useRef(touched);
 
   // Memoized constraints based on unit system
-  const constraints = useMemo(() => ({
-    weight: unitSystem === UNIT_SYSTEMS.METRIC
-      ? { min: 30, max: 300, step: 0.1 }
-      : { min: 66, max: 660, step: 0.1 },
-    height: unitSystem === UNIT_SYSTEMS.METRIC
-      ? { min: 100, max: 250, step: 0.1 }
-      : { min: 3.3, max: 8.2, step: 0.1 },
-  }), [unitSystem]);
+  const constraints = useMemo(() => 
+    unitSystem === UNIT_SYSTEMS.METRIC ? 
+      CONSTRAINTS.METRIC : 
+      CONSTRAINTS.IMPERIAL, 
+  [unitSystem]);
 
   // Event handlers
   const handleChange = useCallback((field, value) => {
@@ -113,16 +112,53 @@ export const MeasurementsInput = ({ onSelect }) => {
   }, []);
 
   const handleUnitChange = useCallback((system) => {
+    if (system === unitSystem) return;
+    
     setUnitSystem(system);
     
     // Convert values when switching units
-    setMeasurements({
-      weight: convertValue(measurements.weight, unitSystem, system, "weight"),
-      height: convertValue(measurements.height, unitSystem, system, "height"),
-    });
+    if (system === UNIT_SYSTEMS.METRIC) {
+      // Convert from imperial to metric
+      const weightInKg = measurements.weight ? 
+        parseFloat(measurements.weight) * CONVERSION_FACTORS.WEIGHT.IMPERIAL_TO_METRIC : "";
+      
+      // Convert from feet and inches to cm
+      let heightInCm = "";
+      if (measurements.height || measurements.inches) {
+        const feet = parseFloat(measurements.height) || 0;
+        const inches = parseFloat(measurements.inches) || 0;
+        const totalInches = (feet * 12) + inches;
+        heightInCm = totalInches * 2.54; // Convert inches to cm
+      }
+      
+      setMeasurements({
+        weight: weightInKg ? weightInKg.toFixed(1) : "",
+        height: heightInCm ? heightInCm.toFixed(1) : "",
+        inches: "", // Clear inches field
+      });
+    } else {
+      // Convert from metric to imperial
+      const weightInLbs = measurements.weight ? 
+        parseFloat(measurements.weight) * CONVERSION_FACTORS.WEIGHT.METRIC_TO_IMPERIAL : "";
+      
+      // Convert from cm to feet and inches
+      let feet = "";
+      let inches = "";
+      if (measurements.height) {
+        const heightInInches = parseFloat(measurements.height) / 2.54; // Convert cm to inches
+        feet = Math.floor(heightInInches / 12); // Get whole feet
+        inches = (heightInInches % 12).toFixed(1); // Get remaining inches
+      }
+      
+      setMeasurements({
+        weight: weightInLbs ? weightInLbs.toFixed(1) : "",
+        height: feet.toString(),
+        inches: inches.toString(),
+      });
+    }
 
     // Clear errors when changing units
-    setErrors({ weight: null, height: null });
+    setErrors({ weight: null, height: null, inches: null });
   }, [measurements, unitSystem]);
 
   // Calculate BMI progress value for the progress bar
@@ -145,28 +181,84 @@ export const MeasurementsInput = ({ onSelect }) => {
     // Check if any relevant values have changed
     const measurementsChanged = 
       measurements.weight !== prevMeasurements.current.weight || 
-      measurements.height !== prevMeasurements.current.height;
+      measurements.height !== prevMeasurements.current.height ||
+      measurements.inches !== prevMeasurements.current.inches;
     const unitSystemChanged = unitSystem !== prevUnitSystem.current;
     const touchedChanged = 
       touched.weight !== prevTouched.current.weight || 
-      touched.height !== prevTouched.current.height;
+      touched.height !== prevTouched.current.height ||
+      touched.inches !== prevTouched.current.inches;
 
     if (!measurementsChanged && !unitSystemChanged && !touchedChanged) {
       return;
     }
 
     const weightValue = parseFloat(measurements.weight);
-    const heightValue = parseFloat(measurements.height);
+    
+    let heightValue;
+    if (unitSystem === UNIT_SYSTEMS.METRIC) {
+      heightValue = parseFloat(measurements.height);
+    } else {
+      // For imperial, combine feet and inches
+      const feet = parseFloat(measurements.height) || 0;
+      const inches = parseFloat(measurements.inches) || 0;
+      
+      // Convert to decimal feet for BMI calculation
+      heightValue = feet + (inches / 12);
+    }
 
-    const hasValidWeight = !isNaN(weightValue) && weightValue > 0;
-    const hasValidHeight = !isNaN(heightValue) && heightValue > 0;
+    const hasValidWeight = !isNaN(weightValue) && weightValue > 0 && 
+                          weightValue >= constraints.weight.min && 
+                          weightValue <= constraints.weight.max;
+    
+    let hasValidHeight;
+    if (unitSystem === UNIT_SYSTEMS.METRIC) {
+      hasValidHeight = !isNaN(heightValue) && heightValue > 0 && 
+                       heightValue >= constraints.height.min && 
+                       heightValue <= constraints.height.max;
+    } else {
+      // For imperial, feet should be between min and max, and inches should be 0-11
+      const feet = parseFloat(measurements.height) || 0;
+      const inches = parseFloat(measurements.inches) || 0;
+      
+      const validFeet = !isNaN(feet) && feet >= Math.floor(constraints.height.min) && 
+                        feet <= Math.floor(constraints.height.max);
+      const validInches = !isNaN(inches) && inches >= 0 && inches < 12;
+      
+      // Also check total height is within range
+      const totalHeightInFeet = feet + (inches / 12);
+      const withinRange = totalHeightInFeet >= constraints.height.min && 
+                          totalHeightInFeet <= constraints.height.max;
+      
+      hasValidHeight = validFeet && validInches && withinRange;
+    }
 
     const newErrors = {};
     if (touched.weight && !hasValidWeight) {
-      newErrors.weight = "Please enter a valid weight";
+      newErrors.weight = `Please enter a valid weight between ${constraints.weight.min} and ${constraints.weight.max} ${unitSystem === UNIT_SYSTEMS.METRIC ? 'kg' : 'lb'}`;
     }
-    if (touched.height && !hasValidHeight) {
-      newErrors.height = "Please enter a valid height";
+    
+    if (unitSystem === UNIT_SYSTEMS.METRIC) {
+      if (touched.height && !hasValidHeight) {
+        newErrors.height = `Please enter a valid height between ${constraints.height.min} and ${constraints.height.max} cm`;
+      }
+    } else {
+      // For imperial, validate feet and inches separately
+      const feet = parseFloat(measurements.height);
+      const inches = parseFloat(measurements.inches);
+      
+      if (touched.height && (isNaN(feet) || feet < Math.floor(constraints.height.min) || feet > Math.floor(constraints.height.max))) {
+        newErrors.height = `Please enter a valid feet value between ${Math.floor(constraints.height.min)} and ${Math.floor(constraints.height.max)}`;
+      }
+      
+      if (touched.inches && (isNaN(inches) || inches < 0 || inches >= 12)) {
+        newErrors.inches = "Please enter a valid inches value between 0 and 11.9";
+      }
+      
+      // Also check if the combined height is within range
+      if (touched.height && touched.inches && hasValidHeight === false) {
+        newErrors.height = `Total height must be between ${constraints.height.min} and ${constraints.height.max} feet`;
+      }
     }
 
     setErrors(newErrors);
@@ -180,15 +272,27 @@ export const MeasurementsInput = ({ onSelect }) => {
       setBmi(bmiValue);
       setBmiCategory(getBmiCategory(bmiValue));
 
-      // Convert height back to cm for API
-      const heightInCm = unitSystem === UNIT_SYSTEMS.METRIC 
-        ? heightValue 
-        : heightValue * CONVERSION_FACTORS.HEIGHT.IMPERIAL_TO_METRIC * 100;
+      // Always convert measurements to metric for the API
+      const weightInKg = unitSystem === UNIT_SYSTEMS.METRIC ? 
+        weightValue : 
+        weightValue * CONVERSION_FACTORS.WEIGHT.IMPERIAL_TO_METRIC;
+      
+      // Convert height to cm for API
+      let heightInCm;
+      if (unitSystem === UNIT_SYSTEMS.METRIC) {
+        heightInCm = heightValue;
+      } else {
+        // Convert height from feet and inches to cm
+        const feet = parseFloat(measurements.height) || 0;
+        const inches = parseFloat(measurements.inches) || 0;
+        const totalInches = (feet * 12) + inches;
+        heightInCm = totalInches * 2.54; // Convert inches to cm
+      }
 
       // Only call onSelect if the values have actually changed
       const newMeasurements = {
-        weight: unitSystem === UNIT_SYSTEMS.METRIC ? weightValue : weightValue * CONVERSION_FACTORS.WEIGHT.IMPERIAL_TO_METRIC,
-        height: heightInCm,
+        weight: parseFloat(weightInKg.toFixed(2)),
+        height: parseFloat(heightInCm.toFixed(2)),
         bmi: bmiValue,
         isValid: newIsValid,
       };
@@ -213,7 +317,7 @@ export const MeasurementsInput = ({ onSelect }) => {
     prevMeasurements.current = { ...measurements, isValid: newIsValid };
     prevUnitSystem.current = unitSystem;
     prevTouched.current = touched;
-  }, [measurements, unitSystem, touched, onSelect]);
+  }, [measurements, unitSystem, touched, onSelect, constraints]);
 
   // Render BMI display
   const renderBmiDisplay = () => {
@@ -267,7 +371,7 @@ export const MeasurementsInput = ({ onSelect }) => {
         </Button>
       </div>
 
-      <div className="space-y-4 bg-[#111] p-6 rounded-xl border border-[#222] shadow-lg">
+      <Card width="100%" topBorderColor={false} borderTop={false}>
         <TextField
           id="weight-input"
           name="weight"
@@ -282,26 +386,63 @@ export const MeasurementsInput = ({ onSelect }) => {
           error={errors.weight}
           min={constraints.weight.min}
           max={constraints.weight.max}
-          step={constraints.weight.step}
+          step={0.1}
+          className="w-full mb-4"
         />
 
-        <TextField
-          id="height-input"
-          name="height"
-          label={`Height (${unitSystem === UNIT_SYSTEMS.METRIC ? "cm" : "ft"})`}
-          type="number"
-          placeholder={`Enter your height in ${
-            unitSystem === UNIT_SYSTEMS.METRIC ? "centimeters" : "feet"
-          }`}
-          value={measurements.height}
-          onChange={(e) => handleChange("height", e.target.value)}
-          onBlur={() => handleBlur("height")}
-          error={errors.height}
-          min={constraints.height.min}
-          max={constraints.height.max}
-          step={constraints.height.step}
-        />
-      </div>
+        {unitSystem === UNIT_SYSTEMS.METRIC ? (
+          // Metric height input (single field for cm)
+          <TextField
+            id="height-input"
+            name="height"
+            label="Height (cm)"
+            type="number"
+            placeholder="Enter your height in centimeters"
+            value={measurements.height}
+            onChange={(e) => handleChange("height", e.target.value)}
+            onBlur={() => handleBlur("height")}
+            error={errors.height}
+            min={constraints.height.min}
+            max={constraints.height.max}
+            step={0.1}
+            className="w-full"
+          />
+        ) : (
+          // Imperial height input (two fields for feet and inches)
+          <div className="flex gap-4 w-full">
+            <TextField
+              id="feet-input"
+              name="height"
+              label="Height (feet)"
+              type="number"
+              placeholder="Feet"
+              value={measurements.height}
+              onChange={(e) => handleChange("height", e.target.value)}
+              onBlur={() => handleBlur("height")}
+              error={errors.height}
+              min={Math.floor(constraints.height.min)}
+              max={Math.floor(constraints.height.max)}
+              step={1}
+              className="w-full"
+            />
+            <TextField
+              id="inches-input"
+              name="inches"
+              label="Inches"
+              type="number"
+              placeholder="Inches"
+              value={measurements.inches}
+              onChange={(e) => handleChange("inches", e.target.value)}
+              onBlur={() => handleBlur("inches")}
+              error={errors.inches}
+              min={0}
+              max={11.9}
+              step={0.1}
+              className="w-full"
+            />
+          </div>
+        )}
+      </Card>
 
       {renderBmiDisplay()}
     </div>

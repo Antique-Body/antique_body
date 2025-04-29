@@ -1,4 +1,5 @@
 "use client";
+
 import { TOTAL_STEPS, stepConfig } from "@/app/utils";
 import Background from "@/components/background";
 import { useWorkoutForm } from "@/hooks/useWorkoutForm";
@@ -19,8 +20,10 @@ import { useCallback, useEffect, useState } from "react";
 
 // Constants
 const MEASUREMENT_CONSTRAINTS = {
-  WEIGHT: { min: 30, max: 300 },
-  HEIGHT: { min: 100, max: 250 },
+  METRIC: {
+    WEIGHT: { min: 30, max: 300 },
+    HEIGHT: { min: 100, max: 250 },
+  }
 };
 
 const TrainingSetup = () => {
@@ -54,28 +57,30 @@ const TrainingSetup = () => {
       return;
     }
 
+    // The MeasurementsInput component now converts all values to metric
+    // for the API, so we only need to validate against metric constraints
     const { weight, height } = userSelections.measurements;
     const weightValue = Number(weight);
     const heightValue = Number(height);
 
     if (
       isNaN(weightValue) ||
-      weightValue < MEASUREMENT_CONSTRAINTS.WEIGHT.min ||
-      weightValue > MEASUREMENT_CONSTRAINTS.WEIGHT.max
+      weightValue < MEASUREMENT_CONSTRAINTS.METRIC.WEIGHT.min ||
+      weightValue > MEASUREMENT_CONSTRAINTS.METRIC.WEIGHT.max
     ) {
       setValidationError(
-        `Weight must be between ${MEASUREMENT_CONSTRAINTS.WEIGHT.min} and ${MEASUREMENT_CONSTRAINTS.WEIGHT.max} kg`
+        `Weight must be between ${MEASUREMENT_CONSTRAINTS.METRIC.WEIGHT.min} and ${MEASUREMENT_CONSTRAINTS.METRIC.WEIGHT.max} kg`
       );
       return;
     }
 
     if (
       isNaN(heightValue) ||
-      heightValue < MEASUREMENT_CONSTRAINTS.HEIGHT.min ||
-      heightValue > MEASUREMENT_CONSTRAINTS.HEIGHT.max
+      heightValue < MEASUREMENT_CONSTRAINTS.METRIC.HEIGHT.min ||
+      heightValue > MEASUREMENT_CONSTRAINTS.METRIC.HEIGHT.max
     ) {
       setValidationError(
-        `Height must be between ${MEASUREMENT_CONSTRAINTS.HEIGHT.min} and ${MEASUREMENT_CONSTRAINTS.HEIGHT.max} cm`
+        `Height must be between ${MEASUREMENT_CONSTRAINTS.METRIC.HEIGHT.min} and ${MEASUREMENT_CONSTRAINTS.METRIC.HEIGHT.max} cm`
       );
       return;
     }
@@ -113,6 +118,7 @@ const TrainingSetup = () => {
         return false;
       }
 
+      // Measurements are already converted to metric units in the MeasurementsInput component
       const userData = {
         measurements: {
           weight: Number(userSelections.measurements.weight),
