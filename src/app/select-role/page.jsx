@@ -130,7 +130,6 @@ export default function SelectRole() {
             onClick={() => handleRoleClick("user")}
             loading={loading && selectedRole === "user"}
             isSelected={selectedRole === "user"}
-            special={true}
           />
         </div>
       </>

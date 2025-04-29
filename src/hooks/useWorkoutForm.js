@@ -103,15 +103,27 @@ export const useWorkoutForm = () => {
   const goToPrevStep = useCallback(() => {
     if (currentStep > 1) {
       setCurrentStep(prev => {
-        const newStep = prev - 1;
-        if (newStep !== prevStepRef.current) {
-          prevStepRef.current = newStep;
-          return newStep;
+        let newStep = prev - 1;
+        
+        // Check if the previous step should be skipped
+        while (newStep >= 1) {
+          const prevStepConfig = stepConfig.find(step => step.stepNumber === newStep);
+          if (prevStepConfig && shouldSkipStep(prevStepConfig)) {
+            newStep -= 1;
+          } else {
+            break;
+          }
         }
-        return prev;
+        
+        // Make sure we don't go below step 1
+        newStep = Math.max(1, newStep);
+        
+        // Update the ref with the new step
+        prevStepRef.current = newStep;
+        return newStep;
       });
     }
-  }, [currentStep]);
+  }, [currentStep, shouldSkipStep]);
 
   const isCurrentStepSelected = useCallback(() => {
     const currentStepConfig = stepConfig.find(
