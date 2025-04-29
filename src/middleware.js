@@ -47,6 +47,12 @@ export async function middleware(request) {
     const hasPreferences = token?.hasCompletedTrainingSetup;
     const targetPath = hasPreferences ? "/user/dashboard" : "/user/training-setup";
     
+    // Allow access to both training-setup and dashboard for users
+    if (pathname.startsWith("/user/")) {
+      return NextResponse.next();
+    }
+    
+    // Redirect to appropriate path if not already there
     if (pathname !== targetPath) {
       return NextResponse.redirect(new URL(targetPath, request.url));
     }

@@ -53,6 +53,24 @@ enum InjuryType {
   chronic
 }
 
+enum InjuryLocation {
+  neck
+  shoulder_l
+  shoulder_r
+  back_upper
+  back_lower
+  elbow_l
+  elbow_r
+  wrist_l
+  wrist_r
+  hip_l
+  hip_r
+  knee_l
+  knee_r
+  ankle_l
+  ankle_r
+}
+
 // Simple User model for authentication
 model User {
   id                String    @id @default(cuid())
@@ -115,7 +133,6 @@ model UserPreferences {
   userId              String              @unique
   hasInjury           Boolean             @default(false)
   injuryType          InjuryType?
-  injuryLocations     String?             @db.Text  // JSON array of injury locations
   wantsRehabilitation RehabilitationOption? 
   environment         TrainingEnvironment
   equipment           EquipmentType
@@ -125,13 +142,39 @@ model UserPreferences {
   weight              Float               // Weight in kg
   height              Float               // Height in cm
   bmi                 Float               // BMI value
+  bmiCategory         String              // For quick category filtering
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
   user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  injuries            UserInjuryLocation[]
 
+  // Indexes for all filterable fields
   @@index([environment])
   @@index([equipment])
   @@index([experience])
   @@index([goal])
   @@index([frequency])
+  @@index([hasInjury])
+  @@index([injuryType])
+  @@index([bmi])
+  @@index([bmiCategory])
+  @@index([wantsRehabilitation])
+  @@index([weight])
+  @@index([height])
+  @@index([createdAt])
+  @@index([hasInjury, injuryType]) // Composite index for injury filtering
+}
+
+// Junction table for user preferences and injury locations
+model UserInjuryLocation {
+  id                String          @id @default(cuid())
+  userPreferences   UserPreferences @relation(fields: [userPreferencesId], references: [id], onDelete: Cascade)
+  userPreferencesId String
+  location          InjuryLocation
+  createdAt         DateTime        @default(now())
+
+  @@unique([userPreferencesId, location])
+  @@index([location])
+  @@index([userPreferencesId])
+  @@index([location, userPreferencesId]) // Composite index for faster filtering
 } 

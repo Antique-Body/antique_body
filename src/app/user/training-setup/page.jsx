@@ -87,9 +87,13 @@ const TrainingSetup = () => {
   useEffect(() => {
     const currentConfig = stepConfig.find(step => step.stepNumber === currentStep);
     if (currentConfig && shouldSkipStep(currentConfig)) {
-      goToNextStep();
+      // Use setTimeout to break the synchronous update cycle
+      const timer = setTimeout(() => {
+        goToNextStep();
+      }, 0);
+      return () => clearTimeout(timer);
     }
-  }, [currentStep, userSelections, shouldSkipStep, goToNextStep]);
+  }, [currentStep, shouldSkipStep, goToNextStep]);
 
   // Helper functions
   const getFrequencyEnum = useCallback((freq) => {
@@ -158,14 +162,18 @@ const TrainingSetup = () => {
 
   // Event handlers
   const handleStartTraining = useCallback(async () => {
-    const success = await saveUserData();
-    if (success) {
-      router.push("/user/dashboard");
+    try {
+      const success = await saveUserData();
+      if (success) {
+        router.push("/user/dashboard");
+      }
+    } catch (error) {
+      setSaveError(error.message);
     }
-  }, [saveUserData, router]);
+  }, [saveUserData]);
 
   const areMeasurementsValid = useCallback(() => {
-    return currentStep !== 6 || userSelections.measurements?.isValid === true;
+    return currentStep !== 9 || userSelections.measurements?.isValid === true;
   }, [currentStep, userSelections.measurements]);
 
   // Render functions

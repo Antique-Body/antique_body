@@ -10,6 +10,7 @@ export const NavigationButtons = ({
   canFinish,
   shouldShowNextStep = true,
 }) => {
+
   return (
     <div className="w-full flex justify-between items-center gap-4 mt-6">
       {currentStep > 1 ? (
