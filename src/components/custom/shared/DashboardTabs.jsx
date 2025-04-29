@@ -1,9 +1,7 @@
-import React from "react";
-
 export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
     return (
-        <div className="flex overflow-x-auto pb-1 mb-6 sticky top-3 z-30 bg-[#0a0a0a] pt-3">
-            {tabs.map((tab) => (
+        <div className="flex overflow-x-auto pb-1 mb-6 sticky top-3 bg-[#0a0a0a] pt-3">
+            {tabs.map(tab => (
                 <button
                     key={tab.id}
                     className={`px-4 py-2 text-sm font-medium transition-all duration-300 border-b-2 whitespace-nowrap ${

@@ -2,31 +2,31 @@ import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 
 export async function middleware(request) {
-  const token = await getToken({ req: request });
-  const { pathname } = request.nextUrl;
-  const userRole = token?.role?.toLowerCase();
+    const token = await getToken({ req: request });
+    const { pathname } = request.nextUrl;
+    const userRole = token?.role?.toLowerCase();
 
-  // Public routes that don't require authentication
-  const publicRoutes = ["/", "/auth/login", "/auth/register"];
-  const isPublicRoute = publicRoutes.includes(pathname);
+    // Public routes that don't require authentication
+    const publicRoutes = ["/", "/auth/login", "/auth/register"];
+    const isPublicRoute = publicRoutes.includes(pathname);
 
-  // 1. Handle public routes
-  if (isPublicRoute) {
-    return NextResponse.next();
-  }
+    // 1. Handle public routes
+    //   if (isPublicRoute) {
+    //     return NextResponse.next();
+    //   }
 
-  // 2. Handle unauthenticated users
-  if (!token) {
-    return NextResponse.redirect(new URL("/auth/login", request.url));
-  }
+    //   // 2. Handle unauthenticated users
+    //   if (!token) {
+    //     return NextResponse.redirect(new URL("/auth/login", request.url));
+    //   }
 
-  // 3. Handle users without a role
-  if (!userRole) {
-    if (pathname !== "/select-role") {
-      return NextResponse.redirect(new URL("/select-role", request.url));
-    }
-    return NextResponse.next();
-  }
+    //   // 3. Handle users without a role
+    //   if (!userRole) {
+    //     if (pathname !== "/select-role") {
+    //       return NextResponse.redirect(new URL("/select-role", request.url));
+    //     }
+    //     return NextResponse.next();
+    //   }
 
   // 4. Role-based routing
   if (userRole === "trainer") {
@@ -71,12 +71,11 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
-  // Default fallback
-  return NextResponse.next();
+    // Default fallback
+    return NextResponse.next();
 }
 
 // Configure middleware to run on all routes except static files and API routes
 export const config = {
     matcher: ["/((?!api|_next/static|_next/image|favicon.ico|public).*)"],
 };
-
