@@ -189,7 +189,7 @@ const SessionsPage = () => {
                                         )}
                                     </div>
                                 </div>
-                                <div className="flex space-x-2">
+                                <div className="space-x-2">
                                     <Button variant="subtle" size="small" onClick={() => toggleExpand(session.id)}>
                                         {expandedSessionId === session.id ? "Less" : "Details"}
                                     </Button>
