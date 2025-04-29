@@ -24,6 +24,21 @@ const validators = {
       height > 0 &&
       bmi > 0
     );
+  },
+  hasInjury: (value) => ["no", "past", "current", "chronic"].includes(value),
+  wantsRehabilitation: (value) => value === null || value === undefined || value === "yes" || value === "no",
+  injuryLocations: (value, hasInjury) => {
+    if (hasInjury === "no") return true;
+    try {
+      if (!value) return false;
+      if (typeof value === "string") {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed);
+      }
+      return Array.isArray(value);
+    } catch (e) {
+      return false;
+    }
   }
 };
 
@@ -38,16 +53,44 @@ const errorResponse = (message, details = null, status = 400) => {
 // Extract and validate data from request
 const extractAndValidateData = (body) => {
   // Extract measurements from the measurements object if it exists
-  const { measurements, environment, equipment, experience, goal, frequency } = body;
+  const { 
+    measurements, 
+    environment, 
+    equipment, 
+    experience, 
+    goal, 
+    frequency,
+    hasInjury,
+    injuryLocations,
+    wantsRehabilitation
+  } = body;
   
   // Get weight, height, and bmi from measurements object or directly from body
   const weight = measurements?.weight || body.weight;
   const height = measurements?.height || body.height;
   const bmi = measurements?.bmi || body.bmi;
 
+  // Convert hasInjury to boolean for database
+  const hasInjuryBool = hasInjury !== "no";
+  
   // Validate all required fields
   if (!weight || !height || !bmi || !environment || !equipment || !experience || !goal || !frequency) {
     return { error: "Missing required fields" };
+  }
+
+  // Validate hasInjury
+  if (!validators.hasInjury(hasInjury)) {
+    return { error: "Invalid injury value", details: "Must be one of 'no', 'past', 'current', or 'chronic'" };
+  }
+
+  // Validate wantsRehabilitation if hasInjury is true
+  if (hasInjuryBool && !validators.wantsRehabilitation(wantsRehabilitation)) {
+    return { error: "Invalid rehabilitation value", details: "Must be 'yes' or 'no'" };
+  }
+
+  // Validate injuryLocations if hasInjury is true
+  if (hasInjuryBool && !validators.injuryLocations(injuryLocations, hasInjury)) {
+    return { error: "Invalid injury locations", details: "Must be an array" };
   }
 
   // Validate enum values
@@ -76,6 +119,18 @@ const extractAndValidateData = (body) => {
     return { error: "Invalid measurement values" };
   }
 
+  // Prepare injury locations
+  let formattedInjuryLocations = null;
+  if (hasInjuryBool && injuryLocations) {
+    try {
+      formattedInjuryLocations = typeof injuryLocations === 'string' 
+        ? injuryLocations 
+        : JSON.stringify(injuryLocations);
+    } catch (e) {
+      return { error: "Invalid injury locations format" };
+    }
+  }
+
   // Return validated data
   return {
     data: {
@@ -86,7 +141,11 @@ const extractAndValidateData = (body) => {
       equipment,
       experience,
       goal,
-      frequency: parseInt(frequency, 10)
+      frequency: parseInt(frequency, 10),
+      hasInjury: hasInjuryBool,
+      injuryType: hasInjury,
+      injuryLocations: formattedInjuryLocations,
+      wantsRehabilitation: hasInjuryBool ? wantsRehabilitation : null
     }
   };
 };

@@ -1,15 +1,18 @@
 import { stepConfig, TOTAL_STEPS } from "@/app/utils";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 export const useWorkoutForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [userSelections, setUserSelections] = useState({
-    trainingType: null,
+    hasInjury: null,
+    injuryLocations: [],
+    wantsRehabilitation: null,
     environment: null,
     equipment: null,
     experience: null,
     goal: null,
     frequency: null,
+    measurements: null,
   });
 
   const handleSelection = (field, value) => {
@@ -31,14 +34,46 @@ export const useWorkoutForm = () => {
     }
   };
 
-  const isCurrentStepSelected = () => {
+  const isCurrentStepSelected = useCallback(() => {
     const currentStepConfig = stepConfig.find(
       (step) => step.stepNumber === currentStep
     );
-    return userSelections[currentStepConfig.field] !== null;
-  };
+    
+    if (!currentStepConfig) return false;
 
-  const canFinish = () => userSelections.frequency !== null;
+    // Special handling for injury locations
+    if (currentStepConfig.isInjuryLocationStep) {
+      return userSelections.injuryLocations && userSelections.injuryLocations.length > 0;
+    }
+    
+    // Normal field checking
+    return userSelections[currentStepConfig.field] !== null && 
+           userSelections[currentStepConfig.field] !== undefined;
+  }, [currentStep, userSelections]);
+
+  // Determine if a step should be skipped based on dependencies
+  const shouldSkipStep = useCallback((step) => {
+    // If the step depends on another field
+    if (step.dependsOn) {
+      const { field, value, values } = step.dependsOn;
+      
+      // If we have multiple allowed values, check if current value is in that list
+      if (values && Array.isArray(values)) {
+        return !values.includes(userSelections[field]);
+      }
+      
+      // Otherwise check for exact value match
+      return userSelections[field] !== value;
+    }
+    return false;
+  }, [userSelections]);
+
+  const canFinish = useCallback(() => {
+    // Check if the frequency step and measurement step are completed
+    return userSelections.frequency !== null && 
+           userSelections.measurements !== null && 
+           userSelections.measurements?.isValid === true;
+  }, [userSelections]);
 
   return {
     currentStep,
@@ -48,5 +83,6 @@ export const useWorkoutForm = () => {
     goToPrevStep,
     isCurrentStepSelected,
     canFinish,
+    shouldSkipStep,
   };
 };

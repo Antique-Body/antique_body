@@ -11,3 +11,4 @@ export { RoleCardCompact } from "./RoleCardCompact";
 export { SelectionCard } from "./SelectionCard";
 export { StepContainer } from "./StepContainer";
 export { WelcomeCard } from "./WelcomeCard";
+export { InjuryLocationSelector } from "./InjuryLocationSelector";

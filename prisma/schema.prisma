@@ -41,6 +41,18 @@ enum TrainingGoal {
   endurance
 }
 
+enum RehabilitationOption {
+  yes
+  no
+}
+
+enum InjuryType {
+  no
+  past
+  current
+  chronic
+}
+
 // Simple User model for authentication
 model User {
   id                String    @id @default(cuid())
@@ -99,19 +111,23 @@ model VerificationToken {
 }
 
 model UserPreferences {
-  id              String            @id @default(cuid())
-  userId          String            @unique
-  environment     TrainingEnvironment
-  equipment       EquipmentType
-  experience      ExperienceLevel
-  goal            TrainingGoal
-  frequency       Int               @db.Int
-  weight          Float             // Weight in kg
-  height          Float             // Height in cm
-  bmi             Float             // BMI value
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                  String              @id @default(cuid())
+  userId              String              @unique
+  hasInjury           Boolean             @default(false)
+  injuryType          InjuryType?
+  injuryLocations     String?             @db.Text  // JSON array of injury locations
+  wantsRehabilitation RehabilitationOption? 
+  environment         TrainingEnvironment
+  equipment           EquipmentType
+  experience          ExperienceLevel
+  goal                TrainingGoal
+  frequency           Int                 @db.Int
+  weight              Float               // Weight in kg
+  height              Float               // Height in cm
+  bmi                 Float               // BMI value
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([environment])
   @@index([equipment])

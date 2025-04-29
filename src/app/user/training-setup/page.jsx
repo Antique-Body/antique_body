@@ -7,6 +7,7 @@ import {
   BrandLogo,
   Card,
   FrequencySelector,
+  InjuryLocationSelector,
   MeasurementsInput,
   NavigationButtons,
   SelectionCard,
@@ -33,6 +34,7 @@ const TrainingSetup = () => {
     goToPrevStep,
     isCurrentStepSelected,
     canFinish,
+    shouldSkipStep,
   } = useWorkoutForm();
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
@@ -81,6 +83,14 @@ const TrainingSetup = () => {
     setValidationError(null);
   }, [userSelections.measurements]);
 
+  // Check if current step should be skipped
+  useEffect(() => {
+    const currentConfig = stepConfig.find(step => step.stepNumber === currentStep);
+    if (currentConfig && shouldSkipStep(currentConfig)) {
+      goToNextStep();
+    }
+  }, [currentStep, userSelections, shouldSkipStep, goToNextStep]);
+
   // Helper functions
   const getFrequencyEnum = useCallback((freq) => {
     const num = Number(freq);
@@ -110,6 +120,10 @@ const TrainingSetup = () => {
         experience: userSelections.experience,
         goal: userSelections.goal,
         frequency: getFrequencyEnum(userSelections.frequency),
+        hasInjury: userSelections.hasInjury !== "no",
+        injuryType: userSelections.hasInjury,
+        injuryLocations: userSelections.hasInjury !== "no" ? userSelections.injuryLocations : [],
+        wantsRehabilitation: userSelections.hasInjury !== "no" ? userSelections.wantsRehabilitation : null
       };
 
       const response = await fetch("/api/users/trainingSetup", {
@@ -170,6 +184,15 @@ const TrainingSetup = () => {
         return (
           <MeasurementsInput
             onSelect={(value) => handleSelection("measurements", value)}
+          />
+        );
+      }
+
+      if (step.isInjuryLocationStep) {
+        return (
+          <InjuryLocationSelector
+            selectedLocations={userSelections.injuryLocations || []}
+            onSelect={(value) => handleSelection("injuryLocations", value)}
           />
         );
       }
@@ -244,17 +267,24 @@ const TrainingSetup = () => {
           </Card>
         </div>
 
-        {stepConfig.map((step) => (
-          <StepContainer
-            key={step.stepNumber}
-            currentStep={currentStep}
-            stepNumber={step.stepNumber}
-            title={step.title}
-            emoji={step.emoji}
-            icon={step.icon}>
-            {renderStepContent(step)}
-          </StepContainer>
-        ))}
+        {stepConfig.map((step) => {
+          // Skip steps that should be skipped in the UI
+          if (shouldSkipStep(step)) {
+            return null;
+          }
+          
+          return (
+            <StepContainer
+              key={step.stepNumber}
+              currentStep={currentStep}
+              stepNumber={step.stepNumber}
+              title={step.title}
+              emoji={step.emoji}
+              icon={step.icon}>
+              {renderStepContent(step)}
+            </StepContainer>
+          );
+        })}
 
         <NavigationButtons
           currentStep={currentStep}
