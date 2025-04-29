@@ -1,11 +1,11 @@
 "use client";
 
-import { FullScreenLoader } from "@/components/custom/FullScreenLoader";
-import { RoleCardCompact } from "@/components/custom/RoleCardCompact";
+
 import { Modal } from "@/components/common";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { RoleCardCompact, FullScreenLoader } from "@/components";
 
 const ROLE_TITLES = {
   trainer: "Preparing your Trainer Journey",

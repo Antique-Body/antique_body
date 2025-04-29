@@ -7,11 +7,84 @@ import {
   DiscusIcon,
 } from "@/components/common/Icons";
 
-export const TOTAL_STEPS = 6;
+export const TOTAL_STEPS = 8;
 
 export const stepConfig = [
   {
     stepNumber: 1,
+    title: "Do you have any injuries?",
+    emoji: "🩹",
+    field: "hasInjury",
+    options: [
+      {
+        value: "no",
+        emoji: "✅",
+        title: "No Injuries",
+        description: "I don't have any injuries",
+        icon: <RunnerIcon className="w-12 h-12" />,
+      },
+      {
+        value: "past",
+        emoji: "🕒",
+        title: "Past Injury",
+        description: "I had an injury in the past",
+        icon: <DiscusIcon className="w-12 h-12" />,
+      },
+      {
+        value: "current",
+        emoji: "🤕",
+        title: "Current Injury",
+        description: "I have a current injury",
+        icon: <VaseIcon className="w-12 h-12" />,
+      },
+      {
+        value: "chronic",
+        emoji: "⚠️",
+        title: "Chronic Injury",
+        description: "I have a chronic/recurring injury",
+        icon: <ColumnIcon className="w-12 h-12" />,
+      },
+    ],
+  },
+  {
+    stepNumber: 2,
+    title: "Select injured body parts",
+    emoji: "🦴",
+    field: "injuryLocations",
+    isInjuryLocationStep: true,
+    dependsOn: {
+      field: "hasInjury",
+      values: ["past", "current", "chronic"],
+    },
+  },
+  {
+    stepNumber: 3,
+    title: "Do you want rehabilitation?",
+    emoji: "🏥",
+    field: "wantsRehabilitation",
+    dependsOn: {
+      field: "hasInjury",
+      values: ["past", "current", "chronic"],
+    },
+    options: [
+      {
+        value: "yes",
+        emoji: "🧠",
+        title: "Yes",
+        description: "I want rehabilitation exercises",
+        icon: <ParthenonIcon className="w-12 h-12" />,
+      },
+      {
+        value: "no",
+        emoji: "💪",
+        title: "No",
+        description: "I want a regular workout",
+        icon: <ColumnIcon className="w-12 h-12" />,
+      },
+    ],
+  },
+  {
+    stepNumber: 4,
     title: "Where will you be training?",
     emoji: "🌍",
     field: "environment",
@@ -31,7 +104,7 @@ export const stepConfig = [
     ],
   },
   {
-    stepNumber: 2,
+    stepNumber: 5,
     title: "What equipment do you have?",
     emoji: "🛠️",
     field: "equipment",
@@ -53,7 +126,7 @@ export const stepConfig = [
     ],
   },
   {
-    stepNumber: 3,
+    stepNumber: 6,
     title: "How long have you been training?",
     emoji: "⏱️",
     field: "experience",
@@ -89,7 +162,7 @@ export const stepConfig = [
     ],
   },
   {
-    stepNumber: 4,
+    stepNumber: 7,
     title: "What's your main goal?",
     emoji: "🎯",
     field: "goal",
@@ -125,14 +198,14 @@ export const stepConfig = [
     ],
   },
   {
-    stepNumber: 5,
+    stepNumber: 8,
     title: "How many times per week will you train?",
     emoji: "📅",
     field: "frequency",
     isFrequencyStep: true,
   },
   {
-    stepNumber: 6,
+    stepNumber: 9,
     title: "What are your measurements?",
     emoji: "📏",
     field: "measurements",
