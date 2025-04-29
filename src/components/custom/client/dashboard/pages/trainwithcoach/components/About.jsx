@@ -1,4 +1,4 @@
-import React from "react";
+import { CheckIcon } from "@/components/common/Icons";
 
 export const About = ({ trainer }) => {
     return (
@@ -41,20 +41,7 @@ export const About = ({ trainer }) => {
                                 className="bg-[rgba(255,107,0,0.1)] border border-[rgba(255,107,0,0.2)] rounded-lg p-3"
                             >
                                 <div className="flex items-center gap-2 mb-1">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="16"
-                                        height="16"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="#FF6B00"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                                    </svg>
+                                    <CheckIcon size={16} stroke="#FF6B00" />
                                     <h5 className="font-medium text-white">{service.name}</h5>
                                 </div>
                                 <p className="text-gray-300 text-sm">{service.description}</p>
@@ -64,20 +51,7 @@ export const About = ({ trainer }) => {
                         <>
                             <div className="bg-[rgba(255,107,0,0.1)] border border-[rgba(255,107,0,0.2)] rounded-lg p-3">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="16"
-                                        height="16"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="#FF6B00"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                                    </svg>
+                                    <CheckIcon size={16} stroke="#FF6B00" />
                                     <h5 className="font-medium text-white">Personal Training</h5>
                                 </div>
                                 <p className="text-gray-300 text-sm">
@@ -87,20 +61,7 @@ export const About = ({ trainer }) => {
 
                             <div className="bg-[rgba(255,107,0,0.1)] border border-[rgba(255,107,0,0.2)] rounded-lg p-3">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="16"
-                                        height="16"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="#FF6B00"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                                    </svg>
+                                    <CheckIcon size={16} stroke="#FF6B00" />
                                     <h5 className="font-medium text-white">Nutrition Planning</h5>
                                 </div>
                                 <p className="text-gray-300 text-sm">
@@ -110,20 +71,7 @@ export const About = ({ trainer }) => {
 
                             <div className="bg-[rgba(255,107,0,0.1)] border border-[rgba(255,107,0,0.2)] rounded-lg p-3">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="16"
-                                        height="16"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="#FF6B00"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                                    </svg>
+                                    <CheckIcon size={16} stroke="#FF6B00" />
                                     <h5 className="font-medium text-white">Performance Assessment</h5>
                                 </div>
                                 <p className="text-gray-300 text-sm">
@@ -133,20 +81,7 @@ export const About = ({ trainer }) => {
 
                             <div className="bg-[rgba(255,107,0,0.1)] border border-[rgba(255,107,0,0.2)] rounded-lg p-3">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="16"
-                                        height="16"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="#FF6B00"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                                    </svg>
+                                    <CheckIcon size={16} stroke="#FF6B00" />
                                     <h5 className="font-medium text-white">Remote Coaching</h5>
                                 </div>
                                 <p className="text-gray-300 text-sm">
@@ -160,4 +95,3 @@ export const About = ({ trainer }) => {
         </div>
     );
 };
-

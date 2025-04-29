@@ -1,4 +1,6 @@
 "use client";
+import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/shared/FormField";
 import { useState } from "react";
 
 const PlansPage = () => {
@@ -90,37 +92,41 @@ const PlansPage = () => {
         setExpandedPlanId(expandedPlanId === planId ? null : planId);
     };
 
+    const durationOptions = [
+        { value: "", label: "All Durations" },
+        { value: "8", label: "8 weeks" },
+        { value: "10", label: "10 weeks" },
+        { value: "12", label: "12 weeks" },
+    ];
+
     return (
         <div>
             <div className="flex flex-col md:flex-row justify-between items-center mb-6">
                 <h2 className="text-xl font-bold mb-4 md:mb-0">Training Plans</h2>
 
-                <button className="bg-[#FF6B00] text-white py-2 px-4 rounded-lg transition-all duration-300 hover:bg-[#FF9A00]">
-                    + Create New Plan
-                </button>
+                <Button variant="orangeFilled" leftIcon={<span className="text-xl">+</span>}>
+                    Create New Plan
+                </Button>
             </div>
 
             {/* Search and filter controls */}
             <div className="flex flex-col md:flex-row gap-3 mb-6">
                 <div className="flex-1">
-                    <input
+                    <FormField
                         type="text"
                         placeholder="Search plans..."
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
-                        className="w-full bg-[rgba(30,30,30,0.8)] border border-[#333] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#FF6B00]"
+                        className="mb-0"
                     />
                 </div>
-                <select
+                <FormField
+                    type="select"
                     value={filterDuration}
                     onChange={e => setFilterDuration(e.target.value)}
-                    className="bg-[rgba(30,30,30,0.8)] border border-[#333] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#FF6B00]"
-                >
-                    <option value="">All Durations</option>
-                    <option value="8">8 weeks</option>
-                    <option value="10">10 weeks</option>
-                    <option value="12">12 weeks</option>
-                </select>
+                    options={durationOptions}
+                    className="mb-0 min-w-[150px]"
+                />
             </div>
 
             {/* Plans grid */}
@@ -166,12 +172,13 @@ const PlansPage = () => {
 
                             {/* Plan sessions */}
                             <div className="mt-auto p-4 pt-0">
-                                <button
+                                <Button
+                                    variant="ghostOrange"
                                     onClick={() => toggleExpand(plan.id)}
-                                    className="text-sm text-[#FF6B00] hover:text-[#FF9A00] transition-all duration-300 flex items-center mt-4"
+                                    className="text-sm mt-4 p-0"
                                 >
                                     {expandedPlanId === plan.id ? "Hide Details" : "Show Details"}
-                                </button>
+                                </Button>
 
                                 {expandedPlanId === plan.id && (
                                     <div className="mt-3 border-t border-[#333] pt-3">
@@ -185,12 +192,12 @@ const PlansPage = () => {
                                 )}
 
                                 <div className="flex space-x-2 mt-4">
-                                    <button className="bg-[rgba(40,40,40,0.7)] text-white py-1 px-3 rounded-lg text-sm transition-all duration-300 hover:bg-[rgba(60,60,60,0.7)] flex-1">
+                                    <Button variant="secondary" size="small" className="flex-1">
                                         Edit
-                                    </button>
-                                    <button className="bg-[#FF6B00] text-white py-1 px-3 rounded-lg text-sm transition-all duration-300 hover:bg-[#FF9A00] flex-1">
+                                    </Button>
+                                    <Button variant="orangeFilled" size="small" className="flex-1">
                                         Assign
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
                         </div>

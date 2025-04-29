@@ -1,3 +1,12 @@
+import {
+    CertificateIcon,
+    EducationIcon,
+    NutritionIcon,
+    PerformanceIcon,
+    RecoveryIcon,
+    StrengthIcon,
+} from "@/components/common/Icons";
+
 export const Expertise = ({ trainer }) => {
     // Expertise areas with proficiency levels
     const expertise = [
@@ -33,7 +42,10 @@ export const Expertise = ({ trainer }) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-[#1A1A1A] border border-[#333] rounded-lg p-4">
-                    <h4 className="text-md font-semibold mb-2 text-[#FF6B00]">Sports Performance</h4>
+                    <div className="flex items-center mb-2">
+                        <PerformanceIcon size={18} className="text-[#FF6B00] mr-2" />
+                        <h4 className="text-md font-semibold text-[#FF6B00]">Sports Performance</h4>
+                    </div>
                     <ul className="text-gray-300 space-y-1">
                         <li>• Sport-specific functional movement patterns</li>
                         <li>• Speed and agility development</li>
@@ -43,7 +55,10 @@ export const Expertise = ({ trainer }) => {
                 </div>
 
                 <div className="bg-[#1A1A1A] border border-[#333] rounded-lg p-4">
-                    <h4 className="text-md font-semibold mb-2 text-[#FF6B00]">Strength & Conditioning</h4>
+                    <div className="flex items-center mb-2">
+                        <StrengthIcon size={18} className="text-[#FF6B00] mr-2" />
+                        <h4 className="text-md font-semibold text-[#FF6B00]">Strength & Conditioning</h4>
+                    </div>
                     <ul className="text-gray-300 space-y-1">
                         <li>• Compound movement optimization</li>
                         <li>• Progressive overload programming</li>
@@ -53,7 +68,10 @@ export const Expertise = ({ trainer }) => {
                 </div>
 
                 <div className="bg-[#1A1A1A] border border-[#333] rounded-lg p-4">
-                    <h4 className="text-md font-semibold mb-2 text-[#FF6B00]">Recovery & Mobility</h4>
+                    <div className="flex items-center mb-2">
+                        <RecoveryIcon size={18} className="text-[#FF6B00] mr-2" />
+                        <h4 className="text-md font-semibold text-[#FF6B00]">Recovery & Mobility</h4>
+                    </div>
                     <ul className="text-gray-300 space-y-1">
                         <li>• Active recovery protocols</li>
                         <li>• Joint mobility enhancement</li>
@@ -63,7 +81,10 @@ export const Expertise = ({ trainer }) => {
                 </div>
 
                 <div className="bg-[#1A1A1A] border border-[#333] rounded-lg p-4">
-                    <h4 className="text-md font-semibold mb-2 text-[#FF6B00]">Nutrition Planning</h4>
+                    <div className="flex items-center mb-2">
+                        <NutritionIcon size={18} className="text-[#FF6B00] mr-2" />
+                        <h4 className="text-md font-semibold text-[#FF6B00]">Nutrition Planning</h4>
+                    </div>
                     <ul className="text-gray-300 space-y-1">
                         <li>• Macronutrient calculation</li>
                         <li>• Performance nutrition timing</li>
@@ -77,20 +98,7 @@ export const Expertise = ({ trainer }) => {
             <ul className="space-y-3">
                 <li className="flex">
                     <div className="bg-[rgba(255,107,0,0.15)] text-[#FF6B00] p-2 rounded-full h-8 w-8 flex items-center justify-center mr-3">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
-                            <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
-                        </svg>
+                        <EducationIcon size={16} />
                     </div>
                     <div>
                         <h5 className="font-medium text-white">BSc in Sports Science</h5>
@@ -101,20 +109,7 @@ export const Expertise = ({ trainer }) => {
                 {trainer?.certifications.map((cert, index) => (
                     <li key={index} className="flex">
                         <div className="bg-[rgba(255,107,0,0.15)] text-[#FF6B00] p-2 rounded-full h-8 w-8 flex items-center justify-center mr-3">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <circle cx="12" cy="8" r="7"></circle>
-                                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
-                            </svg>
+                            <CertificateIcon size={16} />
                         </div>
                         <div>
                             <h5 className="font-medium text-white">{cert}</h5>

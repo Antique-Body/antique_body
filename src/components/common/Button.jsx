@@ -1,44 +1,87 @@
 "use client";
 import { cn } from "@/lib/utils";
+
 export const Button = ({
     children,
     className,
     variant = "primary",
+    size = "default",
     loading = false,
     disabled = false,
     leftIcon,
     rightIcon,
+    fullWidth = false,
+    type = "button",
+    onClick,
+    isActive = false,
     ...props
 }) => {
-  const baseStyles =
-    "px-6 py-2 rounded font-medium h-11 transition-all duration-300 disabled:opacity-50 cursor-pointer hover:scale-[1.02]";
-  const variants = {
-    primary:
-      "bg-gradient-to-r from-[#FF7800] to-[#FF5F00] text-white hover:from-[#FF5F00] hover:to-[#FF7800]",
-    outline: "border border-[#FF7800] text-white hover:bg-[#FF7800]",
-    secondary:
-      "bg-[#1A1A1A] text-white border border-[#333] hover:border-[#FF7800]",
-    modalCancel:
-      "bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-600 text-zinc-300",
-    modalConfirm:
-      "bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20",
-  };
-  return (
-    <button
-      className={cn(baseStyles, variants[variant], className)}
-      disabled={disabled || loading}
-      {...props}>
-      <div className="flex items-center justify-center gap-2 min-h-[24px]">
-        {loading ? (
-          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-        ) : (
-          <>
-            {leftIcon && <span className="flex-shrink-0">{leftIcon}</span>}
-            {children}
-            {rightIcon && <span className="flex-shrink-0">{rightIcon}</span>}
-          </>
-        )}
-      </div>
-    </button>
-  );
+    // Base styles applied to all buttons
+    const baseStyles = "font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed rounded";
+
+    // Size variations
+    const sizes = {
+        small: "px-3 py-1.5 text-sm",
+        default: "px-6 py-2",
+        large: "px-8 py-3 text-lg",
+    };
+
+    // Style variations
+    const variants = {
+        // Main variants
+        primary: "bg-gradient-to-r from-[#FF7800] to-[#FF5F00] text-white hover:from-[#FF5F00] hover:to-[#FF7800]",
+        secondary: "bg-[#1A1A1A] text-white border border-[#333] hover:border-[#FF7800]",
+        outline: "border border-[#FF7800] text-[#FF7800] hover:bg-[rgba(255,107,0,0.15)]",
+
+        // Modal variants
+        modalCancel: "bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-600 text-zinc-300",
+        modalConfirm: "bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20",
+
+        // Nutrition page variants
+        orangeOutline:
+            "bg-[rgba(255,107,0,0.15)] border border-[rgba(255,107,0,0.3)] text-[#FF6B00] hover:bg-[rgba(255,107,0,0.25)] hover:text-[#FF9A00]",
+        orangeFilled: "bg-[#FF6B00] text-white hover:bg-[#FF9A00]",
+
+        // Water tracker variants
+        blueOutline:
+            "bg-[rgba(0,149,255,0.15)] border border-[rgba(0,149,255,0.3)] text-blue-400 hover:bg-[rgba(0,149,255,0.25)]",
+
+        // Dashboard variants
+        ghost: "text-gray-400 hover:text-white hover:bg-[#333] bg-transparent",
+        ghostOrange: "text-[#FF6B00] hover:text-[#FF9A00] hover:bg-transparent bg-transparent",
+        subtle: "text-white/80 hover:text-white border border-[#444] hover:border-[#666]",
+
+        // Tab variants
+        tab: "py-3 px-4 font-medium text-sm border-b-2 whitespace-nowrap bg-transparent rounded-none",
+    };
+
+    return (
+        <button
+            className={cn(
+                baseStyles,
+                sizes[size],
+                variants[variant],
+                variant === "tab" &&
+                    (isActive ? "border-[#FF6B00] text-[#FF6B00]" : "border-transparent text-gray-400 hover:text-white"),
+                fullWidth && "w-full",
+                className,
+            )}
+            disabled={disabled || loading}
+            type={type}
+            onClick={onClick}
+            {...props}
+        >
+            {loading ? (
+                <div className="flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            ) : (
+                <div className="flex items-center justify-center gap-2">
+                    {leftIcon && <span className="flex-shrink-0">{leftIcon}</span>}
+                    {children}
+                    {rightIcon && <span className="flex-shrink-0">{rightIcon}</span>}
+                </div>
+            )}
+        </button>
+    );
 };

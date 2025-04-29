@@ -1,4 +1,6 @@
 "use client";
+import { Button } from "@/components/common/Button";
+import { MessageIcon, NutritionIcon, PlusIcon, ProgressChartIcon, TimerIcon, WorkoutIcon } from "@/components/common/Icons";
 
 export default function OverviewPage() {
     // Access userData from parent layout context in a real application
@@ -78,21 +80,7 @@ export default function OverviewPage() {
                 {/* Next Session */}
                 <div className="bg-[rgba(20,20,20,0.95)] rounded-2xl p-6 z-30 backdrop-blur-lg border border-[#222] shadow-lg">
                     <h2 className="text-xl font-bold mb-4 flex items-center">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="#FF6B00"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="mr-2"
-                        >
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
+                        <TimerIcon className="mr-2" stroke="#FF6B00" />
                         Next Training
                     </h2>
 
@@ -117,28 +105,19 @@ export default function OverviewPage() {
                         </p>
                     </div>
 
-                    <button className="w-full bg-[rgba(255,107,0,0.15)] border border-[rgba(255,107,0,0.3)] text-[#FF6B00] py-2 px-4 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-[rgba(255,107,0,0.25)]">
+                    <Button
+                        variant="orangeOutline"
+                        fullWidth
+                        onClick={() => (window.location.href = "/client/dashboard/trainings")}
+                    >
                         View All Trainings
-                    </button>
+                    </Button>
                 </div>
 
                 {/* Messages Preview */}
                 <div className="bg-[rgba(20,20,20,0.95)] rounded-2xl p-6 z-30 backdrop-blur-lg border border-[#222] shadow-lg">
                     <h2 className="text-xl font-bold mb-4 flex items-center">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="#FF6B00"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="mr-2"
-                        >
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                        </svg>
+                        <MessageIcon className="mr-2" stroke="#FF6B00" />
                         Coach Messages
                     </h2>
 
@@ -159,46 +138,21 @@ export default function OverviewPage() {
                         ))}
                     </div>
 
-                    <button className="w-full mt-4 bg-[#FF6B00] text-white py-2 px-4 rounded-lg transition-all duration-300 hover:bg-[#FF9A00] flex items-center justify-center gap-2">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
+                    <Button
+                        variant="orangeFilled"
+                        fullWidth
+                        className="mt-4"
+                        leftIcon={<PlusIcon />}
+                        onClick={() => (window.location.href = "/client/dashboard/messages")}
+                    >
                         Send Message
-                    </button>
+                    </Button>
                 </div>
 
                 {/* Nutrition Summary */}
                 <div className="bg-[rgba(20,20,20,0.95)] rounded-2xl p-6 z-30 backdrop-blur-lg border border-[#222] shadow-lg">
                     <h2 className="text-xl font-bold mb-4 flex items-center">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="#FF6B00"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="mr-2"
-                        >
-                            <path d="M3 3h18v18H3V3z"></path>
-                            <path d="M9 3v18"></path>
-                            <path d="M15 3v18"></path>
-                            <path d="M3 9h18"></path>
-                            <path d="M3 15h18"></path>
-                        </svg>
+                        <NutritionIcon className="mr-2" stroke="#FF6B00" />
                         Nutrition Overview
                     </h2>
 
@@ -233,31 +187,20 @@ export default function OverviewPage() {
                         </div>
                     </div>
 
-                    <button className="w-full mt-4 bg-[rgba(255,107,0,0.15)] border border-[rgba(255,107,0,0.3)] text-[#FF6B00] py-2 px-4 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-[rgba(255,107,0,0.25)]">
+                    <Button
+                        variant="orangeOutline"
+                        fullWidth
+                        onClick={() => (window.location.href = "/client/dashboard/nutrition")}
+                    >
                         Open Nutrition Tracker
-                    </button>
+                    </Button>
                 </div>
             </div>
 
             {/* Progress Graph */}
             <div className="mt-6 bg-[rgba(20,20,20,0.95)] rounded-2xl p-6 z-30 backdrop-blur-lg border border-[#222] shadow-lg">
                 <h2 className="text-xl font-bold mb-4 flex items-center">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#FF6B00"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="mr-2"
-                    >
-                        <line x1="18" y1="20" x2="18" y2="10"></line>
-                        <line x1="12" y1="20" x2="12" y2="4"></line>
-                        <line x1="6" y1="20" x2="6" y2="14"></line>
-                    </svg>
+                    <ProgressChartIcon className="mr-2" stroke="#FF6B00" />
                     Body Composition Progress
                 </h2>
 
@@ -313,32 +256,15 @@ export default function OverviewPage() {
                     </div>
                 </div>
 
-                <button className="w-full mt-4 bg-[rgba(255,107,0,0.15)] border border-[rgba(255,107,0,0.3)] text-[#FF6B00] py-2 px-4 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-[rgba(255,107,0,0.25)]">
+                <Button variant="orangeOutline" fullWidth>
                     View Detailed Progress
-                </button>
+                </Button>
             </div>
 
             {/* Today's Workout */}
             <div className="mt-6 bg-[rgba(20,20,20,0.95)] rounded-2xl p-6 z-30 backdrop-blur-lg border border-[#222] shadow-lg">
                 <h2 className="text-xl font-bold mb-4 flex items-center">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#FF6B00"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="mr-2"
-                    >
-                        <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
-                        <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
-                        <line x1="6" y1="1" x2="6" y2="4"></line>
-                        <line x1="10" y1="1" x2="10" y2="4"></line>
-                        <line x1="14" y1="1" x2="14" y2="4"></line>
-                    </svg>
+                    <WorkoutIcon className="mr-2" stroke="#FF6B00" />
                     Today's Workout
                 </h2>
 
@@ -366,9 +292,9 @@ export default function OverviewPage() {
                     </div>
                 </div>
 
-                <button className="w-full mt-4 bg-[rgba(255,107,0,0.15)] border border-[rgba(255,107,0,0.3)] text-[#FF6B00] py-2 px-4 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-[rgba(255,107,0,0.25)]">
+                <Button variant="orangeOutline" fullWidth onClick={() => (window.location.href = "/client/dashboard/program")}>
                     View Full Program
-                </button>
+                </Button>
             </div>
         </div>
     );

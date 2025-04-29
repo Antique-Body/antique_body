@@ -1,9 +1,12 @@
 "use client";
 
 import { ProgressBar } from "@/components/common";
+import { Button } from "@/components/common/Button";
+import { ClockIcon, MessageIcon, NutritionIcon, PlusIcon, ProgressChartIcon, WorkoutIcon } from "@/components/common/Icons";
 import { MacroDistribution } from "@/components/custom/client/dashboard/pages/nutrition/components";
 import { BackgroundShapes } from "@/components/custom/shared";
 import { ClientHeader, PerformanceMetrics } from "@/components/custom/trainer/dashboard/pages/clients";
+import { FormField } from "@/components/shared/FormField";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 // Mock data for demonstration
@@ -223,64 +226,19 @@ const ClientId = () => {
                         {/* Training Program Section */}
                         <div className="bg-[rgba(20,20,20,0.95)] rounded-xl p-6 border border-[#333] backdrop-blur-sm">
                             <h3 className="text-xl font-semibold mb-4 flex items-center">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="#FF6B00"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="mr-2"
-                                >
-                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                                </svg>
+                                <WorkoutIcon size={20} stroke="#FF6B00" className="mr-2" />
                                 Training Program
                             </h3>
                             <p className="text-gray-400 mb-4">Create or modify the client's training program</p>
-                            <button className="bg-[#FF6B00] text-white px-4 py-2 rounded-lg hover:bg-[#FF8800] transition-all duration-300 flex items-center gap-2">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="16"
-                                    height="16"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                                </svg>
+                            <Button variant="orangeFilled" leftIcon={<PlusIcon size={16} />}>
                                 Create Program
-                            </button>
+                            </Button>
                         </div>
 
                         {/* Progress Tracking Section */}
                         <div className="bg-[rgba(20,20,20,0.95)] rounded-xl p-6 border border-[#333] backdrop-blur-sm">
                             <h3 className="text-xl font-semibold mb-4 flex items-center">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="#FF6B00"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="mr-2"
-                                >
-                                    <line x1="18" y1="20" x2="18" y2="10"></line>
-                                    <line x1="12" y1="20" x2="12" y2="4"></line>
-                                    <line x1="6" y1="20" x2="6" y2="14"></line>
-                                </svg>
+                                <ProgressChartIcon size={20} stroke="#FF6B00" className="mr-2" />
                                 Progress Tracking
                             </h3>
 
@@ -288,54 +246,54 @@ const ClientId = () => {
                                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-5"
                                 onSubmit={handleProgressUpdate}
                             >
-                                <input
+                                <FormField
                                     type="number"
-                                    step="0.1"
                                     placeholder="Weight (kg)"
                                     value={weight}
                                     onChange={e => setWeight(e.target.value)}
-                                    className="bg-[rgba(30,30,30,0.8)] border border-[#444] rounded-lg px-3 py-2 text-white"
-                                />
-                                <input
-                                    type="number"
+                                    className="mb-0"
+                                    min="0"
                                     step="0.1"
+                                />
+                                <FormField
+                                    type="number"
                                     placeholder="Body Fat (%)"
                                     value={bodyFat}
                                     onChange={e => setBodyFat(e.target.value)}
-                                    className="bg-[rgba(30,30,30,0.8)] border border-[#444] rounded-lg px-3 py-2 text-white"
+                                    className="mb-0"
+                                    min="0"
+                                    step="0.1"
                                 />
 
                                 {/* Dynamic performance metrics based on client type */}
                                 {activeMetric ? (
-                                    <input
+                                    <FormField
                                         type="number"
-                                        step="0.1"
                                         placeholder={performanceFields.find(f => f.id === activeMetric)?.label || activeMetric}
                                         value={newMeasurements[activeMetric] || ""}
                                         onChange={e => handleMeasurementChange(activeMetric, e.target.value)}
-                                        className="bg-[rgba(30,30,30,0.8)] border border-[#444] rounded-lg px-3 py-2 text-white"
+                                        className="mb-0"
+                                        step="0.1"
                                     />
                                 ) : (
-                                    <select
-                                        value=""
+                                    <FormField
+                                        type="select"
+                                        value={activeMetric}
                                         onChange={e => setActiveMetric(e.target.value)}
-                                        className="bg-[rgba(30,30,30,0.8)] border border-[#444] rounded-lg px-3 py-2 text-white"
-                                    >
-                                        <option value="">Select Metric</option>
-                                        {performanceFields.map(field => (
-                                            <option key={field.id} value={field.id}>
-                                                {field.label}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        options={[
+                                            { value: "", label: "Select Metric" },
+                                            ...performanceFields.map(field => ({
+                                                value: field.id,
+                                                label: field.label,
+                                            })),
+                                        ]}
+                                        className="mb-0"
+                                    />
                                 )}
 
-                                <button
-                                    type="submit"
-                                    className="bg-[#FF6B00] text-white px-4 py-2 rounded-lg hover:bg-[#FF8800] transition-all duration-300 md:col-span-2 lg:col-span-3"
-                                >
+                                <Button type="submit" variant="orangeFilled" className="md:col-span-2 lg:col-span-3">
                                     Add Progress Entry
-                                </button>
+                                </Button>
                             </form>
 
                             {/* Client performance metrics visualization */}
@@ -393,38 +351,19 @@ const ClientId = () => {
                         {/* Session notes & feedback */}
                         <div className="bg-[rgba(20,20,20,0.95)] rounded-xl p-6 border border-[#333] backdrop-blur-sm">
                             <h3 className="text-xl font-semibold mb-4 flex items-center">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="#FF6B00"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="mr-2"
-                                >
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <polyline points="14 2 14 8 20 8"></polyline>
-                                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                                    <polyline points="10 9 9 9 8 9"></polyline>
-                                </svg>
+                                <MessageIcon size={20} stroke="#FF6B00" className="mr-2" />
                                 Notes & Feedback
                             </h3>
-                            <textarea
+                            <FormField
+                                type="textarea"
                                 value={notes}
                                 onChange={e => setNotes(e.target.value)}
-                                className="w-full h-32 bg-[rgba(30,30,30,0.8)] border border-[#444] rounded-lg px-4 py-3 text-white mb-3 resize-none"
                                 placeholder="Add notes about this client's progress, challenges, or feedback..."
-                            ></textarea>
-                            <button
-                                onClick={handleSaveNotes}
-                                className="bg-[#FF6B00] text-white px-4 py-2 rounded-lg hover:bg-[#FF8800] transition-all duration-300"
-                            >
+                                className="mb-3"
+                            />
+                            <Button onClick={handleSaveNotes} variant="orangeFilled">
                                 Save Notes
-                            </button>
+                            </Button>
                         </div>
                     </div>
 
@@ -508,76 +447,48 @@ const ClientId = () => {
                         {/* Nutrition Goals Section */}
                         <div className="bg-[rgba(20,20,20,0.95)] rounded-xl p-6 border border-[#333] backdrop-blur-sm">
                             <h3 className="text-xl font-semibold mb-4 flex items-center">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="#FF6B00"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="mr-2"
-                                >
-                                    <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
-                                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
-                                    <line x1="6" y1="1" x2="6" y2="4"></line>
-                                    <line x1="10" y1="1" x2="10" y2="4"></line>
-                                    <line x1="14" y1="1" x2="14" y2="4"></line>
-                                </svg>
+                                <NutritionIcon size={20} stroke="#FF6B00" className="mr-2" />
                                 Nutrition Goals
                             </h3>
 
                             <form className="grid grid-cols-1 gap-3 mb-4" onSubmit={handleNutritionUpdate}>
                                 <div className="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <label className="block text-xs text-gray-400 mb-1">Protein (g)</label>
-                                        <input
-                                            type="number"
-                                            value={nutrition.protein || ""}
-                                            onChange={e => setNutrition({ ...nutrition, protein: parseInt(e.target.value) })}
-                                            className="w-full bg-[rgba(30,30,30,0.8)] border border-[#444] rounded-lg px-3 py-2 text-white"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs text-gray-400 mb-1">Carbs (g)</label>
-                                        <input
-                                            type="number"
-                                            value={nutrition.carbs || ""}
-                                            onChange={e => setNutrition({ ...nutrition, carbs: parseInt(e.target.value) })}
-                                            className="w-full bg-[rgba(30,30,30,0.8)] border border-[#444] rounded-lg px-3 py-2 text-white"
-                                        />
-                                    </div>
+                                    <FormField
+                                        type="number"
+                                        label="Protein (g)"
+                                        value={nutrition.protein || ""}
+                                        onChange={e => setNutrition({ ...nutrition, protein: parseInt(e.target.value) })}
+                                        className="mb-0"
+                                    />
+                                    <FormField
+                                        type="number"
+                                        label="Carbs (g)"
+                                        value={nutrition.carbs || ""}
+                                        onChange={e => setNutrition({ ...nutrition, carbs: parseInt(e.target.value) })}
+                                        className="mb-0"
+                                    />
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <label className="block text-xs text-gray-400 mb-1">Fats (g)</label>
-                                        <input
-                                            type="number"
-                                            value={nutrition.fats || ""}
-                                            onChange={e => setNutrition({ ...nutrition, fats: parseInt(e.target.value) })}
-                                            className="w-full bg-[rgba(30,30,30,0.8)] border border-[#444] rounded-lg px-3 py-2 text-white"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs text-gray-400 mb-1">Calories</label>
-                                        <input
-                                            type="number"
-                                            value={nutrition.calories || ""}
-                                            onChange={e => setNutrition({ ...nutrition, calories: parseInt(e.target.value) })}
-                                            className="w-full bg-[rgba(30,30,30,0.8)] border border-[#444] rounded-lg px-3 py-2 text-white"
-                                        />
-                                    </div>
+                                    <FormField
+                                        type="number"
+                                        label="Fats (g)"
+                                        value={nutrition.fats || ""}
+                                        onChange={e => setNutrition({ ...nutrition, fats: parseInt(e.target.value) })}
+                                        className="mb-0"
+                                    />
+                                    <FormField
+                                        type="number"
+                                        label="Calories"
+                                        value={nutrition.calories || ""}
+                                        onChange={e => setNutrition({ ...nutrition, calories: parseInt(e.target.value) })}
+                                        className="mb-0"
+                                    />
                                 </div>
 
-                                <button
-                                    type="submit"
-                                    className="bg-[#FF6B00] text-white px-3 py-2 rounded-lg hover:bg-[#FF8800] transition-all duration-300 mt-2"
-                                >
+                                <Button type="submit" variant="orangeFilled" className="mt-2">
                                     Update Nutrition Goals
-                                </button>
+                                </Button>
                             </form>
 
                             {/* Macro distribution visualization */}
@@ -606,23 +517,7 @@ const ClientId = () => {
                         {/* Upcoming Sessions */}
                         <div className="bg-[rgba(20,20,20,0.95)] rounded-xl p-6 border border-[#333] backdrop-blur-sm">
                             <h3 className="text-xl font-semibold mb-4 flex items-center">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="#FF6B00"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="mr-2"
-                                >
-                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                                </svg>
+                                <ClockIcon size={20} stroke="#FF6B00" className="mr-2" />
                                 Upcoming Sessions
                             </h3>
 
@@ -638,23 +533,9 @@ const ClientId = () => {
                                 </div>
                             </div>
 
-                            <button className="w-full bg-[#FF6B00] text-white px-4 py-2 rounded-lg hover:bg-[#FF8800] transition-all duration-300 flex items-center justify-center gap-2">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="16"
-                                    height="16"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                                </svg>
+                            <Button variant="orangeFilled" className="w-full" leftIcon={<PlusIcon size={16} />}>
                                 Schedule New Session
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

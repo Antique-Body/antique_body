@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/common/Button";
+
 export default function ProgressPage() {
     // Sample user data
     const userData = {
@@ -107,9 +109,9 @@ export default function ProgressPage() {
                     </div>
                 </div>
 
-                <button className="w-full mt-4 bg-[rgba(255,107,0,0.15)] border border-[rgba(255,107,0,0.3)] text-[#FF6B00] py-2 px-4 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-[rgba(255,107,0,0.25)]">
+                <Button variant="orangeOutline" className="w-full mt-4">
                     Upload Progress Photo
-                </button>
+                </Button>
             </div>
 
             {/* Performance Metrics */}

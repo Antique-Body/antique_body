@@ -2,110 +2,12 @@
 
 import { Button } from "@/components/common/Button";
 import { ChevronDownIcon, MessageIcon, PlusIcon, SendIcon } from "@/components/common/Icons";
+import { ChatHistory, ConversationList } from "@/components/custom/client/dashboard/pages/messaging";
 import { BackgroundShapes } from "@/components/custom/shared";
-import { ChatHistory, ConversationList } from "@/components/custom/trainer/dashboard/pages/messaging";
 import { FormField } from "@/components/shared/FormField";
-import { useRef, useState } from "react";
 
-// Sample conversation data
-const sampleConversations = [
-    {
-        id: "1",
-        name: "John Smith",
-        avatar: "/assets/images/avatar-1.jpg",
-        lastMessage: "Looking forward to our next session!",
-        lastMessageTime: "10:42 AM",
-        unread: true,
-        isOnline: true,
-        lastActive: "Just now",
-    },
-    {
-        id: "2",
-        name: "Sarah Williams",
-        avatar: "/assets/images/avatar-2.jpg",
-        lastMessage: "My knee felt much better after our last session!",
-        lastMessageTime: "Yesterday",
-        unread: true,
-        isOnline: false,
-        lastActive: "2 hours ago",
-    },
-    {
-        id: "3",
-        name: "Mike Chen",
-        avatar: "/assets/images/avatar-3.jpg",
-        lastMessage: "I've updated my food diary for the week.",
-        lastMessageTime: "Apr 5",
-        unread: false,
-        isOnline: false,
-        lastActive: "5 hours ago",
-    },
-];
-
-// Sample messages for a conversation
-const sampleMessages = {
-    1: [
-        {
-            id: "101",
-            content: "Hi Coach, I wanted to ask about Saturday's session.",
-            time: "10:30 AM",
-            isMine: false,
-        },
-        {
-            id: "102",
-            content: "Of course, what would you like to know?",
-            time: "10:32 AM",
-            isMine: true,
-        },
-        {
-            id: "103",
-            content: "Can we move it to 11am instead of 10am?",
-            time: "10:35 AM",
-            isMine: false,
-        },
-        {
-            id: "104",
-            content: "Yes, that works for me. I'll update the schedule.",
-            time: "10:38 AM",
-            isMine: true,
-        },
-        {
-            id: "105",
-            content: "Great! Looking forward to our next session!",
-            time: "10:42 AM",
-            isMine: false,
-        },
-    ],
-};
-
-const MessagesPage = () => {
-    // States for the messaging interface
-    const [activeConversationId, setActiveConversationId] = useState(null);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [filter, setFilter] = useState("all");
-    const [newMessage, setNewMessage] = useState("");
-    const chatContainerRef = useRef(null);
-
-    // Filter conversations based on search query and filter type
-    const filteredConversations = sampleConversations.filter(conversation => {
-        const matchesSearch =
-            conversation.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            conversation.lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesFilter = filter === "all" || (filter === "unread" && conversation.unread);
-        return matchesSearch && matchesFilter;
-    });
-
-    // Get the active conversation
-    const activeConversation = activeConversationId ? sampleConversations.find(conv => conv.id === activeConversationId) : null;
-
-    // Handle sending a new message
-    const handleSendMessage = e => {
-        e.preventDefault();
-        if (newMessage.trim() === "" || !activeConversation) return;
-
-        // In a real app, this would send the message to an API
-        console.log(`Sending message to ${activeConversation?.name || "contact"}: ${newMessage}`);
-        setNewMessage("");
-    };
+export default function MessagesPage() {
+    // ... existing code ...
 
     return (
         <div className="bg-[#0a0a0a] min-h-screen relative text-white">
@@ -172,28 +74,22 @@ const MessagesPage = () => {
                                     <div className="p-4 border-b border-[#333] flex justify-between items-center">
                                         <div className="flex items-center">
                                             <div className="w-10 h-10 rounded-full bg-[#333] overflow-hidden mr-3 flex-shrink-0">
-                                                {activeConversation?.avatar ? (
-                                                    <img
-                                                        src={activeConversation.avatar}
-                                                        alt={activeConversation.name}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full bg-gray-600 flex items-center justify-center text-white font-medium">
-                                                        {activeConversation?.name?.charAt(0) || "?"}
-                                                    </div>
-                                                )}
+                                                <img
+                                                    src={activeConversation.avatar}
+                                                    alt={activeConversation.name}
+                                                    className="w-full h-full object-cover"
+                                                />
                                             </div>
                                             <div>
-                                                <div className="font-medium">{activeConversation?.name}</div>
+                                                <div className="font-medium">{activeConversation.name}</div>
                                                 <div className="text-xs text-gray-400">
-                                                    {activeConversation?.isOnline ? (
+                                                    {activeConversation.isOnline ? (
                                                         <span className="text-green-400 flex items-center">
                                                             <span className="w-2 h-2 bg-green-400 rounded-full mr-1"></span>{" "}
                                                             Online
                                                         </span>
                                                     ) : (
-                                                        <span>Last active {activeConversation?.lastActive}</span>
+                                                        <span>Last active {activeConversation.lastActive}</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -216,8 +112,9 @@ const MessagesPage = () => {
                                     {/* Messages */}
                                     <div className="p-4 overflow-y-auto flex-grow" ref={chatContainerRef}>
                                         <ChatHistory
-                                            messages={sampleMessages[activeConversationId] || []}
-                                            conversation={activeConversation}
+                                            messages={activeConversation.messages}
+                                            userName="John Doe"
+                                            otherUserName={activeConversation.name}
                                         />
                                     </div>
 
@@ -261,6 +158,4 @@ const MessagesPage = () => {
             </div>
         </div>
     );
-};
-
-export default MessagesPage;
+}

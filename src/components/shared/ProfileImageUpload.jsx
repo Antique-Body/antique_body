@@ -1,4 +1,5 @@
-import React from "react";
+import { UserProfileIcon } from "@/components/common/Icons";
+import { FormField } from "@/components/shared";
 
 /**
  * Profile image upload component
@@ -11,27 +12,15 @@ export const ProfileImageUpload = ({ previewImage, onImageUpload }) => {
                     {previewImage ? (
                         <img src={previewImage} alt="Profile preview" className="object-cover w-full h-full" />
                     ) : (
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="40"
-                            height="40"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="text-gray-400"
-                        >
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
+                        <UserProfileIcon size={40} className="text-gray-400" />
                     )}
-                    <input
+                    <FormField
                         type="file"
                         accept="image/*"
                         onChange={onImageUpload}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer hidden-file-input"
+                        id="profile-upload"
+                        name="profile-upload"
                     />
                 </div>
                 <p className="text-sm text-gray-400">Click to upload a profile picture</p>

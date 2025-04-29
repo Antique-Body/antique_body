@@ -1,6 +1,8 @@
 "use client";
 
 import { ProgressBar } from "@/components/common";
+import { Button } from "@/components/common/Button";
+import { CloseXIcon, PlusIcon } from "@/components/common/Icons";
 import {
     AddFoodModal,
     MacroDistribution,
@@ -8,6 +10,7 @@ import {
     NutritionHistory,
 } from "@/components/custom/client/dashboard/pages/nutrition/components";
 import { weeklyNutritionHistory } from "@/components/custom/client/dashboard/pages/nutrition/data/foodDatabase";
+import { FormField } from "@/components/shared";
 import { useMemo, useRef, useState } from "react";
 
 export default function NutritionPage() {
@@ -189,12 +192,9 @@ export default function NutritionPage() {
             <div className="bg-[rgba(20,20,20,0.95)] rounded-2xl p-6 z-30 backdrop-blur-lg border border-[#222] shadow-lg">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold">Nutrition Overview</h2>
-                    <button
-                        onClick={() => setShowNutritionHistory(true)}
-                        className="text-sm text-[#FF6B00] hover:text-[#FF9A00]"
-                    >
+                    <Button variant="ghostOrange" size="small" onClick={() => setShowNutritionHistory(true)}>
                         View History
-                    </button>
+                    </Button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -271,47 +271,13 @@ export default function NutritionPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <button
-                        onClick={scrollToAddMealForm}
-                        className="bg-[#FF6B00] text-white py-2 px-4 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-[#FF9A00] flex items-center justify-center gap-2"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
+                    <Button variant="orangeFilled" onClick={scrollToAddMealForm} leftIcon={<PlusIcon />}>
                         Log New Meal
-                    </button>
+                    </Button>
 
-                    <button
-                        onClick={() => setShowAddFoodModal(true)}
-                        className="bg-[rgba(255,107,0,0.15)] border border-[rgba(255,107,0,0.3)] text-[#FF6B00] py-2 px-4 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-[rgba(255,107,0,0.25)] flex items-center justify-center gap-2"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
+                    <Button variant="orangeOutline" onClick={() => setShowAddFoodModal(true)} leftIcon={<PlusIcon />}>
                         Add Food Item
-                    </button>
+                    </Button>
                 </div>
             </div>
 
@@ -329,71 +295,49 @@ export default function NutritionPage() {
                         <div ref={addMealFormRef} className="bg-[rgba(30,30,30,0.8)] p-4 rounded-xl border border-[#333]">
                             <div className="flex justify-between items-center mb-3">
                                 <h3 className="font-medium">Add New Meal</h3>
-                                <button onClick={() => setShowMealForm(false)} className="text-gray-400 hover:text-white">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="18"
-                                        height="18"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
-                                </button>
+                                <Button
+                                    variant="ghost"
+                                    size="small"
+                                    className="p-1 hover:bg-transparent"
+                                    onClick={() => setShowMealForm(false)}
+                                >
+                                    <CloseXIcon />
+                                </Button>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <label className="block text-gray-400 text-sm mb-1">Meal Name</label>
-                                    <input
-                                        type="text"
-                                        value={newMeal.name}
-                                        onChange={e => setNewMeal({ ...newMeal, name: e.target.value })}
-                                        className="w-full p-2 bg-[rgba(20,20,20,0.8)] border border-[#444] rounded text-white"
-                                        placeholder="e.g. Dinner"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-gray-400 text-sm mb-1">Time</label>
-                                    <input
-                                        type="text"
-                                        value={newMeal.time}
-                                        onChange={e => setNewMeal({ ...newMeal, time: e.target.value })}
-                                        className="w-full p-2 bg-[rgba(20,20,20,0.8)] border border-[#444] rounded text-white"
-                                        placeholder="e.g. 7:00 PM"
-                                    />
-                                </div>
+                                <FormField
+                                    label="Meal Name"
+                                    type="text"
+                                    value={newMeal.name}
+                                    onChange={e => setNewMeal({ ...newMeal, name: e.target.value })}
+                                    placeholder="e.g. Dinner"
+                                    backgroundStyle="transparent"
+                                    size="small"
+                                />
+                                <FormField
+                                    label="Time"
+                                    type="text"
+                                    value={newMeal.time}
+                                    onChange={e => setNewMeal({ ...newMeal, time: e.target.value })}
+                                    placeholder="e.g. 7:00 PM"
+                                    backgroundStyle="transparent"
+                                    size="small"
+                                />
                             </div>
 
                             <div className="mb-4">
                                 <div className="flex justify-between items-center mb-2">
                                     <label className="block text-gray-400 text-sm">Food Items</label>
-                                    <button
+                                    <Button
+                                        variant="ghostOrange"
+                                        size="small"
+                                        className="p-0 flex items-center"
                                         onClick={() => setShowAddFoodModal(true)}
-                                        className="text-[#FF6B00] text-sm hover:text-[#FF9A00] flex items-center"
                                     >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="14"
-                                            height="14"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            className="mr-1"
-                                        >
-                                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                                        </svg>
+                                        <PlusIcon size={14} className="mr-1" />
                                         Add Food
-                                    </button>
+                                    </Button>
                                 </div>
 
                                 {newMeal.items.length === 0 ? (
@@ -418,25 +362,14 @@ export default function NutritionPage() {
                                                             P: {item.protein}g | C: {item.carbs}g | F: {item.fat}g
                                                         </p>
                                                     </div>
-                                                    <button
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="small"
+                                                        className="text-gray-400 hover:text-red-500 p-0 hover:bg-transparent"
                                                         onClick={() => deleteNewMealItem(item.id)}
-                                                        className="text-gray-400 hover:text-red-500"
                                                     >
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            width="16"
-                                                            height="16"
-                                                            viewBox="0 0 24 24"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            strokeWidth="2"
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                        >
-                                                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                                                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                                                        </svg>
-                                                    </button>
+                                                        <CloseXIcon />
+                                                    </Button>
                                                 </div>
                                             </div>
                                         ))}
@@ -457,49 +390,32 @@ export default function NutritionPage() {
                             </div>
 
                             <div className="flex justify-end gap-2">
-                                <button
-                                    onClick={() => setShowMealForm(false)}
-                                    className="px-4 py-2 bg-[#333] text-white rounded hover:bg-[#444]"
-                                >
+                                <Button variant="secondary" size="small" onClick={() => setShowMealForm(false)}>
                                     Cancel
-                                </button>
-                                <button
+                                </Button>
+                                <Button
+                                    variant="orangeFilled"
+                                    size="small"
                                     onClick={handleAddMeal}
                                     disabled={!newMeal.name || !newMeal.time || newMeal.items.length === 0}
-                                    className={`px-4 py-2 ${
-                                        !newMeal.name || !newMeal.time || newMeal.items.length === 0
-                                            ? "bg-gray-600 cursor-not-allowed"
-                                            : "bg-[#FF6B00] hover:bg-[#FF9A00]"
-                                    } text-white rounded`}
                                 >
                                     Add Meal
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     )}
 
                     {/* Add More Meals Button (only shown when form is not visible) */}
                     {!showMealForm && (
-                        <button
+                        <Button
+                            variant="orangeOutline"
+                            fullWidth
+                            size="large"
                             onClick={scrollToAddMealForm}
-                            className="w-full bg-[rgba(255,107,0,0.15)] border border-[rgba(255,107,0,0.3)] text-[#FF6B00] py-3 px-4 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-[rgba(255,107,0,0.25)] flex items-center justify-center gap-2"
+                            leftIcon={<PlusIcon />}
                         >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
                             Add Another Meal
-                        </button>
+                        </Button>
                     )}
                 </div>
             </div>
@@ -522,24 +438,15 @@ export default function NutritionPage() {
                     </div>
 
                     <div className="flex justify-between gap-3">
-                        <button
-                            onClick={() => addWater(250)}
-                            className="flex-1 py-2 bg-[rgba(0,149,255,0.15)] border border-[rgba(0,149,255,0.3)] text-blue-400 rounded-lg hover:bg-[rgba(0,149,255,0.25)]"
-                        >
+                        <Button variant="blueOutline" onClick={() => addWater(250)} className="flex-1">
                             +250ml
-                        </button>
-                        <button
-                            onClick={() => addWater(500)}
-                            className="flex-1 py-2 bg-[rgba(0,149,255,0.15)] border border-[rgba(0,149,255,0.3)] text-blue-400 rounded-lg hover:bg-[rgba(0,149,255,0.25)]"
-                        >
+                        </Button>
+                        <Button variant="blueOutline" onClick={() => addWater(500)} className="flex-1">
                             +500ml
-                        </button>
-                        <button
-                            onClick={() => addWater(750)}
-                            className="flex-1 py-2 bg-[rgba(0,149,255,0.15)] border border-[rgba(0,149,255,0.3)] text-blue-400 rounded-lg hover:bg-[rgba(0,149,255,0.25)]"
-                        >
+                        </Button>
+                        <Button variant="blueOutline" onClick={() => addWater(750)} className="flex-1">
                             +750ml
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -555,12 +462,9 @@ export default function NutritionPage() {
                     <MacroDistribution protein={totals.protein * 4} carbs={totals.carbs * 4} fat={totals.fat * 9} />
                 </div>
 
-                <button
-                    onClick={() => setShowNutritionHistory(true)}
-                    className="w-full bg-[rgba(255,107,0,0.15)] border border-[rgba(255,107,0,0.3)] text-[#FF6B00] py-2 px-4 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-[rgba(255,107,0,0.25)]"
-                >
+                <Button variant="orangeOutline" fullWidth onClick={() => setShowNutritionHistory(true)}>
                     View Detailed Nutrition History
-                </button>
+                </Button>
             </div>
 
             {/* Add Food Modal */}

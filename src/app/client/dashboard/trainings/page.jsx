@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/common/Button";
 import { useState } from "react";
 
 export default function TrainingsPage() {
@@ -98,12 +99,12 @@ export default function TrainingsPage() {
                                     <p className="text-gray-300">{training.notes}</p>
 
                                     <div className="flex space-x-3 mt-4">
-                                        <button className="flex-1 bg-[#FF6B00] text-white py-2 px-4 rounded-lg text-sm transition-all duration-300 hover:bg-[#FF9A00]">
+                                        <Button variant="orangeFilled" className="flex-1">
                                             Confirm Attendance
-                                        </button>
-                                        <button className="flex-1 bg-[rgba(255,107,0,0.15)] border border-[rgba(255,107,0,0.3)] text-[#FF6B00] py-2 px-4 rounded-lg text-sm transition-all duration-300 hover:bg-[rgba(255,107,0,0.25)]">
+                                        </Button>
+                                        <Button variant="orangeOutline" className="flex-1">
                                             Reschedule
-                                        </button>
+                                        </Button>
                                     </div>
                                 </div>
                             </div>
@@ -146,9 +147,9 @@ export default function TrainingsPage() {
                     ))}
                 </div>
 
-                <button className="w-full mt-4 bg-[rgba(255,107,0,0.15)] border border-[rgba(255,107,0,0.3)] text-[#FF6B00] py-2 px-4 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-[rgba(255,107,0,0.25)]">
+                <Button variant="orangeOutline" fullWidth>
                     View Training History
-                </button>
+                </Button>
             </div>
         </div>
     );

@@ -1,6 +1,6 @@
 "use client";
+import { UserProfileIcon } from "@/components/common/Icons";
 import { FormField, RegistrationStep } from "@/components/shared";
-
 export const ProfileContactStep = ({
     formData,
     onChange,
@@ -9,6 +9,11 @@ export const ProfileContactStep = ({
     userType = "client",
     showTerms = true,
 }) => {
+    const handleTermsChange = e => {
+        // This prevents the checkbox from submitting the form
+        e.stopPropagation();
+    };
+
     return (
         <div className="space-y-6">
             <RegistrationStep title="Profile Picture">
@@ -17,40 +22,24 @@ export const ProfileContactStep = ({
                         {previewImage ? (
                             <img src={previewImage} alt="Profile preview" className="w-full h-full object-cover" />
                         ) : (
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="40"
-                                height="40"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="#666"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
+                            <UserProfileIcon size={40} className="text-gray-400" />
                         )}
                     </div>
 
                     <div className="flex-1">
-                        <p className="text-sm text-gray-400 mb-3">
-                            {userType === "trainer" ? "Upload a professional photo for your profile" : "Upload a profile photo"}
-                        </p>
-                        <input
+                        <FormField
                             type="file"
+                            id="profile-image"
+                            name="profileImage"
                             accept="image/*"
                             onChange={handleImageUpload}
-                            className="hidden"
-                            id="profile-image"
+                            subLabel={
+                                userType === "trainer"
+                                    ? "Upload a professional photo for your profile"
+                                    : "Upload a profile photo"
+                            }
+                            className="mb-0"
                         />
-                        <label
-                            htmlFor="profile-image"
-                            className="cursor-pointer py-2 px-4 bg-[#333] hover:bg-[#444] transition-colors rounded-lg inline-block"
-                        >
-                            Choose Image
-                        </label>
                     </div>
                 </div>
 
@@ -96,16 +85,14 @@ export const ProfileContactStep = ({
 
                 {showTerms && (
                     <div className="flex items-center mt-4">
-                        <input
+                        <FormField
                             type="checkbox"
                             id="termsCheck"
-                            className="w-4 h-4 text-[#FF6B00] bg-[#1a1a1a] border-[#333] rounded focus:ring-[#FF6B00] focus:ring-opacity-25"
-                            onChange={(e) => {
-                                // This prevents the checkbox from submitting the form
-                                e.stopPropagation();
-                            }}
+                            name="terms"
+                            onChange={handleTermsChange}
+                            className="w-4 h-4 mr-2"
                         />
-                        <label htmlFor="termsCheck" className="ml-2 text-sm text-gray-300">
+                        <label htmlFor="termsCheck" className="text-sm text-gray-300">
                             I agree to the{" "}
                             <a href="#" className="text-[#FF6B00] underline">
                                 Terms of Service

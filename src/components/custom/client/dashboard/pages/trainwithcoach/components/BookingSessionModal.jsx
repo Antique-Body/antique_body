@@ -1,3 +1,5 @@
+import { Button } from "@/components/common/Button";
+import { CloseXIcon, MonitorIcon, ProgressChartIcon, UserProfileIcon } from "@/components/common/Icons";
 import { useState } from "react";
 
 export const BookingSessionModal = ({ trainer, onClose }) => {
@@ -39,24 +41,24 @@ export const BookingSessionModal = ({ trainer, onClose }) => {
     };
 
     // Format date for display
-    const formatDate = (date) => {
+    const formatDate = date => {
         if (!date) return "";
         const options = { weekday: "short", day: "numeric", month: "short", year: "numeric" };
         return date.toLocaleDateString("en-US", options);
     };
 
     // Handle date selection
-    const handleDateSelect = (date) => {
+    const handleDateSelect = date => {
         setSelectedDate(date);
     };
 
     // Handle time selection
-    const handleTimeSelect = (time) => {
+    const handleTimeSelect = time => {
         setSelectedTime(time);
     };
 
     // Check if date is today
-    const isToday = (date) => {
+    const isToday = date => {
         const today = new Date();
         return (
             date.getDate() === today.getDate() &&
@@ -110,25 +112,13 @@ export const BookingSessionModal = ({ trainer, onClose }) => {
                 <div className="h-1 w-full bg-gradient-to-r from-[#FF6B00] to-[#FF9A00]"></div>
 
                 {/* Close button */}
-                <button
+                <Button
+                    variant="ghost"
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors duration-200 z-10"
+                    className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors duration-200 z-10 p-0"
                 >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    >
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
+                    <CloseXIcon size={24} />
+                </Button>
 
                 {/* Modal header */}
                 <div className="p-6 border-b border-[#333]">
@@ -214,8 +204,8 @@ export const BookingSessionModal = ({ trainer, onClose }) => {
                                                 selectedTime === slot.time
                                                     ? "bg-[#FF6B00] text-white"
                                                     : slot.available
-                                                    ? "bg-[rgba(30,30,30,0.8)] border border-[#444] hover:border-[#FF6B00] hover:-translate-y-1 text-white"
-                                                    : "bg-[rgba(20,20,20,0.5)] border border-[#333] text-gray-500 cursor-not-allowed"
+                                                      ? "bg-[rgba(30,30,30,0.8)] border border-[#444] hover:border-[#FF6B00] hover:-translate-y-1 text-white"
+                                                      : "bg-[rgba(20,20,20,0.5)] border border-[#333] text-gray-500 cursor-not-allowed"
                                             }`}
                                         >
                                             {slot.time}
@@ -245,22 +235,11 @@ export const BookingSessionModal = ({ trainer, onClose }) => {
                                     }`}
                                 >
                                     <div className="flex items-center gap-2 mb-1">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="16"
-                                            height="16"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
+                                        <ProgressChartIcon
+                                            size={16}
                                             stroke={sessionType === "in-person" ? "#FF6B00" : "currentColor"}
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
                                             className="text-gray-300"
-                                        >
-                                            <path d="M18 20V10"></path>
-                                            <path d="M12 20V4"></path>
-                                            <path d="M6 20v-6"></path>
-                                        </svg>
+                                        />
                                         <h4
                                             className={`font-medium ${
                                                 sessionType === "in-person" ? "text-[#FF6B00]" : "text-white"
@@ -281,22 +260,11 @@ export const BookingSessionModal = ({ trainer, onClose }) => {
                                     }`}
                                 >
                                     <div className="flex items-center gap-2 mb-1">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="16"
-                                            height="16"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
+                                        <MonitorIcon
+                                            size={16}
                                             stroke={sessionType === "virtual" ? "#FF6B00" : "currentColor"}
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
                                             className="text-gray-300"
-                                        >
-                                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                                            <line x1="8" y1="21" x2="16" y2="21"></line>
-                                            <line x1="12" y1="17" x2="12" y2="21"></line>
-                                        </svg>
+                                        />
                                         <h4
                                             className={`font-medium ${
                                                 sessionType === "virtual" ? "text-[#FF6B00]" : "text-white"
@@ -314,7 +282,7 @@ export const BookingSessionModal = ({ trainer, onClose }) => {
                         <div className="mb-5">
                             <label className="block text-gray-300 text-sm mb-2">Session Length</label>
                             <div className="grid grid-cols-3 gap-3">
-                                {[30, 60, 90].map((minutes) => (
+                                {[30, 60, 90].map(minutes => (
                                     <div
                                         key={minutes}
                                         onClick={() => setSessionLength(minutes)}
@@ -335,7 +303,7 @@ export const BookingSessionModal = ({ trainer, onClose }) => {
                             <label className="block text-gray-300 text-sm mb-2">Notes for Trainer (Optional)</label>
                             <textarea
                                 value={notes}
-                                onChange={(e) => setNotes(e.target.value)}
+                                onChange={e => setNotes(e.target.value)}
                                 className="w-full py-3 px-4 bg-[rgba(30,30,30,0.8)] border border-[#444] rounded-lg text-white text-sm transition-all duration-300 focus:outline-none focus:border-[#FF6B00] min-h-[100px]"
                                 placeholder="Mention any specific goals, concerns, or questions..."
                             ></textarea>
@@ -352,20 +320,7 @@ export const BookingSessionModal = ({ trainer, onClose }) => {
                             <div className="flex items-start gap-4 mb-4">
                                 {/* Trainer avatar */}
                                 <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-[#FF6B00] to-[#FF9A00] flex-shrink-0 flex justify-center items-center text-white overflow-hidden">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="40"
-                                        height="40"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="white"
-                                        strokeWidth="1.5"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                        <circle cx="12" cy="7" r="4"></circle>
-                                    </svg>
+                                    <UserProfileIcon size={40} />
                                 </div>
 
                                 <div>
@@ -429,40 +384,44 @@ export const BookingSessionModal = ({ trainer, onClose }) => {
                 {/* Modal footer */}
                 <div className="border-t border-[#333] p-5 flex justify-between">
                     {step > 1 ? (
-                        <button
+                        <Button
+                            variant="secondary"
                             onClick={handleBack}
-                            className="py-2.5 px-6 rounded-lg font-medium cursor-pointer transition-all duration-300 bg-transparent border border-[#444] text-white hover:border-[#FF6B00]"
+                            className="py-2.5 px-6 rounded-lg font-medium cursor-pointer transition-all duration-300"
                         >
                             Back
-                        </button>
+                        </Button>
                     ) : (
-                        <button
+                        <Button
+                            variant="secondary"
                             onClick={onClose}
-                            className="py-2.5 px-6 rounded-lg font-medium cursor-pointer transition-all duration-300 bg-transparent border border-[#444] text-white hover:border-[#FF6B00]"
+                            className="py-2.5 px-6 rounded-lg font-medium cursor-pointer transition-all duration-300"
                         >
                             Cancel
-                        </button>
+                        </Button>
                     )}
 
                     {step < 3 ? (
-                        <button
+                        <Button
+                            variant="orangeFilled"
                             onClick={handleNext}
                             disabled={step === 1 && (!selectedDate || !selectedTime)}
                             className={`py-2.5 px-6 rounded-lg font-medium cursor-pointer transition-all duration-300 ${
                                 step === 1 && (!selectedDate || !selectedTime)
-                                    ? "bg-[rgba(255,107,0,0.3)] text-white/50 cursor-not-allowed"
-                                    : "bg-[#FF6B00] text-white hover:bg-[#E66000] hover:shadow-lg hover:-translate-y-0.5"
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : "hover:-translate-y-0.5"
                             }`}
                         >
                             Next
-                        </button>
+                        </Button>
                     ) : (
-                        <button
+                        <Button
+                            variant="orangeFilled"
                             onClick={handleBookSession}
-                            className="py-2.5 px-6 rounded-lg font-medium cursor-pointer transition-all duration-300 bg-[#FF6B00] text-white hover:bg-[#E66000] hover:shadow-lg hover:-translate-y-0.5"
+                            className="py-2.5 px-6 rounded-lg font-medium cursor-pointer transition-all duration-300 hover:-translate-y-0.5"
                         >
                             Confirm Booking
-                        </button>
+                        </Button>
                     )}
                 </div>
             </div>

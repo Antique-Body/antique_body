@@ -1,15 +1,16 @@
 "use client";
+import Background from "@/components/background";
+import { Button, StepProgressBar } from "@/components/common";
+import { Footer } from "@/components/common/Footer";
+import { ArrowRight } from "@/components/common/Icons";
+import { AntiqueBodyLogo } from "@/components/custom/BrandLogo";
+import { TipsSection } from "@/components/custom/shared/TipsSection";
 import {
     BasicInfoStep,
     ProfessionalDetailsStep,
     ProfileAndContactStep,
     VenuesAndSpecialtiesStep,
-} from "@/app/trainer/personal-details/steps";
-import Background from "@/components/background";
-import { Button, StepProgressBar } from "@/components/common";
-import { Footer } from "@/components/common/Footer";
-import { AntiqueBodyLogo } from "@/components/custom/BrandLogo";
-import { TipsSection } from "@/components/custom/shared/TipsSection";
+} from "@/components/custom/trainer/personal-details/steps";
 import { useState } from "react";
 
 const TrainerRegistration = () => {
@@ -65,7 +66,7 @@ const TrainerRegistration = () => {
     ];
 
     // Handle form input changes
-    const handleChange = (e) => {
+    const handleChange = e => {
         const { name, value } = e.target;
 
         if (name.includes(".")) {
@@ -87,11 +88,11 @@ const TrainerRegistration = () => {
     };
 
     // Handle sports selection toggle
-    const handleSportToggle = (sport) => {
+    const handleSportToggle = sport => {
         if (formData.sports.includes(sport)) {
             setFormData({
                 ...formData,
-                sports: formData.sports.filter((s) => s !== sport),
+                sports: formData.sports.filter(s => s !== sport),
             });
         } else {
             setFormData({
@@ -103,13 +104,13 @@ const TrainerRegistration = () => {
 
     // Handle certification fields
     const handleCertChange = (id, value) => {
-        const updatedFields = certFields.map((field) => (field.id === id ? { ...field, value } : field));
+        const updatedFields = certFields.map(field => (field.id === id ? { ...field, value } : field));
         setCertFields(updatedFields);
 
         // Update form data with certification values
         setFormData({
             ...formData,
-            certifications: updatedFields.map((field) => field.value).filter((value) => value !== ""),
+            certifications: updatedFields.map(field => field.value).filter(value => value !== ""),
         });
     };
 
@@ -120,28 +121,28 @@ const TrainerRegistration = () => {
     };
 
     // Remove certification field
-    const removeCertField = (id) => {
+    const removeCertField = id => {
         if (certFields.length > 1) {
-            const updatedFields = certFields.filter((field) => field.id !== id);
+            const updatedFields = certFields.filter(field => field.id !== id);
             setCertFields(updatedFields);
 
             // Update form data
             setFormData({
                 ...formData,
-                certifications: updatedFields.map((field) => field.value).filter((value) => value !== ""),
+                certifications: updatedFields.map(field => field.value).filter(value => value !== ""),
             });
         }
     };
 
     // Handle venue fields
     const handleVenueChange = (id, value) => {
-        const updatedFields = venueFields.map((field) => (field.id === id ? { ...field, value } : field));
+        const updatedFields = venueFields.map(field => (field.id === id ? { ...field, value } : field));
         setVenueFields(updatedFields);
 
         // Update form data with venue values
         setFormData({
             ...formData,
-            trainingVenues: updatedFields.map((field) => field.value).filter((value) => value !== ""),
+            trainingVenues: updatedFields.map(field => field.value).filter(value => value !== ""),
         });
     };
 
@@ -152,21 +153,21 @@ const TrainerRegistration = () => {
     };
 
     // Remove venue field
-    const removeVenueField = (id) => {
+    const removeVenueField = id => {
         if (venueFields.length > 1) {
-            const updatedFields = venueFields.filter((field) => field.id !== id);
+            const updatedFields = venueFields.filter(field => field.id !== id);
             setVenueFields(updatedFields);
 
             // Update form data
             setFormData({
                 ...formData,
-                trainingVenues: updatedFields.map((field) => field.value).filter((value) => value !== ""),
+                trainingVenues: updatedFields.map(field => field.value).filter(value => value !== ""),
             });
         }
     };
 
     // Handle image upload
-    const handleImageUpload = (e) => {
+    const handleImageUpload = e => {
         const file = e.target.files[0];
         if (file) {
             setFormData({
@@ -184,21 +185,21 @@ const TrainerRegistration = () => {
     };
 
     // Handle form submission
-    const handleSubmit = (e) => {
+    const handleSubmit = e => {
         e.preventDefault();
         console.log("Submitting profile data:", formData);
         window.location.href = "/trainer/dashboard";
     };
 
     // Move to next step
-    const goToNextStep = (e) => {
+    const goToNextStep = e => {
         e.preventDefault();
         setStep(step + 1);
         window.scrollTo(0, 0);
     };
 
     // Move to previous step
-    const goToPrevStep = (e) => {
+    const goToPrevStep = e => {
         e.preventDefault();
         setStep(step - 1);
         window.scrollTo(0, 0);
@@ -282,25 +283,7 @@ const TrainerRegistration = () => {
                                     Continue
                                 </Button>
                             ) : (
-                                <Button
-                                    type="submit"
-                                    rightIcon={
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="20"
-                                            height="20"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                        >
-                                            <path d="M5 12h14"></path>
-                                            <path d="m12 5 7 7-7 7"></path>
-                                        </svg>
-                                    }
-                                >
+                                <Button type="submit" rightIcon={<ArrowRight size={20} />}>
                                     Complete Profile
                                 </Button>
                             )}

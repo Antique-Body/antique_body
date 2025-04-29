@@ -1,3 +1,4 @@
+import { Button } from "@/components/common/Button";
 import { useState } from "react";
 
 export const Availability = ({ trainer }) => {
@@ -28,13 +29,13 @@ export const Availability = ({ trainer }) => {
     ];
 
     // Format date for display
-    const formatDate = (date) => {
+    const formatDate = date => {
         const options = { weekday: "short", day: "numeric" };
         return date.toLocaleDateString("en-US", options);
     };
 
     // Check if date is today
-    const isToday = (date) => {
+    const isToday = date => {
         const today = new Date();
         return (
             date.getDate() === today.getDate() &&
@@ -44,7 +45,7 @@ export const Availability = ({ trainer }) => {
     };
 
     // Handle date selection
-    const handleDateSelect = (date) => {
+    const handleDateSelect = date => {
         setSelectedDate(date);
     };
 
@@ -129,18 +130,10 @@ export const Availability = ({ trainer }) => {
             </div>
 
             <div className="pt-2">
-                <button
-                    className={`w-full py-3 px-4 rounded-lg font-medium cursor-pointer transition-all duration-300 ${
-                        selectedDate
-                            ? "bg-[#FF6B00] text-white hover:bg-[#E66000] hover:shadow-lg hover:-translate-y-0.5"
-                            : "bg-[rgba(255,107,0,0.3)] text-white/50 cursor-not-allowed"
-                    }`}
-                    disabled={!selectedDate}
-                >
+                <Button variant={selectedDate ? "primary" : "orangeOutline"} size="large" disabled={!selectedDate} fullWidth>
                     Book Session
-                </button>
+                </Button>
             </div>
         </div>
     );
 };
-

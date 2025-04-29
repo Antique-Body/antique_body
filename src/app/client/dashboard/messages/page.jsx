@@ -1,5 +1,8 @@
 "use client";
 
+import { Button } from "@/components/common/Button";
+import { MessageIcon, SendIcon } from "@/components/common/Icons";
+import { FormField } from "@/components/shared";
 import { useState } from "react";
 
 export default function MessagesPage() {
@@ -47,7 +50,10 @@ export default function MessagesPage() {
         <div className="space-y-6">
             {/* Messages List */}
             <div className="bg-[rgba(20,20,20,0.95)] rounded-2xl p-6 backdrop-blur-lg border border-[#222] shadow-lg">
-                <h2 className="text-xl font-bold mb-6">Messages</h2>
+                <h2 className="text-xl font-bold mb-6 flex items-center">
+                    <MessageIcon className="mr-2" stroke="#FF6B00" />
+                    Messages
+                </h2>
 
                 <div className="space-y-4">
                     {userData.messages.map(message => (
@@ -85,27 +91,20 @@ export default function MessagesPage() {
             >
                 <h3 className="text-lg font-medium mb-4">Send Message</h3>
                 <div className="space-y-4">
-                    <div>
-                        <label htmlFor="message" className="block text-sm font-medium mb-2">
-                            Message
-                        </label>
-                        <textarea
-                            id="message"
-                            rows="4"
-                            value={newMessage}
-                            onChange={e => setNewMessage(e.target.value)}
-                            className="w-full bg-[#222] border border-[#333] rounded-lg p-3 text-gray-200 focus:ring-[#FF6B00] focus:border-[#FF6B00]"
-                            placeholder="Type your message here..."
-                        ></textarea>
-                    </div>
+                    <FormField
+                        label="Message"
+                        type="textarea"
+                        id="message"
+                        rows={4}
+                        value={newMessage}
+                        onChange={e => setNewMessage(e.target.value)}
+                        placeholder="Type your message here..."
+                        backgroundStyle="dark"
+                    />
                     <div className="flex justify-end">
-                        <button
-                            type="submit"
-                            className="px-4 py-2 bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] rounded-lg font-medium hover:from-[#FF9A00] hover:to-[#FFB700] transition-all disabled:opacity-50"
-                            disabled={!newMessage.trim()}
-                        >
+                        <Button type="submit" variant="primary" disabled={!newMessage.trim()} rightIcon={<SendIcon />}>
                             Send Message
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </form>
