@@ -54,21 +54,41 @@ enum InjuryType {
 }
 
 enum InjuryLocation {
+  // Front View
+  head
   neck
+  chest
   shoulder_l
   shoulder_r
-  back_upper
-  back_lower
-  elbow_l
-  elbow_r
-  wrist_l
-  wrist_r
+  bicep_l
+  bicep_r
+  forearm_l
+  forearm_r
+  abdomen
   hip_l
   hip_r
+  quad_l
+  quad_r
   knee_l
   knee_r
   ankle_l
   ankle_r
+
+  // Back View
+  upper_back
+  lower_back
+  back_shoulder_l
+  back_shoulder_r
+  tricep_l
+  tricep_r
+  glute_l
+  glute_r
+  hamstring_l
+  hamstring_r
+  calf_back_l
+  calf_back_r
+  achilles_l
+  achilles_r
 }
 
 // Simple User model for authentication

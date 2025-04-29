@@ -63,7 +63,6 @@ CREATE TABLE `UserPreferences` (
     `userId` VARCHAR(191) NOT NULL,
     `hasInjury` BOOLEAN NOT NULL DEFAULT false,
     `injuryType` ENUM('no', 'past', 'current', 'chronic') NULL,
-    `injuryLocations` TEXT NULL,
     `wantsRehabilitation` ENUM('yes', 'no') NULL,
     `environment` ENUM('gym', 'outside') NOT NULL,
     `equipment` ENUM('with_equipment', 'no_equipment') NOT NULL,
@@ -73,6 +72,7 @@ CREATE TABLE `UserPreferences` (
     `weight` DOUBLE NOT NULL,
     `height` DOUBLE NOT NULL,
     `bmi` DOUBLE NOT NULL,
+    `bmiCategory` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -82,6 +82,29 @@ CREATE TABLE `UserPreferences` (
     INDEX `UserPreferences_experience_idx`(`experience`),
     INDEX `UserPreferences_goal_idx`(`goal`),
     INDEX `UserPreferences_frequency_idx`(`frequency`),
+    INDEX `UserPreferences_hasInjury_idx`(`hasInjury`),
+    INDEX `UserPreferences_injuryType_idx`(`injuryType`),
+    INDEX `UserPreferences_bmi_idx`(`bmi`),
+    INDEX `UserPreferences_bmiCategory_idx`(`bmiCategory`),
+    INDEX `UserPreferences_wantsRehabilitation_idx`(`wantsRehabilitation`),
+    INDEX `UserPreferences_weight_idx`(`weight`),
+    INDEX `UserPreferences_height_idx`(`height`),
+    INDEX `UserPreferences_createdAt_idx`(`createdAt`),
+    INDEX `UserPreferences_hasInjury_injuryType_idx`(`hasInjury`, `injuryType`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `UserInjuryLocation` (
+    `id` VARCHAR(191) NOT NULL,
+    `userPreferencesId` VARCHAR(191) NOT NULL,
+    `location` ENUM('head', 'neck', 'chest', 'shoulder_l', 'shoulder_r', 'bicep_l', 'bicep_r', 'forearm_l', 'forearm_r', 'abdomen', 'hip_l', 'hip_r', 'quad_l', 'quad_r', 'knee_l', 'knee_r', 'ankle_l', 'ankle_r', 'upper_back', 'lower_back', 'back_shoulder_l', 'back_shoulder_r', 'tricep_l', 'tricep_r', 'glute_l', 'glute_r', 'hamstring_l', 'hamstring_r', 'calf_back_l', 'calf_back_r', 'achilles_l', 'achilles_r') NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `UserInjuryLocation_location_idx`(`location`),
+    INDEX `UserInjuryLocation_userPreferencesId_idx`(`userPreferencesId`),
+    INDEX `UserInjuryLocation_location_userPreferencesId_idx`(`location`, `userPreferencesId`),
+    UNIQUE INDEX `UserInjuryLocation_userPreferencesId_location_key`(`userPreferencesId`, `location`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -93,3 +116,6 @@ ALTER TABLE `Session` ADD CONSTRAINT `Session_userId_fkey` FOREIGN KEY (`userId`
 
 -- AddForeignKey
 ALTER TABLE `UserPreferences` ADD CONSTRAINT `UserPreferences_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `UserInjuryLocation` ADD CONSTRAINT `UserInjuryLocation_userPreferencesId_fkey` FOREIGN KEY (`userPreferencesId`) REFERENCES `UserPreferences`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
