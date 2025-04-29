@@ -25,18 +25,31 @@ const validators = {
       bmi > 0
     );
   },
-  hasInjury: (value) => ["no", "past", "current", "chronic"].includes(value),
+  hasInjury: (value) => {
+    if (typeof value === 'boolean') return true;
+    return ["no", "past", "current", "chronic"].includes(value);
+  },
   wantsRehabilitation: (value) => value === null || value === undefined || value === "yes" || value === "no",
   injuryLocations: (value, hasInjury) => {
-    if (hasInjury === "no") return true;
+    if (hasInjury === "no" || hasInjury === false) return true;
     try {
       if (!value) return false;
-      if (typeof value === "string") {
-        const parsed = JSON.parse(value);
-        return Array.isArray(parsed);
-      }
-      return Array.isArray(value);
+      const locations = typeof value === "string" ? JSON.parse(value) : value;
+      if (!Array.isArray(locations)) return false;
+      
+      // Validate each location is a valid injury location
+      const validLocations = [
+        'neck', 'shoulder_l', 'shoulder_r', 'back_upper', 'back_lower',
+        'elbow_l', 'elbow_r', 'wrist_l', 'wrist_r', 'hip_l', 'hip_r',
+        'knee_l', 'knee_r', 'ankle_l', 'ankle_r'
+      ];
+      
+      return locations.every(loc => 
+        typeof loc === 'string' && 
+        validLocations.includes(loc.trim())
+      );
     } catch (e) {
+      console.error('Error validating injury locations:', e);
       return false;
     }
   }
@@ -71,7 +84,7 @@ const extractAndValidateData = (body) => {
   const bmi = measurements?.bmi || body.bmi;
 
   // Convert hasInjury to boolean for database
-  const hasInjuryBool = hasInjury !== "no";
+  const hasInjuryBool = typeof hasInjury === 'boolean' ? hasInjury : hasInjury !== "no";
   
   // Validate all required fields
   if (!weight || !height || !bmi || !environment || !equipment || !experience || !goal || !frequency) {
@@ -90,7 +103,7 @@ const extractAndValidateData = (body) => {
 
   // Validate injuryLocations if hasInjury is true
   if (hasInjuryBool && !validators.injuryLocations(injuryLocations, hasInjury)) {
-    return { error: "Invalid injury locations", details: "Must be an array" };
+    return { error: "Invalid injury locations", details: "Must be an array of valid injury locations" };
   }
 
   // Validate enum values
@@ -119,17 +132,13 @@ const extractAndValidateData = (body) => {
     return { error: "Invalid measurement values" };
   }
 
-  // Prepare injury locations
-  let formattedInjuryLocations = null;
-  if (hasInjuryBool && injuryLocations) {
-    try {
-      formattedInjuryLocations = typeof injuryLocations === 'string' 
-        ? injuryLocations 
-        : JSON.stringify(injuryLocations);
-    } catch (e) {
-      return { error: "Invalid injury locations format" };
-    }
-  }
+  // Calculate BMI category
+  const calculateBMICategory = (bmi) => {
+    if (bmi < 18.5) return "underweight";
+    if (bmi < 25) return "normal";
+    if (bmi < 30) return "overweight";
+    return "obese";
+  };
 
   // Return validated data
   return {
@@ -137,14 +146,17 @@ const extractAndValidateData = (body) => {
       weight: Number(weight),
       height: Number(height),
       bmi: Number(bmi.toFixed(2)),
+      bmiCategory: calculateBMICategory(bmi),
       environment,
       equipment,
       experience,
       goal,
       frequency: parseInt(frequency, 10),
       hasInjury: hasInjuryBool,
-      injuryType: hasInjury,
-      injuryLocations: formattedInjuryLocations,
+      injuryType: hasInjury === true ? "chronic" : hasInjury,
+      injuryLocations: hasInjuryBool && injuryLocations 
+        ? [...new Set(injuryLocations)].sort() // Remove duplicates and sort
+        : [],
       wantsRehabilitation: hasInjuryBool ? wantsRehabilitation : null
     }
   };
@@ -153,17 +165,52 @@ const extractAndValidateData = (body) => {
 // Save user preferences to database
 const saveUserPreferences = async (userId, data) => {
   try {
-    return await prisma.userPreferences.upsert({
-      where: { userId },
-      update: data,
-      create: {
-        userId,
-        ...data
-      },
+    const { injuryLocations, ...preferencesData } = data;
+    
+    // Use a transaction to ensure all operations succeed or fail together
+    return await prisma.$transaction(async (tx) => {
+      // Create or update user preferences
+      const preferences = await tx.userPreferences.upsert({
+        where: { userId },
+        update: preferencesData,
+        create: {
+          userId,
+          ...preferencesData
+        },
+      });
+
+      // If user has injuries, handle injury locations
+      if (data.hasInjury && injuryLocations?.length > 0) {
+        // Delete existing injury locations
+        await tx.userInjuryLocation.deleteMany({
+          where: { userPreferencesId: preferences.id }
+        });
+
+        // Create new injury locations
+        await tx.userInjuryLocation.createMany({
+          data: injuryLocations.map(location => ({
+            userPreferencesId: preferences.id,
+            location: location
+          }))
+        });
+      }
+
+      // Return preferences with injuries included
+      return tx.userPreferences.findUnique({
+        where: { id: preferences.id },
+        include: {
+          injuries: {
+            select: {
+              location: true
+            }
+          }
+        }
+      });
     });
   } catch (error) {
-    console.error("Database error:", error);
-    throw new Error("Failed to save user preferences");
+    console.error("Database error details:", error);
+    console.error("Error stack:", error.stack);
+    throw new Error(`Failed to save user preferences: ${error.message}`);
   }
 };
 

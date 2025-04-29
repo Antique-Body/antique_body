@@ -28,8 +28,7 @@ export default function LoginPage() {
         throw new Error(result.error);
       }
 
-      // Let the middleware handle the redirect based on user role
-      router.push("/");
+      router.push("/select-role");
     } catch (err) {
       console.error("Login - Error:", err);
       setError(err.message);

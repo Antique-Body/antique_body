@@ -185,20 +185,32 @@ export const MeasurementsInput = ({ onSelect }) => {
         ? heightValue 
         : heightValue * CONVERSION_FACTORS.HEIGHT.IMPERIAL_TO_METRIC * 100;
 
-      onSelect({
+      // Only call onSelect if the values have actually changed
+      const newMeasurements = {
         weight: unitSystem === UNIT_SYSTEMS.METRIC ? weightValue : weightValue * CONVERSION_FACTORS.WEIGHT.IMPERIAL_TO_METRIC,
         height: heightInCm,
         bmi: bmiValue,
         isValid: newIsValid,
-      });
+      };
+
+      // Check if the new measurements are different from the previous ones
+      const prevMeasurementsStr = JSON.stringify(prevMeasurements.current);
+      const newMeasurementsStr = JSON.stringify(newMeasurements);
+      
+      if (prevMeasurementsStr !== newMeasurementsStr) {
+        onSelect(newMeasurements);
+      }
     } else {
       setBmi(null);
       setBmiCategory(null);
-      onSelect(null);
+      // Only call onSelect with null if we previously had valid measurements
+      if (prevMeasurements.current.isValid) {
+        onSelect(null);
+      }
     }
 
     // Update refs with current values
-    prevMeasurements.current = measurements;
+    prevMeasurements.current = { ...measurements, isValid: newIsValid };
     prevUnitSystem.current = unitSystem;
     prevTouched.current = touched;
   }, [measurements, unitSystem, touched, onSelect]);

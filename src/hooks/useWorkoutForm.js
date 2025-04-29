@@ -1,5 +1,5 @@
 import { stepConfig, TOTAL_STEPS } from "@/app/utils";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 
 export const useWorkoutForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -15,24 +15,103 @@ export const useWorkoutForm = () => {
     measurements: null,
   });
 
-  const handleSelection = (field, value) => {
-    setUserSelections({
-      ...userSelections,
-      [field]: value,
+  // Use refs to track previous values and prevent unnecessary updates
+  const prevSelectionsRef = useRef(userSelections);
+  const prevStepRef = useRef(currentStep);
+
+  // Determine if a step should be skipped based on dependencies
+  const shouldSkipStep = useCallback((step) => {
+    // If the step depends on another field
+    if (step.dependsOn) {
+      const { field, value, values } = step.dependsOn;
+      
+      // For injury-related steps, we need to check if the user has any injuries
+      if (field === "hasInjury") {
+        // If the step should only show for certain injury types
+        if (values && Array.isArray(values)) {
+          return !values.includes(userSelections[field]);
+        }
+        
+        // If there's a specific value to check against
+        if (value !== undefined) {
+          return userSelections[field] !== value;
+        }
+      }
+      
+      // For other dependencies
+      if (values && Array.isArray(values)) {
+        return !values.includes(userSelections[field]);
+      }
+      
+      return userSelections[field] !== value;
+    }
+    return false;
+  }, [userSelections]);
+
+  const handleSelection = useCallback((field, value) => {
+    setUserSelections(prevSelections => {
+      // If the value is the same as current, don't update
+      if (prevSelections[field] === value) {
+        return prevSelections;
+      }
+      
+      // Create a new object for the update
+      const newSelections = { ...prevSelections };
+
+      // Special handling for injury locations
+      if (field === "injuryLocations") {
+        newSelections[field] = value;
+      }
+      // Special handling for hasInjury
+      else if (field === "hasInjury") {
+        // Always update the hasInjury field
+        newSelections[field] = value;
+        
+        // Only reset related fields when changing to "no"
+        if (value === "no") {
+          newSelections.injuryLocations = [];
+          newSelections.wantsRehabilitation = null;
+        }
+      }
+      // Normal field update
+      else {
+        newSelections[field] = value;
+      }
+
+      // Update the ref with the new state
+      prevSelectionsRef.current = newSelections;
+      return newSelections;
     });
-  };
+  }, []);
 
-  const goToNextStep = () => {
+  const goToNextStep = useCallback(() => {
     if (currentStep < TOTAL_STEPS) {
-      setCurrentStep(currentStep + 1);
+      setCurrentStep(prev => {
+        const newStep = prev + 1;
+        
+        // Check if the next step should be skipped
+        const nextStepConfig = stepConfig.find(step => step.stepNumber === newStep);
+        if (nextStepConfig && shouldSkipStep(nextStepConfig)) {
+          return newStep + 1;
+        }
+        
+        return newStep;
+      });
     }
-  };
+  }, [currentStep, shouldSkipStep]);
 
-  const goToPrevStep = () => {
+  const goToPrevStep = useCallback(() => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      setCurrentStep(prev => {
+        const newStep = prev - 1;
+        if (newStep !== prevStepRef.current) {
+          prevStepRef.current = newStep;
+          return newStep;
+        }
+        return prev;
+      });
     }
-  };
+  }, [currentStep]);
 
   const isCurrentStepSelected = useCallback(() => {
     const currentStepConfig = stepConfig.find(
@@ -45,31 +124,23 @@ export const useWorkoutForm = () => {
     if (currentStepConfig.isInjuryLocationStep) {
       return userSelections.injuryLocations && userSelections.injuryLocations.length > 0;
     }
+
+    // Special handling for measurements step
+    if (currentStepConfig.isMeasurementsStep) {
+      return userSelections.measurements?.isValid === true;
+    }
+    
+    // Special handling for frequency step
+    if (currentStepConfig.isFrequencyStep) {
+      return userSelections.frequency !== null && userSelections.frequency !== undefined;
+    }
     
     // Normal field checking
-    return userSelections[currentStepConfig.field] !== null && 
-           userSelections[currentStepConfig.field] !== undefined;
+    const fieldValue = userSelections[currentStepConfig.field];
+    return fieldValue !== null && fieldValue !== undefined;
   }, [currentStep, userSelections]);
 
-  // Determine if a step should be skipped based on dependencies
-  const shouldSkipStep = useCallback((step) => {
-    // If the step depends on another field
-    if (step.dependsOn) {
-      const { field, value, values } = step.dependsOn;
-      
-      // If we have multiple allowed values, check if current value is in that list
-      if (values && Array.isArray(values)) {
-        return !values.includes(userSelections[field]);
-      }
-      
-      // Otherwise check for exact value match
-      return userSelections[field] !== value;
-    }
-    return false;
-  }, [userSelections]);
-
   const canFinish = useCallback(() => {
-    // Check if the frequency step and measurement step are completed
     return userSelections.frequency !== null && 
            userSelections.measurements !== null && 
            userSelections.measurements?.isValid === true;

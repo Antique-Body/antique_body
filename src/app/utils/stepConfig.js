@@ -7,7 +7,7 @@ import {
   DiscusIcon,
 } from "@/components/common/Icons";
 
-export const TOTAL_STEPS = 8;
+export const TOTAL_STEPS = 9;
 
 export const stepConfig = [
   {
