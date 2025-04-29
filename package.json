@@ -1,34 +1,37 @@
 {
-  "name": "antique_body",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "migrate": "npx prisma migrate deploy",
-    "migrate:create": "npx prisma migrate dev --name ab-migration"
-  },
-  "dependencies": {
-    "@prisma/client": "^6.6.0",
-    "bcrypt": "^5.1.1",
-    "clsx": "^2.1.1",
-    "dotenv": "^16.5.0",
-    "next": "15.3.1",
-    "next-auth": "^4.24.11",
-    "prisma": "^6.6.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-hook-form": "^7.56.0",
-    "sass": "^1.87.0",
-    "tailwind-merge": "^3.2.0"
-  },
-  "devDependencies": {
-    "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4",
-    "eslint": "^9",
-    "eslint-config-next": "15.3.1",
-    "tailwindcss": "^4"
-  }
+    "name": "antique_body",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev --turbopack",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint",
+        "format": "prettier --write '**/*.{ts,tsx,js,jsx,json,css,scss,md}'",
+        "migrate": "npx prisma migrate deploy",
+        "migrate:create": "npx prisma migrate dev --name ab-migration"
+    },
+    "dependencies": {
+        "@prisma/client": "^6.6.0",
+        "bcrypt": "^5.1.1",
+        "clsx": "^2.1.1",
+        "dotenv": "^16.5.0",
+        "next": "15.3.1",
+        "next-auth": "^4.24.11",
+        "prisma": "^6.6.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "react-hook-form": "^7.56.0",
+        "sass": "^1.87.0",
+        "tailwind-merge": "^3.2.0"
+    },
+    "devDependencies": {
+        "@eslint/eslintrc": "^3",
+        "@tailwindcss/postcss": "^4",
+        "eslint": "^9",
+        "eslint-config-next": "15.3.1",
+        "prettier": "^3.2.4",
+        "prettier-plugin-tailwindcss": "^0.5.11",
+        "tailwindcss": "^4"
+    }
 }
