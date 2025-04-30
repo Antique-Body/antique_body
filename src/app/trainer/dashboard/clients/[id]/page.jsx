@@ -13,6 +13,7 @@ import {
   ProgressChartIcon,
   WorkoutIcon,
 } from "@/components/common/Icons";
+import { Card } from "@/components/custom/Card";
 import { MacroDistribution } from "@/components/custom/client/dashboard/pages/nutrition/components";
 import { BackgroundShapes } from "@/components/custom/shared";
 import { ClientHeader, PerformanceMetrics } from "@/components/custom/trainer/dashboard/pages/clients";
@@ -234,7 +235,7 @@ const ClientId = () => {
           {/* Left Column - Progress Tracking */}
           <div className="space-y-6 lg:col-span-2">
             {/* Training Program Section */}
-            <div className="rounded-xl border border-[#333] bg-[rgba(20,20,20,0.95)] p-6 backdrop-blur-sm">
+            <Card variant="darkStrong" width="100%" maxWidth="none">
               <h3 className="mb-4 flex items-center text-xl font-semibold">
                 <WorkoutIcon size={20} stroke="#FF6B00" className="mr-2" />
                 Training Program
@@ -243,10 +244,10 @@ const ClientId = () => {
               <Button variant="orangeFilled" leftIcon={<PlusIcon size={16} />}>
                 Create Program
               </Button>
-            </div>
+            </Card>
 
             {/* Progress Tracking Section */}
-            <div className="rounded-xl border border-[#333] bg-[rgba(20,20,20,0.95)] p-6 backdrop-blur-sm">
+            <Card variant="darkStrong" width="100%" maxWidth="none">
               <h3 className="mb-4 flex items-center text-xl font-semibold">
                 <ProgressChartIcon size={20} stroke="#FF6B00" className="mr-2" />
                 Progress Tracking
@@ -356,10 +357,10 @@ const ClientId = () => {
                   </table>
                 </div>
               </div>
-            </div>
+            </Card>
 
             {/* Session notes & feedback */}
-            <div className="rounded-xl border border-[#333] bg-[rgba(20,20,20,0.95)] p-6 backdrop-blur-sm">
+            <Card variant="darkStrong" width="100%" maxWidth="none">
               <h3 className="mb-4 flex items-center text-xl font-semibold">
                 <MessageIcon size={20} stroke="#FF6B00" className="mr-2" />
                 Notes & Feedback
@@ -374,13 +375,13 @@ const ClientId = () => {
               <Button onClick={handleSaveNotes} variant="orangeFilled">
                 Save Notes
               </Button>
-            </div>
+            </Card>
           </div>
 
           {/* Right Column - Nutrition & Sessions */}
           <div className="space-y-6">
             {/* Body Composition Summary */}
-            <div className="rounded-xl border border-[#333] bg-[rgba(20,20,20,0.95)] p-6 backdrop-blur-sm">
+            <Card variant="darkStrong" width="100%" maxWidth="none">
               <h3 className="mb-4 text-xl font-semibold">Body Composition</h3>
 
               {progress.length > 1 && (
@@ -438,10 +439,10 @@ const ClientId = () => {
                   </div>
                 </div>
               )}
-            </div>
+            </Card>
 
             {/* Nutrition Goals Section */}
-            <div className="rounded-xl border border-[#333] bg-[rgba(20,20,20,0.95)] p-6 backdrop-blur-sm">
+            <Card variant="darkStrong" hover={true} width="100%" maxWidth="none">
               <h3 className="mb-4 flex items-center text-xl font-semibold">
                 <NutritionIcon size={20} stroke="#FF6B00" className="mr-2" />
                 Nutrition Goals
@@ -508,10 +509,10 @@ const ClientId = () => {
                   </ul>
                 </div>
               </div>
-            </div>
+            </Card>
 
             {/* Upcoming Sessions */}
-            <div className="rounded-xl border border-[#333] bg-[rgba(20,20,20,0.95)] p-6 backdrop-blur-sm">
+            <Card variant="darkStrong" hover={true} width="100%" maxWidth="none">
               <h3 className="mb-4 flex items-center text-xl font-semibold">
                 <ClockIcon size={20} stroke="#FF6B00" className="mr-2" />
                 Upcoming Sessions
@@ -530,7 +531,7 @@ const ClientId = () => {
               <Button variant="orangeFilled" className="w-full" leftIcon={<PlusIcon size={16} />}>
                 Schedule New Session
               </Button>
-            </div>
+            </Card>
           </div>
         </div>
       </div>

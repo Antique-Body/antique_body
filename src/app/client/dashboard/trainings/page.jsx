@@ -2,6 +2,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
+import { Card } from "@/components/custom/Card";
 
 export default function TrainingsPage() {
   const [expandedTrainingId, setExpandedTrainingId] = useState(null);
@@ -68,14 +69,17 @@ export default function TrainingsPage() {
   return (
     <div className="space-y-6">
       {/* Upcoming Trainings */}
-      <div className="z-30 rounded-2xl border border-[#222] bg-[rgba(20,20,20,0.95)] p-6 shadow-lg backdrop-blur-lg">
+      <Card variant="darkStrong" width="100%" maxWidth="none">
         <h2 className="mb-4 text-xl font-bold">Upcoming Trainings</h2>
 
         <div className="space-y-4">
           {userData.upcoming_trainings.map(training => (
-            <div
+            <Card
               key={training.id}
-              className="cursor-pointer rounded-xl border border-[#333] bg-[rgba(30,30,30,0.8)] p-4 transition-all duration-300 hover:border-[#FF6B00]"
+              variant="dark"
+              className="cursor-pointer transition-all duration-300 hover:border-[#FF6B00]"
+              width="100%"
+              maxWidth="none"
               onClick={() => toggleExpandTraining(training.id)}
             >
               <div className="flex items-start justify-between">
@@ -109,20 +113,23 @@ export default function TrainingsPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
-      </div>
+      </Card>
 
       {/* Past Trainings */}
-      <div className="z-30 rounded-2xl border border-[#222] bg-[rgba(20,20,20,0.95)] p-6 shadow-lg backdrop-blur-lg">
+      <Card variant="darkStrong" width="100%" maxWidth="none">
         <h2 className="mb-4 text-xl font-bold">Past Trainings</h2>
 
         <div className="space-y-4">
           {userData.past_trainings.map(training => (
-            <div
+            <Card
               key={training.id}
-              className="cursor-pointer rounded-xl border border-[#333] bg-[rgba(30,30,30,0.8)] p-4 transition-all duration-300 hover:border-[#FF6B00]"
+              variant="dark"
+              className="cursor-pointer transition-all duration-300 hover:border-[#FF6B00]"
+              width="100%"
+              maxWidth="none"
               onClick={() => toggleExpandTraining(training.id)}
             >
               <div className="flex items-start justify-between">
@@ -144,14 +151,14 @@ export default function TrainingsPage() {
                   <p className="text-gray-300">{training.feedback}</p>
                 </div>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
 
         <Button variant="orangeOutline" fullWidth>
           View Training History
         </Button>
-      </div>
+      </Card>
     </div>
   );
 }

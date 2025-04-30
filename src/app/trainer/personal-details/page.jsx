@@ -6,6 +6,7 @@ import { Button, StepProgressBar } from "@/components/common";
 import { Footer } from "@/components/common/Footer";
 import { ArrowRight } from "@/components/common/Icons";
 import { AntiqueBodyLogo } from "@/components/custom/BrandLogo";
+import { Card } from "@/components/custom/Card";
 import { TipsSection } from "@/components/custom/shared/TipsSection";
 import {
   BasicInfoStep,
@@ -217,7 +218,7 @@ const TrainerRegistration = () => {
         {/* Progress Bar */}
         <StepProgressBar currentStep={step} totalSteps={4} />
 
-        <div className="mb-12 rounded-2xl border border-[#222] bg-[rgba(20,20,20,0.95)] p-6 shadow-lg backdrop-blur-lg md:p-8">
+        <Card variant="darkStrong" hover={true} width="100%" maxWidth="none" className="mb-12 md:p-8">
           <h1 className="mb-6 text-2xl font-bold md:text-3xl">
             {step === 1 && "Basic Information"}
             {step === 2 && "Professional Details"}
@@ -285,7 +286,7 @@ const TrainerRegistration = () => {
               )}
             </div>
           </form>
-        </div>
+        </Card>
         <TipsSection step={step} userType="trainer" />
 
         <Footer />

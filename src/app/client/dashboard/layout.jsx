@@ -2,6 +2,8 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { Button } from "@/components/common/Button";
+import { BellIcon, SettingsIcon } from "@/components/common/Icons";
 import { AntiqueBodyLogo } from "@/components/custom/BrandLogo";
 import { ClientProfile } from "@/components/custom/client/dashboard/components";
 import { BackgroundShapes, DashboardTabs } from "@/components/custom/shared";
@@ -211,22 +213,32 @@ export default function ClientDashboardLayout({ children }) {
   ];
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#0a0a0a] text-white">
-      {/* Background Shapes */}
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
       <BackgroundShapes />
 
-      <div className="relative z-20 mx-auto w-full max-w-6xl px-4">
-        {/* Header */}
-        <AntiqueBodyLogo />
+      <div className="relative z-10 mx-auto max-w-screen-xl px-4 py-6">
+        <div className="mb-8 flex items-center justify-between">
+          <AntiqueBodyLogo />
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" className="rounded-full bg-[rgba(30,30,30,0.8)] p-2">
+              <BellIcon size={24} />
+            </Button>
+            <Button variant="ghost" className="rounded-full bg-[rgba(30,30,30,0.8)] p-2">
+              <SettingsIcon size={24} />
+            </Button>
+          </div>
+        </div>
 
-        {/* Client Profile Summary */}
-        <ClientProfile userData={userData} />
+        <div className="flex flex-col gap-6">
+          {/* Trainer profile section (top) */}
+          <ClientProfile userData={userData} />
 
-        {/* Tab Navigation */}
-        <DashboardTabs activeTab={activeTab} setActiveTab={handleTabChange} tabs={tabsConfig} />
+          {/* Tab Navigation */}
+          <DashboardTabs activeTab={activeTab} setActiveTab={handleTabChange} tabs={tabsConfig} />
 
-        {/* Content based on active tab - rendered by nested routes */}
-        <div className="pb-20">{children}</div>
+          {/* Content based on active tab - rendered by nested routes */}
+          <div className="pb-20">{children}</div>
+        </div>
       </div>
     </div>
   );

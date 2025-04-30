@@ -2,12 +2,12 @@ import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
 import { ChevronDownIcon, TrashIcon } from "@/components/common/Icons";
-
+import { Card } from "@/components/custom/Card";
 export const MealCard = ({ meal, onDelete }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="rounded-xl border border-[#333] bg-[rgba(30,30,30,0.8)]">
+    <Card variant="dark" width="100%" maxWidth="none">
       <div className="flex cursor-pointer items-center justify-between p-4" onClick={() => setIsExpanded(!isExpanded)}>
         <div>
           <div className="flex items-center gap-2">
@@ -68,6 +68,6 @@ export const MealCard = ({ meal, onDelete }) => {
           </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 };

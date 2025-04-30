@@ -5,13 +5,8 @@ import { useMemo, useRef, useState } from "react";
 import { ProgressBar } from "@/components/common";
 import { Button } from "@/components/common/Button";
 import { CloseXIcon, PlusIcon } from "@/components/common/Icons";
-import {
-  AddFoodModal,
-  MacroDistribution,
-  MealCard,
-  NutritionHistory,
-} from "@/components/custom/client/dashboard/pages/nutrition/components";
-import { weeklyNutritionHistory } from "@/components/custom/client/dashboard/pages/nutrition/data/foodDatabase";
+import { Card } from "@/components/custom/Card";
+import { MacroDistribution, MealCard } from "@/components/custom/client/dashboard/pages/nutrition/components";
 import { FormField } from "@/components/shared";
 
 export default function NutritionPage() {
@@ -85,8 +80,6 @@ export default function NutritionPage() {
   });
 
   // State for modals
-  const [showAddFoodModal, setShowAddFoodModal] = useState(false);
-  const [showNutritionHistory, setShowNutritionHistory] = useState(false);
 
   // State for water intake
   const [waterIntake, setWaterIntake] = useState(1500); // ml
@@ -111,19 +104,6 @@ export default function NutritionPage() {
   const getPercentage = (consumed, goal) => {
     const percentage = (consumed / goal) * 100;
     return Math.min(percentage, 100); // Cap at 100%
-  };
-
-  // Handle adding a food item to the current meal
-  const handleAddFoodToMeal = foodItem => {
-    setNewMeal({
-      ...newMeal,
-      items: [...newMeal.items, foodItem],
-      calories: (newMeal.calories || 0) + foodItem.calories,
-      protein: (newMeal.protein || 0) + foodItem.protein,
-      carbs: (newMeal.carbs || 0) + foodItem.carbs,
-      fat: (newMeal.fat || 0) + foodItem.fat,
-      fiber: (newMeal.fiber || 0) + (foodItem.fiber || 0),
-    });
   };
 
   // Handle adding a new meal
@@ -182,17 +162,17 @@ export default function NutritionPage() {
   return (
     <div className="space-y-6">
       {/* Nutrition Overview */}
-      <div className="z-30 rounded-2xl border border-[#222] bg-[rgba(20,20,20,0.95)] p-6 shadow-lg backdrop-blur-lg">
+      <Card variant="darkStrong" width="100%" maxWidth="none">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-bold">Nutrition Overview</h2>
-          <Button variant="ghostOrange" size="small" onClick={() => setShowNutritionHistory(true)}>
+          <Button variant="ghostOrange" size="small" onClick={() => {}}>
             View History
           </Button>
         </div>
 
         <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div className="rounded-xl border border-[#333] bg-[rgba(30,30,30,0.8)] p-4">
-            <h3 className="mb-3 font-medium">Daily Calories Target</h3>
+          <Card variant="dark" width="100%" maxWidth="none">
+            <h3 className="mb-3 font-bold">Daily Calories Target</h3>
             <div className="mb-3 flex items-center justify-between">
               <p className="text-2xl font-bold">{userData.stats.calorieGoal} cal</p>
               <div className="rounded border border-[rgba(255,107,0,0.3)] bg-[rgba(255,107,0,0.15)] px-2 py-1 text-xs font-medium text-[#FF6B00]">
@@ -209,9 +189,9 @@ export default function NutritionPage() {
               <p className="text-gray-400">{totals.calories} consumed</p>
               <p className="text-gray-400">{userData.stats.calorieGoal - totals.calories} remaining</p>
             </div>
-          </div>
+          </Card>
 
-          <div className="rounded-xl border border-[#333] bg-[rgba(30,30,30,0.8)] p-4">
+          <Card variant="dark" width="100%" maxWidth="none">
             <h3 className="mb-3 font-medium">Macronutrient Targets</h3>
             <div className="space-y-4">
               <div>
@@ -259,7 +239,7 @@ export default function NutritionPage() {
                 />
               </div>
             </div>
-          </div>
+          </Card>
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -267,14 +247,14 @@ export default function NutritionPage() {
             Log New Meal
           </Button>
 
-          <Button variant="orangeOutline" onClick={() => setShowAddFoodModal(true)} leftIcon={<PlusIcon />}>
+          <Button variant="orangeOutline" onClick={() => {}} leftIcon={<PlusIcon />}>
             Add Food Item
           </Button>
         </div>
-      </div>
+      </Card>
 
       {/* Today's Food Log */}
-      <div className="z-30 rounded-2xl border border-[#222] bg-[rgba(20,20,20,0.95)] p-6 shadow-lg backdrop-blur-lg">
+      <Card variant="darkStrong" width="100%" maxWidth="none">
         <h2 className="mb-4 text-xl font-bold">Today's Food Log</h2>
 
         <div className="space-y-4">
@@ -284,7 +264,7 @@ export default function NutritionPage() {
 
           {/* Add New Meal Form */}
           {showMealForm && (
-            <div ref={addMealFormRef} className="rounded-xl border border-[#333] bg-[rgba(30,30,30,0.8)] p-4">
+            <Card ref={addMealFormRef} variant="dark" width="100%" maxWidth="none">
               <div className="mb-3 flex items-center justify-between">
                 <h3 className="font-medium">Add New Meal</h3>
                 <Button
@@ -321,12 +301,7 @@ export default function NutritionPage() {
               <div className="mb-4">
                 <div className="mb-2 flex items-center justify-between">
                   <label className="block text-sm text-gray-400">Food Items</label>
-                  <Button
-                    variant="ghostOrange"
-                    size="small"
-                    className="flex items-center p-0"
-                    onClick={() => setShowAddFoodModal(true)}
-                  >
+                  <Button variant="ghostOrange" size="small" className="flex items-center p-0" onClick={() => {}}>
                     <PlusIcon size={14} className="mr-1" />
                     Add Food
                   </Button>
@@ -391,7 +366,7 @@ export default function NutritionPage() {
                   Add Meal
                 </Button>
               </div>
-            </div>
+            </Card>
           )}
 
           {/* Add More Meals Button (only shown when form is not visible) */}
@@ -407,13 +382,13 @@ export default function NutritionPage() {
             </Button>
           )}
         </div>
-      </div>
+      </Card>
 
       {/* Water Intake Tracker */}
-      <div className="z-30 rounded-2xl border border-[#222] bg-[rgba(20,20,20,0.95)] p-6 shadow-lg backdrop-blur-lg">
+      <Card variant="darkStrong" hover={true} width="100%" maxWidth="none">
         <h2 className="mb-4 text-xl font-bold">Water Intake</h2>
 
-        <div className="mb-4 rounded-xl border border-[#333] bg-[rgba(30,30,30,0.8)] p-4">
+        <Card variant="dark" className="mb-4" width="100%" maxWidth="none">
           <div className="mb-2 flex justify-between">
             <p className="font-medium">Today's Intake</p>
             <p className="font-medium text-blue-400">{(waterIntake / 1000).toFixed(1)} / 3.0 L</p>
@@ -437,36 +412,24 @@ export default function NutritionPage() {
               +750ml
             </Button>
           </div>
-        </div>
-      </div>
+        </Card>
+      </Card>
 
       {/* Macro Breakdown & Statistics */}
-      <div className="z-30 rounded-2xl border border-[#222] bg-[rgba(20,20,20,0.95)] p-6 shadow-lg backdrop-blur-lg">
+      <Card variant="darkStrong" width="100%" maxWidth="none">
         <h2 className="mb-4 text-xl font-bold">Nutrition Breakdown</h2>
 
-        <div className="mb-4 rounded-xl border border-[#333] bg-[rgba(30,30,30,0.8)] p-4">
+        <Card variant="dark" className="mb-4" width="100%" maxWidth="none">
           <h3 className="mb-3 font-medium">Macro Distribution</h3>
 
           {/* Macro distribution chart */}
           <MacroDistribution protein={totals.protein * 4} carbs={totals.carbs * 4} fat={totals.fat * 9} />
-        </div>
+        </Card>
 
-        <Button variant="orangeOutline" fullWidth onClick={() => setShowNutritionHistory(true)}>
+        <Button variant="orangeOutline" fullWidth onClick={() => {}}>
           View Detailed Nutrition History
         </Button>
-      </div>
-
-      {/* Add Food Modal */}
-      <AddFoodModal
-        isOpen={showAddFoodModal}
-        onClose={() => setShowAddFoodModal(false)}
-        onAddFood={handleAddFoodToMeal}
-      />
-
-      {/* Nutrition History Modal */}
-      {showNutritionHistory && (
-        <NutritionHistory historyData={weeklyNutritionHistory} onClose={() => setShowNutritionHistory(false)} />
-      )}
+      </Card>
     </div>
   );
 }

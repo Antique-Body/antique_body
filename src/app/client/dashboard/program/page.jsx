@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/common/Button";
 import { PlusIcon } from "@/components/common/Icons";
+import { Card } from "@/components/custom/Card";
 
 export default function ProgramPage() {
   // Sample user data
@@ -51,7 +52,7 @@ export default function ProgramPage() {
 
   return (
     <div className="space-y-6">
-      <div className="z-30 rounded-2xl border border-[#222] bg-[rgba(20,20,20,0.95)] p-6 shadow-lg backdrop-blur-lg">
+      <Card variant="darkStrong" width="100%" maxWidth="none">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-bold">Your Training Program</h2>
           <span className="rounded-lg border border-[rgba(255,107,0,0.3)] bg-[rgba(255,107,0,0.15)] px-3 py-1 text-sm font-medium text-[#FF6B00]">
@@ -91,7 +92,7 @@ export default function ProgramPage() {
         </div>
 
         {/* Monday Workout */}
-        <div className="mb-4 rounded-xl border border-[#333] bg-[rgba(30,30,30,0.8)] p-4">
+        <Card variant="dark" className="mb-4" width="100%" maxWidth="none">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="font-bold">{userData.workout_plan.monday.focus}</h3>
             <span className="rounded bg-[rgba(40,40,40,0.8)] px-2 py-1 text-xs font-medium text-gray-300">Monday</span>
@@ -110,10 +111,10 @@ export default function ProgramPage() {
               </div>
             ))}
           </div>
-        </div>
+        </Card>
 
         {/* Wednesday Workout */}
-        <div className="mb-4 rounded-xl border border-[#333] bg-[rgba(30,30,30,0.8)] p-4">
+        <Card variant="dark" className="mb-4" width="100%" maxWidth="none">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="font-bold">{userData.workout_plan.wednesday.focus}</h3>
             <span className="rounded bg-[rgba(40,40,40,0.8)] px-2 py-1 text-xs font-medium text-gray-300">
@@ -134,10 +135,10 @@ export default function ProgramPage() {
               </div>
             ))}
           </div>
-        </div>
+        </Card>
 
         {/* Friday Workout */}
-        <div className="rounded-xl border border-[#333] bg-[rgba(30,30,30,0.8)] p-4">
+        <Card variant="dark" width="100%" maxWidth="none">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="font-bold">{userData.workout_plan.friday.focus}</h3>
             <span className="rounded bg-[rgba(255,107,0,0.15)] px-2 py-1 text-xs font-medium text-[#FF6B00]">
@@ -158,14 +159,14 @@ export default function ProgramPage() {
               </div>
             ))}
           </div>
-        </div>
+        </Card>
 
         <div className="mt-6">
           <Button variant="orangeFilled" fullWidth leftIcon={<PlusIcon />}>
             Add Workout Session
           </Button>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

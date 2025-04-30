@@ -6,6 +6,7 @@ import { MessageClientModal } from "./MessageClientModal";
 
 import { Button } from "@/components/common/Button";
 import { CalendarIcon, MessageIcon } from "@/components/common/Icons";
+import { Card } from "@/components/custom/Card";
 import { ScheduleSessionModal } from "@/components/custom/trainer/dashboard/components";
 
 export const ClientHeader = ({ client }) => {
@@ -23,7 +24,7 @@ export const ClientHeader = ({ client }) => {
 
   return (
     <>
-      <div className="relative mb-6 rounded-xl border border-[#333] bg-[rgba(20,20,20,0.95)] p-6 backdrop-blur-sm">
+      <Card variant="darkStrong" width="100%" maxWidth="none" className="relative mb-6">
         {/* Greek pattern top border */}
 
         <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
@@ -64,24 +65,24 @@ export const ClientHeader = ({ client }) => {
 
         {/* Client summary stats */}
         <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-          <div className="rounded-lg border border-[#333] bg-[rgba(30,30,30,0.8)] p-3">
+          <Card variant="dark" width="100%" maxWidth="none">
             <div className="mb-1 text-xs text-gray-400">Goal</div>
             <div className="font-medium">{client.goal}</div>
-          </div>
-          <div className="rounded-lg border border-[#333] bg-[rgba(30,30,30,0.8)] p-3">
+          </Card>
+          <Card variant="dark" width="100%" maxWidth="none">
             <div className="mb-1 text-xs text-gray-400">Client Since</div>
             <div className="font-medium">{client.joinDate}</div>
-          </div>
-          <div className="rounded-lg border border-[#333] bg-[rgba(30,30,30,0.8)] p-3">
+          </Card>
+          <Card variant="dark" width="100%" maxWidth="none">
             <div className="mb-1 text-xs text-gray-400">Next Session</div>
             <div className="font-medium">{client.nextSession}</div>
-          </div>
-          <div className="rounded-lg border border-[#333] bg-[rgba(30,30,30,0.8)] p-3">
+          </Card>
+          <Card variant="dark" width="100%" maxWidth="none">
             <div className="mb-1 text-xs text-gray-400">Total Sessions</div>
             <div className="font-medium">{client.progress?.length || 0}</div>
-          </div>
+          </Card>
         </div>
-      </div>
+      </Card>
 
       {/* Message modal */}
       {showMessageModal && (

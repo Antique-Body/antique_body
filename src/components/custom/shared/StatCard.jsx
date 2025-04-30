@@ -1,9 +1,11 @@
 import React from "react";
 
+import { Card } from "@/components";
+
 export const StatCard = ({ label, value, subtext }) => (
-  <div className="rounded-xl border border-[#333] bg-[rgba(30,30,30,0.8)] p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[#FF6B00]">
+  <Card variant="dark" className="!rounded-xl" hover={true} width="100%" maxWidth="none">
     <p className="mb-1 text-xs text-gray-400">{label}</p>
     <p className="text-lg font-bold">{value}</p>
     {subtext && <p className="text-xs text-gray-300">{subtext}</p>}
-  </div>
+  </Card>
 );

@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 
 import { Button } from "@/components/common/Button";
 import { ChevronDownIcon, MessageIcon, PlusIcon, SendIcon } from "@/components/common/Icons";
+import { Card } from "@/components/custom/Card";
 import { BackgroundShapes } from "@/components/custom/shared";
 import { ChatHistory, ConversationList } from "@/components/custom/trainer/dashboard/pages/messaging";
 import { FormField } from "@/components/shared/FormField";
@@ -126,7 +127,12 @@ const MessagesPage = () => {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Conversations list */}
           <div className="lg:col-span-1">
-            <div className="flex h-full max-h-[calc(100vh-150px)] flex-col rounded-xl border border-[#333] bg-[rgba(20,20,20,0.95)] p-4 backdrop-blur-sm">
+            <Card
+              variant="darkStrong"
+              width="100%"
+              maxWidth="none"
+              className="flex h-full max-h-[calc(100vh-150px)] flex-col"
+            >
               <div className="mb-4">
                 <FormField
                   type="text"
@@ -163,12 +169,19 @@ const MessagesPage = () => {
                   onSelectConversation={setActiveConversationId}
                 />
               </div>
-            </div>
+            </Card>
           </div>
 
           {/* Chat area */}
           <div className="lg:col-span-2">
-            <div className="flex h-full max-h-[calc(100vh-150px)] flex-col rounded-xl border border-[#333] bg-[rgba(20,20,20,0.95)] backdrop-blur-sm">
+            <Card
+              variant="darkStrong"
+              hover={activeConversationId ? true : false}
+              width="100%"
+              maxWidth="none"
+              className="flex h-full max-h-[calc(100vh-150px)] flex-col"
+              padding="0px"
+            >
               {activeConversationId ? (
                 <>
                   {/* Chat header */}
@@ -249,7 +262,7 @@ const MessagesPage = () => {
                   <Button variant="orangeFilled">Start New Conversation</Button>
                 </div>
               )}
-            </div>
+            </Card>
           </div>
         </div>
       </div>

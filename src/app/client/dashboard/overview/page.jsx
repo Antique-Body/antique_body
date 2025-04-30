@@ -8,6 +8,7 @@ import {
   TimerIcon,
   WorkoutIcon,
 } from "@/components/common/Icons";
+import { Card } from "@/components/custom/Card";
 
 export default function OverviewPage() {
   // Access userData from parent layout context in a real application
@@ -85,13 +86,13 @@ export default function OverviewPage() {
     <div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Next Session */}
-        <div className="z-30 rounded-2xl border border-[#222] bg-[rgba(20,20,20,0.95)] p-6 shadow-lg backdrop-blur-lg">
+        <Card variant="dark" width="100%" maxWidth="none">
           <h2 className="mb-4 flex items-center text-xl font-bold">
             <TimerIcon className="mr-2" stroke="#FF6B00" />
             Next Training
           </h2>
 
-          <div className="mb-4 rounded-xl border border-[#333] bg-[rgba(30,30,30,0.8)] p-4">
+          <Card variant="dark" className="mb-4" width="100%" maxWidth="none">
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="text-lg font-bold">{userData.upcoming_trainings[0].date}</h3>
@@ -110,7 +111,7 @@ export default function OverviewPage() {
               <span className="mr-1 text-[#FF6B00]">📝</span>
               {userData.upcoming_trainings[0].notes}
             </p>
-          </div>
+          </Card>
 
           <Button
             variant="orangeOutline"
@@ -119,10 +120,10 @@ export default function OverviewPage() {
           >
             View All Trainings
           </Button>
-        </div>
+        </Card>
 
         {/* Messages Preview */}
-        <div className="z-30 rounded-2xl border border-[#222] bg-[rgba(20,20,20,0.95)] p-6 shadow-lg backdrop-blur-lg">
+        <Card variant="dark" width="100%" maxWidth="none">
           <h2 className="mb-4 flex items-center text-xl font-bold">
             <MessageIcon className="mr-2" stroke="#FF6B00" />
             Coach Messages
@@ -130,18 +131,19 @@ export default function OverviewPage() {
 
           <div className="space-y-3">
             {userData.messages.slice(0, 2).map(message => (
-              <div
+              <Card
                 key={message.id}
-                className={`rounded-xl border bg-[rgba(30,30,30,0.8)] p-3 ${
-                  message.unread && message.from === "Coach Alex" ? "border-[#FF6B00]" : "border-[#333]"
-                }`}
+                variant="dark"
+                className={`${message.unread && message.from === "Coach Alex" ? "border-[#FF6B00]" : ""}`}
+                width="100%"
+                maxWidth="none"
               >
                 <div className="mb-1 flex items-center justify-between">
                   <p className="font-bold">{message.from}</p>
                   <p className="text-xs text-gray-400">{message.time}</p>
                 </div>
                 <p className="text-sm text-gray-300">{message.content}</p>
-              </div>
+              </Card>
             ))}
           </div>
 
@@ -154,17 +156,17 @@ export default function OverviewPage() {
           >
             Send Message
           </Button>
-        </div>
+        </Card>
 
         {/* Nutrition Summary */}
-        <div className="z-30 rounded-2xl border border-[#222] bg-[rgba(20,20,20,0.95)] p-6 shadow-lg backdrop-blur-lg">
+        <Card variant="dark" width="100%" maxWidth="none">
           <h2 className="mb-4 flex items-center text-xl font-bold">
             <NutritionIcon className="mr-2" stroke="#FF6B00" />
             Nutrition Overview
           </h2>
 
           <div className="space-y-3">
-            <div className="rounded-xl border border-[#333] bg-[rgba(30,30,30,0.8)] p-3">
+            <Card variant="dark" width="100%" maxWidth="none">
               <p className="mb-1 text-sm font-medium text-gray-400">Daily Target</p>
               <p className="mb-2 text-xl font-bold">{userData.stats.calorieGoal} cal</p>
 
@@ -191,7 +193,7 @@ export default function OverviewPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </Card>
           </div>
 
           <Button
@@ -201,18 +203,18 @@ export default function OverviewPage() {
           >
             Open Nutrition Tracker
           </Button>
-        </div>
+        </Card>
       </div>
 
       {/* Progress Graph */}
-      <div className="z-30 mt-6 rounded-2xl border border-[#222] bg-[rgba(20,20,20,0.95)] p-6 shadow-lg backdrop-blur-lg">
+      <Card variant="dark" className="mt-6" width="100%" maxWidth="none">
         <h2 className="mb-4 flex items-center text-xl font-bold">
           <ProgressChartIcon className="mr-2" stroke="#FF6B00" />
           Body Composition Progress
         </h2>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="rounded-xl border border-[#333] bg-[rgba(30,30,30,0.8)] p-4">
+          <Card variant="dark" width="100%" maxWidth="none">
             <h3 className="mb-3 font-medium">Weight Progression</h3>
             <div className="relative h-52">
               {/* Simple weight chart - in real app, use a charting library */}
@@ -235,9 +237,9 @@ export default function OverviewPage() {
                 ))}
               </div>
             </div>
-          </div>
+          </Card>
 
-          <div className="rounded-xl border border-[#333] bg-[rgba(30,30,30,0.8)] p-4">
+          <Card variant="dark" width="100%" maxWidth="none">
             <h3 className="mb-3 font-medium">Body Fat Progression</h3>
             <div className="relative h-52">
               {/* Simple body fat chart - in real app, use a charting library */}
@@ -260,23 +262,23 @@ export default function OverviewPage() {
                 ))}
               </div>
             </div>
-          </div>
+          </Card>
         </div>
 
         <Button variant="orangeOutline" fullWidth>
           View Detailed Progress
         </Button>
-      </div>
+      </Card>
 
       {/* Today's Workout */}
-      <div className="z-30 mt-6 rounded-2xl border border-[#222] bg-[rgba(20,20,20,0.95)] p-6 shadow-lg backdrop-blur-lg">
+      <Card variant="dark" className="mt-6" width="100%" maxWidth="none">
         <h2 className="mb-4 flex items-center text-xl font-bold">
           <WorkoutIcon className="mr-2" stroke="#FF6B00" />
           Today's Workout
         </h2>
 
         {/* Today is Friday, show Friday's workout */}
-        <div className="rounded-xl border border-[#333] bg-[rgba(30,30,30,0.8)] p-4">
+        <Card variant="dark" width="100%" maxWidth="none">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="font-bold">{userData.workout_plan.friday.focus}</h3>
             <span className="rounded bg-[rgba(255,107,0,0.15)] px-2 py-1 text-xs font-medium text-[#FF6B00]">
@@ -297,12 +299,12 @@ export default function OverviewPage() {
               </div>
             ))}
           </div>
-        </div>
+        </Card>
 
         <Button variant="orangeOutline" fullWidth onClick={() => (window.location.href = "/client/dashboard/program")}>
           View Full Program
         </Button>
-      </div>
+      </Card>
     </div>
   );
 }
