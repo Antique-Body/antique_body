@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
 import { CertificateIcon, MessageIcon, TimerIcon, UserProfileIcon } from "@/components/common/Icons";
+import { Card } from "@/components/custom/Card";
 import {
   BookingSessionModal,
   TrainerProfileModal,
@@ -157,8 +158,8 @@ export default function TrainWithCoachPage() {
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-[#0a0a0a] text-white">
-      <div className="relative z-20 mx-auto w-full max-w-6xl px-4">
-        <div className="sticky top-3 z-30 mb-5 rounded-2xl border border-[#222] bg-[rgba(20,20,20,0.95)] p-4 shadow-lg backdrop-blur-lg transition-all duration-300 ease-in-out hover:shadow-[0_15px_30px_-10px_rgba(255,107,0,0.2)]">
+      <div className="relative z-20 mx-auto w-full">
+        <Card variant="darkStrong" className="mb-5" width="100%" maxWidth="none">
           <FormField
             type="text"
             placeholder="Search by profession, sport, or goal..."
@@ -184,7 +185,7 @@ export default function TrainWithCoachPage() {
               className="mb-0 min-w-[140px]"
             />
           </div>
-        </div>
+        </Card>
 
         {/* Trainer List */}
         <div className="flex flex-wrap justify-center gap-5 pb-20">
@@ -194,7 +195,7 @@ export default function TrainWithCoachPage() {
                 key={trainer.id}
                 trainer={trainer}
                 onBookSession={handleBookSession}
-                onViewProfile={handleViewProfile} // Pass the new handler
+                onViewProfile={handleViewProfile}
               />
             ))
           ) : (
@@ -261,21 +262,18 @@ const TrainerCard = ({ trainer, onBookSession, onViewProfile }) => {
   };
 
   return (
-    <div className="relative flex w-full max-w-full flex-row gap-5 overflow-hidden rounded-2xl border border-[#333] bg-[rgba(30,30,30,0.8)] p-5 shadow-lg transition-all duration-300 hover:translate-y-[-3px] hover:border-[#FF6B00] hover:shadow-xl md:w-[calc(50%-10px)] md:min-w-[450px]">
-      {/* Left orange bar */}
-      <div className="absolute left-0 top-0 h-full w-1 scale-y-[0.4] transform bg-[#FF6B00] transition-transform duration-300 ease-in-out group-hover:scale-y-100"></div>
-
+    <Card variant="entityCard" width="100%" maxWidth="100%">
       {/* Trainer photo */}
-      <div className="relative flex h-24 w-24 flex-shrink-0 items-center justify-center self-start overflow-hidden rounded-xl bg-gradient-to-br from-[#FF6B00] to-[#FF9A00] text-2xl font-semibold text-white transition-transform duration-300 ease-in-out hover:scale-105">
+      <div className="relative flex h-24 w-24 flex-shrink-0 items-center justify-center self-start overflow-hidden rounded-xl bg-gradient-to-br from-[#FF6B00] to-[#FF9A00] text-2xl font-semibold text-white transition-transform duration-300 ease-in-out group-hover:scale-105">
         <UserProfileIcon size={60} stroke="white" strokeWidth="1.5" />
 
         {/* Shine effect */}
-        <div className="absolute left-[-50%] top-[-50%] h-[200%] w-[200%] rotate-45 transform bg-gradient-to-b from-[rgba(255,255,255,0.1)] to-[rgba(255,255,255,0)] transition-transform duration-500 ease-in-out hover:translate-y-full"></div>
+        <div className="absolute left-[-50%] top-[-50%] h-[200%] w-[200%] rotate-45 transform bg-gradient-to-b from-[rgba(255,255,255,0.1)] to-[rgba(255,255,255,0)] transition-transform duration-500 ease-in-out group-hover:translate-y-full"></div>
       </div>
 
       {/* Trainer info */}
       <div className="flex-1 text-left">
-        <h3 className="mb-1 text-lg font-semibold transition-colors duration-300 hover:text-[#FF6B00]">
+        <h3 className="mb-1 text-lg font-semibold transition-colors duration-300 group-hover:text-[#FF6B00]">
           {trainer.name}
         </h3>
         <p className="mb-2 text-sm text-gray-400">{trainer.specialty}</p>
@@ -285,7 +283,7 @@ const TrainerCard = ({ trainer, onBookSession, onViewProfile }) => {
           {trainer.certifications.map((cert, index) => (
             <span
               key={index}
-              className="flex items-center gap-1 rounded border border-[rgba(255,107,0,0.3)] bg-[rgba(255,107,0,0.15)] px-2 py-1 text-xs font-medium text-[#FF6B00] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[rgba(255,107,0,0.25)]"
+              className="flex items-center gap-1 rounded border border-[rgba(255,107,0,0.3)] bg-[rgba(255,107,0,0.15)] px-2 py-1 text-xs font-medium text-[#FF6B00] transition-all duration-300 group-hover:-translate-y-0.5 group-hover:bg-[rgba(255,107,0,0.25)]"
             >
               <CertificateIcon size={12} />
               {cert}
@@ -295,9 +293,7 @@ const TrainerCard = ({ trainer, onBookSession, onViewProfile }) => {
 
         <p className="mb-3 line-clamp-2 text-sm text-[#ddd]">{trainer.description}</p>
 
-        <p className="my-2.5 text-xl font-bold text-[#FF6B00] transition-transform duration-300 hover:scale-105">
-          ${trainer.hourlyRate}/hour
-        </p>
+        <p className="my-2.5 text-xl font-bold text-[#FF6B00] ">${trainer.hourlyRate}/hour</p>
 
         {/* Meta information */}
         <div className="mb-3 flex flex-wrap gap-3">
@@ -326,7 +322,7 @@ const TrainerCard = ({ trainer, onBookSession, onViewProfile }) => {
             variant="orangeOutline"
             size="small"
             onClick={() => onViewProfile(trainer)}
-            className="hover:-translate-y-0.5"
+            className="transition-transform duration-300 group-hover:-translate-y-0.5"
           >
             View Profile
           </Button>
@@ -334,7 +330,7 @@ const TrainerCard = ({ trainer, onBookSession, onViewProfile }) => {
             variant="orangeFilled"
             size="small"
             onClick={() => onBookSession(trainer)}
-            className="hover:-translate-y-0.5 hover:scale-105"
+            className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:scale-105"
           >
             Book Session
           </Button>
@@ -342,7 +338,7 @@ const TrainerCard = ({ trainer, onBookSession, onViewProfile }) => {
             variant="secondary"
             size="small"
             onClick={() => handleOpenChat(trainer)}
-            className="hover:-translate-y-0.5"
+            className="transition-transform duration-300 group-hover:-translate-y-0.5"
             leftIcon={<MessageIcon size={14} />}
           >
             Send Message
@@ -352,13 +348,13 @@ const TrainerCard = ({ trainer, onBookSession, onViewProfile }) => {
 
       {/* Preferred badge (if applicable) */}
       {trainer.preferred && (
-        <div className="absolute right-4 top-4 rounded bg-[rgba(255,107,0,0.2)] px-2 py-1 text-xs font-medium text-[#FF6B00] transition-all duration-300 hover:bg-[rgba(255,107,0,0.3)]">
+        <div className="absolute right-4 top-4 rounded bg-[rgba(255,107,0,0.2)] px-2 py-1 text-xs font-medium text-[#FF6B00] transition-all duration-300 group-hover:bg-[rgba(255,107,0,0.3)]">
           Preferred for your goals
         </div>
       )}
 
       {/* Proximity */}
       <div className="absolute bottom-4 right-4 text-xs text-gray-400">{trainer.proximity}</div>
-    </div>
+    </Card>
   );
 };

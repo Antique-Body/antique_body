@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
 import { MessageIcon, SendIcon } from "@/components/common/Icons";
+import { Card } from "@/components/custom/Card";
 import { FormField } from "@/components/shared";
 
 export default function MessagesPage() {
@@ -50,7 +51,7 @@ export default function MessagesPage() {
   return (
     <div className="space-y-6">
       {/* Messages List */}
-      <div className="rounded-2xl border border-[#222] bg-[rgba(20,20,20,0.95)] p-6 shadow-lg backdrop-blur-lg">
+      <Card variant="darkStrong" width="100%" maxWidth="none">
         <h2 className="mb-6 flex items-center text-xl font-bold">
           <MessageIcon className="mr-2" stroke="#FF6B00" />
           Messages
@@ -85,31 +86,30 @@ export default function MessagesPage() {
             </div>
           ))}
         </div>
-      </div>
+      </Card>
 
       {/* Send Message Form */}
-      <form
-        onSubmit={handleSendMessage}
-        className="rounded-2xl border border-[#222] bg-[rgba(20,20,20,0.95)] p-6 shadow-lg backdrop-blur-lg"
-      >
-        <h3 className="mb-4 text-lg font-medium">Send Message</h3>
-        <div className="space-y-4">
-          <FormField
-            label="Message"
-            type="textarea"
-            id="message"
-            rows={4}
-            value={newMessage}
-            onChange={e => setNewMessage(e.target.value)}
-            placeholder="Type your message here..."
-            backgroundStyle="dark"
-          />
-          <div className="flex justify-end">
-            <Button type="submit" variant="primary" disabled={!newMessage.trim()} rightIcon={<SendIcon />}>
-              Send Message
-            </Button>
+      <form onSubmit={handleSendMessage}>
+        <Card variant="darkStrong" width="100%" maxWidth="none">
+          <h3 className="mb-4 text-lg font-medium">Send Message</h3>
+          <div className="space-y-4">
+            <FormField
+              label="Message"
+              type="textarea"
+              id="message"
+              rows={4}
+              value={newMessage}
+              onChange={e => setNewMessage(e.target.value)}
+              placeholder="Type your message here..."
+              backgroundStyle="dark"
+            />
+            <div className="flex justify-end">
+              <Button type="submit" variant="primary" disabled={!newMessage.trim()} rightIcon={<SendIcon />}>
+                Send Message
+              </Button>
+            </div>
           </div>
-        </div>
+        </Card>
       </form>
     </div>
   );

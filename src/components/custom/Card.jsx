@@ -8,7 +8,7 @@ export const Card = ({
   topBorderColor,
   width = "90%",
   maxWidth = "500px",
-  padding = "30px 30px", // Smanjeno sa 40px na 30px za vertikalni padding
+  padding = "30px 30px",
   bgGradientFrom = "#0f0f0f",
   bgGradientTo = "#1a1a1a",
   borderRadius = "15px",
@@ -18,36 +18,131 @@ export const Card = ({
   borderTop = true,
   showLogo = false,
   logoTagline = "",
+  // New variant and hover props
+  variant,
+  hover = false,
+  // Hover props
+  hoverTranslateY = "",
+  hoverBorderColor = "",
+  hoverShadow = "",
+  hoverBgGradientFrom = "",
+  hoverBgGradientTo = "",
   ...otherProps
-}) => (
-  <div
-    className={`relative z-10 flex flex-col items-center overflow-hidden text-center backdrop-blur-sm ${className} min-h-max`}
-    style={{
-      width: width,
-      maxWidth: maxWidth,
-      padding: padding,
-      backgroundImage: `linear-gradient(to bottom right, ${bgGradientFrom}, ${bgGradientTo})`,
-      borderRadius: borderRadius,
-      boxShadow: shadow,
-      border: `1px solid ${borderColor}`,
-    }}
-    {...otherProps}
-  >
-    {borderTop && <div className="marble-effect"></div>}
+}) => {
+  // Set styles based on variant
+  let variantClassName = "";
 
-    {topBorderColor && (
-      <div
-        className="absolute left-0 top-0 h-[5px] w-full bg-gradient-to-r bg-[length:200%_100%]"
-        style={{
-          backgroundImage: `linear-gradient(to right, ${topBorderColor}, ${
-            topBorderColor === "#ff7800" ? "#ffa500" : topBorderColor
-          }, ${topBorderColor})`,
-        }}
-      ></div>
-    )}
+  if (variant === "darkStrong") {
+    // Base dashboard styling
+    borderColor = "#222";
+    bgGradientFrom = "rgba(20,20,20,0.95)";
+    bgGradientTo = "rgba(20,20,20,0.95)";
+    borderTop = false;
+    padding = "24px"; // p-6
+    borderRadius = "16px"; // rounded-2xl
+    shadow = "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)"; // shadow-lg
+    variantClassName = "z-30 backdrop-blur-lg";
 
-    {showLogo && <BrandLogo logoTagline={logoTagline} />}
+    // Apply hover effects if hover prop is true
+    if (hover && !hoverBorderColor) {
+      hoverBorderColor = "#FF6B00";
+      hoverShadow = "0 15px 30px -10px rgba(255,107,0,0.2)";
+      variantClassName += " transition-all duration-300 ease-in-out";
+    }
+  } else if (variant === "dark") {
+    // New dark variant styling
+    borderColor = "#333";
+    bgGradientFrom = "rgba(30,30,30,0.8)";
+    bgGradientTo = "rgba(30,30,30,0.8)";
+    borderTop = false;
+    padding = "16px"; // p-4
+    borderRadius = "16px"; // rounded-2xl
+    shadow = "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)"; // shadow-lg
+    variantClassName = "z-30 backdrop-blur-lg";
 
-    {children}
-  </div>
-);
+    // Apply hover effects if hover prop is true
+    if (hover && !hoverBorderColor) {
+      hoverBorderColor = "#FF6B00";
+      hoverShadow = "0 15px 30px -10px rgba(255,107,0,0.2)";
+      variantClassName += " transition-all duration-300 ease-in-out";
+    }
+  } else if (variant === "entityCard") {
+    // Trainer card specific styling
+    borderColor = "#333";
+    bgGradientFrom = "rgba(30,30,30,0.8)";
+    bgGradientTo = "rgba(30,30,30,0.8)";
+    borderTop = false;
+    padding = "20px"; // p-5
+    borderRadius = "16px"; // rounded-2xl
+    shadow = "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)"; // shadow-lg
+    hoverTranslateY = "-3px";
+    hoverBorderColor = "#FF6B00";
+    hoverShadow = "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"; // shadow-xl
+    variantClassName =
+      "flex flex-row gap-5 overflow-hidden relative w-full max-w-full md:w-[calc(50%-10px)] md:min-w-[450px] transition-all duration-300 group";
+  }
+
+  // If hover is true and no variant-specific hover effects are set
+  if (hover && !hoverBorderColor) {
+    hoverBorderColor = "#FF6B00";
+    hoverShadow = "0 15px 30px -10px rgba(255,107,0,0.2)";
+    variantClassName += " transition-all duration-300 ease-in-out";
+  }
+
+  return (
+    <div
+      className={`relative z-10 flex flex-col ${variant?.startsWith("dark") ? "" : variant === "entityCard" ? "text-left" : "items-center text-center"} overflow-hidden ${variantClassName} ${className} min-h-max ${
+        hoverTranslateY ? `hover:translate-y-[${hoverTranslateY}]` : ""
+      } transition-all duration-300`}
+      style={{
+        width: width,
+        maxWidth: maxWidth,
+        padding: padding,
+        backgroundImage: `linear-gradient(to bottom right, ${bgGradientFrom}, ${bgGradientTo})`,
+        borderRadius: borderRadius,
+        boxShadow: shadow,
+        border: `1px solid ${borderColor}`,
+        "--hover-border-color": hoverBorderColor || borderColor,
+        "--hover-shadow": hoverShadow || shadow,
+        "--hover-bg-from": hoverBgGradientFrom || bgGradientFrom,
+        "--hover-bg-to": hoverBgGradientTo || bgGradientTo,
+        transition: "all 0.3s ease",
+      }}
+      onMouseEnter={e => {
+        if (hoverBorderColor) e.currentTarget.style.borderColor = hoverBorderColor;
+        if (hoverShadow) e.currentTarget.style.boxShadow = hoverShadow;
+        if (hoverBgGradientFrom && hoverBgGradientTo) {
+          e.currentTarget.style.backgroundImage = `linear-gradient(to bottom right, ${hoverBgGradientFrom}, ${hoverBgGradientTo})`;
+        }
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.borderColor = borderColor;
+        e.currentTarget.style.boxShadow = shadow;
+        e.currentTarget.style.backgroundImage = `linear-gradient(to bottom right, ${bgGradientFrom}, ${bgGradientTo})`;
+      }}
+      {...otherProps}
+    >
+      {borderTop && <div className="marble-effect"></div>}
+
+      {topBorderColor && (
+        <div
+          className="absolute left-0 top-0 h-[5px] w-full bg-gradient-to-r bg-[length:200%_100%]"
+          style={{
+            backgroundImage: `linear-gradient(to right, ${topBorderColor}, ${
+              topBorderColor === "#ff7800" ? "#ffa500" : topBorderColor
+            }, ${topBorderColor})`,
+          }}
+        ></div>
+      )}
+
+      {/* Add left orange bar for trainer card variant */}
+      {variant === "entityCard" && (
+        <div className="absolute left-0 top-0 h-full w-1 scale-y-[0.4] transform bg-[#FF6B00] transition-transform duration-300 ease-in-out hover:scale-y-100 group-hover:scale-y-100"></div>
+      )}
+
+      {showLogo && <BrandLogo logoTagline={logoTagline} />}
+
+      {children}
+    </div>
+  );
+};

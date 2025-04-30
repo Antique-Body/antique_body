@@ -2,6 +2,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
+import { Card } from "@/components/custom/Card";
 import { FormField } from "@/components/shared";
 
 const NewClientsPage = () => {
@@ -75,28 +76,35 @@ const NewClientsPage = () => {
           </div>
         ) : (
           filteredClients.map(client => (
-            <div
-              key={client.id}
-              className="overflow-hidden rounded-xl border border-[#333] bg-[rgba(20,20,20,0.9)] transition-all duration-300 hover:border-[#FF6B00]"
-            >
-              {/* Header with name and date */}
-              <div className="flex items-center justify-between border-b border-[#333] bg-[rgba(30,30,30,0.9)] px-5 py-3">
-                <div>
-                  <h3 className="text-lg font-semibold">{client.name}</h3>
-                  <p className="text-xs text-gray-400">Requested: {client.requestDate}</p>
+            <Card key={client.id} variant="entityCard" width="100%" maxWidth="100%" className="overflow-hidden">
+              {/* Card content goes here */}
+              <div className="flex-1">
+                {/* Header with name and date */}
+                <div className="-mx-5 -mt-5 mb-4 flex items-center justify-between border-b border-[#333] bg-[rgba(30,30,30,0.9)] px-5 py-3">
+                  <div>
+                    <h3 className="text-lg font-semibold transition-colors duration-300 group-hover:text-[#FF6B00]">
+                      {client.name}
+                    </h3>
+                    <p className="text-xs text-gray-400">Requested: {client.requestDate}</p>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="subtle"
+                      size="small"
+                      className="transition-transform duration-300 group-hover:-translate-y-0.5"
+                    >
+                      Message
+                    </Button>
+                    <Button
+                      variant="orangeFilled"
+                      size="small"
+                      className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:scale-105"
+                    >
+                      Accept
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex space-x-2">
-                  <Button variant="subtle" size="small">
-                    Message
-                  </Button>
-                  <Button variant="orangeFilled" size="small">
-                    Accept
-                  </Button>
-                </div>
-              </div>
 
-              {/* Main content */}
-              <div className="p-5">
                 {/* Primary info section */}
                 <div className="mb-4 border-b border-[#333] pb-4">
                   <h4 className="mb-2 text-sm font-semibold text-white/90">Training Goals</h4>
@@ -131,7 +139,7 @@ const NewClientsPage = () => {
                   <p className="text-sm italic text-white/80">{client.notes}</p>
                 </div>
               </div>
-            </div>
+            </Card>
           ))
         )}
       </div>
