@@ -1,5 +1,6 @@
-import { stepConfig, TOTAL_STEPS } from "@/app/utils";
 import { useState } from "react";
+
+import { stepConfig, TOTAL_STEPS } from "@/app/utils";
 
 export const useWorkoutForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -32,9 +33,7 @@ export const useWorkoutForm = () => {
   };
 
   const isCurrentStepSelected = () => {
-    const currentStepConfig = stepConfig.find(
-      (step) => step.stepNumber === currentStep
-    );
+    const currentStepConfig = stepConfig.find(step => step.stepNumber === currentStep);
     return userSelections[currentStepConfig.field] !== null;
   };
 

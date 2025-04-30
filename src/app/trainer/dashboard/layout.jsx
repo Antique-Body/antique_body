@@ -1,144 +1,129 @@
 "use client";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import { Button } from "@/components/common/Button";
 import { BellIcon, SettingsIcon } from "@/components/common/Icons";
 import { AntiqueBodyLogo } from "@/components/custom/BrandLogo";
 import { BackgroundShapes, DashboardTabs } from "@/components/custom/shared";
 import { ClientModal, CreatePlanModal, TrainerProfile } from "@/components/custom/trainer/dashboard/components";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function TrainerDashboardLayout({ children }) {
-    const router = useRouter();
-    const pathname = usePathname();
+  const router = useRouter();
+  const pathname = usePathname();
 
-    // Map pathname to tab ID
-    const getActiveTabFromPath = path => {
-        if (path.includes("/newclients")) return "newClients";
-        if (path.includes("/clients")) return "clients";
-        if (path.includes("/sessions")) return "sessions";
-        if (path.includes("/messages")) return "messages";
-        if (path.includes("/plans")) return "plans";
-        return "newClients"; // Default tab
-    };
+  // Map pathname to tab ID
+  const getActiveTabFromPath = path => {
+    if (path.includes("/newclients")) return "newClients";
+    if (path.includes("/clients")) return "clients";
+    if (path.includes("/sessions")) return "sessions";
+    if (path.includes("/messages")) return "messages";
+    if (path.includes("/plans")) return "plans";
+    return "newClients"; // Default tab
+  };
 
-    const [activeTab, setActiveTab] = useState(getActiveTabFromPath(pathname));
-    const [showClientModal, setShowClientModal] = useState(false);
-    const [showCreatePlanModal, setShowCreatePlanModal] = useState(false);
-    const [showSessionModal, setShowSessionModal] = useState(false);
-    const [selectedSession, setSelectedSession] = useState(null);
-    const [selectedClient, setSelectedClient] = useState(null);
+  const [activeTab, setActiveTab] = useState(getActiveTabFromPath(pathname));
+  const [showClientModal, setShowClientModal] = useState(false);
+  const [showCreatePlanModal, setShowCreatePlanModal] = useState(false);
 
-    // Update active tab when pathname changes
-    useEffect(() => {
-        setActiveTab(getActiveTabFromPath(pathname));
-    }, [pathname]);
+  // Update active tab when pathname changes
+  useEffect(() => {
+    setActiveTab(getActiveTabFromPath(pathname));
+  }, [pathname]);
 
-    // Navigate to appropriate route when tab changes
-    const handleTabChange = tabId => {
-        setActiveTab(tabId);
+  // Navigate to appropriate route when tab changes
+  const handleTabChange = tabId => {
+    setActiveTab(tabId);
 
-        // Navigate to corresponding route
-        switch (tabId) {
-            case "newClients":
-                router.push("/trainer/dashboard/newclients");
-                break;
-            case "clients":
-                router.push("/trainer/dashboard/clients");
-                break;
-            case "sessions":
-                router.push("/trainer/dashboard/sessions");
-                break;
-            case "messages":
-                router.push("/trainer/dashboard/messages");
-                break;
-            case "plans":
-                router.push("/trainer/dashboard/plans");
-                break;
-            default:
-                router.push("/trainer/dashboard/newclients");
-        }
-    };
+    // Navigate to corresponding route
+    switch (tabId) {
+      case "newClients":
+        router.push("/trainer/dashboard/newclients");
+        break;
+      case "clients":
+        router.push("/trainer/dashboard/clients");
+        break;
+      case "sessions":
+        router.push("/trainer/dashboard/sessions");
+        break;
+      case "messages":
+        router.push("/trainer/dashboard/messages");
+        break;
+      case "plans":
+        router.push("/trainer/dashboard/plans");
+        break;
+      default:
+        router.push("/trainer/dashboard/newclients");
+    }
+  };
 
-    // Sample data for the trainer dashboard
-    const trainerData = {
-        name: "Alex Miller",
-        specialty: "Football Conditioning Specialist",
-        certifications: ["UEFA A License", "NSCA CSCS"],
-        experience: "8 years",
-        rating: 4.8,
-        clients: [
-            { id: 1, name: "John Doe", status: "active" },
-            { id: 2, name: "Jane Smith", status: "inactive" },
-            { id: 3, name: "Mike Johnson", status: "active" },
-        ],
-        totalSessions: 563,
-        totalEarnings: 12450,
-        upcomingSessions: 8,
-    };
+  // Sample data for the trainer dashboard
+  const trainerData = {
+    name: "Alex Miller",
+    specialty: "Football Conditioning Specialist",
+    certifications: ["UEFA A License", "NSCA CSCS"],
+    experience: "8 years",
+    rating: 4.8,
+    clients: [
+      { id: 1, name: "John Doe", status: "active" },
+      { id: 2, name: "Jane Smith", status: "inactive" },
+      { id: 3, name: "Mike Johnson", status: "active" },
+    ],
+    totalSessions: 563,
+    totalEarnings: 12450,
+    upcomingSessions: 8,
+  };
 
-    // Function to close the session modal
-    const closeSessionModal = () => {
-        setShowSessionModal(false);
-        setSelectedSession(null);
-    };
+  // Function to close the create plan modal
+  const closeCreatePlanModal = () => {
+    setShowCreatePlanModal(false);
+  };
 
-    // Function to open create plan modal
-    const handleCreatePlan = () => {
-        setShowCreatePlanModal(true);
-    };
+  // Get the count of unread messages
+  const unreadMessagesCount = 2; // Placeholder value
+  const tabsConfig = [
+    { id: "newClients", label: "New Clients" },
+    { id: "clients", label: "Clients" },
+    { id: "sessions", label: "Sessions" },
+    { id: "messages", label: "Messages", badgeCount: unreadMessagesCount },
+    { id: "plans", label: "Plans" },
+  ];
 
-    // Function to close the create plan modal
-    const closeCreatePlanModal = () => {
-        setShowCreatePlanModal(false);
-    };
+  return (
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
+      <BackgroundShapes />
 
-    // Get the count of unread messages
-    const unreadMessagesCount = 2; // Placeholder value
-    const tabsConfig = [
-        { id: "newClients", label: "New Clients" },
-        { id: "clients", label: "Clients" },
-        { id: "sessions", label: "Sessions" },
-        { id: "messages", label: "Messages", badgeCount: unreadMessagesCount },
-        { id: "plans", label: "Plans" },
-    ];
-
-    return (
-        <div className="min-h-screen bg-[#0a0a0a] text-white">
-            <BackgroundShapes />
-
-            <div className="max-w-screen-xl mx-auto px-4 py-6 relative z-10">
-                <div className="flex justify-between items-center mb-8">
-                    <AntiqueBodyLogo />
-                    <div className="flex items-center gap-4">
-                        <Button variant="ghost" className="bg-[rgba(30,30,30,0.8)] rounded-full p-2">
-                            <BellIcon size={24} />
-                        </Button>
-                        <Button variant="ghost" className="bg-[rgba(30,30,30,0.8)] rounded-full p-2">
-                            <SettingsIcon size={24} />
-                        </Button>
-                    </div>
-                </div>
-
-                <div className="flex flex-col gap-6">
-                    {/* Trainer profile section (top) */}
-                    <TrainerProfile trainerData={trainerData} />
-
-                    {/* Tabs and main content section */}
-                    <div>
-                        <DashboardTabs activeTab={activeTab} setActiveTab={handleTabChange} tabs={tabsConfig} />
-
-                        {/* Render the nested page content */}
-                        <div className="mt-6">{children}</div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Modals */}
-            {showClientModal && selectedClient && (
-                <ClientModal client={selectedClient} onClose={() => setShowClientModal(false)} />
-            )}
-
-            {showCreatePlanModal && <CreatePlanModal onClose={closeCreatePlanModal} />}
+      <div className="relative z-10 mx-auto max-w-screen-xl px-4 py-6">
+        <div className="mb-8 flex items-center justify-between">
+          <AntiqueBodyLogo />
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" className="rounded-full bg-[rgba(30,30,30,0.8)] p-2">
+              <BellIcon size={24} />
+            </Button>
+            <Button variant="ghost" className="rounded-full bg-[rgba(30,30,30,0.8)] p-2">
+              <SettingsIcon size={24} />
+            </Button>
+          </div>
         </div>
-    );
+
+        <div className="flex flex-col gap-6">
+          {/* Trainer profile section (top) */}
+          <TrainerProfile trainerData={trainerData} />
+
+          {/* Tabs and main content section */}
+          <div>
+            <DashboardTabs activeTab={activeTab} setActiveTab={handleTabChange} tabs={tabsConfig} />
+
+            {/* Render the nested page content */}
+            <div className="mt-6">{children}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Modals */}
+      {showClientModal && <ClientModal client={null} onClose={() => setShowClientModal(false)} />}
+
+      {showCreatePlanModal && <CreatePlanModal onClose={closeCreatePlanModal} />}
+    </div>
+  );
 }

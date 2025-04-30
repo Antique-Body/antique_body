@@ -1,45 +1,39 @@
+import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 // Validation helpers
 const validators = {
-  environment: (value) => ["gym", "outside"].includes(value),
-  equipment: (value) => ["with_equipment", "no_equipment"].includes(value),
-  experience: (value) => ["beginner", "intermediate", "advanced", "expert"].includes(value),
-  goal: (value) => ["strength", "muscle", "lose_weight", "endurance"].includes(value),
-  frequency: (value) => {
+  environment: value => ["gym", "outside"].includes(value),
+  equipment: value => ["with_equipment", "no_equipment"].includes(value),
+  experience: value => ["beginner", "intermediate", "advanced", "expert"].includes(value),
+  goal: value => ["strength", "muscle", "lose_weight", "endurance"].includes(value),
+  frequency: value => {
     const num = Number(value);
     return !isNaN(num) && num >= 1 && num <= 7;
   },
-  measurements: (weight, height, bmi) => {
-    return (
-      typeof weight === "number" &&
-      typeof height === "number" &&
-      typeof bmi === "number" &&
-      weight > 0 &&
-      height > 0 &&
-      bmi > 0
-    );
-  }
+  measurements: (weight, height, bmi) =>
+    typeof weight === "number" &&
+    typeof height === "number" &&
+    typeof bmi === "number" &&
+    weight > 0 &&
+    height > 0 &&
+    bmi > 0,
 };
 
 // Error response helper
-const errorResponse = (message, details = null, status = 400) => {
-  return NextResponse.json(
-    { error: message, ...(details && { details }) },
-    { status }
-  );
-};
+const errorResponse = (message, details = null, status = 400) =>
+  NextResponse.json({ error: message, ...(details && { details }) }, { status });
 
 // Extract and validate data from request
-const extractAndValidateData = (body) => {
+const extractAndValidateData = body => {
   // Extract measurements from the measurements object if it exists
   const { measurements, environment, equipment, experience, goal, frequency } = body;
-  
+
   // Get weight, height, and bmi from measurements object or directly from body
   const weight = measurements?.weight || body.weight;
   const height = measurements?.height || body.height;
@@ -60,7 +54,10 @@ const extractAndValidateData = (body) => {
   }
 
   if (!validators.experience(experience)) {
-    return { error: "Invalid experience value", details: "Must be 'beginner', 'intermediate', 'advanced', or 'expert'" };
+    return {
+      error: "Invalid experience value",
+      details: "Must be 'beginner', 'intermediate', 'advanced', or 'expert'",
+    };
   }
 
   if (!validators.goal(goal)) {
@@ -86,8 +83,8 @@ const extractAndValidateData = (body) => {
       equipment,
       experience,
       goal,
-      frequency: parseInt(frequency, 10)
-    }
+      frequency: parseInt(frequency, 10),
+    },
   };
 };
 
@@ -99,7 +96,7 @@ const saveUserPreferences = async (userId, data) => {
       update: data,
       create: {
         userId,
-        ...data
+        ...data,
       },
     });
   } catch (error) {
@@ -119,7 +116,7 @@ export async function POST(request) {
     // Parse and validate request body
     const body = await request.json();
     const validationResult = extractAndValidateData(body);
-    
+
     if (validationResult.error) {
       return errorResponse(validationResult.error, validationResult.details);
     }
@@ -135,14 +132,14 @@ export async function POST(request) {
 
     // Save user preferences
     const result = await saveUserPreferences(user.id, validationResult.data);
-    
+
     // Update the session to reflect that training setup is completed
     session.user.hasCompletedTrainingSetup = true;
-    
+
     // Return success response
     return NextResponse.json({
       preferences: result,
-      hasCompletedTrainingSetup: true
+      hasCompletedTrainingSetup: true,
     });
   } catch (error) {
     console.error("Error saving training setup:", error);

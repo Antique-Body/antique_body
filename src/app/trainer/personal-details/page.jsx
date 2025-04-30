@@ -1,4 +1,6 @@
 "use client";
+import { useState } from "react";
+
 import Background from "@/components/background";
 import { Button, StepProgressBar } from "@/components/common";
 import { Footer } from "@/components/common/Footer";
@@ -6,296 +8,290 @@ import { ArrowRight } from "@/components/common/Icons";
 import { AntiqueBodyLogo } from "@/components/custom/BrandLogo";
 import { TipsSection } from "@/components/custom/shared/TipsSection";
 import {
-    BasicInfoStep,
-    ProfessionalDetailsStep,
-    ProfileAndContactStep,
-    VenuesAndSpecialtiesStep,
+  BasicInfoStep,
+  ProfessionalDetailsStep,
+  ProfileAndContactStep,
+  VenuesAndSpecialtiesStep,
 } from "@/components/custom/trainer/personal-details/steps";
-import { useState } from "react";
 
 const TrainerRegistration = () => {
-    const [formData, setFormData] = useState({
-        name: "",
-        specialty: "",
-        certifications: [""],
-        yearsExperience: "",
-        bio: "",
-        location: {
-            city: "",
-            state: "",
-            country: "",
+  const [formData, setFormData] = useState({
+    name: "",
+    specialty: "",
+    certifications: [""],
+    yearsExperience: "",
+    bio: "",
+    location: {
+      city: "",
+      state: "",
+      country: "",
+    },
+    trainingVenues: [""],
+    sports: [],
+    contactEmail: "",
+    contactPhone: "",
+    profileImage: null,
+  });
+
+  const [previewImage, setPreviewImage] = useState(null);
+  const [step, setStep] = useState(1);
+  const [certFields, setCertFields] = useState([{ id: 1, value: "" }]);
+  const [venueFields, setVenueFields] = useState([{ id: 1, value: "" }]);
+
+  // Available sports options
+  const sportsOptions = [
+    "Weightlifting",
+    "CrossFit",
+    "HIIT",
+    "Yoga",
+    "Pilates",
+    "Running",
+    "Cycling",
+    "Swimming",
+    "Basketball",
+    "Football",
+    "Soccer",
+    "Tennis",
+    "Volleyball",
+    "Boxing",
+    "MMA",
+    "Gymnastics",
+    "Track & Field",
+    "Golf",
+    "Powerlifting",
+    "Olympic Lifting",
+    "Bodybuilding",
+    "Functional Training",
+    "Rehabilitation",
+    "Senior Fitness",
+  ];
+
+  // Handle form input changes
+  const handleChange = e => {
+    const { name, value } = e.target;
+
+    if (name.includes(".")) {
+      // Handle nested objects like location.city
+      const [parent, child] = name.split(".");
+      setFormData({
+        ...formData,
+        [parent]: {
+          ...formData[parent],
+          [child]: value,
         },
-        trainingVenues: [""],
-        sports: [],
-        contactEmail: "",
-        contactPhone: "",
-        profileImage: null,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+
+  // Handle sports selection toggle
+  const handleSportToggle = sport => {
+    if (formData.sports.includes(sport)) {
+      setFormData({
+        ...formData,
+        sports: formData.sports.filter(s => s !== sport),
+      });
+    } else {
+      setFormData({
+        ...formData,
+        sports: [...formData.sports, sport],
+      });
+    }
+  };
+
+  // Handle certification fields
+  const handleCertChange = (id, value) => {
+    const updatedFields = certFields.map(field => (field.id === id ? { ...field, value } : field));
+    setCertFields(updatedFields);
+
+    // Update form data with certification values
+    setFormData({
+      ...formData,
+      certifications: updatedFields.map(field => field.value).filter(value => value !== ""),
     });
+  };
 
-    const [previewImage, setPreviewImage] = useState(null);
-    const [step, setStep] = useState(1);
-    const [certFields, setCertFields] = useState([{ id: 1, value: "" }]);
-    const [venueFields, setVenueFields] = useState([{ id: 1, value: "" }]);
+  // Add new certification field
+  const addCertField = () => {
+    const newField = { id: certFields.length + 1, value: "" };
+    setCertFields([...certFields, newField]);
+  };
 
-    // Available sports options
-    const sportsOptions = [
-        "Weightlifting",
-        "CrossFit",
-        "HIIT",
-        "Yoga",
-        "Pilates",
-        "Running",
-        "Cycling",
-        "Swimming",
-        "Basketball",
-        "Football",
-        "Soccer",
-        "Tennis",
-        "Volleyball",
-        "Boxing",
-        "MMA",
-        "Gymnastics",
-        "Track & Field",
-        "Golf",
-        "Powerlifting",
-        "Olympic Lifting",
-        "Bodybuilding",
-        "Functional Training",
-        "Rehabilitation",
-        "Senior Fitness",
-    ];
+  // Remove certification field
+  const removeCertField = id => {
+    if (certFields.length > 1) {
+      const updatedFields = certFields.filter(field => field.id !== id);
+      setCertFields(updatedFields);
 
-    // Handle form input changes
-    const handleChange = e => {
-        const { name, value } = e.target;
+      // Update form data
+      setFormData({
+        ...formData,
+        certifications: updatedFields.map(field => field.value).filter(value => value !== ""),
+      });
+    }
+  };
 
-        if (name.includes(".")) {
-            // Handle nested objects like location.city
-            const [parent, child] = name.split(".");
-            setFormData({
-                ...formData,
-                [parent]: {
-                    ...formData[parent],
-                    [child]: value,
-                },
-            });
-        } else {
-            setFormData({
-                ...formData,
-                [name]: value,
-            });
-        }
-    };
+  // Handle venue fields
+  const handleVenueChange = (id, value) => {
+    const updatedFields = venueFields.map(field => (field.id === id ? { ...field, value } : field));
+    setVenueFields(updatedFields);
 
-    // Handle sports selection toggle
-    const handleSportToggle = sport => {
-        if (formData.sports.includes(sport)) {
-            setFormData({
-                ...formData,
-                sports: formData.sports.filter(s => s !== sport),
-            });
-        } else {
-            setFormData({
-                ...formData,
-                sports: [...formData.sports, sport],
-            });
-        }
-    };
+    // Update form data with venue values
+    setFormData({
+      ...formData,
+      trainingVenues: updatedFields.map(field => field.value).filter(value => value !== ""),
+    });
+  };
 
-    // Handle certification fields
-    const handleCertChange = (id, value) => {
-        const updatedFields = certFields.map(field => (field.id === id ? { ...field, value } : field));
-        setCertFields(updatedFields);
+  // Add new venue field
+  const addVenueField = () => {
+    const newField = { id: venueFields.length + 1, value: "" };
+    setVenueFields([...venueFields, newField]);
+  };
 
-        // Update form data with certification values
-        setFormData({
-            ...formData,
-            certifications: updatedFields.map(field => field.value).filter(value => value !== ""),
-        });
-    };
+  // Remove venue field
+  const removeVenueField = id => {
+    if (venueFields.length > 1) {
+      const updatedFields = venueFields.filter(field => field.id !== id);
+      setVenueFields(updatedFields);
 
-    // Add new certification field
-    const addCertField = () => {
-        const newField = { id: certFields.length + 1, value: "" };
-        setCertFields([...certFields, newField]);
-    };
+      // Update form data
+      setFormData({
+        ...formData,
+        trainingVenues: updatedFields.map(field => field.value).filter(value => value !== ""),
+      });
+    }
+  };
 
-    // Remove certification field
-    const removeCertField = id => {
-        if (certFields.length > 1) {
-            const updatedFields = certFields.filter(field => field.id !== id);
-            setCertFields(updatedFields);
+  // Handle image upload
+  const handleImageUpload = e => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData({
+        ...formData,
+        profileImage: file,
+      });
 
-            // Update form data
-            setFormData({
-                ...formData,
-                certifications: updatedFields.map(field => field.value).filter(value => value !== ""),
-            });
-        }
-    };
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = () => {
+        setPreviewImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-    // Handle venue fields
-    const handleVenueChange = (id, value) => {
-        const updatedFields = venueFields.map(field => (field.id === id ? { ...field, value } : field));
-        setVenueFields(updatedFields);
+  // Handle form submission
+  const handleSubmit = e => {
+    e.preventDefault();
+    window.location.href = "/trainer/dashboard";
+  };
 
-        // Update form data with venue values
-        setFormData({
-            ...formData,
-            trainingVenues: updatedFields.map(field => field.value).filter(value => value !== ""),
-        });
-    };
+  // Move to next step
+  const goToNextStep = e => {
+    e.preventDefault();
+    setStep(step + 1);
+    window.scrollTo(0, 0);
+  };
 
-    // Add new venue field
-    const addVenueField = () => {
-        const newField = { id: venueFields.length + 1, value: "" };
-        setVenueFields([...venueFields, newField]);
-    };
+  // Move to previous step
+  const goToPrevStep = e => {
+    e.preventDefault();
+    setStep(step - 1);
+    window.scrollTo(0, 0);
+  };
 
-    // Remove venue field
-    const removeVenueField = id => {
-        if (venueFields.length > 1) {
-            const updatedFields = venueFields.filter(field => field.id !== id);
-            setVenueFields(updatedFields);
+  return (
+    <div className="relative min-h-screen bg-[#0a0a0a] text-white">
+      <Background />
+      <div className="relative z-10 mx-auto max-w-4xl px-4 py-8">
+        {/* Header */}
+        <header className="mb-8 flex items-center justify-center py-4">
+          <AntiqueBodyLogo />
+        </header>
 
-            // Update form data
-            setFormData({
-                ...formData,
-                trainingVenues: updatedFields.map(field => field.value).filter(value => value !== ""),
-            });
-        }
-    };
+        {/* Progress Bar */}
+        <StepProgressBar currentStep={step} totalSteps={4} />
 
-    // Handle image upload
-    const handleImageUpload = e => {
-        const file = e.target.files[0];
-        if (file) {
-            setFormData({
-                ...formData,
-                profileImage: file,
-            });
+        <div className="mb-12 rounded-2xl border border-[#222] bg-[rgba(20,20,20,0.95)] p-6 shadow-lg backdrop-blur-lg md:p-8">
+          <h1 className="mb-6 text-2xl font-bold md:text-3xl">
+            {step === 1 && "Basic Information"}
+            {step === 2 && "Professional Details"}
+            {step === 3 && "Training Venues & Specialties"}
+            {step === 4 && "Profile Image & Contact"}
+          </h1>
 
-            // Create preview URL
-            const reader = new FileReader();
-            reader.onload = () => {
-                setPreviewImage(reader.result);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
+          <form onSubmit={handleSubmit}>
+            {/* Step 1: Basic Information */}
+            {step === 1 && <BasicInfoStep formData={formData} onChange={handleChange} userType="trainer" />}
 
-    // Handle form submission
-    const handleSubmit = e => {
-        e.preventDefault();
-        console.log("Submitting profile data:", formData);
-        window.location.href = "/trainer/dashboard";
-    };
+            {/* Step 2: Professional Details */}
+            {step === 2 && (
+              <ProfessionalDetailsStep
+                formData={formData}
+                onChange={handleChange}
+                certFields={certFields}
+                handleCertChange={handleCertChange}
+                addCertField={addCertField}
+                removeCertField={removeCertField}
+              />
+            )}
 
-    // Move to next step
-    const goToNextStep = e => {
-        e.preventDefault();
-        setStep(step + 1);
-        window.scrollTo(0, 0);
-    };
+            {/* Step 3: Training Venues & Specialties */}
+            {step === 3 && (
+              <VenuesAndSpecialtiesStep
+                formData={formData}
+                sportsOptions={sportsOptions}
+                handleSportToggle={handleSportToggle}
+                venueFields={venueFields}
+                handleVenueChange={handleVenueChange}
+                addVenueField={addVenueField}
+                removeVenueField={removeVenueField}
+              />
+            )}
 
-    // Move to previous step
-    const goToPrevStep = e => {
-        e.preventDefault();
-        setStep(step - 1);
-        window.scrollTo(0, 0);
-    };
+            {/* Step 4: Profile Image & Contact */}
+            {step === 4 && (
+              <ProfileAndContactStep
+                formData={formData}
+                onChange={handleChange}
+                previewImage={previewImage}
+                handleImageUpload={handleImageUpload}
+              />
+            )}
 
-    return (
-        <div className="min-h-screen bg-[#0a0a0a] text-white relative">
-            <Background />
-            <div className="relative z-10 max-w-4xl mx-auto px-4 py-8">
-                {/* Header */}
-                <header className="py-4 flex items-center justify-center mb-8">
-                    <AntiqueBodyLogo />
-                </header>
+            {/* Navigation buttons */}
+            <div className="mt-8 flex justify-between">
+              {step > 1 ? (
+                <Button onClick={goToPrevStep} variant="secondary" type="button">
+                  Back
+                </Button>
+              ) : (
+                <div></div>
+              )}
 
-                {/* Progress Bar */}
-                <StepProgressBar currentStep={step} totalSteps={4} />
-
-                <div className="bg-[rgba(20,20,20,0.95)] rounded-2xl p-6 md:p-8 backdrop-blur-lg border border-[#222] shadow-lg mb-12">
-                    <h1 className="text-2xl md:text-3xl font-bold mb-6">
-                        {step === 1 && "Basic Information"}
-                        {step === 2 && "Professional Details"}
-                        {step === 3 && "Training Venues & Specialties"}
-                        {step === 4 && "Profile Image & Contact"}
-                    </h1>
-
-                    <form onSubmit={handleSubmit}>
-                        {/* Step 1: Basic Information */}
-                        {step === 1 && <BasicInfoStep formData={formData} onChange={handleChange} userType="trainer" />}
-
-                        {/* Step 2: Professional Details */}
-                        {step === 2 && (
-                            <ProfessionalDetailsStep
-                                formData={formData}
-                                onChange={handleChange}
-                                certFields={certFields}
-                                handleCertChange={handleCertChange}
-                                addCertField={addCertField}
-                                removeCertField={removeCertField}
-                            />
-                        )}
-
-                        {/* Step 3: Training Venues & Specialties */}
-                        {step === 3 && (
-                            <VenuesAndSpecialtiesStep
-                                formData={formData}
-                                sportsOptions={sportsOptions}
-                                handleSportToggle={handleSportToggle}
-                                venueFields={venueFields}
-                                handleVenueChange={handleVenueChange}
-                                addVenueField={addVenueField}
-                                removeVenueField={removeVenueField}
-                            />
-                        )}
-
-                        {/* Step 4: Profile Image & Contact */}
-                        {step === 4 && (
-                            <ProfileAndContactStep
-                                formData={formData}
-                                onChange={handleChange}
-                                previewImage={previewImage}
-                                handleImageUpload={handleImageUpload}
-                            />
-                        )}
-
-                        {/* Navigation buttons */}
-                        <div className="flex justify-between mt-8">
-                            {step > 1 ? (
-                                <Button onClick={goToPrevStep} variant="secondary" type="button">
-                                    Back
-                                </Button>
-                            ) : (
-                                <div></div>
-                            )}
-
-                            {step < 4 ? (
-                                <Button
-                                    onClick={goToNextStep}
-                                    type="button"
-                                    disabled={step === 3 && formData.sports.length === 0}
-                                >
-                                    Continue
-                                </Button>
-                            ) : (
-                                <Button type="submit" rightIcon={<ArrowRight size={20} />}>
-                                    Complete Profile
-                                </Button>
-                            )}
-                        </div>
-                    </form>
-                </div>
-                <TipsSection step={step} userType="trainer" />
-
-                <Footer />
+              {step < 4 ? (
+                <Button onClick={goToNextStep} type="button" disabled={step === 3 && formData.sports.length === 0}>
+                  Continue
+                </Button>
+              ) : (
+                <Button type="submit" rightIcon={<ArrowRight size={20} />}>
+                  Complete Profile
+                </Button>
+              )}
             </div>
+          </form>
         </div>
-    );
+        <TipsSection step={step} userType="trainer" />
+
+        <Footer />
+      </div>
+    </div>
+  );
 };
 
 export default TrainerRegistration;

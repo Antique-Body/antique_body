@@ -1,18 +1,14 @@
 "use client";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
+
 import { Button } from "../common/Button";
 import { GoogleIcon } from "../common/Icons";
 import { TextField } from "../common/TextField";
+
 import { useAuth } from "./AuthContext";
 
-export const AuthForm = ({
-  onSubmit,
-  loading,
-  error,
-  isLogin = true,
-  googleSignIn = true,
-}) => {
+export const AuthForm = ({ onSubmit, loading, error, isLogin = true, googleSignIn = true }) => {
   const { isLoading: authLoading } = useAuth();
   const {
     register,
@@ -20,20 +16,18 @@ export const AuthForm = ({
     formState: { errors },
   } = useForm();
 
-  const handleGoogleSignIn = (e) => {
+  const handleGoogleSignIn = e => {
     e.preventDefault();
     e.stopPropagation();
     signIn("google", { callbackUrl: "/select-role" });
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 w-full">
-      {error && (
-        <div className="mb-4 text-red-500 text-center text-sm">{error}</div>
-      )}
+    <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-4">
+      {error && <div className="mb-4 text-center text-sm text-red-500">{error}</div>}
 
       {!isLogin && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
           <TextField
             id="name"
             name="name"
@@ -44,13 +38,7 @@ export const AuthForm = ({
             required
           />
 
-          <TextField
-            id="lastName"
-            name="lastName"
-            label="Last Name"
-            register={register}
-            error={errors.lastName}
-          />
+          <TextField id="lastName" name="lastName" label="Last Name" register={register} error={errors.lastName} />
         </div>
       )}
 
@@ -106,7 +94,8 @@ export const AuthForm = ({
       <Button
         type="submit"
         loading={loading || authLoading}
-        className="w-full bg-gradient-to-r from-[#ff7800] to-[#ff5f00] py-2 rounded font-medium text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 disabled:opacity-50">
+        className="w-full rounded bg-gradient-to-r from-[#ff7800] to-[#ff5f00] py-2 font-medium text-white transition-all duration-300 hover:from-[#ff5f00] hover:to-[#ff7800] disabled:opacity-50"
+      >
         {isLogin ? "SIGN IN" : "REGISTER"}
       </Button>
 
@@ -117,17 +106,16 @@ export const AuthForm = ({
               <div className="w-full border-t border-[#333]"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-[#1a1a1a] text-gray-400">
-                Or continue with
-              </span>
+              <span className="bg-[#1a1a1a] px-2 text-gray-400">Or continue with</span>
             </div>
           </div>
 
           <Button
             onClick={handleGoogleSignIn}
             variant="outline"
-            className="mt-6 w-full bg-white text-[#1a1a1a] hover:bg-gray-100 hover:scale-[1.02] transition-all duration-200"
-            leftIcon={<GoogleIcon />}>
+            className="mt-6 w-full bg-white text-[#1a1a1a] transition-all duration-200 hover:scale-[1.02] hover:bg-gray-100"
+            leftIcon={<GoogleIcon />}
+          >
             Sign in with Google
           </Button>
         </div>

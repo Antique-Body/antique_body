@@ -19,35 +19,35 @@ export const Card = ({
   showLogo = false,
   logoTagline = "",
   ...otherProps
-}) => {
-  return (
-    <div
-      className={`relative z-10 backdrop-blur-sm overflow-hidden flex flex-col items-center text-center ${className} min-h-max`}
-      style={{
-        width: width,
-        maxWidth: maxWidth,
-        padding: padding,
-        backgroundImage: `linear-gradient(to bottom right, ${bgGradientFrom}, ${bgGradientTo})`,
-        borderRadius: borderRadius,
-        boxShadow: shadow,
-        border: `1px solid ${borderColor}`,
-      }}
-      {...otherProps}>
-      {borderTop && <div className="marble-effect"></div>}
+}) => (
+  <div
+    className={`relative z-10 flex flex-col items-center overflow-hidden text-center backdrop-blur-sm ${className} min-h-max`}
+    style={{
+      width: width,
+      maxWidth: maxWidth,
+      padding: padding,
+      backgroundImage: `linear-gradient(to bottom right, ${bgGradientFrom}, ${bgGradientTo})`,
+      borderRadius: borderRadius,
+      boxShadow: shadow,
+      border: `1px solid ${borderColor}`,
+    }}
+    {...otherProps}
+  >
+    {borderTop && <div className="marble-effect"></div>}
 
-      {topBorderColor && (
-        <div
-          className="absolute top-0 left-0 w-full h-[5px] bg-gradient-to-r bg-[length:200%_100%]"
-          style={{
-            backgroundImage: `linear-gradient(to right, ${topBorderColor}, ${
-              topBorderColor === "#ff7800" ? "#ffa500" : topBorderColor
-            }, ${topBorderColor})`,
-          }}></div>
-      )}
+    {topBorderColor && (
+      <div
+        className="absolute left-0 top-0 h-[5px] w-full bg-gradient-to-r bg-[length:200%_100%]"
+        style={{
+          backgroundImage: `linear-gradient(to right, ${topBorderColor}, ${
+            topBorderColor === "#ff7800" ? "#ffa500" : topBorderColor
+          }, ${topBorderColor})`,
+        }}
+      ></div>
+    )}
 
-      {showLogo && <BrandLogo logoTagline={logoTagline} />}
+    {showLogo && <BrandLogo logoTagline={logoTagline} />}
 
-      {children}
-    </div>
-  );
-};
+    {children}
+  </div>
+);

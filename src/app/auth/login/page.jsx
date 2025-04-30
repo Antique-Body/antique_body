@@ -1,19 +1,20 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { useState } from "react";
+
 import { AuthForm } from "@/components/auth/AuthForm";
 import Background from "@/components/background";
 import { Card } from "@/components/custom/index";
-import { signIn } from "next-auth/react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (data) => {
+  const handleSubmit = async data => {
     setLoading(true);
     setError("");
 
@@ -39,39 +40,24 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#161616] text-white relative">
-      <Background
-        parthenon={true}
-        runner={true}
-        discus={true}
-        colosseum={true}
-        column={false}
-        vase={false}
-      />
+    <main className="relative min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#161616] text-white">
+      <Background parthenon={true} runner={true} discus={true} colosseum={true} column={false} vase={false} />
 
-      <div className="relative z-10 flex items-center justify-center min-h-screen">
+      <div className="relative z-10 flex min-h-screen items-center justify-center">
         <Card
-          className="w-full max-w-md p-8 bg-zinc-900/80 backdrop-blur-md border border-zinc-800 rounded-xl shadow-2xl"
+          className="w-full max-w-md rounded-xl border border-zinc-800 bg-zinc-900/80 p-8 shadow-2xl backdrop-blur-md"
           borderTop={true}
           showLogo={true}
-          logoTagline="STRENGTH OF THE ANCIENTS">
-          <p className="text-gray-400 mb-8 text-center">
-            Sign in to continue your fitness journey
-          </p>
+          logoTagline="STRENGTH OF THE ANCIENTS"
+        >
+          <p className="mb-8 text-center text-gray-400">Sign in to continue your fitness journey</p>
 
-          <AuthForm
-            onSubmit={handleSubmit}
-            loading={loading}
-            error={error}
-            isLogin={true}
-          />
+          <AuthForm onSubmit={handleSubmit} loading={loading} error={error} isLogin={true} />
 
           <div className="mt-6 text-center">
             <p className="text-gray-400">
               Don't have an account?{" "}
-              <Link
-                href="/auth/register"
-                className="text-[#ff7800] hover:text-[#ff5f00] transition-colors">
+              <Link href="/auth/register" className="text-[#ff7800] transition-colors hover:text-[#ff5f00]">
                 Register
               </Link>
             </p>

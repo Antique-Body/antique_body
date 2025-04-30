@@ -25,7 +25,7 @@ export const authOptions = {
 
         const user = await prismaClient.user.findUnique({
           where: { email: credentials.email },
-          include: { preferences: true }
+          include: { preferences: true },
         });
 
         if (!user) {
@@ -36,10 +36,7 @@ export const authOptions = {
           throw new Error("No password set for this user");
         }
 
-        const isPasswordValid = await compare(
-          credentials.password,
-          user.password
-        );
+        const isPasswordValid = await compare(credentials.password, user.password);
 
         if (!isPasswordValid) {
           throw new Error("Invalid password");
@@ -50,17 +47,17 @@ export const authOptions = {
           name: user.name,
           email: user.email,
           role: user.role?.toLowerCase(),
-          hasCompletedTrainingSetup: !!user.preferences
+          hasCompletedTrainingSetup: !!user.preferences,
         };
       },
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (account?.provider === "google") {
         const existingUser = await prismaClient.user.findUnique({
           where: { email: user.email },
-          include: { preferences: true }
+          include: { preferences: true },
         });
 
         if (!existingUser) {
@@ -94,14 +91,14 @@ export const authOptions = {
 
       return session;
     },
-    async jwt({ token, user, account, trigger, session }) {
+    async jwt({ token, user, trigger, session }) {
       // Handle session update
       if (trigger === "update" && session) {
         // Ažuriraj role ako je dostupan u session objektu
         if (session.role) {
           token.role = session.role.toLowerCase();
         }
-        
+
         // Ažuriraj hasCompletedTrainingSetup ako je dostupan u session objektu
         if (session.hasCompletedTrainingSetup !== undefined) {
           token.hasCompletedTrainingSetup = session.hasCompletedTrainingSetup;

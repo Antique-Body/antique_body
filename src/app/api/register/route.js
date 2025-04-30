@@ -10,10 +10,7 @@ export async function POST(request) {
 
     // Validate the input
     if (!name || !email || !password) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     // Check if user already exists
@@ -22,10 +19,7 @@ export async function POST(request) {
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: "Email already in use" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Email already in use" }, { status: 400 });
     }
 
     // Hash the password
@@ -44,15 +38,9 @@ export async function POST(request) {
     // Return the user without password
     const { password: _, ...userWithoutPassword } = user;
 
-    return NextResponse.json(
-      { message: "User created successfully", user: userWithoutPassword },
-      { status: 201 }
-    );
+    return NextResponse.json({ message: "User created successfully", user: userWithoutPassword }, { status: 201 });
   } catch (error) {
     console.error("Registration error:", error);
-    return NextResponse.json(
-      { error: "An error occurred during registration" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "An error occurred during registration" }, { status: 500 });
   }
 }
