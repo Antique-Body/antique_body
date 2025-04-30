@@ -28,9 +28,7 @@ export const Card = ({
 }) => {
   return (
     <div
-      className={`relative z-10 backdrop-blur-sm overflow-hidden flex flex-col items-center text-center ${className} min-h-max ${
-        hoverTranslateY && `hover:translate-y-[${hoverTranslateY}]`
-      } transition-all duration-300`}
+      className={`relative z-10 flex flex-col items-center overflow-hidden text-center backdrop-blur-sm ${className} min-h-max`}
       style={{
         width: width,
         maxWidth: maxWidth,
@@ -39,35 +37,20 @@ export const Card = ({
         borderRadius: borderRadius,
         boxShadow: shadow,
         border: `1px solid ${borderColor}`,
-        "--hover-border-color": hoverBorderColor || borderColor,
-        "--hover-shadow": hoverShadow || shadow,
-        "--hover-bg-from": hoverBgGradientFrom || bgGradientFrom,
-        "--hover-bg-to": hoverBgGradientTo || bgGradientTo,
-        transition: "all 0.3s ease"
       }}
-      onMouseEnter={(e) => {
-        if (hoverBorderColor) e.currentTarget.style.borderColor = hoverBorderColor;
-        if (hoverShadow) e.currentTarget.style.boxShadow = hoverShadow;
-        if (hoverBgGradientFrom && hoverBgGradientTo) {
-          e.currentTarget.style.backgroundImage = `linear-gradient(to bottom right, ${hoverBgGradientFrom}, ${hoverBgGradientTo})`;
-        }
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = borderColor;
-        e.currentTarget.style.boxShadow = shadow;
-        e.currentTarget.style.backgroundImage = `linear-gradient(to bottom right, ${bgGradientFrom}, ${bgGradientTo})`;
-      }}
-      {...otherProps}>
+      {...otherProps}
+    >
       {borderTop && <div className="marble-effect"></div>}
 
       {topBorderColor && (
         <div
-          className="absolute top-0 left-0 w-full h-[5px] bg-gradient-to-r bg-[length:200%_100%]"
+          className="absolute left-0 top-0 h-[5px] w-full bg-gradient-to-r bg-[length:200%_100%]"
           style={{
             backgroundImage: `linear-gradient(to right, ${topBorderColor}, ${
               topBorderColor === "#ff7800" ? "#ffa500" : topBorderColor
             }, ${topBorderColor})`,
-          }}></div>
+          }}
+        ></div>
       )}
 
       {showLogo && <BrandLogo logoTagline={logoTagline} />}

@@ -91,6 +91,8 @@ export async function POST(request) {
       );
     }
   } catch (error) {
+    console.error("Registration error:", error);
+    return NextResponse.json({ error: "An error occurred during registration" }, { status: 500 });
     console.error("Registration error details:", error);
     return NextResponse.json(
       { error: "Failed to register user. Please try again." },

@@ -1,3 +1,37 @@
+# Dependencies
 node_modules/
+
+# Build
+.next/
 build/
 dist/
+out/
+
+# Cache
+.cache/
+.eslintcache
+.stylelintcache
+
+# Misc
+coverage/
+*.log
+.DS_Store
+.env*
+!.env.example
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Typescript
+*.tsbuildinfo
+
+# Prisma
+prisma/migrations/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo

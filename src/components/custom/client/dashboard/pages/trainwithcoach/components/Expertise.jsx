@@ -1,123 +1,123 @@
 import {
-    CertificateIcon,
-    EducationIcon,
-    NutritionIcon,
-    PerformanceIcon,
-    RecoveryIcon,
-    StrengthIcon,
+  CertificateIcon,
+  EducationIcon,
+  NutritionIcon,
+  PerformanceIcon,
+  RecoveryIcon,
+  StrengthIcon,
 } from "@/components/common/Icons";
 
 export const Expertise = ({ trainer }) => {
-    // Expertise areas with proficiency levels
-    const expertise = [
-        { area: "Strength Training", level: 90 },
-        { area: "Sport-specific Conditioning", level: 95 },
-        { area: "Nutrition Planning", level: 85 },
-        { area: "Injury Prevention", level: 80 },
-        { area: "Recovery Protocols", level: 90 },
-    ];
+  // Expertise areas with proficiency levels
+  const expertise = [
+    { area: "Strength Training", level: 90 },
+    { area: "Sport-specific Conditioning", level: 95 },
+    { area: "Nutrition Planning", level: 85 },
+    { area: "Injury Prevention", level: 80 },
+    { area: "Recovery Protocols", level: 90 },
+  ];
 
-    return (
-        <div>
-            <h3 className="text-lg font-semibold mb-4 text-white">Areas of Expertise</h3>
+  return (
+    <div>
+      <h3 className="mb-4 text-lg font-semibold text-white">Areas of Expertise</h3>
 
-            <div className="space-y-4 mb-6">
-                {expertise.map((item, index) => (
-                    <div key={index}>
-                        <div className="flex justify-between mb-1">
-                            <span className="text-gray-300">{item.area}</span>
-                            <span className="text-[#FF6B00]">{item.level}%</span>
-                        </div>
-                        <div className="h-2 bg-[#333] rounded-full overflow-hidden">
-                            <div
-                                className="h-full bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] rounded-full"
-                                style={{ width: `${item.level}%` }}
-                            ></div>
-                        </div>
-                    </div>
-                ))}
+      <div className="mb-6 space-y-4">
+        {expertise.map((item, index) => (
+          <div key={index}>
+            <div className="mb-1 flex justify-between">
+              <span className="text-gray-300">{item.area}</span>
+              <span className="text-[#FF6B00]">{item.level}%</span>
             </div>
-
-            <h3 className="text-lg font-semibold mb-3 text-white">Specialization Details</h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-[#1A1A1A] border border-[#333] rounded-lg p-4">
-                    <div className="flex items-center mb-2">
-                        <PerformanceIcon size={18} className="text-[#FF6B00] mr-2" />
-                        <h4 className="text-md font-semibold text-[#FF6B00]">Sports Performance</h4>
-                    </div>
-                    <ul className="text-gray-300 space-y-1">
-                        <li>• Sport-specific functional movement patterns</li>
-                        <li>• Speed and agility development</li>
-                        <li>• Power and explosiveness training</li>
-                        <li>• Competition preparation cycles</li>
-                    </ul>
-                </div>
-
-                <div className="bg-[#1A1A1A] border border-[#333] rounded-lg p-4">
-                    <div className="flex items-center mb-2">
-                        <StrengthIcon size={18} className="text-[#FF6B00] mr-2" />
-                        <h4 className="text-md font-semibold text-[#FF6B00]">Strength & Conditioning</h4>
-                    </div>
-                    <ul className="text-gray-300 space-y-1">
-                        <li>• Compound movement optimization</li>
-                        <li>• Progressive overload programming</li>
-                        <li>• Muscular endurance development</li>
-                        <li>• Functional strength training</li>
-                    </ul>
-                </div>
-
-                <div className="bg-[#1A1A1A] border border-[#333] rounded-lg p-4">
-                    <div className="flex items-center mb-2">
-                        <RecoveryIcon size={18} className="text-[#FF6B00] mr-2" />
-                        <h4 className="text-md font-semibold text-[#FF6B00]">Recovery & Mobility</h4>
-                    </div>
-                    <ul className="text-gray-300 space-y-1">
-                        <li>• Active recovery protocols</li>
-                        <li>• Joint mobility enhancement</li>
-                        <li>• Myofascial release techniques</li>
-                        <li>• Sleep optimization strategies</li>
-                    </ul>
-                </div>
-
-                <div className="bg-[#1A1A1A] border border-[#333] rounded-lg p-4">
-                    <div className="flex items-center mb-2">
-                        <NutritionIcon size={18} className="text-[#FF6B00] mr-2" />
-                        <h4 className="text-md font-semibold text-[#FF6B00]">Nutrition Planning</h4>
-                    </div>
-                    <ul className="text-gray-300 space-y-1">
-                        <li>• Macronutrient calculation</li>
-                        <li>• Performance nutrition timing</li>
-                        <li>• Hydration strategies</li>
-                        <li>• Supplementation guidance</li>
-                    </ul>
-                </div>
+            <div className="h-2 overflow-hidden rounded-full bg-[#333]">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-[#FF6B00] to-[#FF9A00]"
+                style={{ width: `${item.level}%` }}
+              ></div>
             </div>
+          </div>
+        ))}
+      </div>
 
-            <h3 className="text-lg font-semibold mt-6 mb-3 text-white">Education & Certifications</h3>
-            <ul className="space-y-3">
-                <li className="flex">
-                    <div className="bg-[rgba(255,107,0,0.15)] text-[#FF6B00] p-2 rounded-full h-8 w-8 flex items-center justify-center mr-3">
-                        <EducationIcon size={16} />
-                    </div>
-                    <div>
-                        <h5 className="font-medium text-white">BSc in Sports Science</h5>
-                        <p className="text-sm text-gray-400">University of Athletic Excellence, 2018</p>
-                    </div>
-                </li>
+      <h3 className="mb-3 text-lg font-semibold text-white">Specialization Details</h3>
 
-                {trainer?.certifications.map((cert, index) => (
-                    <li key={index} className="flex">
-                        <div className="bg-[rgba(255,107,0,0.15)] text-[#FF6B00] p-2 rounded-full h-8 w-8 flex items-center justify-center mr-3">
-                            <CertificateIcon size={16} />
-                        </div>
-                        <div>
-                            <h5 className="font-medium text-white">{cert}</h5>
-                            <p className="text-sm text-gray-400">Valid through 2026</p>
-                        </div>
-                    </li>
-                ))}
-            </ul>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="rounded-lg border border-[#333] bg-[#1A1A1A] p-4">
+          <div className="mb-2 flex items-center">
+            <PerformanceIcon size={18} className="mr-2 text-[#FF6B00]" />
+            <h4 className="text-md font-semibold text-[#FF6B00]">Sports Performance</h4>
+          </div>
+          <ul className="space-y-1 text-gray-300">
+            <li>• Sport-specific functional movement patterns</li>
+            <li>• Speed and agility development</li>
+            <li>• Power and explosiveness training</li>
+            <li>• Competition preparation cycles</li>
+          </ul>
         </div>
-    );
+
+        <div className="rounded-lg border border-[#333] bg-[#1A1A1A] p-4">
+          <div className="mb-2 flex items-center">
+            <StrengthIcon size={18} className="mr-2 text-[#FF6B00]" />
+            <h4 className="text-md font-semibold text-[#FF6B00]">Strength & Conditioning</h4>
+          </div>
+          <ul className="space-y-1 text-gray-300">
+            <li>• Compound movement optimization</li>
+            <li>• Progressive overload programming</li>
+            <li>• Muscular endurance development</li>
+            <li>• Functional strength training</li>
+          </ul>
+        </div>
+
+        <div className="rounded-lg border border-[#333] bg-[#1A1A1A] p-4">
+          <div className="mb-2 flex items-center">
+            <RecoveryIcon size={18} className="mr-2 text-[#FF6B00]" />
+            <h4 className="text-md font-semibold text-[#FF6B00]">Recovery & Mobility</h4>
+          </div>
+          <ul className="space-y-1 text-gray-300">
+            <li>• Active recovery protocols</li>
+            <li>• Joint mobility enhancement</li>
+            <li>• Myofascial release techniques</li>
+            <li>• Sleep optimization strategies</li>
+          </ul>
+        </div>
+
+        <div className="rounded-lg border border-[#333] bg-[#1A1A1A] p-4">
+          <div className="mb-2 flex items-center">
+            <NutritionIcon size={18} className="mr-2 text-[#FF6B00]" />
+            <h4 className="text-md font-semibold text-[#FF6B00]">Nutrition Planning</h4>
+          </div>
+          <ul className="space-y-1 text-gray-300">
+            <li>• Macronutrient calculation</li>
+            <li>• Performance nutrition timing</li>
+            <li>• Hydration strategies</li>
+            <li>• Supplementation guidance</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 className="mb-3 mt-6 text-lg font-semibold text-white">Education & Certifications</h3>
+      <ul className="space-y-3">
+        <li className="flex">
+          <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(255,107,0,0.15)] p-2 text-[#FF6B00]">
+            <EducationIcon size={16} />
+          </div>
+          <div>
+            <h5 className="font-medium text-white">BSc in Sports Science</h5>
+            <p className="text-sm text-gray-400">University of Athletic Excellence, 2018</p>
+          </div>
+        </li>
+
+        {trainer?.certifications.map((cert, index) => (
+          <li key={index} className="flex">
+            <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(255,107,0,0.15)] p-2 text-[#FF6B00]">
+              <CertificateIcon size={16} />
+            </div>
+            <div>
+              <h5 className="font-medium text-white">{cert}</h5>
+              <p className="text-sm text-gray-400">Valid through 2026</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 };

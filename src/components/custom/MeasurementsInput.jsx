@@ -12,10 +12,34 @@ const UNIT_SYSTEMS = {
 };
 
 const BMI_CATEGORIES = {
-  UNDERWEIGHT: { max: 18.5, label: "Underweight", color: "text-blue-400", gradientFrom: "from-blue-500", gradientTo: "to-blue-600" },
-  NORMAL: { max: 25, label: "Normal weight", color: "text-green-400", gradientFrom: "from-green-500", gradientTo: "to-green-600" },
-  OVERWEIGHT: { max: 30, label: "Overweight", color: "text-yellow-400", gradientFrom: "from-yellow-500", gradientTo: "to-yellow-600" },
-  OBESE: { max: Infinity, label: "Obese", color: "text-red-400", gradientFrom: "from-red-500", gradientTo: "to-red-600" },
+  UNDERWEIGHT: {
+    max: 18.5,
+    label: "Underweight",
+    color: "text-blue-400",
+    gradientFrom: "from-blue-500",
+    gradientTo: "to-blue-600",
+  },
+  NORMAL: {
+    max: 25,
+    label: "Normal weight",
+    color: "text-green-400",
+    gradientFrom: "from-green-500",
+    gradientTo: "to-green-600",
+  },
+  OVERWEIGHT: {
+    max: 30,
+    label: "Overweight",
+    color: "text-yellow-400",
+    gradientFrom: "from-yellow-500",
+    gradientTo: "to-yellow-600",
+  },
+  OBESE: {
+    max: Infinity,
+    label: "Obese",
+    color: "text-red-400",
+    gradientFrom: "from-red-500",
+    gradientTo: "to-red-600",
+  },
 };
 
 const CONVERSION_FACTORS = {
@@ -42,16 +66,16 @@ const CONSTRAINTS = {
 };
 
 // Helper functions
-const getBmiCategory = (bmi) => {
+const getBmiCategory = bmi => {
   if (!bmi) return null;
 
   const bmiValue = parseFloat(bmi);
-  for (const [key, category] of Object.entries(BMI_CATEGORIES)) {
+  for (const [_, category] of Object.entries(BMI_CATEGORIES)) {
     if (bmiValue < category.max) {
       return category;
     }
   }
-  
+
   return BMI_CATEGORIES.OBESE;
 };
 
@@ -88,7 +112,6 @@ export const MeasurementsInput = ({ onSelect }) => {
   });
   const [bmi, setBmi] = useState(null);
   const [bmiCategory, setBmiCategory] = useState(null);
-  const [isValid, setIsValid] = useState(false);
 
   // Refs to track previous values
   const prevMeasurements = useRef(measurements);
@@ -104,11 +127,11 @@ export const MeasurementsInput = ({ onSelect }) => {
 
   // Event handlers
   const handleChange = useCallback((field, value) => {
-    setMeasurements((prev) => ({ ...prev, [field]: value }));
+    setMeasurements(prev => ({ ...prev, [field]: value }));
   }, []);
 
-  const handleBlur = useCallback((field) => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
+  const handleBlur = useCallback(field => {
+    setTouched(prev => ({ ...prev, [field]: true }));
   }, []);
 
   const handleUnitChange = useCallback((system) => {
@@ -263,12 +286,11 @@ export const MeasurementsInput = ({ onSelect }) => {
 
     setErrors(newErrors);
     const newIsValid = hasValidWeight && hasValidHeight;
-    setIsValid(newIsValid);
 
     if (newIsValid) {
       const calculatedBmi = calculateBmi(weightValue, heightValue, unitSystem);
       const bmiValue = Number(calculatedBmi.toFixed(2));
-      
+
       setBmi(bmiValue);
       setBmiCategory(getBmiCategory(bmiValue));
 
@@ -322,15 +344,13 @@ export const MeasurementsInput = ({ onSelect }) => {
   // Render BMI display
   const renderBmiDisplay = () => {
     if (!bmi || !bmiCategory) return null;
-    
+
     return (
-      <div className="mt-6 p-4 bg-[#0a0a0a] rounded-lg border border-[#222]">
-        <h3 className="text-lg font-semibold mb-2">Your BMI</h3>
-        <div className="flex items-center justify-between mb-3">
+      <div className="mt-6 rounded-lg border border-[#222] bg-[#0a0a0a] p-4">
+        <h3 className="mb-2 text-lg font-semibold">Your BMI</h3>
+        <div className="mb-3 flex items-center justify-between">
           <div className="text-3xl font-bold">{bmi}</div>
-          <div className={`text-lg font-medium ${bmiCategory.color}`}>
-            {bmiCategory.label}
-          </div>
+          <div className={`text-lg font-medium ${bmiCategory.color}`}>{bmiCategory.label}</div>
         </div>
 
         <ProgressBar
@@ -356,17 +376,19 @@ export const MeasurementsInput = ({ onSelect }) => {
 
   return (
     <div className="w-full space-y-6">
-      <div className="flex justify-center gap-4 mb-6">
+      <div className="mb-6 flex justify-center gap-4">
         <Button
           onClick={() => handleUnitChange(UNIT_SYSTEMS.METRIC)}
           variant={unitSystem === UNIT_SYSTEMS.METRIC ? "primary" : "secondary"}
-          className="min-w-[140px]">
+          className="min-w-[140px]"
+        >
           Metric (kg/cm)
         </Button>
         <Button
           onClick={() => handleUnitChange(UNIT_SYSTEMS.IMPERIAL)}
           variant={unitSystem === UNIT_SYSTEMS.IMPERIAL ? "primary" : "secondary"}
-          className="min-w-[140px]">
+          className="min-w-[140px]"
+        >
           Imperial (lb/ft)
         </Button>
       </div>
@@ -377,11 +399,9 @@ export const MeasurementsInput = ({ onSelect }) => {
           name="weight"
           label={`Weight (${unitSystem === UNIT_SYSTEMS.METRIC ? "kg" : "lb"})`}
           type="number"
-          placeholder={`Enter your weight in ${
-            unitSystem === UNIT_SYSTEMS.METRIC ? "kilograms" : "pounds"
-          }`}
+          placeholder={`Enter your weight in ${unitSystem === UNIT_SYSTEMS.METRIC ? "kilograms" : "pounds"}`}
           value={measurements.weight}
-          onChange={(e) => handleChange("weight", e.target.value)}
+          onChange={e => handleChange("weight", e.target.value)}
           onBlur={() => handleBlur("weight")}
           error={errors.weight}
           min={constraints.weight.min}

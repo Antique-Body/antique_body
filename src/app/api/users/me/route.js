@@ -1,3 +1,4 @@
+import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { isAuthenticated } from "@/middleware/auth";
 import { userService } from "@/services/users";
@@ -9,6 +10,27 @@ export async function GET(request) {
         if (!authenticated) {
             return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
         }
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+      },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(user);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
 
         try {
             // Get detailed user info using the service

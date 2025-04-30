@@ -1,113 +1,116 @@
 "use client";
 
+import Image from "next/image";
+import { useState } from "react";
+
 import { Button } from "@/components/common/Button";
 import { MessageIcon, SendIcon } from "@/components/common/Icons";
 import { FormField } from "@/components/shared";
-import { useState } from "react";
 
 export default function MessagesPage() {
-    const [newMessage, setNewMessage] = useState("");
+  const [newMessage, setNewMessage] = useState("");
 
-    // Sample user data with messages
-    const userData = {
-        messages: [
-            {
-                id: 1,
-                sender: "Alex Campbell",
-                sender_image: "/trainers/trainer1.jpg",
-                content: "Great progress this week! Let's discuss adjusting your program on our next call.",
-                time: "Today, 2:30 PM",
-                unread: true,
-            },
-            {
-                id: 2,
-                sender: "NutritionBot",
-                sender_image: "/logo/logo-icon.png",
-                content:
-                    "Your nutrition log shows you're consistently under your protein goal. Consider adding protein-rich foods to your breakfast.",
-                time: "Yesterday, 10:15 AM",
-                unread: false,
-            },
-            {
-                id: 3,
-                sender: "Alex Campbell",
-                sender_image: "/trainers/trainer1.jpg",
-                content: "I've uploaded a new workout routine for next week. Check the training tab!",
-                time: "Aug 15, 9:45 AM",
-                unread: false,
-            },
-        ],
-    };
+  // Sample user data with messages
+  const userData = {
+    messages: [
+      {
+        id: 1,
+        sender: "Alex Campbell",
+        sender_image: "/trainers/trainer1.jpg",
+        content: "Great progress this week! Let's discuss adjusting your program on our next call.",
+        time: "Today, 2:30 PM",
+        unread: true,
+      },
+      {
+        id: 2,
+        sender: "NutritionBot",
+        sender_image: "/logo/logo-icon.png",
+        content:
+          "Your nutrition log shows you're consistently under your protein goal. Consider adding protein-rich foods to your breakfast.",
+        time: "Yesterday, 10:15 AM",
+        unread: false,
+      },
+      {
+        id: 3,
+        sender: "Alex Campbell",
+        sender_image: "/trainers/trainer1.jpg",
+        content: "I've uploaded a new workout routine for next week. Check the training tab!",
+        time: "Aug 15, 9:45 AM",
+        unread: false,
+      },
+    ],
+  };
 
-    const handleSendMessage = e => {
-        e.preventDefault();
-        // In a real application, we would send the message to the server
-        console.log("Sending message:", newMessage);
-        setNewMessage("");
-    };
+  const handleSendMessage = e => {
+    e.preventDefault();
+    // In a real application, we would send the message to the server
+    setNewMessage("");
+  };
 
-    return (
-        <div className="space-y-6">
-            {/* Messages List */}
-            <div className="bg-[rgba(20,20,20,0.95)] rounded-2xl p-6 backdrop-blur-lg border border-[#222] shadow-lg">
-                <h2 className="text-xl font-bold mb-6 flex items-center">
-                    <MessageIcon className="mr-2" stroke="#FF6B00" />
-                    Messages
-                </h2>
+  return (
+    <div className="space-y-6">
+      {/* Messages List */}
+      <div className="rounded-2xl border border-[#222] bg-[rgba(20,20,20,0.95)] p-6 shadow-lg backdrop-blur-lg">
+        <h2 className="mb-6 flex items-center text-xl font-bold">
+          <MessageIcon className="mr-2" stroke="#FF6B00" />
+          Messages
+        </h2>
 
-                <div className="space-y-4">
-                    {userData.messages.map(message => (
-                        <div
-                            key={message.id}
-                            className={`p-4 rounded-lg border ${
-                                message.unread
-                                    ? "bg-[rgba(255,107,0,0.05)] border-[rgba(255,107,0,0.2)]"
-                                    : "bg-[rgba(30,30,30,0.5)] border-[#333]"
-                            }`}
-                        >
-                            <div className="flex items-start gap-3">
-                                <img
-                                    src={message.sender_image}
-                                    alt={message.sender}
-                                    className="w-10 h-10 rounded-full object-cover"
-                                />
-                                <div className="flex-1">
-                                    <div className="flex justify-between">
-                                        <h3 className="font-medium">{message.sender}</h3>
-                                        <span className="text-xs text-gray-400">{message.time}</span>
-                                    </div>
-                                    <p className="text-gray-300 mt-1">{message.content}</p>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Send Message Form */}
-            <form
-                onSubmit={handleSendMessage}
-                className="bg-[rgba(20,20,20,0.95)] rounded-2xl p-6 backdrop-blur-lg border border-[#222] shadow-lg"
+        <div className="space-y-4">
+          {userData.messages.map(message => (
+            <div
+              key={message.id}
+              className={`rounded-lg border p-4 ${
+                message.unread
+                  ? "border-[rgba(255,107,0,0.2)] bg-[rgba(255,107,0,0.05)]"
+                  : "border-[#333] bg-[rgba(30,30,30,0.5)]"
+              }`}
             >
-                <h3 className="text-lg font-medium mb-4">Send Message</h3>
-                <div className="space-y-4">
-                    <FormField
-                        label="Message"
-                        type="textarea"
-                        id="message"
-                        rows={4}
-                        value={newMessage}
-                        onChange={e => setNewMessage(e.target.value)}
-                        placeholder="Type your message here..."
-                        backgroundStyle="dark"
-                    />
-                    <div className="flex justify-end">
-                        <Button type="submit" variant="primary" disabled={!newMessage.trim()} rightIcon={<SendIcon />}>
-                            Send Message
-                        </Button>
-                    </div>
+              <div className="flex items-start gap-3">
+                <Image
+                  src={message.sender_image}
+                  alt={message.sender}
+                  width={40}
+                  height={40}
+                  className="rounded-full object-cover"
+                />
+                <div className="flex-1">
+                  <div className="flex justify-between">
+                    <h3 className="font-medium">{message.sender}</h3>
+                    <span className="text-xs text-gray-400">{message.time}</span>
+                  </div>
+                  <p className="mt-1 text-gray-300">{message.content}</p>
                 </div>
-            </form>
+              </div>
+            </div>
+          ))}
         </div>
-    );
+      </div>
+
+      {/* Send Message Form */}
+      <form
+        onSubmit={handleSendMessage}
+        className="rounded-2xl border border-[#222] bg-[rgba(20,20,20,0.95)] p-6 shadow-lg backdrop-blur-lg"
+      >
+        <h3 className="mb-4 text-lg font-medium">Send Message</h3>
+        <div className="space-y-4">
+          <FormField
+            label="Message"
+            type="textarea"
+            id="message"
+            rows={4}
+            value={newMessage}
+            onChange={e => setNewMessage(e.target.value)}
+            placeholder="Type your message here..."
+            backgroundStyle="dark"
+          />
+          <div className="flex justify-end">
+            <Button type="submit" variant="primary" disabled={!newMessage.trim()} rightIcon={<SendIcon />}>
+              Send Message
+            </Button>
+          </div>
+        </div>
+      </form>
+    </div>
+  );
 }

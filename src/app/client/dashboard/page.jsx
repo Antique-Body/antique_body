@@ -3,12 +3,12 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function DashboardPage() {
-    const router = useRouter();
+  const router = useRouter();
 
-    useEffect(() => {
-        // Redirect to the default tab
-        router.push("/client/dashboard/trainwithcoach");
-    }, [router]);
+  useEffect(() => {
+    // Redirect to the default tab
+    router.push("/client/dashboard/trainwithcoach");
+  }, [router]);
 
-    return null;
+  return null;
 }

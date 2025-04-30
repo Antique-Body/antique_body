@@ -23,6 +23,10 @@ export const authOptions = {
                     throw new Error("Missing credentials");
                 }
 
+        const user = await prismaClient.user.findUnique({
+          where: { email: credentials.email },
+          include: { preferences: true },
+        });
                 const user = await prisma.user.findUnique({
                     where: { email: credentials.email },
                     include: { preferences: true },
@@ -36,6 +40,7 @@ export const authOptions = {
                     throw new Error("No password set for this user");
                 }
 
+        const isPasswordValid = await compare(credentials.password, user.password);
                 // Only enforce email verification if there is a token
                 if (!user.emailVerified && user.emailVerificationToken) {
                     // Generate new verification token if needed
@@ -84,6 +89,23 @@ export const authOptions = {
                     throw new Error("Invalid password");
                 }
 
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role?.toLowerCase(),
+          hasCompletedTrainingSetup: !!user.preferences,
+        };
+      },
+    }),
+  ],
+  callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider === "google") {
+        const existingUser = await prismaClient.user.findUnique({
+          where: { email: user.email },
+          include: { preferences: true },
+        });
                 return {
                     id: user.id,
                     name: user.name,
