@@ -910,3 +910,11 @@ export const CalendarIcon = ({ size = 16, className = "", ...props }) => (
     <line x1="3" y1="10" x2="21" y2="10"></line>
   </svg>
 );
+
+export const NutritionStrategyIcon = () => (
+  <span className="mr-2 flex h-7 w-7 items-center justify-center rounded-full bg-[rgba(255,107,0,0.2)]">
+    <svg viewBox="0 0 24 24" fill="#FF6B00" className="h-4 w-4">
+      <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" />
+    </svg>
+  </span>
+);

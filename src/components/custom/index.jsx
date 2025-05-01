@@ -9,3 +9,5 @@ export { Navbar } from "@components/custom/Navbar";
 export { NavigationButtons } from "@components/custom/NavigationButtons";
 export { SelectionCard } from "@components/custom/SelectionCard";
 export { StepContainer } from "@components/custom/StepContainer";
+export { DashboardTabs } from "@components/custom/DashboardTabs";
+export { WelcomeCard } from "@components/custom/WelcomeCard";

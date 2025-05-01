@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/common/Button";
 import { BellIcon, SettingsIcon } from "@/components/common/Icons";
+import { DashboardTabs } from "@/components/custom";
 import { AntiqueBodyLogo } from "@/components/custom/BrandLogo";
 import { ClientProfile } from "@/components/custom/client/dashboard/components";
-import { BackgroundShapes, DashboardTabs } from "@/components/custom/shared";
+import { BackgroundShapes } from "@/components/custom/shared";
 
 export default function ClientDashboardLayout({ children }) {
   const router = useRouter();

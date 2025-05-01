@@ -4,7 +4,6 @@ import { Button } from "@/components/common/Button";
 import { PlusIcon } from "@/components/common/Icons";
 import { Card } from "@/components/custom/Card";
 import ClientChatInterface from "@/components/custom/client/dashboard/pages/messages/ClientChatInterface";
-import { BackgroundShapes } from "@/components/custom/shared";
 
 export default function MessagesPage() {
   // Handle sending a message
@@ -17,9 +16,6 @@ export default function MessagesPage() {
 
   return (
     <div className="relative min-h-screen bg-[#0a0a0a] text-white">
-      {/* Background shapes */}
-      <BackgroundShapes />
-
       <div className="container relative z-10 mx-auto px-4 pb-10 pt-4">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold">Messages</h1>

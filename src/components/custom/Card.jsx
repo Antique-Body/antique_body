@@ -81,6 +81,38 @@ export const Card = ({
     hoverShadow = "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"; // shadow-xl
     variantClassName =
       "flex flex-row gap-5 overflow-hidden relative w-full max-w-full md:w-[calc(50%-10px)] md:min-w-[450px] transition-all duration-300 group";
+  } else if (variant === "planCard") {
+    // Specific styling for plan cards based on the screenshots
+    borderColor = "#333";
+    bgGradientFrom = "rgba(20,20,20,0.95)";
+    bgGradientTo = "rgba(22,22,22,0.95)";
+    borderTop = false;
+    padding = "0"; // No padding to allow for custom inner layout
+    borderRadius = "12px";
+    shadow = "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)";
+    width = "100%";
+    maxWidth = "100%";
+    hoverTranslateY = "-2px";
+    hoverBorderColor = "#FF6B00";
+    hoverShadow = "0 10px 15px -3px rgba(0, 0, 0, 0.2)";
+    variantClassName = "text-left overflow-hidden relative transition-all duration-300";
+  } else if (variant === "createPlanCard") {
+    // Styling for the "Create New Plan" card
+    borderColor = "#333";
+    bgGradientFrom = "rgba(20,20,20,0.5)";
+    bgGradientTo = "rgba(22,22,22,0.5)";
+    borderTop = false;
+    padding = "24px";
+    borderRadius = "12px";
+    shadow = "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)";
+    width = "100%";
+    maxWidth = "100%";
+    hoverTranslateY = "-2px";
+    hoverBorderColor = "#FF6B00";
+    hoverBgGradientFrom = "rgba(25,25,25,0.6)";
+    hoverBgGradientTo = "rgba(28,28,28,0.6)";
+    hoverShadow = "0 10px 15px -3px rgba(0, 0, 0, 0.2)";
+    variantClassName = "text-center cursor-pointer border border-dashed transition-all duration-300";
   }
 
   // If hover is true and no variant-specific hover effects are set
@@ -92,7 +124,7 @@ export const Card = ({
 
   return (
     <div
-      className={`relative z-10 flex flex-col ${variant?.startsWith("dark") ? "" : variant === "entityCard" ? "text-left" : "items-center text-center"} overflow-hidden ${variantClassName} ${className} min-h-max ${
+      className={`relative z-10 flex flex-col ${variant?.startsWith("dark") ? "" : variant === "entityCard" ? "text-left" : variant === "planCard" || variant === "createPlanCard" ? "text-left" : "items-center text-center"} overflow-hidden ${variantClassName} ${className} min-h-max ${
         hoverTranslateY ? `hover:translate-y-[${hoverTranslateY}]` : ""
       } transition-all duration-300`}
       style={{
@@ -140,6 +172,9 @@ export const Card = ({
       {variant === "entityCard" && (
         <div className="absolute left-0 top-0 h-full w-1 scale-y-[0.4] transform bg-[#FF6B00] transition-transform duration-300 ease-in-out hover:scale-y-100 group-hover:scale-y-100"></div>
       )}
+
+      {/* Add left orange bar for plan card variant */}
+      {variant === "planCard" && <div className="absolute left-0 top-0 h-full w-1 bg-[#FF6B00]"></div>}
 
       {showLogo && <BrandLogo logoTagline={logoTagline} />}
 
