@@ -18,7 +18,12 @@ export const AuthForm = ({
     register,
     handleSubmit,
     formState: { errors },
+    getValues,
+    watch,
   } = useForm();
+
+  // Watch the password field
+  const password = watch("password");
 
   const handleGoogleSignIn = (e) => {
     e.preventDefault();
@@ -26,10 +31,31 @@ export const AuthForm = ({
     signIn("google", { callbackUrl: "/select-role" });
   };
 
+  const processSubmit = (data) => {
+    // For registration, check if passwords match
+    if (!isLogin && data.password !== data.confirmPassword) {
+      return; // Form validation should catch this
+    }
+    onSubmit(data);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 w-full">
+    <form onSubmit={handleSubmit(processSubmit)} className="space-y-4 w-full">
       {error && (
-        <div className="mb-4 text-red-500 text-center text-sm">{error}</div>
+        <div className="mb-4 p-3 bg-red-900/20 border border-red-500/50 rounded-md flex items-center space-x-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 text-red-500 flex-shrink-0"
+            viewBox="0 0 20 20"
+            fill="currentColor">
+            <path
+              fillRule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <span className="text-red-400 text-sm">{error}</span>
+        </div>
       )}
 
       {!isLogin && (
@@ -40,7 +66,7 @@ export const AuthForm = ({
             label="First Name"
             register={register}
             rules={{ required: "First name is required" }}
-            error={errors.name}
+            error={errors.name?.message}
             required
           />
 
@@ -49,7 +75,9 @@ export const AuthForm = ({
             name="lastName"
             label="Last Name"
             register={register}
-            error={errors.lastName}
+            rules={{ required: "Last name is required" }}
+            error={errors.lastName?.message}
+            required
           />
         </div>
       )}
@@ -67,7 +95,7 @@ export const AuthForm = ({
             message: "Invalid email address",
           },
         }}
-        error={errors.email}
+        error={errors.email?.message}
         required
       />
 
@@ -84,7 +112,7 @@ export const AuthForm = ({
             message: "Password must be at least 6 characters",
           },
         }}
-        error={errors.password}
+        error={errors.password?.message}
         required
         autoComplete="current-password"
       />
@@ -96,8 +124,11 @@ export const AuthForm = ({
           type="password"
           label="Confirm Password"
           register={register}
-          rules={{ required: "Please confirm your password" }}
-          error={errors.confirmPassword}
+          rules={{
+            required: "Please confirm your password",
+            validate: (value) => value === password || "Passwords do not match",
+          }}
+          error={errors.confirmPassword?.message}
           required
           autoComplete="new-password"
         />
@@ -111,7 +142,7 @@ export const AuthForm = ({
       </Button>
 
       {googleSignIn && (
-        <div className="mt-6">
+        <div className="mt-2">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-[#333]"></div>

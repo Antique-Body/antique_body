@@ -11,7 +11,7 @@ export const Button = ({
   ...props
 }) => {
   const baseStyles =
-    "px-6 py-2 rounded font-medium transition-all duration-300 disabled:opacity-50 cursor-pointer hover:scale-[1.02]";
+    "px-6 py-2 rounded font-medium h-11 transition-all duration-300 disabled:opacity-50 cursor-pointer hover:scale-[1.02]";
   const variants = {
     primary:
       "bg-gradient-to-r from-[#FF7800] to-[#FF5F00] text-white hover:from-[#FF5F00] hover:to-[#FF7800]",
@@ -28,17 +28,17 @@ export const Button = ({
       className={cn(baseStyles, variants[variant], className)}
       disabled={disabled || loading}
       {...props}>
-      {loading ? (
-        <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center gap-2 min-h-[24px]">
+        {loading ? (
           <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      ) : (
-        <div className="flex items-center justify-center gap-2">
-          {leftIcon && <span className="flex-shrink-0">{leftIcon}</span>}
-          {children}
-          {rightIcon && <span className="flex-shrink-0">{rightIcon}</span>}
-        </div>
-      )}
+        ) : (
+          <>
+            {leftIcon && <span className="flex-shrink-0">{leftIcon}</span>}
+            {children}
+            {rightIcon && <span className="flex-shrink-0">{rightIcon}</span>}
+          </>
+        )}
+      </div>
     </button>
   );
 };

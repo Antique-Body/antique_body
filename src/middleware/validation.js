@@ -1,4 +1,11 @@
-// Validation utilities for API requests
+import {
+  validateLogin,
+  validateRegistration,
+  validateRoleUpdate,
+  validateTrainingSetup,
+  validateUserUpdate,
+} from '../services/validation';
+
 
 // Email validation regex
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -102,7 +109,6 @@ export const validateUserUpdate = (data) => {
 };
 
 // Validate role update data
-// Validate role update data
 export const validateRoleUpdate = (data) => {
   const errors = {};
 
@@ -132,8 +138,39 @@ export const validateTrainingSetup = (data) => {
     return { valid: false, errors: { general: "No data provided" } };
   }
 
-  // Add specific validation for training setup fields
-  // This will depend on your specific requirements
+  const { title, description, duration, maxParticipants } = data;
+
+  if (isEmpty(title)) {
+    errors.title = "Title is required";
+  }
+
+  if (isEmpty(description)) {
+    errors.description = "Description is required";
+  }
+
+  if (!duration || isNaN(duration) || duration <= 0) {
+    errors.duration = "Duration must be a positive number";
+  }
+
+  if (!maxParticipants || isNaN(maxParticipants) || maxParticipants <= 0) {
+    errors.maxParticipants = "Maximum participants must be a positive number";
+  }
+
+  return {
+    valid: Object.keys(errors).length === 0,
+    errors,
+  };
+};
+
+// Validate email
+export const validateEmail = (email) => {
+  const errors = {};
+
+  if (isEmpty(email)) {
+    errors.email = "Email is required";
+  } else if (!emailRegex.test(email)) {
+    errors.email = "Please provide a valid email";
+  }
 
   return {
     valid: Object.keys(errors).length === 0,
