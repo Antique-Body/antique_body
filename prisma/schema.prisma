@@ -93,20 +93,26 @@ enum InjuryLocation {
 
 // Simple User model for authentication
 model User {
-  id                String    @id @default(cuid())
-  name              String
-  lastName          String?
-  email             String    @unique
-  password          String?
-  role              UserRole?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  accounts          Account[]
-  sessions          Session[]
-  preferences       UserPreferences?
+  id                    String    @id @default(cuid())
+  name                  String
+  lastName              String?
+  email                 String    @unique
+  password              String?
+  role                  UserRole?
+  emailVerified         Boolean   @default(false)
+  emailVerificationToken String?
+  resetToken            String?
+  resetTokenExpiry      DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  accounts              Account[]
+  sessions              Session[]
+  preferences           UserPreferences?
 
   @@index([email])
   @@index([role])
+  @@index([emailVerificationToken])
+  @@index([resetToken])
 }
 
 // NextAuth models

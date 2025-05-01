@@ -7,8 +7,15 @@ export async function middleware(request) {
   const userRole = token?.role?.toLowerCase();
 
   // Public routes that don't require authentication
-  const publicRoutes = ["/", "/auth/login", "/auth/register"];
-  const isPublicRoute = publicRoutes.includes(pathname);
+  const publicPaths = ["/", "/auth/login", "/auth/register", "/auth/reset-password", "/auth/verify-email"];
+  
+  // Check if the current path starts with any of the public paths
+  const isPublicRoute = publicPaths.some(path => pathname === path || pathname.startsWith(`${path}?`));
+
+  // Handle routes for verification and reset password that have query parameters
+  if (pathname.startsWith("/auth/reset-password") || pathname.startsWith("/auth/verify-email")) {
+    return NextResponse.next();
+  }
 
   // 1. Handle public routes
   if (isPublicRoute) {
@@ -63,7 +70,7 @@ export async function middleware(request) {
   return NextResponse.next();
 }
 
-// Configure middleware to run on all routes except static files
+// Configure middleware to run on all routes except static files and API routes
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico|public).*)"],
 };

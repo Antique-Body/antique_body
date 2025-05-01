@@ -23,17 +23,75 @@ export const authOptions = {
           throw new Error("Missing credentials");
         }
 
+        console.log("Login attempt for:", credentials.email);
+
         const user = await prismaClient.user.findUnique({
           where: { email: credentials.email },
           include: { preferences: true }
         });
 
         if (!user) {
+          console.log("User not found:", credentials.email);
           throw new Error("User not found");
         }
 
         if (!user.password) {
+          console.log("No password set for user:", credentials.email);
           throw new Error("No password set for this user");
+        }
+
+        console.log("User found, checking email verification:", {
+          email: user.email,
+          verified: user.emailVerified,
+          hasToken: !!user.emailVerificationToken
+        });
+
+        // Only enforce email verification if there is a token
+        if (!user.emailVerified && user.emailVerificationToken) {
+          console.log("Email not verified for user:", user.email);
+          
+          // Generate new verification token if needed
+          const crypto = require('crypto');
+          const verificationToken = crypto.randomBytes(32).toString("hex");
+          await prismaClient.user.update({
+            where: { id: user.id },
+            data: { emailVerificationToken: verificationToken }
+          });
+          
+          // Send verification email
+          try {
+            console.log("Sending new verification email to:", user.email);
+            const { sendVerificationEmail } = await import('@/app/utils/email');
+            await sendVerificationEmail(user.email, verificationToken);
+          } catch (error) {
+            console.error("Error sending verification email during login:", error);
+          }
+          
+          throw new Error("Email not verified. We've sent a new verification email. Please check your inbox.");
+        }
+
+        // Don't auto-fix verification status - require proper verification
+        if (!user.emailVerified) {
+          console.log("Email not verified for user but no token found:", user.email);
+          
+          // Generate new verification token
+          const crypto = require('crypto');
+          const verificationToken = crypto.randomBytes(32).toString("hex");
+          await prismaClient.user.update({
+            where: { id: user.id },
+            data: { emailVerificationToken: verificationToken }
+          });
+          
+          // Send verification email
+          try {
+            console.log("Sending verification email to:", user.email);
+            const { sendVerificationEmail } = await import('@/app/utils/email');
+            await sendVerificationEmail(user.email, verificationToken);
+          } catch (error) {
+            console.error("Error sending verification email during login:", error);
+          }
+          
+          throw new Error("Email not verified. We've sent a verification email. Please check your inbox.");
         }
 
         const isPasswordValid = await compare(
@@ -42,8 +100,11 @@ export const authOptions = {
         );
 
         if (!isPasswordValid) {
+          console.log("Invalid password for user:", user.email);
           throw new Error("Invalid password");
         }
+
+        console.log("Login successful for:", user.email);
 
         return {
           id: user.id,
@@ -64,20 +125,20 @@ export const authOptions = {
         });
 
         if (!existingUser) {
-          // Create new user with default role
+          // Create new user with default role and verified email (since Google auth is verified)
           const newUser = await prismaClient.user.create({
             data: {
               name: user.name,
               email: user.email,
+              lastName: "",
               role: null,
+              emailVerified: true,
             },
           });
 
-          // Update the user object with the role
           user.role = newUser.role?.toLowerCase();
           user.hasCompletedTrainingSetup = false;
         } else {
-          // Update the user object with existing user's role
           user.role = existingUser.role?.toLowerCase();
           user.hasCompletedTrainingSetup = !!existingUser.preferences;
         }

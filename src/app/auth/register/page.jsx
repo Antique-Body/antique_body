@@ -2,8 +2,8 @@
 
 import { AuthForm } from "@/components/auth/AuthForm";
 import Background from "@/components/background";
+import { Button } from "@/components/common/index";
 import { Card } from "@/components/custom/index";
-import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -12,6 +12,11 @@ export default function RegisterPage() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
+  const [resendingEmail, setResendingEmail] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
+  const [resendError, setResendError] = useState("");
 
   const handleSubmit = async (data) => {
     setLoading(true);
@@ -26,28 +31,52 @@ export default function RegisterPage() {
         body: JSON.stringify(data),
       });
 
+      const responseData = await registerResponse.json();
+
       if (!registerResponse.ok) {
-        const errorData = await registerResponse.json();
-        throw new Error(errorData.error || "Registration failed");
+        throw new Error(responseData.error || "Registration failed");
       }
 
-      // Then, sign in the user
-      const result = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-      });
+      // Set registered email for the success message
+      setRegisteredEmail(data.email);
+      setRegistrationSuccess(true);
 
-      if (result?.error) {
-        throw new Error(result.error);
-      }
-
-      router.push("/select-role");
+      // Don't auto-sign in, wait for email verification
     } catch (err) {
       console.error("Register - Error:", err);
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendEmail = async () => {
+    setResendingEmail(true);
+    setResendSuccess(false);
+    setResendError("");
+
+    try {
+      const response = await fetch("/api/email-verification/resend", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: registeredEmail }),
+        cache: "no-store",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to resend verification email");
+      }
+
+      setResendSuccess(true);
+    } catch (err) {
+      console.error("Resend email error:", err);
+      setResendError(err.message);
+    } finally {
+      setResendingEmail(false);
     }
   };
 
@@ -68,27 +97,89 @@ export default function RegisterPage() {
           borderTop={true}
           showLogo={true}
           logoTagline="STRENGTH OF THE ANCIENTS">
-          <p className="text-gray-400 mb-8 text-center">
-            Join our fitness community and start your journey today
-          </p>
+          {registrationSuccess ? (
+            <div className="text-center">
+              <div className="flex justify-center mb-6">
+                <div className="bg-green-500/20 p-3 rounded-full">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-12 w-12 text-green-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <h2 className="text-2xl font-semibold mb-4 text-green-500">
+                Registration Successful!
+              </h2>
+              <p className="text-gray-400 mb-2">
+                We've sent a verification email to:
+              </p>
+              <p className="font-medium text-white mb-6">{registeredEmail}</p>
+              <p className="text-gray-400 mb-6">
+                Please check your inbox and click the verification link to
+                activate your account.
+              </p>
 
-          <AuthForm
-            onSubmit={handleSubmit}
-            loading={loading}
-            error={error}
-            isLogin={false}
-          />
+              {resendSuccess ? (
+                <div className="mb-6 p-3 bg-green-500/10 rounded-lg">
+                  <p className="text-green-500">
+                    Verification email sent again! Please check your inbox.
+                  </p>
+                </div>
+              ) : resendError ? (
+                <div className="mb-6 p-3 bg-red-500/10 rounded-lg">
+                  <p className="text-red-500">{resendError}</p>
+                </div>
+              ) : null}
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-400">
-              Already have an account?{" "}
-              <Link
-                href="/auth/login"
-                className="text-[#ff7800] hover:text-[#ff5f00] transition-colors">
-                Sign In
-              </Link>
-            </p>
-          </div>
+              <div className="space-y-3">
+                <Button
+                  onClick={handleResendEmail}
+                  loading={resendingEmail}
+                  variant="outline"
+                  className="w-full">
+                  Resend Verification Email
+                </Button>
+                <Link
+                  href="/auth/login"
+                  className="inline-block w-full bg-gradient-to-r from-[#ff7800] to-[#ff5f00] text-white px-6 py-3 rounded-lg font-medium transition-all hover:shadow-lg hover:from-[#ff5f00] hover:to-[#ff7800]">
+                  Go to Login
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <>
+              <p className="text-gray-400 mb-8 text-center">
+                Join our fitness community and start your journey today
+              </p>
+
+              <AuthForm
+                onSubmit={handleSubmit}
+                loading={loading}
+                error={error}
+                isLogin={false}
+              />
+
+              <div className="mt-6 text-center">
+                <p className="text-gray-400">
+                  Already have an account?{" "}
+                  <Link
+                    href="/auth/login"
+                    className="text-[#ff7800] hover:text-[#ff5f00] transition-colors">
+                    Sign In
+                  </Link>
+                </p>
+              </div>
+            </>
+          )}
         </Card>
       </div>
     </main>

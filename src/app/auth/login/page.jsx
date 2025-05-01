@@ -2,6 +2,7 @@
 
 import { AuthForm } from "@/components/auth/AuthForm";
 import Background from "@/components/background";
+import { Button } from "@/components/common/index";
 import { Card } from "@/components/custom/index";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
@@ -12,10 +13,17 @@ export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordStatus, setForgotPasswordStatus] = useState("");
+  const [manualFixingVerification, setManualFixingVerification] =
+    useState(false);
+  const [currentLoginEmail, setCurrentLoginEmail] = useState("");
 
   const handleSubmit = async (data) => {
     setLoading(true);
     setError("");
+    setCurrentLoginEmail(data.email);
 
     try {
       const result = await signIn("credentials", {
@@ -25,6 +33,38 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
+        if (
+          result.error.includes("not verified") ||
+          result.error.includes("verify")
+        ) {
+          try {
+            const resetResponse = await fetch(
+              `/api/email-verification/resend`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email: data.email }),
+                cache: "no-store",
+              }
+            );
+
+            const resetData = await resetResponse.json();
+
+            if (resetResponse.ok) {
+              setError(
+                "Verification email sent. Please check your inbox and verify your email before logging in."
+              );
+              return;
+            } else {
+              console.error("Verification reset error:", resetData.message);
+            }
+          } catch (fixError) {
+            console.error("Verification fix error:", fixError);
+          }
+        }
+
         throw new Error(result.error);
       }
 
@@ -32,6 +72,66 @@ export default function LoginPage() {
     } catch (err) {
       console.error("Login - Error:", err);
       setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setForgotPasswordStatus("sending");
+
+    try {
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: forgotPasswordEmail }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to send reset email");
+      }
+
+      setForgotPasswordStatus("success");
+      setTimeout(() => {
+        setShowForgotPassword(false);
+        setForgotPasswordEmail("");
+        setForgotPasswordStatus("");
+      }, 3000);
+    } catch (err) {
+      setForgotPasswordStatus("error");
+      console.error("Forgot password error:", err);
+    }
+  };
+
+  const handleManualVerification = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/email-verification/resend`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: currentLoginEmail }),
+        cache: "no-store",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to send verification email");
+      }
+
+      setError(
+        "Verification email sent. Please check your inbox and verify your email before logging in."
+      );
+    } catch (err) {
+      console.error("Verification error:", err);
+      setError("Failed to send verification email. Please contact support.");
     } finally {
       setLoading(false);
     }
@@ -54,27 +154,89 @@ export default function LoginPage() {
           borderTop={true}
           showLogo={true}
           logoTagline="STRENGTH OF THE ANCIENTS">
-          <p className="text-gray-400 mb-8 text-center">
-            Sign in to continue your fitness journey
-          </p>
+          {showForgotPassword ? (
+            <div className="w-full">
+              <h2 className="text-xl font-semibold mb-4 text-center">
+                Reset Password
+              </h2>
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={forgotPasswordEmail}
+                    onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff7800]"
+                    required
+                  />
+                </div>
+                {forgotPasswordStatus === "error" && (
+                  <p className="text-red-500 text-sm">
+                    Failed to send reset email. Please try again.
+                  </p>
+                )}
+                {forgotPasswordStatus === "success" && (
+                  <p className="text-green-500 text-sm">
+                    If an account exists with this email, you will receive a
+                    reset link.
+                  </p>
+                )}
+                <Button
+                  type="submit"
+                  disabled={forgotPasswordStatus === "sending"}
+                  loading={forgotPasswordStatus === "sending"}
+                  className="w-full">
+                  Send Reset Link
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => {
+                    setShowForgotPassword(false);
+                    setForgotPasswordEmail("");
+                    setForgotPasswordStatus("");
+                  }}
+                  className="w-full">
+                  Back to Login
+                </Button>
+              </form>
+            </div>
+          ) : (
+            <>
+              <p className="text-gray-400 mb-8 text-center">
+                Sign in to continue your fitness journey
+              </p>
 
-          <AuthForm
-            onSubmit={handleSubmit}
-            loading={loading}
-            error={error}
-            isLogin={true}
-          />
+              <AuthForm
+                onSubmit={handleSubmit}
+                loading={loading}
+                error={error}
+                isLogin={true}
+              />
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-400">
-              Don't have an account?{" "}
-              <Link
-                href="/auth/register"
-                className="text-[#ff7800] hover:text-[#ff5f00] transition-colors">
-                Register
-              </Link>
-            </p>
-          </div>
+              <div className="mt-4 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-sm text-gray-400 hover:text-[#ff7800] transition-colors duration-300 cursor-pointer">
+                  Forgot password?
+                </button>
+              </div>
+
+              <div className="mt-6 text-center">
+                <p className="text-gray-400">
+                  Don't have an account?{" "}
+                  <Link
+                    href="/auth/register"
+                    className="text-[#ff7800] hover:text-[#ff5f00] transition-colors">
+                    Register
+                  </Link>
+                </p>
+              </div>
+            </>
+          )}
         </Card>
       </div>
     </main>
