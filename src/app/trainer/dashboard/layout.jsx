@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/common/Button";
 import { BellIcon, SettingsIcon } from "@/components/common/Icons";
+import { DashboardTabs } from "@/components/custom";
 import { AntiqueBodyLogo } from "@/components/custom/BrandLogo";
-import { BackgroundShapes, DashboardTabs } from "@/components/custom/shared";
+import { BackgroundShapes } from "@/components/custom/shared";
 import { ClientModal, CreatePlanModal, TrainerProfile } from "@/components/custom/trainer/dashboard/components";
-
 export default function TrainerDashboardLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();

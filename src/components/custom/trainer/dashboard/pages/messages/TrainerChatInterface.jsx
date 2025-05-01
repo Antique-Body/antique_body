@@ -157,13 +157,6 @@ const TrainerChatInterface = ({ onSendMessage }) => {
   const [reply, setReply] = useState("");
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState({});
-  const [quickReplies, setQuickReplies] = useState([
-    "Let's schedule a call to discuss your progress.",
-    "Don't forget to log your measurements this week.",
-    "Great job with your consistency!",
-    "Remember to stay hydrated during your workouts.",
-  ]);
-  const [newQuickReply, setNewQuickReply] = useState("");
 
   // Load mock data on component mount
   useEffect(() => {
@@ -239,18 +232,6 @@ const TrainerChatInterface = ({ onSendMessage }) => {
     }
 
     setReply("");
-  };
-
-  // Add a new quick reply
-  const handleAddQuickReply = () => {
-    if (newQuickReply.trim() === "") return;
-    setQuickReplies([...quickReplies, newQuickReply]);
-    setNewQuickReply("");
-  };
-
-  // Use a quick reply
-  const handleUseQuickReply = quickReply => {
-    setReply(quickReply);
   };
 
   return (
@@ -333,24 +314,6 @@ const TrainerChatInterface = ({ onSendMessage }) => {
                 )}
               </div>
 
-              {/* Quick replies */}
-              {activeConversation.role === "client" && (
-                <div className="border-t border-[#333] bg-[#0f0f0f] p-2">
-                  <div className="flex flex-wrap gap-2">
-                    {quickReplies.map((quickReply, index) => (
-                      <Button
-                        key={index}
-                        variant="orangeGhost"
-                        size="small"
-                        onClick={() => handleUseQuickReply(quickReply)}
-                      >
-                        {quickReply}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* Message input */}
               <MessageInput
                 value={reply}
@@ -363,32 +326,6 @@ const TrainerChatInterface = ({ onSendMessage }) => {
             <NoConversationSelected />
           )}
         </div>
-
-        {/* Quick reply manager */}
-        {activeConversation && activeConversation.role === "client" && (
-          <div className="mt-4 rounded-lg bg-[#0f0f0f] p-4">
-            <h3 className="mb-2 text-sm font-medium">Manage Quick Replies</h3>
-            <div className="flex items-end gap-2">
-              <div className="flex-grow">
-                <FormField
-                  type="text"
-                  placeholder="Add new quick reply..."
-                  value={newQuickReply}
-                  onChange={e => setNewQuickReply(e.target.value)}
-                  background="dark"
-                />
-              </div>
-              <Button
-                onClick={handleAddQuickReply}
-                variant="orangeFilled"
-                size="small"
-                disabled={newQuickReply.trim() === ""}
-              >
-                Add
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -11,4 +11,5 @@ export { NavigationButtons } from "@components/custom/NavigationButtons";
 export { RoleCardCompact } from "@components/custom/RoleCardCompact";
 export { SelectionCard } from "@components/custom/SelectionCard";
 export { StepContainer } from "@components/custom/StepContainer";
+export { DashboardTabs } from "@components/custom/DashboardTabs";
 export { WelcomeCard } from "@components/custom/WelcomeCard";
