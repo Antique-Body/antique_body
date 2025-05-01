@@ -4,72 +4,73 @@ import { getToken } from "next-auth/jwt";
 export async function middleware(request) {
   const token = await getToken({ req: request });
   const { pathname } = request.nextUrl;
-
-  // Definiranje ruta i uloga
-  const publicRoutes = ["/", "/auth/login", "/auth/register"];
-  const protectedPrefixes = ["/user-dashboard", "/trainer-dashboard", "/client-dashboard", "/admin-dashboard"];
-  const isPublicRoute = publicRoutes.includes(pathname);
-  const isRoleSelectionRoute = pathname === "/select-role";
   const userRole = token?.role?.toLowerCase();
-  const dashboardUrls = {
-    trainer: "/trainer-dashboard",
-    client: "/client-dashboard",
-    admin: "/admin-dashboard",
-    user: "/user-dashboard"
-  };
 
-  // Provjeri je li ruta pod nekim zaštićenim prefiksom
-  const matchesProtectedPrefix = protectedPrefixes.some(prefix => 
-    pathname === prefix || pathname.startsWith(`${prefix}/`)
-  );
+  // Public routes that don't require authentication
+  const publicPaths = ["/", "/auth/login", "/auth/register", "/auth/reset-password", "/auth/verify-email"];
+  
+  // Check if the current path starts with any of the public paths
+  const isPublicRoute = publicPaths.some(path => pathname === path || pathname.startsWith(`${path}?`));
 
-  // Provjeri je li ruta jedna od poznatih ruta
-  const isKnownRoute = isPublicRoute || isRoleSelectionRoute || matchesProtectedPrefix;
-
-  // Rukovanje nepostojecim rutama - ako ruta nije poznata
-  if (!isKnownRoute) {
-    // Ako korisnik ima ulogu, preusmeri na odgovarajući dashboard
-    if (userRole && dashboardUrls[userRole]) {
-      return NextResponse.redirect(new URL(dashboardUrls[userRole], request.url));
-    }
-    // Ako korisnik nije prijavljen, preusmeri na početnu stranicu
-    return NextResponse.redirect(new URL("/", request.url));
+  // Handle routes for verification and reset password that have query parameters
+  if (pathname.startsWith("/auth/reset-password") || pathname.startsWith("/auth/verify-email")) {
+    return NextResponse.next();
   }
 
-  // 1. Korisnik nije autentificiran
+  // 1. Handle public routes
+  if (isPublicRoute) {
+    return NextResponse.next();
+  }
+
+  // 2. Handle unauthenticated users
   if (!token) {
-    return isPublicRoute 
-      ? NextResponse.next() 
-      : NextResponse.redirect(new URL("/auth/login", request.url));
+    return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
-  // 2. Korisnik je autentificiran ali pokušava pristupiti javnim rutama ili odabiru uloge
-  if (userRole && (isPublicRoute || isRoleSelectionRoute)) {
-    const dashboardUrl = dashboardUrls[userRole];
-    if (dashboardUrl) {
-      return NextResponse.redirect(new URL(dashboardUrl, request.url));
+  // 3. Handle users without a role
+  if (!userRole) {
+    if (pathname !== "/select-role") {
+      return NextResponse.redirect(new URL("/select-role", request.url));
     }
+    return NextResponse.next();
   }
 
-  // 3. Korisnik nema ulogu, a pokušava pristupiti zaštićenim rutama
-  if (!userRole && !isPublicRoute && !isRoleSelectionRoute) {
-    return NextResponse.redirect(new URL("/select-role", request.url));
-  }
-
-  // 4. Provjera pristupa specifičnim dashboard rutama
-  if (userRole) {
-    for (const [role, url] of Object.entries(dashboardUrls)) {
-      if (pathname.startsWith(url) && userRole !== role) {
-        return NextResponse.redirect(new URL(dashboardUrls[userRole] || "/select-role", request.url));
-      }
+  // 4. Role-based routing
+  if (userRole === "trainer") {
+    if (pathname !== "/trainer/dashboard") {
+      return NextResponse.redirect(new URL("/trainer/dashboard", request.url));
     }
+    return NextResponse.next();
   }
 
-  // Dozvoli pristup traženoj ruti
+  if (userRole === "client") {
+    if (pathname !== "/client/dashboard") {
+      return NextResponse.redirect(new URL("/client/dashboard", request.url));
+    }
+    return NextResponse.next();
+  }
+
+  if (userRole === "user") {
+    const hasPreferences = token?.hasCompletedTrainingSetup;
+    const targetPath = hasPreferences ? "/user/dashboard" : "/user/training-setup";
+    
+    // Allow access to both training-setup and dashboard for users
+    if (pathname.startsWith("/user/")) {
+      return NextResponse.next();
+    }
+    
+    // Redirect to appropriate path if not already there
+    if (pathname !== targetPath) {
+      return NextResponse.redirect(new URL(targetPath, request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // Default fallback
   return NextResponse.next();
 }
 
-// Konfiguracija za middleware - uhvati SVE rute
+// Configure middleware to run on all routes except static files and API routes
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico|public).*)"],
 };
