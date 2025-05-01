@@ -9,17 +9,11 @@ const prisma = new PrismaClient();
 export async function POST(request) {
   try {
     const body = await request.json();
-    console.log("Registration request body:", body);
 
     const { email, password, name, lastName } = body;
 
     if (!email || !password || !name || !lastName) {
-      console.log("Missing required fields:", { 
-        email: !!email, 
-        password: !!password, 
-        name: !!name,
-        lastName: !!lastName 
-      });
+     
       return NextResponse.json(
         { error: "All fields are required" },
         { status: 400 }
@@ -74,13 +68,11 @@ export async function POST(request) {
         },
       });
 
-      console.log("User created successfully:", { id: user.id, email: user.email });
 
       // Send verification email
       try {
         const emailSent = await sendVerificationEmail(email, verificationToken);
         if (!emailSent) {
-          console.log("Failed to send verification email");
           // Don't return error here, just log it
         }
       } catch (emailError) {

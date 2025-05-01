@@ -66,6 +66,12 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
+  // Check if the request is for email verification
+  if (pathname.startsWith('/api/email-verification')) {
+    // Let the request continue to the API route
+    return NextResponse.next();
+  }
+
   // Default fallback
   return NextResponse.next();
 }

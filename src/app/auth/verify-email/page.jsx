@@ -18,19 +18,17 @@ export default function VerifyEmailPage() {
   useEffect(() => {
     const verifyEmail = async () => {
       const token = searchParams.get("token");
-      console.log("Verifying email with token:", token ? token.substring(0, 10) + "..." : "No token");
+      const email = searchParams.get("email");
 
-      if (!token) {
+      if (!token || !email) {
         setStatus("error");
-        setError("Verification token is missing");
+        setError("Verification token or email is missing");
         return;
       }
 
       try {
-        console.log("Sending verification request to API");
-        const response = await fetch(`/api/auth/verify-email?token=${token}`);
+        const response = await fetch(`/api/email-verification/verify?token=${token}&email=${email}`);
         const data = await response.json();
-        console.log("Verification API response:", { status: response.status, data });
 
         // Store debug info
         setDebug({
