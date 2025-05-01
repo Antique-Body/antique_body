@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport({
 });
 
 export async function sendVerificationEmail(email, token) {
-  const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email?token=${token}`;
+  const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
 
   const mailOptions = {
     from: `"Antique Body" <${process.env.EMAIL_USER}>`,
