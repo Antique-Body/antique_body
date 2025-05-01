@@ -66,7 +66,9 @@ CREATE TABLE `UserPreferences` (
     `experience` ENUM('beginner', 'intermediate', 'advanced', 'expert') NOT NULL,
     `goal` ENUM('strength', 'muscle', 'lose_weight', 'endurance') NOT NULL,
     `frequency` INTEGER NOT NULL,
-    `measurements` JSON NOT NULL,
+    `weight` DOUBLE NOT NULL,
+    `height` DOUBLE NOT NULL,
+    `bmi` DOUBLE NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
