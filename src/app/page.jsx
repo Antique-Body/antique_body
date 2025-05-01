@@ -1,9 +1,11 @@
 "use client";
 import Background from "@/components/background";
+import { Navbar } from "@/components";
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white relative">
+      <Navbar />
       <Background
         parthenon={true}
         runner={true}
@@ -46,12 +48,13 @@ export default function Home() {
               Ancient Wisdom
             </h3>
             <p className="text-gray-300">
-              Incorporate time-tested training methods from ancient civilizations
+              Incorporate time-tested training methods from ancient
+              civilizations
             </p>
           </div>
         </div>
 
-        <div className="space-x-4">
+        <div className="space-x-4 w-full">
           <a
             href="/auth/register"
             className="bg-gradient-to-r from-[#ff7800] to-[#ff5f00] px-8 py-3 rounded font-medium text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300">

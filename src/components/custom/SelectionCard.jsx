@@ -1,3 +1,5 @@
+import { Card } from "..";
+
 export const SelectionCard = ({
   selected,
   onClick,
@@ -10,25 +12,36 @@ export const SelectionCard = ({
   icon
 }) => {
   return (
-    <div
-      className={`relative bg-[rgba(20,20,20,0.8)] border-2 ${
-        selected ? "border-[#FF7800]" : "border-[#222]"
-      } rounded-2xl p-6 cursor-pointer transition-all duration-300 flex flex-col items-center text-center ${aspect} overflow-hidden hover:translate-y-[-3px] hover:border-[#FF7800] hover:shadow-[0_5px_15px_rgba(255,120,0,0.15)] ${className}`}
+    <Card
+      className={`relative ${aspect} overflow-hidden cursor-pointer ${className}`}
+      borderTop={false}
+      borderColor={selected ? "#FF7800" : "#222"}
+      shadow={selected ? "0 0 20px rgba(255, 120, 0, 0.2)" : "0 5px 15px rgba(0,0,0,0.2)"}
+      bgGradientFrom="rgba(20,20,20,0.8)"
+      bgGradientTo="rgba(20,20,20,0.8)"
+      padding="0"
+      width="100%"
       onClick={onClick}
-      style={{
-        boxShadow: selected ? "0 0 20px rgba(255, 120, 0, 0.2)" : "none",
-        backgroundImage: bgImage ? `url(${bgImage})` : "none",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}>
+      // Hover props
+      hoverTranslateY="-3px"
+      hoverBorderColor="#FF7800"
+      hoverShadow="0 5px 15px rgba(255,120,0,0.15)"
+      {...(bgImage && {
+        style: {
+          backgroundImage: `url(${bgImage})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }
+      })}
+    >
       {bgImage && (
         <div className="absolute inset-0 bg-black bg-opacity-50 z-0"></div>
       )}
-      <div className="relative z-10 flex flex-col items-center justify-center h-full">
+      <div className="relative z-10 flex flex-col items-center justify-center h-full p-6">
         <div className="text-4xl mb-3">{icon}</div>
         <h3 className="text-lg font-bold mb-2">{title}</h3>
         <p className="text-sm text-[#aaa]">{description}</p>
       </div>
-    </div>
+    </Card>
   );
 };

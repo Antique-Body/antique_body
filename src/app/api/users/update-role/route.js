@@ -1,63 +1,77 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { PrismaClient, UserRole } from "@prisma/client";
+import { isAuthenticated } from "@/middleware/auth";
+import { validateRoleUpdate } from "@/middleware/validation";
+import { userService } from "@/services/users";
 
-const prisma = new PrismaClient();
-
-// Define valid roles based on the Prisma schema
-const VALID_ROLES = Object.values(UserRole);
-
-export async function POST(req) {
+export async function PATCH(request) {
   try {
-    const session = await getServerSession(authOptions);
+    const { authenticated, user } = await isAuthenticated(request);
 
-    if (!session) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+    if (!authenticated) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const { email, role } = await req.json();
+    const data = await request.json();
+    console.log("Received data:", data);
 
-    if (email !== session.user.email) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
+    // Validate the input
+    const validation = validateRoleUpdate(data);
 
-    // Validate role
-    const normalizedRole = role.toLowerCase();
-    if (!role || !VALID_ROLES.includes(normalizedRole)) {
+    if (!validation.valid) {
       return NextResponse.json(
-        { error: "Invalid role. Must be one of: " + VALID_ROLES.join(", ") },
+        { error: "Validation failed", details: validation.errors },
         { status: 400 }
       );
     }
 
-    // Update the user's role using Prisma's type-safe update method
-    const updatedUser = await prisma.user.update({
-      where: { email },
-      data: { role: normalizedRole },
-    });
+    try {
+      // Pretpostavljamo da userService ima metodu za nalaženje korisnika po email-u
+      // Ako nema, morate dodati takvu metodu u userService
+      const dbUser = await userService.findUserByEmail(data.email);
 
-    return NextResponse.json(updatedUser);
-  } catch (error) {
-    console.error("Error updating role:", error);
-    
-    // Handle specific Prisma errors
-    if (error.code === "P2025") {
+      if (!dbUser) {
+        return NextResponse.json(
+          { error: "User not found in database" },
+          { status: 404 }
+        );
+      }
+
+      // Sada koristimo ID iz baze za ažuriranje
+      const updatedUser = await userService.updateUserRole(
+        dbUser.id,
+        data.role
+      );
+
+      return NextResponse.json({
+        message: "Role updated successfully",
+        user: updatedUser,
+      });
+    } catch (error) {
+      console.error("Service error details:", error);
+
+      if (error.message === "User not found" || error.code === "P2025") {
+        return NextResponse.json(
+          { error: "User not found in database" },
+          { status: 404 }
+        );
+      }
+
       return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
+        {
+          error: "Service error",
+          details: error.message || "Unknown error in service",
+        },
+        { status: 500 }
       );
     }
-    
+  } catch (error) {
+    console.error("Error updating role:", error);
     return NextResponse.json(
-      { error: "Internal server error", details: error.message },
+      {
+        error: "An error occurred while updating role",
+        details: error.message || "Unknown error",
+      },
       { status: 500 }
     );
   }
-} 
+}

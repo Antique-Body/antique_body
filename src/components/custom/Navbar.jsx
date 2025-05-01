@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function Navbar() {
+export const Navbar = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();

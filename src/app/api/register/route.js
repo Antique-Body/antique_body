@@ -1,58 +1,108 @@
+import { sendVerificationEmail } from "@/app/utils/email";
 import { PrismaClient } from "@prisma/client";
 import { hash } from "bcrypt";
+import crypto from "crypto";
 import { NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
 export async function POST(request) {
   try {
-    const { name, lastName, email, password } = await request.json();
+    const body = await request.json();
+    console.log("Registration request body:", body);
 
-    // Validate the input
-    if (!name || !email || !password) {
+    const { email, password, name, lastName } = body;
+
+    if (!email || !password || !name || !lastName) {
+      console.log("Missing required fields:", { 
+        email: !!email, 
+        password: !!password, 
+        name: !!name,
+        lastName: !!lastName 
+      });
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "All fields are required" },
         { status: 400 }
       );
     }
 
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
       return NextResponse.json(
-        { error: "Email already in use" },
+        { error: "Invalid email format" },
         { status: 400 }
       );
     }
 
-    // Hash the password
-    const hashedPassword = await hash(password, 10);
+    // Simple password validation - at least 6 characters
+    if (password.length < 6) {
+      return NextResponse.json(
+        { error: "Password must be at least 6 characters long" },
+        { status: 400 }
+      );
+    }
 
-    // Create the user
-    const user = await prisma.user.create({
-      data: {
-        name,
-        lastName,
-        email,
-        password: hashedPassword,
-      },
-    });
+    try {
+      // Check if user already exists
+      const existingUser = await prisma.user.findUnique({
+        where: { email },
+      });
 
-    // Return the user without password
-    const { password: _, ...userWithoutPassword } = user;
+      if (existingUser) {
+        return NextResponse.json(
+          { error: "User already exists" },
+          { status: 400 }
+        );
+      }
 
-    return NextResponse.json(
-      { message: "User created successfully", user: userWithoutPassword },
-      { status: 201 }
-    );
+      // Generate verification token
+      const verificationToken = crypto.randomBytes(32).toString("hex");
+
+      // Hash password
+      const hashedPassword = await hash(password, 12);
+
+      // Create user
+      const user = await prisma.user.create({
+        data: {
+          email,
+          name,
+          lastName,
+          password: hashedPassword,
+          emailVerificationToken: verificationToken,
+          emailVerified: false,
+        },
+      });
+
+      console.log("User created successfully:", { id: user.id, email: user.email });
+
+      // Send verification email
+      try {
+        const emailSent = await sendVerificationEmail(email, verificationToken);
+        if (!emailSent) {
+          console.log("Failed to send verification email");
+          // Don't return error here, just log it
+        }
+      } catch (emailError) {
+        console.error("Error sending verification email:", emailError);
+        // Don't return error here, just log it
+      }
+
+      return NextResponse.json({
+        message: "Registration successful. Please check your email to verify your account.",
+      });
+    } catch (prismaError) {
+      console.error("Prisma error:", prismaError);
+      return NextResponse.json(
+        { error: "Database error occurred" },
+        { status: 500 }
+      );
+    }
   } catch (error) {
-    console.error("Registration error:", error);
+    console.error("Registration error details:", error);
     return NextResponse.json(
-      { error: "An error occurred during registration" },
+      { error: "Failed to register user. Please try again." },
       { status: 500 }
     );
   }
-}
+} 
