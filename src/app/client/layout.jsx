@@ -1,3 +1,5 @@
+import { Navbar } from "@/components/custom";
+
 export default function ClientLayout({ children }) {
   return (
     <div>

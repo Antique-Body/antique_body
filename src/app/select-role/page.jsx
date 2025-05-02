@@ -1,10 +1,10 @@
 "use client";
 
+import { FullScreenLoader, RoleCardCompact } from "@/components";
 import { Modal } from "@/components/common";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { RoleCardCompact, FullScreenLoader } from "@/components";
 
 const ROLE_TITLES = {
   trainer: "Preparing your Trainer Journey",
@@ -21,8 +21,8 @@ const ROLE_DESCRIPTIONS = {
 };
 
 const ROLE_REDIRECTS = {
-  trainer: "/trainer-dashboard",
-  client: "/client-dashboard",
+  trainer: "/trainer/personal-details",
+  client: "/client/personal-details",
   user: "/user/training-setup",
   admin: "/admin-dashboard",
 };

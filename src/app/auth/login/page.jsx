@@ -1,13 +1,14 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { useState } from "react";
+
 import { AuthForm } from "@/components/auth/AuthForm";
 import Background from "@/components/background";
 import { Button } from "@/components/common/index";
 import { Card } from "@/components/custom/index";
-import { signIn } from "next-auth/react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,11 +17,10 @@ export default function LoginPage() {
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordStatus, setForgotPasswordStatus] = useState("");
-  const [manualFixingVerification, setManualFixingVerification] =
-    useState(false);
+  const [manualFixingVerification, setManualFixingVerification] = useState(false);
   const [currentLoginEmail, setCurrentLoginEmail] = useState("");
 
-  const handleSubmit = async (data) => {
+  const handleSubmit = async data => {
     setLoading(true);
     setError("");
     setCurrentLoginEmail(data.email);
@@ -33,29 +33,21 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        if (
-          result.error.includes("not verified") ||
-          result.error.includes("verify")
-        ) {
+        if (result.error.includes("not verified") || result.error.includes("verify")) {
           try {
-            const resetResponse = await fetch(
-              `/api/email-verification/resend`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ email: data.email }),
-                cache: "no-store",
-              }
-            );
+            const resetResponse = await fetch(`/api/email-verification/resend`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ email: data.email }),
+              cache: "no-store",
+            });
 
             const resetData = await resetResponse.json();
 
             if (resetResponse.ok) {
-              setError(
-                "Verification email sent. Please check your inbox and verify your email before logging in."
-              );
+              setError("Verification email sent. Please check your inbox and verify your email before logging in.");
               return;
             } else {
               console.error("Verification reset error:", resetData.message);
@@ -77,7 +69,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleForgotPassword = async (e) => {
+  const handleForgotPassword = async e => {
     e.preventDefault();
     setForgotPasswordStatus("sending");
 
@@ -126,9 +118,7 @@ export default function LoginPage() {
         throw new Error(data.message || "Failed to send verification email");
       }
 
-      setError(
-        "Verification email sent. Please check your inbox and verify your email before logging in."
-      );
+      setError("Verification email sent. Please check your inbox and verify your email before logging in.");
     } catch (err) {
       console.error("Verification error:", err);
       setError("Failed to send verification email. Please contact support.");
@@ -138,105 +128,28 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#161616] text-white relative">
-      <Background
-        parthenon={true}
-        runner={true}
-        discus={true}
-        colosseum={true}
-        column={false}
-        vase={false}
-      />
+    <main className="relative min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#161616] text-white">
+      <Background parthenon={true} runner={true} discus={true} colosseum={true} column={false} vase={false} />
 
-      <div className="relative z-10 flex items-center justify-center min-h-screen">
+      <div className="relative z-10 flex min-h-screen items-center justify-center">
         <Card
-          className="w-full max-w-md p-8 bg-zinc-900/80 backdrop-blur-md border border-zinc-800 rounded-xl shadow-2xl"
+          className="w-full max-w-md rounded-xl border border-zinc-800 bg-zinc-900/80 p-8 shadow-2xl backdrop-blur-md"
           borderTop={true}
           showLogo={true}
-          logoTagline="STRENGTH OF THE ANCIENTS">
-          {showForgotPassword ? (
-            <div className="w-full">
-              <h2 className="text-xl font-semibold mb-4 text-center">
-                Reset Password
-              </h2>
-              <form onSubmit={handleForgotPassword} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    value={forgotPasswordEmail}
-                    onChange={(e) => setForgotPasswordEmail(e.target.value)}
-                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff7800]"
-                    required
-                  />
-                </div>
-                {forgotPasswordStatus === "error" && (
-                  <p className="text-red-500 text-sm">
-                    Failed to send reset email. Please try again.
-                  </p>
-                )}
-                {forgotPasswordStatus === "success" && (
-                  <p className="text-green-500 text-sm">
-                    If an account exists with this email, you will receive a
-                    reset link.
-                  </p>
-                )}
-                <Button
-                  type="submit"
-                  disabled={forgotPasswordStatus === "sending"}
-                  loading={forgotPasswordStatus === "sending"}
-                  className="w-full">
-                  Send Reset Link
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => {
-                    setShowForgotPassword(false);
-                    setForgotPasswordEmail("");
-                    setForgotPasswordStatus("");
-                  }}
-                  className="w-full">
-                  Back to Login
-                </Button>
-              </form>
-            </div>
-          ) : (
-            <>
-              <p className="text-gray-400 mb-8 text-center">
-                Sign in to continue your fitness journey
-              </p>
+          logoTagline="STRENGTH OF THE ANCIENTS"
+        >
+          <p className="mb-8 text-center text-gray-400">Sign in to continue your fitness journey</p>
 
-              <AuthForm
-                onSubmit={handleSubmit}
-                loading={loading}
-                error={error}
-                isLogin={true}
-              />
+          <AuthForm onSubmit={handleSubmit} loading={loading} error={error} isLogin={true} />
 
-              <div className="mt-4 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setShowForgotPassword(true)}
-                  className="text-sm text-gray-400 hover:text-[#ff7800] transition-colors duration-300 cursor-pointer">
-                  Forgot password?
-                </button>
-              </div>
-
-              <div className="mt-6 text-center">
-                <p className="text-gray-400">
-                  Don't have an account?{" "}
-                  <Link
-                    href="/auth/register"
-                    className="text-[#ff7800] hover:text-[#ff5f00] transition-colors">
-                    Register
-                  </Link>
-                </p>
-              </div>
-            </>
-          )}
+          <div className="mt-6 text-center">
+            <p className="text-gray-400">
+              Don't have an account?{" "}
+              <Link href="/auth/register" className="text-[#ff7800] transition-colors hover:text-[#ff5f00]">
+                Register
+              </Link>
+            </p>
+          </div>
         </Card>
       </div>
     </main>

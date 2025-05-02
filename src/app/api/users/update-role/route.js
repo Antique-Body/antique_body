@@ -1,11 +1,12 @@
+import { NextResponse } from "next/server";
+
 import { isAuthenticated } from "@/middleware/auth";
 import { validateRoleUpdate } from "@/middleware/validation";
 import { userService } from "@/services/users";
-import { NextResponse } from "next/server";
 
 export async function PATCH(request) {
   try {
-    const { authenticated, user } = await isAuthenticated(request);
+    const { authenticated } = await isAuthenticated(request);
 
     if (!authenticated) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
@@ -17,10 +18,7 @@ export async function PATCH(request) {
     const validation = validateRoleUpdate(data);
 
     if (!validation.valid) {
-      return NextResponse.json(
-        { error: "Validation failed", details: validation.errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Validation failed", details: validation.errors }, { status: 400 });
     }
 
     try {
@@ -29,17 +27,11 @@ export async function PATCH(request) {
       const dbUser = await userService.findUserByEmail(data.email);
 
       if (!dbUser) {
-        return NextResponse.json(
-          { error: "User not found in database" },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: "User not found in database" }, { status: 404 });
       }
 
       // Sada koristimo ID iz baze za ažuriranje
-      const updatedUser = await userService.updateUserRole(
-        dbUser.id,
-        data.role
-      );
+      const updatedUser = await userService.updateUserRole(dbUser.id, data.role);
 
       return NextResponse.json({
         message: "Role updated successfully",
@@ -49,10 +41,7 @@ export async function PATCH(request) {
       console.error("Service error details:", error);
 
       if (error.message === "User not found" || error.code === "P2025") {
-        return NextResponse.json(
-          { error: "User not found in database" },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: "User not found in database" }, { status: 404 });
       }
 
       return NextResponse.json(
@@ -60,7 +49,7 @@ export async function PATCH(request) {
           error: "Service error",
           details: error.message || "Unknown error in service",
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
   } catch (error) {
@@ -70,7 +59,7 @@ export async function PATCH(request) {
         error: "An error occurred while updating role",
         details: error.message || "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

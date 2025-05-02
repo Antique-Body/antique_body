@@ -4,20 +4,10 @@ import { TOTAL_STEPS, stepConfig } from "@/app/utils";
 import Background from "@/components/background";
 import { useWorkoutForm } from "@/hooks/useWorkoutForm";
 import { ProgressBar, TrainerIcon } from "@components/common";
-import {
-  BrandLogo,
-  Card,
-  FrequencySelector,
-  InjuryLocationSelector,
-  MeasurementsInput,
-  NavigationButtons,
-  SelectionCard,
-  StepContainer,
-} from "@components/custom";
+import { BrandLogo, Card, FrequencySelector, InjuryLocationSelector, MeasurementsInput, NavigationButtons, SelectionCard, StepContainer } from "@components/custom";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-
 // Constants
 const MEASUREMENT_CONSTRAINTS = {
   METRIC: {

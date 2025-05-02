@@ -7,4 +7,4 @@ export default function SelectRoleLayout({ children }) {
       {children}
     </div>
   );
-} 
+}

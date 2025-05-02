@@ -7,8 +7,8 @@ import {
   TrainerIcon,
   UserIcon,
 } from "@/components/common/Icons";
-import { Card } from "../../..";
 import { memo, useCallback, useState } from "react";
+import { Card } from "../../..";
 
 const roleIcons = {
   trainer: TrainerIcon,

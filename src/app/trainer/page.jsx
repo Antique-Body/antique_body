@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
 
 export default function TrainerPage() {
-  redirect('/trainer/dashboard');
-} 
+  redirect("/trainer/dashboard");
+}

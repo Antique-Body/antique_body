@@ -1,10 +1,10 @@
 import {
-  VaseIcon,
-  ParthenonIcon,
   ColosseumIcon,
   ColumnIcon,
-  RunnerIcon,
   DiscusIcon,
+  ParthenonIcon,
+  RunnerIcon,
+  VaseIcon,
 } from "@/components/common/Icons";
 
 export const TOTAL_STEPS = 9;

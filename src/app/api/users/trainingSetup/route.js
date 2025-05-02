@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { hasRole } from "@/middleware/auth";
 import { validateTrainingSetup } from "@/middleware/validation";
 import { userService } from "@/services/users";
@@ -18,18 +19,12 @@ export async function POST(request) {
     const validation = validateTrainingSetup(data);
 
     if (!validation.valid) {
-      return NextResponse.json(
-        { error: "Validation failed", details: validation.errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Validation failed", details: validation.errors }, { status: 400 });
     }
 
     try {
       // Setup training profile using the service
-      const updatedUser = await userService.setupTrainingProfile(
-        roleCheck.user.id,
-        data
-      );
+      const updatedUser = await userService.setupTrainingProfile(roleCheck.user.id, data);
 
       return NextResponse.json({
         message: "Training profile set up successfully",
@@ -44,9 +39,6 @@ export async function POST(request) {
     }
   } catch (error) {
     console.error("Error setting up training profile:", error);
-    return NextResponse.json(
-      { error: "An error occurred while setting up training profile" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "An error occurred while setting up training profile" }, { status: 500 });
   }
 }

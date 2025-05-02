@@ -23,10 +23,9 @@ export const authOptions = {
           throw new Error("Missing credentials");
         }
 
-
         const user = await prismaClient.user.findUnique({
           where: { email: credentials.email },
-          include: { preferences: true }
+          include: { preferences: true },
         });
 
         if (!user) {
@@ -37,78 +36,70 @@ export const authOptions = {
           throw new Error("No password set for this user");
         }
 
-    
-
         // Only enforce email verification if there is a token
         if (!user.emailVerified && user.emailVerificationToken) {
-          
           // Generate new verification token if needed
-          const crypto = require('crypto');
+          const crypto = require("crypto");
           const verificationToken = crypto.randomBytes(32).toString("hex");
           await prismaClient.user.update({
             where: { id: user.id },
-            data: { emailVerificationToken: verificationToken }
+            data: { emailVerificationToken: verificationToken },
           });
-          
+
           // Send verification email
           try {
-            const { sendVerificationEmail } = await import('@/app/utils/email');
+            const { sendVerificationEmail } = await import("@/app/utils/email");
             await sendVerificationEmail(user.email, verificationToken);
           } catch (error) {
             console.error("Error sending verification email during login:", error);
           }
-          
+
           throw new Error("Email not verified. We've sent a new verification email. Please check your inbox.");
         }
 
         // Don't auto-fix verification status - require proper verification
         if (!user.emailVerified) {
-          
           // Generate new verification token
-          const crypto = require('crypto');
+          const crypto = require("crypto");
           const verificationToken = crypto.randomBytes(32).toString("hex");
           await prismaClient.user.update({
             where: { id: user.id },
-            data: { emailVerificationToken: verificationToken }
+            data: { emailVerificationToken: verificationToken },
           });
-          
+
           // Send verification email
           try {
-            const { sendVerificationEmail } = await import('@/app/utils/email');
+            const { sendVerificationEmail } = await import("@/app/utils/email");
             await sendVerificationEmail(user.email, verificationToken);
           } catch (error) {
             console.error("Error sending verification email during login:", error);
           }
-          
+
           throw new Error("Email not verified. We've sent a verification email. Please check your inbox.");
         }
 
-        const isPasswordValid = await compare(
-          credentials.password,
-          user.password
-        );
+        const isPasswordValid = await compare(credentials.password, user.password);
 
         if (!isPasswordValid) {
           throw new Error("Invalid password");
         }
-
 
         return {
           id: user.id,
           name: user.name,
           email: user.email,
           role: user.role?.toLowerCase(),
-          hasCompletedTrainingSetup: !!user.preferences
+          hasCompletedTrainingSetup: !!user.preferences,
         };
       },
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (account?.provider === "google") {
         const existingUser = await prismaClient.user.findUnique({
           where: { email: user.email },
-          include: { preferences: true }
+          include: { preferences: true },
         });
 
         if (!existingUser) {
@@ -142,14 +133,14 @@ export const authOptions = {
 
       return session;
     },
-    async jwt({ token, user, account, trigger, session }) {
+    async jwt({ token, user, trigger, session }) {
       // Handle session update
       if (trigger === "update" && session) {
         // Ažuriraj role ako je dostupan u session objektu
         if (session.role) {
           token.role = session.role.toLowerCase();
         }
-        
+
         // Ažuriraj hasCompletedTrainingSetup ako je dostupan u session objektu
         if (session.hasCompletedTrainingSetup !== undefined) {
           token.hasCompletedTrainingSetup = session.hasCompletedTrainingSetup;

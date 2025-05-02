@@ -1,7 +1,7 @@
 "use client";
-import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
 export const Navbar = () => {
@@ -15,8 +15,7 @@ export const Navbar = () => {
 
   useEffect(() => {
     // Check if current path is login or register
-    const authPageCheck =
-      pathname?.includes("/auth/login") || pathname?.includes("/auth/register");
+    const authPageCheck = pathname?.includes("/auth/login") || pathname?.includes("/auth/register");
     setIsAuthPage(authPageCheck);
 
     // Set authentication state
@@ -48,30 +47,27 @@ export const Navbar = () => {
   }
 
   return (
-    <nav className="fixed top-0 right-0 z-50 p-4 flex justify-end w-full">
-      <div
-        className={`transition-all duration-500 ${
-          isVisible ? "opacity-100" : "opacity-0"
-        }`}>
+    <nav className="fixed right-0 top-0 z-50 flex w-full justify-end p-4">
+      <div className={`transition-all duration-500 ${isVisible ? "opacity-100" : "opacity-0"}`}>
         {isAuthenticated ? (
           <div className="flex items-center gap-4">
-            <span className="text-white text-sm">
-              Welcome, {session?.user?.name}
-            </span>
+            <span className="text-sm text-white">Welcome, {session?.user?.name}</span>
             <button
               onClick={handleLogout}
-              className="bg-gradient-to-r from-[#ff7800] to-[#ff5f00] px-4 py-2 rounded text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 transform hover:scale-105 cursor-pointer">
+              className="transform cursor-pointer rounded bg-gradient-to-r from-[#ff7800] to-[#ff5f00] px-4 py-2 text-white transition-all duration-300 hover:scale-105 hover:from-[#ff5f00] hover:to-[#ff7800]"
+            >
               Logout
             </button>
           </div>
         ) : (
           <Link
             href="/auth/login"
-            className="bg-gradient-to-r from-[#ff7800] to-[#ff5f00] px-4 py-2 rounded text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 transform hover:scale-105 cursor-pointer">
+            className="transform cursor-pointer rounded bg-gradient-to-r from-[#ff7800] to-[#ff5f00] px-4 py-2 text-white transition-all duration-300 hover:scale-105 hover:from-[#ff5f00] hover:to-[#ff7800]"
+          >
             Login
           </Link>
         )}
       </div>
     </nav>
   );
-}
+};

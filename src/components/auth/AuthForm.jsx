@@ -1,37 +1,32 @@
 "use client";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
+
 import { Button } from "../common/Button";
 import { GoogleIcon } from "../common/Icons";
-import { TextField } from "../common/TextField";
+import { FormField } from "../shared/FormField";
+
 import { useAuth } from "./AuthContext";
 
-export const AuthForm = ({
-  onSubmit,
-  loading,
-  error,
-  isLogin = true,
-  googleSignIn = true,
-}) => {
+export const AuthForm = ({ onSubmit, loading, error, isLogin = true, googleSignIn = true }) => {
   const { isLoading: authLoading } = useAuth();
   const {
     register,
     handleSubmit,
     formState: { errors },
-    getValues,
     watch,
   } = useForm();
 
   // Watch the password field
   const password = watch("password");
 
-  const handleGoogleSignIn = (e) => {
+  const handleGoogleSignIn = e => {
     e.preventDefault();
     e.stopPropagation();
     signIn("google", { callbackUrl: "/select-role" });
   };
 
-  const processSubmit = (data) => {
+  const processSubmit = data => {
     // For registration, check if passwords match
     if (!isLogin && data.password !== data.confirmPassword) {
       return; // Form validation should catch this
@@ -40,27 +35,28 @@ export const AuthForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(processSubmit)} className="space-y-4 w-full">
+    <form onSubmit={handleSubmit(processSubmit)} className="w-full space-y-4">
       {error && (
-        <div className="mb-4 p-3 bg-red-900/20 border border-red-500/50 rounded-md flex items-center space-x-2">
+        <div className="mb-4 flex items-center space-x-2 rounded-md border border-red-500/50 bg-red-900/20 p-3">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 text-red-500 flex-shrink-0"
+            className="h-5 w-5 flex-shrink-0 text-red-500"
             viewBox="0 0 20 20"
-            fill="currentColor">
+            fill="currentColor"
+          >
             <path
               fillRule="evenodd"
               d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
               clipRule="evenodd"
             />
           </svg>
-          <span className="text-red-400 text-sm">{error}</span>
+          <span className="text-sm text-red-400">{error}</span>
         </div>
       )}
 
       {!isLogin && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <TextField
+        <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <FormField
             id="name"
             name="name"
             label="First Name"
@@ -70,7 +66,7 @@ export const AuthForm = ({
             required
           />
 
-          <TextField
+          <FormField
             id="lastName"
             name="lastName"
             label="Last Name"
@@ -82,7 +78,7 @@ export const AuthForm = ({
         </div>
       )}
 
-      <TextField
+      <FormField
         id="email"
         name="email"
         type="email"
@@ -99,7 +95,7 @@ export const AuthForm = ({
         required
       />
 
-      <TextField
+      <FormField
         id="password"
         name="password"
         type="password"
@@ -118,7 +114,7 @@ export const AuthForm = ({
       />
 
       {!isLogin && (
-        <TextField
+        <FormField
           id="confirmPassword"
           name="confirmPassword"
           type="password"
@@ -126,7 +122,7 @@ export const AuthForm = ({
           register={register}
           rules={{
             required: "Please confirm your password",
-            validate: (value) => value === password || "Passwords do not match",
+            validate: value => value === password || "Passwords do not match",
           }}
           error={errors.confirmPassword?.message}
           required
@@ -137,7 +133,8 @@ export const AuthForm = ({
       <Button
         type="submit"
         loading={loading || authLoading}
-        className="w-full bg-gradient-to-r from-[#ff7800] to-[#ff5f00] py-2 rounded font-medium text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 disabled:opacity-50">
+        className="w-full rounded bg-gradient-to-r from-[#ff7800] to-[#ff5f00] py-2 font-medium text-white transition-all duration-300 hover:from-[#ff5f00] hover:to-[#ff7800] disabled:opacity-50"
+      >
         {isLogin ? "SIGN IN" : "REGISTER"}
       </Button>
 
@@ -148,17 +145,16 @@ export const AuthForm = ({
               <div className="w-full border-t border-[#333]"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-[#1a1a1a] text-gray-400">
-                Or continue with
-              </span>
+              <span className="bg-[#1a1a1a] px-2 text-gray-400">Or continue with</span>
             </div>
           </div>
 
           <Button
             onClick={handleGoogleSignIn}
             variant="outline"
-            className="mt-6 w-full bg-white text-[#1a1a1a] hover:bg-gray-100 hover:scale-[1.02] transition-all duration-200"
-            leftIcon={<GoogleIcon />}>
+            className="mt-6 w-full bg-white text-[#1a1a1a] transition-all duration-200 hover:scale-[1.02] hover:bg-gray-100"
+            leftIcon={<GoogleIcon />}
+          >
             Sign in with Google
           </Button>
         </div>

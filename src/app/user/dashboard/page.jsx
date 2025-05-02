@@ -1,28 +1,22 @@
 "use client";
-import Background from "@/components/background";
 import { BrandLogo, Card } from "@components/custom";
-import { useSession } from "next-auth/react";
+
+import Background from "@/components/background";
 
 export default function UserDashboard() {
-  const { data: session } = useSession();
-
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white overflow-x-hidden relative">
+    <div className="relative min-h-screen overflow-x-hidden bg-[#0a0a0a] text-white">
       <Background />
 
-      <div className="max-w-[550px] mx-auto px-5 py-5 relative z-20 h-screen flex flex-col items-center">
-        <header className="pt-10 w-full text-center justify-center">
+      <div className="relative z-20 mx-auto flex h-screen max-w-[550px] flex-col items-center px-5 py-5">
+        <header className="w-full justify-center pt-10 text-center">
           <BrandLogo />
         </header>
 
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex flex-1 items-center justify-center">
           <Card width="100%">
-            <div className="text-2xl sm:text-3xl font-bold mb-4 text-center">
-              Welcome to Your Dashboard
-            </div>
-            <div className="text-[#aaa] text-base text-center">
-              Your personalized fitness journey starts here
-            </div>
+            <div className="mb-4 text-center text-2xl font-bold sm:text-3xl">Welcome to Your Dashboard</div>
+            <div className="text-center text-base text-[#aaa]">Your personalized fitness journey starts here</div>
           </Card>
         </div>
       </div>

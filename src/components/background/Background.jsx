@@ -1,40 +1,39 @@
 "use client";
 
-import React, { Suspense, lazy, useEffect, useState } from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
+
 import "./background.css";
 
 // Lazy load icons to reduce initial bundle size
 const ParthenonIcon = lazy(() =>
-  import("@/components/common/Icons").then((mod) => ({
+  import("@/components/common/Icons").then(mod => ({
     default: mod.ParthenonIcon,
-  }))
+  })),
 );
 const RunnerIcon = lazy(() =>
-  import("@/components/common/Icons").then((mod) => ({
+  import("@/components/common/Icons").then(mod => ({
     default: mod.RunnerIcon,
-  }))
+  })),
 );
 const DiscusIcon = lazy(() =>
-  import("@/components/common/Icons").then((mod) => ({
+  import("@/components/common/Icons").then(mod => ({
     default: mod.DiscusIcon,
-  }))
+  })),
 );
 const ColosseumIcon = lazy(() =>
-  import("@/components/common/Icons").then((mod) => ({
+  import("@/components/common/Icons").then(mod => ({
     default: mod.ColosseumIcon,
-  }))
+  })),
 );
 const ColumnIcon = lazy(() =>
-  import("@/components/common/Icons").then((mod) => ({
+  import("@/components/common/Icons").then(mod => ({
     default: mod.ColumnIcon,
-  }))
+  })),
 );
-const VaseIcon = lazy(() =>
-  import("@/components/common/Icons").then((mod) => ({ default: mod.VaseIcon }))
-);
+const VaseIcon = lazy(() => import("@/components/common/Icons").then(mod => ({ default: mod.VaseIcon })));
 
 // Simple placeholder for icons while loading
-const IconPlaceholder = () => <div className="w-full h-full bg-transparent" />;
+const IconPlaceholder = () => <div className="h-full w-full bg-transparent" />;
 
 const Background = ({
   parthenon = true,
@@ -57,53 +56,46 @@ const Background = ({
   }, []);
 
   return (
-    <div
-      className={`background-shapes ${className} ${
-        isVisible ? "visible" : ""
-      }`}>
+    <div className={`background-shapes ${className} ${isVisible ? "visible" : ""}`}>
       {parthenon && (
-        <div
-          className="ancient-building parthenon"
-          style={{ "--delay": "0.1s" }}>
+        <div className="ancient-building parthenon" style={{ "--delay": "0.1s" }}>
           <Suspense fallback={<IconPlaceholder />}>
-            <ParthenonIcon className="w-full h-full" />
+            <ParthenonIcon className="h-full w-full" />
           </Suspense>
         </div>
       )}
       {runner && (
         <div className="olympian runner" style={{ "--delay": "0.3s" }}>
           <Suspense fallback={<IconPlaceholder />}>
-            <RunnerIcon className="w-full h-full" />
+            <RunnerIcon className="h-full w-full" />
           </Suspense>
         </div>
       )}
       {discus && (
         <div className="olympian discus" style={{ "--delay": "0.5s" }}>
           <Suspense fallback={<IconPlaceholder />}>
-            <DiscusIcon className="w-full h-full" />
+            <DiscusIcon className="h-full w-full" />
           </Suspense>
         </div>
       )}
       {colosseum && (
-        <div
-          className="ancient-building colosseum"
-          style={{ "--delay": "0.2s" }}>
+        <div className="ancient-building colosseum" style={{ "--delay": "0.2s" }}>
           <Suspense fallback={<IconPlaceholder />}>
-            <ColosseumIcon className="w-full h-full" />
+            <ColosseumIcon className="h-full w-full" />
           </Suspense>
         </div>
       )}
       {column && (
         <div className="ancient-building column" style={{ "--delay": "0.4s" }}>
           <Suspense fallback={<IconPlaceholder />}>
-            <ColumnIcon className="w-full h-full" />
+            <ColumnIcon className="h-full w-full" />
           </Suspense>
         </div>
       )}
       {vase && (
         <div className="ancient-building vase" style={{ "--delay": "0.6s" }}>
           <Suspense fallback={<IconPlaceholder />}>
-            <VaseIcon className="w-full h-full" />
+            <VaseIcon className="h-full w-full" />
           </Suspense>
         </div>
       )}

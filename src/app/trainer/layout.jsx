@@ -1,11 +1,11 @@
 import { Navbar } from "@/components";
 
 export default function TrainerLayout({ children }) {
-    return (
-        <div>
-            <Navbar />
+  return (
+    <div>
+      <Navbar />
 
-            <main>{children}</main>
-        </div>
-    );
+      <main>{children}</main>
+    </div>
+  );
 }

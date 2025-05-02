@@ -1,8 +1,9 @@
 "use client";
 
 import Background from "@/components/background";
-import { Button, TextField } from "@/components/common/index";
+import { Button } from "@/components/common/index";
 import { Card } from "@/components/custom/index";
+import { FormField } from "@/components/shared";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -132,7 +133,7 @@ export default function ResetPasswordPage() {
                 Reset Password
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <TextField
+                <FormField
                   id="password"
                   name="password"
                   label="New Password"
@@ -148,7 +149,7 @@ export default function ResetPasswordPage() {
                   }
                   className="w-full"
                 />
-                <TextField
+                <FormField
                   id="confirmPassword"
                   name="confirmPassword"
                   label="Confirm New Password"
