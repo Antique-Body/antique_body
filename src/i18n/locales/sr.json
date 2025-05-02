@@ -1,0 +1,430 @@
+{
+  "common": {
+    "loading": "Учитавање...",
+    "error": "Грешка",
+    "success": "Успех",
+    "submit": "Пошаљи",
+    "cancel": "Откажи",
+    "save": "Сачувај",
+    "edit": "Уреди",
+    "delete": "Обриши",
+    "search": "Претражи",
+    "continue": "Настави",
+    "show": "Прикажи",
+    "hide": "Сакриј"
+  },
+  "role": {
+    "admin": "Администратор",
+    "trainer": {
+      "label": "Тренер",
+      "become": "Постаните тренер",
+      "description": "Креирајте свој тренерски профил, пронађите клијенте и пратите њихов напредак. Поделите своје знање и помозите другима да постигну своје фитнес циљеве."
+    },
+    "client": {
+      "label": "Клијент",
+      "train_with_coach": "Тренирајте са тренером",
+      "description": "Повежите се са професионалним тренерима који ће вас водити кроз ваше путовање фитнесом, пружајући персонализоване тренинге и савете о исхрани."
+    },
+    "user": {
+      "label": "Корисник",
+      "custom_workout": "Прилагођени план вежбања",
+      "description": "Добијте персонализовани план вежбања заснован на вашим преференцијама, нивоу кондиције и циљевима. Тренирајте самостално са вежбама генерисаним вештачком интелигенцијом."
+    },
+    "selection": {
+      "title": "Изаберите своју улогу",
+      "description": "Изаберите улогу која најбоље одговара вашем путовању фитнесом",
+      "continue_as": "Да ли сте сигурни да желите да наставите као",
+      "confirm_path": "Потврдите свој пут"
+    },
+    "preparing": {
+      "trainer": "Припрема вашег тренерског путовања",
+      "client": "Припрема вашег клијентског путовања",
+      "user": "Припрема вашег корисничког путовања",
+      "admin": "Припрема вашег администраторског путовања",
+      "journey": "Припрема вашег путовања"
+    },
+    "update": {
+      "failed": "Неуспело ажурирање улоге. Статус: {{status}}"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Пријава",
+      "sign_in": "ПРИЈАВА",
+      "sign_in_to_account": "Пријавите се на свој налог",
+      "forgot_password": "Заборавили сте лозинку?",
+      "no_account": "Немате налог?",
+      "or_continue_with": "Или наставите са",
+      "sign_in_with_google": "Пријавите се са Google-ом",
+      "back_to_login": "Назад на пријаву"
+    },
+    "register": {
+      "title": "Регистрација",
+      "join_fitness_community": "Придружите се нашој фитнес заједници",
+      "have_account": "Већ имате налог?",
+      "sign_in": "Пријава",
+      "verification": {
+        "email_sent": "Е-пошта за верификацију је послата",
+        "email_sent_again": "Е-пошта за верификацију је поново послата",
+        "email_sent_to": "Е-пошта за верификацију је послата на",
+        "check_inbox": "Молимо проверите свој претинац и следите упутства за верификацију налога",
+        "resend": "Поново пошаљи е-пошту за верификацију"
+      },
+      "verification_email_failed": "Неуспело слање е-поште за верификацију"
+    },
+    "form": {
+      "email": "Е-пошта",
+      "password": "Лозинка",
+      "confirm_password": "Потврди лозинку",
+      "first_name": "Име",
+      "last_name": "Презиме",
+      "submit": "Пошаљи"
+    },
+    "password_reset": {
+      "title": "Ресетовање лозинке",
+      "instructions": "Унесите своју е-пошту и послаћемо вам упутства за ресетовање лозинке",
+      "new_password": "Нова лозинка",
+      "confirm_new_password": "Потврди нову лозинку",
+      "enter_new_password": "Унесите нову лозинку",
+      "confirm_new_password_placeholder": "Потврдите нову лозинку",
+      "successful": "Лозинка успешно ресетована",
+      "redirect": "Ваша лозинка је успешно ресетована. Преусмеравање на пријаву...",
+      "invalid_link": "Неважећа веза за ресетовање",
+      "link_expired": "Ова веза за ресетовање лозинке је неважећа или је истекла.",
+      "return_to_login": "Повратак на пријаву",
+      "reset": "Ресетуј лозинку",
+      "failed": "Неуспело ресетовање лозинке",
+      "success": "Упутства за ресетовање лозинке су послата"
+    },
+    "logout": {
+      "title": "Одјава",
+      "message": "Одјављујете се. Молимо сачекајте..."
+    },
+    "navigation": {
+      "go_to_login": "Иди на пријаву",
+      "back_to_login": "Повратак на пријаву"
+    }
+  },
+  "dashboard": {
+    "welcome_to_dashboard": "Добродошли у свој контролни панел",
+    "personalized_fitness_journey": "Ваше персонализовано путовање фитнесом почиње овде",
+    "client_dashboard": "Контролни панел клијента",
+    "trainer_dashboard": "Контролни панел тренера",
+    "create_workout_plan": "Креирајмо ваш план вежбања",
+    "answer_questions": "Одговорите на неколико питања за почетак",
+    "step": "Корак",
+    "saving_preferences": "Чување ваших подешавања...",
+    "loading_dashboard": "Учитавање контролног панела...",
+    "choose_your_path": "Изаберите свој пут",
+    "select_experience": "Изаберите како желите да искусите своје путовање фитнесом",
+    "become_trainer": "Постаните тренер",
+    "trainer_description": "Креирајте свој тренерски профил, пронађите клијенте и пратите њихов напредак. Поделите своје знање и помозите другима да постигну своје фитнес циљеве.",
+    "train_with_coach": "Тренирајте са тренером",
+    "client_description": "Повежите се са професионалним тренерима који ће вас водити кроз ваше путовање фитнесом, пружајући персонализоване тренинге и савете о исхрани.",
+    "custom_workout": "Прилагођени план вежбања",
+    "user_description": "Добијте персонализовани план вежбања заснован на вашим преференцијама, нивоу кондиције и циљевима. Тренирајте самостално са вежбама генерисаним вештачком интелигенцијом.",
+    "confirm_path": "Потврдите свој пут",
+    "continue_as": "Да ли сте сигурни да желите да наставите као",
+    "preparing_journey": "Припрема вашег путовања",
+    "preparing_trainer": "Припрема вашег тренерског путовања",
+    "preparing_client": "Припрема вашег клијентског путовања",
+    "preparing_user": "Припрема вашег корисничког путовања",
+    "preparing_admin": "Припрема вашег администраторског путовања",
+    "weight_validation": "Тежина мора бити између {{min}} и {{max}} кг",
+    "height_validation": "Висина мора бити између {{min}} и {{max}} цм",
+    "save_failed": "Подаци нису могли бити сачувани"
+  },
+  "home": {
+    "welcome_message": "Добродошли у Antique Body",
+    "brand_name": "Antique Body",
+    "home_subtitle": "Ваше путовање ка античкој фитнес традицији почиње овде",
+    "personalized_training_title": "Персонализовани тренинг",
+    "personalized_training_description": "Добијте прилагођени план вежбања прилагођен вашим циљевима, нивоу искуства и преференцијама",
+    "expert_guidance_title": "Стручно вођство",
+    "expert_guidance_description": "Тренирајте са искусним професионалцима који разумеју ваше потребе",
+    "ancient_wisdom_title": "Античка мудрост",
+    "ancient_wisdom_description": "Откријте временски тестиране принципе фитнеса који су се показали кроз време",
+    "get_started": "Започни",
+    "learn_more": "Сазнај више"
+  },
+  "verification": {
+    "verifying_email": "Верификација е-поште",
+    "please_wait": "Молимо сачекајте док верификујемо вашу е-пошту...",
+    "email_verified": "Е-пошта верификована!",
+    "email_verification_success": "Ваша е-пошта је успешно верификована. Ваш налог је сада активан.",
+    "redirecting_to_login": "Преусмеравање на пријаву за",
+    "seconds": "секунди",
+    "cancel_redirect": "Откажи",
+    "continue_to_login": "Настави на пријаву",
+    "verification_failed": "Верификација није успела",
+    "verification_error": "Нисмо могли верификовати вашу е-пошту. Веза је можда неважећа или је истекла.",
+    "back_to_login": "Повратак на пријаву",
+    "technical_details": "Технички детаљи",
+    "invalid_reset_link": "Неважећа веза за ресетовање",
+    "reset_link_expired": "Ова веза за ресетовање лозинке је неважећа или је истекла.",
+    "return_to_login": "Повратак на пријаву"
+  },
+  "validation": {
+    "required_field": "Обавезно поље",
+    "email_required": "Е-пошта је обавезна",
+    "email_invalid": "Молимо унесите важећу е-пошту",
+    "password_required": "Лозинка је обавезна",
+    "password_min_length": "Лозинка мора имати најмање 6 карактера",
+    "passwords_must_match": "Лозинке се морају подударати",
+    "first_name_required": "Име је обавезно",
+    "last_name_required": "Презиме је обавезно",
+    "confirm_password_required": "Молимо потврдите своју лозинку",
+    "passwords_do_not_match": "Лозинке се не подударају"
+  },
+  "errors": {
+    "login_failed": "Пријава није успела. Молимо проверите своје податке за пријаву.",
+    "register_failed": "Регистрација није успела. Молимо покушајте поново.",
+    "password_reset_failed": "Ресетовање лозинке није успело. Молимо покушајте поново.",
+    "general_error": "Дошло је до грешке. Молимо покушајте поново."
+  },
+  "training": {
+    "measurements": {
+      "title": "Унесите своје мере",
+      "weight_label": "Тежина",
+      "height_label": "Висина",
+      "feet_label": "Стопала",
+      "inches_label": "Инчи",
+      "metric_button": "Метрички (кг/цм)",
+      "imperial_button": "Империјални (лб/фт)",
+      "weight_placeholder_metric": "Унесите своју тежину у килограмима",
+      "weight_placeholder_imperial": "Унесите своју тежину у фунтама",
+      "height_placeholder_metric": "Унесите своју висину у центиметрима",
+      "feet_placeholder": "Стопала",
+      "inches_placeholder": "Инчи",
+      "bmi_title": "Ваш БМИ",
+      "bmi_categories": {
+        "underweight": "Потхрањеност",
+        "normal": "Нормална тежина",
+        "overweight": "Прекомерна тежина",
+        "obese": "Претежина"
+      }
+    },
+    "injury": {
+      "title": "Da li imate povrede?",
+      "select_locations": "Izaberite povređene delove tela",
+      "want_rehabilitation": "Da li želite rehabilitaciju?",
+      "options": {
+        "no_injuries": "Bez povreda",
+        "no_injuries_desc": "Nemam povreda",
+        "past_injury": "Prošla povreda",
+        "past_injury_desc": "Imao sam povredu u prošlosti",
+        "current_injury": "Trenutna povreda",
+        "current_injury_desc": "Imam trenutnu povredu",
+        "chronic_injury": "Hronična povreda",
+        "chronic_injury_desc": "Imam hroničnu/ponavljajuću povredu",
+        "yes_rehab": "Da",
+        "yes_rehab_desc": "Želim rehabilitacijske vežbe",
+        "no_rehab": "Ne",
+        "no_rehab_desc": "Želim redovni trening"
+      }
+    },
+    "environment": {
+      "title": "Gde ćete trenirati?",
+      "options": {
+        "gym": "U teretani",
+        "outside": "Napolju"
+      }
+    },
+    "equipment": {
+      "title": "Kakvu opremu imate?",
+      "options": {
+        "with_equipment": "Sa opremom",
+        "with_equipment_desc": "Utge, trake za otpor, itd.",
+        "no_equipment": "Samo telesna težina",
+        "no_equipment_desc": "Nije potrebna oprema"
+      }
+    },
+    "experience": {
+      "title": "Koliko dugo trenirate?",
+      "options": {
+        "beginner": "Početnik",
+        "beginner_desc": "0-6 meseci",
+        "intermediate": "Srednji nivo",
+        "intermediate_desc": "6 meseci - 2 godine",
+        "advanced": "Napredni",
+        "advanced_desc": "2-5 godina",
+        "expert": "Stručnjak",
+        "expert_desc": "Više od 5 godina"
+      }
+    },
+    "goal": {
+      "title": "Koji je vaš glavni cilj?",
+      "options": {
+        "strength": "Izgradnja snage",
+        "strength_desc": "Povećanje snage i moći",
+        "muscle": "Izgradnja mišića",
+        "muscle_desc": "Povećanje mase i definicije",
+        "lose_weight": "Gubitak težine",
+        "lose_weight_desc": "Sagorevanje masti i smanjenje težine",
+        "endurance": "Izgradnja izdržljivosti",
+        "endurance_desc": "Poboljšanje kondicije i kardija"
+      }
+    },
+    "frequency": {
+      "title": "Koliko puta nedeljno ćete trenirati?"
+    },
+    "setup": {
+      "create_plan": "Креирајмо ваш план вежбања",
+      "answer_questions": "Одговорите на неколико питања за почетак",
+      "loading_dashboard": "Учитавање контролног панела...",
+      "saving_preferences": "Чување ваших подешавања...",
+      "save_failed": "Подаци нису могли бити сачувани"
+    }
+  },
+  "training_setup": {
+    "title": "Подешавање тренинга",
+    "description": "Подесимо ваше тренинг преференције",
+    "step": "Корак",
+    "next": "Даље",
+    "previous": "Назад",
+    "start_training": "Започни тренинг",
+    "saving": "Чување ваших подешавања...",
+    "redirecting": "Преусмеравање на контролну таблу...",
+    "injury": {
+      "title": "Да ли имате повреде?",
+      "select_locations": "Изаберите повређене делове тела",
+      "rehabilitation": "Да ли желите рехабилитацију?",
+      "selected_injuries": "Изабране повреде",
+      "no_injuries_selected": "Нема изабраних повреда",
+      "tap_locations": "Додирните делове тела где имате повреде",
+      "body_outline": "Обрис тела",
+      "locations": {
+        "head": "Глава",
+        "neck": "Врат",
+        "chest": "Груди",
+        "shoulder_left": "Лево раме",
+        "shoulder_right": "Десно раме",
+        "bicep_left": "Леви бицепс",
+        "bicep_right": "Десни бицепс",
+        "forearm_left": "Лева подлактица",
+        "forearm_right": "Десна подлактица",
+        "abdomen": "Стомак",
+        "hip_left": "Леви кук",
+        "hip_right": "Десни кук",
+        "quad_left": "Леви квадрицепс",
+        "quad_right": "Десни квадрицепс",
+        "knee_left": "Лево колено",
+        "knee_right": "Десно колено",
+        "ankle_left": "Леви скочни зглоб",
+        "ankle_right": "Десни скочни зглоб",
+        "upper_back": "Горњи део леђа",
+        "lower_back": "Доњи део леђа",
+        "back_shoulder_left": "Лево раме (леђа)",
+        "back_shoulder_right": "Десно раме (леђа)",
+        "tricep_left": "Леви трицепс",
+        "tricep_right": "Десни трицепс",
+        "glute_left": "Леви глутеус",
+        "glute_right": "Десни глутеус",
+        "hamstring_left": "Лева задња ложа",
+        "hamstring_right": "Десна задња ложа",
+        "calf_left": "Леви лист",
+        "calf_right": "Десни лист",
+        "achilles_left": "Лева Ахилова тетива",
+        "achilles_right": "Десна Ахилова тетива"
+      },
+      "options": {
+        "no_injuries": "Без повреда",
+        "no_injuries_desc": "Немам повреда",
+        "past_injury": "Прошла повреда",
+        "past_injury_desc": "Имао/ла сам повреду у прошлости",
+        "current_injury": "Тренутna повреда",
+        "current_injury_desc": "Имам тренутну повреду",
+        "chronic_injury": "Хронична повреда",
+        "chronic_injury_desc": "Имам хроничну/понављајућу повреду",
+        "yes_rehab": "Да",
+        "yes_rehab_desc": "Желим рехабилитационе вежбе",
+        "no_rehab": "Не",
+        "no_rehab_desc": "Желим редован тренинг"
+      }
+    },
+    "environment": {
+      "title": "Где ћете тренирати?",
+      "options": {
+        "gym": "У теретани",
+        "gym_desc": "Тренирајте у потпуно опремљеној теретани",
+        "outside": "Напољу",
+        "outside_desc": "Тренирајте на отвореном у природи"
+      }
+    },
+    "equipment": {
+      "title": "Какву опрему имате?",
+      "options": {
+        "with_equipment": "Са опремом",
+        "with_equipment_desc": "Тегови, гуме за вежбање, итд.",
+        "no_equipment": "Само телесна тежина",
+        "no_equipment_desc": "Није потребна опрема"
+      }
+    },
+    "experience": {
+      "title": "Колико дуго тренирате?",
+      "options": {
+        "beginner": "Почетник",
+        "beginner_desc": "0-6 месеци",
+        "intermediate": "Средњи ниво",
+        "intermediate_desc": "6 месеци - 2 године",
+        "advanced": "2 до 5 година",
+        "advanced_desc": "2-5 година",
+        "expert": "5+ година",
+        "expert_desc": "Више од 5 година"
+      }
+    },
+    "goal": {
+      "title": "Који је ваш главни циљ?",
+      "options": {
+        "strength": "Изградња снаге",
+        "strength_desc": "Повећање снаге и моћи",
+        "muscle": "Изградња мишића",
+        "muscle_desc": "Повећање масе и дефиниције",
+        "lose_weight": "Губитак тежине",
+        "lose_weight_desc": "Сагоревање масти и смањење тежине",
+        "endurance": "Изградња издржљивости",
+        "endurance_desc": "Побољшање кондиције и кардио способности"
+      }
+    },
+    "frequency": {
+      "title": "Колико пута недељно ћете тренирати?",
+      "description": "Изаберите жељену учесталост тренинга",
+      "times_per_week": "{{count}} пут недељно",
+      "times_per_week_plural": "{{count}} пута недељно"
+    },
+    "measurements": {
+      "title": "Које су ваше мере?",
+      "description": "Унесите своје тренутне мере",
+      "weight": "Тежина ({{unit}})",
+      "height": "Висина ({{unit}})",
+      "height_feet": "Висина (стопе)",
+      "height_inches": "Инчи",
+      "bmi": "БМИ",
+      "your_bmi": "Ваш БМИ",
+      "metric": "Метрички (кг/цм)",
+      "imperial": "Империјални (лб/фт)",
+      "weight_placeholder": "Унесите своју тежину у {{unit}}",
+      "height_placeholder_metric": "Унесите своју висину у центиметрима",
+      "feet_placeholder": "Стопе",
+      "inches_placeholder": "Инчи",
+      "weight_validation": "Унесите валидну тежину између {{min}} и {{max}} {{unit}}",
+      "height_validation": "Унесите валидну висину између {{min}} и {{max}} {{unit}}",
+      "feet_validation": "Унесите валидну вредност стопа између {{min}} и {{max}}",
+      "inches_validation": "Унесите валидну вредност инча између 0 и 11.9",
+      "total_height_validation": "Укупна висина мора бити између {{min}} и {{max}} стопа",
+      "bmi_categories": {
+        "underweight": "Потхрањеност",
+        "normal": "Нормална тежина",
+        "overweight": "Прекомерна тежина",
+        "obese": "Гојазност"
+      }
+    }
+  },
+  "registration_successful": "Регистрација успешна!",
+  "check_inbox_verification": "Молимо проверите своје сандуче и пратите упутства за верификацију налога",
+  "resend_verification_email": "Поново пошаљи е-пошту за верификацију",
+  "go_to_login": "Иди на пријаву",
+  "register_failed": "Регистрација није успела",
+  "verification_email_failed": "Неуспело слање е-поште за верификацију",
+  "verification_email_sent_again": "Е-пошта за верификацију је поново послата"
+} 

@@ -2,8 +2,8 @@
 
 import { Button, ProgressBar, TextField } from "@components/common";
 import { Card } from "@components/custom";
-
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 // Constants
 const UNIT_SYSTEMS = {
@@ -12,10 +12,10 @@ const UNIT_SYSTEMS = {
 };
 
 const BMI_CATEGORIES = {
-  UNDERWEIGHT: { max: 18.5, label: "Underweight", color: "text-blue-400", gradientFrom: "from-blue-500", gradientTo: "to-blue-600" },
-  NORMAL: { max: 25, label: "Normal weight", color: "text-green-400", gradientFrom: "from-green-500", gradientTo: "to-green-600" },
-  OVERWEIGHT: { max: 30, label: "Overweight", color: "text-yellow-400", gradientFrom: "from-yellow-500", gradientTo: "to-yellow-600" },
-  OBESE: { max: Infinity, label: "Obese", color: "text-red-400", gradientFrom: "from-red-500", gradientTo: "to-red-600" },
+  UNDERWEIGHT: { max: 18.5, label: "training_setup.measurements.bmi_categories.underweight", color: "text-blue-400", gradientFrom: "from-blue-500", gradientTo: "to-blue-600" },
+  NORMAL: { max: 25, label: "training_setup.measurements.bmi_categories.normal", color: "text-green-400", gradientFrom: "from-green-500", gradientTo: "to-green-600" },
+  OVERWEIGHT: { max: 30, label: "training_setup.measurements.bmi_categories.overweight", color: "text-yellow-400", gradientFrom: "from-yellow-500", gradientTo: "to-yellow-600" },
+  OBESE: { max: Infinity, label: "training_setup.measurements.bmi_categories.obese", color: "text-red-400", gradientFrom: "from-red-500", gradientTo: "to-red-600" },
 };
 
 const CONVERSION_FACTORS = {
@@ -69,6 +69,8 @@ const calculateBmi = (weight, height, unitSystem) => {
 };
 
 export const MeasurementsInput = ({ onSelect }) => {
+  const { t } = useTranslation();
+
   // State
   const [unitSystem, setUnitSystem] = useState(UNIT_SYSTEMS.METRIC);
   const [measurements, setMeasurements] = useState({
@@ -235,12 +237,20 @@ export const MeasurementsInput = ({ onSelect }) => {
 
     const newErrors = {};
     if (touched.weight && !hasValidWeight) {
-      newErrors.weight = `Please enter a valid weight between ${constraints.weight.min} and ${constraints.weight.max} ${unitSystem === UNIT_SYSTEMS.METRIC ? 'kg' : 'lb'}`;
+      newErrors.weight = t("training_setup.measurements.weight_validation", {
+        min: constraints.weight.min,
+        max: constraints.weight.max,
+        unit: unitSystem === UNIT_SYSTEMS.METRIC ? 'kg' : 'lb'
+      });
     }
     
     if (unitSystem === UNIT_SYSTEMS.METRIC) {
       if (touched.height && !hasValidHeight) {
-        newErrors.height = `Please enter a valid height between ${constraints.height.min} and ${constraints.height.max} cm`;
+        newErrors.height = t("training_setup.measurements.height_validation", {
+          min: constraints.height.min,
+          max: constraints.height.max,
+          unit: 'cm'
+        });
       }
     } else {
       // For imperial, validate feet and inches separately
@@ -248,16 +258,22 @@ export const MeasurementsInput = ({ onSelect }) => {
       const inches = parseFloat(measurements.inches);
       
       if (touched.height && (isNaN(feet) || feet < Math.floor(constraints.height.min) || feet > Math.floor(constraints.height.max))) {
-        newErrors.height = `Please enter a valid feet value between ${Math.floor(constraints.height.min)} and ${Math.floor(constraints.height.max)}`;
+        newErrors.height = t("training_setup.measurements.feet_validation", {
+          min: Math.floor(constraints.height.min),
+          max: Math.floor(constraints.height.max)
+        });
       }
       
       if (touched.inches && (isNaN(inches) || inches < 0 || inches >= 12)) {
-        newErrors.inches = "Please enter a valid inches value between 0 and 11.9";
+        newErrors.inches = t("training_setup.measurements.inches_validation");
       }
       
       // Also check if the combined height is within range
       if (touched.height && touched.inches && hasValidHeight === false) {
-        newErrors.height = `Total height must be between ${constraints.height.min} and ${constraints.height.max} feet`;
+        newErrors.height = t("training_setup.measurements.total_height_validation", {
+          min: constraints.height.min,
+          max: constraints.height.max
+        });
       }
     }
 
@@ -317,7 +333,7 @@ export const MeasurementsInput = ({ onSelect }) => {
     prevMeasurements.current = { ...measurements, isValid: newIsValid };
     prevUnitSystem.current = unitSystem;
     prevTouched.current = touched;
-  }, [measurements, unitSystem, touched, onSelect, constraints]);
+  }, [measurements, unitSystem, touched, onSelect, constraints, t]);
 
   // Render BMI display
   const renderBmiDisplay = () => {
@@ -325,11 +341,11 @@ export const MeasurementsInput = ({ onSelect }) => {
     
     return (
       <div className="mt-6 p-4 bg-[#0a0a0a] rounded-lg border border-[#222]">
-        <h3 className="text-lg font-semibold mb-2">Your BMI</h3>
+        <h3 className="text-lg font-semibold mb-2">{t("training_setup.measurements.your_bmi")}</h3>
         <div className="flex items-center justify-between mb-3">
           <div className="text-3xl font-bold">{bmi}</div>
           <div className={`text-lg font-medium ${bmiCategory.color}`}>
-            {bmiCategory.label}
+            {t(bmiCategory.label)}
           </div>
         </div>
 
@@ -345,10 +361,10 @@ export const MeasurementsInput = ({ onSelect }) => {
         />
 
         <div className="flex justify-between text-xs text-gray-400">
-          <span>Underweight</span>
-          <span>Normal</span>
-          <span>Overweight</span>
-          <span>Obese</span>
+          <span>{t("training_setup.measurements.bmi_categories.underweight")}</span>
+          <span>{t("training_setup.measurements.bmi_categories.normal")}</span>
+          <span>{t("training_setup.measurements.bmi_categories.overweight")}</span>
+          <span>{t("training_setup.measurements.bmi_categories.obese")}</span>
         </div>
       </div>
     );
@@ -361,13 +377,13 @@ export const MeasurementsInput = ({ onSelect }) => {
           onClick={() => handleUnitChange(UNIT_SYSTEMS.METRIC)}
           variant={unitSystem === UNIT_SYSTEMS.METRIC ? "primary" : "secondary"}
           className="min-w-[140px]">
-          Metric (kg/cm)
+          {t("training_setup.measurements.metric")}
         </Button>
         <Button
           onClick={() => handleUnitChange(UNIT_SYSTEMS.IMPERIAL)}
           variant={unitSystem === UNIT_SYSTEMS.IMPERIAL ? "primary" : "secondary"}
           className="min-w-[140px]">
-          Imperial (lb/ft)
+          {t("training_setup.measurements.imperial")}
         </Button>
       </div>
 
@@ -375,11 +391,13 @@ export const MeasurementsInput = ({ onSelect }) => {
         <TextField
           id="weight-input"
           name="weight"
-          label={`Weight (${unitSystem === UNIT_SYSTEMS.METRIC ? "kg" : "lb"})`}
+          label={t("training_setup.measurements.weight", {
+            unit: unitSystem === UNIT_SYSTEMS.METRIC ? "kg" : "lb"
+          })}
           type="number"
-          placeholder={`Enter your weight in ${
-            unitSystem === UNIT_SYSTEMS.METRIC ? "kilograms" : "pounds"
-          }`}
+          placeholder={t("training_setup.measurements.weight_placeholder", {
+            unit: unitSystem === UNIT_SYSTEMS.METRIC ? "kilograms" : "pounds"
+          })}
           value={measurements.weight}
           onChange={(e) => handleChange("weight", e.target.value)}
           onBlur={() => handleBlur("weight")}
@@ -395,9 +413,9 @@ export const MeasurementsInput = ({ onSelect }) => {
           <TextField
             id="height-input"
             name="height"
-            label="Height (cm)"
+            label={t("training_setup.measurements.height", { unit: "cm" })}
             type="number"
-            placeholder="Enter your height in centimeters"
+            placeholder={t("training_setup.measurements.height_placeholder_metric")}
             value={measurements.height}
             onChange={(e) => handleChange("height", e.target.value)}
             onBlur={() => handleBlur("height")}
@@ -413,9 +431,9 @@ export const MeasurementsInput = ({ onSelect }) => {
             <TextField
               id="feet-input"
               name="height"
-              label="Height (feet)"
+              label={t("training_setup.measurements.height_feet")}
               type="number"
-              placeholder="Feet"
+              placeholder={t("training_setup.measurements.feet_placeholder")}
               value={measurements.height}
               onChange={(e) => handleChange("height", e.target.value)}
               onBlur={() => handleBlur("height")}
@@ -428,9 +446,9 @@ export const MeasurementsInput = ({ onSelect }) => {
             <TextField
               id="inches-input"
               name="inches"
-              label="Inches"
+              label={t("training_setup.measurements.height_inches")}
               type="number"
-              placeholder="Inches"
+              placeholder={t("training_setup.measurements.inches_placeholder")}
               value={measurements.inches}
               onChange={(e) => handleChange("inches", e.target.value)}
               onBlur={() => handleBlur("inches")}

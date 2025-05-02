@@ -107,41 +107,69 @@ export const userService = {
 
   // Update user role
   async updateUserRole(userId, role) {
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: { role },
-    });
+    try {
+      const user = await this.getUserById(userId);
+      
+      const updatedUser = await prisma.user.update({
+        where: { email: user.email },
+        data: { role },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          lastName: true,
+          role: true,
+          language: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
 
-    const { password, ...userWithoutPassword } = updatedUser;
-    return userWithoutPassword;
+      return updatedUser;
+    } catch (error) {
+      console.error("Error in updateUserRole:", error);
+      throw error;
+    }
   },
 
   // Update user profile
   async updateUserProfile(userId, userData) {
-    const { name, lastName, email } = userData;
+    try {
+      const user = await this.getUserById(userId);
+      const { name, lastName, email } = userData;
 
-    // Check if email is being changed and if it's already in use
-    if (email) {
-      const existingUser = await prisma.user.findUnique({
-        where: { email },
+      // Check if email is being changed and if it's already in use
+      if (email && email !== user.email) {
+        const existingUser = await this.findUserByEmail(email);
+        if (existingUser) {
+          throw new Error("Email already in use");
+        }
+      }
+
+      const updatedUser = await prisma.user.update({
+        where: { email: user.email },
+        data: {
+          ...(name && { name }),
+          ...(lastName && { lastName }),
+          ...(email && { email }),
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          lastName: true,
+          role: true,
+          language: true,
+          createdAt: true,
+          updatedAt: true,
+        },
       });
 
-      if (existingUser && existingUser.id !== userId) {
-        throw new Error("Email already in use");
-      }
+      return updatedUser;
+    } catch (error) {
+      console.error("Error in updateUserProfile:", error);
+      throw error;
     }
-
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: {
-        ...(name && { name }),
-        ...(lastName && { lastName }),
-        ...(email && { email }),
-      },
-    });
-
-    const { password, ...userWithoutPassword } = updatedUser;
-    return userWithoutPassword;
   },
 
   async findUserByEmail(email) {
@@ -202,5 +230,158 @@ export const userService = {
     });
 
     return { success: true };
+  },
+
+  // Update user language
+  async updateUserLanguage(userId, language) {
+    try {
+      if (!userId || !language) {
+        throw new Error("User ID and language are required");
+      }
+
+      // Get user by ID first to get their email
+      const user = await this.getUserByEmail(userId);
+      
+      // Update using email
+      const updatedUser = await prisma.user.update({
+        where: { email: user.email },
+        data: { language },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          lastName: true,
+          role: true,
+          language: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return updatedUser;
+    } catch (error) {
+      console.error("Error in updateUserLanguage:", error);
+      if (error.code === 'P2025') {
+        throw new Error("User not found");
+      }
+      throw error;
+    }
+  },
+
+  // Verify email
+  async verifyEmail(email, token) {
+    try {
+      const user = await prisma.user.findFirst({
+        where: {
+          email: email,
+          emailVerificationToken: token
+        }
+      });
+
+      if (!user) {
+        throw new Error('Invalid verification token or email');
+      }
+
+      return await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          emailVerified: true,
+          emailVerificationToken: null
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          lastName: true,
+          role: true,
+          language: true,
+          emailVerified: true,
+          createdAt: true,
+          updatedAt: true,
+        }
+      });
+    } catch (error) {
+      console.error("Error in verifyEmail:", error);
+      throw error;
+    }
+  },
+
+  // Reset password
+  async resetPassword(token, newPassword) {
+    try {
+      const user = await prisma.user.findFirst({
+        where: {
+          resetToken: token,
+          resetTokenExpiry: {
+            gt: new Date()
+          }
+        }
+      });
+
+      if (!user) {
+        throw new Error('Invalid or expired reset token');
+      }
+
+      const hashedPassword = await hash(newPassword, 12);
+      
+      return await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          password: hashedPassword,
+          resetToken: null,
+          resetTokenExpiry: null
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          lastName: true,
+          role: true,
+          language: true,
+          emailVerified: true,
+          createdAt: true,
+          updatedAt: true,
+        }
+      });
+    } catch (error) {
+      console.error("Error in resetPassword:", error);
+      throw error;
+    }
+  },
+
+  // Initiate password reset
+  async initiatePasswordReset(email) {
+    try {
+      const user = await this.findUserByEmail(email);
+      
+      if (!user) {
+        return null; // Return null instead of throwing to maintain security
+      }
+
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      const resetTokenExpiry = new Date(Date.now() + 3600000);
+
+      return await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          resetToken,
+          resetTokenExpiry
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          lastName: true,
+          role: true,
+          language: true,
+          emailVerified: true,
+          createdAt: true,
+          updatedAt: true,
+        }
+      });
+    } catch (error) {
+      console.error("Error in initiatePasswordReset:", error);
+      throw error;
+    }
   },
 };

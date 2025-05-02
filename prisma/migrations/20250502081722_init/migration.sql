@@ -6,12 +6,19 @@ CREATE TABLE `User` (
     `email` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NULL,
     `role` ENUM('trainer', 'client', 'user', 'admin') NULL,
+    `language` VARCHAR(191) NOT NULL DEFAULT 'en',
+    `emailVerified` BOOLEAN NOT NULL DEFAULT false,
+    `emailVerificationToken` VARCHAR(191) NULL,
+    `resetToken` VARCHAR(191) NULL,
+    `resetTokenExpiry` DATETIME(3) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `User_email_key`(`email`),
     INDEX `User_email_idx`(`email`),
     INDEX `User_role_idx`(`role`),
+    INDEX `User_emailVerificationToken_idx`(`emailVerificationToken`),
+    INDEX `User_resetToken_idx`(`resetToken`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

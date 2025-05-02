@@ -2,9 +2,11 @@
 import Background from "@/components/background";
 import { BrandLogo, Card } from "@components/custom";
 import { useSession } from "next-auth/react";
+import { useTranslation } from "react-i18next";
 
 export default function UserDashboard() {
   const { data: session } = useSession();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white overflow-x-hidden relative">
@@ -18,10 +20,10 @@ export default function UserDashboard() {
         <div className="flex-1 flex items-center justify-center">
           <Card width="100%">
             <div className="text-2xl sm:text-3xl font-bold mb-4 text-center">
-              Welcome to Your Dashboard
+              {t("welcome_to_dashboard")}
             </div>
             <div className="text-[#aaa] text-base text-center">
-              Your personalized fitness journey starts here
+              {t("personalized_fitness_journey")}
             </div>
           </Card>
         </div>

@@ -48,7 +48,7 @@ export const Navbar = () => {
   }
 
   return (
-    <nav className="fixed top-0 right-0 z-50 p-4 flex justify-end w-full">
+    <nav className="fixed top-0 right-0 z-50 p-4 flex justify-end">
       <div
         className={`transition-all duration-500 ${
           isVisible ? "opacity-100" : "opacity-0"

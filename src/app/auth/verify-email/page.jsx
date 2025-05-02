@@ -4,9 +4,11 @@ import Background from "@/components/background";
 import { Card } from "@/components/custom/index";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function VerifyEmailPage() {
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [status, setStatus] = useState("verifying");
@@ -14,19 +16,23 @@ export default function VerifyEmailPage() {
   const [debug, setDebug] = useState({});
   const [autoRedirect, setAutoRedirect] = useState(false);
   const [countdown, setCountdown] = useState(5);
+  const verificationAttempted = useRef(false);
 
   useEffect(() => {
     const verifyEmail = async () => {
+      if (verificationAttempted.current) return;
+      
       const token = searchParams.get("token");
       const email = searchParams.get("email");
 
       if (!token || !email) {
         setStatus("error");
-        setError("Verification token or email is missing");
+        setError(t("missing_token_or_email"));
         return;
       }
 
       try {
+        verificationAttempted.current = true;
         const response = await fetch(`/api/email-verification/verify?token=${token}&email=${email}`);
         const data = await response.json();
 
@@ -38,7 +44,7 @@ export default function VerifyEmailPage() {
         });
 
         if (!response.ok) {
-          throw new Error(data.error || "Verification failed");
+          throw new Error(data.error || t("verification_failed"));
         }
 
         setStatus("success");
@@ -52,7 +58,7 @@ export default function VerifyEmailPage() {
     };
 
     verifyEmail();
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   // Auto redirect countdown
   useEffect(() => {
@@ -94,11 +100,11 @@ export default function VerifyEmailPage() {
           logoTagline="STRENGTH OF THE ANCIENTS">
           {status === "verifying" && (
             <div className="text-center">
-              <h2 className="text-xl font-semibold mb-4">Verifying Your Email</h2>
+              <h2 className="text-xl font-semibold mb-4">{t("verifying_email")}</h2>
               <div className="flex justify-center mb-4">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ff7800]"></div>
               </div>
-              <p className="text-gray-400">Please wait while we verify your email address...</p>
+              <p className="text-gray-400">{t("please_wait")}</p>
             </div>
           )}
 
@@ -111,25 +117,25 @@ export default function VerifyEmailPage() {
                   </svg>
                 </div>
               </div>
-              <h2 className="text-2xl font-semibold mb-4 text-green-500">Email Verified!</h2>
-              <p className="text-gray-400 mb-6">Your email has been successfully verified. Your account is now active.</p>
+              <h2 className="text-2xl font-semibold mb-4 text-green-500">{t("email_verified")}</h2>
+              <p className="text-gray-400 mb-6">{t("email_verification_success")}</p>
               
               {autoRedirect ? (
                 <div className="mb-6">
                   <p className="text-green-500 mb-2">
-                    Redirecting to login in {countdown} seconds...
+                    {t("redirecting_to_login")} {countdown} {t("seconds")}...
                   </p>
                   <button 
                     onClick={cancelRedirect}
                     className="text-sm text-gray-400 hover:text-white">
-                    Cancel
+                    {t("cancel_redirect")}
                   </button>
                 </div>
               ) : (
                 <Link
                   href="/auth/login"
                   className="inline-block bg-gradient-to-r from-[#ff7800] to-[#ff5f00] text-white px-6 py-3 rounded-lg font-medium transition-all hover:shadow-lg hover:from-[#ff5f00] hover:to-[#ff7800]">
-                  Continue to Login
+                  {t("continue_to_login")}
                 </Link>
               )}
             </div>
@@ -144,18 +150,18 @@ export default function VerifyEmailPage() {
                   </svg>
                 </div>
               </div>
-              <h2 className="text-2xl font-semibold mb-4 text-red-500">Verification Failed</h2>
-              <p className="text-gray-400 mb-6">{error || "We couldn't verify your email address. The link may be invalid or expired."}</p>
+              <h2 className="text-2xl font-semibold mb-4 text-red-500">{t("verification_failed")}</h2>
+              <p className="text-gray-400 mb-6">{error || t("verification_error")}</p>
               <div className="space-y-3">
                 <Link
                   href="/auth/login"
                   className="inline-block w-full bg-gradient-to-r from-[#ff7800] to-[#ff5f00] text-white px-6 py-3 rounded-lg font-medium transition-all hover:shadow-lg hover:from-[#ff5f00] hover:to-[#ff7800]">
-                  Back to Login
+                  {t("back_to_login")}
                 </Link>
                 <Link
                   href="/auth/register"
                   className="inline-block w-full border border-zinc-700 hover:border-[#ff7800] text-white px-6 py-3 rounded-lg font-medium transition-all">
-                  Create New Account
+                  {t("create_new_account")}
                 </Link>
               </div>
             </div>
@@ -167,7 +173,7 @@ export default function VerifyEmailPage() {
               onClick={() => setShowDebug(!showDebug)}
               className="text-xs text-gray-500 hover:text-gray-400"
             >
-              {showDebug ? "Hide" : "Show"} Technical Details
+              {showDebug ? t("hide") : t("show")} {t("technical_details")}
             </button>
             
             {showDebug && (

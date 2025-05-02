@@ -1,0 +1,419 @@
+{
+  "common": {
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "submit": "Absenden",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "search": "Suchen",
+    "continue": "Weiter",
+    "show": "Anzeigen",
+    "hide": "Ausblenden"
+  },
+  "role": {
+    "admin": "Administrator",
+    "selection": {
+      "title": "Wählen Sie Ihre Rolle",
+      "description": "Wählen Sie die Rolle, die am besten zu Ihrer Fitness-Reise passt",
+      "continue_as": "Sind Sie sicher, dass Sie als",
+      "confirm_path": "Bestätigen Sie Ihren Weg"
+    },
+
+    "preparing": {
+      "trainer": "Ihre Trainer-Reise wird vorbereitet",
+      "client": "Ihre Kunden-Reise wird vorbereitet",
+      "user": "Ihre Benutzer-Reise wird vorbereitet",
+      "admin": "Ihre Admin-Reise wird vorbereitet",
+      "journey": "Ihre Reise wird vorbereitet"
+    },
+    "update": {
+      "failed": "Rollenaktualisierung fehlgeschlagen. Status: {{status}}"
+    },
+    "trainer": {
+      "label": "Trainer",
+      "become": "Werden Sie Trainer",
+      "description": "Erstellen Sie Ihr Trainer-Profil, gewinnen Sie Kunden und verfolgen Sie deren Fortschritt. Teilen Sie Ihr Fachwissen und helfen Sie anderen, ihre Fitnessziele zu erreichen."
+    },
+    "client": {
+      "label": "Kunde",
+      "train_with_coach": "Trainieren Sie mit einem Coach",
+      "description": "Verbinden Sie sich mit professionellen Trainern, die Sie auf Ihrer Fitness-Reise begleiten und personalisierte Workouts und Ernährungsberatung anbieten."
+    },
+    "user": {
+      "label": "Benutzer",
+      "custom_workout": "Individueller Trainingsplan",
+      "description": "Erhalten Sie einen personalisierten Trainingsplan basierend auf Ihren Vorlieben, Ihrem Fitnesslevel und Ihren Zielen. Trainieren Sie unabhängig mit KI-generierten Übungen."
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Anmelden",
+      "sign_in": "ANMELDEN",
+      "sign_in_to_account": "Melden Sie sich bei Ihrem Konto an",
+      "forgot_password": "Passwort vergessen?",
+      "no_account": "Noch kein Konto?",
+      "or_continue_with": "Oder fortfahren mit",
+      "sign_in_with_google": "Mit Google anmelden"
+    },
+    "register": {
+      "title": "Registrieren",
+      "join_fitness_community": "Treten Sie unserer Fitness-Community bei",
+      "have_account": "Bereits ein Konto?",
+      "sign_in": "Anmelden",
+      "verification": {
+        "email_sent": "Bestätigungs-E-Mail gesendet",
+        "email_sent_again": "Bestätigungs-E-Mail erneut gesendet",
+        "email_sent_to": "Eine Bestätigungs-E-Mail wurde gesendet an",
+        "check_inbox": "Bitte überprüfen Sie Ihren Posteingang und folgen Sie den Anweisungen zur Kontobestätigung",
+        "resend": "Bestätigungs-E-Mail erneut senden"
+      }
+    },
+    "form": {
+      "email": "E-Mail",
+      "password": "Passwort",
+      "confirm_password": "Passwort bestätigen",
+      "first_name": "Vorname",
+      "last_name": "Nachname"
+    },
+    "password_reset": {
+      "title": "Passwort zurücksetzen",
+      "instructions": "Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen Anweisungen zum Zurücksetzen Ihres Passworts",
+      "new_password": "Neues Passwort",
+      "confirm_new_password": "Neues Passwort bestätigen",
+      "enter_new_password": "Geben Sie Ihr neues Passwort ein",
+      "confirm_new_password_placeholder": "Bestätigen Sie Ihr neues Passwort",
+      "successful": "Passwort erfolgreich zurückgesetzt",
+      "redirect": "Ihr Passwort wurde erfolgreich zurückgesetzt. Weiterleitung zur Anmeldung...",
+      "invalid_link": "Ungültiger Reset-Link",
+      "link_expired": "Dieser Link zum Zurücksetzen des Passworts ist ungültig oder abgelaufen.",
+      "return_to_login": "Zurück zur Anmeldung",
+      "reset": "Passwort zurücksetzen"
+    },
+    "logout": {
+      "title": "Abmelden",
+      "message": "Sie werden abgemeldet. Bitte warten..."
+    },
+    "navigation": {
+      "go_to_login": "Zur Anmeldung",
+      "back_to_login": "Zurück zur Anmeldung"
+    }
+  },
+  "dashboard": {
+    "welcome_to_dashboard": "Willkommen in Ihrem Dashboard",
+    "personalized_fitness_journey": "Ihre personalisierte Fitness-Reise beginnt hier",
+    "client_dashboard": "Kunden-Dashboard",
+    "trainer_dashboard": "Trainer-Dashboard",
+    "create_workout_plan": "Lassen Sie uns Ihren Trainingsplan erstellen",
+    "answer_questions": "Beantworten Sie ein paar Fragen, um zu beginnen",
+    "step": "Schritt",
+    "saving_preferences": "Ihre Einstellungen werden gespeichert...",
+    "loading_dashboard": "Dashboard wird geladen...",
+    "choose_your_path": "Wählen Sie Ihren Weg",
+    "select_experience": "Wählen Sie, wie Sie Ihre Fitness-Reise erleben möchten",
+    "become_trainer": "Werden Sie Trainer",
+    "trainer_description": "Erstellen Sie Ihr Trainer-Profil, gewinnen Sie Kunden und verfolgen Sie deren Fortschritt. Teilen Sie Ihr Fachwissen und helfen Sie anderen, ihre Fitnessziele zu erreichen.",
+    "train_with_coach": "Trainieren Sie mit einem Coach",
+    "client_description": "Verbinden Sie sich mit professionellen Trainern, die Sie auf Ihrer Fitness-Reise begleiten und personalisierte Workouts und Ernährungsberatung anbieten.",
+    "custom_workout": "Individueller Trainingsplan",
+    "user_description": "Erhalten Sie einen personalisierten Trainingsplan basierend auf Ihren Vorlieben, Ihrem Fitnesslevel und Ihren Zielen. Trainieren Sie unabhängig mit KI-generierten Übungen.",
+    "confirm_path": "Bestätigen Sie Ihren Weg",
+    "continue_as": "Sind Sie sicher, dass Sie als",
+    "preparing_journey": "Ihre Reise wird vorbereitet",
+    "preparing_trainer": "Ihre Trainer-Reise wird vorbereitet",
+    "preparing_client": "Ihre Kunden-Reise wird vorbereitet",
+    "preparing_user": "Ihre Benutzer-Reise wird vorbereitet",
+    "preparing_admin": "Ihre Admin-Reise wird vorbereitet",
+    "weight_validation": "Gewicht muss zwischen {{min}} und {{max}} kg liegen",
+    "height_validation": "Größe muss zwischen {{min}} und {{max}} cm liegen",
+    "save_failed": "Daten konnten nicht gespeichert werden"
+  },
+  "home": {
+    "welcome_message": "Willkommen bei Antique Body",
+    "brand_name": "Antique Body",
+    "home_subtitle": "Ihre Reise zur antiken Fitness beginnt hier",
+    "personalized_training_title": "Personalisierte Ausbildung",
+    "personalized_training_description": "Erhalten Sie einen maßgeschneiderten Trainingsplan, der auf Ihre Ziele, Ihr Erfahrungsniveau und Ihre Vorlieben abgestimmt ist",
+    "expert_guidance_title": "Expertenführung",
+    "expert_guidance_description": "Trainieren Sie mit erfahrenen Fachleuten, die Ihre Bedürfnisse verstehen",
+    "ancient_wisdom_title": "Antike Weisheit",
+    "ancient_wisdom_description": "Entdecken Sie zeitlose Fitnessprinzipien, die sich bewährt haben",
+    "get_started": "Jetzt starten",
+    "learn_more": "Mehr erfahren"
+  },
+  "verification": {
+    "verifying_email": "E-Mail wird verifiziert",
+    "please_wait": "Bitte warten Sie, während wir Ihre E-Mail-Adresse verifizieren...",
+    "email_verified": "E-Mail verifiziert!",
+    "email_verification_success": "Ihre E-Mail wurde erfolgreich verifiziert. Ihr Konto ist jetzt aktiv.",
+    "redirecting_to_login": "Weiterleitung zur Anmeldung in",
+    "seconds": "Sekunden",
+    "cancel_redirect": "Abbrechen",
+    "continue_to_login": "Zur Anmeldung",
+    "verification_failed": "Verifizierung fehlgeschlagen",
+    "verification_error": "Wir konnten Ihre E-Mail-Adresse nicht verifizieren. Der Link ist möglicherweise ungültig oder abgelaufen.",
+    "back_to_login": "Zurück zur Anmeldung",
+    "technical_details": "Technische Details",
+    "invalid_reset_link": "Ungültiger Reset-Link",
+    "reset_link_expired": "Dieser Link zum Zurücksetzen des Passworts ist ungültig oder abgelaufen.",
+    "return_to_login": "Zurück zur Anmeldung"
+  },
+  "validation": {
+    "required_field": "Pflichtfeld",
+    "email_required": "E-Mail ist erforderlich",
+    "email_invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+    "password_required": "Passwort ist erforderlich",
+    "password_min_length": "Passwort muss mindestens 6 Zeichen lang sein",
+    "passwords_must_match": "Passwörter müssen übereinstimmen",
+    "first_name_required": "Vorname ist erforderlich",
+    "last_name_required": "Nachname ist erforderlich",
+    "confirm_password_required": "Bitte bestätigen Sie Ihr Passwort",
+    "passwords_do_not_match": "Passwörter stimmen nicht überein"
+  },
+  "errors": {
+    "login_failed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten.",
+    "register_failed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "password_reset_failed": "Passwort zurücksetzen fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "general_error": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut."
+  },
+  "training": {
+    "measurements": {
+      "title": "Geben Sie Ihre Maße ein",
+      "weight_label": "Gewicht",
+      "height_label": "Größe",
+      "feet_label": "Fuß",
+      "inches_label": "Zoll",
+      "metric_button": "Metrisch (kg/cm)",
+      "imperial_button": "Imperial (lb/ft)",
+      "weight_placeholder_metric": "Geben Sie Ihr Gewicht in Kilogramm ein",
+      "weight_placeholder_imperial": "Geben Sie Ihr Gewicht in Pfund ein",
+      "height_placeholder_metric": "Geben Sie Ihre Größe in Zentimetern ein",
+      "feet_placeholder": "Fuß",
+      "inches_placeholder": "Zoll",
+      "bmi_title": "Ihr BMI",
+      "bmi_categories": {
+        "underweight": "Untergewicht",
+        "normal": "Normalgewicht",
+        "overweight": "Übergewicht",
+        "obese": "Adipositas"
+      }
+    },
+    "injury": {
+      "title": "Haben Sie Verletzungen?",
+      "select_locations": "Wählen Sie die verletzten Körperteile aus",
+      "want_rehabilitation": "Möchten Sie Rehabilitation?",
+      "options": {
+        "no_injuries": "Keine Verletzungen",
+        "no_injuries_desc": "Ich habe keine Verletzungen",
+        "past_injury": "Frühere Verletzung",
+        "past_injury_desc": "Ich hatte in der Vergangenheit eine Verletzung",
+        "current_injury": "Aktuelle Verletzung",
+        "current_injury_desc": "Ich habe eine aktuelle Verletzung",
+        "chronic_injury": "Chronische Verletzung",
+        "chronic_injury_desc": "Ich habe eine chronische/wiederkehrende Verletzung",
+        "yes_rehab": "Ja",
+        "yes_rehab_desc": "Ich möchte Rehabilitationsübungen",
+        "no_rehab": "Nein",
+        "no_rehab_desc": "Ich möchte normales Training"
+      }
+    },
+    "environment": {
+      "title": "Wo werden Sie trainieren?",
+      "options": {
+        "gym": "Im Fitnessstudio",
+        "outside": "Draußen"
+      }
+    },
+    "equipment": {
+      "title": "Welche Ausrüstung haben Sie?",
+      "options": {
+        "with_equipment": "Mit Ausrüstung",
+        "with_equipment_desc": "Hanteln, Widerstandsbänder, etc.",
+        "no_equipment": "Nur Körpergewicht",
+        "no_equipment_desc": "Keine Ausrüstung erforderlich"
+      }
+    },
+    "experience": {
+      "title": "Wie lange trainieren Sie bereits?",
+      "options": {
+        "beginner": "Anfänger",
+        "beginner_desc": "0-6 Monate",
+        "intermediate": "Fortgeschritten",
+        "intermediate_desc": "6 Monate - 2 Jahre",
+        "advanced": "Erweitert",
+        "advanced_desc": "2-5 Jahre",
+        "expert": "Experte",
+        "expert_desc": "Mehr als 5 Jahre"
+      }
+    },
+    "goal": {
+      "title": "Was ist Ihr Hauptziel?",
+      "options": {
+        "strength": "Kraftaufbau",
+        "strength_desc": "Steigerung von Kraft und Leistung",
+        "muscle": "Muskelaufbau",
+        "muscle_desc": "Zunahme von Masse und Definition",
+        "lose_weight": "Gewichtsverlust",
+        "lose_weight_desc": "Fettverbrennung und Gewichtsreduktion",
+        "endurance": "Ausdaueraufbau",
+        "endurance_desc": "Verbesserung der Kondition und Cardio"
+      }
+    },
+    "frequency": {
+      "title": "Wie oft pro Woche werden Sie trainieren?"
+    },
+    "setup": {
+      "create_plan": "Erstellen wir Ihren Trainingsplan",
+      "answer_questions": "Beantworten Sie einige Fragen zum Start",
+      "loading_dashboard": "Dashboard wird geladen...",
+      "saving_preferences": "Ihre Einstellungen werden gespeichert...",
+      "save_failed": "Daten konnten nicht gespeichert werden"
+    }
+  },
+  "training_setup": {
+    "title": "Trainingseinrichtung",
+    "description": "Lassen Sie uns Ihre Trainingspräferenzen einrichten",
+    "step": "Schritt",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "start_training": "Training starten",
+    "saving": "Ihre Einstellungen werden gespeichert...",
+    "redirecting": "Weiterleitung zum Dashboard...",
+    "injury": {
+      "title": "Haben Sie Verletzungen?",
+      "select_locations": "Wählen Sie die verletzten Körperteile",
+      "rehabilitation": "Möchten Sie Rehabilitation?",
+      "selected_injuries": "Ausgewählte Verletzungen",
+      "no_injuries_selected": "Keine Verletzungen ausgewählt",
+      "tap_locations": "Tippen Sie auf die Körperteile, wo Sie Verletzungen haben",
+      "body_outline": "Körperumriss",
+      "locations": {
+        "head": "Kopf",
+        "neck": "Nacken",
+        "chest": "Brust",
+        "shoulder_left": "Linke Schulter",
+        "shoulder_right": "Rechte Schulter",
+        "bicep_left": "Linker Bizeps",
+        "bicep_right": "Rechter Bizeps",
+        "forearm_left": "Linker Unterarm",
+        "forearm_right": "Rechter Unterarm",
+        "abdomen": "Bauch",
+        "hip_left": "Linke Hüfte",
+        "hip_right": "Rechte Hüfte",
+        "quad_left": "Linker Quadrizeps",
+        "quad_right": "Rechter Quadrizeps",
+        "knee_left": "Linkes Knie",
+        "knee_right": "Rechtes Knie",
+        "ankle_left": "Linkes Sprunggelenk",
+        "ankle_right": "Rechtes Sprunggelenk",
+        "upper_back": "Oberer Rücken",
+        "lower_back": "Unterer Rücken",
+        "back_shoulder_left": "Linke Schulter (Rücken)",
+        "back_shoulder_right": "Rechte Schulter (Rücken)",
+        "tricep_left": "Linker Trizeps",
+        "tricep_right": "Rechter Trizeps",
+        "glute_left": "Linker Gluteus",
+        "glute_right": "Rechter Gluteus",
+        "hamstring_left": "Linker Oberschenkelrückseite",
+        "hamstring_right": "Rechter Oberschenkelrückseite",
+        "calf_left": "Linke Wade",
+        "calf_right": "Rechte Wade",
+        "achilles_left": "Linke Achillessehne",
+        "achilles_right": "Rechte Achillessehne"
+      },
+      "options": {
+        "no_injuries": "Keine Verletzungen",
+        "no_injuries_desc": "Ich habe keine Verletzungen",
+        "past_injury": "Frühere Verletzung",
+        "past_injury_desc": "Ich hatte in der Vergangenheit eine Verletzung",
+        "current_injury": "Aktuelle Verletzung",
+        "current_injury_desc": "Ich habe eine aktuelle Verletzung",
+        "chronic_injury": "Chronische Verletzung",
+        "chronic_injury_desc": "Ich habe eine chronische/wiederkehrende Verletzung",
+        "yes_rehab": "Ja",
+        "yes_rehab_desc": "Ich möchte Rehabilitationsübungen",
+        "no_rehab": "Nein",
+        "no_rehab_desc": "Ich möchte normales Training"
+      }
+    },
+    "environment": {
+      "title": "Wo werden Sie trainieren?",
+      "options": {
+        "gym": "Im Fitnessstudio",
+        "gym_desc": "Trainieren Sie in einem voll ausgestatteten Studio",
+        "outside": "Draußen",
+        "outside_desc": "Trainieren Sie in der Natur"
+      }
+    },
+    "equipment": {
+      "title": "Welche Ausrüstung haben Sie?",
+      "options": {
+        "with_equipment": "Mit Ausrüstung",
+        "with_equipment_desc": "Hanteln, Widerstandsbänder, etc.",
+        "no_equipment": "Nur Körpergewicht",
+        "no_equipment_desc": "Keine Ausrüstung erforderlich"
+      }
+    },
+    "experience": {
+      "title": "Wie lange trainieren Sie schon?",
+      "options": {
+        "beginner": "Anfänger",
+        "beginner_desc": "0-6 Monate",
+        "intermediate": "Fortgeschritten",
+        "intermediate_desc": "6 Monate - 2 Jahre",
+        "advanced": "2 bis 5 Jahre",
+        "advanced_desc": "2-5 Jahre",
+        "expert": "5+ Jahre",
+        "expert_desc": "Mehr als 5 Jahre"
+      }
+    },
+    "goal": {
+      "title": "Was ist Ihr Hauptziel?",
+      "options": {
+        "strength": "Kraft aufbauen",
+        "strength_desc": "Steigerung von Kraft und Leistung",
+        "muscle": "Muskelaufbau",
+        "muscle_desc": "Zunahme von Masse und Definition",
+        "lose_weight": "Gewicht verlieren",
+        "lose_weight_desc": "Fettverbrennung und Gewichtsreduktion",
+        "endurance": "Ausdauer aufbauen",
+        "endurance_desc": "Verbesserung der Kondition und Ausdauer"
+      }
+    },
+    "frequency": {
+      "title": "Wie oft pro Woche werden Sie trainieren?",
+      "description": "Wählen Sie Ihre bevorzugte Trainingshäufigkeit",
+      "times_per_week": "{{count}} Mal pro Woche",
+      "times_per_week_plural": "{{count}} Mal pro Woche"
+    },
+    "measurements": {
+      "title": "Wie sind Ihre Maße?",
+      "description": "Geben Sie Ihre aktuellen Maße ein",
+      "weight": "Gewicht ({{unit}})",
+      "height": "Größe ({{unit}})",
+      "height_feet": "Größe (Fuß)",
+      "height_inches": "Zoll",
+      "bmi": "BMI",
+      "your_bmi": "Ihr BMI",
+      "metric": "Metrisch (kg/cm)",
+      "imperial": "Imperial (lb/ft)",
+      "weight_placeholder": "Geben Sie Ihr Gewicht in {{unit}} ein",
+      "height_placeholder_metric": "Geben Sie Ihre Größe in Zentimetern ein",
+      "feet_placeholder": "Fuß",
+      "inches_placeholder": "Zoll",
+      "weight_validation": "Bitte geben Sie ein gültiges Gewicht zwischen {{min}} und {{max}} {{unit}} ein",
+      "height_validation": "Bitte geben Sie eine gültige Größe zwischen {{min}} und {{max}} {{unit}} ein",
+      "feet_validation": "Bitte geben Sie einen gültigen Fußwert zwischen {{min}} und {{max}} ein",
+      "inches_validation": "Bitte geben Sie einen gültigen Zollwert zwischen 0 und 11.9 ein",
+      "total_height_validation": "Die Gesamtgröße muss zwischen {{min}} und {{max}} Fuß liegen",
+      "bmi_categories": {
+        "underweight": "Untergewicht",
+        "normal": "Normalgewicht",
+        "overweight": "Übergewicht",
+        "obese": "Adipositas"
+      }
+    }
+  }
+} 
