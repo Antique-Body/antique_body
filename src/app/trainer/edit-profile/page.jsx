@@ -15,7 +15,7 @@ import {
   Availability,
 } from "@/components/custom/trainer/edit-profile";
 
-const EditProfilePage = () => {
+const TrainerEditProfilePage = () => {
   const router = useRouter();
   const [previewImage, setPreviewImage] = useState(null);
 
@@ -260,4 +260,4 @@ const EditProfilePage = () => {
   );
 };
 
-export default EditProfilePage;
+export default TrainerEditProfilePage;
