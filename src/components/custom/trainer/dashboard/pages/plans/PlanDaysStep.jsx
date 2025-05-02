@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/common/Button";
 import { TrashIcon, PlusIcon } from "@/components/common/Icons";
 import { Card } from "@/components/custom/Card";
+import { FormField } from "@/components/shared";
 
 export const PlanDaysStep = ({ initialData = [], onSubmit, _planType }) => {
   const [days, setDays] = useState(
@@ -95,14 +96,15 @@ export const PlanDaysStep = ({ initialData = [], onSubmit, _planType }) => {
           {days.map((day, dayIndex) => (
             <Card key={dayIndex} variant="dark" width="100%" maxWidth="100%" className="relative">
               <div className="absolute right-4 top-4">
-                <button
+                <Button
                   type="button"
                   onClick={() => removeDay(dayIndex)}
                   className="p-1 text-gray-400 transition-colors hover:text-red-500"
                   disabled={days.length === 1}
-                >
-                  <TrashIcon size={16} />
-                </button>
+                  variant="ghost"
+                  size="small"
+                  leftIcon={<TrashIcon size={16} />}
+                />
               </div>
 
               <div className="mb-6">
@@ -110,13 +112,14 @@ export const PlanDaysStep = ({ initialData = [], onSubmit, _planType }) => {
                   <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(255,107,0,0.15)]">
                     <span className="font-bold text-[#FF6B00]">{day.day}</span>
                   </div>
-                  <input
+                  <FormField
                     type="text"
                     value={day.focus}
                     onChange={e => handleDayChange(dayIndex, "focus", e.target.value)}
                     placeholder="Day Focus (e.g., Lower Body, HIIT, Recovery)"
-                    className="flex-1 rounded-md border border-[#444] bg-[#333] px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-[#FF6B00]"
+                    className="m-0 flex-1"
                     required
+                    backgroundStyle="semi-transparent"
                   />
                 </div>
 
@@ -124,88 +127,89 @@ export const PlanDaysStep = ({ initialData = [], onSubmit, _planType }) => {
                   {day.exercises.map((exercise, exerciseIndex) => (
                     <div key={exerciseIndex} className="relative rounded-md border border-[#333] p-4">
                       <div className="absolute right-2 top-2">
-                        <button
+                        <Button
                           type="button"
                           onClick={() => removeExercise(dayIndex, exerciseIndex)}
                           className="p-1 text-gray-400 transition-colors hover:text-red-500"
                           disabled={day.exercises.length === 1}
-                        >
-                          <TrashIcon size={14} />
-                        </button>
+                          variant="ghost"
+                          size="small"
+                          leftIcon={<TrashIcon size={14} />}
+                        />
                       </div>
 
                       <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div>
-                          <label className="mb-1 block text-sm font-medium text-gray-300">Exercise Name</label>
-                          <input
+                          <FormField
+                            label="Exercise Name"
                             type="text"
                             value={exercise.name}
                             onChange={e => handleExerciseChange(dayIndex, exerciseIndex, "name", e.target.value)}
                             placeholder="E.g., Bench Press, Squat Jumps"
-                            className="w-full rounded-md border border-[#444] bg-[#222] px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-[#FF6B00]"
                             required
+                            backgroundStyle="darker"
+                            className="mb-0"
                           />
                         </div>
 
                         <div className="grid grid-cols-3 gap-2">
-                          <div>
-                            <label className="mb-1 block text-sm font-medium text-gray-300">Sets</label>
-                            <input
-                              type="text"
-                              value={exercise.sets}
-                              onChange={e => handleExerciseChange(dayIndex, exerciseIndex, "sets", e.target.value)}
-                              placeholder="3-5"
-                              className="w-full rounded-md border border-[#444] bg-[#222] px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-[#FF6B00]"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label className="mb-1 block text-sm font-medium text-gray-300">Reps</label>
-                            <input
-                              type="text"
-                              value={exercise.reps}
-                              onChange={e => handleExerciseChange(dayIndex, exerciseIndex, "reps", e.target.value)}
-                              placeholder="8-12"
-                              className="w-full rounded-md border border-[#444] bg-[#222] px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-[#FF6B00]"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label className="mb-1 block text-sm font-medium text-gray-300">Rest</label>
-                            <input
-                              type="text"
-                              value={exercise.rest}
-                              onChange={e => handleExerciseChange(dayIndex, exerciseIndex, "rest", e.target.value)}
-                              placeholder="60 sec"
-                              className="w-full rounded-md border border-[#444] bg-[#222] px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-[#FF6B00]"
-                              required
-                            />
-                          </div>
+                          <FormField
+                            label="Sets"
+                            type="text"
+                            value={exercise.sets}
+                            onChange={e => handleExerciseChange(dayIndex, exerciseIndex, "sets", e.target.value)}
+                            placeholder="3-5"
+                            required
+                            backgroundStyle="darker"
+                            className="mb-0"
+                          />
+                          <FormField
+                            label="Reps"
+                            type="text"
+                            value={exercise.reps}
+                            onChange={e => handleExerciseChange(dayIndex, exerciseIndex, "reps", e.target.value)}
+                            placeholder="8-12"
+                            required
+                            backgroundStyle="darker"
+                            className="mb-0"
+                          />
+                          <FormField
+                            label="Rest"
+                            type="text"
+                            value={exercise.rest}
+                            onChange={e => handleExerciseChange(dayIndex, exerciseIndex, "rest", e.target.value)}
+                            placeholder="60 sec"
+                            required
+                            backgroundStyle="darker"
+                            className="mb-0"
+                          />
                         </div>
                       </div>
 
-                      <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-300">Video URL (Optional)</label>
-                        <input
-                          type="url"
-                          value={exercise.videoUrl || ""}
-                          onChange={e => handleExerciseChange(dayIndex, exerciseIndex, "videoUrl", e.target.value)}
-                          placeholder="https://example.com/video-demonstration"
-                          className="w-full rounded-md border border-[#444] bg-[#222] px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-[#FF6B00]"
-                        />
-                        <p className="mt-1 text-xs text-gray-500">Add a URL to a video demonstrating the exercise</p>
-                      </div>
+                      <FormField
+                        label="Video URL (Optional)"
+                        type="url"
+                        value={exercise.videoUrl || ""}
+                        onChange={e => handleExerciseChange(dayIndex, exerciseIndex, "videoUrl", e.target.value)}
+                        placeholder="https://example.com/video-demonstration"
+                        backgroundStyle="darker"
+                        subLabel="Add a URL to a video demonstrating the exercise"
+                        className="mb-0"
+                      />
                     </div>
                   ))}
                 </div>
 
-                <button
+                <Button
                   type="button"
                   onClick={() => addExercise(dayIndex)}
                   className="mt-4 flex items-center text-sm text-[#FF6B00] transition-colors hover:text-[#FF9A00]"
+                  variant="ghostOrange"
+                  size="small"
+                  leftIcon={<PlusIcon size={14} className="mr-1" />}
                 >
-                  <PlusIcon size={14} className="mr-1" /> Add Exercise
-                </button>
+                  Add Exercise
+                </Button>
               </div>
             </Card>
           ))}

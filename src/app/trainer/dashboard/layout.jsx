@@ -6,6 +6,7 @@ import { DashboardTabs } from "@/components/custom";
 import { AntiqueBodyLogo } from "@/components/custom/BrandLogo";
 import { BackgroundShapes } from "@/components/custom/shared";
 import { TrainerProfile } from "@/components/custom/trainer/dashboard/components";
+
 export default function TrainerDashboardLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
