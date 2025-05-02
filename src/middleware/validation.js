@@ -1,12 +1,3 @@
-import {
-  validateLogin,
-  validateRegistration,
-  validateRoleUpdate,
-  validateTrainingSetup,
-  validateUserUpdate,
-} from '../services/validation';
-
-
 // Email validation regex
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

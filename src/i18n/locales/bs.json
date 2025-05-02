@@ -1,0 +1,177 @@
+{
+  "common": {
+    "loading": "Učitavanje...",
+    "error": "Greška",
+    "success": "Uspjeh",
+    "submit": "Pošalji",
+    "cancel": "Otkaži",
+    "save": "Sačuvaj",
+    "edit": "Uredi",
+    "delete": "Izbriši",
+    "search": "Pretraži",
+    "continue": "Nastavi",
+    "show": "Prikaži",
+    "hide": "Sakrij"
+  },
+  "role": {
+    "admin": "Administrator",
+    "trainer": {
+      "label": "Trener",
+      "become": "Postanite trener",
+      "description": "Kreirajte svoj trenerski profil, pronađite klijente i pratite njihov napredak. Podijelite svoje znanje i pomozite drugima postići njihove fitness ciljeve."
+    },
+    "client": {
+      "label": "Klijent",
+      "train_with_coach": "Trenirajte sa trenerom",
+      "description": "Povežite se sa profesionalnim trenerima koji će vas voditi kroz vaše putovanje fitnessom, pružajući personalizirane treninge i savjete o ishrani."
+    },
+    "user": {
+      "label": "Korisnik",
+      "custom_workout": "Prilagođeni plan treninga",
+      "description": "Dobijte personalizirani plan treninga zasnovan na vašim preferencijama, nivou kondicije i ciljevima. Trenirajte samostalno sa vježbama generisanim veštačkom inteligencijom."
+    },
+    "selection": {
+      "title": "Izaberite svoju ulogu",
+      "description": "Izaberite ulogu koja najbolje odgovara vašem putovanju fitnessom",
+      "continue_as": "Da li ste sigurni da želite nastaviti kao",
+      "confirm_path": "Potvrdite svoj put"
+    },
+    "preparing": {
+      "trainer": "Priprema vašeg trenerskog putovanja",
+      "client": "Priprema vašeg klijentskog putovanja",
+      "user": "Priprema vašeg korisničkog putovanja",
+      "admin": "Priprema vašeg administratorskog putovanja",
+      "journey": "Priprema vašeg putovanja"
+    },
+    "update": {
+      "failed": "Neuspjelo ažuriranje uloge. Status: {{status}}"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Prijava",
+      "sign_in": "PRIJAVA",
+      "sign_in_to_account": "Prijavite se na svoj račun",
+      "forgot_password": "Zaboravili ste lozinku?",
+      "no_account": "Nemate račun?",
+      "or_continue_with": "Ili nastavite sa",
+      "sign_in_with_google": "Prijavite se sa Google-om"
+    },
+    "register": {
+      "title": "Registracija",
+      "join_fitness_community": "Pridružite se našoj fitness zajednici",
+      "have_account": "Već imate račun?",
+      "sign_in": "Prijava",
+      "verification": {
+        "email_sent": "E-mail za verifikaciju poslan",
+        "email_sent_again": "E-mail za verifikaciju ponovno poslan",
+        "email_sent_to": "E-mail za verifikaciju je poslan na",
+        "check_inbox": "Molimo provjerite svoj pretinac i slijedite upute za verifikaciju računa",
+        "resend": "Ponovno pošalji e-mail za verifikaciju"
+      }
+    },
+    "form": {
+      "email": "E-mail",
+      "password": "Lozinka",
+      "confirm_password": "Potvrdi lozinku",
+      "first_name": "Ime",
+      "last_name": "Prezime"
+    },
+    "password_reset": {
+      "title": "Resetiranje lozinke",
+      "instructions": "Unesite svoju e-mail adresu i poslat ćemo vam upute za resetiranje lozinke",
+      "new_password": "Nova lozinka",
+      "confirm_new_password": "Potvrdi novu lozinku",
+      "enter_new_password": "Unesite novu lozinku",
+      "confirm_new_password_placeholder": "Potvrdite novu lozinku",
+      "successful": "Lozinka uspješno resetirana",
+      "redirect": "Vaša lozinka je uspješno resetirana. Preusmjeravanje na prijavu...",
+      "invalid_link": "Nevažeća poveznica za resetiranje",
+      "link_expired": "Ova poveznica za resetiranje lozinke je nevažeća ili je istekla.",
+      "return_to_login": "Povratak na prijavu",
+      "reset": "Resetiraj lozinku"
+    },
+    "logout": {
+      "title": "Odjava",
+      "message": "Odjavljujete se. Molimo pričekajte..."
+    },
+    "navigation": {
+      "go_to_login": "Idi na prijavu",
+      "back_to_login": "Povratak na prijavu"
+    }
+  },
+  "dashboard": {
+    "welcome_to_dashboard": "Dobrodošli u svoj kontrolni panel",
+    "personalized_fitness_journey": "Vaše personalizirano putovanje fitnessom počinje ovdje",
+    "client_dashboard": "Kontrolni panel klijenta",
+    "trainer_dashboard": "Kontrolni panel trenera",
+    "create_workout_plan": "Kreirajmo vaš plan treninga",
+    "answer_questions": "Odgovorite na nekoliko pitanja za početak",
+    "step": "Korak",
+    "saving_preferences": "Čuvanje vaših postavki...",
+    "loading_dashboard": "Učitavanje kontrolnog panela...",
+    "choose_your_path": "Izaberite svoj put",
+    "select_experience": "Izaberite kako želite iskusiti svoje putovanje fitnessom",
+    "become_trainer": "Postanite trener",
+    "trainer_description": "Kreirajte svoj trenerski profil, pronađite klijente i pratite njihov napredak. Podijelite svoje znanje i pomozite drugima postići njihove fitness ciljeve.",
+    "train_with_coach": "Trenirajte sa trenerom",
+    "client_description": "Povežite se sa profesionalnim trenerima koji će vas voditi kroz vaše putovanje fitnessom, pružajući personalizirane treninge i savjete o ishrani.",
+    "custom_workout": "Prilagođeni plan treninga",
+    "user_description": "Dobijte personalizirani plan treninga zasnovan na vašim preferencijama, nivou kondicije i ciljevima. Trenirajte samostalno sa vježbama generisanim veštačkom inteligencijom.",
+    "confirm_path": "Potvrdite svoj put",
+    "continue_as": "Da li ste sigurni da želite nastaviti kao",
+    "preparing_journey": "Priprema vašeg putovanja",
+    "preparing_trainer": "Priprema vašeg trenerskog putovanja",
+    "preparing_client": "Priprema vašeg klijentskog putovanja",
+    "preparing_user": "Priprema vašeg korisničkog putovanja",
+    "preparing_admin": "Priprema vašeg administratorskog putovanja",
+    "weight_validation": "Težina mora biti između {{min}} i {{max}} kg",
+    "height_validation": "Visina mora biti između {{min}} i {{max}} cm",
+    "save_failed": "Podaci nisu mogli biti sačuvani"
+  },
+  "home": {
+    "welcome_message": "Dobrodošli u Antique Body",
+    "brand_name": "Antique Body",
+    "home_subtitle": "Vaše putovanje ka antičkoj fitness tradiciji počinje ovdje",
+    "personalized_training_title": "Personalizirani trening",
+    "personalized_training_description": "Dobijte prilagođeni plan treninga prilagođen vašim ciljevima, nivou iskustva i preferencijama",
+    "expert_guidance_title": "Stručno vođstvo",
+    "expert_guidance_description": "Trenirajte sa iskusnim profesionalcima koji razumiju vaše potrebe",
+    "ancient_wisdom_title": "Antička mudrost",
+    "ancient_wisdom_description": "Otkrijte vremenski testirane principe fitnessa koji su se pokazali kroz vrijeme",
+    "get_started": "Započni",
+    "learn_more": "Saznaj više"
+  },
+  "verification": {
+    "verifying_email": "Verifikacija e-pošte",
+    "please_wait": "Molimo pričekajte dok verifikujemo vašu e-mail adresu...",
+    "email_verified": "E-pošta verifikovana!",
+    "email_verification_success": "Vaša e-pošta je uspješno verifikovana. Vaš račun je sada aktivan.",
+    "redirecting_to_login": "Preusmjeravanje na prijavu za",
+    "seconds": "sekundi",
+    "cancel_redirect": "Otkaži",
+    "continue_to_login": "Nastavi na prijavu",
+    "verification_failed": "Verifikacija nije uspjela",
+    "verification_error": "Nismo mogli verifikovati vašu e-mail adresu. Poveznica je možda nevažeća ili je istekla.",
+    "back_to_login": "Povratak na prijavu",
+    "technical_details": "Tehnički detalji"
+  },
+  "validation": {
+    "required_field": "Obavezno polje",
+    "email_required": "E-pošta je obavezna",
+    "email_invalid": "Molimo unesite važeću e-mail adresu",
+    "password_required": "Lozinka je obavezna",
+    "password_min_length": "Lozinka mora imati najmanje 6 karaktera",
+    "passwords_must_match": "Lozinke se moraju podudarati",
+    "first_name_required": "Ime je obavezno",
+    "last_name_required": "Prezime je obavezno",
+    "confirm_password_required": "Molimo potvrdite svoju lozinku",
+    "passwords_do_not_match": "Lozinke se ne podudaraju"
+  },
+  "errors": {
+    "login_failed": "Prijava nije uspjela. Molimo provjerite svoje podatke za prijavu.",
+    "register_failed": "Registracija nije uspjela. Molimo pokušajte ponovo.",
+    "password_reset_failed": "Resetiranje lozinke nije uspjelo. Molimo pokušajte ponovo.",
+    "general_error": "Došlo je do greške. Molimo pokušajte ponovo."
+  }
+} 

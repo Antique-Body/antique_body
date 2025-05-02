@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "react-i18next";
 import { Card } from "..";
 
 export const SelectionCard = ({
@@ -11,6 +14,8 @@ export const SelectionCard = ({
   aspect = "aspect-[4/3]",
   icon
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Card
       className={`relative ${aspect} overflow-hidden cursor-pointer ${className}`}
@@ -39,8 +44,8 @@ export const SelectionCard = ({
       )}
       <div className="relative z-10 flex flex-col items-center justify-center h-full p-6">
         <div className="text-4xl mb-3">{icon}</div>
-        <h3 className="text-lg font-bold mb-2">{title}</h3>
-        <p className="text-sm text-[#aaa]">{description}</p>
+        <h3 className="text-lg font-bold mb-2">{t(title)}</h3>
+        <p className="text-sm text-[#aaa]">{t(description)}</p>
       </div>
     </Card>
   );

@@ -1,8 +1,5 @@
-import { PrismaClient } from "@prisma/client";
-import { hash } from "bcrypt";
+import { userService } from "@/services/users";
 import { NextResponse } from "next/server";
-
-const prisma = new PrismaClient();
 
 export async function POST(request) {
   try {
@@ -16,46 +13,26 @@ export async function POST(request) {
       );
     }
 
-    // Find user with the reset token
-    const user = await prisma.user.findFirst({
-      where: {
-        resetToken: token,
-        resetTokenExpiry: {
-          gt: new Date(), // Check if token hasn't expired
-        },
-      },
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "Invalid or expired reset token" },
-        { status: 400 }
-      );
+    try {
+      const updatedUser = await userService.resetPassword(token, password);
+      return NextResponse.json({
+        message: "Password has been reset successfully",
+        user: updatedUser
+      });
+    } catch (error) {
+      if (error.message === "Invalid or expired reset token") {
+        return NextResponse.json(
+          { error: error.message },
+          { status: 400 }
+        );
+      }
+      throw error;
     }
-
-    // Hash the new password
-    const hashedPassword = await hash(password, 12);
-
-    // Update user's password and clear reset token
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        password: hashedPassword,
-        resetToken: null,
-        resetTokenExpiry: null,
-      },
-    });
-
-    return NextResponse.json({
-      message: "Password has been reset successfully",
-    });
   } catch (error) {
     console.error("Password reset error:", error);
     return NextResponse.json(
       { error: "Failed to reset password" },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 } 

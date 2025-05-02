@@ -7,8 +7,9 @@ import {
   TrainerIcon,
   UserIcon,
 } from "@/components/common/Icons";
+import { memo, useCallback, useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Card } from "../../..";
-import { memo, useCallback, useState } from "react";
 
 const roleIcons = {
   trainer: TrainerIcon,
@@ -16,6 +17,9 @@ const roleIcons = {
   user: UserIcon,
   admin: AdminIcon,
 };
+
+// Create a shared height state
+let maxHeight = 0;
 
 export const RoleCardCompact = memo(({
   role,
@@ -26,8 +30,30 @@ export const RoleCardCompact = memo(({
   loading,
   cardProps = {},
 }) => {
+  const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
+  const cardRef = useRef(null);
   const Icon = roleIcons[role];
+
+  useEffect(() => {
+    if (cardRef.current) {
+      const height = cardRef.current.offsetHeight;
+      if (height > maxHeight) {
+        maxHeight = height;
+      }
+      // Update all cards to match the max height
+      const allCards = document.querySelectorAll('.role-card');
+      allCards.forEach(card => {
+        card.style.height = `${maxHeight}px`;
+      });
+    }
+  }, [title, description, loading, isSelected, isHovered]);
+
+  const getRoleTranslation = (role) => {
+    const roleKey = role.toLowerCase();
+
+    return t(`role.${roleKey}.label`);
+  };
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
@@ -89,7 +115,8 @@ export const RoleCardCompact = memo(({
 
   return (
     <div 
-      className={`transition-all duration-300 ${isHovered ? "scale-105" : ""}`}
+      ref={cardRef}
+      className={`transition-all duration-300 role-card h-full ${isHovered ? "scale-105" : ""}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
@@ -109,14 +136,14 @@ export const RoleCardCompact = memo(({
         bgGradientTo={bg.to}
         borderColor={getBorderStyle()}
         shadow={getShadowEffect()}
-        className={`relative ${isSelected ? "ring-4 ring-orange-300 ring-opacity-40" : ""}`}
+        className={`relative h-full flex flex-col ${isSelected ? "ring-4 ring-orange-300 ring-opacity-40" : ""}`}
         borderTop={false}
         topBorderColor={false}
         {...cardProps}
       >
         <GreekPatternBorder isVisible={isSelected || isHovered} />
         
-        <div className="flex flex-col items-center relative z-10">
+        <div className="flex flex-col items-center relative z-10 flex-grow">
           <div
             className={`relative transition-transform duration-300 ${
               isHovered ? "scale-110" : ""
@@ -150,16 +177,14 @@ export const RoleCardCompact = memo(({
           </p>
 
           <span
-            className={`mt-4 inline-block px-4 py-2 rounded-md text-base font-bold capitalize tracking-wider transition-all duration-300 ${
+            className={`mt-auto inline-block px-4 py-2 rounded-md text-base font-bold capitalize tracking-wider transition-all duration-300 ${
               isSelected
                 ? "bg-orange-400 bg-opacity-30 text-white shadow-inner border border-orange-300 border-opacity-40 backdrop-blur-sm"
                 : "bg-gradient-to-r from-zinc-800 to-zinc-900 text-orange-400 border border-orange-500 border-opacity-40 hover:border-orange-400 hover:text-orange-300"
             } ${isHovered ? "scale-105" : ""}`}>
-            {role.toLowerCase()}
+            {getRoleTranslation(role)}
           </span>
         </div>
-
-    
 
         {isSelected && (
           <div className="absolute inset-0 bg-orange-500 opacity-10 blur-lg -z-10"></div>
