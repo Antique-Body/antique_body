@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/shared";
 
 export const PlanDetailsStep = ({ initialData, onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -35,70 +36,55 @@ export const PlanDetailsStep = ({ initialData, onSubmit }) => {
 
       <form onSubmit={handleSubmit}>
         <div className="space-y-6">
-          <div>
-            <label htmlFor="title" className="mb-2 block text-sm font-medium text-gray-200">
-              Plan Title
-            </label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              className="w-full rounded-md border border-[#333] bg-[#222] px-4 py-3 text-white focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6B00]"
-              placeholder="E.g., Basketball Elite Performance"
-            />
-          </div>
+          <FormField
+            label="Plan Title"
+            id="title"
+            name="title"
+            type="text"
+            value={formData.title}
+            onChange={handleChange}
+            required
+            placeholder="E.g., Basketball Elite Performance"
+            backgroundStyle="darker"
+          />
 
-          <div>
-            <label htmlFor="summary" className="mb-2 block text-sm font-medium text-gray-200">
-              Short Summary
-            </label>
-            <input
-              type="text"
-              id="summary"
-              name="summary"
-              value={formData.summary}
-              onChange={handleChange}
-              required
-              className="w-full rounded-md border border-[#333] bg-[#222] px-4 py-3 text-white focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6B00]"
-              placeholder="Brief description (50-100 characters)"
-            />
-            <p className="mt-1 text-xs text-gray-500">This will appear on the plan card</p>
-          </div>
+          <FormField
+            label="Short Summary"
+            id="summary"
+            name="summary"
+            type="text"
+            value={formData.summary}
+            onChange={handleChange}
+            required
+            placeholder="Brief description (50-100 characters)"
+            backgroundStyle="darker"
+            subLabel="This will appear on the plan card"
+          />
 
-          <div>
-            <label htmlFor="description" className="mb-2 block text-sm font-medium text-gray-200">
-              Detailed Description
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              required
-              rows={4}
-              className="w-full rounded-md border border-[#333] bg-[#222] px-4 py-3 text-white focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6B00]"
-              placeholder="Detailed explanation of what the plan involves and its benefits"
-            />
-          </div>
+          <FormField
+            label="Detailed Description"
+            id="description"
+            name="description"
+            type="textarea"
+            value={formData.description}
+            onChange={handleChange}
+            required
+            rows={4}
+            placeholder="Detailed explanation of what the plan involves and its benefits"
+            backgroundStyle="darker"
+          />
 
-          <div>
-            <label htmlFor="forAthletes" className="mb-2 block text-sm font-medium text-gray-200">
-              Target Athletes
-            </label>
-            <input
-              type="text"
-              id="forAthletes"
-              name="forAthletes"
-              value={formData.forAthletes}
-              onChange={handleChange}
-              required
-              className="w-full rounded-md border border-[#333] bg-[#222] px-4 py-3 text-white focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6B00]"
-              placeholder="E.g., Basketball players looking to improve jumping ability"
-            />
-          </div>
+          <FormField
+            label="Target Athletes"
+            id="forAthletes"
+            name="forAthletes"
+            type="text"
+            value={formData.forAthletes}
+            onChange={handleChange}
+            required
+            placeholder="E.g., Basketball players looking to improve jumping ability"
+            backgroundStyle="darker"
+          />
 
           <div className="pt-6">
             <Button type="submit" variant="orangeFilled" className="w-full py-3">

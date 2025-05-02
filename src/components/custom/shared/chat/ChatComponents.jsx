@@ -2,6 +2,7 @@ import Image from "next/image";
 import React from "react";
 
 import { Button } from "@/components/common/Button";
+import { ChatMessageIcon } from "@/components/common/Icons";
 import { FormField } from "@/components/shared/FormField";
 
 export const ConversationItem = ({ conversation, isSelected, onClick }) => (
@@ -117,20 +118,7 @@ export const EmptyChatState = ({ message }) => <div className="py-8 text-center 
 export const NoConversationSelected = () => (
   <div className="flex h-full flex-col items-center justify-center p-6 text-center">
     <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#222]">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="text-gray-400"
-        width="32"
-        height="32"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-      </svg>
+      <ChatMessageIcon className="text-gray-400" />
     </div>
     <h3 className="mb-2 text-xl font-medium">No Conversation Selected</h3>
     <p className="max-w-md text-gray-400">

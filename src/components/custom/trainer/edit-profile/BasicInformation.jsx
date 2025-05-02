@@ -1,8 +1,25 @@
+import { motion } from "framer-motion";
 import Image from "next/image";
 
 import { Button } from "@/components/common/Button";
 import { UserProfileIcon, CertificateIcon, TrashIcon } from "@/components/common/Icons";
 import { FormField } from "@/components/shared";
+
+// Animation variants
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
+
+const staggerItems = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
 
 export const BasicInformation = ({
   trainerData,
@@ -14,23 +31,31 @@ export const BasicInformation = ({
   addCertification,
   removeCertification,
 }) => (
-  <div className="space-y-6">
-    <h2 className="text-xl font-semibold text-[#FF6B00]">Basic Information</h2>
+  <motion.div variants={staggerItems} initial="hidden" animate="visible" className="space-y-6">
+    <motion.h2
+      variants={fadeInUp}
+      className="bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] bg-clip-text text-xl font-semibold text-transparent"
+    >
+      Basic Information
+    </motion.h2>
 
     {/* Profile Picture */}
-    <div className="flex flex-col items-start gap-6 md:flex-row">
-      <div className="relative flex h-32 w-32 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#FF6B00] to-[#FF9A00] text-3xl font-semibold text-white">
+    <motion.div variants={fadeInUp} className="flex flex-col items-start gap-6 md:flex-row">
+      <div className="group relative flex h-32 w-32 flex-shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-[#FF6B00] to-[#FF9A00] text-3xl font-semibold text-white shadow-lg shadow-orange-800/20">
         {previewImage ? (
           <Image
             src={previewImage}
             alt="Profile preview"
             width={128}
             height={128}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
-          <UserProfileIcon size={64} className="text-white" />
+          <UserProfileIcon size={64} className="m-auto text-white opacity-90" />
         )}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <span className="text-sm font-medium text-white">Change Photo</span>
+        </div>
       </div>
 
       <div className="flex-1">
@@ -40,13 +65,14 @@ export const BasicInformation = ({
           name="profileImage"
           accept="image/*"
           onChange={handleImageUpload}
-          subLabel="Upload a professional photo for your profile"
+          subLabel="Upload a professional photo for your profile - high quality headshot recommended"
           className="mb-0"
         />
+        <p className="mt-2 text-xs text-gray-400">Your profile photo helps clients recognize you and builds trust</p>
       </div>
-    </div>
+    </motion.div>
 
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <motion.div variants={fadeInUp} className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <FormField
         label="Full Name"
         name="name"
@@ -64,9 +90,9 @@ export const BasicInformation = ({
         placeholder="Your main area of specialization"
         required
       />
-    </div>
+    </motion.div>
 
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <motion.div variants={fadeInUp} className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <FormField
         label="Experience"
         name="experience"
@@ -85,9 +111,9 @@ export const BasicInformation = ({
         placeholder="Your hourly rate"
         required
       />
-    </div>
+    </motion.div>
 
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <motion.div variants={fadeInUp} className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <FormField
         label="Email"
         name="contact.email"
@@ -105,9 +131,9 @@ export const BasicInformation = ({
         onChange={handleChange}
         placeholder="Your contact phone"
       />
-    </div>
+    </motion.div>
 
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+    <motion.div variants={fadeInUp} className="grid grid-cols-1 gap-4 md:grid-cols-3">
       <FormField
         label="City"
         name="location.city"
@@ -134,28 +160,32 @@ export const BasicInformation = ({
         placeholder="Your country"
         required
       />
-    </div>
+    </motion.div>
 
     {/* Certifications Section */}
-    <div>
+    <motion.div variants={fadeInUp}>
       <h3 className="mb-3 text-lg font-medium">Certifications</h3>
 
       <div className="mb-4 flex flex-wrap gap-2">
         {trainerData.certifications.map((cert, index) => (
-          <div
+          <motion.div
             key={index}
-            className="flex items-center gap-1 rounded border border-[rgba(255,107,0,0.3)] bg-[rgba(255,107,0,0.15)] px-2 py-1 text-xs font-medium text-[#FF6B00]"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="flex items-center gap-1 rounded-full border border-[rgba(255,107,0,0.3)] bg-[rgba(255,107,0,0.15)] px-3 py-1.5 text-sm font-medium text-[#FF6B00] shadow-sm transition-all duration-200 hover:border-[rgba(255,107,0,0.5)] hover:bg-[rgba(255,107,0,0.2)]"
           >
-            <CertificateIcon size={12} />
+            <CertificateIcon size={14} className="mr-1" />
             <span>{cert}</span>
-            <button
+            <Button
               type="button"
               onClick={() => removeCertification(index)}
-              className="ml-1 rounded-full p-1 text-[#FF6B00] hover:bg-[rgba(255,107,0,0.3)]"
-            >
-              <TrashIcon size={10} />
-            </button>
-          </div>
+              className="ml-1 rounded-full p-1 text-[#FF6B00] transition-colors hover:bg-[rgba(255,107,0,0.3)]"
+              variant="ghost"
+              size="small"
+              leftIcon={<TrashIcon size={12} />}
+            />
+          </motion.div>
         ))}
       </div>
 
@@ -167,10 +197,17 @@ export const BasicInformation = ({
           placeholder="Add new certification"
           className="mb-0 flex-1"
         />
-        <Button type="button" variant="secondary" onClick={addCertification} disabled={!newCertification.trim()}>
+        <Button
+          type="button"
+          variant="orangeOutline"
+          onClick={addCertification}
+          disabled={!newCertification.trim()}
+          className="transition-all duration-300 hover:shadow-md hover:shadow-orange-900/10"
+        >
           Add
         </Button>
       </div>
-    </div>
-  </div>
+      <p className="mt-2 text-xs text-gray-400">Add certifications to build credibility with potential clients</p>
+    </motion.div>
+  </motion.div>
 );
