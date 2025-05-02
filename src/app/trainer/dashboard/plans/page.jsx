@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 
 import { PlansList } from "@/components/custom/trainer/dashboard/pages/plans";
 import mockPlans from "@/components/custom/trainer/dashboard/pages/plans/data/mockPlans";
+
 const PlansPage = () => {
   const [plans, setPlans] = useState([]);
 

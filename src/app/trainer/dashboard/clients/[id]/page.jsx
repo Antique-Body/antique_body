@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 
@@ -12,12 +13,16 @@ import {
   PlusIcon,
   ProgressChartIcon,
   WorkoutIcon,
+  EditIcon,
+  ViewIcon,
 } from "@/components/common/Icons";
 import { Card } from "@/components/custom/Card";
 import { MacroDistribution } from "@/components/custom/client/dashboard/pages/nutrition/components";
 import { BackgroundShapes } from "@/components/custom/shared";
 import { ClientHeader, PerformanceMetrics } from "@/components/custom/trainer/dashboard/pages/clients";
+import mockPlans from "@/components/custom/trainer/dashboard/pages/plans/data/mockPlans";
 import { FormField } from "@/components/shared/FormField";
+
 // Mock data for demonstration
 const mockClients = [
   {
@@ -29,6 +34,7 @@ const mockClients = [
     joinDate: "Jan 15, 2025",
     nextSession: "Apr 12, 2025",
     type: "gym",
+    assignedPlan: "gym-burn-fat", // ID of the assigned plan
     progress: [
       { date: "2025-04-01", benchPress: 80, squat: 100, deadlift: 120, weight: 80, bodyFat: 15 },
       { date: "2025-04-08", benchPress: 85, squat: 105, deadlift: 125, weight: 81, bodyFat: 14.8 },
@@ -46,6 +52,7 @@ const mockClients = [
     nextSession: "Apr 10, 2025",
     type: "athlete",
     sport: "football",
+    assignedPlan: "football-pro", // Football plan
     progress: [
       { date: "2025-04-01", sprint: 12.5, agility: 8.2, kickAccuracy: 75, weight: 65, bodyFat: 18 },
       { date: "2025-04-08", sprint: 12.2, agility: 8.0, kickAccuracy: 78, weight: 65.5, bodyFat: 17.8 },
@@ -62,6 +69,7 @@ const mockClients = [
     joinDate: "Mar 10, 2025",
     nextSession: "Apr 15, 2025",
     type: "gym",
+    // No assigned plan yet
     progress: [
       { date: "2025-04-01", cardio: 35, caloriesBurned: 450, weight: 92, bodyFat: 24 },
       { date: "2025-04-08", cardio: 40, caloriesBurned: 520, weight: 90.5, bodyFat: 23.5 },
@@ -78,6 +86,7 @@ const mockClients = [
     joinDate: "Jan 5, 2025",
     nextSession: "Apr 14, 2025",
     type: "basketball",
+    assignedPlan: "basketball-elite", // Basketball plan
     progress: [
       { date: "2025-04-01", verticalJump: 60, shootingAccuracy: 72, sprint: 8.6, weight: 75, bodyFat: 12 },
       { date: "2025-04-08", verticalJump: 62, shootingAccuracy: 75, sprint: 8.4, weight: 74.5, bodyFat: 11.8 },
@@ -94,6 +103,7 @@ const mockClients = [
     joinDate: "Feb 20, 2025",
     nextSession: "Apr 16, 2025",
     type: "tennis",
+    // No assigned plan yet
     progress: [
       { date: "2025-04-01", serveSpeed: 165, forehandAccuracy: 75, backhandAccuracy: 70, weight: 72, bodyFat: 14 },
       { date: "2025-04-08", serveSpeed: 168, forehandAccuracy: 78, backhandAccuracy: 72, weight: 71.5, bodyFat: 13.8 },
@@ -240,10 +250,56 @@ const ClientId = () => {
                 <WorkoutIcon size={20} stroke="#FF6B00" className="mr-2" />
                 Training Program
               </h3>
-              <p className="mb-4 text-gray-400">Create or modify the client's training program</p>
-              <Button variant="orangeFilled" leftIcon={<PlusIcon size={16} />}>
-                Create Program
-              </Button>
+
+              {client.assignedPlan ? (
+                <div className="mb-4">
+                  <div className="mb-2 font-medium">Current Program:</div>
+                  <div className="mb-4 rounded-lg border border-[#444] bg-[rgba(30,30,30,0.8)] p-4">
+                    <div className="mb-2 text-lg text-[#FF6B00]">
+                      {mockPlans.find(p => p.id === client.assignedPlan)?.title || "Custom Program"}
+                    </div>
+                    <p className="text-sm text-gray-400">
+                      {mockPlans.find(p => p.id === client.assignedPlan)?.summary ||
+                        "Custom training program for client's specific needs."}
+                    </p>
+                  </div>
+                  <Link href="/trainer/dashboard/plans">
+                    <Button variant="outlineOrange" leftIcon={<EditIcon size={16} />}>
+                      Change Program
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center">
+                    <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(255,107,0,0.15)]">
+                      <WorkoutIcon size={20} stroke="#FF6B00" />
+                    </div>
+                    <div>
+                      <div className="font-medium">No Program Assigned</div>
+                      <p className="text-sm text-gray-400">
+                        Assign a training program to help your client achieve their goals
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-[#333] bg-[rgba(30,30,30,0.3)] p-4">
+                    <div className="mb-3 flex items-center">
+                      <div className="mr-2 rounded-full bg-yellow-600 px-2 py-1 text-xs font-medium">Action Needed</div>
+                      <span className="text-sm text-gray-400">Create a personalized training experience</span>
+                    </div>
+                    <Link href="/trainer/dashboard/plans">
+                      <Button
+                        variant="orangeFilled"
+                        leftIcon={<PlusIcon size={16} />}
+                        className="w-full justify-center py-2.5 text-sm font-medium"
+                      >
+                        Assign Training Program
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              )}
             </Card>
 
             {/* Progress Tracking Section */}

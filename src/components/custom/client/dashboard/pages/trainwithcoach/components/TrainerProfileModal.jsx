@@ -15,10 +15,19 @@ import {
   Expertise,
   Testimonials,
 } from "@/components/custom/client/dashboard/pages/trainwithcoach/components";
+import { DashboardTabs, AnimatedTabContent } from "@/components/custom/DashboardTabs";
 
 // This component is the profile modal that appears when "View Profile" is clicked
 export const TrainerProfileModal = ({ trainer, onClose }) => {
   const [activeTab, setActiveTab] = useState("about");
+
+  // Define tabs for the DashboardTabs component
+  const tabs = [
+    { id: "about", label: "About", badgeCount: 0 },
+    { id: "expertise", label: "Expertise", badgeCount: 0 },
+    { id: "availability", label: "Availability", badgeCount: 0 },
+    { id: "testimonials", label: "Testimonials", badgeCount: 0 },
+  ];
 
   // Function to render rating stars
   const renderStars = rating => {
@@ -138,30 +147,28 @@ export const TrainerProfileModal = ({ trainer, onClose }) => {
           </div>
         </div>
 
-        {/* Tabs navigation */}
+        {/* Replace tabs navigation with DashboardTabs component */}
         <div className="border-b border-[#333] px-6">
-          <div className="flex overflow-x-auto">
-            <Button variant="tab" onClick={() => setActiveTab("about")} isActive={activeTab === "about"}>
-              About
-            </Button>
-            <Button variant="tab" onClick={() => setActiveTab("expertise")} isActive={activeTab === "expertise"}>
-              Expertise
-            </Button>
-            <Button variant="tab" onClick={() => setActiveTab("availability")} isActive={activeTab === "availability"}>
-              Availability
-            </Button>
-            <Button variant="tab" onClick={() => setActiveTab("testimonials")} isActive={activeTab === "testimonials"}>
-              Testimonials
-            </Button>
-          </div>
+          <DashboardTabs activeTab={activeTab} setActiveTab={setActiveTab} tabs={tabs} />
         </div>
 
-        {/* Tab content */}
+        {/* Replace tab content with AnimatedTabContent components */}
         <div className="max-h-[60vh] overflow-y-auto p-6">
-          {activeTab === "about" && <About trainer={trainer} />}
-          {activeTab === "expertise" && <Expertise trainer={trainer} />}
-          {activeTab === "availability" && <Availability trainer={trainer} />}
-          {activeTab === "testimonials" && <Testimonials trainer={trainer} renderStars={renderStars} />}
+          <AnimatedTabContent isActive={activeTab === "about"} tabId="about">
+            <About trainer={trainer} />
+          </AnimatedTabContent>
+
+          <AnimatedTabContent isActive={activeTab === "expertise"} tabId="expertise">
+            <Expertise trainer={trainer} />
+          </AnimatedTabContent>
+
+          <AnimatedTabContent isActive={activeTab === "availability"} tabId="availability">
+            <Availability trainer={trainer} />
+          </AnimatedTabContent>
+
+          <AnimatedTabContent isActive={activeTab === "testimonials"} tabId="testimonials">
+            <Testimonials trainer={trainer} renderStars={renderStars} />
+          </AnimatedTabContent>
         </div>
       </div>
     </div>

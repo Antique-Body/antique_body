@@ -2,8 +2,6 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { Button } from "@/components/common/Button";
-import { BellIcon, SettingsIcon } from "@/components/common/Icons";
 import { DashboardTabs } from "@/components/custom";
 import { AntiqueBodyLogo } from "@/components/custom/BrandLogo";
 import { BackgroundShapes } from "@/components/custom/shared";
@@ -94,16 +92,8 @@ export default function TrainerDashboardLayout({ children }) {
       <BackgroundShapes />
 
       <div className="relative z-10 mx-auto max-w-screen-xl px-4 py-6">
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-8 flex items-center justify-center">
           <AntiqueBodyLogo />
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" className="rounded-full bg-[rgba(30,30,30,0.8)] p-2">
-              <BellIcon size={24} />
-            </Button>
-            <Button variant="ghost" className="rounded-full bg-[rgba(30,30,30,0.8)] p-2">
-              <SettingsIcon size={24} />
-            </Button>
-          </div>
         </div>
 
         <div className="flex flex-col gap-6">
