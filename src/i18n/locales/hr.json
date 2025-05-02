@@ -37,11 +37,11 @@
       "confirm_path": "Potvrdite svoj put"
     },
     "preparing": {
+      "journey": "Priprema vašeg antičkog putovanja",
       "trainer": "Priprema vašeg trenerskog putovanja",
       "client": "Priprema vašeg klijentskog putovanja",
       "user": "Priprema vašeg korisničkog putovanja",
-      "admin": "Priprema vašeg administratorskog putovanja",
-      "journey": "Priprema vašeg putovanja"
+      "admin": "Priprema vašeg administratorskog putovanja"
     },
     "update": {
       "failed": "Neuspjelo ažuriranje uloge. Status: {{status}}"
