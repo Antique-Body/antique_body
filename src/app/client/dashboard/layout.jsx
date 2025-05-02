@@ -1,13 +1,19 @@
 "use client";
+import { motion, AnimatePresence } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { Button } from "@/components/common/Button";
-import { BellIcon, SettingsIcon } from "@/components/common/Icons";
 import { DashboardTabs } from "@/components/custom";
 import { AntiqueBodyLogo } from "@/components/custom/BrandLogo";
 import { ClientProfile } from "@/components/custom/client/dashboard/components";
 import { BackgroundShapes } from "@/components/custom/shared";
+
+// Animation variants for page transitions
+const pageVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
+};
 
 export default function ClientDashboardLayout({ children }) {
   const router = useRouter();
@@ -218,16 +224,8 @@ export default function ClientDashboardLayout({ children }) {
       <BackgroundShapes />
 
       <div className="relative z-10 mx-auto max-w-screen-xl px-4 py-6">
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-8 flex items-center justify-center">
           <AntiqueBodyLogo />
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" className="rounded-full bg-[rgba(30,30,30,0.8)] p-2">
-              <BellIcon size={24} />
-            </Button>
-            <Button variant="ghost" className="rounded-full bg-[rgba(30,30,30,0.8)] p-2">
-              <SettingsIcon size={24} />
-            </Button>
-          </div>
         </div>
 
         <div className="flex flex-col gap-6">
@@ -237,8 +235,26 @@ export default function ClientDashboardLayout({ children }) {
           {/* Tab Navigation */}
           <DashboardTabs activeTab={activeTab} setActiveTab={handleTabChange} tabs={tabsConfig} />
 
-          {/* Content based on active tab - rendered by nested routes */}
-          <div className="pb-20">{children}</div>
+          {/* Content based on active tab - rendered by nested routes with animation */}
+          <div className="relative pb-20">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={pathname}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                variants={pageVariants}
+                transition={{
+                  type: "tween",
+                  duration: 0.3,
+                  ease: "easeInOut",
+                }}
+                className="w-full"
+              >
+                {children}
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </div>
