@@ -110,14 +110,6 @@ export const FitnessGoals = ({ clientData, handleChange, newGoal, setNewGoal, ad
                 </span>
               </div>
             )}
-
-            {clientData.currentWeight &&
-              clientData.targetWeight &&
-              clientData.currentWeight !== clientData.targetWeight && (
-                <div className="absolute -right-4 top-1/2 hidden -translate-y-1/2 transform text-[#FF7800] md:block">
-                  <ArrowRight size={24} />
-                </div>
-              )}
           </div>
         </div>
       </div>
@@ -168,10 +160,11 @@ export const FitnessGoals = ({ clientData, handleChange, newGoal, setNewGoal, ad
           />
           <Button
             type="button"
-            variant="orangeFilled"
+            variant="compactOrange"
+            size="compact"
+            className="mt-3"
             onClick={addGoal}
             disabled={!newGoal.trim()}
-            className="group overflow-hidden transition-all duration-300"
             leftIcon={<PlusIcon size={16} className="transition-transform duration-300 group-hover:rotate-90" />}
           >
             Add Goal

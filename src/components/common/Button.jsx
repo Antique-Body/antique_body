@@ -24,6 +24,7 @@ export const Button = ({
     small: "px-3 py-1.5 text-sm",
     default: "px-6 py-2",
     large: "px-8 py-3 text-lg",
+    compact: "min-w-[60px] h-[42px] px-3 py-2 text-sm",
   };
 
   // Style variations
@@ -41,6 +42,7 @@ export const Button = ({
     orangeOutline:
       "bg-[rgba(255,107,0,0.15)] border border-[rgba(255,107,0,0.3)] text-[#FF6B00] hover:bg-[rgba(255,107,0,0.25)] hover:text-[#FF9A00]",
     orangeFilled: "bg-[#FF6B00] text-white hover:bg-[#FF9A00]",
+    compactOrange: "bg-[#FF6B00] text-white hover:bg-[#FF9A00] text-xs font-medium",
 
     // Water tracker variants
     blueOutline:
@@ -59,7 +61,7 @@ export const Button = ({
     <button
       className={cn(
         baseStyles,
-        sizes[size],
+        size === "compact" ? sizes.compact : sizes[size],
         variants[variant],
         variant === "tab" &&
           (isActive ? "border-[#FF6B00] text-[#FF6B00]" : "border-transparent text-gray-400 hover:text-white"),

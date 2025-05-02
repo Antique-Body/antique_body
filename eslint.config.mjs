@@ -9,7 +9,6 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
-// Add all files from .eslintignore
 const ignores = [
   "node_modules",
   ".next",

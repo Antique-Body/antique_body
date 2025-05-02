@@ -86,12 +86,12 @@ export const ClientHeader = ({ client }) => {
 
       {/* Message modal */}
       {showMessageModal && (
-        <MessageClientModal client={client} onClose={() => setShowMessageModal(false)} onSend={() => {}} />
+        <MessageClientModal client={client} onClose={() => setShowMessageModal(false)} isOpen={showMessageModal} onSend={() => {}} />
       )}
 
       {/* Schedule session modal */}
       {showScheduleModal && (
-        <ScheduleSessionModal client={client} onClose={() => setShowScheduleModal(false)} onSchedule={() => {}} />
+        <ScheduleSessionModal client={client} onClose={() => setShowScheduleModal(false)} isOpen={showScheduleModal} onSchedule={() => {}} />
       )}
     </>
   );

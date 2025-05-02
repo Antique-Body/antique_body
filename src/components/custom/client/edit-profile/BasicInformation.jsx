@@ -84,20 +84,17 @@ export const BasicInformation = ({ clientData, handleChange, previewImage, handl
     </motion.div>
 
     <motion.div variants={fadeInUp} className="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <div className="relative">
-        <FormField
-          label="Gender"
-          name="gender"
-          type="select"
-          value={clientData.gender}
-          onChange={handleChange}
-          options={["Male", "Female", "Non-binary", "Prefer not to say"]}
-          placeholder="Select your gender"
-          required
-          backgroundStyle="semi-transparent"
-        />
-        <div className="absolute -bottom-1 h-px w-full bg-gradient-to-r from-transparent via-[#FF7800]/30 to-transparent"></div>
-      </div>
+      <FormField
+        label="Gender"
+        name="gender"
+        type="select"
+        value={clientData.gender}
+        onChange={handleChange}
+        options={["Male", "Female", "Non-binary", "Prefer not to say"]}
+        placeholder="Select your gender"
+        required
+        backgroundStyle="semi-transparent"
+      />
 
       <div className="relative">
         <FormField
@@ -196,45 +193,33 @@ export const BasicInformation = ({ clientData, handleChange, previewImage, handl
     </motion.h3>
 
     <motion.div variants={fadeInUp} className="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <div className="group relative overflow-hidden rounded-lg bg-gradient-to-br from-[rgba(20,20,20,0.8)] to-[rgba(30,30,30,0.8)] p-0.5">
-        <FormField
-          label="Fitness Level"
-          name="fitnessLevel"
-          type="select"
-          value={clientData.fitnessLevel}
-          onChange={handleChange}
-          options={["Beginner", "Intermediate", "Advanced", "Professional"]}
-          placeholder="Select your fitness level"
-          backgroundStyle="transparent"
-        />
-        <div
-          className="absolute inset-0 rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-          style={{ background: "linear-gradient(45deg, rgba(255,120,0,0.1), rgba(255,120,0,0))" }}
-        ></div>
-      </div>
+      <FormField
+        label="Fitness Level"
+        name="fitnessLevel"
+        type="select"
+        value={clientData.fitnessLevel}
+        onChange={handleChange}
+        options={["Beginner", "Intermediate", "Advanced", "Professional"]}
+        placeholder="Select your fitness level"
+        backgroundStyle="semi-transparent"
+      />
 
-      <div className="group relative overflow-hidden rounded-lg bg-gradient-to-br from-[rgba(20,20,20,0.8)] to-[rgba(30,30,30,0.8)] p-0.5">
-        <FormField
-          label="Activity Level"
-          name="activityLevel"
-          type="select"
-          value={clientData.activityLevel}
-          onChange={handleChange}
-          options={[
-            "Sedentary (office job)",
-            "Lightly active",
-            "Moderately active",
-            "Very active",
-            "Extremely active (physical job)",
-          ]}
-          placeholder="Select your typical activity level"
-          backgroundStyle="transparent"
-        />
-        <div
-          className="absolute inset-0 rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-          style={{ background: "linear-gradient(45deg, rgba(255,120,0,0.1), rgba(255,120,0,0))" }}
-        ></div>
-      </div>
+      <FormField
+        label="Activity Level"
+        name="activityLevel"
+        type="select"
+        value={clientData.activityLevel}
+        onChange={handleChange}
+        options={[
+          "Sedentary (office job)",
+          "Lightly active",
+          "Moderately active",
+          "Very active",
+          "Extremely active (physical job)",
+        ]}
+        placeholder="Select your typical activity level"
+        backgroundStyle="semi-transparent"
+      />
     </motion.div>
   </motion.div>
 );

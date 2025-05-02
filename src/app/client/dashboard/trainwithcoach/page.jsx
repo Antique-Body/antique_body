@@ -211,12 +211,12 @@ export default function TrainWithCoachPage() {
 
       {/* Booking Modal */}
       {showBookingModal && selectedTrainer && (
-        <BookingSessionModal trainer={selectedTrainer} onClose={closeBookingModal} />
+        <BookingSessionModal isOpen={showBookingModal} trainer={selectedTrainer} onClose={closeBookingModal} />
       )}
 
       {/* Profile Modal */}
       {showProfileModal && selectedTrainer && (
-        <TrainerProfileModal trainer={selectedTrainer} onClose={closeProfileModal} />
+        <TrainerProfileModal isOpen={showProfileModal} trainer={selectedTrainer} onClose={closeProfileModal} />
       )}
     </div>
   );

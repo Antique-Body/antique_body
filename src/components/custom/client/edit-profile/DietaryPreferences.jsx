@@ -271,11 +271,11 @@ export const DietaryPreferences = ({
               />
               <Button
                 type="button"
-                variant="orangeFilled"
-                size="sm"
+                variant="compactOrange"
+                size="compact"
+                className="mt-3"
                 onClick={addRestriction}
                 disabled={!newRestriction.trim()}
-                className="group flex-shrink-0 transition-all duration-300"
                 leftIcon={<PlusIcon size={14} className="transition-transform duration-300 group-hover:rotate-90" />}
               >
                 Add
@@ -335,11 +335,11 @@ export const DietaryPreferences = ({
               />
               <Button
                 type="button"
-                variant="orangeFilled"
-                size="sm"
+                variant="compactOrange"
+                size="compact"
+                className="mt-3"
                 onClick={addIntolerance}
                 disabled={!newIntolerance.trim()}
-                className="group flex-shrink-0 transition-all duration-300"
                 leftIcon={<PlusIcon size={14} className="transition-transform duration-300 group-hover:rotate-90" />}
               >
                 Add

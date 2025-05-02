@@ -1,9 +1,9 @@
 import { useState } from "react";
 
-import { Button } from "@/components/common/Button";
-import { CloseXIcon, MonitorIcon, ProgressChartIcon, UserProfileIcon } from "@/components/common/Icons";
+import { MonitorIcon, ProgressChartIcon, UserProfileIcon } from "@/components/common/Icons";
+import { Modal } from "@/components/common/Modal";
 
-export const BookingSessionModal = ({ trainer, onClose }) => {
+export const BookingSessionModal = ({ trainer, onClose, isOpen }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [sessionType, setSessionType] = useState("in-person");
@@ -87,325 +87,281 @@ export const BookingSessionModal = ({ trainer, onClose }) => {
   // Handle booking submission
   const handleBookSession = () => {
     // Here you would typically make an API call to book the session
-
     // Close the modal after booking
     onClose();
   };
 
+  // Determine button text and action based on step
+  const getPrimaryButtonText = () => {
+    return step < 3 ? "Next" : "Confirm Booking";
+  };
+
+  const getSecondaryButtonText = () => {
+    return step > 1 ? "Back" : "Cancel";
+  };
+
+  const getPrimaryButtonAction = () => {
+    return step < 3 ? handleNext : handleBookSession;
+  };
+
+  const getSecondaryButtonAction = () => {
+    return step > 1 ? handleBack : onClose;
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black bg-opacity-70 p-4">
-      <div
-        className="animate-modalFadeIn relative w-full max-w-2xl overflow-hidden rounded-2xl border border-[#333] bg-[#121212] shadow-2xl"
-        style={{
-          animation: "modalFadeIn 0.3s ease-out",
-          boxShadow: "0 15px 40px -10px rgba(255,107,0,0.3)",
-        }}
-      >
-        {/* Orange accent line at top */}
-        <div className="h-1 w-full bg-gradient-to-r from-[#FF6B00] to-[#FF9A00]"></div>
-
-        {/* Close button */}
-        <Button
-          variant="ghost"
-          onClick={onClose}
-          className="absolute right-4 top-4 z-10 p-0 text-gray-400 transition-colors duration-200 hover:text-white"
-        >
-          <CloseXIcon size={24} />
-        </Button>
-
-        {/* Modal header */}
-        <div className="border-b border-[#333] p-6">
-          <h2 className="text-xl font-bold text-white">Book a Session with {trainer?.name}</h2>
-          <p className="mt-1 text-gray-400">{trainer?.specialty}</p>
-        </div>
-
-        {/* Progress indicator */}
-        <div className="flex items-center px-6 pt-4">
-          <div className="mx-auto flex w-full max-w-md items-center">
-            <div
-              className={`flex h-10 w-10 items-center justify-center rounded-full 
-              ${step >= 1 ? "bg-[#FF6B00] text-white" : "bg-[#333] text-gray-400"}`}
-            >
-              1
-            </div>
-            <div
-              className={`mx-2 h-1 flex-1 
-              ${step >= 2 ? "bg-[#FF6B00]" : "bg-[#333]"}`}
-            ></div>
-            <div
-              className={`flex h-10 w-10 items-center justify-center rounded-full 
-              ${step >= 2 ? "bg-[#FF6B00] text-white" : "bg-[#333] text-gray-400"}`}
-            >
-              2
-            </div>
-            <div
-              className={`mx-2 h-1 flex-1 
-              ${step >= 3 ? "bg-[#FF6B00]" : "bg-[#333]"}`}
-            ></div>
-            <div
-              className={`flex h-10 w-10 items-center justify-center rounded-full 
-              ${step >= 3 ? "bg-[#FF6B00] text-white" : "bg-[#333] text-gray-400"}`}
-            >
-              3
-            </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`Book a Session with ${trainer?.name}`}
+      message={trainer?.specialty}
+      primaryButtonText={getPrimaryButtonText()}
+      secondaryButtonText={getSecondaryButtonText()}
+      primaryButtonAction={getPrimaryButtonAction()}
+      secondaryButtonAction={getSecondaryButtonAction()}
+      primaryButtonDisabled={step === 1 && (!selectedDate || !selectedTime)}
+    >
+      {/* Progress indicator */}
+      <div className="flex items-center mb-6">
+        <div className="mx-auto flex w-full max-w-md items-center">
+          <div
+            className={`flex h-10 w-10 items-center justify-center rounded-full 
+            ${step >= 1 ? "bg-[#FF6B00] text-white" : "bg-[#333] text-gray-400"}`}
+          >
+            1
           </div>
-        </div>
-
-        {/* Step 1: Select Date and Time */}
-        {step === 1 && (
-          <div className="p-6">
-            <h3 className="mb-4 text-lg font-medium text-white">Select Date & Time</h3>
-
-            {/* Date selection */}
-            <div className="mb-5">
-              <label className="mb-2 block text-sm text-gray-300">Date</label>
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {dates.map((date, index) => (
-                  <div
-                    key={index}
-                    onClick={() => handleDateSelect(date)}
-                    className={`flex w-[90px] flex-shrink-0 cursor-pointer flex-col items-center justify-center rounded-xl p-3 transition-all duration-300 hover:-translate-y-1 ${
-                      selectedDate && selectedDate.getDate() === date.getDate()
-                        ? "border-[#FF6B00] bg-[#FF6B00] text-white"
-                        : "border border-[#444] bg-[rgba(30,30,30,0.8)] text-white hover:border-[#FF6B00]"
-                    }`}
-                  >
-                    <span className="mb-1 text-xs font-medium">
-                      {isToday(date) ? "TODAY" : date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase()}
-                    </span>
-                    <span className="text-2xl font-bold">{date.getDate()}</span>
-                    <span className="mt-1 text-xs">{date.toLocaleString("default", { month: "short" })}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Time selection */}
-            {selectedDate && (
-              <div>
-                <label className="mb-2 block text-sm text-gray-300">Time</label>
-                <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-                  {availableTimes.map((slot, index) => (
-                    <div
-                      key={index}
-                      onClick={() => slot.available && handleTimeSelect(slot.time)}
-                      className={`cursor-pointer rounded-lg px-4 py-3 text-center transition-all duration-300 ${
-                        selectedTime === slot.time
-                          ? "bg-[#FF6B00] text-white"
-                          : slot.available
-                            ? "border border-[#444] bg-[rgba(30,30,30,0.8)] text-white hover:-translate-y-1 hover:border-[#FF6B00]"
-                            : "cursor-not-allowed border border-[#333] bg-[rgba(20,20,20,0.5)] text-gray-500"
-                      }`}
-                    >
-                      {slot.time}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+          <div
+            className={`mx-2 h-1 flex-1 
+            ${step >= 2 ? "bg-[#FF6B00]" : "bg-[#333]"}`}
+          ></div>
+          <div
+            className={`flex h-10 w-10 items-center justify-center rounded-full 
+            ${step >= 2 ? "bg-[#FF6B00] text-white" : "bg-[#333] text-gray-400"}`}
+          >
+            2
           </div>
-        )}
-
-        {/* Step 2: Session Details */}
-        {step === 2 && (
-          <div className="p-6">
-            <h3 className="mb-4 text-lg font-medium text-white">Session Details</h3>
-
-            {/* Session type */}
-            <div className="mb-5">
-              <label className="mb-2 block text-sm text-gray-300">Session Type</label>
-              <div className="grid grid-cols-2 gap-3">
-                <div
-                  onClick={() => setSessionType("in-person")}
-                  className={`cursor-pointer rounded-lg p-4 transition-all duration-300 ${
-                    sessionType === "in-person"
-                      ? "border border-[#FF6B00] bg-[rgba(255,107,0,0.2)]"
-                      : "border border-[#444] bg-[rgba(30,30,30,0.8)] hover:border-[#FF6B00]"
-                  }`}
-                >
-                  <div className="mb-1 flex items-center gap-2">
-                    <ProgressChartIcon
-                      size={16}
-                      stroke={sessionType === "in-person" ? "#FF6B00" : "currentColor"}
-                      className="text-gray-300"
-                    />
-                    <h4 className={`font-medium ${sessionType === "in-person" ? "text-[#FF6B00]" : "text-white"}`}>
-                      In Person
-                    </h4>
-                  </div>
-                  <p className="text-sm text-gray-400">Face-to-face training at gym or designated location</p>
-                </div>
-
-                <div
-                  onClick={() => setSessionType("virtual")}
-                  className={`cursor-pointer rounded-lg p-4 transition-all duration-300 ${
-                    sessionType === "virtual"
-                      ? "border border-[#FF6B00] bg-[rgba(255,107,0,0.2)]"
-                      : "border border-[#444] bg-[rgba(30,30,30,0.8)] hover:border-[#FF6B00]"
-                  }`}
-                >
-                  <div className="mb-1 flex items-center gap-2">
-                    <MonitorIcon
-                      size={16}
-                      stroke={sessionType === "virtual" ? "#FF6B00" : "currentColor"}
-                      className="text-gray-300"
-                    />
-                    <h4 className={`font-medium ${sessionType === "virtual" ? "text-[#FF6B00]" : "text-white"}`}>
-                      Virtual
-                    </h4>
-                  </div>
-                  <p className="text-sm text-gray-400">Remote training via video call from your location</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Session length */}
-            <div className="mb-5">
-              <label className="mb-2 block text-sm text-gray-300">Session Length</label>
-              <div className="grid grid-cols-3 gap-3">
-                {[30, 60, 90].map(minutes => (
-                  <div
-                    key={minutes}
-                    onClick={() => setSessionLength(minutes)}
-                    className={`cursor-pointer rounded-lg px-4 py-3 text-center transition-all duration-300 ${
-                      sessionLength === minutes
-                        ? "border border-[#FF6B00] bg-[rgba(255,107,0,0.2)] text-[#FF6B00]"
-                        : "border border-[#444] bg-[rgba(30,30,30,0.8)] text-white hover:border-[#FF6B00]"
-                    }`}
-                  >
-                    {minutes} min
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Notes */}
-            <div className="mb-5">
-              <label className="mb-2 block text-sm text-gray-300">Notes for Trainer (Optional)</label>
-              <textarea
-                value={notes}
-                onChange={e => setNotes(e.target.value)}
-                className="min-h-[100px] w-full rounded-lg border border-[#444] bg-[rgba(30,30,30,0.8)] px-4 py-3 text-sm text-white transition-all duration-300 focus:border-[#FF6B00] focus:outline-none"
-                placeholder="Mention any specific goals, concerns, or questions..."
-              ></textarea>
-            </div>
+          <div
+            className={`mx-2 h-1 flex-1 
+            ${step >= 3 ? "bg-[#FF6B00]" : "bg-[#333]"}`}
+          ></div>
+          <div
+            className={`flex h-10 w-10 items-center justify-center rounded-full 
+            ${step >= 3 ? "bg-[#FF6B00] text-white" : "bg-[#333] text-gray-400"}`}
+          >
+            3
           </div>
-        )}
-
-        {/* Step 3: Confirmation */}
-        {step === 3 && (
-          <div className="p-6">
-            <h3 className="mb-4 text-lg font-medium text-white">Confirm Booking</h3>
-
-            <div className="mb-5 rounded-xl border border-[#444] bg-[rgba(30,30,30,0.8)] p-5">
-              <div className="mb-4 flex items-start gap-4">
-                {/* Trainer avatar */}
-                <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#FF6B00] to-[#FF9A00] text-white">
-                  <UserProfileIcon size={40} />
-                </div>
-
-                <div>
-                  <h4 className="font-medium text-white">{trainer?.name}</h4>
-                  <p className="text-sm text-gray-400">{trainer?.specialty}</p>
-                  <p className="mt-1 font-medium text-[#FF6B00]">${calculatePrice().toFixed(2)}</p>
-                </div>
-              </div>
-
-              <div className="space-y-3 border-t border-[#333] pt-4">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Date:</span>
-                  <span className="text-white">{formatDate(selectedDate)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Time:</span>
-                  <span className="text-white">{selectedTime}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Session Type:</span>
-                  <span className="capitalize text-white">{sessionType}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Duration:</span>
-                  <span className="text-white">{sessionLength} minutes</span>
-                </div>
-                {notes && (
-                  <div className="pt-2">
-                    <span className="mb-1 block text-gray-400">Notes:</span>
-                    <p className="rounded bg-[rgba(20,20,20,0.5)] p-3 text-sm text-white">{notes}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="mb-5 rounded-lg border border-[rgba(255,107,0,0.2)] bg-[rgba(255,107,0,0.1)] p-4">
-              <h4 className="mb-2 font-medium text-white">Payment Information</h4>
-              <p className="mb-4 text-sm text-gray-300">
-                You will not be charged until after the session is completed.
-              </p>
-              <div className="flex justify-between font-medium">
-                <span className="text-white">Total:</span>
-                <span className="text-[#FF6B00]">${calculatePrice().toFixed(2)}</span>
-              </div>
-            </div>
-
-            <div className="mb-4 text-center text-sm text-gray-400">
-              By confirming, you agree to our{" "}
-              <a href="#" className="text-[#FF6B00] hover:underline">
-                Terms of Service
-              </a>{" "}
-              and
-              <a href="#" className="text-[#FF6B00] hover:underline">
-                {" "}
-                Cancellation Policy
-              </a>
-            </div>
-          </div>
-        )}
-
-        {/* Modal footer */}
-        <div className="flex justify-between border-t border-[#333] p-5">
-          {step > 1 ? (
-            <Button
-              variant="secondary"
-              onClick={handleBack}
-              className="cursor-pointer rounded-lg px-6 py-2.5 font-medium transition-all duration-300"
-            >
-              Back
-            </Button>
-          ) : (
-            <Button
-              variant="secondary"
-              onClick={onClose}
-              className="cursor-pointer rounded-lg px-6 py-2.5 font-medium transition-all duration-300"
-            >
-              Cancel
-            </Button>
-          )}
-
-          {step < 3 ? (
-            <Button
-              variant="orangeFilled"
-              onClick={handleNext}
-              disabled={step === 1 && (!selectedDate || !selectedTime)}
-              className={`cursor-pointer rounded-lg px-6 py-2.5 font-medium transition-all duration-300 ${
-                step === 1 && (!selectedDate || !selectedTime)
-                  ? "cursor-not-allowed opacity-50"
-                  : "hover:-translate-y-0.5"
-              }`}
-            >
-              Next
-            </Button>
-          ) : (
-            <Button
-              variant="orangeFilled"
-              onClick={handleBookSession}
-              className="cursor-pointer rounded-lg px-6 py-2.5 font-medium transition-all duration-300 hover:-translate-y-0.5"
-            >
-              Confirm Booking
-            </Button>
-          )}
         </div>
       </div>
-    </div>
+
+      {/* Step 1: Select Date and Time */}
+      {step === 1 && (
+        <div>
+          <h3 className="mb-4 text-lg font-medium text-white">Select Date & Time</h3>
+
+          {/* Date selection */}
+          <div className="mb-5">
+            <label className="mb-2 block text-sm text-gray-300">Date</label>
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {dates.map((date, index) => (
+                <div
+                  key={index}
+                  onClick={() => handleDateSelect(date)}
+                  className={`flex w-[90px] flex-shrink-0 cursor-pointer flex-col items-center justify-center rounded-xl p-3 transition-all duration-300 hover:-translate-y-1 ${
+                    selectedDate && selectedDate.getDate() === date.getDate()
+                      ? "border-[#FF6B00] bg-[#FF6B00] text-white"
+                      : "border border-[#444] bg-[rgba(30,30,30,0.8)] text-white hover:border-[#FF6B00]"
+                  }`}
+                >
+                  <span className="mb-1 text-xs font-medium">
+                    {isToday(date) ? "TODAY" : date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase()}
+                  </span>
+                  <span className="text-2xl font-bold">{date.getDate()}</span>
+                  <span className="mt-1 text-xs">{date.toLocaleString("default", { month: "short" })}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Time selection */}
+          {selectedDate && (
+            <div>
+              <label className="mb-2 block text-sm text-gray-300">Time</label>
+              <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+                {availableTimes.map((slot, index) => (
+                  <div
+                    key={index}
+                    onClick={() => slot.available && handleTimeSelect(slot.time)}
+                    className={`cursor-pointer rounded-lg px-4 py-3 text-center transition-all duration-300 ${
+                      selectedTime === slot.time
+                        ? "bg-[#FF6B00] text-white"
+                        : slot.available
+                          ? "border border-[#444] bg-[rgba(30,30,30,0.8)] text-white hover:-translate-y-1 hover:border-[#FF6B00]"
+                          : "cursor-not-allowed border border-[#333] bg-[rgba(20,20,20,0.5)] text-gray-500"
+                    }`}
+                  >
+                    {slot.time}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Step 2: Session Details */}
+      {step === 2 && (
+        <div>
+          <h3 className="mb-4 text-lg font-medium text-white">Session Details</h3>
+
+          {/* Session type */}
+          <div className="mb-5">
+            <label className="mb-2 block text-sm text-gray-300">Session Type</label>
+            <div className="grid grid-cols-2 gap-3">
+              <div
+                onClick={() => setSessionType("in-person")}
+                className={`cursor-pointer rounded-lg p-4 transition-all duration-300 ${
+                  sessionType === "in-person"
+                    ? "border border-[#FF6B00] bg-[rgba(255,107,0,0.2)]"
+                    : "border border-[#444] bg-[rgba(30,30,30,0.8)] hover:border-[#FF6B00]"
+                }`}
+              >
+                <div className="mb-1 flex items-center gap-2">
+                  <ProgressChartIcon
+                    size={16}
+                    stroke={sessionType === "in-person" ? "#FF6B00" : "currentColor"}
+                    className="text-gray-300"
+                  />
+                  <h4 className={`font-medium ${sessionType === "in-person" ? "text-[#FF6B00]" : "text-white"}`}>
+                    In Person
+                  </h4>
+                </div>
+                <p className="text-sm text-gray-400">Face-to-face training at gym or designated location</p>
+              </div>
+
+              <div
+                onClick={() => setSessionType("virtual")}
+                className={`cursor-pointer rounded-lg p-4 transition-all duration-300 ${
+                  sessionType === "virtual"
+                    ? "border border-[#FF6B00] bg-[rgba(255,107,0,0.2)]"
+                    : "border border-[#444] bg-[rgba(30,30,30,0.8)] hover:border-[#FF6B00]"
+                }`}
+              >
+                <div className="mb-1 flex items-center gap-2">
+                  <MonitorIcon
+                    size={16}
+                    stroke={sessionType === "virtual" ? "#FF6B00" : "currentColor"}
+                    className="text-gray-300"
+                  />
+                  <h4 className={`font-medium ${sessionType === "virtual" ? "text-[#FF6B00]" : "text-white"}`}>
+                    Virtual
+                  </h4>
+                </div>
+                <p className="text-sm text-gray-400">Remote training via video call from your location</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Session length */}
+          <div className="mb-5">
+            <label className="mb-2 block text-sm text-gray-300">Session Length</label>
+            <div className="grid grid-cols-3 gap-3">
+              {[30, 60, 90].map(minutes => (
+                <div
+                  key={minutes}
+                  onClick={() => setSessionLength(minutes)}
+                  className={`cursor-pointer rounded-lg px-4 py-3 text-center transition-all duration-300 ${
+                    sessionLength === minutes
+                      ? "border border-[#FF6B00] bg-[rgba(255,107,0,0.2)] text-[#FF6B00]"
+                      : "border border-[#444] bg-[rgba(30,30,30,0.8)] text-white hover:border-[#FF6B00]"
+                  }`}
+                >
+                  {minutes} min
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div className="mb-5">
+            <label className="mb-2 block text-sm text-gray-300">Notes for Trainer (Optional)</label>
+            <textarea
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              className="min-h-[100px] w-full rounded-lg border border-[#444] bg-[rgba(30,30,30,0.8)] px-4 py-3 text-sm text-white transition-all duration-300 focus:border-[#FF6B00] focus:outline-none"
+              placeholder="Mention any specific goals, concerns, or questions..."
+            ></textarea>
+          </div>
+        </div>
+      )}
+
+      {/* Step 3: Confirmation */}
+      {step === 3 && (
+        <div>
+          <h3 className="mb-4 text-lg font-medium text-white">Confirm Booking</h3>
+
+          <div className="mb-5 rounded-xl border border-[#444] bg-[rgba(30,30,30,0.8)] p-5">
+            <div className="mb-4 flex items-start gap-4">
+              {/* Trainer avatar */}
+              <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#FF6B00] to-[#FF9A00] text-white">
+                <UserProfileIcon size={40} />
+              </div>
+
+              <div>
+                <h4 className="font-medium text-white">{trainer?.name}</h4>
+                <p className="text-sm text-gray-400">{trainer?.specialty}</p>
+                <p className="mt-1 font-medium text-[#FF6B00]">${calculatePrice().toFixed(2)}</p>
+              </div>
+            </div>
+
+            <div className="space-y-3 border-t border-[#333] pt-4">
+              <div className="flex justify-between">
+                <span className="text-gray-400">Date:</span>
+                <span className="text-white">{formatDate(selectedDate)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Time:</span>
+                <span className="text-white">{selectedTime}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Session Type:</span>
+                <span className="capitalize text-white">{sessionType}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Duration:</span>
+                <span className="text-white">{sessionLength} minutes</span>
+              </div>
+              {notes && (
+                <div className="pt-2">
+                  <span className="mb-1 block text-gray-400">Notes:</span>
+                  <p className="rounded bg-[rgba(20,20,20,0.5)] p-3 text-sm text-white">{notes}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="mb-5 rounded-lg border border-[rgba(255,107,0,0.2)] bg-[rgba(255,107,0,0.1)] p-4">
+            <h4 className="mb-2 font-medium text-white">Payment Information</h4>
+            <p className="mb-4 text-sm text-gray-300">
+              You will not be charged until after the session is completed.
+            </p>
+            <div className="flex justify-between font-medium">
+              <span className="text-white">Total:</span>
+              <span className="text-[#FF6B00]">${calculatePrice().toFixed(2)}</span>
+            </div>
+          </div>
+
+          <div className="mb-4 text-center text-sm text-gray-400">
+            By confirming, you agree to our{" "}
+            <a href="#" className="text-[#FF6B00] hover:underline">
+              Terms of Service
+            </a>{" "}
+            and
+            <a href="#" className="text-[#FF6B00] hover:underline">
+              {" "}
+              Cancellation Policy
+            </a>
+          </div>
+        </div>
+      )}
+    </Modal>
   );
 };

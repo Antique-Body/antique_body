@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
   const tabsRef = useRef([]);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  const [hoverIndicatorStyle, setHoverIndicatorStyle] = useState(null);
 
   // Update indicator position when activeTab changes
   useEffect(() => {
@@ -19,9 +20,23 @@ export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
     }
   }, [activeTab, tabs]);
 
+  const handleMouseEnter = (index) => {
+    if (tabs[index].id !== activeTab) {
+      const tabElement = tabsRef.current[index];
+      setHoverIndicatorStyle({
+        left: tabElement.offsetLeft,
+        width: tabElement.offsetWidth,
+      });
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setHoverIndicatorStyle(null);
+  };
+
   return (
     <div className="relative top-3 mb-6 flex overflow-x-auto bg-[#0a0a0a] pb-1 pt-3">
-      {/* Sliding indicator */}
+      {/* Active tab indicator */}
       <div
         className="absolute bottom-0 h-0.5 bg-[#FF6B00] transition-all duration-300 ease-in-out"
         style={{
@@ -29,17 +44,30 @@ export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
           width: `${indicatorStyle.width}px`,
         }}
       />
-
+      
+      {/* Hover indicator */}
+      {hoverIndicatorStyle && (
+        <div
+          className="absolute bottom-0 h-0.5 bg-[#FF6B00]/30 transition-all duration-300 ease-in-out"
+          style={{
+            left: `${hoverIndicatorStyle.left}px`,
+            width: `${hoverIndicatorStyle.width}px`,
+          }}
+        />
+      )}
+      
       {tabs.map((tab, index) => (
         <button
           key={tab.id}
           ref={el => (tabsRef.current[index] = el)}
-          className={`whitespace-nowrap border-b-2 px-4 py-2 text-sm font-medium transition-all duration-300 ${
+          className={`whitespace-nowrap px-4 py-2 text-sm font-medium transition-all duration-300 ${
             activeTab === tab.id
-              ? "scale-105 transform border-transparent text-white"
-              : "border-transparent text-gray-400 hover:border-[#FF6B00]/30 hover:text-white"
+              ? "scale-105 transform text-white"
+              : "text-gray-400 hover:text-white"
           }`}
           onClick={() => setActiveTab(tab.id)}
+          onMouseEnter={() => handleMouseEnter(index)}
+          onMouseLeave={handleMouseLeave}
         >
           <span className={`transition-all duration-300 ${activeTab === tab.id ? "translate-y-[-2px] transform" : ""}`}>
             {tab.label}
