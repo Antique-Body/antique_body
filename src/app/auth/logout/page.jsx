@@ -4,8 +4,10 @@ import Background from "@/components/background";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function LogoutPage() {
+  const { t } = useTranslation();
   const router = useRouter();
 
   useEffect(() => {
@@ -32,9 +34,9 @@ export default function LogoutPage() {
 
         <div className="text-center">
           <h1 className="text-[28px] font-bold tracking-[2px] spartacus-font mb-4">
-            LOGGING OUT
+            {t("logging_out")}
           </h1>
-          <p className="text-gray-400">You are being securely logged out...</p>
+          <p className="text-gray-400">{t("logging_out_message")}</p>
         </div>
       </div>
     </main>

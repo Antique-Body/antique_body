@@ -1,7 +1,12 @@
+"use client";
+
 import { CheckIcon } from "@components/common";
+import { useTranslation } from "react-i18next";
 import { Card } from "..";
 
 export const FrequencySelector = ({ selectedFrequency, onSelect }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="grid grid-cols-3 gap-3">
       {[1, 2, 3, 4, 5, 6, 7].map((num) => (
@@ -24,7 +29,7 @@ export const FrequencySelector = ({ selectedFrequency, onSelect }) => {
           <div className="py-4 px-2 flex flex-col items-center text-center">
             <div className="font-bold text-2xl">{num}</div>
             <div className="text-xs text-[#aaa] mt-1">
-              {num === 1 ? "time" : "times"} per week
+              {t("training_setup.frequency.times_per_week", { count: num })}
             </div>
             {selectedFrequency === num && (
               <div className="absolute top-2 right-2 text-[#FF7800]">

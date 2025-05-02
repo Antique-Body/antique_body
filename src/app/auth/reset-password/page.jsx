@@ -5,9 +5,10 @@ import { Button, TextField } from "@/components/common/index";
 import { Card } from "@/components/custom/index";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-
+import { useTranslation } from "react-i18next";
 
 export default function ResetPasswordPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -26,13 +27,13 @@ export default function ResetPasswordPage() {
     setLoading(true);
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("passwords_do_not_match"));
       setLoading(false);
       return;
     }
 
     if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters long");
+      setError(t("password_min_length"));
       setLoading(false);
       return;
     }
@@ -52,7 +53,7 @@ export default function ResetPasswordPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to reset password");
+        throw new Error(data.error || t("password_reset_failed"));
       }
 
       setSuccess(true);
@@ -84,14 +85,14 @@ export default function ResetPasswordPage() {
             showLogo={true}
             logoTagline="STRENGTH OF THE ANCIENTS">
             <div className="text-center">
-              <h2 className="text-xl font-semibold mb-4">Invalid Reset Link</h2>
+              <h2 className="text-xl font-semibold mb-4">{t("invalid_reset_link")}</h2>
               <p className="text-gray-400 mb-4">
-                This password reset link is invalid or has expired.
+                {t("reset_link_expired")}
               </p>
               <button
                 onClick={() => router.push("/auth/login")}
                 className="text-[#ff7800] hover:text-[#ff5f00] transition-colors">
-                Return to Login
+                {t("return_to_login")}
               </button>
             </div>
           </Card>
@@ -119,39 +120,38 @@ export default function ResetPasswordPage() {
           {success ? (
             <div className="text-center">
               <h2 className="text-xl font-semibold mb-4 text-green-500">
-                Password Reset Successful
+                {t("password_reset_successful")}
               </h2>
               <p className="text-gray-400">
-                Your password has been reset successfully. Redirecting to
-                login...
+                {t("password_reset_redirect")}
               </p>
             </div>
           ) : (
             <div className="w-full">
               <h2 className="text-xl font-semibold mb-4 text-center">
-                Reset Password
+                {t("reset_password")}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <TextField
                   id="password"
                   name="password"
-                  label="New Password"
+                  label={t("new_password")}
                   type="password"
                   value={formData.password}
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
                   }
                   required
-                  placeholder="Enter your new password"
+                  placeholder={t("enter_new_password")}
                   error={
-                    error && error.includes("Password must be") ? error : ""
+                    error && error.includes(t("password_min_length")) ? error : ""
                   }
                   className="w-full"
                 />
                 <TextField
                   id="confirmPassword"
                   name="confirmPassword"
-                  label="Confirm New Password"
+                  label={t("confirm_new_password")}
                   type="password"
                   value={formData.confirmPassword}
                   onChange={(e) =>
@@ -161,16 +161,16 @@ export default function ResetPasswordPage() {
                     })
                   }
                   required
-                  placeholder="Confirm your new password"
+                  placeholder={t("confirm_new_password_placeholder")}
                   error={
-                    error && error.includes("Passwords do not match")
+                    error && error.includes(t("passwords_do_not_match"))
                       ? error
                       : ""
                   }
                 />
                 {error &&
-                  !error.includes("Password must be") &&
-                  !error.includes("Passwords do not match") && (
+                  !error.includes(t("password_min_length")) &&
+                  !error.includes(t("passwords_do_not_match")) && (
                     <p className="text-red-500 text-sm">{error}</p>
                   )}
                 <Button
@@ -178,7 +178,7 @@ export default function ResetPasswordPage() {
                   loading={loading}
                   variant="primary"
                   className="w-full">
-                  Reset Password
+                  {t("reset_password")}
                 </Button>
               </form>
             </div>

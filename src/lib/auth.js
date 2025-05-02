@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 import { compare } from "bcrypt";
-import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 
@@ -23,7 +22,6 @@ export const authOptions = {
           throw new Error("Missing credentials");
         }
 
-
         const user = await prismaClient.user.findUnique({
           where: { email: credentials.email },
           include: { preferences: true }
@@ -37,11 +35,8 @@ export const authOptions = {
           throw new Error("No password set for this user");
         }
 
-    
-
         // Only enforce email verification if there is a token
         if (!user.emailVerified && user.emailVerificationToken) {
-          
           // Generate new verification token if needed
           const crypto = require('crypto');
           const verificationToken = crypto.randomBytes(32).toString("hex");
@@ -63,7 +58,6 @@ export const authOptions = {
 
         // Don't auto-fix verification status - require proper verification
         if (!user.emailVerified) {
-          
           // Generate new verification token
           const crypto = require('crypto');
           const verificationToken = crypto.randomBytes(32).toString("hex");
@@ -91,7 +85,6 @@ export const authOptions = {
         if (!isPasswordValid) {
           throw new Error("Invalid password");
         }
-
 
         return {
           id: user.id,
@@ -121,24 +114,18 @@ export const authOptions = {
               lastName: "",
               role: null,
               emailVerified: true,
-              language: 'en', // Default language
+              language: 'en' // Default language
             },
           });
 
-          user.id = newUser.id;
           user.role = newUser.role?.toLowerCase();
           user.hasCompletedTrainingSetup = false;
           user.language = newUser.language;
         } else {
-          user.id = existingUser.id;
           user.role = existingUser.role?.toLowerCase();
           user.hasCompletedTrainingSetup = !!existingUser.preferences;
-          // Don't set language here, it will be set from localStorage in the session callback
+          user.language = existingUser.language;
         }
-      } else {
-        // For credentials provider, check if there's a saved language in localStorage
-        const savedLanguage = user.language || 'en';
-        user.language = savedLanguage;
       }
 
       return true;
@@ -148,9 +135,7 @@ export const authOptions = {
         session.user.id = token.id;
         session.user.role = token.role?.toLowerCase();
         session.user.hasCompletedTrainingSetup = token.hasCompletedTrainingSetup;
-        // Get language from localStorage if available, otherwise use token language
-        const savedLanguage = typeof window !== 'undefined' ? localStorage.getItem('language') : null;
-        session.user.language = savedLanguage || token.language;
+        session.user.language = token.language;
       }
 
       return session;
@@ -178,7 +163,7 @@ export const authOptions = {
       }
 
       return token;
-    }
+    },
   },
   pages: {
     signIn: "/auth/login",
@@ -189,7 +174,4 @@ export const authOptions = {
     strategy: "jwt",
   },
   secret: process.env.NEXTAUTH_SECRET,
-};
-
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
+}; 

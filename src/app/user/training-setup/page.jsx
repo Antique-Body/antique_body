@@ -17,6 +17,7 @@ import {
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 // Constants
 const MEASUREMENT_CONSTRAINTS = {
@@ -27,6 +28,7 @@ const MEASUREMENT_CONSTRAINTS = {
 };
 
 const TrainingSetup = () => {
+  const { t } = useTranslation();
   const router = useRouter();
   const { data: session, update } = useSession();
   const {
@@ -69,7 +71,10 @@ const TrainingSetup = () => {
       weightValue > MEASUREMENT_CONSTRAINTS.METRIC.WEIGHT.max
     ) {
       setValidationError(
-        `Weight must be between ${MEASUREMENT_CONSTRAINTS.METRIC.WEIGHT.min} and ${MEASUREMENT_CONSTRAINTS.METRIC.WEIGHT.max} kg`
+        t("dashboard.weight_validation", {
+          min: MEASUREMENT_CONSTRAINTS.METRIC.WEIGHT.min,
+          max: MEASUREMENT_CONSTRAINTS.METRIC.WEIGHT.max
+        })
       );
       return;
     }
@@ -80,13 +85,16 @@ const TrainingSetup = () => {
       heightValue > MEASUREMENT_CONSTRAINTS.METRIC.HEIGHT.max
     ) {
       setValidationError(
-        `Height must be between ${MEASUREMENT_CONSTRAINTS.METRIC.HEIGHT.min} and ${MEASUREMENT_CONSTRAINTS.METRIC.HEIGHT.max} cm`
+        t("dashboard.height_validation", {
+          min: MEASUREMENT_CONSTRAINTS.METRIC.HEIGHT.min,
+          max: MEASUREMENT_CONSTRAINTS.METRIC.HEIGHT.max
+        })
       );
       return;
     }
 
     setValidationError(null);
-  }, [userSelections.measurements]);
+  }, [userSelections.measurements, t]);
 
   // Check if current step should be skipped
   useEffect(() => {
@@ -187,14 +195,14 @@ const TrainingSetup = () => {
         })
         .catch(error => {
           console.error("Error in save process:", error);
-          setSaveError(error.message || "Failed to save data");
+          setSaveError(error.message || t("save_failed"));
           setIsRedirecting(false);
         });
     } catch (error) {
       setSaveError(error.message);
       setIsRedirecting(false);
     }
-  }, [saveUserData, router]);
+  }, [saveUserData, router, t]);
 
   const areMeasurementsValid = useCallback(() => {
     return currentStep !== 9 || userSelections.measurements?.isValid === true;
@@ -274,7 +282,7 @@ const TrainingSetup = () => {
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
         <div className="text-white text-center">
           <div className="mb-4">
-            {isRedirecting ? "Loading your dashboard..." : "Saving your preferences..."}
+            {isRedirecting ? t("training_setup.redirecting") : t("training_setup.saving")}
           </div>
           <div className="w-10 h-10 border-t-2 border-[#FF7800] rounded-full animate-spin mx-auto"></div>
         </div>
@@ -299,10 +307,10 @@ const TrainingSetup = () => {
         <div className="mb-5">
           <Card width="100%">
             <div className="text-2xl sm:text-3xl font-bold mb-2">
-              Let's create your workout plan
+              {t("training_setup.title")}
             </div>
             <div className="text-[#aaa] text-base mb-4">
-              Answer a few questions to get started
+              {t("training_setup.description")}
             </div>
             <div
               className="relative inline-block mt-2 mb-1 w-[60px] h-[60px] bg-gradient-to-br from-[#FF7800] to-[#FF9A00] rounded-full flex justify-center items-center"
@@ -348,7 +356,7 @@ const TrainingSetup = () => {
           <ProgressBar
             value={currentStep}
             maxValue={TOTAL_STEPS}
-            label="Step"
+            label={t("training_setup.step")}
           />
         </div>
       </div>

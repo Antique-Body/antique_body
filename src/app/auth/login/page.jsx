@@ -7,18 +7,21 @@ import { Card } from "@/components/custom/index";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordStatus, setForgotPasswordStatus] = useState("");
-  const [manualFixingVerification, setManualFixingVerification] =
-    useState(false);
+  const [manualFixingVerification, setManualFixingVerification] = useState(false);
   const [currentLoginEmail, setCurrentLoginEmail] = useState("");
+
+
 
   const handleSubmit = async (data) => {
     setLoading(true);
@@ -53,9 +56,7 @@ export default function LoginPage() {
             const resetData = await resetResponse.json();
 
             if (resetResponse.ok) {
-              setError(
-                "Verification email sent. Please check your inbox and verify your email before logging in."
-              );
+              setError(t("auth.register.verification_email_sent"));
               return;
             } else {
               console.error("Verification reset error:", resetData.message);
@@ -93,7 +94,7 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to send reset email");
+        throw new Error(data.error || t("auth.password_reset.failed"));
       }
 
       setForgotPasswordStatus("success");
@@ -123,19 +124,18 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to send verification email");
+        throw new Error(data.message || t("auth.register.verification_email_failed"));
       }
 
-      setError(
-        "Verification email sent. Please check your inbox and verify your email before logging in."
-      );
+      setError(t("auth.register.verification_email_sent"));
     } catch (err) {
       console.error("Verification error:", err);
-      setError("Failed to send verification email. Please contact support.");
+      setError(t("auth.register.verification_email_failed"));
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#161616] text-white relative">
@@ -157,12 +157,12 @@ export default function LoginPage() {
           {showForgotPassword ? (
             <div className="w-full">
               <h2 className="text-xl font-semibold mb-4 text-center">
-                Reset Password
+                {t("auth.password_reset.title")}
               </h2>
               <form onSubmit={handleForgotPassword} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Email Address
+                    {t("auth.form.email")}
                   </label>
                   <input
                     type="email"
@@ -174,13 +174,12 @@ export default function LoginPage() {
                 </div>
                 {forgotPasswordStatus === "error" && (
                   <p className="text-red-500 text-sm">
-                    Failed to send reset email. Please try again.
+                    {t("auth.password_reset.failed")}
                   </p>
                 )}
                 {forgotPasswordStatus === "success" && (
                   <p className="text-green-500 text-sm">
-                    If an account exists with this email, you will receive a
-                    reset link.
+                    {t("auth.password_reset.instructions")}
                   </p>
                 )}
                 <Button
@@ -188,7 +187,7 @@ export default function LoginPage() {
                   disabled={forgotPasswordStatus === "sending"}
                   loading={forgotPasswordStatus === "sending"}
                   className="w-full">
-                  Send Reset Link
+                  {t("auth.form.submit")}
                 </Button>
                 <Button
                   type="button"
@@ -199,14 +198,14 @@ export default function LoginPage() {
                     setForgotPasswordStatus("");
                   }}
                   className="w-full">
-                  Back to Login
+                  {t("auth.login.back_to_login")}
                 </Button>
               </form>
             </div>
           ) : (
             <>
-              <p className="text-gray-400 mb-8 text-center">
-                Sign in to continue your fitness journey
+              <p className="text-gray-400 mb-8 text-center" >
+                {t("auth.login.sign_in_to_account")}
               </p>
 
               <AuthForm
@@ -221,17 +220,17 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => setShowForgotPassword(true)}
                   className="text-sm text-gray-400 hover:text-[#ff7800] transition-colors duration-300 cursor-pointer">
-                  Forgot password?
+                  {t("auth.login.forgot_password")}
                 </button>
               </div>
 
               <div className="mt-6 text-center">
-                <p className="text-gray-400">
-                  Don't have an account?{" "}
+                <p className="text-gray-400" >
+                  {t("auth.login.no_account")}{" "}
                   <Link
                     href="/auth/register"
                     className="text-[#ff7800] hover:text-[#ff5f00] transition-colors">
-                    Register
+                    {t("auth.register.title")}
                   </Link>
                 </p>
               </div>
