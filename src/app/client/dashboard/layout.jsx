@@ -1,5 +1,4 @@
 "use client";
-import { motion, AnimatePresence } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -7,13 +6,6 @@ import { DashboardTabs } from "@/components/custom";
 import { AntiqueBodyLogo } from "@/components/custom/BrandLogo";
 import { ClientProfile } from "@/components/custom/client/dashboard/components";
 import { BackgroundShapes } from "@/components/custom/shared";
-
-// Animation variants for page transitions
-const pageVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
-};
 
 export default function ClientDashboardLayout({ children }) {
   const router = useRouter();
@@ -232,28 +224,12 @@ export default function ClientDashboardLayout({ children }) {
           {/* Trainer profile section (top) */}
           <ClientProfile userData={userData} />
 
-          {/* Tab Navigation */}
-          <DashboardTabs activeTab={activeTab} setActiveTab={handleTabChange} tabs={tabsConfig} />
+          {/* Tabs and main content section */}
+          <div>
+            <DashboardTabs activeTab={activeTab} setActiveTab={handleTabChange} tabs={tabsConfig} />
 
-          {/* Content based on active tab - rendered by nested routes with animation */}
-          <div className="relative pb-20">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={pathname}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                variants={pageVariants}
-                transition={{
-                  type: "tween",
-                  duration: 0.3,
-                  ease: "easeInOut",
-                }}
-                className="w-full"
-              >
-                {children}
-              </motion.div>
-            </AnimatePresence>
+            {/* Render the nested page content */}
+            <div className="mt-6">{children}</div>
           </div>
         </div>
       </div>

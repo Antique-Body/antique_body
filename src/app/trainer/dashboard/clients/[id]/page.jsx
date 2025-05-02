@@ -14,7 +14,6 @@ import {
   ProgressChartIcon,
   WorkoutIcon,
   EditIcon,
-  ViewIcon,
 } from "@/components/common/Icons";
 import { Card } from "@/components/custom/Card";
 import { MacroDistribution } from "@/components/custom/client/dashboard/pages/nutrition/components";

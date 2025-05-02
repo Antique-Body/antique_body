@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { DashboardTabs } from "@/components/custom";
 import { AntiqueBodyLogo } from "@/components/custom/BrandLogo";
 import { BackgroundShapes } from "@/components/custom/shared";
-import { ClientModal, CreatePlanModal, TrainerProfile } from "@/components/custom/trainer/dashboard/components";
+import { TrainerProfile } from "@/components/custom/trainer/dashboard/components";
 export default function TrainerDashboardLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -21,8 +21,6 @@ export default function TrainerDashboardLayout({ children }) {
   };
 
   const [activeTab, setActiveTab] = useState(getActiveTabFromPath(pathname));
-  const [showClientModal, setShowClientModal] = useState(false);
-  const [showCreatePlanModal, setShowCreatePlanModal] = useState(false);
 
   // Update active tab when pathname changes
   useEffect(() => {
@@ -72,11 +70,6 @@ export default function TrainerDashboardLayout({ children }) {
     upcomingSessions: 8,
   };
 
-  // Function to close the create plan modal
-  const closeCreatePlanModal = () => {
-    setShowCreatePlanModal(false);
-  };
-
   // Get the count of unread messages
   const unreadMessagesCount = 2; // Placeholder value
   const tabsConfig = [
@@ -109,11 +102,6 @@ export default function TrainerDashboardLayout({ children }) {
           </div>
         </div>
       </div>
-
-      {/* Modals */}
-      {showClientModal && <ClientModal client={null} onClose={() => setShowClientModal(false)} />}
-
-      {showCreatePlanModal && <CreatePlanModal onClose={closeCreatePlanModal} />}
     </div>
   );
 }
