@@ -1,6 +1,7 @@
 "use client";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Button } from "../common/Button";
 import { GoogleIcon } from "../common/Icons";
 import { TextField } from "../common/TextField";
@@ -13,6 +14,7 @@ export const AuthForm = ({
   isLogin = true,
   googleSignIn = true,
 }) => {
+  const { t } = useTranslation();
   const { isLoading: authLoading } = useAuth();
   const {
     register,
@@ -21,6 +23,8 @@ export const AuthForm = ({
     getValues,
     watch,
   } = useForm();
+
+ 
 
   // Watch the password field
   const password = watch("password");
@@ -39,6 +43,7 @@ export const AuthForm = ({
     onSubmit(data);
   };
 
+  
   return (
     <form onSubmit={handleSubmit(processSubmit)} className="space-y-4 w-full">
       {error && (
@@ -54,7 +59,7 @@ export const AuthForm = ({
               clipRule="evenodd"
             />
           </svg>
-          <span className="text-red-400 text-sm">{error}</span>
+          <span className="text-red-400 text-sm" >{error}</span>
         </div>
       )}
 
@@ -63,9 +68,9 @@ export const AuthForm = ({
           <TextField
             id="name"
             name="name"
-            label="First Name"
+            label={t("auth.form.first_name")}
             register={register}
-            rules={{ required: "First name is required" }}
+            rules={{ required: t("validation.first_name_required") }}
             error={errors.name?.message}
             required
           />
@@ -73,9 +78,9 @@ export const AuthForm = ({
           <TextField
             id="lastName"
             name="lastName"
-            label="Last Name"
+            label={t("auth.form.last_name")}
             register={register}
-            rules={{ required: "Last name is required" }}
+            rules={{ required: t("validation.last_name_required") }}
             error={errors.lastName?.message}
             required
           />
@@ -86,13 +91,13 @@ export const AuthForm = ({
         id="email"
         name="email"
         type="email"
-        label="Email"
+        label={t("auth.form.email")}
         register={register}
         rules={{
-          required: "Email is required",
+          required: t("validation.email_required"),
           pattern: {
             value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-            message: "Invalid email address",
+            message: t("validation.email_invalid"),
           },
         }}
         error={errors.email?.message}
@@ -103,13 +108,13 @@ export const AuthForm = ({
         id="password"
         name="password"
         type="password"
-        label="Password"
+        label={t("auth.form.password")}
         register={register}
         rules={{
-          required: "Password is required",
+          required: t("validation.password_required"),
           minLength: {
             value: 6,
-            message: "Password must be at least 6 characters",
+            message: t("validation.password_min_length"),
           },
         }}
         error={errors.password?.message}
@@ -122,11 +127,11 @@ export const AuthForm = ({
           id="confirmPassword"
           name="confirmPassword"
           type="password"
-          label="Confirm Password"
+          label={t("auth.form.confirm_password")}
           register={register}
           rules={{
-            required: "Please confirm your password",
-            validate: (value) => value === password || "Passwords do not match",
+            required: t("validation.confirm_password_required"),
+            validate: (value) => value === password || t("validation.passwords_do_not_match"),
           }}
           error={errors.confirmPassword?.message}
           required
@@ -138,7 +143,7 @@ export const AuthForm = ({
         type="submit"
         loading={loading || authLoading}
         className="w-full bg-gradient-to-r from-[#ff7800] to-[#ff5f00] py-2 rounded font-medium text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 disabled:opacity-50">
-        {isLogin ? "SIGN IN" : "REGISTER"}
+        {isLogin ? t("auth.login.sign_in") : t("auth.register.title")}
       </Button>
 
       {googleSignIn && (
@@ -148,8 +153,8 @@ export const AuthForm = ({
               <div className="w-full border-t border-[#333]"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-[#1a1a1a] text-gray-400">
-                Or continue with
+              <span className="px-2 bg-[#1a1a1a] text-gray-400" >
+                {t("auth.login.or_continue_with")}
               </span>
             </div>
           </div>
@@ -159,7 +164,7 @@ export const AuthForm = ({
             variant="outline"
             className="mt-6 w-full bg-white text-[#1a1a1a] hover:bg-gray-100 hover:scale-[1.02] transition-all duration-200"
             leftIcon={<GoogleIcon />}>
-            Sign in with Google
+            {t("auth.login.sign_in_with_google")}
           </Button>
         </div>
       )}

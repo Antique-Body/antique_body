@@ -7,8 +7,10 @@ import { Card } from "@/components/custom/index";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function RegisterPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,14 +36,11 @@ export default function RegisterPage() {
       const responseData = await registerResponse.json();
 
       if (!registerResponse.ok) {
-        throw new Error(responseData.error || "Registration failed");
+        throw new Error(responseData.error || t("register_failed"));
       }
 
-      // Set registered email for the success message
       setRegisteredEmail(data.email);
       setRegistrationSuccess(true);
-
-      // Don't auto-sign in, wait for email verification
     } catch (err) {
       console.error("Register - Error:", err);
       setError(err.message);
@@ -68,7 +67,7 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to resend verification email");
+        throw new Error(data.error || t("verification_email_failed"));
       }
 
       setResendSuccess(true);
@@ -117,21 +116,20 @@ export default function RegisterPage() {
                 </div>
               </div>
               <h2 className="text-2xl font-semibold mb-4 text-green-500">
-                Registration Successful!
+                {t("registration_successful")}
               </h2>
               <p className="text-gray-400 mb-2">
-                We've sent a verification email to:
+                {t("auth.register.verification.email_sent_to")}
               </p>
               <p className="font-medium text-white mb-6">{registeredEmail}</p>
               <p className="text-gray-400 mb-6">
-                Please check your inbox and click the verification link to
-                activate your account.
+                {t("check_inbox_verification")}
               </p>
 
               {resendSuccess ? (
                 <div className="mb-6 p-3 bg-green-500/10 rounded-lg">
                   <p className="text-green-500">
-                    Verification email sent again! Please check your inbox.
+                    {t("verification_email_sent_again")}
                   </p>
                 </div>
               ) : resendError ? (
@@ -146,19 +144,19 @@ export default function RegisterPage() {
                   loading={resendingEmail}
                   variant="outline"
                   className="w-full">
-                  Resend Verification Email
+                  {t("resend_verification_email")}
                 </Button>
                 <Link
                   href="/auth/login"
                   className="inline-block w-full bg-gradient-to-r from-[#ff7800] to-[#ff5f00] text-white px-6 py-3 rounded-lg font-medium transition-all hover:shadow-lg hover:from-[#ff5f00] hover:to-[#ff7800]">
-                  Go to Login
+                  {t("go_to_login")}
                 </Link>
               </div>
             </div>
           ) : (
             <>
-              <p className="text-gray-400 mb-8 text-center">
-                Join our fitness community and start your journey today
+              <p className="text-gray-400 mb-8 text-center" >
+                {t("auth.register.join_fitness_community")}
               </p>
 
               <AuthForm
@@ -169,12 +167,12 @@ export default function RegisterPage() {
               />
 
               <div className="mt-6 text-center">
-                <p className="text-gray-400">
-                  Already have an account?{" "}
+                <p className="text-gray-400" >
+                  {t("auth.register.have_account")}{" "}
                   <Link
                     href="/auth/login"
                     className="text-[#ff7800] hover:text-[#ff5f00] transition-colors">
-                    Sign In
+                    {t("auth.register.sign_in")}
                   </Link>
                 </p>
               </div>

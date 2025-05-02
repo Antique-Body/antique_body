@@ -1,23 +1,24 @@
 "use client";
 
+import { FullScreenLoader, RoleCardCompact } from "@/components";
 import { Modal } from "@/components/common";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { RoleCardCompact, FullScreenLoader } from "@/components";
+import { useTranslation } from "react-i18next";
 
 const ROLE_TITLES = {
-  trainer: "Preparing your Trainer Journey",
-  client: "Preparing your Client Journey",
-  user: "Preparing your User Journey",
-  admin: "Preparing your Admin Journey",
+  trainer: "role.preparing.trainer",
+  client: "role.preparing.client",
+  user: "role.preparing.user",
+  admin: "role.preparing.admin",
 };
 
 const ROLE_DESCRIPTIONS = {
-  trainer: "a Trainer",
-  client: "a Client",
-  user: "a User",
-  admin: "an Admin",
+  trainer: "role.trainer",
+  client: "role.client",
+  user: "role.user",
+  admin: "role.admin",
 };
 
 const ROLE_REDIRECTS = {
@@ -28,6 +29,7 @@ const ROLE_REDIRECTS = {
 };
 
 export default function SelectRole() {
+  const { t } = useTranslation();
   const { data: session, update } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -58,9 +60,8 @@ export default function SelectRole() {
     setError(null);
 
     try {
-      // Koristimo PATCH metodu umesto POST jer vaš API koristi PATCH
       const response = await fetch("/api/users/update-role", {
-        method: "PATCH", // Promenjena metoda iz POST u PATCH
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
@@ -70,15 +71,13 @@ export default function SelectRole() {
         }),
       });
 
-      // Proveravamo prvo da li je odgovor OK pre nego što pozovemo response.json()
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
-          errorData.error || `Failed to update role: ${response.status}`
+          errorData.error || t("role.update.failed", { status: response.status })
         );
       }
 
-      // Sada bezbedno pozivamo json() nakon što smo proverili status
       const data = await response.json();
 
       await update({
@@ -92,11 +91,11 @@ export default function SelectRole() {
       }
     } catch (error) {
       console.error("Error updating role:", error);
-      setError(error.message || "Unknown error occurred");
+      setError(error.message || t("common.unknown_error"));
       setLoading(false);
       setSelectedRole(null);
     }
-  }, [session?.user?.email, pendingRole, router, update]);
+  }, [session?.user?.email, pendingRole, router, update, t]);
 
   const closeModal = useCallback(() => {
     setIsModalOpen(false);
@@ -107,10 +106,10 @@ export default function SelectRole() {
   const roleCards = useMemo(
     () => (
       <>
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid md:grid-cols-2 gap-5 auto-rows-fr">
           <RoleCardCompact
-            title="Become a Trainer"
-            description="Create your trainer profile, acquire clients, and track their progress. Share your expertise and help others achieve their fitness goals."
+            title={t("role.trainer.become")}
+            description={t("role.trainer.description")}
             role="trainer"
             onClick={() => handleRoleClick("trainer")}
             loading={loading && selectedRole === "trainer"}
@@ -118,8 +117,8 @@ export default function SelectRole() {
           />
 
           <RoleCardCompact
-            title="Train with a Coach"
-            description="Connect with professional trainers who will guide your fitness journey, providing personalized workouts and nutrition advice."
+            title={t("role.client.train_with_coach")}
+            description={t("role.client.description")}
             role="client"
             onClick={() => handleRoleClick("client")}
             loading={loading && selectedRole === "client"}
@@ -129,8 +128,8 @@ export default function SelectRole() {
 
         <div className="max-w-md mx-auto w-full">
           <RoleCardCompact
-            title="Custom Workout Plan"
-            description="Get a personalized workout plan based on your preferences, fitness level, and goals. Train independently with AI-generated exercises."
+            title={t("role.user.custom_workout")}
+            description={t("role.user.description")}
             role="user"
             onClick={() => handleRoleClick("user")}
             loading={loading && selectedRole === "user"}
@@ -139,20 +138,20 @@ export default function SelectRole() {
         </div>
       </>
     ),
-    [handleRoleClick, loading, selectedRole]
+    [handleRoleClick, loading, selectedRole, t]
   );
 
   return (
     <div className="relative z-10 max-w-4xl mx-auto px-4 py-12 text-center">
-      <h1 className="text-4xl font-bold mb-6 spartacus-font text-[#ff7800]">
-        Choose Your Path
+      <h1 className="text-4xl font-bold mb-6 spartacus-font text-[#ff7800]" >
+        {t("role.selection.title")}
       </h1>
-      <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
-        Select how you want to experience your fitness journey
+      <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto" >
+        {t("role.selection.description")}
       </p>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-200">
+        <div className="mb-6 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-200" >
           {error}
         </div>
       )}
@@ -163,20 +162,20 @@ export default function SelectRole() {
         isOpen={isModalOpen}
         onClose={closeModal}
         onConfirm={handleConfirmRole}
-        title="Confirm Your Path"
+        title={t("role.selection.confirm_path")}
         message={
           pendingRole
-            ? `Are you sure you want to continue as ${ROLE_DESCRIPTIONS[pendingRole]}?`
+            ? t("role.selection.continue_as", { role: t(ROLE_DESCRIPTIONS[pendingRole]) })
             : ""
         }
-        confirmButtonText="Continue"
-        cancelButtonText="Cancel"
+        confirmButtonText={t("common.continue")}
+        cancelButtonText={t("common.cancel")}
         confirmButtonColor="bg-[#ff7800] hover:bg-[#e66e00]"
       />
 
       {loading && selectedRole && (
         <FullScreenLoader
-          text={ROLE_TITLES[selectedRole] || "Preparing your Journey"}
+          text={t(ROLE_TITLES[selectedRole] || "role.preparing.journey")}
         />
       )}
     </div>
