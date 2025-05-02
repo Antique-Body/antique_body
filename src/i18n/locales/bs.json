@@ -37,11 +37,11 @@
       "confirm_path": "Potvrdite svoj put"
     },
     "preparing": {
+      "journey": "Priprema vašeg antičkog putovanja",
       "trainer": "Priprema vašeg trenerskog putovanja",
       "client": "Priprema vašeg klijentskog putovanja",
       "user": "Priprema vašeg korisničkog putovanja",
-      "admin": "Priprema vašeg administratorskog putovanja",
-      "journey": "Priprema vašeg putovanja"
+      "admin": "Priprema vašeg administratorskog putovanja"
     },
     "update": {
       "failed": "Neuspjelo ažuriranje uloge. Status: {{status}}"
@@ -173,5 +173,38 @@
     "register_failed": "Registracija nije uspjela. Molimo pokušajte ponovo.",
     "password_reset_failed": "Resetiranje lozinke nije uspjelo. Molimo pokušajte ponovo.",
     "general_error": "Došlo je do greške. Molimo pokušajte ponovo."
+  },
+  "training_setup": {
+    "title": "Postavke treninga",
+    "description": "Postavimo vaše trening preferencije",
+    "step": "Korak",
+    "next": "Sljedeće",
+    "previous": "Prethodno",
+    "start_training": "Započni trening",
+    "saving": "Čuvanje vaših postavki...",
+    "redirecting": "Preusmjeravanje na kontrolni panel...",
+    "injury": {
+      "title": "Da li imate ozljede?",
+      "select_locations": "Izaberite ozlijeđene dijelove tijela",
+      "rehabilitation": "Da li želite rehabilitaciju?",
+      "selected_injuries": "Odabrane ozljede",
+      "no_injuries_selected": "Nema odabranih ozljeda",
+      "tap_locations": "Dodirnite dijelove tijela gdje imate ozljede",
+      "body_outline": "Obris tijela",
+      "options": {
+        "no_injuries": "Bez ozljeda",
+        "no_injuries_desc": "Nemam ozljeda",
+        "past_injury": "Prošla ozljeda",
+        "past_injury_desc": "Imao sam ozljedu u prošlosti",
+        "current_injury": "Trenutna ozljeda",
+        "current_injury_desc": "Imam trenutnu ozljedu",
+        "chronic_injury": "Hronična ozljeda",
+        "chronic_injury_desc": "Imam hroničnu/povremenu ozljedu",
+        "yes_rehab": "Da",
+        "yes_rehab_desc": "Želim rehabilitacijske vježbe",
+        "no_rehab": "Ne",
+        "no_rehab_desc": "Želim redovni trening"
+      }
+    }
   }
 } 

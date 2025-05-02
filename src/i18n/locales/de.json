@@ -21,13 +21,12 @@
       "continue_as": "Sind Sie sicher, dass Sie als",
       "confirm_path": "Bestätigen Sie Ihren Weg"
     },
-
     "preparing": {
+      "journey": "Ihre antike Reise wird vorbereitet",
       "trainer": "Ihre Trainer-Reise wird vorbereitet",
       "client": "Ihre Kunden-Reise wird vorbereitet",
       "user": "Ihre Benutzer-Reise wird vorbereitet",
-      "admin": "Ihre Admin-Reise wird vorbereitet",
-      "journey": "Ihre Reise wird vorbereitet"
+      "admin": "Ihre Admin-Reise wird vorbereitet"
     },
     "update": {
       "failed": "Rollenaktualisierung fehlgeschlagen. Status: {{status}}"

@@ -37,11 +37,11 @@
       "confirm_path": "Potrdite svojo pot"
     },
     "preparing": {
+      "journey": "Priprava vašega antičnega potovanja",
       "trainer": "Priprava vašega trenerskega potovanja",
       "client": "Priprava vašega potovanja stranke",
       "user": "Priprava vašega uporabniškega potovanja",
-      "admin": "Priprava vašega administratorskega potovanja",
-      "journey": "Priprava vašega potovanja"
+      "admin": "Priprava vašega administratorskega potovanja"
     },
     "update": {
       "failed": "Posodobitev vloge ni uspela. Status: {{status}}"

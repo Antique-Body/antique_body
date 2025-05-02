@@ -37,11 +37,11 @@
       "confirm_path": "Confirm Your Path"
     },
     "preparing": {
+      "journey": "Preparing your Ancient Journey",
       "trainer": "Preparing your Trainer Journey",
       "client": "Preparing your Client Journey",
       "user": "Preparing your User Journey",
-      "admin": "Preparing your Admin Journey",
-      "journey": "Preparing your Journey"
+      "admin": "Preparing your Admin Journey"
     },
     "update": {
       "failed": "Failed to update role. Status: {{status}}"
