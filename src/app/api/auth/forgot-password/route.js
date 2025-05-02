@@ -1,7 +1,9 @@
-import { sendPasswordResetEmail } from "@/app/utils/email";
-import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
+
+import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+
+import { sendPasswordResetEmail } from "@/app/utils/email";
 
 const prisma = new PrismaClient();
 
@@ -10,10 +12,7 @@ export async function POST(request) {
     const { email } = await request.json();
 
     if (!email) {
-      return NextResponse.json(
-        { error: "Email is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
     // Find user by email
@@ -54,11 +53,8 @@ export async function POST(request) {
     });
   } catch (error) {
     console.error("Forgot password error:", error);
-    return NextResponse.json(
-      { error: "Failed to process password reset request" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to process password reset request" }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }
-} 
+}

@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 
 import { Button } from "@/components/common/Button";
-import { EducationIcon, TrashIcon } from "@/components/common/Icons";
-import { FormField } from "@/components/shared";
+import { EducationIcon, PlusIcon, TrashIcon } from "@/components/common/Icons";
+import { FormField, SectionTitle } from "@/components/shared";
 
 // Animation variants
 const fadeInUp = {
@@ -16,6 +16,24 @@ const staggerItems = {
     opacity: 1,
     transition: {
       staggerChildren: 0.1,
+    },
+  },
+};
+
+const listItemVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: 0.3,
+    },
+  },
+  exit: {
+    opacity: 0,
+    x: 20,
+    transition: {
+      duration: 0.2,
     },
   },
 };
@@ -34,12 +52,7 @@ export const AboutYou = ({
     animate="visible"
     className="space-y-6 border-t border-[#333] pt-8"
   >
-    <motion.h2
-      variants={fadeInUp}
-      className="bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] bg-clip-text text-xl font-semibold text-transparent"
-    >
-      About You
-    </motion.h2>
+    <SectionTitle title="About You" />
 
     <motion.div variants={fadeInUp}>
       <FormField
@@ -50,6 +63,7 @@ export const AboutYou = ({
         onChange={handleChange}
         placeholder="Describe your background and experience..."
         rows={5}
+        backgroundStyle="semi-transparent"
       />
       <p className="mt-1 text-xs text-gray-400">
         Tell clients about your background, specialties, and what makes you unique as a trainer (250-300 words
@@ -66,6 +80,7 @@ export const AboutYou = ({
         onChange={handleChange}
         placeholder="Describe your approach to training..."
         rows={4}
+        backgroundStyle="semi-transparent"
       />
       <p className="mt-1 text-xs text-gray-400">
         Share your training methodology and how you help clients achieve results
@@ -73,36 +88,39 @@ export const AboutYou = ({
     </motion.div>
 
     {/* Education Section */}
-    <motion.div variants={fadeInUp}>
-      <h3 className="mb-3 text-lg font-medium">Education & Background</h3>
+    <motion.h3
+      variants={fadeInUp}
+      className="mb-4 mt-8 bg-gradient-to-r from-[#FF7800] to-white bg-clip-text text-lg font-medium text-transparent"
+    >
+      Education & Background
+    </motion.h3>
 
-      <ul className="mb-4 space-y-2">
+    <motion.div variants={fadeInUp}>
+      <motion.ul className="mb-6 space-y-3" variants={staggerItems}>
         {trainerData.education.map((edu, index) => (
           <motion.li
             key={index}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
-            className="flex items-center gap-2 rounded-lg border border-[#333] bg-[rgba(30,30,30,0.5)] p-2 transition-all duration-200 hover:border-[#444] hover:bg-[rgba(40,40,40,0.5)]"
+            variants={listItemVariants}
+            className="group flex items-center gap-3 rounded-xl border border-[#333] bg-[rgba(26,26,26,0.8)] px-4 py-3 transition-all duration-300 hover:border-[#FF7800]/40 hover:bg-[rgba(30,30,30,0.8)]"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(255,107,0,0.15)] p-2 text-[#FF6B00]">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[rgba(255,120,0,0.15)] text-[#FF7800] transition-transform duration-300 group-hover:scale-110">
               <EducationIcon size={18} />
             </div>
-            <span className="flex-1 font-medium">{edu}</span>
+            <span className="flex-1 font-medium text-white">{edu}</span>
             <Button
               type="button"
               onClick={() => removeEducation(index)}
-              className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-[#333] hover:text-white"
+              className="rounded-full p-2 text-gray-400 opacity-0 transition-all duration-300 hover:bg-[#333] hover:text-white group-hover:opacity-100"
+              aria-label={`Remove education: ${edu}`}
               variant="ghost"
               size="small"
               leftIcon={<TrashIcon size={16} />}
             />
           </motion.li>
         ))}
-      </ul>
+      </motion.ul>
 
-      <div className="rounded-lg border border-[#333] bg-[#1A1A1A] p-4">
-        <h4 className="mb-2 text-sm font-medium text-gray-300">Add New Education</h4>
+      <div className="relative">
         <div className="flex gap-2">
           <FormField
             name="newEducation"
@@ -110,21 +128,24 @@ export const AboutYou = ({
             onChange={e => setNewEducation(e.target.value)}
             placeholder="Add degree or certification with institution"
             className="mb-0 flex-1"
+            backgroundStyle="semi-transparent"
           />
           <Button
             type="button"
-            variant="orangeOutline"
+            variant="orangeFilled"
             onClick={addEducation}
             disabled={!newEducation.trim()}
-            className="transition-all duration-300 hover:shadow-md hover:shadow-orange-900/10"
+            className="group overflow-hidden transition-all duration-300"
+            leftIcon={<PlusIcon size={16} className="transition-transform duration-300 group-hover:rotate-90" />}
           >
             Add
           </Button>
         </div>
-        <p className="mt-2 text-xs text-gray-400">
-          Example: "Bachelor's in Exercise Science, University of California"
-        </p>
+        <div className="absolute bottom-0 left-0 h-0.5 w-full bg-gradient-to-r from-[#FF7800]/5 via-[#FF7800]/20 to-[#FF7800]/5"></div>
       </div>
+      <p className="mt-2 text-xs text-gray-400">
+        Example: "Bachelor's in Exercise Science, University of California"
+      </p>
     </motion.div>
   </motion.div>
 );

@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 
 import { UserProfileIcon } from "@/components/common/Icons";
-import { FormField } from "@/components/shared";
+import { FormField, SectionTitle } from "@/components/shared";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -26,12 +26,7 @@ const staggerItems = {
 
 export const BasicInformation = ({ clientData, handleChange, previewImage, handleImageUpload }) => (
   <motion.div className="space-y-6" variants={staggerItems} initial="hidden" animate="visible">
-    <motion.div variants={fadeInUp} className="flex items-center justify-between">
-      <h2 className="bg-gradient-to-r from-[#FF7800] to-[#FF9A00] bg-clip-text text-xl font-semibold text-transparent">
-        Basic Information
-      </h2>
-      <div className="ml-4 h-px flex-1 bg-gradient-to-r from-[#FF7800]/50 to-transparent"></div>
-    </motion.div>
+    <SectionTitle title="Basic Information" />
 
     {/* Profile Picture */}
     <motion.div variants={fadeInUp} className="flex flex-col items-start gap-6 md:flex-row">

@@ -9,7 +9,6 @@ export const Card = ({
   width = "90%",
   maxWidth = "500px",
   padding = "30px 30px",
-  padding = "30px 30px",
   bgGradientFrom = "#0f0f0f",
   bgGradientTo = "#1a1a1a",
   borderRadius = "15px",

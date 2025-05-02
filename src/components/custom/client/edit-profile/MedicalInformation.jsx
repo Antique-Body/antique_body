@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 
 import { Button } from "@/components/common/Button";
-import { MedicalIcon, AlertIcon, InjuryIcon, PlusIcon, TrashIcon } from "@/components/common/Icons";
-import { FormField } from "@/components/shared";
+import { AlertIcon, InjuryIcon, MedicalIcon, PlusIcon, TrashIcon } from "@/components/common/Icons";
+import { FormField, SectionTitle } from "@/components/shared";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -63,12 +63,7 @@ export const MedicalInformation = ({
     initial="hidden"
     animate="visible"
   >
-    <motion.div variants={fadeInUp} className="flex items-center justify-between">
-      <h2 className="bg-gradient-to-r from-[#FF7800] to-[#FF9A00] bg-clip-text text-xl font-semibold text-transparent">
-        Medical Information
-      </h2>
-      <div className="ml-4 h-px flex-1 bg-gradient-to-r from-[#FF7800]/50 to-transparent"></div>
-    </motion.div>
+    <SectionTitle title="Medical Information" />
 
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       {/* Medical Conditions */}

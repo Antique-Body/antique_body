@@ -1,7 +1,5 @@
 import { CheckIcon } from "@components/common";
 
-import { Card } from "..";
-
 export const FrequencySelector = ({ selectedFrequency, onSelect }) => (
   <div className="grid grid-cols-3 gap-3">
     {[1, 2, 3, 4, 5, 6, 7].map(num => (

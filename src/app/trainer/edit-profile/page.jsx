@@ -1,19 +1,20 @@
 "use client";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { BackButton } from "@/components/common/BackButton";
 import { Button } from "@/components/common/Button";
 import { SaveIcon } from "@/components/common/Icons";
 import { AntiqueBodyLogo } from "@/components/custom/BrandLogo";
 import { Card } from "@/components/custom/Card";
+import { AnimatedTabContent, DashboardTabs } from "@/components/custom/DashboardTabs";
 import {
-  BasicInformation,
   AboutYou,
   AreasOfExpertise,
-  ServicesOffered,
   Availability,
+  BasicInformation,
+  ServicesOffered,
 } from "@/components/custom/trainer/edit-profile";
 
 const fadeIn = {
@@ -271,58 +272,12 @@ const TrainerEditProfilePage = () => {
 
   // Navigation sections
   const sections = [
-    { id: "basicInfo", label: "Basic Information" },
-    { id: "aboutYou", label: "About You" },
-    { id: "expertise", label: "Expertise" },
-    { id: "services", label: "Services" },
-    { id: "availability", label: "Availability" },
+    { id: "basicInfo", label: "Basic Information", badgeCount: 0 },
+    { id: "aboutYou", label: "About You", badgeCount: 0 },
+    { id: "expertise", label: "Expertise", badgeCount: 0 },
+    { id: "services", label: "Services", badgeCount: 0 },
+    { id: "availability", label: "Availability", badgeCount: 0 },
   ];
-
-  // Get active section component
-  const renderActiveSection = () => {
-    switch (activeSection) {
-      case "basicInfo":
-        return (
-          <BasicInformation
-            trainerData={trainerData}
-            handleChange={handleChange}
-            previewImage={previewImage}
-            handleImageUpload={handleImageUpload}
-            newCertification={newCertification}
-            setNewCertification={setNewCertification}
-            addCertification={addCertification}
-            removeCertification={removeCertification}
-          />
-        );
-      case "aboutYou":
-        return (
-          <AboutYou
-            trainerData={trainerData}
-            handleChange={handleChange}
-            newEducation={newEducation}
-            setNewEducation={setNewEducation}
-            addEducation={addEducation}
-            removeEducation={removeEducation}
-          />
-        );
-      case "expertise":
-        return <AreasOfExpertise trainerData={trainerData} updateExpertiseLevel={updateExpertiseLevel} />;
-      case "services":
-        return (
-          <ServicesOffered
-            trainerData={trainerData}
-            newService={newService}
-            setNewService={setNewService}
-            addService={addService}
-            removeService={removeService}
-          />
-        );
-      case "availability":
-        return <Availability trainerData={trainerData} handleChange={handleChange} setTrainerData={setTrainerData} />;
-      default:
-        return null;
-    }
-  };
 
   return (
     <div className="relative min-h-screen bg-[#0a0a0a] bg-[radial-gradient(circle_at_center,rgba(40,40,40,0.3),transparent_70%)] px-4 py-6">
@@ -360,20 +315,8 @@ const TrainerEditProfilePage = () => {
           </div>
         </motion.div>
 
-        <motion.div variants={fadeIn} className="scrollbar-hide mb-6 flex overflow-x-auto px-1 pb-2">
-          {sections.map(section => (
-            <button
-              key={section.id}
-              onClick={() => setActiveSection(section.id)}
-              className={`mr-3 flex-shrink-0 rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 ${
-                activeSection === section.id
-                  ? "bg-gradient-to-r from-[#FF7800] to-[#FF5F00] text-white shadow-lg shadow-orange-500/20"
-                  : "bg-[#1A1A1A] text-gray-300 hover:bg-[#222]"
-              }`}
-            >
-              {section.label}
-            </button>
-          ))}
+        <motion.div variants={fadeIn}>
+          <DashboardTabs activeTab={activeSection} setActiveTab={setActiveSection} tabs={sections} />
         </motion.div>
 
         <motion.div variants={fadeIn}>
@@ -389,15 +332,47 @@ const TrainerEditProfilePage = () => {
               </div>
 
               {/* Active section */}
-              <motion.div
-                key={activeSection}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                {renderActiveSection()}
-              </motion.div>
+              <AnimatedTabContent isActive={activeSection === "basicInfo"} tabId="basicInfo">
+                <BasicInformation
+                  trainerData={trainerData}
+                  handleChange={handleChange}
+                  previewImage={previewImage}
+                  handleImageUpload={handleImageUpload}
+                  newCertification={newCertification}
+                  setNewCertification={setNewCertification}
+                  addCertification={addCertification}
+                  removeCertification={removeCertification}
+                />
+              </AnimatedTabContent>
+
+              <AnimatedTabContent isActive={activeSection === "aboutYou"} tabId="aboutYou">
+                <AboutYou
+                  trainerData={trainerData}
+                  handleChange={handleChange}
+                  newEducation={newEducation}
+                  setNewEducation={setNewEducation}
+                  addEducation={addEducation}
+                  removeEducation={removeEducation}
+                />
+              </AnimatedTabContent>
+
+              <AnimatedTabContent isActive={activeSection === "expertise"} tabId="expertise">
+                <AreasOfExpertise trainerData={trainerData} updateExpertiseLevel={updateExpertiseLevel} />
+              </AnimatedTabContent>
+
+              <AnimatedTabContent isActive={activeSection === "services"} tabId="services">
+                <ServicesOffered
+                  trainerData={trainerData}
+                  newService={newService}
+                  setNewService={setNewService}
+                  addService={addService}
+                  removeService={removeService}
+                />
+              </AnimatedTabContent>
+
+              <AnimatedTabContent isActive={activeSection === "availability"} tabId="availability">
+                <Availability trainerData={trainerData} handleChange={handleChange} setTrainerData={setTrainerData} />
+              </AnimatedTabContent>
 
               {/* Navigation and Submit */}
               <div className="flex justify-between border-t border-[#333] pt-8">

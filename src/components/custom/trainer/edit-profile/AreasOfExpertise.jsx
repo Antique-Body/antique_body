@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 
-import { PerformanceIcon, StrengthIcon, RecoveryIcon, NutritionIcon } from "@/components/common/Icons";
+import { NutritionIcon, PerformanceIcon, RecoveryIcon, StrengthIcon } from "@/components/common/Icons";
+import { SectionTitle } from "@/components/shared";
 
 // Animation variants
 const fadeInUp = {
@@ -25,19 +26,14 @@ export const AreasOfExpertise = ({ trainerData, updateExpertiseLevel }) => (
     animate="visible"
     className="space-y-6 border-t border-[#333] pt-8"
   >
-    <motion.h2
-      variants={fadeInUp}
-      className="bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] bg-clip-text text-xl font-semibold text-transparent"
-    >
-      Areas of Expertise
-    </motion.h2>
+    <SectionTitle title="Areas of Expertise" />
 
     <motion.div variants={fadeInUp} className="mb-6 space-y-4">
       {trainerData.expertise.map((item, index) => (
         <motion.div key={index} whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
           <div className="mb-1 flex justify-between">
             <span className="font-medium text-white">{item.area}</span>
-            <span className="font-semibold text-[#FF6B00]">{item.level}%</span>
+            <span className="font-semibold text-[#FF7800]">{item.level}%</span>
           </div>
           <div className="flex items-center gap-3">
             <div className="relative h-3 flex-1 overflow-hidden rounded-full bg-[#333]">
@@ -45,7 +41,7 @@ export const AreasOfExpertise = ({ trainerData, updateExpertiseLevel }) => (
                 initial={{ width: 0 }}
                 animate={{ width: `${item.level}%` }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="h-full rounded-full bg-gradient-to-r from-[#FF6B00] to-[#FF9A00]"
+                className="h-full rounded-full bg-gradient-to-r from-[#FF7800] to-[#FF9A00]"
               ></motion.div>
               {/* Adding subtle animation */}
               <motion.div
@@ -68,43 +64,46 @@ export const AreasOfExpertise = ({ trainerData, updateExpertiseLevel }) => (
               max="100"
               value={item.level}
               onChange={e => updateExpertiseLevel(index, e.target.value)}
-              className="w-24 accent-[#FF6B00]"
+              className="w-24 accent-[#FF7800]"
             />
           </div>
         </motion.div>
       ))}
     </motion.div>
 
-    <motion.h3 variants={fadeInUp} className="mb-3 text-lg font-medium">
+    <motion.h3
+      variants={fadeInUp}
+      className="mb-4 mt-8 bg-gradient-to-r from-[#FF7800] to-white bg-clip-text text-lg font-medium text-transparent"
+    >
       Specialization Details
     </motion.h3>
 
     <motion.div variants={fadeInUp} className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <motion.div
         whileHover={{ y: -4, transition: { duration: 0.2 } }}
-        className="rounded-lg border border-[#333] bg-gradient-to-b from-[#1A1A1A] to-[#111] p-4 shadow-lg transition-all duration-300 hover:border-[#FF6B00]/30 hover:shadow-orange-800/5"
+        className="rounded-lg border border-[rgba(255,120,0,0.3)] bg-[rgba(255,120,0,0.1)] p-5 shadow-lg transition-all duration-300 hover:border-[#FF7800]/40 hover:shadow-orange-500/20"
       >
         <div className="mb-3 flex items-center">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(255,107,0,0.15)]">
-            <PerformanceIcon size={20} className="text-[#FF6B00]" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(255,120,0,0.15)]">
+            <PerformanceIcon size={20} className="text-[#FF7800]" />
           </div>
-          <h4 className="ml-3 text-lg font-semibold text-[#FF6B00]">Sports Performance</h4>
+          <h4 className="ml-3 text-lg font-semibold text-[#FF7800]">Sports Performance</h4>
         </div>
         <ul className="space-y-2 text-gray-300">
           <li className="flex items-center">
-            <span className="mr-2 text-[#FF6B00]">•</span>
+            <span className="mr-2 text-[#FF7800]">•</span>
             <span>Sport-specific functional movement patterns</span>
           </li>
           <li className="flex items-center">
-            <span className="mr-2 text-[#FF6B00]">•</span>
+            <span className="mr-2 text-[#FF7800]">•</span>
             <span>Speed and agility development</span>
           </li>
           <li className="flex items-center">
-            <span className="mr-2 text-[#FF6B00]">•</span>
+            <span className="mr-2 text-[#FF7800]">•</span>
             <span>Power and explosiveness training</span>
           </li>
           <li className="flex items-center">
-            <span className="mr-2 text-[#FF6B00]">•</span>
+            <span className="mr-2 text-[#FF7800]">•</span>
             <span>Competition preparation cycles</span>
           </li>
         </ul>
@@ -112,29 +111,29 @@ export const AreasOfExpertise = ({ trainerData, updateExpertiseLevel }) => (
 
       <motion.div
         whileHover={{ y: -4, transition: { duration: 0.2 } }}
-        className="rounded-lg border border-[#333] bg-gradient-to-b from-[#1A1A1A] to-[#111] p-4 shadow-lg transition-all duration-300 hover:border-[#FF6B00]/30 hover:shadow-orange-800/5"
+        className="rounded-lg border border-[rgba(255,120,0,0.3)] bg-[rgba(255,120,0,0.1)] p-5 shadow-lg transition-all duration-300 hover:border-[#FF7800]/40 hover:shadow-orange-500/20"
       >
         <div className="mb-3 flex items-center">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(255,107,0,0.15)]">
-            <StrengthIcon size={20} className="text-[#FF6B00]" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(255,120,0,0.15)]">
+            <StrengthIcon size={20} className="text-[#FF7800]" />
           </div>
-          <h4 className="ml-3 text-lg font-semibold text-[#FF6B00]">Strength & Conditioning</h4>
+          <h4 className="ml-3 text-lg font-semibold text-[#FF7800]">Strength & Conditioning</h4>
         </div>
         <ul className="space-y-2 text-gray-300">
           <li className="flex items-center">
-            <span className="mr-2 text-[#FF6B00]">•</span>
+            <span className="mr-2 text-[#FF7800]">•</span>
             <span>Compound movement optimization</span>
           </li>
           <li className="flex items-center">
-            <span className="mr-2 text-[#FF6B00]">•</span>
+            <span className="mr-2 text-[#FF7800]">•</span>
             <span>Progressive overload programming</span>
           </li>
           <li className="flex items-center">
-            <span className="mr-2 text-[#FF6B00]">•</span>
+            <span className="mr-2 text-[#FF7800]">•</span>
             <span>Muscular endurance development</span>
           </li>
           <li className="flex items-center">
-            <span className="mr-2 text-[#FF6B00]">•</span>
+            <span className="mr-2 text-[#FF7800]">•</span>
             <span>Functional strength training</span>
           </li>
         </ul>
@@ -142,29 +141,29 @@ export const AreasOfExpertise = ({ trainerData, updateExpertiseLevel }) => (
 
       <motion.div
         whileHover={{ y: -4, transition: { duration: 0.2 } }}
-        className="rounded-lg border border-[#333] bg-gradient-to-b from-[#1A1A1A] to-[#111] p-4 shadow-lg transition-all duration-300 hover:border-[#FF6B00]/30 hover:shadow-orange-800/5"
+        className="rounded-lg border border-[rgba(255,120,0,0.3)] bg-[rgba(255,120,0,0.1)] p-5 shadow-lg transition-all duration-300 hover:border-[#FF7800]/40 hover:shadow-orange-500/20"
       >
         <div className="mb-3 flex items-center">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(255,107,0,0.15)]">
-            <RecoveryIcon size={20} className="text-[#FF6B00]" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(255,120,0,0.15)]">
+            <RecoveryIcon size={20} className="text-[#FF7800]" />
           </div>
-          <h4 className="ml-3 text-lg font-semibold text-[#FF6B00]">Recovery & Mobility</h4>
+          <h4 className="ml-3 text-lg font-semibold text-[#FF7800]">Recovery & Mobility</h4>
         </div>
         <ul className="space-y-2 text-gray-300">
           <li className="flex items-center">
-            <span className="mr-2 text-[#FF6B00]">•</span>
+            <span className="mr-2 text-[#FF7800]">•</span>
             <span>Active recovery protocols</span>
           </li>
           <li className="flex items-center">
-            <span className="mr-2 text-[#FF6B00]">•</span>
+            <span className="mr-2 text-[#FF7800]">•</span>
             <span>Joint mobility enhancement</span>
           </li>
           <li className="flex items-center">
-            <span className="mr-2 text-[#FF6B00]">•</span>
+            <span className="mr-2 text-[#FF7800]">•</span>
             <span>Myofascial release techniques</span>
           </li>
           <li className="flex items-center">
-            <span className="mr-2 text-[#FF6B00]">•</span>
+            <span className="mr-2 text-[#FF7800]">•</span>
             <span>Sleep optimization strategies</span>
           </li>
         </ul>
@@ -172,29 +171,29 @@ export const AreasOfExpertise = ({ trainerData, updateExpertiseLevel }) => (
 
       <motion.div
         whileHover={{ y: -4, transition: { duration: 0.2 } }}
-        className="rounded-lg border border-[#333] bg-gradient-to-b from-[#1A1A1A] to-[#111] p-4 shadow-lg transition-all duration-300 hover:border-[#FF6B00]/30 hover:shadow-orange-800/5"
+        className="rounded-lg border border-[rgba(255,120,0,0.3)] bg-[rgba(255,120,0,0.1)] p-5 shadow-lg transition-all duration-300 hover:border-[#FF7800]/40 hover:shadow-orange-500/20"
       >
         <div className="mb-3 flex items-center">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(255,107,0,0.15)]">
-            <NutritionIcon size={20} className="text-[#FF6B00]" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(255,120,0,0.15)]">
+            <NutritionIcon size={20} className="text-[#FF7800]" />
           </div>
-          <h4 className="ml-3 text-lg font-semibold text-[#FF6B00]">Nutrition Planning</h4>
+          <h4 className="ml-3 text-lg font-semibold text-[#FF7800]">Nutrition Planning</h4>
         </div>
         <ul className="space-y-2 text-gray-300">
           <li className="flex items-center">
-            <span className="mr-2 text-[#FF6B00]">•</span>
+            <span className="mr-2 text-[#FF7800]">•</span>
             <span>Macronutrient calculation</span>
           </li>
           <li className="flex items-center">
-            <span className="mr-2 text-[#FF6B00]">•</span>
+            <span className="mr-2 text-[#FF7800]">•</span>
             <span>Performance nutrition timing</span>
           </li>
           <li className="flex items-center">
-            <span className="mr-2 text-[#FF6B00]">•</span>
+            <span className="mr-2 text-[#FF7800]">•</span>
             <span>Hydration strategies</span>
           </li>
           <li className="flex items-center">
-            <span className="mr-2 text-[#FF6B00]">•</span>
+            <span className="mr-2 text-[#FF7800]">•</span>
             <span>Supplementation guidance</span>
           </li>
         </ul>

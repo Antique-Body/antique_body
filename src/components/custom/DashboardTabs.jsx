@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
 export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
   const tabsRef = useRef([]);
@@ -61,49 +61,21 @@ export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
 
 // AnimatedTabContent component for smooth tab transitions
 export const AnimatedTabContent = ({ children, isActive, tabId, animateOpacity = false }) => {
-  // Simple fade with small slide down
-  const variants = {
-    enter: {
-      opacity: 0,
-      y: -10,
-    },
-    center: {
-      opacity: 1,
-      y: 0,
-    },
-    exit: {
-      opacity: 0,
-      position: "absolute",
-    },
-  };
-
-  // If animateOpacity is true, use simpler fade animation
-  const fadeVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
-    exit: { opacity: 0, position: "absolute" },
-  };
 
   return (
-    <div className="relative">
-      <AnimatePresence mode="wait">
-        {isActive && (
-          <motion.div
-            key={tabId}
-            initial={animateOpacity ? "hidden" : "enter"}
-            animate={animateOpacity ? "visible" : "center"}
-            exit={animateOpacity ? "exit" : "exit"}
-            variants={animateOpacity ? fadeVariants : variants}
-            transition={{
-              y: { type: "tween", duration: 0.2 },
-              opacity: { duration: 0.2 },
-            }}
-            style={{ width: "100%" }}
-          >
-            {children}
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <div 
+      className="relative transition-opacity duration-300"
+      style={{ 
+        opacity: isActive ? 1 : 0,
+        visibility: isActive ? 'visible' : 'hidden',
+        position: isActive ? 'relative' : 'absolute',
+        width: '100%',
+        zIndex: isActive ? 10 : 0,
+        top: 0,
+        left: 0
+      }}
+    >
+      {children}
     </div>
   );
 };

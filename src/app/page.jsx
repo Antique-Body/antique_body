@@ -1,7 +1,6 @@
 "use client";
 import { Navbar } from "@/components";
 import Background from "@/components/background";
-import { Navbar } from "@/components";
 
 export default function Home() {
   return (

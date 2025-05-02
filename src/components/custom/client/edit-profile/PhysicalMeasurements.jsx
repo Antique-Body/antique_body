@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 
-import { RulerIcon, ChartBarIcon } from "@/components/common/Icons";
-import { FormField } from "@/components/shared";
+import { ChartBarIcon, RulerIcon } from "@/components/common/Icons";
+import { FormField, SectionTitle } from "@/components/shared";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -39,12 +39,7 @@ export const PhysicalMeasurements = ({ clientData, handleChange }) => (
     initial="hidden"
     animate="visible"
   >
-    <motion.div variants={fadeInUp} className="flex items-center justify-between">
-      <h2 className="bg-gradient-to-r from-[#FF7800] to-[#FF9A00] bg-clip-text text-xl font-semibold text-transparent">
-        Physical Measurements
-      </h2>
-      <div className="ml-4 h-px flex-1 bg-gradient-to-r from-[#FF7800]/50 to-transparent"></div>
-    </motion.div>
+    <SectionTitle title="Physical Measurements" />
 
     {/* Basic measurements */}
     <motion.div

@@ -1,7 +1,6 @@
 export const SelectionCard = ({
   selected,
   onClick,
-  emoji,
   title,
   description,
   bgImage,

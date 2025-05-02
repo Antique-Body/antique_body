@@ -1,6 +1,7 @@
 "use client";
 
-import { Button, ProgressBar, TextField } from "@components/common";
+import { FormField } from "@/components/shared";
+import { Button, ProgressBar } from "@components/common";
 import { Card } from "@components/custom";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -394,7 +395,7 @@ export const MeasurementsInput = ({ onSelect }) => {
       </div>
 
       <Card width="100%" topBorderColor={false} borderTop={false}>
-        <TextField
+        <FormField
           id="weight-input"
           name="weight"
           label={`Weight (${unitSystem === UNIT_SYSTEMS.METRIC ? "kg" : "lb"})`}
@@ -412,7 +413,7 @@ export const MeasurementsInput = ({ onSelect }) => {
 
         {unitSystem === UNIT_SYSTEMS.METRIC ? (
           // Metric height input (single field for cm)
-          <TextField
+          <FormField
             id="height-input"
             name="height"
             label="Height (cm)"
@@ -430,7 +431,7 @@ export const MeasurementsInput = ({ onSelect }) => {
         ) : (
           // Imperial height input (two fields for feet and inches)
           <div className="flex gap-4 w-full">
-            <TextField
+            <FormField
               id="feet-input"
               name="height"
               label="Height (feet)"
@@ -445,7 +446,7 @@ export const MeasurementsInput = ({ onSelect }) => {
               step={1}
               className="w-full"
             />
-            <TextField
+            <FormField
               id="inches-input"
               name="inches"
               label="Inches"

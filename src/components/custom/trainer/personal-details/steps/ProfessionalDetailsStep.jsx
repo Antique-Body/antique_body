@@ -1,7 +1,6 @@
 "use client";
 import { useForm } from "react-hook-form";
 
-import { TextField } from "@/components/common";
 import { Button } from "@/components/common/Button";
 import { CloseXIcon } from "@/components/common/Icons";
 import { FormCard } from "@/components/custom/FormCard";
@@ -24,7 +23,7 @@ export const ProfessionalDetailsStep = ({
   return (
     <div className="space-y-6">
       <FormCard title="Professional Information">
-        <TextField
+        <FormField
           id="specialty"
           name="specialty"
           label="Primary Specialty"

@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 
 import { Button } from "@/components/common/Button";
-import { TargetIcon, TrashIcon, PlusIcon, ArrowRight } from "@/components/common/Icons";
-import { FormField } from "@/components/shared";
+import { ArrowRight, PlusIcon, TargetIcon, TrashIcon } from "@/components/common/Icons";
+import { FormField, SectionTitle } from "@/components/shared";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -49,12 +49,7 @@ export const FitnessGoals = ({ clientData, handleChange, newGoal, setNewGoal, ad
     initial="hidden"
     animate="visible"
   >
-    <motion.div variants={fadeInUp} className="flex items-center justify-between">
-      <h2 className="bg-gradient-to-r from-[#FF7800] to-[#FF9A00] bg-clip-text text-xl font-semibold text-transparent">
-        Fitness Goals
-      </h2>
-      <div className="ml-4 h-px flex-1 bg-gradient-to-r from-[#FF7800]/50 to-transparent"></div>
-    </motion.div>
+    <SectionTitle title="Fitness Goals" />
 
     <motion.div
       variants={fadeInUp}

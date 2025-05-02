@@ -1,19 +1,20 @@
 "use client";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { BackButton } from "@/components/common/BackButton";
 import { Button } from "@/components/common/Button";
 import { SaveIcon } from "@/components/common/Icons";
 import { AntiqueBodyLogo } from "@/components/custom/BrandLogo";
 import { Card } from "@/components/custom/Card";
+import { AnimatedTabContent, DashboardTabs } from "@/components/custom/DashboardTabs";
 import {
   BasicInformation,
-  FitnessGoals,
-  PhysicalMeasurements,
-  MedicalInformation,
   DietaryPreferences,
+  FitnessGoals,
+  MedicalInformation,
+  PhysicalMeasurements,
 } from "@/components/custom/client/edit-profile";
 
 const fadeIn = {
@@ -243,196 +244,12 @@ const ClientEditProfilePage = () => {
 
   // Navigation sections
   const sections = [
-    { id: "basicInfo", label: "Basic Information" },
-    { id: "fitnessGoals", label: "Fitness Goals" },
-    { id: "measurements", label: "Measurements" },
-    { id: "medicalInfo", label: "Medical Info" },
-    { id: "dietaryPrefs", label: "Diet & Nutrition" },
+    { id: "basicInfo", label: "Basic Information", badgeCount: 0 },
+    { id: "fitnessGoals", label: "Fitness Goals", badgeCount: 0 },
+    { id: "measurements", label: "Measurements", badgeCount: 0 },
+    { id: "medicalInfo", label: "Medical Info", badgeCount: 0 },
+    { id: "dietaryPrefs", label: "Diet & Nutrition", badgeCount: 0 },
   ];
-
-  // Get active section component
-  const renderActiveSection = () => {
-    switch (activeSection) {
-      case "basicInfo":
-        return (
-          <BasicInformation
-            clientData={clientData}
-            handleChange={handleChange}
-            previewImage={previewImage}
-            handleImageUpload={handleImageUpload}
-          />
-        );
-      case "fitnessGoals":
-        return (
-          <FitnessGoals
-            clientData={clientData}
-            handleChange={handleChange}
-            newGoal={newGoal}
-            setNewGoal={setNewGoal}
-            addGoal={() => handleArrayItemChange("fitnessGoals", newGoal, true)}
-            removeGoal={goal => handleArrayItemChange("fitnessGoals", goal, false)}
-          />
-        );
-      case "measurements":
-        return (
-          <PhysicalMeasurements
-            clientData={clientData}
-            handleChange={handleChange}
-            handleMeasurementChange={handleMeasurementChange}
-          />
-        );
-      case "medicalInfo":
-        return (
-          <MedicalInformation
-            clientData={clientData}
-            newCondition={newMedicalCondition}
-            setNewCondition={setNewMedicalCondition}
-            addCondition={() => handleArrayItemChange("medicalConditions", newMedicalCondition, true)}
-            removeCondition={condition => handleArrayItemChange("medicalConditions", condition, false)}
-            newAllergy={newAllergy}
-            setNewAllergy={setNewAllergy}
-            addAllergy={() => handleArrayItemChange("allergies", newAllergy, true)}
-            removeAllergy={allergy => handleArrayItemChange("allergies", allergy, false)}
-            newInjury={newInjury}
-            setNewInjury={setNewInjury}
-            addInjury={() => handleArrayItemChange("injuries", newInjury, true)}
-            removeInjury={injury => handleArrayItemChange("injuries", injury, false)}
-          />
-        );
-      case "dietaryPrefs":
-        return (
-          <DietaryPreferences
-            clientData={{
-              ...clientData,
-              dietType: clientData.dietaryPreferences.diet,
-              calorieGoal: clientData.dietaryPreferences.calorieGoal,
-              proteinPercentage: clientData.dietaryPreferences.macros.protein,
-              carbsPercentage: clientData.dietaryPreferences.macros.carbs,
-              fatsPercentage: clientData.dietaryPreferences.macros.fats,
-              dietaryRestrictions: clientData.dietaryPreferences.restrictions,
-              foodIntolerances: clientData.dietaryPreferences.intolerances,
-            }}
-            handleChange={e => {
-              const { name, value } = e.target;
-
-              // Show temporary save indicator effect
-              setSaveIndicator(true);
-              setTimeout(() => setSaveIndicator(false), 1000);
-
-              if (name === "dietType") {
-                setClientData({
-                  ...clientData,
-                  dietaryPreferences: {
-                    ...clientData.dietaryPreferences,
-                    diet: value,
-                  },
-                });
-              } else if (name === "calorieGoal") {
-                setClientData({
-                  ...clientData,
-                  dietaryPreferences: {
-                    ...clientData.dietaryPreferences,
-                    calorieGoal: value,
-                  },
-                });
-              } else if (name === "proteinPercentage") {
-                setClientData({
-                  ...clientData,
-                  dietaryPreferences: {
-                    ...clientData.dietaryPreferences,
-                    macros: {
-                      ...clientData.dietaryPreferences.macros,
-                      protein: value,
-                    },
-                  },
-                });
-              } else if (name === "carbsPercentage") {
-                setClientData({
-                  ...clientData,
-                  dietaryPreferences: {
-                    ...clientData.dietaryPreferences,
-                    macros: {
-                      ...clientData.dietaryPreferences.macros,
-                      carbs: value,
-                    },
-                  },
-                });
-              } else if (name === "fatsPercentage") {
-                setClientData({
-                  ...clientData,
-                  dietaryPreferences: {
-                    ...clientData.dietaryPreferences,
-                    macros: {
-                      ...clientData.dietaryPreferences.macros,
-                      fats: value,
-                    },
-                  },
-                });
-              } else {
-                // Handle other properties
-                handleChange(e);
-              }
-            }}
-            newRestriction={newDietaryRestriction}
-            setNewRestriction={setNewDietaryRestriction}
-            addRestriction={() => {
-              if (newDietaryRestriction.trim()) {
-                setClientData({
-                  ...clientData,
-                  dietaryPreferences: {
-                    ...clientData.dietaryPreferences,
-                    restrictions: [...clientData.dietaryPreferences.restrictions, newDietaryRestriction.trim()],
-                  },
-                });
-                setSaveIndicator(true);
-                setTimeout(() => setSaveIndicator(false), 1000);
-                setNewDietaryRestriction("");
-              }
-            }}
-            removeRestriction={restriction => {
-              setClientData({
-                ...clientData,
-                dietaryPreferences: {
-                  ...clientData.dietaryPreferences,
-                  restrictions: clientData.dietaryPreferences.restrictions.filter(r => r !== restriction),
-                },
-              });
-              setSaveIndicator(true);
-              setTimeout(() => setSaveIndicator(false), 1000);
-            }}
-            newIntolerance={newIntolerance}
-            setNewIntolerance={setNewIntolerance}
-            addIntolerance={() => {
-              if (newIntolerance.trim()) {
-                setClientData({
-                  ...clientData,
-                  dietaryPreferences: {
-                    ...clientData.dietaryPreferences,
-                    intolerances: [...clientData.dietaryPreferences.intolerances, newIntolerance.trim()],
-                  },
-                });
-                setSaveIndicator(true);
-                setTimeout(() => setSaveIndicator(false), 1000);
-                setNewIntolerance("");
-              }
-            }}
-            removeIntolerance={intolerance => {
-              setClientData({
-                ...clientData,
-                dietaryPreferences: {
-                  ...clientData.dietaryPreferences,
-                  intolerances: clientData.dietaryPreferences.intolerances.filter(i => i !== intolerance),
-                },
-              });
-              setSaveIndicator(true);
-              setTimeout(() => setSaveIndicator(false), 1000);
-            }}
-          />
-        );
-      default:
-        return null;
-    }
-  };
 
   return (
     <div className="relative min-h-screen bg-[#0a0a0a] bg-[radial-gradient(circle_at_center,rgba(40,40,40,0.3),transparent_70%)] px-4 py-6">
@@ -470,20 +287,8 @@ const ClientEditProfilePage = () => {
           </div>
         </motion.div>
 
-        <motion.div variants={fadeIn} className="scrollbar-hide mb-6 flex overflow-x-auto px-1 pb-2">
-          {sections.map(section => (
-            <button
-              key={section.id}
-              onClick={() => setActiveSection(section.id)}
-              className={`mr-3 flex-shrink-0 rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 ${
-                activeSection === section.id
-                  ? "bg-gradient-to-r from-[#FF7800] to-[#FF5F00] text-white shadow-lg shadow-orange-500/20"
-                  : "bg-[#1A1A1A] text-gray-300 hover:bg-[#222]"
-              }`}
-            >
-              {section.label}
-            </button>
-          ))}
+        <motion.div variants={fadeIn}>
+          <DashboardTabs activeTab={activeSection} setActiveTab={setActiveSection} tabs={sections} />
         </motion.div>
 
         <motion.div variants={fadeIn}>
@@ -499,15 +304,181 @@ const ClientEditProfilePage = () => {
               </div>
 
               {/* Active section */}
-              <motion.div
-                key={activeSection}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                {renderActiveSection()}
-              </motion.div>
+              <AnimatedTabContent isActive={activeSection === "basicInfo"} tabId="basicInfo">
+                <BasicInformation
+                  clientData={clientData}
+                  handleChange={handleChange}
+                  previewImage={previewImage}
+                  handleImageUpload={handleImageUpload}
+                />
+              </AnimatedTabContent>
+
+              <AnimatedTabContent isActive={activeSection === "fitnessGoals"} tabId="fitnessGoals">
+                <FitnessGoals
+                  clientData={clientData}
+                  handleChange={handleChange}
+                  newGoal={newGoal}
+                  setNewGoal={setNewGoal}
+                  addGoal={() => handleArrayItemChange("fitnessGoals", newGoal, true)}
+                  removeGoal={goal => handleArrayItemChange("fitnessGoals", goal, false)}
+                />
+              </AnimatedTabContent>
+
+              <AnimatedTabContent isActive={activeSection === "measurements"} tabId="measurements">
+                <PhysicalMeasurements
+                  clientData={clientData}
+                  handleChange={handleChange}
+                  handleMeasurementChange={handleMeasurementChange}
+                />
+              </AnimatedTabContent>
+
+              <AnimatedTabContent isActive={activeSection === "medicalInfo"} tabId="medicalInfo">
+                <MedicalInformation
+                  clientData={clientData}
+                  newCondition={newMedicalCondition}
+                  setNewCondition={setNewMedicalCondition}
+                  addCondition={() => handleArrayItemChange("medicalConditions", newMedicalCondition, true)}
+                  removeCondition={condition => handleArrayItemChange("medicalConditions", condition, false)}
+                  newAllergy={newAllergy}
+                  setNewAllergy={setNewAllergy}
+                  addAllergy={() => handleArrayItemChange("allergies", newAllergy, true)}
+                  removeAllergy={allergy => handleArrayItemChange("allergies", allergy, false)}
+                  newInjury={newInjury}
+                  setNewInjury={setNewInjury}
+                  addInjury={() => handleArrayItemChange("injuries", newInjury, true)}
+                  removeInjury={injury => handleArrayItemChange("injuries", injury, false)}
+                />
+              </AnimatedTabContent>
+
+              <AnimatedTabContent isActive={activeSection === "dietaryPrefs"} tabId="dietaryPrefs">
+                <DietaryPreferences
+                  clientData={{
+                    ...clientData,
+                    dietType: clientData.dietaryPreferences.diet,
+                    calorieGoal: clientData.dietaryPreferences.calorieGoal,
+                    proteinPercentage: clientData.dietaryPreferences.macros.protein,
+                    carbsPercentage: clientData.dietaryPreferences.macros.carbs,
+                    fatsPercentage: clientData.dietaryPreferences.macros.fats,
+                    dietaryRestrictions: clientData.dietaryPreferences.restrictions,
+                    foodIntolerances: clientData.dietaryPreferences.intolerances,
+                  }}
+                  handleChange={e => {
+                    const { name, value } = e.target;
+
+                    // Show temporary save indicator effect
+                    setSaveIndicator(true);
+                    setTimeout(() => setSaveIndicator(false), 1000);
+
+                    if (name === "dietType") {
+                      setClientData({
+                        ...clientData,
+                        dietaryPreferences: {
+                          ...clientData.dietaryPreferences,
+                          diet: value,
+                        },
+                      });
+                    } else if (name === "calorieGoal") {
+                      setClientData({
+                        ...clientData,
+                        dietaryPreferences: {
+                          ...clientData.dietaryPreferences,
+                          calorieGoal: value,
+                        },
+                      });
+                    } else if (name === "proteinPercentage") {
+                      setClientData({
+                        ...clientData,
+                        dietaryPreferences: {
+                          ...clientData.dietaryPreferences,
+                          macros: {
+                            ...clientData.dietaryPreferences.macros,
+                            protein: value,
+                          },
+                        },
+                      });
+                    } else if (name === "carbsPercentage") {
+                      setClientData({
+                        ...clientData,
+                        dietaryPreferences: {
+                          ...clientData.dietaryPreferences,
+                          macros: {
+                            ...clientData.dietaryPreferences.macros,
+                            carbs: value,
+                          },
+                        },
+                      });
+                    } else if (name === "fatsPercentage") {
+                      setClientData({
+                        ...clientData,
+                        dietaryPreferences: {
+                          ...clientData.dietaryPreferences,
+                          macros: {
+                            ...clientData.dietaryPreferences.macros,
+                            fats: value,
+                          },
+                        },
+                      });
+                    } else {
+                      // Handle other properties
+                      handleChange(e);
+                    }
+                  }}
+                  newRestriction={newDietaryRestriction}
+                  setNewRestriction={setNewDietaryRestriction}
+                  addRestriction={() => {
+                    if (newDietaryRestriction.trim()) {
+                      setClientData({
+                        ...clientData,
+                        dietaryPreferences: {
+                          ...clientData.dietaryPreferences,
+                          restrictions: [...clientData.dietaryPreferences.restrictions, newDietaryRestriction.trim()],
+                        },
+                      });
+                      setSaveIndicator(true);
+                      setTimeout(() => setSaveIndicator(false), 1000);
+                      setNewDietaryRestriction("");
+                    }
+                  }}
+                  removeRestriction={restriction => {
+                    setClientData({
+                      ...clientData,
+                      dietaryPreferences: {
+                        ...clientData.dietaryPreferences,
+                        restrictions: clientData.dietaryPreferences.restrictions.filter(r => r !== restriction),
+                      },
+                    });
+                    setSaveIndicator(true);
+                    setTimeout(() => setSaveIndicator(false), 1000);
+                  }}
+                  newIntolerance={newIntolerance}
+                  setNewIntolerance={setNewIntolerance}
+                  addIntolerance={() => {
+                    if (newIntolerance.trim()) {
+                      setClientData({
+                        ...clientData,
+                        dietaryPreferences: {
+                          ...clientData.dietaryPreferences,
+                          intolerances: [...clientData.dietaryPreferences.intolerances, newIntolerance.trim()],
+                        },
+                      });
+                      setSaveIndicator(true);
+                      setTimeout(() => setSaveIndicator(false), 1000);
+                      setNewIntolerance("");
+                    }
+                  }}
+                  removeIntolerance={intolerance => {
+                    setClientData({
+                      ...clientData,
+                      dietaryPreferences: {
+                        ...clientData.dietaryPreferences,
+                        intolerances: clientData.dietaryPreferences.intolerances.filter(i => i !== intolerance),
+                      },
+                    });
+                    setSaveIndicator(true);
+                    setTimeout(() => setSaveIndicator(false), 1000);
+                  }}
+                />
+              </AnimatedTabContent>
 
               {/* Navigation and Submit */}
               <div className="flex justify-between border-t border-[#333] pt-8">
