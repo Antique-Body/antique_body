@@ -186,8 +186,8 @@ const TrainingSetup = () => {
       saveUserData()
         .then(success => {
           if (success) {
-            // Redirect to dashboard 
-            router.push("/user/dashboard");
+            // Redirect to loading screen instead of dashboard
+            router.push("/user/training-setup/loading");
           } else {
             // If save failed, stop showing redirect UI
             setIsRedirecting(false);
