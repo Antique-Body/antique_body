@@ -30,6 +30,43 @@ const animationStyles = `
   .animate-ping-slow {
     animation: ping-slow 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
   }
+  
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(0.7);
+      opacity: 0;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(1.2);
+      opacity: 0;
+    }
+  }
+  .animate-pulse-ring {
+    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .animation-delay-150 {
+    animation-delay: 150ms;
+  }
+  
+  @keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient 3s ease infinite;
+  }
 `;
 
 export default function TrainingPage() {
@@ -135,11 +172,11 @@ export default function TrainingPage() {
     });
     setCompletedExercises(newCompleted);
     
-    // Show completion animation for 3 seconds before showing modal
+    // Show completion animation for 5 seconds before showing modal
     setTimeout(() => {
       setShowAnimation(false);
       setShowCompletionModal(true);
-    }, 3000);
+    }, 4000);
   };
   
   const handleConfirmCompleteAnyway = () => {
