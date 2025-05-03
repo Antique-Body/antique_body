@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/common/Button";
 import { Card } from "@/components/custom/Card";
 
-export default function TrainingsPage() {
+export default function UpcomingTrainingsPage() {
   const [expandedTrainingId, setExpandedTrainingId] = useState(null);
 
   // Sample user data

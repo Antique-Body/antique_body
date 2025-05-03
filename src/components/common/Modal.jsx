@@ -105,7 +105,7 @@ export const Modal = memo(({
         
         {/* Footer with action buttons */}
         {footerButtons && (
-          <div className={`flex justify-between ${footerBorder ? 'border-t border-[#333]' : ''} p-4 sm:p-5`}>
+          <div className={`flex justify-end gap-2 ${footerBorder ? 'border-t border-[#333]' : ''} p-4 sm:p-5`}>
             <Button
               variant="secondary"
               onClick={secondaryButtonAction || onClose}
@@ -132,3 +132,6 @@ export const Modal = memo(({
     </div>
   );
 });
+
+// Add display name for memo component
+Modal.displayName = 'Modal';

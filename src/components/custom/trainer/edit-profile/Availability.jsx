@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-import { ClockIcon, CalendarIcon } from "@/components/common/Icons";
+import { CalendarIcon, ClockIcon } from "@/components/common/Icons";
 import { FormField, SectionTitle } from "@/components/shared";
 
 // Animation variants

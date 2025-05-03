@@ -1,45 +1,57 @@
 "use client";
 
-import { RunnerIcon, TrainerIcon, PerformanceIcon, WorkoutIcon, PlusIcon } from "@/components/common/Icons";
+import { PlusIcon, WorkoutIcon } from "@/components/common/Icons";
 
 const planTypes = [
   {
-    id: "football",
-    name: "Football Training",
-    icon: <TrainerIcon className="h-12 w-12 text-[#FF6B00]" />,
-    description:
-      "Create specialized training plans for football players focusing on agility, explosiveness, and sport-specific drills.",
-  },
-  {
-    id: "basketball",
-    name: "Basketball Training",
-    icon: <PerformanceIcon className="h-12 w-12 text-[#FF6B00]" />,
-    description:
-      "Design basketball-specific programs with emphasis on vertical jump, quick footwork, and game conditioning.",
-  },
-  {
-    id: "athletics",
-    name: "Track & Field",
-    icon: <RunnerIcon className="h-12 w-12 text-[#FF6B00]" />,
-    description:
-      "Build training plans for track and field athletes with focus on sprint mechanics, power development, and event specificity.",
-  },
-  {
-    id: "gym",
-    name: "Gym Program",
+    id: "muscle-building",
+    name: "Muscle Building Program",
     icon: <WorkoutIcon className="h-12 w-12 text-[#FF6B00]" />,
-    description: "Create general gym programs for fat loss, muscle building, or overall fitness improvement.",
+    description: "Focused strength training program designed for muscle hypertrophy and overall strength gains.",
     subtypes: [
-      { id: "burn-fat", name: "Burn Fat" },
-      { id: "build-muscle", name: "Build Muscle" },
-      { id: "general-fitness", name: "General Fitness" },
+      { id: "beginner-bulk", name: "Beginner Bulk" },
+      { id: "advanced-hypertrophy", name: "Advanced Hypertrophy" },
+      { id: "strength-focus", name: "Strength Focus" },
+    ],
+  },
+  {
+    id: "fat-loss",
+    name: "Fat Loss Program",
+    icon: <WorkoutIcon className="h-12 w-12 text-[#FF6B00]" />,
+    description: "High-intensity workouts combined with strategic cardio for optimal fat burning and body composition.",
+    subtypes: [
+      { id: "hiit-focus", name: "HIIT Training" },
+      { id: "metabolic-conditioning", name: "Metabolic Conditioning" },
+      { id: "weight-management", name: "Weight Management" },
+    ],
+  },
+  {
+    id: "rehabilitation",
+    name: "Injury Rehabilitation",
+    icon: <WorkoutIcon className="h-12 w-12 text-[#FF6B00]" />,
+    description: "Specialized programs for recovery from injuries with focus on mobility, stability, and gradual strength building.",
+    subtypes: [
+      { id: "joint-recovery", name: "Joint Recovery" },
+      { id: "back-rehabilitation", name: "Back Rehabilitation" },
+      { id: "post-surgery", name: "Post-Surgery" },
+    ],
+  },
+  {
+    id: "functional-fitness",
+    name: "Functional Fitness",
+    icon: <WorkoutIcon className="h-12 w-12 text-[#FF6B00]" />,
+    description: "Improve everyday movement patterns, core strength, and overall mobility for better quality of life.",
+    subtypes: [
+      { id: "mobility-focus", name: "Mobility & Flexibility" },
+      { id: "core-strength", name: "Core Strength" },
+      { id: "balance-stability", name: "Balance & Stability" },
     ],
   },
   {
     id: "custom",
     name: "Custom Program",
     icon: <PlusIcon size={32} className="text-[#FF6B00]" />,
-    description: "Start from scratch and build a fully customized training program for any sport or fitness goal.",
+    description: "Start from scratch and build a fully customized training program for any specific fitness goal or requirement.",
   },
 ];
 

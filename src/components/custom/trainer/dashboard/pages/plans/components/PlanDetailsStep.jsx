@@ -44,7 +44,7 @@ export const PlanDetailsStep = ({ initialData, onSubmit }) => {
             value={formData.title}
             onChange={handleChange}
             required
-            placeholder="E.g., Basketball Elite Performance"
+            placeholder="Fat Loss Plan"
             backgroundStyle="darker"
           />
 

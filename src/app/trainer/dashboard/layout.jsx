@@ -18,6 +18,7 @@ export default function TrainerDashboardLayout({ children }) {
     if (path.includes("/sessions")) return "sessions";
     if (path.includes("/messages")) return "messages";
     if (path.includes("/plans")) return "plans";
+    if (path.includes("/exercises")) return "exercises";
     return "newClients"; // Default tab
   };
 
@@ -49,6 +50,9 @@ export default function TrainerDashboardLayout({ children }) {
       case "plans":
         router.push("/trainer/dashboard/plans");
         break;
+      case "exercises":
+        router.push("/trainer/dashboard/exercises");
+        break;
       default:
         router.push("/trainer/dashboard/newclients");
     }
@@ -79,6 +83,7 @@ export default function TrainerDashboardLayout({ children }) {
     { id: "sessions", label: "Sessions" },
     { id: "messages", label: "Messages", badgeCount: unreadMessagesCount },
     { id: "plans", label: "Plans" },
+    { id: "exercises", label: "Exercises" },
   ];
 
   return (
