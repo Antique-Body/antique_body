@@ -5,6 +5,7 @@ import {
 } from "@/components/common/Icons";
 import { memo, useEffect } from "react";
 
+
 export const Modal = memo(({
   isOpen,
   onClose,
@@ -26,15 +27,6 @@ export const Modal = memo(({
 }) => {
   if (!isOpen) return null;
 
-  // Prevent body scrolling when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    }
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
-  }, [isOpen]);
 
   // Handle backdrop click to close modal
   const handleBackdropClick = (e) => {
@@ -132,6 +124,3 @@ export const Modal = memo(({
     </div>
   );
 });
-
-// Add display name for memo component
-Modal.displayName = 'Modal';

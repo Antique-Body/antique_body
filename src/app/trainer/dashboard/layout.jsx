@@ -15,7 +15,7 @@ export default function TrainerDashboardLayout({ children }) {
   const getActiveTabFromPath = path => {
     if (path.includes("/newclients")) return "newClients";
     if (path.includes("/clients")) return "clients";
-    if (path.includes("/sessions")) return "sessions";
+    if (path.includes("/upcoming-trainings")) return "upcomingTrainings";
     if (path.includes("/messages")) return "messages";
     if (path.includes("/plans")) return "plans";
     if (path.includes("/exercises")) return "exercises";
@@ -41,8 +41,8 @@ export default function TrainerDashboardLayout({ children }) {
       case "clients":
         router.push("/trainer/dashboard/clients");
         break;
-      case "sessions":
-        router.push("/trainer/dashboard/sessions");
+      case "upcomingTrainings":
+        router.push("/trainer/dashboard/upcoming-trainings");
         break;
       case "messages":
         router.push("/trainer/dashboard/messages");
@@ -80,7 +80,7 @@ export default function TrainerDashboardLayout({ children }) {
   const tabsConfig = [
     { id: "newClients", label: "New Clients" },
     { id: "clients", label: "Clients" },
-    { id: "sessions", label: "Sessions" },
+    { id: "upcomingTrainings", label: "Upcoming Trainings" },
     { id: "messages", label: "Messages", badgeCount: unreadMessagesCount },
     { id: "plans", label: "Plans" },
     { id: "exercises", label: "Exercises" },

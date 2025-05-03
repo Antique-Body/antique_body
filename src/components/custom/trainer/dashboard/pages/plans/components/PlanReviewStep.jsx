@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/common/Button";
 import { CheckIcon, StrengthIcon, TimerIcon } from "@/components/common/Icons";
-import mockExercises from "../exercises/data/mockExercises";
+import mockExercises from "@/components/custom/trainer/dashboard/pages/exercises/data/mockExercises";
 
 export const PlanReviewStep = ({ planData, onSubmit }) => {
   const findExerciseName = (id) => {

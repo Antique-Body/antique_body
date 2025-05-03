@@ -8,9 +8,9 @@ import {
   TrashIcon
 } from "@/components/common/Icons";
 import { Card } from "@/components/custom/Card";
+import mockExercises from "@/components/custom/trainer/dashboard/pages/exercises/data/mockExercises";
 import { FormField } from "@/components/shared";
 import { useState } from "react";
-import mockExercises from "../exercises/data/mockExercises";
 
 export const PlanDaysStep = ({ initialData = [], onSubmit, planType }) => {
   const [days, setDays] = useState(initialData.length > 0 ? initialData : [{ 

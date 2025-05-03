@@ -295,7 +295,7 @@ const TrainingSetup = () => {
               Answer a few questions to get started
             </div>
             <div
-              className="relative inline-block mt-2 mb-1 w-[60px] h-[60px] bg-gradient-to-br from-[#FF7800] to-[#FF9A00] rounded-full flex justify-center items-center"
+              className="relative mt-2 mb-1 w-[60px] h-[60px] bg-gradient-to-br from-[#FF7800] to-[#FF9A00] rounded-full flex justify-center items-center"
               style={{ boxShadow: "0 5px 15px rgba(255, 120, 0, 0.3)" }}>
               <TrainerIcon />
             </div>

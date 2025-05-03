@@ -1,7 +1,12 @@
 "use client";
 
+import { Modal } from "@/components/common";
 import { Button } from "@/components/common/Button";
+import { PlusIcon } from "@/components/common/Icons";
 import { Card } from "@/components/custom/Card";
+import { FormField } from "@/components/shared/FormField";
+import Image from "next/image";
+import { useState } from "react";
 
 export default function ProgressPage() {
   // Sample user data
@@ -20,6 +25,60 @@ export default function ProgressPage() {
       { date: "Feb 15, 2025", weight: 77, bodyFat: 20.5 },
       { date: "Feb 1, 2025", weight: 78, bodyFat: 21 },
     ],
+  };
+
+  // State for progress photos
+  const [progressPhotos, setProgressPhotos] = useState([
+    {
+      id: 1,
+      date: "2025-04-15",
+      imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&auto=format&fit=crop&q=60",
+      notes: "Front view - 2 months into program"
+    },
+    {
+      id: 2,
+      date: "2025-03-15",
+      imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&auto=format&fit=crop&q=60",
+      notes: "Front view - 1 month into program"
+    },
+    {
+      id: 3,
+      date: "2025-02-15",
+      imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&auto=format&fit=crop&q=60",
+      notes: "Front view - Initial photo"
+    }
+  ]);
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Handle photo upload
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setIsUploading(true);
+      // In a real app, you would upload to your backend/storage here
+      // For now, we'll simulate an upload with a timeout
+      setTimeout(() => {
+        const newPhoto = {
+          id: progressPhotos.length + 1,
+          date: new Date().toISOString().slice(0, 10),
+          imageUrl: URL.createObjectURL(file),
+          notes: ""
+        };
+        setProgressPhotos([newPhoto, ...progressPhotos]);
+        setIsUploading(false);
+      }, 1000);
+    }
+  };
+
+  // Handle photo view
+  const handleViewPhoto = (photo) => {
+    setSelectedPhoto(photo);
+  };
+
+  // Handle photo close
+  const handleClosePhoto = () => {
+    setSelectedPhoto(null);
   };
 
   return (
@@ -114,6 +173,93 @@ export default function ProgressPage() {
           Upload Progress Photo
         </Button>
       </Card>
+
+      {/* Progress Photos Section */}
+      <Card variant="dark" width="100%" maxWidth="none">
+        <h2 className="mb-4 text-xl font-bold">Progress Photos</h2>
+
+        <div className="mb-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-400">
+              Track your visual progress with photos. Upload new photos to document your journey.
+            </p>
+            <label className="relative cursor-pointer">
+              <FormField
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="hidden-file-input"
+              />
+              <Button
+                variant="orangeFilled"
+                leftIcon={<PlusIcon size={16} />}
+                disabled={isUploading}
+              >
+                {isUploading ? "Uploading..." : "Upload Photo"}
+              </Button>
+            </label>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {progressPhotos.map((photo) => (
+            <div
+              key={photo.id}
+              className="group relative cursor-pointer overflow-hidden rounded-lg border border-[#333] bg-[rgba(30,30,30,0.6)]"
+              onClick={() => handleViewPhoto(photo)}
+            >
+              <div className="relative aspect-square w-full">
+                <Image
+                  src={photo.imageUrl}
+                  alt={`Progress photo from ${photo.date}`}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                <div className="absolute bottom-0 left-0 right-0 p-3">
+                  <p className="text-sm font-medium text-white">{photo.date}</p>
+                  {photo.notes && (
+                    <p className="mt-1 text-xs text-gray-300">{photo.notes}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4 text-center text-sm text-gray-400">
+          <p>Tip: Take photos in consistent lighting and poses for better progress tracking</p>
+        </div>
+      </Card>
+
+      {/* Progress Photos Modal */}
+      <Modal
+        isOpen={selectedPhoto !== null}
+        onClose={handleClosePhoto}
+        title={`Progress Photo - ${selectedPhoto?.date}`}
+        size="large"
+        footerButtons={false}
+      >
+        {selectedPhoto && (
+          <div>
+            <div className="mb-4 relative aspect-[4/3] w-full">
+              <Image 
+                src={selectedPhoto.imageUrl} 
+                alt={`Progress photo from ${selectedPhoto.date}`}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 60vw"
+                className="rounded-lg object-cover"
+              />
+            </div>
+            <div className="text-sm text-gray-400">
+              <p>Date: {selectedPhoto.date}</p>
+              {selectedPhoto.notes && <p className="mt-2">Notes: {selectedPhoto.notes}</p>}
+            </div>
+          </div>
+        )}
+      </Modal>
 
       {/* Performance Metrics */}
       <Card variant="dark" width="100%" maxWidth="none">
