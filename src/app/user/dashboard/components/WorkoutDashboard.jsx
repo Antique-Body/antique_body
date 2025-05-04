@@ -1,13 +1,12 @@
 "use client";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import MuscleGroupSelector from "./MuscleGroupSelector";
 import RecommendedProgram from "./RecommendedProgram";
 import WorkoutPlans from "./WorkoutPlans";
-import MuscleGroupSelector from "./MuscleGroupSelector";
 
 export default function WorkoutDashboard() {
-  const { t } = useTranslation();
   const [showMuscleGroups, setShowMuscleGroups] = useState(false);
+  const [selectedWorkout, setSelectedWorkout] = useState(null);
   
   // Recommended custom training program for client
   const recommendedTraining = {
@@ -214,30 +213,190 @@ export default function WorkoutDashboard() {
     }
   ];
 
-  // Featured workouts
+  // Featured workouts with detailed workout plans
   const featuredWorkouts = [
     {
       title: "30-Day Strength Builder",
       level: "Intermediate",
       duration: "45 min",
       color: "#e74c3c",
-      users: 856
+      users: 856,
+      description: "A comprehensive strength program designed to increase your power and muscle mass over 30 days",
+      schedule: "3-4 days per week",
+      equipment: "Full gym access required",
+      workouts: [
+        {
+          name: "Day 1 - Upper Body Power",
+          exercises: [
+            { name: "Bench Press", sets: 5, reps: "5", rest: "2-3 min", weight: "80% 1RM" },
+            { name: "Weighted Pull-ups", sets: 4, reps: "6-8", rest: "2 min" },
+            { name: "Military Press", sets: 4, reps: "6-8", rest: "2 min" },
+            { name: "Barbell Rows", sets: 4, reps: "6-8", rest: "2 min" },
+            { name: "Incline Dumbbell Press", sets: 3, reps: "8-10", rest: "90 sec" }
+          ]
+        },
+        {
+          name: "Day 2 - Lower Body Power",
+          exercises: [
+            { name: "Back Squats", sets: 5, reps: "5", rest: "3 min", weight: "80% 1RM" },
+            { name: "Romanian Deadlifts", sets: 4, reps: "6-8", rest: "2-3 min" },
+            { name: "Bulgarian Split Squats", sets: 3, reps: "8-10", rest: "90 sec" },
+            { name: "Leg Press", sets: 3, reps: "8-10", rest: "2 min" },
+            { name: "Standing Calf Raises", sets: 4, reps: "12-15", rest: "60 sec" }
+          ]
+        }
+      ]
     },
     {
       title: "HIIT Core Challenge",
       level: "Advanced",
       duration: "30 min",
       color: "#f1c40f",
-      users: 1243
+      users: 1243,
+      description: "High-intensity interval training focused on core strength and cardiovascular endurance",
+      schedule: "4-5 days per week",
+      equipment: "Minimal equipment needed",
+      workouts: [
+        {
+          name: "Circuit A",
+          exercises: [
+            { name: "Mountain Climbers", duration: "45 sec", rest: "15 sec" },
+            { name: "Russian Twists", duration: "45 sec", rest: "15 sec" },
+            { name: "Plank Hold", duration: "60 sec", rest: "15 sec" },
+            { name: "Bicycle Crunches", duration: "45 sec", rest: "15 sec" },
+            { name: "V-Ups", duration: "45 sec", rest: "15 sec" }
+          ],
+          rounds: 3,
+          restBetweenRounds: "60 sec"
+        },
+        {
+          name: "Circuit B",
+          exercises: [
+            { name: "Burpees", duration: "45 sec", rest: "15 sec" },
+            { name: "Dead Bugs", duration: "45 sec", rest: "15 sec" },
+            { name: "Side Plank (each side)", duration: "30 sec", rest: "15 sec" },
+            { name: "Flutter Kicks", duration: "45 sec", rest: "15 sec" },
+            { name: "Plank to Downward Dog", duration: "45 sec", rest: "15 sec" }
+          ],
+          rounds: 3,
+          restBetweenRounds: "60 sec"
+        }
+      ]
     },
     {
       title: "Full Body Toning",
       level: "Beginner",
       duration: "60 min",
       color: "#2ecc71",
-      users: 972
+      users: 972,
+      description: "A balanced full-body workout program perfect for beginners looking to improve overall fitness",
+      schedule: "3 days per week",
+      equipment: "Dumbbells and resistance bands",
+      workouts: [
+        {
+          name: "Full Body Workout A",
+          exercises: [
+            { name: "Dumbbell Squats", sets: 3, reps: "12-15", rest: "60 sec" },
+            { name: "Push-ups (or Modified)", sets: 3, reps: "10-12", rest: "60 sec" },
+            { name: "Dumbbell Rows", sets: 3, reps: "12-15", rest: "60 sec" },
+            { name: "Walking Lunges", sets: 3, reps: "10 each leg", rest: "60 sec" },
+            { name: "Lateral Raises", sets: 3, reps: "12-15", rest: "60 sec" }
+          ]
+        },
+        {
+          name: "Full Body Workout B",
+          exercises: [
+            { name: "Glute Bridges", sets: 3, reps: "15-20", rest: "60 sec" },
+            { name: "Band Pull-Aparts", sets: 3, reps: "15-20", rest: "60 sec" },
+            { name: "Dumbbell Step-Ups", sets: 3, reps: "12 each leg", rest: "60 sec" },
+            { name: "Dumbbell Shoulder Press", sets: 3, reps: "12-15", rest: "60 sec" },
+            { name: "Plank Hold", sets: 3, duration: "30 sec", rest: "60 sec" }
+          ]
+        }
+      ]
     }
   ];
+
+  const handleWorkoutSelect = (workout) => {
+    setSelectedWorkout(workout);
+  };
+
+  const renderWorkoutDetails = () => {
+    if (!selectedWorkout) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
+        <div className="bg-[#111] rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="sticky top-0 bg-[#111] p-6 border-b border-[#333] flex justify-between items-center">
+            <div>
+              <h2 className="text-2xl font-bold">{selectedWorkout.title}</h2>
+              <p className="text-gray-400">{selectedWorkout.description}</p>
+            </div>
+            <button 
+              onClick={() => setSelectedWorkout(null)}
+              className="w-8 h-8 rounded-full bg-[#222] flex items-center justify-center hover:bg-[#333] transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+          
+          <div className="p-6">
+            <div className="grid grid-cols-3 gap-4 mb-8">
+              <div className="bg-[#222] rounded-xl p-4">
+                <p className="text-sm text-gray-400">Level</p>
+                <p className="font-medium">{selectedWorkout.level}</p>
+              </div>
+              <div className="bg-[#222] rounded-xl p-4">
+                <p className="text-sm text-gray-400">Duration</p>
+                <p className="font-medium">{selectedWorkout.duration}</p>
+              </div>
+              <div className="bg-[#222] rounded-xl p-4">
+                <p className="text-sm text-gray-400">Schedule</p>
+                <p className="font-medium">{selectedWorkout.schedule}</p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              {selectedWorkout.workouts.map((workout, index) => (
+                <div key={index} className="bg-[#222] rounded-xl p-6">
+                  <h3 className="text-lg font-medium mb-4">{workout.name}</h3>
+                  <div className="space-y-4">
+                    {workout.exercises.map((exercise, exIndex) => (
+                      <div key={exIndex} className="flex items-center justify-between p-3 bg-[#333] rounded-lg">
+                        <div>
+                          <p className="font-medium">{exercise.name}</p>
+                          <p className="text-sm text-gray-400">
+                            {exercise.sets && `${exercise.sets} sets`} {exercise.reps && `× ${exercise.reps}`}
+                            {exercise.duration && `${exercise.duration}`}
+                            {exercise.weight && ` @ ${exercise.weight}`}
+                          </p>
+                        </div>
+                        <p className="text-sm text-gray-400">Rest: {exercise.rest}</p>
+                      </div>
+                    ))}
+                  </div>
+                  {workout.rounds && (
+                    <div className="mt-4 text-sm text-gray-400">
+                      Complete {workout.rounds} rounds • Rest {workout.restBetweenRounds} between rounds
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 flex gap-4">
+              <button className="flex-1 py-3 bg-[#FF6B00] hover:bg-[#FF8533] rounded-xl font-medium transition-colors">
+                Start Workout
+              </button>
+              <button className="flex-1 py-3 bg-[#222] hover:bg-[#333] rounded-xl font-medium transition-colors">
+                Save for Later
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="w-full">
@@ -322,7 +481,7 @@ export default function WorkoutDashboard() {
           {/* Or choose your own separator */}
           <div className="flex items-center my-12">
             <div className="flex-grow h-px bg-[#333]"></div>
-            <div className="px-4 text-sm text-gray-400">{t("or_create_your_own")}</div>
+            <div className="px-4 text-sm text-gray-400">or create your own</div>
             <div className="flex-grow h-px bg-[#333]"></div>
           </div>
           
@@ -335,9 +494,9 @@ export default function WorkoutDashboard() {
           {/* Featured Workouts */}
           <div className="mt-16 mb-8">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold">{t("featured_workouts")}</h3>
+              <h3 className="text-2xl font-bold">Featured Workouts</h3>
               <button className="text-[#3498db] hover:underline text-sm font-medium">
-                {t("view_all")}
+                View All
               </button>
             </div>
             
@@ -345,6 +504,7 @@ export default function WorkoutDashboard() {
               {featuredWorkouts.map((workout, index) => (
                 <div 
                   key={index}
+                  onClick={() => handleWorkoutSelect(workout)}
                   className="rounded-xl overflow-hidden bg-gradient-to-b from-[#161616] to-[#0a0a0a] border border-[#333] hover:border-gray-500 transition-all duration-300 p-4 cursor-pointer"
                 >
                   <div 
@@ -375,13 +535,16 @@ export default function WorkoutDashboard() {
                   </div>
                   
                   <h4 className="font-medium text-lg mb-1">{workout.title}</h4>
-                  <p className="text-gray-400 text-sm">{workout.duration} • {workout.users} {t("active_users")}</p>
+                  <p className="text-gray-400 text-sm">{workout.duration} • {workout.users} active users</p>
                 </div>
               ))}
             </div>
           </div>
         </>
       )}
+
+      {/* Workout Details Modal */}
+      {renderWorkoutDetails()}
 
       {/* Global CSS for animations */}
       <style jsx global>{`

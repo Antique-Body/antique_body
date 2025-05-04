@@ -1,14 +1,15 @@
 "use client";
-import { useState } from "react";
 import Background from "@/components/background";
-import { BrandLogo, Card } from "@components/custom";
+import { BrandLogo } from "@components/custom";
 import { useSession } from "next-auth/react";
-import { useTranslation } from "react-i18next";
+import { useState } from "react";
+import NutritionDashboard from "./components/NutritionDashboard";
+import ProgressDashboard from "./components/ProgressDashboard";
+import SettingsDashboard from "./components/SettingsDashboard";
 import WorkoutDashboard from "./components/WorkoutDashboard";
 
 export default function UserDashboard() {
   const { data: session } = useSession();
-  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("workout");
 
   return (
@@ -39,8 +40,8 @@ export default function UserDashboard() {
         </header>
 
         <div className="mt-8 mb-6">
-          <h1 className="text-4xl font-bold">{t("welcome_back")}{session?.user?.name ? `, ${session.user.name}` : ""}</h1>
-          <p className="text-gray-400 mt-2">{t("dashboard_description")}</p>
+          <h1 className="text-4xl font-bold">Welcome back{session?.user?.name ? `, ${session.user.name}` : ""}</h1>
+          <p className="text-gray-400 mt-2">Track your fitness journey and achieve your goals</p>
         </div>
 
         <div className="mb-8">
@@ -49,34 +50,34 @@ export default function UserDashboard() {
               className={`px-6 py-3 whitespace-nowrap font-medium text-sm transition-colors ${activeTab === "workout" ? "text-[#FF6B00] border-b-2 border-[#FF6B00]" : "text-gray-400 hover:text-white"}`}
               onClick={() => setActiveTab("workout")}
             >
-              {t("workout")}
+              Workout
             </button>
             <button 
               className={`px-6 py-3 whitespace-nowrap font-medium text-sm transition-colors ${activeTab === "nutrition" ? "text-[#FF6B00] border-b-2 border-[#FF6B00]" : "text-gray-400 hover:text-white"}`}
               onClick={() => setActiveTab("nutrition")}
             >
-              {t("nutrition")}
+              Nutrition
             </button>
             <button 
               className={`px-6 py-3 whitespace-nowrap font-medium text-sm transition-colors ${activeTab === "progress" ? "text-[#FF6B00] border-b-2 border-[#FF6B00]" : "text-gray-400 hover:text-white"}`}
               onClick={() => setActiveTab("progress")}
             >
-              {t("progress")}
+              Progress
             </button>
             <button 
               className={`px-6 py-3 whitespace-nowrap font-medium text-sm transition-colors ${activeTab === "settings" ? "text-[#FF6B00] border-b-2 border-[#FF6B00]" : "text-gray-400 hover:text-white"}`}
               onClick={() => setActiveTab("settings")}
             >
-              {t("settings")}
+              Settings
             </button>
           </div>
         </div>
 
         <div className="flex-1">
           {activeTab === "workout" && <WorkoutDashboard />}
-          {activeTab === "nutrition" && <div className="flex items-center justify-center h-full"><p className="text-gray-400">{t("nutrition_coming_soon")}</p></div>}
-          {activeTab === "progress" && <div className="flex items-center justify-center h-full"><p className="text-gray-400">{t("progress_coming_soon")}</p></div>}
-          {activeTab === "settings" && <div className="flex items-center justify-center h-full"><p className="text-gray-400">{t("settings_coming_soon")}</p></div>}
+          {activeTab === "nutrition" && <NutritionDashboard />}
+          {activeTab === "progress" && <ProgressDashboard />}
+          {activeTab === "settings" && <SettingsDashboard />}
         </div>
       </div>
     </div>

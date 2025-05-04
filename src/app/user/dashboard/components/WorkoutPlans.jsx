@@ -1,10 +1,8 @@
 "use client";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 import TrainingPlanModal from "./TrainingPlanModal";
 
 const WorkoutPlans = ({ trainingTypes, onShowMuscleGroups }) => {
-  const { t } = useTranslation();
   const [selectedTraining, setSelectedTraining] = useState(null);
   const [showTrainingModal, setShowTrainingModal] = useState(false);
 
@@ -61,9 +59,9 @@ const WorkoutPlans = ({ trainingTypes, onShowMuscleGroups }) => {
               <path d="M16 4v4"></path>
             </svg>
           </div>
-          <h3 className="text-2xl font-bold mb-4">{t("training_types")}</h3>
+          <h3 className="text-2xl font-bold mb-4">Training Types</h3>
           <p className="text-gray-400 mb-6">
-            {t("training_types_description")}
+            Choose from various training programs designed to meet your specific fitness goals
           </p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
             {trainingTypes.map((training) => (
@@ -99,7 +97,7 @@ const WorkoutPlans = ({ trainingTypes, onShowMuscleGroups }) => {
             ))}
           </div>
           <button className="w-full px-6 py-3 bg-[#1A1A1A] border border-[#333] rounded-xl font-medium transition-all duration-300 hover:bg-[#222] hover:border-[#FF6B00]">
-            {t("browse_all_training_types")}
+            Browse All Training Types
           </button>
         </div>
       </div>
@@ -132,9 +130,9 @@ const WorkoutPlans = ({ trainingTypes, onShowMuscleGroups }) => {
               <path d="M13.5 18.5v-1a2 2 0 012-2h4a2 2 0 012 2v1a2 2 0 01-2 2h-4a2 2 0 01-2-2z"></path>
             </svg>
           </div>
-          <h3 className="text-2xl font-bold mb-4">{t("muscle_groups")}</h3>
+          <h3 className="text-2xl font-bold mb-4">Muscle Groups</h3>
           <p className="text-gray-400 mb-6">
-            {t("muscle_groups_description")}
+            Target specific muscle groups with specialized exercises and workouts
           </p>
           
           {/* Body Preview Illustration */}
@@ -150,29 +148,29 @@ const WorkoutPlans = ({ trainingTypes, onShowMuscleGroups }) => {
                 <path d="M90 140C90 140 85 185 85 195C85 205 90 225 100 225C110 225 115 205 115 195C115 185 110 140 110 140" stroke="white" strokeWidth="1.5" opacity="0.4"/>
               </svg>
               
-              {/* Muscle Group Highlights - These are positioned absolutely over the body outline */}
+              {/* Muscle Group Highlights */}
               <div className="absolute top-[15%] left-[50%] transform -translate-x-1/2 w-14 h-14 rounded-full bg-[#3498db] bg-opacity-20 cursor-pointer hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center text-xs font-medium">
-                {t("shoulders")}
+                Shoulders
               </div>
               
               <div className="absolute top-[35%] left-[50%] transform -translate-x-1/2 w-16 h-16 rounded-full bg-[#e74c3c] bg-opacity-20 cursor-pointer hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center text-xs font-medium">
-                {t("chest")}
+                Chest
               </div>
               
               <div className="absolute top-[42%] left-[30%] w-12 h-12 rounded-full bg-[#2ecc71] bg-opacity-20 cursor-pointer hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center text-xs font-medium">
-                {t("biceps")}
+                Biceps
               </div>
               
               <div className="absolute top-[42%] right-[30%] w-12 h-12 rounded-full bg-[#2ecc71] bg-opacity-20 cursor-pointer hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center text-xs font-medium">
-                {t("triceps")}
+                Triceps
               </div>
               
               <div className="absolute top-[55%] left-[50%] transform -translate-x-1/2 w-14 h-14 rounded-full bg-[#f1c40f] bg-opacity-20 cursor-pointer hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center text-xs font-medium">
-                {t("abs")}
+                Abs
               </div>
               
               <div className="absolute bottom-[25%] left-[50%] transform -translate-x-1/2 w-16 h-16 rounded-full bg-[#9b59b6] bg-opacity-20 cursor-pointer hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center text-xs font-medium">
-                {t("legs")}
+                Legs
               </div>
             </div>
           </div>
@@ -181,7 +179,7 @@ const WorkoutPlans = ({ trainingTypes, onShowMuscleGroups }) => {
             className="w-full px-6 py-3 bg-[#1A1A1A] border border-[#333] rounded-xl font-medium transition-all duration-300 hover:bg-[#222] hover:border-[#3498db]"
             onClick={onShowMuscleGroups}
           >
-            {t("explore_muscle_groups")}
+            Explore Muscle Groups
           </button>
         </div>
       </div>

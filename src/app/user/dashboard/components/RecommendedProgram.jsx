@@ -57,7 +57,7 @@ const RecommendedProgram = ({ program }) => {
               {getIconPath(program.icon)}
             </svg>
           </div>
-          <h3 className="text-2xl font-bold">{t("your_recommended_program")}</h3>
+          <h3 className="text-2xl font-bold">Your Recommended Program</h3>
         </div>
         <div className="flex gap-2">
           <button 
@@ -69,7 +69,7 @@ const RecommendedProgram = ({ program }) => {
             }}
             onClick={() => setShowTrainingModal(true)}
           >
-            {t("view_details")}
+            View Details
           </button>
         </div>
       </div>
@@ -111,7 +111,7 @@ const RecommendedProgram = ({ program }) => {
                 </svg>
               </div>
               <div>
-                <span className="text-xs text-gray-400 uppercase tracking-wider mb-1">{t("personalized_for_you")}</span>
+                <span className="text-xs text-gray-400 uppercase tracking-wider mb-1">Personalized for You</span>
                 <h2 className="text-2xl font-bold">{program.name}</h2>
                 <p className="text-gray-300">{program.summary}</p>
               </div>
@@ -119,19 +119,19 @@ const RecommendedProgram = ({ program }) => {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 w-full md:w-auto">
               <div className="p-2 rounded-lg bg-[#1A1A1A] text-center">
-                <p className="text-xs text-gray-400">{t("location").toUpperCase()}</p>
+                <p className="text-xs text-gray-400">LOCATION</p>
                 <p className="text-sm font-medium">{program.preferences.location}</p>
               </div>
               <div className="p-2 rounded-lg bg-[#1A1A1A] text-center">
-                <p className="text-xs text-gray-400">{t("equipment").toUpperCase()}</p>
+                <p className="text-xs text-gray-400">EQUIPMENT</p>
                 <p className="text-sm font-medium">{program.preferences.equipment}</p>
               </div>
               <div className="p-2 rounded-lg bg-[#1A1A1A] text-center">
-                <p className="text-xs text-gray-400">{t("duration").toUpperCase()}</p>
+                <p className="text-xs text-gray-400">DURATION</p>
                 <p className="text-sm font-medium">{program.preferences.duration}</p>
               </div>
               <div className="p-2 rounded-lg bg-[#1A1A1A] text-center">
-                <p className="text-xs text-gray-400">{t("frequency").toUpperCase()}</p>
+                <p className="text-xs text-gray-400">FREQUENCY</p>
                 <p className="text-sm font-medium">{program.preferences.frequency}</p>
               </div>
             </div>
@@ -142,7 +142,7 @@ const RecommendedProgram = ({ program }) => {
           {/* Training Days Preview */}
           {showDetails && (
             <div className="mb-6 animate-fadeIn">
-              <h4 className="font-semibold mb-4 text-lg">{t("training_schedule")}</h4>
+              <h4 className="font-semibold mb-4 text-lg">Training Schedule</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {program.days.map((day, idx) => (
                   <div 
@@ -158,7 +158,7 @@ const RecommendedProgram = ({ program }) => {
                         </div>
                       ))}
                       {day.exercises.length > 3 && (
-                        <p className="text-sm text-gray-400">+ {day.exercises.length - 3} {t("more_exercises")}</p>
+                        <p className="text-sm text-gray-400">+ {day.exercises.length - 3} more exercises</p>
                       )}
                     </div>
                   </div>
@@ -167,7 +167,7 @@ const RecommendedProgram = ({ program }) => {
               
               {/* Training Notes */}
               <div className="mt-6 p-4 rounded-xl bg-[#1A1A1A] border border-[#333]">
-                <h4 className="font-semibold mb-3">{t("training_notes")}</h4>
+                <h4 className="font-semibold mb-3">Training Notes</h4>
                 <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
                   {program.notes.slice(0, 4).map((note, idx) => (
                     <li key={idx}>{note}</li>
@@ -186,7 +186,7 @@ const RecommendedProgram = ({ program }) => {
                 toggleDetails();
               }}
             >
-              {showDetails ? t("hide_details") : t("show_details")}
+              {showDetails ? "Hide Details" : "Show Details"}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -215,7 +215,7 @@ const RecommendedProgram = ({ program }) => {
                 setShowTrainingModal(true);
               }}
             >
-              {t("start_recommended_program")}
+              Start Recommended Program
             </button>
           </div>
         </div>
@@ -288,48 +288,48 @@ const RecommendedProgram = ({ program }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                   <div className="mb-6">
-                    <h3 className="text-lg font-medium mb-4">{t("program_details")}</h3>
+                    <h3 className="text-lg font-medium mb-4">Program Details</h3>
                     <p className="text-gray-400 mb-4">
                       {program.description}
                     </p>
                     
                     <div className="grid grid-cols-2 gap-3 mb-6">
                       <div className="p-3 rounded-lg bg-[#1A1A1A]">
-                        <p className="text-xs text-gray-400">{t("location").toUpperCase()}</p>
+                        <p className="text-xs text-gray-400">LOCATION</p>
                         <p className="font-medium">{program.preferences.location}</p>
                       </div>
                       <div className="p-3 rounded-lg bg-[#1A1A1A]">
-                        <p className="text-xs text-gray-400">{t("equipment").toUpperCase()}</p>
+                        <p className="text-xs text-gray-400">EQUIPMENT</p>
                         <p className="font-medium">{program.preferences.equipment}</p>
                       </div>
                       <div className="p-3 rounded-lg bg-[#1A1A1A]">
-                        <p className="text-xs text-gray-400">{t("duration").toUpperCase()}</p>
+                        <p className="text-xs text-gray-400">DURATION</p>
                         <p className="font-medium">{program.preferences.duration}</p>
                       </div>
                       <div className="p-3 rounded-lg bg-[#1A1A1A]">
-                        <p className="text-xs text-gray-400">{t("frequency").toUpperCase()}</p>
+                        <p className="text-xs text-gray-400">FREQUENCY</p>
                         <p className="font-medium">{program.preferences.frequency}</p>
                       </div>
                     </div>
                   </div>
                   
                   <div>
-                    <h3 className="text-lg font-medium mb-4">{t("fitness_benefits")}</h3>
+                    <h3 className="text-lg font-medium mb-4">Fitness Benefits</h3>
                     <div className="space-y-3">
                       {[
                         { 
-                          title: t("performance_enhancement"), 
-                          description: t("performance_enhancement_desc"),
+                          title: "Performance Enhancement", 
+                          description: "Improve strength, power, and overall athletic performance",
                           icon: "trending-up"
                         },
                         { 
-                          title: t("hormonal_optimization"), 
-                          description: t("hormonal_optimization_desc"),
+                          title: "Hormonal Optimization", 
+                          description: "Optimize hormone levels for better muscle growth and recovery",
                           icon: "activity"
                         },
                         { 
-                          title: t("recovery_focus"), 
-                          description: t("recovery_focus_desc"),
+                          title: "Recovery Focus", 
+                          description: "Strategic rest periods and recovery techniques for optimal results",
                           icon: "refresh-cw"
                         }
                       ].map((benefit, idx) => (
@@ -374,7 +374,7 @@ const RecommendedProgram = ({ program }) => {
                 </div>
                 
                 <div>
-                  <h3 className="text-lg font-medium mb-4">{t("workout_schedule")}</h3>
+                  <h3 className="text-lg font-medium mb-4">Workout Schedule</h3>
                   <div className="space-y-4 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
                     {program.days.map((day, idx) => (
                       <div 
@@ -401,7 +401,7 @@ const RecommendedProgram = ({ program }) => {
                   className="px-4 py-2 bg-transparent border border-[#333] hover:border-white rounded-xl transition-all duration-300"
                   onClick={() => setShowTrainingModal(false)}
                 >
-                  {t("go_back")}
+                  Go Back
                 </button>
                 
                 <button
@@ -411,11 +411,11 @@ const RecommendedProgram = ({ program }) => {
                     boxShadow: `0 8px 16px -8px ${program.color}80`,
                   }}
                   onClick={() => {
-                    alert(`${t("starting")} ${program.name} ${t("training_program")}! 💪`);
                     setShowTrainingModal(false);
+                    window.location.href = `/user/workout/${program.id}`;
                   }}
                 >
-                  {t("start_this_program")}
+                  Start This Program
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="20"

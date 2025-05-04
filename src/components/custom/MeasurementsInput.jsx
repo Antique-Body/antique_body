@@ -371,7 +371,7 @@ export const MeasurementsInput = ({ onSelect }) => {
   };
 
   return (
-    <div className="w-full space-y-6">
+    <div className="w-full space-y-6 flex flex-col items-center">
       <div className="flex justify-center gap-4 mb-6">
         <Button
           onClick={() => handleUnitChange(UNIT_SYSTEMS.METRIC)}

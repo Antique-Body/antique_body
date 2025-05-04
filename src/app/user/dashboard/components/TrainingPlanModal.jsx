@@ -1,8 +1,11 @@
 "use client";
-import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
 
 const TrainingPlanModal = ({ training, onClose }) => {
-  const { t } = useTranslation();
+  const [isStarting, setIsStarting] = useState(false);
+  const [selectedExercises, setSelectedExercises] = useState([]);
+  const [timer, setTimer] = useState(null);
+  const [timerActive, setTimerActive] = useState(false);
 
   const getIconPath = (iconName) => {
     switch (iconName) {
@@ -24,9 +27,42 @@ const TrainingPlanModal = ({ training, onClose }) => {
   };
 
   const handleStartTraining = () => {
-    alert(`${t("starting")} ${training.name} ${t("training_program")}! 💪`);
-    onClose();
+    setIsStarting(true);
+    // Simulate loading state
+    setTimeout(() => {
+      setIsStarting(false);
+      onClose();
+      // Navigate to the workout page
+      window.location.href = `/user/workout/${training.id}`;
+    }, 1500);
   };
+
+  const toggleExercise = (exercise) => {
+    setSelectedExercises(prev => {
+      const isSelected = prev.find(e => e.name === exercise.name);
+      if (isSelected) {
+        return prev.filter(e => e.name !== exercise.name);
+      }
+      return [...prev, exercise];
+    });
+  };
+
+  const startTimer = () => {
+    setTimerActive(true);
+    setTimer(60); // Start with 60 seconds
+  };
+
+  useEffect(() => {
+    let interval;
+    if (timerActive && timer > 0) {
+      interval = setInterval(() => {
+        setTimer(prev => prev - 1);
+      }, 1000);
+    } else if (timer === 0) {
+      setTimerActive(false);
+    }
+    return () => clearInterval(interval);
+  }, [timerActive, timer]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
@@ -76,8 +112,8 @@ const TrainingPlanModal = ({ training, onClose }) => {
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
+                width="24"
+                height="24"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -91,147 +127,122 @@ const TrainingPlanModal = ({ training, onClose }) => {
             </button>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <div className="mb-6">
-                <h3 className="text-lg font-medium mb-4">{t("program_details")}</h3>
-                <p className="text-gray-400 mb-4">
-                  {training.description}
-                </p>
-                
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                  <div className="p-3 rounded-lg bg-[#1A1A1A]">
-                    <p className="text-xs text-gray-400">{t("location").toUpperCase()}</p>
-                    <p className="font-medium">{training.preferences.location}</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-[#1A1A1A]">
-                    <p className="text-xs text-gray-400">{t("equipment").toUpperCase()}</p>
-                    <p className="font-medium">{training.preferences.equipment}</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-[#1A1A1A]">
-                    <p className="text-xs text-gray-400">{t("duration").toUpperCase()}</p>
-                    <p className="font-medium">{training.preferences.duration}</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-[#1A1A1A]">
-                    <p className="text-xs text-gray-400">{t("frequency").toUpperCase()}</p>
-                    <p className="font-medium">{training.preferences.frequency}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-medium mb-4">{t("fitness_benefits")}</h3>
-                <div className="space-y-3">
-                  {[
-                    { 
-                      title: t("performance_enhancement"), 
-                      description: t("performance_enhancement_desc"),
-                      icon: "trending-up"
-                    },
-                    { 
-                      title: t("hormonal_optimization"), 
-                      description: t("hormonal_optimization_desc"),
-                      icon: "activity"
-                    },
-                    { 
-                      title: t("recovery_focus"), 
-                      description: t("recovery_focus_desc"),
-                      icon: "refresh-cw"
-                    }
-                  ].map((benefit, idx) => (
-                    <div key={idx} className="flex items-start gap-3">
-                      <div
-                        className="mt-1 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                        style={{
-                          background: `${training.color}20`,
-                        }}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke={training.color}
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          {benefit.icon === "trending-up" && <path d="M23 6l-9.5 9.5-5-5L1 18"></path>}
-                          {benefit.icon === "activity" && <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>}
-                          {benefit.icon === "refresh-cw" && (
-                            <>
-                              <path d="M23 4v6h-6"></path>
-                              <path d="M1 20v-6h6"></path>
-                              <path d="M3.51 9a9 9 0 0114.85-3.36L23 10"></path>
-                              <path d="M1 14l4.64 4.36A9 9 0 0020.49 15"></path>
-                            </>
-                          )}
-                        </svg>
-                      </div>
-                      <div>
-                        <h4 className="font-medium">{benefit.title}</h4>
-                        <p className="text-sm text-gray-400">{benefit.description}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          {/* Training Details */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="p-4 rounded-xl bg-[#1A1A1A] border border-[#333]">
+              <div className="text-sm text-gray-400 mb-1">Location</div>
+              <div className="font-medium">{training.preferences.location}</div>
             </div>
-            
-            <div>
-              <h3 className="text-lg font-medium mb-4">{t("featured_exercises")}</h3>
-              <div className="space-y-4">
-                {training.exercises.map((exercise, idx) => (
-                  <div 
-                    key={idx} 
-                    className="p-4 rounded-xl border border-[#333] bg-[#1A1A1A] hover:bg-[#222] transition-colors duration-300"
-                  >
-                    <div className="flex justify-between mb-2">
-                      <h4 className="font-medium">{exercise.name}</h4>
-                      <span className="text-gray-400 text-sm">{exercise.sets} sets</span>
-                    </div>
-                    <div className="flex justify-between text-sm text-gray-400">
-                      <span>{exercise.reps} reps</span>
-                      <span>{exercise.restTime} rest</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <div className="p-4 rounded-xl bg-[#1A1A1A] border border-[#333]">
+              <div className="text-sm text-gray-400 mb-1">Equipment</div>
+              <div className="font-medium">{training.preferences.equipment}</div>
+            </div>
+            <div className="p-4 rounded-xl bg-[#1A1A1A] border border-[#333]">
+              <div className="text-sm text-gray-400 mb-1">Duration</div>
+              <div className="font-medium">{training.preferences.duration}</div>
+            </div>
+            <div className="p-4 rounded-xl bg-[#1A1A1A] border border-[#333]">
+              <div className="text-sm text-gray-400 mb-1">Frequency</div>
+              <div className="font-medium">{training.preferences.frequency}</div>
             </div>
           </div>
           
+          {/* Exercises */}
+          <div className="mb-8">
+            <h3 className="text-xl font-bold mb-4">Exercises</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {training.exercises.map((exercise, index) => (
+                <div 
+                  key={index}
+                  className={`p-4 rounded-xl border transition-all duration-300 cursor-pointer ${
+                    selectedExercises.find(e => e.name === exercise.name)
+                      ? 'bg-[#222] border-[#FF6B00]'
+                      : 'bg-[#1A1A1A] border-[#333] hover:border-[#444]'
+                  }`}
+                  onClick={() => toggleExercise(exercise)}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-medium">{exercise.name}</h4>
+                    <div className="flex gap-2">
+                      <span className="text-xs px-2 py-1 rounded-full bg-[#333]">
+                        {exercise.sets} sets
+                      </span>
+                      <span className="text-xs px-2 py-1 rounded-full bg-[#333]">
+                        {exercise.reps}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-400">{exercise.restTime} rest</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Timer Section */}
+          <div className="mb-8 p-4 rounded-xl bg-[#1A1A1A] border border-[#333]">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold">Rest Timer</h3>
+              <button
+                className={`px-4 py-2 rounded-lg transition-all duration-300 ${
+                  timerActive
+                    ? 'bg-red-500 hover:bg-red-600'
+                    : 'bg-[#333] hover:bg-[#444]'
+                }`}
+                onClick={startTimer}
+                disabled={timerActive}
+              >
+                {timerActive ? 'Stop' : 'Start'}
+              </button>
+            </div>
+            <div className="text-4xl font-bold text-center">
+              {timer !== null ? `${timer}s` : '--'}
+            </div>
+          </div>
+          
+          {/* Action Buttons */}
           <div className="mt-8 flex justify-between">
             <button
               className="px-4 py-2 bg-transparent border border-[#333] hover:border-white rounded-xl transition-all duration-300"
               onClick={onClose}
             >
-              {t("go_back")}
+              Go Back
             </button>
             
             <button
-              className="px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center gap-2"
+              className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center gap-2 ${
+                isStarting ? 'opacity-75 cursor-not-allowed' : ''
+              }`}
               style={{
                 background: `linear-gradient(135deg, ${training.color}, ${training.color}BB)`,
                 boxShadow: `0 8px 16px -8px ${training.color}80`,
               }}
               onClick={handleStartTraining}
+              disabled={isStarting}
             >
-              {t("start_this_program")}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M5 12h14"></path>
-                <path d="M12 5l7 7-7 7"></path>
-              </svg>
+              {isStarting ? (
+                <>
+                  <div className="w-5 h-5 border-t-2 border-white rounded-full animate-spin"></div>
+                  Starting...
+                </>
+              ) : (
+                <>
+                  Start This Program
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M5 12h14"></path>
+                    <path d="M12 5l7 7-7 7"></path>
+                  </svg>
+                </>
+              )}
             </button>
           </div>
         </div>
