@@ -1144,3 +1144,52 @@ export const UploadIcon = ({ size = 16, className = "", ...props }) => (
     <line x1="12" y1="3" x2="12" y2="15" />
   </svg>
 );
+
+// Water Icons
+export const WaterSmallIcon = ({ size = 32, className = "", ...props }) => (
+  <svg width={size} height={size} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} {...props}>
+    <path d="M10 5H22L20 28H12L10 5Z" stroke="#3B82F6" strokeWidth="2" strokeLinejoin="round"/>
+    <path d="M10 5H22L20 28H12L10 5Z" fill="rgba(59,130,246,0.2)"/>
+    <path d="M12 20L20 20" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M11 12L21 12" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
+
+export const WaterMediumIcon = ({ size = 32, className = "", ...props }) => (
+  <svg width={size} height={size} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} {...props}>
+    <path d="M8 5H24L22 28H10L8 5Z" stroke="#3B82F6" strokeWidth="2" strokeLinejoin="round"/>
+    <path d="M8 5H24L22 28H10L8 5Z" fill="rgba(59,130,246,0.2)"/>
+    <path d="M11 20L21 20" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M10 12L22 12" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M10.5 16L21.5 16" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
+
+export const WaterLargeIcon = ({ size = 32, className = "", ...props }) => (
+  <svg width={size} height={size} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} {...props}>
+    <path d="M12 3H20V6C22 6 24 8 24 10V28H8V10C8 8 10 6 12 6V3Z" stroke="#3B82F6" strokeWidth="2" strokeLinejoin="round"/>
+    <path d="M12 3H20V6C22 6 24 8 24 10V28H8V10C8 8 10 6 12 6V3Z" fill="rgba(59,130,246,0.2)"/>
+    <path d="M13 20L19 20" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M12 15L20 15" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M12 10L20 10" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M14 24L18 24" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
+
+export const CameraIcon = ({ size = 16, className = "", ...props }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    {...props}
+  >
+    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+    <circle cx="12" cy="13" r="4" />
+  </svg>
+);

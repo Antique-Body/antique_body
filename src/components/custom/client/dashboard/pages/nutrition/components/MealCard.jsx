@@ -1,9 +1,11 @@
+import Image from "next/image";
 import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
-import { ChevronDownIcon, TrashIcon } from "@/components/common/Icons";
+import { ChevronDownIcon, EditIcon, PlusIcon, TrashIcon } from "@/components/common/Icons";
 import { Card } from "@/components/custom/Card";
-export const MealCard = ({ meal, onDelete }) => {
+
+export const MealCard = ({ meal, onDelete, onEdit, onAddFood }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
@@ -41,19 +43,85 @@ export const MealCard = ({ meal, onDelete }) => {
       {isExpanded && (
         <div className="px-4 pb-4">
           <div className="mb-3 h-px bg-[#444]"></div>
+          
+          {/* Meal macro distribution summary */}
+          <div className="mb-4 grid grid-cols-4 gap-2">
+            <div className="rounded bg-[rgba(59,130,246,0.15)] px-2 py-1.5">
+              <p className="text-xs text-gray-400">Protein</p>
+              <p className="text-sm font-medium text-blue-500">{meal.protein}g</p>
+            </div>
+            <div className="rounded bg-[rgba(34,197,94,0.15)] px-2 py-1.5">
+              <p className="text-xs text-gray-400">Carbs</p>
+              <p className="text-sm font-medium text-green-500">{meal.carbs}g</p>
+            </div>
+            <div className="rounded bg-[rgba(234,179,8,0.15)] px-2 py-1.5">
+              <p className="text-xs text-gray-400">Fat</p>
+              <p className="text-sm font-medium text-yellow-500">{meal.fat}g</p>
+            </div>
+            <div className="rounded bg-[rgba(255,107,0,0.15)] px-2 py-1.5">
+              <p className="text-xs text-gray-400">Calories</p>
+              <p className="text-sm font-medium text-orange-500">{meal.calories}</p>
+            </div>
+          </div>
+          
           <div className="max-h-60 space-y-2 overflow-y-auto">
             {meal.items.map((item, index) => (
               <div key={index} className="flex items-center justify-between rounded-lg bg-[rgba(20,20,20,0.5)] p-2">
-                <div>
-                  <p className="font-medium">{item.name}</p>
-                  <p className="text-xs text-gray-400">{item.amount}</p>
+                <div className="flex items-center gap-3">
+                  {item.image && (
+                    <div className="relative h-10 w-10 overflow-hidden rounded">
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-medium">{item.name}</p>
+                    <p className="text-xs text-gray-400">{item.amount}</p>
+                  </div>
                 </div>
-                <p className="text-sm">{item.calories} kcal</p>
+                <div className="text-right">
+                  <p className="text-sm">{item.calories} kcal</p>
+                  <p className="text-xs text-gray-400">
+                    P: {item.protein}g | C: {item.carbs}g | F: {item.fat}g
+                  </p>
+                </div>
               </div>
             ))}
           </div>
 
-          <div className="mt-3 flex justify-end">
+          <div className="mt-4 flex flex-wrap justify-between gap-3">
+            <div className="flex gap-2">
+              <Button
+                variant="orangeOutline"
+                size="small"
+                leftIcon={<PlusIcon size={14} />}
+                className="text-sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddFood && onAddFood();
+                }}
+              >
+                Add Food
+              </Button>
+              
+              <Button
+                variant="secondary"
+                size="small"
+                leftIcon={<EditIcon size={14} />}
+                className="text-sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit && onEdit();
+                }}
+              >
+                Edit Meal
+              </Button>
+            </div>
+            
             <Button
               variant="ghost"
               onClick={e => {
