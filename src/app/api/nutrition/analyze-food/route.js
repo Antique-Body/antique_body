@@ -100,7 +100,6 @@ export async function POST(request) {
 
         const { foodName, confidence } = combinedResult;
 
-        // Additional validation: check if the identified item is actually food
         const isLikelyNonFood = commonNonFoodItems.some(item => 
             foodName.toLowerCase().includes(item.toLowerCase())
         );

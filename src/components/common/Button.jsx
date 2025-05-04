@@ -43,6 +43,7 @@ export const Button = ({
       "bg-[rgba(255,107,0,0.15)] border border-[rgba(255,107,0,0.3)] text-[#FF6B00] hover:bg-[rgba(255,107,0,0.25)] hover:text-[#FF9A00]",
     orangeFilled: "bg-[#FF6B00] text-white hover:bg-[#FF9A00]",
     compactOrange: "bg-[#FF6B00] text-white hover:bg-[#FF9A00] text-xs font-medium",
+    orangeText: "text-[#FF6B00] hover:text-[#FF9A00] bg-transparent hover:bg-transparent p-0",
 
     // Water tracker variants
     blueOutline:

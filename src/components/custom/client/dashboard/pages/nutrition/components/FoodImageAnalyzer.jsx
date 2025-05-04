@@ -302,7 +302,7 @@ export const FoodImageAnalyzer = ({ onAddToMeal, dailyGoals, dailyMacros }) => {
                     )}
                     <Button
                       variant="orangeFilled"
-                      size="large"
+                      size="small"
                       onClick={analyzeImage}
                       disabled={loading || (manualInput && !manualFoodName)}
                     >
