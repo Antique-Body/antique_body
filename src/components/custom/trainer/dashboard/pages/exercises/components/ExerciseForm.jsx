@@ -1,10 +1,11 @@
 "use client";
 
-import { Button } from "@/components/common/Button";
-import { SaveIcon, TrashIcon } from "@/components/common/Icons";
-import { FormField } from "@/components/common/FormField";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+
+import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/common/FormField";
+import { SaveIcon, TrashIcon } from "@/components/common/Icons";
 
 export const ExerciseForm = ({ exercise = null, onSave, onCancel }) => {
     const isEditMode = !!exercise;

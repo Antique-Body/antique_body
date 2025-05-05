@@ -1,8 +1,8 @@
 "use client";
 import Image from "next/image";
 
-import { UserProfileIcon } from "@/components/common/Icons";
 import { FormField } from "@/components/common/FormField";
+import { UserProfileIcon } from "@/components/common/Icons";
 import { RegistrationStep } from "@/components/custom/shared";
 export const ProfileContactStep = ({
     formData,

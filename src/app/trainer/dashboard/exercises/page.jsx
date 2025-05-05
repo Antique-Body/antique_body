@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { ExercisesList } from "@/components/custom/trainer/dashboard/pages/exercises/components";
 import mockExercises from "@/components/custom/trainer/dashboard/pages/exercises/data/mockExercises";
-import { useEffect, useState } from "react";
 
 const ExercisesPage = () => {
   const [exercises, setExercises] = useState([]);

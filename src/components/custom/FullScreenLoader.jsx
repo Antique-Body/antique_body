@@ -1,7 +1,8 @@
 "use client";
 
-import { GreekLoader } from "./GreekLoader";
 import { useTranslation } from "react-i18next";
+
+import { GreekLoader } from "./GreekLoader";
 
 export function FullScreenLoader({ text }) {
   const { t } = useTranslation();

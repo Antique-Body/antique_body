@@ -88,24 +88,22 @@ export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
 };
 
 // AnimatedTabContent component for smooth tab transitions
-export const AnimatedTabContent = ({ children, isActive, tabId, animateOpacity = false }) => {
-    return (
-        <div
-            className="relative transition-opacity duration-300"
-            style={{
-                opacity: isActive ? 1 : 0,
-                visibility: isActive ? "visible" : "hidden",
-                position: isActive ? "relative" : "absolute",
-                width: "100%",
-                zIndex: isActive ? 10 : 0,
-                top: 0,
-                left: 0,
-            }}
-        >
-            {children}
-        </div>
-    );
-};
+export const AnimatedTabContent = ({ children, isActive }) => (
+    <div
+        className="relative transition-opacity duration-300"
+        style={{
+            opacity: isActive ? 1 : 0,
+            visibility: isActive ? "visible" : "hidden",
+            position: isActive ? "relative" : "absolute",
+            width: "100%",
+            zIndex: isActive ? 10 : 0,
+            top: 0,
+            left: 0,
+        }}
+    >
+        {children}
+    </div>
+);
 
 // AnimatedPageTransition for nested page transitions with the same animation
 export const AnimatedPageTransition = ({ children, routeKey }) => {

@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
-import { useEffect, useRef } from "react";
-import { ContactInfoCard } from "./ContactInfoCard";
+import { useRef } from "react";
+
 import { ContactForm } from "./ContactForm";
+import { ContactInfoCard } from "./ContactInfoCard";
+
 import { LocationIcon, MessageIcon, TimerIcon } from "@/components/common/Icons";
 
 const contactInfoData = [
@@ -37,17 +39,6 @@ export const ContactSection = () => {
     const sectionRef = useRef(null);
 
     // Force layout recalculation to fix the issue where content doesn't appear until refresh
-    useEffect(() => {
-        // Force a layout recalculation
-        if (sectionRef.current) {
-            // Trigger a reflow by accessing offsetHeight
-            const height = sectionRef.current.offsetHeight;
-            // Could also use a tiny timeout to ensure components have mounted
-            setTimeout(() => {
-                const forcedHeight = sectionRef.current?.offsetHeight;
-            }, 0);
-        }
-    }, []);
 
     return (
         <section id="contact" className="py-20 relative" ref={sectionRef}>

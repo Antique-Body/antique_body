@@ -2,8 +2,7 @@ import { Button } from "@/components/common/Button";
 import { TimerIcon, WorkoutIcon } from "@/components/common/Icons";
 import { Card } from "@/components/custom/Card";
 
-export const WorkoutOverview = ({ currentDay, onStartTraining }) => {
-  return (
+export const WorkoutOverview = ({ currentDay, onStartTraining }) => (
     <Card variant="darkStrong" width="100%" maxWidth="none">
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center">
@@ -56,5 +55,4 @@ export const WorkoutOverview = ({ currentDay, onStartTraining }) => {
         Start Today's Workout
       </Button>
     </Card>
-  );
-}; 
+  ); 

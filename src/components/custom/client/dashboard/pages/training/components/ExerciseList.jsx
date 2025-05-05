@@ -1,8 +1,7 @@
 import { Button } from "@/components/common/Button";
 import { ArrowRight, CheckIcon, PlayIcon, WorkoutIcon } from "@/components/common/Icons";
 
-export const ExerciseList = ({ exercises, completedExercises, onViewExercise }) => {
-  return (
+export const ExerciseList = ({ exercises, completedExercises, onViewExercise }) => (
     <>
       <h3 className="mb-3 flex items-center text-sm font-semibold text-white">
         <WorkoutIcon size={16} className="mr-2 text-[#FF6B00]" />
@@ -56,5 +55,4 @@ export const ExerciseList = ({ exercises, completedExercises, onViewExercise }) 
         ))}
       </div>
     </>
-  );
-}; 
+  ); 

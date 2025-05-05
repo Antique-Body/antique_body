@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { validateRegistration } from "@/middleware/validation";
 import { userService } from "@/services/users";
 

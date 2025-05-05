@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import {
   EditIcon,
   IconButton,
@@ -8,7 +10,6 @@ import {
   ViewIcon
 } from "@/components/common/Icons";
 import { Card } from "@/components/custom/Card";
-import Image from "next/image";
 
 export const ExerciseCard = ({ exercise, onView, onEdit, onDelete }) => {
   const { 

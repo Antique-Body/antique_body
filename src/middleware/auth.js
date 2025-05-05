@@ -1,8 +1,9 @@
 import { getServerSession } from "next-auth/next";
+
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 // Check if the user is authenticated
-export const isAuthenticated = async (req) => {
+export const isAuthenticated = async () => {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {

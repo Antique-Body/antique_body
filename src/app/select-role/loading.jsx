@@ -1,7 +1,8 @@
 "use client";
 
-import { FullScreenLoader } from "@/components/custom/FullScreenLoader";
 import { useTranslation } from "react-i18next";
+
+import { FullScreenLoader } from "@/components/custom/FullScreenLoader";
 
 export default function Loading() {
   const { t } = useTranslation();

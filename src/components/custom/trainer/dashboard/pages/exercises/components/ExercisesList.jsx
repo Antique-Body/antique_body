@@ -1,12 +1,14 @@
 "use client";
 
-import { Button } from "@/components/common/Button";
-import { PlusIcon } from "@/components/common/Icons";
-import { FormField } from "@/components/common/FormField";
 import { useState } from "react";
+
 import { CreateExerciseCard } from "./CreateExerciseCard";
 import { ExerciseCard } from "./ExerciseCard";
 import { ExerciseModal } from "./ExerciseModal";
+
+import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/common/FormField";
+import { PlusIcon } from "@/components/common/Icons";
 
 export const ExercisesList = ({ exercises, onUpdate }) => {
     const [searchTerm, setSearchTerm] = useState("");

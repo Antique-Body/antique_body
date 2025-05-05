@@ -1,6 +1,7 @@
+import { useEffect, useState } from "react";
+
 import { Button } from "@/components/common/Button";
 import { ArrowRight, CalendarIcon, CheckIcon } from "@/components/common/Icons";
-import { useEffect, useState } from "react";
 
 export const WorkoutComplete = ({ 
   isOpen, 

@@ -1,7 +1,8 @@
+import { NextResponse } from "next/server";
+
 import { isAuthenticated } from "@/middleware/auth";
 import { validateRoleUpdate } from "@/middleware/validation";
 import { userService } from "@/services/users";
-import { NextResponse } from "next/server";
 
 export async function PATCH(request) {
   try {

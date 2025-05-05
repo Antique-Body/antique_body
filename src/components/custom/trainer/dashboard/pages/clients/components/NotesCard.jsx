@@ -1,10 +1,9 @@
 import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/common/FormField";
 import { MessageIcon } from "@/components/common/Icons";
 import { Card } from "@/components/custom/Card";
-import { FormField } from "@/components/common/FormField";
 
-export const NotesCard = ({ notes, onNotesChange, onSaveNotes }) => {
-    return (
+export const NotesCard = ({ notes, onNotesChange, onSaveNotes }) => (
         <Card variant="darkStrong" width="100%" maxWidth="none">
             <h3 className="mb-4 flex items-center text-xl font-semibold">
                 <MessageIcon size={20} stroke="#FF6B00" className="mr-2" />
@@ -22,4 +21,3 @@ export const NotesCard = ({ notes, onNotesChange, onSaveNotes }) => {
             </Button>
         </Card>
     );
-};

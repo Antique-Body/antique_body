@@ -1,5 +1,6 @@
-import { CheckIcon } from "@/components/common/Icons";
 import { useEffect, useState } from "react";
+
+import { CheckIcon } from "@/components/common/Icons";
 
 export const CompletionAnimation = ({ isVisible }) => {
   const [animationStep, setAnimationStep] = useState(0);

@@ -1,14 +1,7 @@
 "use client";
 
 import { Footer } from "@/components/common/Footer";
-import {
-    Navigation,
-    HeroSection,
-    ContactSection,
-    MapSection,
-    FAQSection,
-    CallToAction,
-} from "@/components/custom/contact/components";
+import { Navigation, HeroSection, ContactSection, FAQSection, CallToAction } from "@/components/custom/contact/components";
 
 export default function ContactPage() {
     return (
@@ -16,7 +9,6 @@ export default function ContactPage() {
             <Navigation />
             <HeroSection />
             <ContactSection />
-            <MapSection />
             <FAQSection />
             <CallToAction />
             <Footer />

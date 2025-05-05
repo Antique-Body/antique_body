@@ -40,8 +40,6 @@ const getInitialLanguage = () => {
     return "en";
 };
 
-console.log("language", getInitialLanguage());
-
 i18n.use(Backend)
     .use(LanguageDetector)
     .use(initReactI18next)

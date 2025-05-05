@@ -1,8 +1,9 @@
+import { useMemo, useState } from "react";
+
 import { Button } from "@/components/common/Button";
 import { CalendarIcon, CameraIcon, ChevronDownIcon, ChevronUpIcon, PlusIcon, TrashIcon } from "@/components/common/Icons";
 import { Card } from "@/components/custom/Card";
 import { FoodImageAnalyzer } from "@/components/custom/client/dashboard/pages/nutrition/components";
-import { useMemo, useState } from "react";
 
 export const MealLoggingSection = ({ 
   meals, 

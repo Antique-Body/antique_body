@@ -8,8 +8,7 @@ export const TrainingProgressCard = ({
   scheduledWorkouts, 
   onOpenWorkoutModal,
   onViewWorkoutDetail
-}) => {
-  return (
+}) => (
     <Card variant="darkStrong" width="100%" maxWidth="none">
       <h3 className="mb-4 flex items-center text-xl font-semibold">
         <WorkoutIcon size={20} stroke="#4CAF50" className="mr-2" />
@@ -144,5 +143,4 @@ export const TrainingProgressCard = ({
         </Button>
       </div>
     </Card>
-  );
-}; 
+  ); 

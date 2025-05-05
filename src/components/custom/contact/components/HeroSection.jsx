@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
+
 import { ParthenonIcon } from "@/components/common/Icons";
 
-export const HeroSection = () => {
-    return (
+export const HeroSection = () => (
         <section className="relative py-20 md:py-32 overflow-hidden">
             {/* Background elements */}
             <div className="absolute inset-0 bg-gradient-to-b from-[#FF6B00]/10 via-black to-black pointer-events-none"></div>
@@ -42,4 +42,3 @@ export const HeroSection = () => {
             </div>
         </section>
     );
-};

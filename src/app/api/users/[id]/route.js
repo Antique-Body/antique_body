@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+
 import { isAuthenticated, hasRole } from "@/middleware/auth";
-import { userService } from "@/services/users";
 import { validateUserUpdate } from "@/middleware/validation";
+import { userService } from "@/services/users";
 
 // Get a user by ID
 export async function GET(request, { params }) {

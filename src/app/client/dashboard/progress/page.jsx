@@ -1,12 +1,13 @@
 "use client";
 
-import { Modal } from "@/components/common";
-import { Button } from "@/components/common/Button";
-import { PlusIcon } from "@/components/common/Icons";
-import { Card } from "@/components/custom/Card";
-import { FormField } from "@/components/common/FormField";
 import Image from "next/image";
 import { useState } from "react";
+
+import { Modal } from "@/components/common";
+import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/common/FormField";
+import { PlusIcon } from "@/components/common/Icons";
+import { Card } from "@/components/custom/Card";
 
 export default function ProgressPage() {
     // Sample user data

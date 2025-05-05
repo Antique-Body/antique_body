@@ -1,8 +1,9 @@
+import { PerformanceMetrics } from "./PerformanceMetrics";
+
 import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/common/FormField";
 import { ProgressChartIcon } from "@/components/common/Icons";
 import { Card } from "@/components/custom/Card";
-import { FormField } from "@/components/common/FormField";
-import { PerformanceMetrics } from "./PerformanceMetrics";
 
 export const ProgressTrackingCard = ({
     weight,
@@ -19,8 +20,7 @@ export const ProgressTrackingCard = ({
     onMetricAdd,
     clientType,
     clientGoal,
-}) => {
-    return (
+}) => (
         <Card variant="darkStrong" width="100%" maxWidth="none">
             <h3 className="mb-4 flex items-center text-xl font-semibold">
                 <ProgressChartIcon size={20} stroke="#FF6B00" className="mr-2" />
@@ -125,4 +125,3 @@ export const ProgressTrackingCard = ({
             </div>
         </Card>
     );
-};

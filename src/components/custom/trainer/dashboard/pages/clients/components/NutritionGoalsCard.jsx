@@ -1,11 +1,10 @@
 import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/common/FormField";
 import { NutritionIcon } from "@/components/common/Icons";
 import { Card } from "@/components/custom/Card";
 import { MacroDistribution } from "@/components/custom/client/dashboard/pages/nutrition/components";
-import { FormField } from "@/components/common/FormField";
 
-export const NutritionGoalsCard = ({ nutrition, onNutritionChange, onSubmit, clientGoal }) => {
-    return (
+export const NutritionGoalsCard = ({ nutrition, onNutritionChange, onSubmit, clientGoal }) => (
         <Card variant="darkStrong" hover={true} width="100%" maxWidth="none">
             <h3 className="mb-4 flex items-center text-xl font-semibold">
                 <NutritionIcon size={20} stroke="#FF6B00" className="mr-2" />
@@ -71,4 +70,3 @@ export const NutritionGoalsCard = ({ nutrition, onNutritionChange, onSubmit, cli
             </div>
         </Card>
     );
-};

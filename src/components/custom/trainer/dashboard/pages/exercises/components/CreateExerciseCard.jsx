@@ -3,8 +3,7 @@
 import { PlusIcon } from "@/components/common/Icons";
 import { Card } from "@/components/custom/Card";
 
-export const CreateExerciseCard = ({ onClick }) => {
-  return (
+export const CreateExerciseCard = ({ onClick }) => (
     <Card
       variant="createPlanCard"
       width="100%"
@@ -20,5 +19,4 @@ export const CreateExerciseCard = ({ onClick }) => {
         <p className="text-sm text-gray-400">Create a custom exercise for your training library</p>
       </div>
     </Card>
-  );
-}; 
+  ); 

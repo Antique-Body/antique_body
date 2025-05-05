@@ -2,8 +2,7 @@ import { Button } from "@/components/common/Button";
 import { EditIcon, PlusIcon, WorkoutIcon } from "@/components/common/Icons";
 import { Card } from "@/components/custom/Card";
 
-export const TrainingProgramCard = ({ currentPlan, onOpenPlanModal, onOpenWorkoutModal }) => {
-  return (
+export const TrainingProgramCard = ({ currentPlan, onOpenPlanModal, onOpenWorkoutModal }) => (
     <Card variant="darkStrong" width="100%" maxWidth="none">
       <h3 className="mb-4 flex items-center text-xl font-semibold">
         <WorkoutIcon size={20} stroke="#FF6B00" className="mr-2" />
@@ -92,5 +91,4 @@ export const TrainingProgramCard = ({ currentPlan, onOpenPlanModal, onOpenWorkou
         </div>
       )}
     </Card>
-  );
-}; 
+  ); 

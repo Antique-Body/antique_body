@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { hasRole } from "@/middleware/auth";
 import { validateTrainingSetup } from "@/middleware/validation";
 import { userService } from "@/services/users";

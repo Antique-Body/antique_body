@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
 
 // Helper function to handle verification responses
-const handleVerificationResponse = (success, message, status = 200) => {
-  return NextResponse.json(
+const handleVerificationResponse = (success, message, status = 200) => NextResponse.json(
     { success, message },
     { status }
   );
-};
 
 // Check verification status
 export async function GET(request) {

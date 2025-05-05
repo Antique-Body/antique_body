@@ -1,8 +1,9 @@
+import { useMemo } from "react";
+
 import { Button } from "@/components/common/Button";
 import { CalendarIcon, CameraIcon, PlusIcon, WaterMediumIcon } from "@/components/common/Icons";
 import { Card } from "@/components/custom/Card";
 import { MacroDistribution } from "@/components/custom/client/dashboard/pages/nutrition/components";
-import { useMemo } from "react";
 
 export const NutritionSummary = ({ 
   userData, 

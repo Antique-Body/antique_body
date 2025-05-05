@@ -1,10 +1,11 @@
-import { Modal } from "@/components/common";
-import { Button } from "@/components/common/Button";
-import { BookmarkIcon, CheckIcon, ClockIcon, PlusIcon, TrashIcon, WorkoutIcon } from "@/components/common/Icons";
-import { FormField } from "@/components/common/FormField";
 import { useState } from "react";
 
-export const WorkoutScheduleModal = ({ isOpen, onClose, onScheduleWorkout, client, existingPlan }) => {
+import { Modal } from "@/components/common";
+import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/common/FormField";
+import { BookmarkIcon, CheckIcon, ClockIcon, PlusIcon, TrashIcon, WorkoutIcon } from "@/components/common/Icons";
+
+export const WorkoutScheduleModal = ({ isOpen, onClose, onScheduleWorkout, existingPlan }) => {
     const today = new Date().toISOString().split("T")[0];
 
     // Basic workout data

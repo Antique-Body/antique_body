@@ -1,9 +1,10 @@
+import { useEffect, useState } from "react";
+
 import { Modal } from "@/components/common";
 import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/common/FormField";
 import { NutritionIcon, PlusIcon, TrashIcon, WorkoutIcon } from "@/components/common/Icons";
 import mockPlans from "@/components/custom/trainer/dashboard/pages/plans/data/mockPlans";
-import { FormField } from "@/components/common/FormField";
-import { useEffect, useState } from "react";
 
 export const TrainingPlanModal = ({ isOpen, onClose, onAssignPlan, client, existingPlanId }) => {
     // Modal mode - "assign" (existing plan) or "custom" (create custom)

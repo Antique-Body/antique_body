@@ -2,9 +2,9 @@
 import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/common/FormField";
 import { Card } from "@/components/custom/Card";
 import { ScheduleSessionModal } from "@/components/custom/trainer/dashboard/components/ScheduleSessionModal";
-import { FormField } from "@/components/common/FormField";
 
 export default function TrainerUpcomingTrainingsPage() {
     const [expandedTrainingId, setExpandedTrainingId] = useState(null);

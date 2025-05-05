@@ -1,10 +1,12 @@
 "use client";
 
-import { Button } from "@/components/common/Button";
-import { Modal } from "@/components/common/Modal";
 import Image from "next/image";
 import { useState } from "react";
+
 import { ExerciseForm } from "./ExerciseForm";
+
+import { Button } from "@/components/common/Button";
+import { Modal } from "@/components/common/Modal";
 
 export const ExerciseModal = ({ isOpen, onClose, mode = "view", exercise = null, onSave }) => {
   const [currentMode, setCurrentMode] = useState(mode);

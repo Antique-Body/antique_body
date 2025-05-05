@@ -99,13 +99,9 @@ export default function TrainingPage() {
     }
   }, [activeDay]);
 
-  const getCurrentDay = () => {
-    return mockTrainings.days.find(day => day.id === activeDay);
-  };
+  const getCurrentDay = () => mockTrainings.days.find(day => day.id === activeDay);
 
-  const getTomorrowDay = () => {
-    return mockTrainings.days.find(day => day.isTomorrow);
-  };
+  const getTomorrowDay = () => mockTrainings.days.find(day => day.isTomorrow);
 
   const handleStartTraining = () => {
     setShowStartTraining(false);

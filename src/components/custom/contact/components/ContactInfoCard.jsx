@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 
-export const ContactInfoCard = ({ title, content, subContent, icon, delay }) => {
-    return (
+export const ContactInfoCard = ({ title, content, subContent, icon, delay }) => (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -20,4 +19,3 @@ export const ContactInfoCard = ({ title, content, subContent, icon, delay }) => 
             {subContent && <p className="text-gray-400 text-sm mt-1">{subContent}</p>}
         </motion.div>
     );
-};

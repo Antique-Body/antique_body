@@ -1,8 +1,7 @@
 import { Button } from "@/components/common/Button";
 import { CheckIcon, CloseIcon } from "@/components/common/Icons";
 
-export const ExerciseDetail = ({ exercise, isCompleted, onMarkComplete, onClose }) => {
-  return (
+export const ExerciseDetail = ({ exercise, isCompleted, onMarkComplete, onClose }) => (
     <div className="rounded-lg border border-[#333] bg-[rgba(20,20,20,0.3)] p-4">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-lg font-bold text-white">{exercise.name}</h3>
@@ -64,5 +63,4 @@ export const ExerciseDetail = ({ exercise, isCompleted, onMarkComplete, onClose 
         {isCompleted ? "Completed" : "Mark as Complete"}
       </Button>
     </div>
-  );
-}; 
+  ); 

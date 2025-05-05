@@ -8,7 +8,6 @@ import { Button } from "@/components/common/Button";
 import { SaveIcon } from "@/components/common/Icons";
 import { BrandLogo } from "@/components/custom/BrandLogo";
 import { Card } from "@/components/custom/Card";
-import { AnimatedTabContent, DashboardTabs } from "@/components/custom/DashboardTabs";
 import {
     BasicInformation,
     DietaryPreferences,
@@ -16,6 +15,7 @@ import {
     MedicalInformation,
     PhysicalMeasurements,
 } from "@/components/custom/client/edit-profile";
+import { AnimatedTabContent, DashboardTabs } from "@/components/custom/DashboardTabs";
 
 const fadeIn = {
     hidden: { opacity: 0, y: 20 },

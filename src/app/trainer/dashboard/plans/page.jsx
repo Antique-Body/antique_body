@@ -1,8 +1,8 @@
 "use client";
 
-import { PlansList } from "@/components/custom/trainer/dashboard/pages/plans/components";
 import { useEffect, useState } from "react";
 
+import { PlansList } from "@/components/custom/trainer/dashboard/pages/plans/components";
 import mockPlans from "@/components/custom/trainer/dashboard/pages/plans/data/mockPlans";
 const PlansPage = () => {
   const [plans, setPlans] = useState([]);

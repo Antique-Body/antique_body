@@ -1,10 +1,11 @@
-import { Button } from "@/components/common/Button";
-import { TimerIcon } from "@/components/common/Icons";
-import { Card } from "@/components/custom/Card";
 import { ExerciseDetail } from "./ExerciseDetail";
 import { ExerciseList } from "./ExerciseList";
 import { SessionProgress } from "./SessionProgress";
 import { WaterTracker } from "./WaterTracker";
+
+import { Button } from "@/components/common/Button";
+import { TimerIcon } from "@/components/common/Icons";
+import { Card } from "@/components/custom/Card";
 
 export const TrainingSession = ({
   currentDay,
@@ -20,8 +21,7 @@ export const TrainingSession = ({
   onCompleteTraining,
   onResetSession,
   setSelectedExercise
-}) => {
-  return (
+}) => (
     <Card variant="darkStrong" width="100%" maxWidth="none">
       <div className="mb-4 flex flex-wrap items-center justify-between">
         <h2 className="text-lg font-bold text-white">{currentDay.name}</h2>
@@ -84,5 +84,4 @@ export const TrainingSession = ({
         </>
       )}
     </Card>
-  );
-}; 
+  ); 

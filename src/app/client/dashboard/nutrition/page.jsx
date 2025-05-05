@@ -1,7 +1,8 @@
 "use client";
 
-import { HydrationTracker, MealLoggingSection, MealLogModal, NutritionHistoryModal, NutritionSummary } from "@/components/custom/client/dashboard/pages/nutrition/components";
 import { useRef, useState } from "react";
+
+import { HydrationTracker, MealLoggingSection, MealLogModal, NutritionHistoryModal, NutritionSummary } from "@/components/custom/client/dashboard/pages/nutrition/components";
 export default function NutritionPage() {
   // Sample user data (should be fetched from API in production)
   const userData = {

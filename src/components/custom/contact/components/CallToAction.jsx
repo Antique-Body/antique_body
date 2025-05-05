@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 
-export const CallToAction = () => {
-    return (
+export const CallToAction = () => (
         <section className="py-16 bg-gradient-to-b from-black to-[#0D0D0D]">
             <div className="container mx-auto px-4">
                 <motion.div
@@ -26,4 +25,3 @@ export const CallToAction = () => {
             </div>
         </section>
     );
-};

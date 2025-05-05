@@ -92,21 +92,13 @@ export const BookingSessionModal = ({ trainer, onClose, isOpen }) => {
   };
 
   // Determine button text and action based on step
-  const getPrimaryButtonText = () => {
-    return step < 3 ? "Next" : "Confirm Booking";
-  };
+  const getPrimaryButtonText = () => step < 3 ? "Next" : "Confirm Booking";
 
-  const getSecondaryButtonText = () => {
-    return step > 1 ? "Back" : "Cancel";
-  };
+  const getSecondaryButtonText = () => step > 1 ? "Back" : "Cancel";
 
-  const getPrimaryButtonAction = () => {
-    return step < 3 ? handleNext : handleBookSession;
-  };
+  const getPrimaryButtonAction = () => step < 3 ? handleNext : handleBookSession;
 
-  const getSecondaryButtonAction = () => {
-    return step > 1 ? handleBack : onClose;
-  };
+  const getSecondaryButtonAction = () => step > 1 ? handleBack : onClose;
 
   return (
     <Modal

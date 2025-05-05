@@ -1,5 +1,6 @@
-import { stepConfig, TOTAL_STEPS } from "@/app/utils";
 import { useState, useCallback, useRef } from "react";
+
+import { stepConfig, TOTAL_STEPS } from "@/app/utils";
 
 export const useWorkoutForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -152,11 +153,9 @@ export const useWorkoutForm = () => {
     return fieldValue !== null && fieldValue !== undefined;
   }, [currentStep, userSelections]);
 
-  const canFinish = useCallback(() => {
-    return userSelections.frequency !== null && 
+  const canFinish = useCallback(() => userSelections.frequency !== null && 
            userSelections.measurements !== null && 
-           userSelections.measurements?.isValid === true;
-  }, [userSelections]);
+           userSelections.measurements?.isValid === true, [userSelections]);
 
   return {
     currentStep,

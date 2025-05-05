@@ -1,7 +1,6 @@
 import { Card } from "@/components/custom/Card";
 
-export const ProgramHeader = ({ program }) => {
-  return (
+export const ProgramHeader = ({ program }) => (
     <Card variant="darkStrong" width="100%" maxWidth="none">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xl font-bold text-white">Your Training Program</h2>
@@ -41,5 +40,4 @@ export const ProgramHeader = ({ program }) => {
         <p className="mt-1 text-xs text-gray-400">Next milestone: {program.progress.nextMilestone}</p>
       </div>
     </Card>
-  );
-}; 
+  ); 

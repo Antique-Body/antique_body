@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/common/FormField";
 import {
     ConversationList,
     MessageBubble,
@@ -9,7 +10,6 @@ import {
     EmptyChatState,
     NoConversationSelected,
 } from "@/components/custom/shared/chat/ChatComponents";
-import { FormField } from "@/components/common/FormField";
 
 // Client chat mock data
 const clientMockData = {

@@ -1,5 +1,6 @@
-import { userService } from '@/services/users';
 import { NextResponse } from 'next/server';
+
+import { userService } from '@/services/users';
 
 // Verify email - handles both GET and POST requests
 export async function GET(request) {

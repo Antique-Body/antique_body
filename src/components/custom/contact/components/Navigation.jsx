@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+
 import { BrandLogo } from "@/components/custom/BrandLogo";
 
 export const Navigation = () => {

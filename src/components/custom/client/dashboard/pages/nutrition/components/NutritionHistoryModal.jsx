@@ -1,8 +1,10 @@
+import { useMemo, useState } from 'react';
+
+import { MacroDistribution } from "./MacroDistribution";
+
 import { CalendarIcon } from "@/components/common/Icons";
 import { Modal } from "@/components/common/Modal";
 import { Card } from "@/components/custom/Card";
-import { useMemo, useState } from 'react';
-import { MacroDistribution } from "./MacroDistribution";
 
 export const NutritionHistoryModal = ({ 
   isOpen, 
@@ -26,8 +28,7 @@ export const NutritionHistoryModal = ({
   }, [selectedDate]);
   
   // Calculate total macros for the day
-  const totals = useMemo(() => {
-    return meals.reduce(
+  const totals = useMemo(() => meals.reduce(
       (acc, meal) => ({
         calories: acc.calories + meal.calories,
         protein: acc.protein + meal.protein,
@@ -36,8 +37,7 @@ export const NutritionHistoryModal = ({
         fiber: acc.fiber + (meal.fiber || 0),
       }),
       { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 }
-    );
-  }, [meals]);
+    ), [meals]);
   
   // Calculate percentages for progress bars
   const getPercentage = (consumed, goal) => {

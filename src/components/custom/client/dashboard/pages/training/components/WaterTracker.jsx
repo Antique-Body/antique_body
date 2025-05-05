@@ -1,7 +1,6 @@
 import { Button } from "@/components/common/Button";
 
-export const WaterTracker = ({ waterIntake, waterGoal, onAddWater }) => {
-  return (
+export const WaterTracker = ({ waterIntake, waterGoal, onAddWater }) => (
     <div className="mb-6 rounded-lg border border-[#333] bg-[rgba(20,20,20,0.3)] p-4">
       <div className="flex items-center justify-between">
         <h3 className="flex items-center text-sm font-semibold text-white">
@@ -39,5 +38,4 @@ export const WaterTracker = ({ waterIntake, waterGoal, onAddWater }) => {
         </Button>
       </div>
     </div>
-  );
-}; 
+  ); 

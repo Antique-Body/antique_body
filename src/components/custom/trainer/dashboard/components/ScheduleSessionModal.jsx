@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 
-import { Modal } from "@/components/common/Modal";
 import { FormField } from "@/components/common/FormField";
+import { Modal } from "@/components/common/Modal";
 
 export const ScheduleSessionModal = ({ client, onClose, onSchedule, isOpen }) => {
     const [date, setDate] = useState("");

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+
 import bodyOutline from "../../../public/images/body-outline.png";
 
 const bodyParts = [
@@ -75,7 +76,7 @@ export const InjuryLocationSelector = ({ onSelect, selectedLocations = [] }) => 
             <Image
               src={bodyOutline}
               alt={t("training_setup.injury.body_outline")}
-              width='24rem'
+              width="24rem"
               height={500}
               className="opacity-70"
               priority

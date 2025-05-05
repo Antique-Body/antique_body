@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { isAuthenticated } from "@/middleware/auth";
 import { userService } from "@/services/users";
 

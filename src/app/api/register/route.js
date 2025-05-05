@@ -1,8 +1,10 @@
-import { sendVerificationEmail } from "@/app/utils/email";
+import crypto from "crypto";
+
 import { PrismaClient } from "@prisma/client";
 import { hash } from "bcrypt";
-import crypto from "crypto";
 import { NextResponse } from "next/server";
+
+import { sendVerificationEmail } from "@/app/utils/email";
 
 const prisma = new PrismaClient();
 
