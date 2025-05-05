@@ -1,84 +1,75 @@
 .background-shapes {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  z-index: 1;
-  pointer-events: none;
-  will-change: transform, opacity;
-  transform: translateZ(0);
-  backface-visibility: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 1;
+    pointer-events: none;
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 .ancient-building,
 .olympian {
-  position: absolute;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  opacity: 0.4;
-  filter: brightness(0) saturate(100%) invert(56%) sepia(83%) saturate(1500%)
-    hue-rotate(360deg) brightness(100%) contrast(106%);
-  pointer-events: auto;
-  will-change: transform, opacity;
-  transform: translateZ(0);
-  backface-visibility: hidden;
+    position: absolute;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.4;
+    filter: brightness(0) saturate(100%) invert(56%) sepia(83%) saturate(1500%) hue-rotate(360deg) brightness(100%)
+        contrast(106%);
+    pointer-events: auto;
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 /* Elementi sa fiksnim pozicijama, bez animacija */
 .parthenon {
-  width: 200px;
-  height: 80px;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%) translateY(-40%) scale(1) translateZ(0);
+    width: 200px;
+    height: 80px;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(-40%) scale(1) translateZ(0);
 }
 
 .runner {
-  width: 80px;
-  height: 120px;
-  top: 0;
-  left: 30%;
-  transform: translateY(20%) scale(1) translateZ(0);
+    width: 80px;
+    height: 120px;
+    top: 0;
+    left: 30%;
+    transform: translateY(20%) scale(1) translateZ(0);
 }
 
 .discus {
-  width: 100px;
-  height: 100px;
-  top: 0;
-  right: 30%;
-  transform: translateY(30%) scale(1) translateZ(0);
+    width: 100px;
+    height: 100px;
+    top: 0;
+    right: 30%;
+    transform: translateY(30%) scale(1) translateZ(0);
 }
 
 .colosseum {
-  width: 200px;
-  height: 100px;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%) translateY(40%) scale(1) translateZ(0);
+    width: 200px;
+    height: 100px;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(40%) scale(1) translateZ(0);
 }
 
 .column {
-  width: 80px;
-  height: 120px;
-  bottom: 0;
-  left: 30%;
-  transform: translateY(-30%) scale(1) translateZ(0);
+    width: 80px;
+    height: 120px;
+    bottom: 0;
+    left: 30%;
+    transform: translateY(-30%) scale(1) translateZ(0);
 }
 
 .vase {
-  width: 80px;
-  height: 100px;
-  bottom: 0;
-  right: 30%;
-  transform: translateY(-20%) scale(1) translateZ(0);
-}
-
-/* Hover efekti pretvoreni u brzi transition */
-.ancient-building:hover,
-.olympian:hover {
-  opacity: 0.7;
-  transform: scale(1.05) translateZ(0);
-  transition: opacity 0.2s ease,
-    transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    width: 80px;
+    height: 100px;
+    bottom: 0;
+    right: 30%;
+    transform: translateY(-20%) scale(1) translateZ(0);
 }

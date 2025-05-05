@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
@@ -133,10 +134,7 @@ export default function ContactPage() {
 
                     {/* Mobile Menu Button */}
                     <div className="md:hidden">
-                        <button
-                            className="text-white focus:outline-none"
-                            onClick={() => setMobileMenuOpen && setMobileMenuOpen(!mobileMenuOpen)}
-                        >
+                        <button className="text-white focus:outline-none" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                             <div className="flex flex-col space-y-1.5 w-6">
                                 <span
                                     className={`h-0.5 w-full bg-white transition-all duration-300 ${mobileMenuOpen ? "translate-y-2 rotate-45" : ""}`}
@@ -253,84 +251,74 @@ export default function ContactPage() {
             {/* Contact Section */}
             <section id="contact" className="py-20 relative">
                 <div className="container mx-auto px-4">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="mb-12 text-center"
+                    >
+                        <h2 className="text-3xl font-bold mb-4">
+                            <span className="bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] bg-clip-text text-transparent">
+                                Connect With Us
+                            </span>
+                        </h2>
+                        <p className="text-gray-300 max-w-2xl mx-auto">
+                            We're here to help you on your fitness journey. Reach out to us through any of these channels.
+                        </p>
+                    </motion.div>
+
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-                        {/* Contact Info */}
-                        <motion.div
-                            initial={{ opacity: 0, x: -30 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6 }}
-                        >
-                            <h2 className="text-3xl font-bold mb-8">Connect With Us</h2>
-
-                            <div className="space-y-8">
+                        {/* Contact Info Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {[
+                                {
+                                    title: "Our Location",
+                                    content: "123 Fitness Avenue, Athens, Greece",
+                                    icon: <LocationIcon size={24} className="text-[#FF6B00]" />,
+                                    delay: 0.1,
+                                },
+                                {
+                                    title: "Email Address",
+                                    content: "support@antiquebody.com",
+                                    icon: <MessageIcon size={24} className="text-[#FF6B00]" />,
+                                    delay: 0.2,
+                                },
+                                {
+                                    title: "Phone Number",
+                                    content: "+30 123 456 7890",
+                                    icon: <TimerIcon size={24} className="text-[#FF6B00]" />,
+                                    delay: 0.3,
+                                },
+                                {
+                                    title: "Business Hours",
+                                    content: "Mon-Fri: 9:00 AM - 6:00 PM",
+                                    subContent: "Sat: 10:00 AM - 4:00 PM, Sun: Closed",
+                                    icon: <TimerIcon size={24} className="text-[#FF6B00]" />,
+                                    delay: 0.4,
+                                },
+                            ].map((item, index) => (
                                 <motion.div
+                                    key={index}
                                     initial={{ opacity: 0, y: 20 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
-                                    transition={{ delay: 0.1, duration: 0.4 }}
-                                    className="flex items-start space-x-4"
+                                    transition={{ delay: item.delay, duration: 0.5 }}
+                                    className="group relative overflow-hidden rounded-xl border border-gray-800 bg-gradient-to-br from-gray-900 to-black p-6 hover:border-[#FF6B00]/30 transition-all duration-300"
                                 >
-                                    <div className="p-3 bg-[#FF6B00]/10 rounded-md">
-                                        <LocationIcon size={24} className="text-[#FF6B00]" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-semibold mb-1">Our Location</h3>
-                                        <p className="text-gray-300">123 Fitness Avenue, Athens, Greece</p>
-                                    </div>
-                                </motion.div>
+                                    <div className="absolute right-0 top-0 h-20 w-20 rounded-full bg-gradient-to-br from-[#FF6B00]/5 to-transparent blur-xl"></div>
 
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: 0.2, duration: 0.4 }}
-                                    className="flex items-start space-x-4"
-                                >
-                                    <div className="p-3 bg-[#FF6B00]/10 rounded-md">
-                                        <MessageIcon size={24} className="text-[#FF6B00]" />
+                                    <div className="mb-4 p-3 w-14 h-14 bg-[#FF6B00]/10 rounded-lg flex items-center justify-center group-hover:bg-[#FF6B00]/20 transition-colors duration-300">
+                                        {item.icon}
                                     </div>
-                                    <div>
-                                        <h3 className="font-semibold mb-1">Email Address</h3>
-                                        <p className="text-gray-300">support@antiquebody.com</p>
-                                    </div>
-                                </motion.div>
 
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: 0.3, duration: 0.4 }}
-                                    className="flex items-start space-x-4"
-                                >
-                                    <div className="p-3 bg-[#FF6B00]/10 rounded-md">
-                                        <TimerIcon size={24} className="text-[#FF6B00]" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-semibold mb-1">Phone Number</h3>
-                                        <p className="text-gray-300">+30 123 456 7890</p>
-                                    </div>
+                                    <h3 className="text-xl font-semibold mb-2 group-hover:text-[#FF6B00] transition-colors duration-300">
+                                        {item.title}
+                                    </h3>
+                                    <p className="text-gray-300">{item.content}</p>
+                                    {item.subContent && <p className="text-gray-400 text-sm mt-1">{item.subContent}</p>}
                                 </motion.div>
-                            </div>
-
-                            <div className="mt-12 bg-gradient-to-br from-gray-900 to-black rounded-xl border border-gray-800 p-6">
-                                <h3 className="text-xl font-semibold mb-4">Business Hours</h3>
-                                <ul className="space-y-2">
-                                    <li className="flex justify-between">
-                                        <span className="text-gray-400">Monday - Friday</span>
-                                        <span>9:00 AM - 6:00 PM</span>
-                                    </li>
-                                    <li className="flex justify-between">
-                                        <span className="text-gray-400">Saturday</span>
-                                        <span>10:00 AM - 4:00 PM</span>
-                                    </li>
-                                    <li className="flex justify-between">
-                                        <span className="text-gray-400">Sunday</span>
-                                        <span>Closed</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </motion.div>
+                            ))}
+                        </div>
 
                         {/* Contact Form */}
                         <motion.div
@@ -338,9 +326,11 @@ export default function ContactPage() {
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.6 }}
-                            className="bg-gradient-to-br from-gray-900 to-black rounded-xl border border-gray-800 p-6 md:p-8"
+                            className="bg-gradient-to-br from-gray-900 to-black rounded-xl border border-gray-800 p-6 md:p-8 shadow-lg"
                         >
-                            <h2 className="text-2xl font-bold mb-6">Send Us a Message</h2>
+                            <h3 className="text-2xl font-bold mb-6 inline-block bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] bg-clip-text text-transparent">
+                                Send Us a Message
+                            </h3>
 
                             {submitted ? (
                                 <motion.div
@@ -471,6 +461,47 @@ export default function ContactPage() {
                 </div>
             </section>
 
+            {/* Map Section */}
+            <section className="py-12 relative bg-gradient-to-b from-black to-[#0A0A0A]">
+                <div className="container mx-auto px-4 relative z-10">
+                    <div className="rounded-xl overflow-hidden border border-gray-800 h-[400px] relative">
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 z-10"></div>
+                        <Image
+                            src="https://maps.googleapis.com/maps/api/staticmap?center=Athens,Greece&zoom=13&size=1200x400&maptype=roadmap&markers=color:orange%7CAthens,Greece&key=YOUR_API_KEY"
+                            alt="Location Map"
+                            fill
+                            className="object-cover"
+                        />
+                        <div className="absolute bottom-6 left-6 z-20 bg-black/80 backdrop-blur-md p-4 rounded-lg border border-gray-800">
+                            <h3 className="text-xl font-bold mb-1 text-[#FF6B00]">Athens Headquarters</h3>
+                            <p className="text-white">123 Fitness Avenue, Athens, Greece</p>
+                            <a
+                                href="https://maps.google.com/?q=Athens,Greece"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-2 inline-flex items-center text-sm text-[#FF6B00] hover:text-white transition-colors"
+                            >
+                                Get Directions
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={1.5}
+                                    stroke="currentColor"
+                                    className="w-4 h-4 ml-1"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
+                                    />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* FAQ Section */}
             <section id="faq" className="py-20 relative">
                 <div className="absolute right-0 top-20 opacity-5">
@@ -528,7 +559,9 @@ export default function ContactPage() {
                                 transition={{ delay: index * 0.1, duration: 0.5 }}
                                 className="bg-gradient-to-br from-gray-900 to-black border border-gray-800 rounded-xl p-6 hover:border-[#FF6B00]/30 transition-all duration-300"
                             >
-                                <h3 className="text-xl font-semibold mb-3">{faq.question}</h3>
+                                <h3 className="text-xl font-semibold mb-3 text-white group-hover:text-[#FF6B00]">
+                                    {faq.question}
+                                </h3>
                                 <p className="text-gray-300">{faq.answer}</p>
                             </motion.div>
                         ))}
