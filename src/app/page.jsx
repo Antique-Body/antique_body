@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState, useRef } from "react";
+import { useRef } from "react";
 
 import Background from "@/components/background";
 import { Button } from "@/components/common/Button";
@@ -13,48 +13,10 @@ import { Counter } from "@/components/custom/Counter";
 import { Navigation, HeroSection, TopTrainersSection } from "@/components/custom/home-page/components";
 
 export default function Home() {
-    const [activeSection, setActiveSection] = useState("");
-    const [scrollY, setScrollY] = useState(0);
     const featuresRef = useRef(null);
     const benefitsRef = useRef(null);
     const ctaRef = useRef(null);
     const appRef = useRef(null);
-
-    // Handle scroll animation
-    useEffect(() => {
-        const handleScroll = () => {
-            const position = window.scrollY;
-            setScrollY(position);
-
-            // Set active section based on scroll position
-            const scrollPosition = position + window.innerHeight / 3;
-
-            const sections = [
-                { ref: featuresRef, id: "features" },
-                { ref: benefitsRef, id: "benefits" },
-                { ref: appRef, id: "app" },
-                { ref: ctaRef, id: "cta" },
-            ];
-
-            // Check if user is at the top of the page (hero section)
-            if (scrollPosition < (featuresRef?.current?.offsetTop || 0)) {
-                setActiveSection("hero");
-                return;
-            }
-
-            // Check other sections
-            for (const section of sections) {
-                if (section.ref.current && scrollPosition < section.ref.current.offsetTop + section.ref.current.offsetHeight) {
-                    setActiveSection(section.id);
-                    return;
-                }
-            }
-        };
-
-        // Add event listener
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
 
     return (
         <div className="relative min-h-screen w-full overflow-x-hidden bg-black text-white">

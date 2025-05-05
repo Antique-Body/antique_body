@@ -90,13 +90,13 @@ export function HeroSection() {
                         >
                             <div>
                                 <h3 className="text-3xl sm:text-4xl font-bold text-[#FF6B00]">
-                                    <Counter end={5000} suffix="+" duration={2500} />
+                                    <Counter end={5000} suffix="+" duration={3500} />
                                 </h3>
                                 <p className="text-sm sm:text-base text-gray-400">Active Users</p>
                             </div>
                             <div>
                                 <h3 className="text-3xl sm:text-4xl font-bold text-[#FF6B00]">
-                                    <Counter end={200} suffix="+" duration={2500} />
+                                    <Counter end={200} suffix="+" duration={3500} />
                                 </h3>
                                 <p className="text-sm sm:text-base text-gray-400">Certified Trainers</p>
                             </div>
