@@ -340,7 +340,7 @@ export const MeasurementsInput = ({ onSelect }) => {
     if (!bmi || !bmiCategory) return null;
     
     return (
-      <div className="mt-6 p-4 bg-[#0a0a0a] rounded-lg border border-[#222]">
+      <div className="mt-6 p-4 bg-[#0a0a0a] rounded-lg border border-[#222] w-full">
         <h3 className="text-lg font-semibold mb-2">{t("training_setup.measurements.your_bmi")}</h3>
         <div className="flex items-center justify-between mb-3">
           <div className="text-3xl font-bold">{bmi}</div>
