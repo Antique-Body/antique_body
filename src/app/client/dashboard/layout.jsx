@@ -57,6 +57,9 @@ export default function ClientDashboardLayout({ children }) {
       case "nutrition":
         router.push("/client/dashboard/nutrition");
         break;
+      case "health":
+        router.push("/client/dashboard/health");
+        break;
       default:
         router.push("/client/dashboard/trainwithcoach");
     }
@@ -209,6 +212,7 @@ export default function ClientDashboardLayout({ children }) {
     { id: "progress", label: "Progress" },
     { id: "messages", label: "Messages", badgeCount: unreadMessagesCount },
     { id: "nutrition", label: "Nutrition" },
+    { id: "health", label: "Health" },
   ];
 
   return (
