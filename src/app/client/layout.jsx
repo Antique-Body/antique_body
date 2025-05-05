@@ -1,4 +1,4 @@
-import { Navbar } from "@/components";
+import { Navbar } from "@/components/custom";
 
 export default function ClientLayout({ children }) {
   return (

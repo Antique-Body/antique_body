@@ -1,322 +1,325 @@
 {
-  "common": {
-    "loading": "Loading...",
-    "error": "Error",
-    "success": "Success",
-    "submit": "Submit",
-    "cancel": "Cancel",
-    "save": "Save",
-    "edit": "Edit",
-    "delete": "Delete",
-    "search": "Search",
-    "continue": "Continue",
-    "show": "Show",
-    "hide": "Hide"
-  },
-  "role": {
-    "admin": "Administrator",
-    "trainer": {
-      "label": "Trainer",
-      "become": "Become a Trainer",
-      "description": "Create your trainer profile, acquire clients, and track their progress. Share your expertise and help others achieve their fitness goals."
+    "common": {
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "submit": "Submit",
+        "cancel": "Cancel",
+        "save": "Save",
+        "edit": "Edit",
+        "delete": "Delete",
+        "search": "Search",
+        "continue": "Continue",
+        "show": "Show",
+        "hide": "Hide"
     },
-    "client": {
-      "label": "Client",
-      "train_with_coach": "Train with a Coach",
-      "description": "Connect with professional trainers who will guide your fitness journey, providing personalized workouts and nutrition advice."
+    "role": {
+        "admin": "Administrator",
+        "trainer": {
+            "label": "Trainer",
+            "become": "Become a Trainer",
+            "description": "Create your trainer profile, acquire clients, and track their progress. Share your expertise and help others achieve their fitness goals."
+        },
+        "client": {
+            "label": "Client",
+            "train_with_coach": "Train with a Coach",
+            "description": "Connect with professional trainers who will guide your fitness journey, providing personalized workouts and nutrition advice."
+        },
+        "user": {
+            "label": "User",
+            "custom_workout": "Custom Workout Plan",
+            "description": "Get a personalized workout plan based on your preferences, fitness level, and goals. Train independently with AI-generated exercises."
+        },
+        "selection": {
+            "title": "Choose Your Role",
+            "description": "Select the role that best fits your fitness journey",
+            "continue_as": "Are you sure you want to continue as {{role}}?",
+            "confirm_path": "Confirm Your Path"
+        },
+        "preparing": {
+            "journey": "Preparing your Ancient Journey",
+            "trainer": "Preparing your Trainer Journey",
+            "client": "Preparing your Client Journey",
+            "user": "Preparing your User Journey",
+            "admin": "Preparing your Admin Journey"
+        },
+        "update": {
+            "failed": "Failed to update role. Status: {{status}}"
+        }
     },
-    "user": {
-      "label": "User",
-      "custom_workout": "Custom Workout Plan",
-      "description": "Get a personalized workout plan based on your preferences, fitness level, and goals. Train independently with AI-generated exercises."
+    "auth": {
+        "login": {
+            "title": "Login",
+            "sign_in": "SIGN IN",
+            "sign_in_to_account": "Sign in to your account",
+            "forgot_password": "Forgot Password?",
+            "no_account": "Don't have an account?",
+            "back_to_login": "Back to Login",
+            "sign_in_with_google": "Sign in with Google",
+            "or_continue_with": "Or continue with"
+        },
+        "register": {
+            "title": "Register",
+            "join_fitness_community": "Join our fitness community",
+            "have_account": "Already have an account?",
+            "sign_in": "Sign In",
+            "verification": {
+                "email_sent": "Verification email sent",
+                "email_sent_again": "Verification email sent again",
+                "email_sent_to": "A verification email has been sent to",
+                "check_inbox": "Please check your inbox and follow the instructions to verify your account",
+                "resend": "Resend verification email"
+            }
+        },
+        "form": {
+            "email": "Email",
+            "password": "Password",
+            "submit": "Submit",
+            "confirm_password": "Confirm Password",
+            "first_name": "First Name",
+            "last_name": "Last Name"
+        },
+        "password_reset": {
+            "title": "Password Reset",
+            "instructions": "Enter your email and we'll send you instructions to reset your password",
+            "failed": "Failed to reset password",
+            "success": "Password reset instructions sent"
+        },
+        "logout": {
+            "title": "Logging Out",
+            "message": "You are being logged out. Please wait..."
+        },
+        "navigation": {
+            "go_to_login": "Go to Login",
+            "back_to_login": "Back to Login"
+        }
     },
-    "selection": {
-      "title": "Choose Your Role",
-      "description": "Select the role that best fits your fitness journey",
-      "continue_as": "Are you sure you want to continue as",
-      "confirm_path": "Confirm Your Path"
+    "dashboard": {
+        "welcome_to_dashboard": "Welcome to Your Dashboard",
+        "personalized_fitness_journey": "Your personalized fitness journey starts here",
+        "client_dashboard": "Client Dashboard",
+        "trainer_dashboard": "Trainer Dashboard",
+        "create_workout_plan": "Let's create your workout plan",
+        "answer_questions": "Answer a few questions to get started",
+        "step": "Step",
+        "saving_preferences": "Saving your preferences...",
+        "loading_dashboard": "Loading your dashboard...",
+        "choose_your_path": "Choose Your Path",
+        "select_experience": "Select how you want to experience your fitness journey",
+        "become_trainer": "Become a Trainer",
+        "trainer_description": "Create your trainer profile, acquire clients, and track their progress. Share your expertise and help others achieve their fitness goals.",
+        "train_with_coach": "Train with a Coach",
+        "client_description": "Connect with professional trainers who will guide your fitness journey, providing personalized workouts and nutrition advice.",
+        "custom_workout": "Custom Workout Plan",
+        "user_description": "Get a personalized workout plan based on your preferences, fitness level, and goals. Train independently with AI-generated exercises.",
+        "confirm_path": "Confirm Your Path",
+        "continue_as": "Are you sure you want to continue as",
+        "preparing_journey": "Preparing your Journey",
+        "preparing_trainer": "Preparing your Trainer Journey",
+        "preparing_client": "Preparing your Client Journey",
+        "preparing_user": "Preparing your User Journey",
+        "preparing_admin": "Preparing your Admin Journey",
+        "weight_validation": "Weight must be between {{min}} and {{max}} kg",
+        "height_validation": "Height must be between {{min}} and {{max}} cm",
+        "save_failed": "Failed to save data"
     },
-    "preparing": {
-      "journey": "Preparing your Ancient Journey",
-      "trainer": "Preparing your Trainer Journey",
-      "client": "Preparing your Client Journey",
-      "user": "Preparing your User Journey",
-      "admin": "Preparing your Admin Journey"
+    "home": {
+        "welcome_message": "Welcome to Antique Body",
+        "brand_name": "Antique Body",
+        "home_subtitle": "Your Journey to Ancient Fitness Begins Here",
+        "personalized_training_title": "Personalized Training",
+        "personalized_training_description": "Get a customized workout plan tailored to your goals, experience level, and preferences",
+        "expert_guidance_title": "Expert Guidance",
+        "expert_guidance_description": "Train with experienced professionals who understand your needs",
+        "ancient_wisdom_title": "Ancient Wisdom",
+        "ancient_wisdom_description": "Discover time-tested fitness principles that have stood the test of time",
+        "get_started": "Get Started",
+        "learn_more": "Learn More"
     },
-    "update": {
-      "failed": "Failed to update role. Status: {{status}}"
-    }
-  },
-  "auth": {
-    "login": {
-      "title": "Login",
-      "sign_in": "SIGN IN",
-      "sign_in_to_account": "Sign in to your account",
-      "forgot_password": "Forgot Password?",
-      "no_account": "Don't have an account?",
-      "back_to_login": "Back to Login",
-      "sign_in_with_google": "Sign in with Google",
-      "or_continue_with": "Or continue with"
+    "verification": {
+        "verifying_email": "Verifying Your Email",
+        "please_wait": "Please wait while we verify your email address...",
+        "email_verified": "Email Verified!",
+        "email_verification_success": "Your email has been successfully verified. Your account is now active.",
+        "redirecting_to_login": "Redirecting to login in",
+        "seconds": "seconds",
+        "cancel_redirect": "Cancel",
+        "continue_to_login": "Continue to Login",
+        "verification_failed": "Verification Failed",
+        "verification_error": "We couldn't verify your email address. The link may be invalid or expired.",
+        "back_to_login": "Back to Login",
+        "technical_details": "Technical Details",
+        "invalid_reset_link": "Invalid Reset Link",
+        "reset_link_expired": "This password reset link is invalid or has expired.",
+        "return_to_login": "Return to Login"
     },
-    "register": {
-      "title": "Register",
-      "join_fitness_community": "Join our fitness community",
-      "have_account": "Already have an account?",
-      "sign_in": "Sign In",
-      "verification": {
-        "email_sent": "Verification email sent",
-        "email_sent_again": "Verification email sent again",
-        "email_sent_to": "A verification email has been sent to",
-        "check_inbox": "Please check your inbox and follow the instructions to verify your account",
-        "resend": "Resend verification email"
-      }
+    "validation": {
+        "required_field": "Required field",
+        "email_required": "Email is required",
+        "email_invalid": "Please enter a valid email address",
+        "password_required": "Password is required",
+        "password_min_length": "Password must be at least 6 characters long",
+        "passwords_must_match": "Passwords must match",
+        "first_name_required": "First name is required",
+        "last_name_required": "Last name is required",
+        "confirm_password_required": "Please confirm your password",
+        "passwords_do_not_match": "Passwords do not match"
     },
-    "form": {
-      "email": "Email",
-      "password": "Password",
-      "submit": "Submit"
+    "errors": {
+        "login_failed": "Login failed. Please check your credentials.",
+        "register_failed": "Registration failed. Please try again.",
+        "password_reset_failed": "Password reset failed. Please try again.",
+        "general_error": "An error occurred. Please try again."
     },
-    "password_reset": {
-      "title": "Password Reset",
-      "instructions": "Enter your email and we'll send you instructions to reset your password",
-      "failed": "Failed to reset password",
-      "success": "Password reset instructions sent"
+    "training_setup": {
+        "title": "Training Setup",
+        "description": "Let's set up your training preferences",
+        "step": "Step",
+        "next": "Next",
+        "previous": "Previous",
+        "start_training": "Start Training",
+        "saving": "Saving your preferences...",
+        "redirecting": "Redirecting to dashboard...",
+        "injury": {
+            "title": "Do you have any injuries?",
+            "select_locations": "Select injured body parts",
+            "rehabilitation": "Do you want rehabilitation?",
+            "selected_injuries": "Selected injuries",
+            "no_injuries_selected": "No injuries selected",
+            "tap_locations": "Tap on the body parts where you have injuries",
+            "body_outline": "Body outline",
+            "locations": {
+                "head": "Head",
+                "neck": "Neck",
+                "chest": "Chest",
+                "shoulder_left": "Left Shoulder",
+                "shoulder_right": "Right Shoulder",
+                "bicep_left": "Left Bicep",
+                "bicep_right": "Right Bicep",
+                "forearm_left": "Left Forearm",
+                "forearm_right": "Right Forearm",
+                "abdomen": "Abdomen",
+                "hip_left": "Left Hip",
+                "hip_right": "Right Hip",
+                "quad_left": "Left Quad",
+                "quad_right": "Right Quad",
+                "knee_left": "Left Knee",
+                "knee_right": "Right Knee",
+                "ankle_left": "Left Ankle",
+                "ankle_right": "Right Ankle",
+                "upper_back": "Upper Back",
+                "lower_back": "Lower Back",
+                "back_shoulder_left": "Left Back Shoulder",
+                "back_shoulder_right": "Right Back Shoulder",
+                "tricep_left": "Left Tricep",
+                "tricep_right": "Right Tricep",
+                "glute_left": "Left Glute",
+                "glute_right": "Right Glute",
+                "hamstring_left": "Left Hamstring",
+                "hamstring_right": "Right Hamstring",
+                "calf_left": "Left Calf",
+                "calf_right": "Right Calf",
+                "achilles_left": "Left Achilles",
+                "achilles_right": "Right Achilles"
+            },
+            "options": {
+                "no_injuries": "No Injuries",
+                "no_injuries_desc": "I don't have any injuries",
+                "past_injury": "Past Injury",
+                "past_injury_desc": "I had an injury in the past",
+                "current_injury": "Current Injury",
+                "current_injury_desc": "I have a current injury",
+                "chronic_injury": "Chronic Injury",
+                "chronic_injury_desc": "I have a chronic/recurring injury",
+                "yes_rehab": "Yes",
+                "yes_rehab_desc": "I want rehabilitation exercises",
+                "no_rehab": "No",
+                "no_rehab_desc": "I want a regular workout"
+            }
+        },
+        "environment": {
+            "title": "Where will you be training?",
+            "options": {
+                "gym": "In the Gym",
+                "gym_desc": "Train in a fully equipped gym",
+                "outside": "Outside",
+                "outside_desc": "Train outdoors in nature"
+            }
+        },
+        "equipment": {
+            "title": "What equipment do you have?",
+            "options": {
+                "with_equipment": "With Equipment",
+                "with_equipment_desc": "Dumbbells, resistance bands, etc.",
+                "no_equipment": "Bodyweight Only",
+                "no_equipment_desc": "No equipment needed"
+            }
+        },
+        "experience": {
+            "title": "How long have you been training?",
+            "options": {
+                "beginner": "Beginner",
+                "beginner_desc": "0-6 months",
+                "intermediate": "Intermediate",
+                "intermediate_desc": "6 months - 2 years",
+                "advanced": "2 to 5 years",
+                "advanced_desc": "2-5 years",
+                "expert": "5+ years",
+                "expert_desc": "More than 5 years"
+            }
+        },
+        "goal": {
+            "title": "What's your main goal?",
+            "options": {
+                "strength": "Build Strength",
+                "strength_desc": "Increase power & force",
+                "muscle": "Build Muscle",
+                "muscle_desc": "Gain size & definition",
+                "lose_weight": "Lose Weight",
+                "lose_weight_desc": "Burn fat & reduce weight",
+                "endurance": "Build Endurance",
+                "endurance_desc": "Improve stamina & cardio"
+            }
+        },
+        "frequency": {
+            "title": "How many times per week will you train?",
+            "description": "Select your preferred training frequency",
+            "times_per_week": "{{count}} time per week",
+            "times_per_week_plural": "{{count}} times per week"
+        },
+        "measurements": {
+            "title": "What are your measurements?",
+            "description": "Enter your current measurements",
+            "weight": "Weight ({{unit}})",
+            "height": "Height ({{unit}})",
+            "height_feet": "Height (feet)",
+            "height_inches": "Inches",
+            "bmi": "BMI",
+            "your_bmi": "Your BMI",
+            "metric": "Metric (kg/cm)",
+            "imperial": "Imperial (lb/ft)",
+            "weight_placeholder": "Enter your weight in {{unit}}",
+            "height_placeholder_metric": "Enter your height in centimeters",
+            "feet_placeholder": "Feet",
+            "inches_placeholder": "Inches",
+            "weight_validation": "Please enter a valid weight between {{min}} and {{max}} {{unit}}",
+            "height_validation": "Please enter a valid height between {{min}} and {{max}} {{unit}}",
+            "feet_validation": "Please enter a valid feet value between {{min}} and {{max}}",
+            "inches_validation": "Please enter a valid inches value between 0 and 11.9",
+            "total_height_validation": "Total height must be between {{min}} and {{max}} feet",
+            "bmi_categories": {
+                "underweight": "Underweight",
+                "normal": "Normal weight",
+                "overweight": "Overweight",
+                "obese": "Obese"
+            }
+        }
     },
-    "logout": {
-      "title": "Logging Out",
-      "message": "You are being logged out. Please wait..."
-    },
-    "navigation": {
-      "go_to_login": "Go to Login",
-      "back_to_login": "Back to Login"
-    }
-  },
-  "dashboard": {
-    "welcome_to_dashboard": "Welcome to Your Dashboard",
-    "personalized_fitness_journey": "Your personalized fitness journey starts here",
-    "client_dashboard": "Client Dashboard",
-    "trainer_dashboard": "Trainer Dashboard",
-    "create_workout_plan": "Let's create your workout plan",
-    "answer_questions": "Answer a few questions to get started",
-    "step": "Step",
-    "saving_preferences": "Saving your preferences...",
-    "loading_dashboard": "Loading your dashboard...",
-    "choose_your_path": "Choose Your Path",
-    "select_experience": "Select how you want to experience your fitness journey",
-    "become_trainer": "Become a Trainer",
-    "trainer_description": "Create your trainer profile, acquire clients, and track their progress. Share your expertise and help others achieve their fitness goals.",
-    "train_with_coach": "Train with a Coach",
-    "client_description": "Connect with professional trainers who will guide your fitness journey, providing personalized workouts and nutrition advice.",
-    "custom_workout": "Custom Workout Plan",
-    "user_description": "Get a personalized workout plan based on your preferences, fitness level, and goals. Train independently with AI-generated exercises.",
-    "confirm_path": "Confirm Your Path",
-    "continue_as": "Are you sure you want to continue as",
-    "preparing_journey": "Preparing your Journey",
-    "preparing_trainer": "Preparing your Trainer Journey",
-    "preparing_client": "Preparing your Client Journey",
-    "preparing_user": "Preparing your User Journey",
-    "preparing_admin": "Preparing your Admin Journey",
-    "weight_validation": "Weight must be between {{min}} and {{max}} kg",
-    "height_validation": "Height must be between {{min}} and {{max}} cm",
-    "save_failed": "Failed to save data"
-  },
-  "home": {
-    "welcome_message": "Welcome to Antique Body",
-    "brand_name": "Antique Body",
-    "home_subtitle": "Your Journey to Ancient Fitness Begins Here",
-    "personalized_training_title": "Personalized Training",
-    "personalized_training_description": "Get a customized workout plan tailored to your goals, experience level, and preferences",
-    "expert_guidance_title": "Expert Guidance",
-    "expert_guidance_description": "Train with experienced professionals who understand your needs",
-    "ancient_wisdom_title": "Ancient Wisdom",
-    "ancient_wisdom_description": "Discover time-tested fitness principles that have stood the test of time",
-    "get_started": "Get Started",
-    "learn_more": "Learn More"
-  },
-  "verification": {
-    "verifying_email": "Verifying Your Email",
-    "please_wait": "Please wait while we verify your email address...",
-    "email_verified": "Email Verified!",
-    "email_verification_success": "Your email has been successfully verified. Your account is now active.",
-    "redirecting_to_login": "Redirecting to login in",
-    "seconds": "seconds",
-    "cancel_redirect": "Cancel",
-    "continue_to_login": "Continue to Login",
-    "verification_failed": "Verification Failed",
-    "verification_error": "We couldn't verify your email address. The link may be invalid or expired.",
-    "back_to_login": "Back to Login",
-    "technical_details": "Technical Details",
-    "invalid_reset_link": "Invalid Reset Link",
-    "reset_link_expired": "This password reset link is invalid or has expired.",
-    "return_to_login": "Return to Login"
-  },
-  "validation": {
-    "required_field": "Required field",
-    "email_required": "Email is required",
-    "email_invalid": "Please enter a valid email address",
-    "password_required": "Password is required",
-    "password_min_length": "Password must be at least 6 characters long",
-    "passwords_must_match": "Passwords must match",
-    "first_name_required": "First name is required",
-    "last_name_required": "Last name is required",
-    "confirm_password_required": "Please confirm your password",
-    "passwords_do_not_match": "Passwords do not match"
-  },
-  "errors": {
-    "login_failed": "Login failed. Please check your credentials.",
-    "register_failed": "Registration failed. Please try again.",
-    "password_reset_failed": "Password reset failed. Please try again.",
-    "general_error": "An error occurred. Please try again."
-  },
-  "training_setup": {
-    "title": "Training Setup",
-    "description": "Let's set up your training preferences",
-    "step": "Step",
-    "next": "Next",
-    "previous": "Previous",
-    "start_training": "Start Training",
-    "saving": "Saving your preferences...",
-    "redirecting": "Redirecting to dashboard...",
-    "injury": {
-      "title": "Do you have any injuries?",
-      "select_locations": "Select injured body parts",
-      "rehabilitation": "Do you want rehabilitation?",
-      "selected_injuries": "Selected injuries",
-      "no_injuries_selected": "No injuries selected",
-      "tap_locations": "Tap on the body parts where you have injuries",
-      "body_outline": "Body outline",
-      "locations": {
-        "head": "Head",
-        "neck": "Neck",
-        "chest": "Chest",
-        "shoulder_left": "Left Shoulder",
-        "shoulder_right": "Right Shoulder",
-        "bicep_left": "Left Bicep",
-        "bicep_right": "Right Bicep",
-        "forearm_left": "Left Forearm",
-        "forearm_right": "Right Forearm",
-        "abdomen": "Abdomen",
-        "hip_left": "Left Hip",
-        "hip_right": "Right Hip",
-        "quad_left": "Left Quad",
-        "quad_right": "Right Quad",
-        "knee_left": "Left Knee",
-        "knee_right": "Right Knee",
-        "ankle_left": "Left Ankle",
-        "ankle_right": "Right Ankle",
-        "upper_back": "Upper Back",
-        "lower_back": "Lower Back",
-        "back_shoulder_left": "Left Back Shoulder",
-        "back_shoulder_right": "Right Back Shoulder",
-        "tricep_left": "Left Tricep",
-        "tricep_right": "Right Tricep",
-        "glute_left": "Left Glute",
-        "glute_right": "Right Glute",
-        "hamstring_left": "Left Hamstring",
-        "hamstring_right": "Right Hamstring",
-        "calf_left": "Left Calf",
-        "calf_right": "Right Calf",
-        "achilles_left": "Left Achilles",
-        "achilles_right": "Right Achilles"
-      },
-      "options": {
-        "no_injuries": "No Injuries",
-        "no_injuries_desc": "I don't have any injuries",
-        "past_injury": "Past Injury",
-        "past_injury_desc": "I had an injury in the past",
-        "current_injury": "Current Injury",
-        "current_injury_desc": "I have a current injury",
-        "chronic_injury": "Chronic Injury",
-        "chronic_injury_desc": "I have a chronic/recurring injury",
-        "yes_rehab": "Yes",
-        "yes_rehab_desc": "I want rehabilitation exercises",
-        "no_rehab": "No",
-        "no_rehab_desc": "I want a regular workout"
-      }
-    },
-    "environment": {
-      "title": "Where will you be training?",
-      "options": {
-        "gym": "In the Gym",
-        "gym_desc": "Train in a fully equipped gym",
-        "outside": "Outside",
-        "outside_desc": "Train outdoors in nature"
-      }
-    },
-    "equipment": {
-      "title": "What equipment do you have?",
-      "options": {
-        "with_equipment": "With Equipment",
-        "with_equipment_desc": "Dumbbells, resistance bands, etc.",
-        "no_equipment": "Bodyweight Only",
-        "no_equipment_desc": "No equipment needed"
-      }
-    },
-    "experience": {
-      "title": "How long have you been training?",
-      "options": {
-        "beginner": "Beginner",
-        "beginner_desc": "0-6 months",
-        "intermediate": "Intermediate",
-        "intermediate_desc": "6 months - 2 years",
-        "advanced": "2 to 5 years",
-        "advanced_desc": "2-5 years",
-        "expert": "5+ years",
-        "expert_desc": "More than 5 years"
-      }
-    },
-    "goal": {
-      "title": "What's your main goal?",
-      "options": {
-        "strength": "Build Strength",
-        "strength_desc": "Increase power & force",
-        "muscle": "Build Muscle",
-        "muscle_desc": "Gain size & definition",
-        "lose_weight": "Lose Weight",
-        "lose_weight_desc": "Burn fat & reduce weight",
-        "endurance": "Build Endurance",
-        "endurance_desc": "Improve stamina & cardio"
-      }
-    },
-    "frequency": {
-      "title": "How many times per week will you train?",
-      "description": "Select your preferred training frequency",
-      "times_per_week": "{{count}} time per week",
-      "times_per_week_plural": "{{count}} times per week"
-    },
-    "measurements": {
-      "title": "What are your measurements?",
-      "description": "Enter your current measurements",
-      "weight": "Weight ({{unit}})",
-      "height": "Height ({{unit}})",
-      "height_feet": "Height (feet)",
-      "height_inches": "Inches",
-      "bmi": "BMI",
-      "your_bmi": "Your BMI",
-      "metric": "Metric (kg/cm)",
-      "imperial": "Imperial (lb/ft)",
-      "weight_placeholder": "Enter your weight in {{unit}}",
-      "height_placeholder_metric": "Enter your height in centimeters",
-      "feet_placeholder": "Feet",
-      "inches_placeholder": "Inches",
-      "weight_validation": "Please enter a valid weight between {{min}} and {{max}} {{unit}}",
-      "height_validation": "Please enter a valid height between {{min}} and {{max}} {{unit}}",
-      "feet_validation": "Please enter a valid feet value between {{min}} and {{max}}",
-      "inches_validation": "Please enter a valid inches value between 0 and 11.9",
-      "total_height_validation": "Total height must be between {{min}} and {{max}} feet",
-      "bmi_categories": {
-        "underweight": "Underweight",
-        "normal": "Normal weight",
-        "overweight": "Overweight",
-        "obese": "Obese"
-      }
-    }
-  },
-  "registration_successful": "Registration Successful!",
-  "check_inbox_verification": "Please check your inbox and follow the instructions to verify your account",
-  "resend_verification_email": "Resend Verification Email",
-  "go_to_login": "Go to Login",
-  "register_failed": "Registration failed",
-  "verification_email_failed": "Failed to send verification email",
-  "verification_email_sent_again": "Verification email sent again"
-} 
+    "registration_successful": "Registration Successful!",
+    "check_inbox_verification": "Please check your inbox and follow the instructions to verify your account",
+    "resend_verification_email": "Resend Verification Email",
+    "go_to_login": "Go to Login",
+    "register_failed": "Registration failed",
+    "verification_email_failed": "Failed to send verification email",
+    "verification_email_sent_again": "Verification email sent again"
+}
