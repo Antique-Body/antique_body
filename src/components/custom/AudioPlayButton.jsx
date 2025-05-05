@@ -11,7 +11,9 @@ export default function AudioPlayButton({ audioSrc }) {
             if (isPlaying) {
                 audioRef.current.pause();
             } else {
-                audioRef.current.play().catch((error) => {});
+                audioRef.current.play().catch((error) => {
+                    console.error("Error playing audio:", error);
+                });
             }
             setIsPlaying(!isPlaying);
         }

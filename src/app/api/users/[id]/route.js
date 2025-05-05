@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { isAuthenticated, hasRole } from "@/middleware/auth";
+import { hasRole } from "@/middleware/auth";
 import { validateUserUpdate } from "@/middleware/validation";
 import { userService } from "@/services/users";
 

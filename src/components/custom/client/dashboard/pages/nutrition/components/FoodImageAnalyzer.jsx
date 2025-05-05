@@ -309,7 +309,7 @@ export const FoodImageAnalyzer = ({ onAddToMeal, dailyGoals, dailyMacros }) => {
                                 ) : (
                                     <div className="w-full">
                                         <div className="mb-4 flex items-center justify-between">
-                                            <h3 className="text-xl font-bold">{analysis.foodName}</h3>
+                                            <h3 className="text-xl font-bold capitalize">{analysis.foodName}</h3>
                                             <div className="rounded-md bg-[rgba(255,107,0,0.15)] px-2 py-1 text-xs font-medium text-[#FF6B00]">
                                                 {analysis.confidence > 0.9 ? "High Confidence" : "Medium Confidence"}
                                             </div>

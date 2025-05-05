@@ -1,75 +1,75 @@
 import { NextResponse } from "next/server";
-// import { getToken } from "next-auth/jwt";
+import { getToken } from "next-auth/jwt";
 
 export async function middleware(request) {
     // const token = await getToken({ req: request });
     // const { pathname } = request.nextUrl;
     // const userRole = token?.role?.toLowerCase();
 
-    // Public routes that don't require authentication
+    // // Public routes that don't require authentication
     // const publicPaths = ["/", "/auth/login", "/auth/register", "/auth/reset-password", "/auth/verify-email"];
 
-    // Check if the current path starts with any of the public paths
+    // // Check if the current path starts with any of the public paths
     // const isPublicRoute = publicPaths.some((path) => pathname === path || pathname.startsWith(`${path}?`));
 
     // // Handle routes for verification and reset password that have query parameters
     // if (pathname.startsWith("/auth/reset-password") || pathname.startsWith("/auth/verify-email")) {
-    //   return NextResponse.next();
+    //     return NextResponse.next();
     // }
 
     // // 1. Handle public routes
     // if (isPublicRoute) {
-    //   return NextResponse.next();
+    //     return NextResponse.next();
     // }
 
     // // 2. Handle unauthenticated users
     // if (!token) {
-    //   return NextResponse.redirect(new URL("/auth/login", request.url));
+    //     return NextResponse.redirect(new URL("/auth/login", request.url));
     // }
 
     // // 3. Handle users without a role
     // if (!userRole) {
-    //   if (pathname !== "/select-role") {
-    //     return NextResponse.redirect(new URL("/select-role", request.url));
-    //   }
-    //   return NextResponse.next();
+    //     if (pathname !== "/select-role") {
+    //         return NextResponse.redirect(new URL("/select-role", request.url));
+    //     }
+    //     return NextResponse.next();
     // }
 
     // // 4. Role-based routing
     // if (userRole === "trainer") {
-    //   if (pathname !== "/trainer/dashboard") {
-    //     return NextResponse.redirect(new URL("/trainer/dashboard", request.url));
-    //   }
-    //   return NextResponse.next();
+    //     if (pathname !== "/trainer/dashboard") {
+    //         return NextResponse.redirect(new URL("/trainer/dashboard", request.url));
+    //     }
+    //     return NextResponse.next();
     // }
 
     // if (userRole === "client") {
-    //   if (pathname !== "/client/dashboard") {
-    //     return NextResponse.redirect(new URL("/client/dashboard", request.url));
-    //   }
-    //   return NextResponse.next();
+    //     if (pathname !== "/client/dashboard") {
+    //         return NextResponse.redirect(new URL("/client/dashboard", request.url));
+    //     }
+    //     return NextResponse.next();
     // }
 
     // if (userRole === "user") {
-    //   const hasPreferences = token?.hasCompletedTrainingSetup;
-    //   const targetPath = hasPreferences ? "/user/dashboard" : "/user/training-setup";
+    //     const hasPreferences = token?.hasCompletedTrainingSetup;
+    //     const targetPath = hasPreferences ? "/user/dashboard" : "/user/training-setup";
 
-    //   // Allow access to both training-setup and dashboard for users
-    //   if (pathname.startsWith("/user/")) {
+    //     // Allow access to both training-setup and dashboard for users
+    //     if (pathname.startsWith("/user/")) {
+    //         return NextResponse.next();
+    //     }
+
+    //     // Redirect to appropriate path if not already there
+    //     if (pathname !== targetPath) {
+    //         return NextResponse.redirect(new URL(targetPath, request.url));
+    //     }
     //     return NextResponse.next();
-    //   }
-
-    //   // Redirect to appropriate path if not already there
-    //   if (pathname !== targetPath) {
-    //     return NextResponse.redirect(new URL(targetPath, request.url));
-    //   }
-    //   return NextResponse.next();
     // }
 
     // // Check if the request is for email verification
-    // if (pathname.startsWith('/api/email-verification')) {
-    //   // Let the request continue to the API route
-    //   return NextResponse.next();
+    // if (pathname.startsWith("/api/email-verification")) {
+    //     // Let the request continue to the API route
+    //     return NextResponse.next();
     // }
 
     // Default fallback

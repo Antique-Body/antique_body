@@ -11,7 +11,6 @@ export default function TrainerUpcomingTrainingsPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [filterStatus, setFilterStatus] = useState("");
     const [filterType, setFilterType] = useState("");
-    const [modalOpen, setModalOpen] = useState(false);
     const [selectedTraining, setSelectedTraining] = useState(null);
     const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false);
 
@@ -150,12 +149,10 @@ export default function TrainerUpcomingTrainingsPage() {
 
     const openNewTrainingModal = () => {
         setSelectedTraining(null);
-        setModalOpen(true);
     };
 
     const openManageTrainingModal = (training) => {
         setSelectedTraining(training);
-        setModalOpen(true);
     };
 
     const openRescheduleModal = (e, training) => {
@@ -170,14 +167,10 @@ export default function TrainerUpcomingTrainingsPage() {
 
     const handleReschedule = (sessionData) => {
         // Here you would update the training in your database
+        // eslint-disable-next-line no-console
         console.log("Rescheduled session:", sessionData);
         // For demo purposes, we'll just close the modal
         setRescheduleModalOpen(false);
-    };
-
-    const closeModal = () => {
-        setModalOpen(false);
-        setSelectedTraining(null);
     };
 
     const statusOptions = [

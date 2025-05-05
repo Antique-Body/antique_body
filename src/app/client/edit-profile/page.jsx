@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 import { BackButton } from "@/components/common/BackButton";
 import { Button } from "@/components/common/Button";
@@ -86,13 +86,8 @@ const ClientEditProfilePage = () => {
         bio: "I'm looking to get back in shape after a few years of low activity. I used to play soccer regularly and want to regain my fitness and strength.",
     });
 
-    // Update form progress whenever any data changes
-    useEffect(() => {
-        calculateFormProgress();
-    }, [clientData]);
-
     // Calculate form completion percentage
-    const calculateFormProgress = () => {
+    const calculateFormProgress = useCallback(() => {
         // This is a simplified calculation - in a real app you'd check all required fields
         const totalFields = 15; // approximate total number of important fields
         let filledFields = 0;
@@ -114,7 +109,12 @@ const ClientEditProfilePage = () => {
         if (clientData.bio) filledFields++;
 
         setFormProgress(Math.max(20, Math.round((filledFields / totalFields) * 100)));
-    };
+    }, [clientData]);
+
+    // Update form progress whenever any data changes
+    useEffect(() => {
+        calculateFormProgress();
+    }, [calculateFormProgress]);
 
     // Handler for text input changes
     const handleChange = (e) => {
