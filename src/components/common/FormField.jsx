@@ -33,7 +33,7 @@ export const FormField = ({
 }) => {
     // Handle react-hook-form props
     const inputProps = register
-        ? { ...register(name, rules) }
+        ? { ...register(name, rules), type }
         : {
               id: id || name,
               name,

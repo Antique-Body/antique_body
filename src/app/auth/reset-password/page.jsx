@@ -71,7 +71,7 @@ export default function ResetPasswordPage() {
     if (!token) {
         return (
             <main className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#161616] text-white relative">
-                <Background parthenon={true} runner={true} discus={true} colosseum={true} column={false} vase={false} />
+                <Background />
                 <div className="relative z-10 flex items-center justify-center min-h-screen">
                     <Card
                         className="w-full max-w-md p-8 bg-zinc-900/80 backdrop-blur-md border border-zinc-800 rounded-xl shadow-2xl"

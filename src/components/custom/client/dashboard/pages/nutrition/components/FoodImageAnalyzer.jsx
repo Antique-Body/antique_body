@@ -571,12 +571,12 @@ export const FoodImageAnalyzer = ({ onAddToMeal, dailyGoals, dailyMacros }) => {
                     </div>
 
                     {error && (
-                        <div className="mt-4 rounded-lg bg-red-900/20 p-4 text-sm text-red-200">
-                            <p>{error}</p>
+                        <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-start rounded-lg bg-red-900/20 p-3 text-sm text-red-200">
+                            <p className="mb-2 sm:mb-0">{error}</p>
                             {error.includes("manual input") && !manualInput && (
                                 <Button
                                     variant="ghost"
-                                    className="mt-2 text-[#FF6B00] hover:text-[#FF6B00]/80"
+                                    className="whitespace-nowrap pl-0 sm:pl-2 text-[#FF6B00] hover:text-[#FF6B00]/80"
                                     onClick={() => setManualInput(true)}
                                 >
                                     Enter food manually instead

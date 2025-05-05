@@ -1,5 +1,5 @@
 "use client";
-import { memo } from "react";
+import { memo, useEffect } from "react";
 
 import { Button } from "@/components/common/Button";
 import { CloseXIcon } from "@/components/common/Icons";
@@ -23,6 +23,24 @@ export const Modal = memo(
         footerBorder = true,
         size = "default", // default, large, small
     }) => {
+        // Handle ESC key press
+        useEffect(() => {
+            if (!isOpen) return;
+
+            const handleEscKey = (event) => {
+                if (event.key === "Escape") {
+                    onClose();
+                }
+            };
+
+            window.addEventListener("keydown", handleEscKey);
+
+            // Cleanup function to remove event listener
+            return () => {
+                window.removeEventListener("keydown", handleEscKey);
+            };
+        }, [isOpen, onClose]);
+
         if (!isOpen) return null;
 
         // Handle backdrop click to close modal

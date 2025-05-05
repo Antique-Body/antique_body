@@ -10,7 +10,6 @@ export default function UserDashboard() {
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white overflow-x-hidden relative">
             <Background />
-
             <div className="max-w-[550px] mx-auto px-5 py-5 relative z-20 h-screen flex flex-col items-center">
                 <header className="pt-10 w-full text-center justify-center">
                     <BrandLogo />

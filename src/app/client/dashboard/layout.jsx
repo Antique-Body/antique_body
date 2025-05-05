@@ -2,10 +2,10 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import Background from "@/components/background";
 import { DashboardTabs } from "@/components/custom";
 import { BrandLogo } from "@/components/custom/BrandLogo";
 import { ClientProfile } from "@/components/custom/client/dashboard/components";
-import Background from "@/components/background";
 
 export default function ClientDashboardLayout({ children }) {
     const router = useRouter();
@@ -216,7 +216,6 @@ export default function ClientDashboardLayout({ children }) {
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white">
             <Background />
-
             <div className="relative z-10 mx-auto max-w-screen-xl px-4 py-6">
                 <div className="mb-8 flex items-center justify-center">
                     <BrandLogo />

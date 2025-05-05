@@ -134,6 +134,7 @@ export const AuthForm = ({ onSubmit, loading, error, isLogin = true, googleSignI
 
             <Button
                 type="submit"
+                variant="primary"
                 loading={loading || authLoading}
                 className="w-full bg-gradient-to-r from-[#ff7800] to-[#ff5f00] py-2 rounded font-medium text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 disabled:opacity-50"
             >

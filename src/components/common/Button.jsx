@@ -17,7 +17,8 @@ export const Button = ({
     ...props
 }) => {
     // Base styles applied to all buttons
-    const baseStyles = "font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed rounded";
+    const baseStyles =
+        "font-medium cursor-pointer transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed rounded relative";
 
     // Size variations
     const sizes = {
@@ -58,6 +59,8 @@ export const Button = ({
         tab: "py-3 px-4 font-medium text-sm border-b-2 whitespace-nowrap bg-transparent rounded-none",
     };
 
+    const contentClasses = "flex items-center justify-center gap-2";
+
     return (
         <button
             className={cn(
@@ -74,15 +77,17 @@ export const Button = ({
             onClick={onClick}
             {...props}
         >
-            {loading ? (
-                <div className="flex items-center justify-center">
+            {/* Visible content */}
+            <div className={contentClasses} style={{ opacity: loading ? 0 : 1 }}>
+                {leftIcon && <span className="flex-shrink-0">{leftIcon}</span>}
+                {children}
+                {rightIcon && <span className="flex-shrink-0">{rightIcon}</span>}
+            </div>
+
+            {/* Loading spinner overlay */}
+            {loading && (
+                <div className="absolute inset-0 flex items-center justify-center">
                     <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                </div>
-            ) : (
-                <div className="flex items-center justify-center gap-2">
-                    {leftIcon && <span className="flex-shrink-0">{leftIcon}</span>}
-                    {children}
-                    {rightIcon && <span className="flex-shrink-0">{rightIcon}</span>}
                 </div>
             )}
         </button>

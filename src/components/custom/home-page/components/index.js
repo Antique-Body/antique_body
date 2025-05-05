@@ -1,0 +1,1 @@
+export { TopTrainersSection } from "./TopTrainersSection";

@@ -1,46 +1,76 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 // API Keys
-const HF_API_KEY = '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';
-const USDA_API_KEY = 'FB0PddhzFxWrUI2mgAf4CGt7oHqIt3UHLyeVFl2k';
-const NUTRITIONIX_APP_ID = '4224c603';
-const NUTRITIONIX_API_KEY = '484c7cf7419e0479b73fa8349367e0f1';
+const HF_API_KEY = "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";
+const USDA_API_KEY = "FB0PddhzFxWrUI2mgAf4CGt7oHqIt3UHLyeVFl2k";
+const NUTRITIONIX_APP_ID = "4224c603";
+const NUTRITIONIX_API_KEY = "67bb3800d9e56c2b46d5b99aa15c809e";
 
 // Common non-food items to filter out
 const commonNonFoodItems = [
-    'car', 'truck', 'vehicle', 'building', 'house', 'furniture', 'electronics',
-    'phone', 'computer', 'laptop', 'tablet', 'camera', 'television', 'tv',
-    'chair', 'table', 'desk', 'bed', 'sofa', 'couch', 'lamp', 'light',
-    'clothing', 'shirt', 'pants', 'dress', 'shoes', 'hat', 'jacket',
-    'animal', 'pet', 'dog', 'cat', 'bird', 'fish', 'plant', 'tree', 'flower'
+    "car",
+    "truck",
+    "vehicle",
+    "building",
+    "house",
+    "furniture",
+    "electronics",
+    "phone",
+    "computer",
+    "laptop",
+    "tablet",
+    "camera",
+    "television",
+    "tv",
+    "chair",
+    "table",
+    "desk",
+    "bed",
+    "sofa",
+    "couch",
+    "lamp",
+    "light",
+    "clothing",
+    "shirt",
+    "pants",
+    "dress",
+    "shoes",
+    "hat",
+    "jacket",
+    "animal",
+    "pet",
+    "dog",
+    "cat",
+    "bird",
+    "fish",
+    "plant",
+    "tree",
+    "flower",
 ];
 
 export async function POST(request) {
     try {
         const formData = await request.formData();
-        const file = formData.get('file');
-        const manualInput = formData.get('manualInput');
-        const manualFoodName = formData.get('manualFoodName');
-        const manualServingSize = formData.get('manualServingSize');
-        const manualServingUnit = formData.get('manualServingUnit');
-        const manualDescription = formData.get('manualDescription');
+        const file = formData.get("file");
+        const manualInput = formData.get("manualInput");
+        const manualFoodName = formData.get("manualFoodName");
+        const manualServingSize = formData.get("manualServingSize");
+        const manualServingUnit = formData.get("manualServingUnit");
+        const manualDescription = formData.get("manualDescription");
 
         // If manual input is provided, skip image analysis
-        if (manualInput === 'true' && manualFoodName) {
+        if (manualInput === "true" && manualFoodName) {
             // Validate required fields
             if (!manualServingSize || !manualServingUnit) {
-                return NextResponse.json(
-                    { error: 'Please provide both serving size and unit' },
-                    { status: 400 }
-                );
+                return NextResponse.json({ error: "Please provide both serving size and unit" }, { status: 400 });
             }
 
             // Try multiple databases for the best result
             const nutritionalInfo = await getBestNutritionalInfo(manualFoodName);
-            
+
             if (!nutritionalInfo) {
                 return NextResponse.json(
-                    { error: 'Could not find nutritional information for this food in any database' },
+                    { error: "Could not find nutritional information for this food in any database" },
                     { status: 404 }
                 );
             }
@@ -66,47 +96,46 @@ export async function POST(request) {
             return NextResponse.json({
                 foodName: manualFoodName,
                 confidence: 1.0,
-                ...nutritionalInfo
+                ...nutritionalInfo,
             });
         }
 
         if (!file) {
-            return NextResponse.json(
-                { error: 'No file provided' },
-                { status: 400 }
-            );
+            return NextResponse.json({ error: "No file provided" }, { status: 400 });
         }
 
         // Convert the file to base64
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
-        const base64Image = buffer.toString('base64');
+        const base64Image = buffer.toString("base64");
 
         // Try multiple AI models for better accuracy
         const [convnextResult, foodModelResult] = await Promise.all([
             analyzeWithConvNext(base64Image),
-            analyzeWithFoodModel(base64Image)
+            analyzeWithFoodModel(base64Image),
         ]);
 
         // Combine results from both models
         const combinedResult = combineModelResults(convnextResult, foodModelResult);
-        
+
         if (!combinedResult) {
             return NextResponse.json(
-                { error: 'Could not identify food with sufficient confidence. Please try again with a clearer food image or use manual input.' },
+                {
+                    error: "Could not identify food with sufficient confidence. Please try again with a clearer food image or use manual input.",
+                },
                 { status: 400 }
             );
         }
 
         const { foodName, confidence } = combinedResult;
 
-        const isLikelyNonFood = commonNonFoodItems.some(item => 
-            foodName.toLowerCase().includes(item.toLowerCase())
-        );
+        const isLikelyNonFood = commonNonFoodItems.some((item) => foodName.toLowerCase().includes(item.toLowerCase()));
 
         if (isLikelyNonFood) {
             return NextResponse.json(
-                { error: 'The image appears to contain a non-food item. Please provide a clear image of food or use manual input.' },
+                {
+                    error: "The image appears to contain a non-food item. Please provide a clear image of food or use manual input.",
+                },
                 { status: 400 }
             );
         }
@@ -116,7 +145,7 @@ export async function POST(request) {
 
         if (!nutritionalInfo) {
             return NextResponse.json(
-                { error: 'Could not find nutritional information for this food in any database. Please try manual input.' },
+                { error: "Could not find nutritional information for this food in any database. Please try manual input." },
                 { status: 404 }
             );
         }
@@ -124,7 +153,7 @@ export async function POST(request) {
         // Additional validation: check if the nutritional values make sense
         if (!isValidNutritionalInfo(nutritionalInfo)) {
             return NextResponse.json(
-                { error: 'The nutritional information seems incorrect. Please try manual input.' },
+                { error: "The nutritional information seems incorrect. Please try manual input." },
                 { status: 400 }
             );
         }
@@ -132,59 +161,135 @@ export async function POST(request) {
         return NextResponse.json({
             foodName,
             confidence,
-            ...nutritionalInfo
+            ...nutritionalInfo,
         });
-
     } catch (error) {
-        console.error('Error analyzing food:', error);
-        return NextResponse.json(
-            { error: 'Failed to analyze food image. Please try manual input.' },
-            { status: 500 }
-        );
+        console.error("Error analyzing food:", error);
+        return NextResponse.json({ error: "Failed to analyze food image. Please try manual input." }, { status: 500 });
     }
 }
 
 async function analyzeWithConvNext(base64Image) {
-    const response = await fetch(
-        'https://api-inference.huggingface.co/models/facebook/convnext-base-224',
-        {
-            method: 'POST',
+    try {
+        // First try with Microsoft's ResNet model
+        const response = await fetch("https://api-inference.huggingface.co/models/microsoft/resnet-50", {
+            method: "POST",
             headers: {
-                'Authorization': `Bearer ${HF_API_KEY}`,
-                'Content-Type': 'application/json',
+                Authorization: `Bearer ${HF_API_KEY}`,
+                "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                inputs: {
-                    image: base64Image
-                }
+                inputs: base64Image,
             }),
-        }
-    );
+        });
 
-    if (!response.ok) return null;
-    return await response.json();
+        if (!response.ok) {
+            console.error("ResNet API error:", await response.text());
+            // If ResNet fails, try with nateraw/food model as fallback
+            return await analyzeWithFallbackModel(base64Image);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("ResNet error:", error);
+        // If ResNet fails, try with nateraw/food model as fallback
+        return await analyzeWithFallbackModel(base64Image);
+    }
+}
+
+async function analyzeWithFallbackModel(base64Image) {
+    try {
+        const response = await fetch("https://api-inference.huggingface.co/models/nateraw/food", {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${HF_API_KEY}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                inputs: base64Image,
+            }),
+        });
+
+        if (!response.ok) {
+            console.error("Fallback model API error:", await response.text());
+            return null;
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Fallback model error:", error);
+        return null;
+    }
 }
 
 async function analyzeWithFoodModel(base64Image) {
-    // Using a more specialized food recognition model
-    const response = await fetch(
-        'https://api-inference.huggingface.co/models/facebook/convnext-base-224-finetuned-food101',
-        {
-            method: 'POST',
+    try {
+        // Using a more specialized model for food recognition
+        const response = await fetch("https://api-inference.huggingface.co/models/nateraw/food", {
+            method: "POST",
             headers: {
-                'Authorization': `Bearer ${HF_API_KEY}`,
-                'Content-Type': 'application/json',
+                Authorization: `Bearer ${HF_API_KEY}`,
+                "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                inputs: {
-                    image: base64Image
-                }
+                inputs: base64Image,
             }),
-        }
-    );
+        });
 
-    if (!response.ok) return null;
-    return await response.json();
+        if (!response.ok) {
+            console.error("Food Model API error:", await response.text());
+            return null;
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Food Model error:", error);
+        return null;
+    }
+}
+
+// Add meat-specific validation
+function validateMeatType(foodName, confidence) {
+    const meatTypes = {
+        chicken: ["chicken", "poultry", "hen", "rooster", "breast", "thigh", "wing", "drumstick", "leg", "whole chicken"],
+        beef: ["beef", "steak", "cow", "burger", "patty", "ground beef", "ribeye", "sirloin", "tenderloin", "roast"],
+        pork: ["pork", "pig", "bacon", "ham", "sausage", "chop", "loin", "belly", "ribs", "shoulder"],
+        lamb: ["lamb", "mutton", "sheep", "lamb chop", "lamb leg", "lamb shoulder"],
+        turkey: ["turkey", "turkey breast", "turkey thigh", "turkey leg", "turkey wing"],
+        fish: ["fish", "salmon", "tuna", "cod", "trout", "bass", "tilapia", "halibut", "mackerel", "sardine"],
+        seafood: ["shrimp", "prawn", "crab", "lobster", "mussel", "clam", "oyster", "scallop", "squid", "octopus"],
+    };
+
+    // Check if the food name contains any meat-related terms
+    const lowerFoodName = foodName.toLowerCase();
+    let detectedMeatType = null;
+    let meatConfidence = 0;
+    let bestMatch = null;
+
+    for (const [meatType, keywords] of Object.entries(meatTypes)) {
+        const matches = keywords.filter((keyword) => lowerFoodName.includes(keyword));
+        if (matches.length > 0) {
+            const currentConfidence = matches.length / keywords.length;
+            if (currentConfidence > meatConfidence) {
+                meatConfidence = currentConfidence;
+                detectedMeatType = meatType;
+                bestMatch = matches[0];
+            }
+        }
+    }
+
+    // If we detected a meat type but the confidence is too low, return null
+    if (detectedMeatType && meatConfidence < 0.2) {
+        return null;
+    }
+
+    // If we have a good meat match, use the specific meat term
+    if (bestMatch && meatConfidence > 0.3) {
+        foodName = bestMatch;
+    }
+
+    return {
+        foodName,
+        confidence: confidence * (detectedMeatType ? 1.3 : 1), // Boost confidence more for meat matches
+        meatType: detectedMeatType,
+    };
 }
 
 function combineModelResults(convnextResult, foodModelResult) {
@@ -192,19 +297,19 @@ function combineModelResults(convnextResult, foodModelResult) {
 
     // Combine and weight the results from both models
     const results = [];
-    
+
     if (convnextResult) {
         // Filter out non-food items from convnext results
-        const foodResults = convnextResult.filter(r => {
+        const foodResults = convnextResult.filter((r) => {
             const label = r.label.toLowerCase();
-            return !commonNonFoodItems.some(item => label.includes(item.toLowerCase()));
+            return !commonNonFoodItems.some((item) => label.includes(item.toLowerCase()));
         });
-        results.push(...foodResults.map(r => ({ ...r, weight: 0.4 })));
+        results.push(...foodResults.map((r) => ({ ...r, weight: 0.6 }))); // Give more weight to ResNet results
     }
-    
+
     if (foodModelResult) {
-        // Food model results get higher weight as it's specialized
-        results.push(...foodModelResult.map(r => ({ ...r, weight: 0.6 })));
+        // Food model results get lower weight as fallback
+        results.push(...foodModelResult.map((r) => ({ ...r, weight: 0.4 })));
     }
 
     // Group by label and combine scores
@@ -219,14 +324,14 @@ function combineModelResults(convnextResult, foodModelResult) {
 
     // Calculate weighted average and sort
     const finalResults = Object.values(combined)
-        .map(r => ({
+        .map((r) => ({
             label: r.label,
-            score: r.score / r.weight
+            score: r.score / r.weight,
         }))
         .sort((a, b) => b.score - a.score);
 
-    // Adjusted confidence threshold for better performance
-    if (finalResults.length === 0 || finalResults[0].score < 0.75) {
+    // Lower confidence threshold for better recognition
+    if (finalResults.length === 0 || finalResults[0].score < 0.15) {
         return null;
     }
 
@@ -234,16 +339,29 @@ function combineModelResults(convnextResult, foodModelResult) {
     if (finalResults.length > 1) {
         const topScore = finalResults[0].score;
         const secondScore = finalResults[1].score;
-        
-        // Reduced gap requirement for better performance
-        if (topScore - secondScore < 0.15) {
+
+        // Very small gap requirement for better performance
+        if (topScore - secondScore < 0.03) {
             return null;
         }
     }
 
+    // Clean up the food name
+    let foodName = finalResults[0].label;
+    // Remove common prefixes/suffixes that might confuse the nutrition database
+    foodName = foodName.replace(/^(a |an |the |some |piece of |slice of |bowl of |plate of )/i, "");
+    foodName = foodName.replace(/(, cooked|, raw|, prepared|, ready to eat)$/i, "");
+
+    // Validate meat type and adjust confidence
+    const validatedResult = validateMeatType(foodName, finalResults[0].score);
+    if (!validatedResult) {
+        return null;
+    }
+
     return {
-        foodName: finalResults[0].label,
-        confidence: finalResults[0].score
+        foodName: validatedResult.foodName,
+        confidence: validatedResult.confidence,
+        meatType: validatedResult.meatType,
     };
 }
 
@@ -253,14 +371,14 @@ async function getBestNutritionalInfo(foodName) {
         const [usdaInfo, nutritionixInfo, openFoodFactsInfo] = await Promise.all([
             getUSDAInfo(foodName),
             getNutritionixInfo(foodName),
-            getOpenFoodFactsInfo(foodName)
+            getOpenFoodFactsInfo(foodName),
         ]);
 
         // Combine and select the best information
         const combinedInfo = combineNutritionalInfo(usdaInfo, nutritionixInfo, openFoodFactsInfo);
         return combinedInfo;
     } catch (error) {
-        console.error('Error fetching nutritional info:', error);
+        console.error("Error fetching nutritional info:", error);
         return null;
     }
 }
@@ -270,26 +388,26 @@ async function getUSDAInfo(foodName) {
         const response = await fetch(
             `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(foodName)}&pageSize=1`,
             {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
             }
         );
 
         if (!response.ok) return null;
         const data = await response.json();
-        
+
         if (!data.foods || data.foods.length === 0) return null;
 
         const food = data.foods[0];
         const nutrients = food.foodNutrients;
-        
+
         const findNutrient = (id) => {
-            const nutrient = nutrients.find(n => n.nutrientId === id);
+            const nutrient = nutrients.find((n) => n.nutrientId === id);
             return nutrient ? nutrient.value : 0;
         };
 
         return {
-            source: 'USDA',
+            source: "USDA",
             confidence: 0.8,
             calories: findNutrient(1008),
             proteins: findNutrient(1003),
@@ -299,9 +417,9 @@ async function getUSDAInfo(foodName) {
             sugar: findNutrient(2000),
             sodium: findNutrient(1093),
             servingSize: food.servingSize || 100,
-            servingUnit: food.servingSizeUnit || 'g',
+            servingUnit: food.servingSizeUnit || "g",
             servingWeight: food.servingSize || 100,
-            brandName: food.brandName || 'Generic',
+            brandName: food.brandName || "Generic",
             description: food.description || foodName,
             // Additional nutrients
             saturatedFat: findNutrient(1258),
@@ -330,40 +448,37 @@ async function getUSDAInfo(foodName) {
             caffeine: findNutrient(1057),
             alcohol: findNutrient(1018),
             water: findNutrient(1051),
-            ash: findNutrient(1007)
+            ash: findNutrient(1007),
         };
     } catch (error) {
-        console.error('Error fetching USDA info:', error);
+        console.error("Error fetching USDA info:", error);
         return null;
     }
 }
 
 async function getNutritionixInfo(foodName) {
     try {
-        const response = await fetch(
-            'https://trackapi.nutritionix.com/v2/natural/nutrients',
-            {
-                method: 'POST',
-                headers: {
-                    'x-app-id': NUTRITIONIX_APP_ID,
-                    'x-app-key': NUTRITIONIX_API_KEY,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    query: foodName,
-                    timezone: "US/Eastern"
-                }),
-            }
-        );
+        const response = await fetch("https://trackapi.nutritionix.com/v2/natural/nutrients", {
+            method: "POST",
+            headers: {
+                "x-app-id": NUTRITIONIX_APP_ID,
+                "x-app-key": NUTRITIONIX_API_KEY,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                query: foodName,
+                timezone: "US/Eastern",
+            }),
+        });
 
         if (!response.ok) return null;
         const data = await response.json();
-        
+
         if (!data.foods || data.foods.length === 0) return null;
 
         const food = data.foods[0];
         return {
-            source: 'Nutritionix',
+            source: "Nutritionix",
             confidence: 0.7,
             calories: food.nf_calories || 0,
             proteins: food.nf_protein || 0,
@@ -373,20 +488,20 @@ async function getNutritionixInfo(foodName) {
             sugar: food.nf_sugars || 0,
             sodium: food.nf_sodium || 0,
             servingSize: food.serving_qty || 1,
-            servingUnit: food.serving_unit || 'serving',
+            servingUnit: food.serving_unit || "serving",
             servingWeight: food.serving_weight_grams || 0,
-            brandName: food.brand_name || 'Generic',
+            brandName: food.brand_name || "Generic",
             description: food.food_name || foodName,
             saturatedFat: food.nf_saturated_fat || 0,
             cholesterol: food.nf_cholesterol || 0,
             potassium: food.nf_potassium || 0,
-            vitaminA: food.full_nutrients?.find(n => n.attr_id === 320)?.value || 0,
-            vitaminC: food.full_nutrients?.find(n => n.attr_id === 401)?.value || 0,
-            calcium: food.full_nutrients?.find(n => n.attr_id === 301)?.value || 0,
-            iron: food.full_nutrients?.find(n => n.attr_id === 303)?.value || 0
+            vitaminA: food.full_nutrients?.find((n) => n.attr_id === 320)?.value || 0,
+            vitaminC: food.full_nutrients?.find((n) => n.attr_id === 401)?.value || 0,
+            calcium: food.full_nutrients?.find((n) => n.attr_id === 301)?.value || 0,
+            iron: food.full_nutrients?.find((n) => n.attr_id === 303)?.value || 0,
         };
     } catch (error) {
-        console.error('Error fetching Nutritionix info:', error);
+        console.error("Error fetching Nutritionix info:", error);
         return null;
     }
 }
@@ -396,23 +511,23 @@ async function getOpenFoodFactsInfo(foodName) {
         const response = await fetch(
             `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(foodName)}&search_simple=1&action=process&json=1`,
             {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
             }
         );
 
         if (!response.ok) return null;
         const data = await response.json();
-        
+
         if (!data.products || data.products.length === 0) return null;
 
         const product = data.products[0];
         const nutriments = product.nutriments || {};
-        
+
         return {
-            source: 'OpenFoodFacts',
+            source: "OpenFoodFacts",
             confidence: 0.75,
-            calories: nutriments['energy-kcal_100g'] || 0,
+            calories: nutriments["energy-kcal_100g"] || 0,
             proteins: nutriments.proteins_100g || 0,
             carbs: nutriments.carbohydrates_100g || 0,
             fats: nutriments.fat_100g || 0,
@@ -420,29 +535,29 @@ async function getOpenFoodFactsInfo(foodName) {
             sugar: nutriments.sugars_100g || 0,
             sodium: (nutriments.sodium_100g || 0) * 1000, // Convert to mg
             servingSize: 100,
-            servingUnit: 'g',
+            servingUnit: "g",
             servingWeight: 100,
-            brandName: product.brands || 'Generic',
+            brandName: product.brands || "Generic",
             description: product.product_name || foodName,
-            saturatedFat: nutriments['saturated-fat_100g'] || 0,
+            saturatedFat: nutriments["saturated-fat_100g"] || 0,
             cholesterol: nutriments.cholesterol_100g || 0,
             potassium: nutriments.potassium_100g || 0,
-            vitaminA: nutriments['vitamin-a_100g'] || 0,
-            vitaminC: nutriments['vitamin-c_100g'] || 0,
+            vitaminA: nutriments["vitamin-a_100g"] || 0,
+            vitaminC: nutriments["vitamin-c_100g"] || 0,
             calcium: nutriments.calcium_100g || 0,
             iron: nutriments.iron_100g || 0,
             // Additional nutrients
             magnesium: nutriments.magnesium_100g || 0,
             zinc: nutriments.zinc_100g || 0,
-            vitaminD: nutriments['vitamin-d_100g'] || 0,
-            vitaminE: nutriments['vitamin-e_100g'] || 0,
-            vitaminK: nutriments['vitamin-k_100g'] || 0,
-            thiamin: nutriments['vitamin-b1_100g'] || 0,
-            riboflavin: nutriments['vitamin-b2_100g'] || 0,
-            niacin: nutriments['vitamin-b3_100g'] || 0,
-            vitaminB6: nutriments['vitamin-b6_100g'] || 0,
-            folate: nutriments['vitamin-b9_100g'] || 0,
-            vitaminB12: nutriments['vitamin-b12_100g'] || 0,
+            vitaminD: nutriments["vitamin-d_100g"] || 0,
+            vitaminE: nutriments["vitamin-e_100g"] || 0,
+            vitaminK: nutriments["vitamin-k_100g"] || 0,
+            thiamin: nutriments["vitamin-b1_100g"] || 0,
+            riboflavin: nutriments["vitamin-b2_100g"] || 0,
+            niacin: nutriments["vitamin-b3_100g"] || 0,
+            vitaminB6: nutriments["vitamin-b6_100g"] || 0,
+            folate: nutriments["vitamin-b9_100g"] || 0,
+            vitaminB12: nutriments["vitamin-b12_100g"] || 0,
             phosphorus: nutriments.phosphorus_100g || 0,
             selenium: nutriments.selenium_100g || 0,
             copper: nutriments.copper_100g || 0,
@@ -450,10 +565,10 @@ async function getOpenFoodFactsInfo(foodName) {
             caffeine: nutriments.caffeine_100g || 0,
             alcohol: nutriments.alcohol_100g || 0,
             water: nutriments.water_100g || 0,
-            ash: nutriments.ash_100g || 0
+            ash: nutriments.ash_100g || 0,
         };
     } catch (error) {
-        console.error('Error fetching OpenFoodFacts info:', error);
+        console.error("Error fetching OpenFoodFacts info:", error);
         return null;
     }
 }
@@ -470,30 +585,40 @@ function combineNutritionalInfo(usdaInfo, nutritionixInfo, openFoodFactsInfo) {
 
     // Combine information from all sources, preferring higher confidence values
     const combinedInfo = { ...baseInfo };
-    
+
     // For each nutrient, use the value from the source with highest confidence
     const nutrients = [
-        'calories', 'proteins', 'carbs', 'fats', 'fiber', 'sugar', 'sodium',
-        'saturatedFat', 'cholesterol', 'potassium', 'vitaminA', 'vitaminC',
-        'calcium', 'iron'
+        "calories",
+        "proteins",
+        "carbs",
+        "fats",
+        "fiber",
+        "sugar",
+        "sodium",
+        "saturatedFat",
+        "cholesterol",
+        "potassium",
+        "vitaminA",
+        "vitaminC",
+        "calcium",
+        "iron",
     ];
 
-    nutrients.forEach(nutrient => {
+    nutrients.forEach((nutrient) => {
         const values = sources
-            .filter(s => s[nutrient] !== undefined && s[nutrient] !== 0)
-            .map(s => ({ value: s[nutrient], confidence: s.confidence }));
-        
+            .filter((s) => s[nutrient] !== undefined && s[nutrient] !== 0)
+            .map((s) => ({ value: s[nutrient], confidence: s.confidence }));
+
         if (values.length > 0) {
             // Use weighted average if multiple sources have values
             const totalConfidence = values.reduce((sum, v) => sum + v.confidence, 0);
-            combinedInfo[nutrient] = values.reduce((sum, v) => 
-                sum + (v.value * v.confidence / totalConfidence), 0);
+            combinedInfo[nutrient] = values.reduce((sum, v) => sum + (v.value * v.confidence) / totalConfidence, 0);
         }
     });
 
     // Round numeric values
-    Object.keys(combinedInfo).forEach(key => {
-        if (typeof combinedInfo[key] === 'number') {
+    Object.keys(combinedInfo).forEach((key) => {
+        if (typeof combinedInfo[key] === "number") {
             combinedInfo[key] = Number(combinedInfo[key].toFixed(1));
         }
     });
@@ -514,5 +639,5 @@ function isValidNutritionalInfo(info) {
     ];
 
     // All checks must pass
-    return checks.every(check => check === true);
-} 
+    return checks.every((check) => check === true);
+}
