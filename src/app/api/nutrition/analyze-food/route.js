@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 
 // API Keys
-const HF_API_KEY = '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';
+const AZURE_VISION_KEY = 'GEnxR09VxvFBATQ1i7fOXX6XiJxp7kJhZqZEYNi4fnKR8wQzOQdeJQQJ99BEAC5RqLJXJ3w3AAAFACOG8HGt'; // Trebat ćete dodati svoj Azure Vision ključ
+const AZURE_VISION_ENDPOINT = 'https://antiquebodyapp.cognitiveservices.azure.com/'; // Trebat ćete dodati svoj Azure Vision endpoint
 const USDA_API_KEY = 'FB0PddhzFxWrUI2mgAf4CGt7oHqIt3UHLyeVFl2k';
 const NUTRITIONIX_APP_ID = '4224c603';
 const NUTRITIONIX_API_KEY = '484c7cf7419e0479b73fa8349367e0f1';
@@ -15,10 +16,354 @@ const commonNonFoodItems = [
     'animal', 'pet', 'dog', 'cat', 'bird', 'fish', 'plant', 'tree', 'flower'
 ];
 
+// Food-related keywords to help with recognition
+const foodKeywords = [
+    // General food terms
+    'food', 'meal', 'dish', 'cuisine', 'cooking', 'cooked', 'raw', 'fresh',
+    'plate', 'bowl', 'serving', 'portion', 'restaurant', 'takeout', 'homemade',
+    'fast food', 'junk food', 'street food', 'finger food',
+
+    // Fast Food Chains
+    'kfc', 'mcdonalds', 'burger king', 'subway', 'pizza hut', 'dominos',
+    'wendys', 'taco bell', 'popeyes', 'chick fil a', 'five guys', 'shake shack',
+    'in n out', 'white castle', 'chipotle', 'panera', 'arbys', 'dunkin',
+    'starbucks', 'costa', 'pret a manger',
+
+    // Balkan Cuisine
+    'cevapi', 'cevapcici', 'pljeskavica', 'burek', 'sarma', 'musaka',
+    'gibanica', 'ajvar', 'kajmak', 'proja', 'rakija', 'slivovitz',
+    'balkan', 'bosnian', 'serbian', 'croatian', 'montenegrin',
+    'slovenian', 'macedonian', 'bulgarian', 'romanian', 'hungarian',
+    'greek', 'turkish', 'mediterranean', 'balkan food', 'balkan cuisine',
+    'pita', 'lepinja', 'somun', 'kifla', 'kiflice', 'pogaca',
+    'sarma', 'musaka', 'sogan dolma', 'dolma', 'grah', 'pasulj',
+    'prebranac', 'sataraš', 'paprikaš', 'gulaš', 'čorba', 'supa',
+    'kisela juha', 'kisela čorba', 'kisela supa', 'kisela juha',
+    'kisela čorba', 'kisela supa', 'kisela juha', 'kisela čorba',
+    'kisela supa', 'kisela juha', 'kisela čorba', 'kisela supa',
+
+    // Meats
+    'meat', 'chicken', 'beef', 'pork', 'steak', 'burger', 'hamburger', 'cheeseburger',
+    'sausage', 'bacon', 'ham', 'turkey', 'lamb', 'veal', 'patty', 'meatball',
+    'kebab', 'barbecue', 'bbq', 'grilled', 'fried chicken', 'nuggets',
+    'wings', 'drumsticks', 'breast', 'thigh', 'ribs', 'chops',
+    'roast', 'fillet', 'tenderloin', 'sirloin', 'ribeye', 't-bone',
+    'ground meat', 'minced meat', 'schnitzel', 'cutlet', 'escalope',
+    'meatloaf', 'bologna', 'salami', 'pepperoni', 'prosciutto',
+    'pancetta', 'chorizo', 'pastrami', 'corned beef', 'jerky',
+
+    // Seafood
+    'fish', 'seafood', 'salmon', 'tuna', 'shrimp', 'prawn', 'crab', 'lobster',
+    'oyster', 'mussel', 'clam', 'squid', 'octopus', 'anchovy', 'sardine',
+    'mackerel', 'trout', 'cod', 'halibut', 'sea bass', 'tilapia',
+    'catfish', 'swordfish', 'scallop', 'caviar', 'roe', 'sushi',
+    'sashimi', 'ceviche', 'fish and chips', 'fish fillet', 'fish steak',
+
+    // Vegetables
+    'vegetable', 'salad', 'lettuce', 'tomato', 'cucumber', 'carrot', 'potato',
+    'onion', 'garlic', 'pepper', 'broccoli', 'spinach', 'cabbage', 'mushroom',
+    'zucchini', 'eggplant', 'corn', 'peas', 'beans', 'celery', 'radish',
+    'beet', 'turnip', 'parsnip', 'sweet potato', 'yam', 'pumpkin',
+    'squash', 'asparagus', 'artichoke', 'cauliflower', 'brussels sprouts',
+    'kale', 'collard greens', 'mustard greens', 'swiss chard', 'bok choy',
+    'watercress', 'arugula', 'endive', 'fennel', 'leek', 'shallot',
+    'scallion', 'green onion', 'chive', 'parsley', 'cilantro', 'basil',
+    'thyme', 'rosemary', 'sage', 'oregano', 'mint', 'dill',
+
+    // Fruits
+    'fruit', 'apple', 'banana', 'orange', 'grape', 'strawberry', 'berry',
+    'pear', 'peach', 'plum', 'cherry', 'watermelon', 'melon', 'pineapple',
+    'mango', 'kiwi', 'avocado', 'pomegranate', 'fig', 'date', 'prune',
+    'raisin', 'cranberry', 'blueberry', 'raspberry', 'blackberry',
+    'currant', 'gooseberry', 'elderberry', 'mulberry', 'boysenberry',
+    'coconut', 'passion fruit', 'guava', 'papaya', 'dragon fruit',
+    'star fruit', 'persimmon', 'lychee', 'rambutan', 'durian',
+    'jackfruit', 'breadfruit', 'plantain', 'lime', 'lemon', 'grapefruit',
+    'tangerine', 'mandarin', 'clementine', 'kumquat', 'apricot',
+    'nectarine', 'quince', 'rhubarb',
+
+    // Grains & Breads
+    'bread', 'toast', 'sandwich', 'bun', 'roll', 'bagel', 'croissant',
+    'pasta', 'noodle', 'rice', 'grain', 'cereal', 'oatmeal', 'pancake',
+    'waffle', 'tortilla', 'wrap', 'pita', 'naan', 'focaccia', 'ciabatta',
+    'sourdough', 'rye', 'whole wheat', 'multigrain', 'baguette', 'brioche',
+    'challah', 'pumpernickel', 'matzo', 'lavash', 'flatbread', 'cracker',
+    'pretzel', 'muffin', 'scone', 'biscuit', 'danish', 'strudel',
+    'quinoa', 'couscous', 'bulgur', 'barley', 'millet', 'amaranth',
+    'buckwheat', 'spelt', 'farro', 'polenta', 'grits', 'cornmeal',
+
+    // Dairy & Eggs
+    'milk', 'cheese', 'yogurt', 'cream', 'butter', 'egg', 'omelette',
+    'cottage cheese', 'ricotta', 'mozzarella', 'cheddar', 'parmesan',
+    'feta', 'brie', 'camembert', 'gouda', 'swiss', 'provolone',
+    'blue cheese', 'gorgonzola', 'roquefort', 'cream cheese', 'sour cream',
+    'whipped cream', 'ice cream', 'gelato', 'sorbet', 'pudding',
+    'custard', 'flan', 'panna cotta', 'mascarpone', 'quark',
+    'kefir', 'buttermilk', 'condensed milk', 'evaporated milk',
+    'powdered milk', 'almond milk', 'soy milk', 'oat milk', 'coconut milk',
+
+    // Fast Food & Snacks
+    'pizza', 'burger', 'fries', 'chips', 'snack', 'sandwich', 'hotdog',
+    'taco', 'burrito', 'nachos', 'popcorn', 'pretzel', 'nuggets',
+    'wings', 'mozzarella sticks', 'onion rings', 'chicken tenders',
+    'fish sticks', 'corn dog', 'chili dog', 'cheese dog', 'bratwurst',
+    'sausage roll', 'sausage sandwich', 'meatball sub', 'philly cheesesteak',
+    'reuben', 'club sandwich', 'blt', 'grilled cheese', 'panini',
+    'wrap', 'burrito bowl', 'taco salad', 'nachos', 'quesadilla',
+    'empanada', 'calzone', 'stromboli', 'pizza roll', 'pizza pocket',
+    'pizza bagel', 'pizza bites', 'pizza sticks', 'pizza fries',
+    'pizza chips', 'pizza pretzel', 'pizza waffle', 'pizza pancake',
+
+    // Desserts & Sweets
+    'dessert', 'cake', 'pie', 'cookie', 'chocolate', 'ice cream', 'candy',
+    'sweet', 'pastry', 'donut', 'muffin', 'brownie', 'cheesecake',
+    'tiramisu', 'pudding', 'custard', 'flan', 'panna cotta',
+    'mousse', 'souffle', 'creme brulee', 'tart', 'eclair', 'profiterole',
+    'cannoli', 'baklava', 'strudel', 'croissant', 'danish', 'scone',
+    'biscuit', 'shortbread', 'gingerbread', 'fruitcake', 'pound cake',
+    'sponge cake', 'angel food cake', 'devil food cake', 'carrot cake',
+    'red velvet cake', 'chocolate cake', 'coffee cake', 'banana bread',
+    'zucchini bread', 'pumpkin bread', 'cornbread', 'muffin', 'cupcake',
+    'brownie', 'blondie', 'cookie', 'biscotti', 'macaron', 'meringue',
+    'fudge', 'toffee', 'caramel', 'nougat', 'marshmallow', 'gumdrop',
+    'jelly bean', 'licorice', 'candy cane', 'lollipop', 'gummy bear',
+    'gummy worm', 'chocolate bar', 'chocolate truffle', 'chocolate bonbon',
+    'chocolate covered', 'chocolate dipped', 'chocolate coated',
+
+    // Beverages
+    'drink', 'beverage', 'coffee', 'tea', 'juice', 'soda', 'water',
+    'smoothie', 'milkshake', 'cocktail', 'beer', 'wine', 'espresso',
+    'cappuccino', 'latte', 'mocha', 'americano', 'macchiato', 'frappuccino',
+    'hot chocolate', 'cocoa', 'chocolate milk', 'almond milk', 'soy milk',
+    'oat milk', 'coconut milk', 'rice milk', 'hemp milk', 'cashew milk',
+    'lemonade', 'limeade', 'orange juice', 'apple juice', 'grape juice',
+    'cranberry juice', 'tomato juice', 'vegetable juice', 'smoothie',
+    'protein shake', 'energy drink', 'sports drink', 'vitamin water',
+    'sparkling water', 'mineral water', 'spring water', 'purified water',
+    'distilled water', 'seltzer', 'tonic water', 'club soda', 'ginger ale',
+    'root beer', 'cream soda', 'orange soda', 'grape soda', 'lemon-lime soda',
+    'cola', 'diet cola', 'cherry cola', 'vanilla cola', 'coffee cola',
+    'beer', 'lager', 'ale', 'stout', 'porter', 'pilsner', 'wheat beer',
+    'hefeweizen', 'ipa', 'pale ale', 'amber ale', 'brown ale', 'red ale',
+    'wine', 'red wine', 'white wine', 'rose wine', 'sparkling wine',
+    'champagne', 'prosecco', 'cava', 'sake', 'mead', 'cider',
+    'hard cider', 'cocktail', 'martini', 'margarita', 'mojito',
+    'daiquiri', 'pina colada', 'mai tai', 'old fashioned', 'manhattan',
+    'whiskey sour', 'moscow mule', 'bloody mary', 'mimosa', 'bellini'
+];
+
+// Common food mappings for generic tags
+const foodMappings = {
+    'food': null, // Skip generic "food" tag
+    'meal': null, // Skip generic "meal" tag
+    'dish': null, // Skip generic "dish" tag
+    'fast food': null, // Don't default to burger anymore
+    'junk food': null, // Don't default to burger anymore
+    'finger food': 'snack',
+    'produce': 'vegetable',
+    'meat': 'beef',
+    'bun': 'hamburger bun',
+    'bread': 'sandwich bread',
+    'patty': 'beef patty',
+    'ground beef': 'beef patty',
+    'sandwich': 'hamburger',
+    'plate': null, // Skip plate detection
+    'table': null, // Skip table detection
+    
+    // Fast food chain mappings with specific items
+    'kfc': 'fried chicken',
+    'kentucky fried chicken': 'fried chicken',
+    'kentucky': 'fried chicken',
+    'fried chicken': 'kfc fried chicken',
+    'chicken bucket': 'kfc fried chicken',
+    'chicken pieces': 'kfc fried chicken',
+    'chicken wings': 'kfc wings',
+    'chicken nuggets': 'kfc nuggets',
+    'chicken tenders': 'kfc tenders',
+    'chicken sandwich': 'kfc sandwich',
+    'chicken burger': 'kfc sandwich',
+    'chicken fillet': 'kfc sandwich',
+    'chicken breast': 'kfc sandwich',
+    'chicken thigh': 'kfc fried chicken',
+    'chicken drumstick': 'kfc fried chicken',
+    'chicken leg': 'kfc fried chicken',
+    'chicken meal': 'kfc fried chicken',
+    'chicken dinner': 'kfc fried chicken',
+    'chicken box': 'kfc fried chicken',
+    'chicken combo': 'kfc fried chicken',
+    'chicken family meal': 'kfc fried chicken',
+    'chicken bucket meal': 'kfc fried chicken',
+    'chicken bucket dinner': 'kfc fried chicken',
+    'chicken bucket combo': 'kfc fried chicken',
+    'chicken bucket family meal': 'kfc fried chicken',
+    'chicken bucket box': 'kfc fried chicken',
+    'chicken bucket pack': 'kfc fried chicken',
+    'chicken bucket deal': 'kfc fried chicken',
+    'chicken bucket special': 'kfc fried chicken',
+    'chicken bucket value': 'kfc fried chicken',
+    'chicken bucket value meal': 'kfc fried chicken',
+    'chicken bucket value dinner': 'kfc fried chicken',
+    'chicken bucket value combo': 'kfc fried chicken',
+    'chicken bucket value family meal': 'kfc fried chicken',
+    'chicken bucket value box': 'kfc fried chicken',
+    'chicken bucket value pack': 'kfc fried chicken',
+    'chicken bucket value deal': 'kfc fried chicken',
+    'chicken bucket value special': 'kfc fried chicken',
+    
+    // Other fast food chains
+    'mcdonalds': 'big mac',
+    'mcdonalds burger': 'big mac',
+    'mcdonalds sandwich': 'big mac',
+    'mcdonalds meal': 'big mac meal',
+    'mcdonalds combo': 'big mac meal',
+    'mcdonalds value meal': 'big mac meal',
+    'mcdonalds value combo': 'big mac meal',
+    'mcdonalds value pack': 'big mac meal',
+    'mcdonalds value deal': 'big mac meal',
+    'mcdonalds value special': 'big mac meal',
+    
+    'burger king': 'whopper',
+    'burger king burger': 'whopper',
+    'burger king sandwich': 'whopper',
+    'burger king meal': 'whopper meal',
+    'burger king combo': 'whopper meal',
+    'burger king value meal': 'whopper meal',
+    'burger king value combo': 'whopper meal',
+    'burger king value pack': 'whopper meal',
+    'burger king value deal': 'whopper meal',
+    'burger king value special': 'whopper meal',
+    
+    // Balkan specific mappings
+    'balkan food': 'cevapi',
+    'balkan cuisine': 'cevapi',
+    'bosnian food': 'cevapi',
+    'serbian food': 'pljeskavica',
+    'croatian food': 'cevapi',
+    'montenegrin food': 'cevapi',
+    'slovenian food': 'kranjska klobasa',
+    'macedonian food': 'tavce gravce',
+    'bulgarian food': 'banitsa',
+    'romanian food': 'sarmale',
+    'hungarian food': 'goulash',
+    'greek food': 'moussaka',
+    'turkish food': 'kebab',
+    'mediterranean food': 'kebab',
+};
+
+async function analyzeWithAzureVision(base64Image) {
+    try {
+        // Convert base64 back to binary
+        const imageBuffer = Buffer.from(base64Image, 'base64');
+
+        const response = await fetch(
+            `${AZURE_VISION_ENDPOINT}/vision/v3.2/analyze?visualFeatures=Tags,Objects&language=en`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/octet-stream',
+                    'Ocp-Apim-Subscription-Key': AZURE_VISION_KEY
+                },
+                body: imageBuffer
+            }
+        );
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Azure Vision API error:', errorText);
+            return null;
+        }
+
+        const data = await response.json();
+        console.log('Azure Vision API response:', data);
+        
+        // Combine and process results
+        const results = [];
+
+        // Process tags with improved food detection
+        if (data.tags) {
+            data.tags.forEach(tag => {
+                const tagName = tag.name.toLowerCase();
+                
+                // Skip if it's in the non-food items list
+                if (commonNonFoodItems.some(item => tagName.includes(item))) {
+                    return;
+                }
+
+                // Check if this tag is a food item or matches food keywords
+                const isFoodRelated = foodKeywords.some(keyword => tagName.includes(keyword.toLowerCase()));
+                
+                if (isFoodRelated && tag.confidence > 0.5) {
+                    // Check if we have a mapping for this tag
+                    const mappedFood = foodMappings[tagName];
+                    if (mappedFood !== null) { // null means we should skip this tag
+                        // Increase confidence for chain-specific foods
+                        let confidence = tag.confidence;
+                        if (tagName.includes('kfc') || tagName.includes('kentucky')) {
+                            confidence = Math.min(confidence + 0.3, 1.0);
+                        }
+                        results.push({
+                            label: mappedFood || tagName,
+                            score: confidence
+                        });
+                    }
+                }
+            });
+        }
+
+        // Process objects with the same improved logic
+        if (data.objects) {
+            data.objects.forEach(obj => {
+                const objName = obj.object.toLowerCase();
+                
+                // Skip if it's in the non-food items list
+                if (commonNonFoodItems.some(item => objName.includes(item))) {
+                    return;
+                }
+
+                // Check if this object is a food item or matches food keywords
+                const isFoodRelated = foodKeywords.some(keyword => objName.includes(keyword.toLowerCase()));
+                
+                if (isFoodRelated && obj.confidence > 0.5) {
+                    // Check if we have a mapping for this object
+                    const mappedFood = foodMappings[objName];
+                    if (mappedFood !== null) { // null means we should skip this tag
+                        // Increase confidence for chain-specific foods
+                        let confidence = obj.confidence;
+                        if (objName.includes('kfc') || objName.includes('kentucky')) {
+                            confidence = Math.min(confidence + 0.3, 1.0);
+                        }
+                        results.push({
+                            label: mappedFood || objName,
+                            score: confidence
+                        });
+                    }
+                }
+            });
+        }
+
+        // Remove duplicates and sort by confidence
+        const uniqueResults = Array.from(new Set(results.map(r => r.label)))
+            .map(label => {
+                const items = results.filter(r => r.label === label);
+                return {
+                    label: label,
+                    score: Math.max(...items.map(i => i.score))
+                };
+            })
+            .sort((a, b) => b.score - a.score);
+
+        return uniqueResults;
+    } catch (error) {
+        console.error('Error calling Azure Vision API:', error);
+        return null;
+    }
+}
+
 export async function POST(request) {
     try {
         const formData = await request.formData();
         const file = formData.get('file');
+        const foodDescription = formData.get('foodDescription');
         const manualInput = formData.get('manualInput');
         const manualFoodName = formData.get('manualFoodName');
         const manualServingSize = formData.get('manualServingSize');
@@ -72,7 +417,15 @@ export async function POST(request) {
 
         if (!file) {
             return NextResponse.json(
-                { error: 'No file provided' },
+                { error: 'No file provided. Please upload an image or use manual input.' },
+                { status: 400 }
+            );
+        }
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            return NextResponse.json(
+                { error: 'Invalid file type. Please upload an image file (JPEG, PNG, etc.).' },
                 { status: 400 }
             );
         }
@@ -82,23 +435,51 @@ export async function POST(request) {
         const buffer = Buffer.from(bytes);
         const base64Image = buffer.toString('base64');
 
-        // Try multiple AI models for better accuracy
-        const [convnextResult, foodModelResult] = await Promise.all([
-            analyzeWithConvNext(base64Image),
-            analyzeWithFoodModel(base64Image)
-        ]);
+        let analysisResult = null;
+        let nutritionalInfo = null;
 
-        // Combine results from both models
-        const combinedResult = combineModelResults(convnextResult, foodModelResult);
-        
-        if (!combinedResult) {
+        // Try image analysis first
+        try {
+            const visionResults = await analyzeWithAzureVision(base64Image);
+            
+            if (visionResults && visionResults.length > 0) {
+                analysisResult = {
+                    foodName: visionResults[0].label,
+                    confidence: visionResults[0].score
+                };
+            }
+        } catch (error) {
+            console.error('Image analysis error:', error);
+        }
+
+        // If image analysis failed but we have a food description, use that instead
+        if (!analysisResult && foodDescription) {
+            console.log('Using food description as fallback:', foodDescription);
+            analysisResult = {
+                foodName: foodDescription,
+                confidence: 0.8
+            };
+        }
+
+        if (!analysisResult) {
             return NextResponse.json(
-                { error: 'Could not identify food with sufficient confidence. Please try again with a clearer food image or use manual input.' },
+                { error: 'Could not identify food in the image. Please try again with a clearer image or use manual input.' },
                 { status: 400 }
             );
         }
 
-        const { foodName, confidence } = combinedResult;
+        const { foodName, confidence } = analysisResult;
+
+        // If we have a food description, use it to improve the result
+        if (foodDescription) {
+            const descriptionWords = foodDescription.toLowerCase().split(' ');
+            const currentLabel = foodName.toLowerCase();
+            
+            // If the description contains words that match the current label, increase confidence
+            if (descriptionWords.some(word => currentLabel.includes(word))) {
+                analysisResult.confidence = Math.min(confidence + 0.3, 1.0);
+            }
+        }
 
         const isLikelyNonFood = commonNonFoodItems.some(item => 
             foodName.toLowerCase().includes(item.toLowerCase())
@@ -112,11 +493,11 @@ export async function POST(request) {
         }
 
         // Get detailed nutritional information from multiple sources
-        const nutritionalInfo = await getBestNutritionalInfo(foodName);
+        nutritionalInfo = await getBestNutritionalInfo(foodName);
 
         if (!nutritionalInfo) {
             return NextResponse.json(
-                { error: 'Could not find nutritional information for this food in any database. Please try manual input.' },
+                { error: `Could not find nutritional information for "${foodName}". Please try manual input or a different food item.` },
                 { status: 404 }
             );
         }
@@ -124,7 +505,7 @@ export async function POST(request) {
         // Additional validation: check if the nutritional values make sense
         if (!isValidNutritionalInfo(nutritionalInfo)) {
             return NextResponse.json(
-                { error: 'The nutritional information seems incorrect. Please try manual input.' },
+                { error: 'The nutritional information seems incorrect. Please try manual input or a different food item.' },
                 { status: 400 }
             );
         }
@@ -138,113 +519,10 @@ export async function POST(request) {
     } catch (error) {
         console.error('Error analyzing food:', error);
         return NextResponse.json(
-            { error: 'Failed to analyze food image. Please try manual input.' },
+            { error: 'An error occurred while analyzing the food. Please try again or use manual input.' },
             { status: 500 }
         );
     }
-}
-
-async function analyzeWithConvNext(base64Image) {
-    const response = await fetch(
-        'https://api-inference.huggingface.co/models/facebook/convnext-base-224',
-        {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${HF_API_KEY}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                inputs: {
-                    image: base64Image
-                }
-            }),
-        }
-    );
-
-    if (!response.ok) return null;
-    return await response.json();
-}
-
-async function analyzeWithFoodModel(base64Image) {
-    // Using a more specialized food recognition model
-    const response = await fetch(
-        'https://api-inference.huggingface.co/models/facebook/convnext-base-224-finetuned-food101',
-        {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${HF_API_KEY}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                inputs: {
-                    image: base64Image
-                }
-            }),
-        }
-    );
-
-    if (!response.ok) return null;
-    return await response.json();
-}
-
-function combineModelResults(convnextResult, foodModelResult) {
-    if (!convnextResult && !foodModelResult) return null;
-
-    // Combine and weight the results from both models
-    const results = [];
-    
-    if (convnextResult) {
-        // Filter out non-food items from convnext results
-        const foodResults = convnextResult.filter(r => {
-            const label = r.label.toLowerCase();
-            return !commonNonFoodItems.some(item => label.includes(item.toLowerCase()));
-        });
-        results.push(...foodResults.map(r => ({ ...r, weight: 0.4 })));
-    }
-    
-    if (foodModelResult) {
-        // Food model results get higher weight as it's specialized
-        results.push(...foodModelResult.map(r => ({ ...r, weight: 0.6 })));
-    }
-
-    // Group by label and combine scores
-    const combined = results.reduce((acc, curr) => {
-        if (!acc[curr.label]) {
-            acc[curr.label] = { label: curr.label, score: 0, weight: 0 };
-        }
-        acc[curr.label].score += curr.score * curr.weight;
-        acc[curr.label].weight += curr.weight;
-        return acc;
-    }, {});
-
-    // Calculate weighted average and sort
-    const finalResults = Object.values(combined)
-        .map(r => ({
-            label: r.label,
-            score: r.score / r.weight
-        }))
-        .sort((a, b) => b.score - a.score);
-
-    // Adjusted confidence threshold for better performance
-    if (finalResults.length === 0 || finalResults[0].score < 0.75) {
-        return null;
-    }
-
-    // If we have multiple results, check the confidence gap
-    if (finalResults.length > 1) {
-        const topScore = finalResults[0].score;
-        const secondScore = finalResults[1].score;
-        
-        // Reduced gap requirement for better performance
-        if (topScore - secondScore < 0.15) {
-            return null;
-        }
-    }
-
-    return {
-        foodName: finalResults[0].label,
-        confidence: finalResults[0].score
-    };
 }
 
 async function getBestNutritionalInfo(foodName) {

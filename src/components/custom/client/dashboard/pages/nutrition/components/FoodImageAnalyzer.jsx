@@ -21,6 +21,7 @@ export const FoodImageAnalyzer = ({ onAddToMeal, dailyGoals, dailyMacros }) => {
   const [manualServingSize, setManualServingSize] = useState("");
   const [manualServingUnit, setManualServingUnit] = useState("g");
   const [manualDescription, setManualDescription] = useState("");
+  const [foodDescription, setFoodDescription] = useState("");
   
   // For daily goals tracking
   const { calorieGoal = 2400, proteinGoal = 180, carbsGoal = 240, fatGoal = 80 } = dailyGoals || {};
@@ -90,6 +91,9 @@ export const FoodImageAnalyzer = ({ onAddToMeal, dailyGoals, dailyMacros }) => {
         formData.append('manualServingSize', manualServingSize);
         formData.append('manualServingUnit', manualServingUnit);
         formData.append('manualDescription', manualDescription);
+      }
+      if (foodDescription) {
+        formData.append('foodDescription', foodDescription);
       }
 
       const response = await fetch('/api/nutrition/analyze-food', {
@@ -269,6 +273,23 @@ export const FoodImageAnalyzer = ({ onAddToMeal, dailyGoals, dailyMacros }) => {
                       <AIImageScanner isScanning={loading} previewUrl={previewUrl} />
                     </>
                   )}
+                </div>
+              )}
+              
+              {/* Add food description field below the image */}
+              {!manualInput && !analysis && (
+                <div className="mt-4">
+                  <FormField
+                    label="Food Description (Optional)"
+                    type="text"
+                    value={foodDescription}
+                    onChange={(e) => setFoodDescription(e.target.value)}
+                    placeholder="e.g., Beef steak, White bread, etc."
+                    className="w-full"
+                  />
+                  <p className="mt-1 text-xs text-gray-400">
+                    Adding a description helps the AI better identify your food
+                  </p>
                 </div>
               )}
               
