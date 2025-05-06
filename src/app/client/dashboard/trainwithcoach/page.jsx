@@ -16,6 +16,7 @@ export default function TrainWithCoachPage() {
     const [selectedTrainer, setSelectedTrainer] = useState(null);
     const [showBookingModal, setShowBookingModal] = useState(false);
     const [showProfileModal, setShowProfileModal] = useState(false); // New state for profile modal
+    
 
     const trainers = [
         {
@@ -27,10 +28,11 @@ export default function TrainWithCoachPage() {
                 "Specializing in elite football performance and recovery protocols. Worked with professional clubs for over 5 years, focusing on speed and agility development...",
             hourlyRate: 65,
             rating: 4.8,
-            experience: "8 years",
+            experience: "8+ years",
             available: true,
             preferred: true,
             proximity: "1.2 km away",
+            primaryGym: "Elite Performance Center",
             profileImage: "https://ai-previews.123rf.com/ai-txt2img/600nwm/74143221-4fc9-47bd-a919-0c6d55da9cc5.jpg",
         },
         {
@@ -42,10 +44,11 @@ export default function TrainWithCoachPage() {
                 "Holistic approach to fitness combining strength training with evidence-based nutrition plans. Specializes in body transformation and metabolic optimization for sustainable results.",
             hourlyRate: 75,
             rating: 5.0,
-            experience: "6 years",
+            experience: "6+ years",
             available: false,
             preferred: false,
             proximity: "2.5 km away",
+            primaryGym: "Wellness Hub",
             profileImage:
                 "https://media.istockphoto.com/id/1497018234/photo/strong-and-healthy-people-working-out.jpg?s=1024x1024&w=is&k=20&c=5Hxmof3LgI6gyBUr1aI1bvopFn6krQhSxDVPxtobImY=",
         },
@@ -58,10 +61,11 @@ export default function TrainWithCoachPage() {
                 "Specializing in injury prevention and performance enhancement. Expertise in functional movement screening and corrective exercise programming for athletes.",
             hourlyRate: 85,
             rating: 4.9,
-            experience: "10 years",
+            experience: "10+ years",
             available: true,
             preferred: false,
             proximity: "3.7 km away",
+            primaryGym: "SportsMed Center",
             profileImage: "https://thumbs.wbm.im/pw/medium/210960354d062d6662846e36aae53ffb.jpg",
         },
         {
@@ -73,10 +77,11 @@ export default function TrainWithCoachPage() {
                 "High-intensity functional training expert with focus on metabolic conditioning. Developed training programs for competitive CrossFit athletes and weekend warriors alike.",
             hourlyRate: 70,
             rating: 4.7,
-            experience: "7 years",
+            experience: "7+ years",
             available: false,
             preferred: true,
             proximity: "0.8 km away",
+            primaryGym: "CrossFit Box",
             profileImage:
                 "https://media.istockphoto.com/id/1420697156/photo/leadership-manager-and-team-leader.jpg?s=1024x1024&w=is&k=20&c=Ly785VLGMCGJ87uFYp_cWaFaznmN6YT6m-m3pKcd4Cs=",
         },
@@ -89,10 +94,11 @@ export default function TrainWithCoachPage() {
                 "Combines traditional yoga practices with modern mobility training. Specializes in improving flexibility and movement patterns for athletes and desk warriors.",
             hourlyRate: 60,
             rating: 4.6,
-            experience: "9 years",
+            experience: "9+ years",
             available: true,
             preferred: false,
             proximity: "4.1 km away",
+            primaryGym: "Zen Fitness Studio",
             profileImage:
                 "https://media.istockphoto.com/id/1359149467/photo/shot-of-a-handsome-young-man-standing-alone-and-stretching-during-his-outdoor-workout.jpg?s=1024x1024&w=is&k=20&c=-HVl9xVbCUrtb_2R1oKdbaxcR79QQ-QjHMvr5EYrM4c=",
         },
@@ -329,7 +335,7 @@ const TrainerCard = ({ trainer, onBookSession, onViewProfile }) => {
                     <p className="mt-4 text-xl font-bold text-[#FF6B00]">${trainer.hourlyRate}/hour</p>
 
                     {/* Rating and details */}
-                    <div className="mt-2 flex items-center gap-4">
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
                         <div className="flex items-center gap-1">
                             <div className="flex gap-0.5 text-base">{renderStars(trainer.rating)}</div>
                             <span className="text-sm text-white">{trainer.rating}</span>
@@ -342,10 +348,20 @@ const TrainerCard = ({ trainer, onBookSession, onViewProfile }) => {
 
                         {/* Availability tag */}
                         {trainer.available && (
-                            <span className="inline-flex rounded bg-[rgba(40,167,69,0.2)] px-2 py-1 text-xs font-medium text-[#28a745]">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(40,167,69,0.2)] px-2 py-0.5 text-xs font-medium text-[#28a745]">
+                                <span className="h-1.5 w-1.5 rounded-full bg-[#28a745]"></span>
                                 Available Now
                             </span>
                         )}
+                    </div>
+
+                    {/* Primary Gym */}
+                    <div className="mt-2 flex items-center gap-1 text-sm text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                        <span>{trainer.primaryGym}</span>
                     </div>
                 </div>
 

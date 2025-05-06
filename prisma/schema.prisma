@@ -204,4 +204,20 @@ model UserInjuryLocation {
   @@index([location])
   @@index([userPreferencesId])
   @@index([location, userPreferencesId]) // Composite index for faster filtering
+}
+
+model GoogleFitAccount {
+  id                String    @id
+  providerAccountId String    @unique
+  access_token      String?   @db.Text
+  refresh_token     String?   @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?   @db.Text
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([providerAccountId])
+  @@index([createdAt])
+  @@index([updatedAt])
 } 
