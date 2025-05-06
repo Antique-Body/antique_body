@@ -19,6 +19,7 @@
     },
     "dependencies": {
         "@googlemaps/js-api-loader": "^1.16.8",
+        "@mdi/font": "^7.4.47",
         "@prisma/client": "^6.6.0",
         "bcrypt": "^5.1.1",
         "clsx": "^2.1.1",

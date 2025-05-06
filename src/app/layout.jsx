@@ -2,6 +2,7 @@
 
 import { Inter } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
+import '@mdi/font/css/materialdesignicons.css';
 
 import AuthProvider from "../components/auth/AuthProvider";
 import I18nProvider from "../components/I18nProvider";
@@ -14,6 +15,12 @@ const inter = Inter({ subsets: ["latin"] });
 export default function RootLayout({ children }) {
     return (
         <html lang="en">
+            <head>
+                <link
+                    rel="stylesheet"
+                    href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css"
+                />
+            </head>
             <body className={inter.className}>
                 <SessionProvider>
                     <I18nProvider>
