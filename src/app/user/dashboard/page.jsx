@@ -1,27 +1,24 @@
 "use client";
-import { BrandLogo, Card } from "@components/custom";
-import { useTranslation } from "react-i18next";
-
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import Background from "@/components/background";
+import { BrandLogo } from "@components/custom";
+import { useSession } from "next-auth/react";
+import { useState } from "react";
+import NutritionDashboard from "./components/NutritionDashboard";
+import ProgressDashboard from "./components/ProgressDashboard";
+import SettingsDashboard from "./components/SettingsDashboard";
+import WorkoutDashboard from "./components/WorkoutDashboard";
 
-export default function UserDashboard() {
-    const { t } = useTranslation();
+export default function DashboardPage() {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const [activeTab, setActiveTab] = useState("workout");
 
-    return (
-        <div className="min-h-screen bg-[#0a0a0a] text-white overflow-x-hidden relative">
-            <Background />
-            <div className="max-w-[550px] mx-auto px-5 py-5 relative z-20 h-screen flex flex-col items-center">
-                <header className="pt-10 w-full text-center justify-center">
-                    <BrandLogo />
-                </header>
+  useEffect(() => {
+    // Redirect to the default tab
+    router.push("/user/dashboard/overview");
+  }, [router]);
 
-                <div className="flex-1 flex items-center justify-center">
-                    <Card width="100%">
-                        <div className="text-2xl sm:text-3xl font-bold mb-4 text-center">{t("welcome_to_dashboard")}</div>
-                        <div className="text-[#aaa] text-base text-center">{t("personalized_fitness_journey")}</div>
-                    </Card>
-                </div>
-            </div>
-        </div>
-    );
+  return null;
 }

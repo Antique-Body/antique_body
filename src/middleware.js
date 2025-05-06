@@ -7,7 +7,7 @@ export async function middleware(request) {
     const userRole = token?.role?.toLowerCase();
 
     // Public routes that don't require authentication
-    const publicPaths = ["/", "/auth/login", "/auth/register", "/auth/reset-password", "/auth/verify-email"];
+    const publicPaths = ["/", "/auth/login", "/auth/register", "/auth/reset-password", "/auth/verify-email", "/contact"];
 
     // Check if the current path starts with any of the public paths
     const isPublicRoute = publicPaths.some((path) => pathname === path || pathname.startsWith(`${path}?`));
@@ -39,15 +39,15 @@ export async function middleware(request) {
     const validRoutes = {
         trainer: ["/trainer/dashboard"],
         client: ["/client/dashboard"],
-        user: ["/user/dashboard", "/user/training-setup"]
+        user: ["/user"]
     };
 
     // Check if the current path is valid for the user's role
     const isValidRoute = validRoutes[userRole]?.some(route => pathname.startsWith(route));
 
-    // If the route is not valid, let the catch-all route handle it
+    // If the route is not valid for the user's role, redirect to their dashboard
     if (!isValidRoute) {
-        return NextResponse.next();
+        return NextResponse.redirect(new URL(`/${userRole}/dashboard`, request.url));
     }
 
     // If we get here, the route is valid for the user's role

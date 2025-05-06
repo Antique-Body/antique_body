@@ -12,7 +12,7 @@ const Background = () => (
         </div>
 
         <div className="olympian runner" style={{ "--delay": "0.3s" }}>
-            \ <RunnerIcon className="w-full h-full" />
+            <RunnerIcon className="w-full h-full" />
         </div>
 
         <div className="olympian discus" style={{ "--delay": "0.5s" }}>

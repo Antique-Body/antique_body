@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 
 import { MacroDistribution } from "./MacroDistribution";
 
-import { CalendarIcon } from "@/components/common/Icons";
 import { Modal } from "@/components/common/Modal";
 import { Card } from "@/components/custom/Card";
 
@@ -44,6 +43,11 @@ export const NutritionHistoryModal = ({
     const percentage = (consumed / goal) * 100;
     return Math.min(percentage, 100); // Cap at 100%
   };
+
+  // Format date for input
+  const formatDateForInput = (date) => {
+    return date.toISOString().split('T')[0];
+  };
   
   return (
     <Modal
@@ -57,10 +61,11 @@ export const NutritionHistoryModal = ({
         <Card variant="dark" className="md:col-span-1 p-5">
           <h3 className="font-bold mb-4 text-lg">Select Date</h3>
           <div className="mb-4">
-            <CalendarIcon
-              selectedDate={selectedDate}
-              onChange={onDateChange}
-              className="bg-[#121212] border border-[#333] rounded-lg shadow-lg p-2"
+            <input
+              type="date"
+              value={formatDateForInput(selectedDate)}
+              onChange={(e) => onDateChange(new Date(e.target.value))}
+              className="w-full bg-[#121212] border border-[#333] rounded-lg shadow-lg p-2 text-white"
             />
           </div>
           
