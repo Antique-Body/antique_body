@@ -11,7 +11,8 @@ import {
     PlanDaysStep,
     PlanNutritionStep,
     PlanReviewStep,
-} from "@/components/custom/trainer/dashboard/pages/plans";
+} from "@/components/custom/trainer/dashboard/pages/plans/components";
+
 const STEPS = {
     TYPE: 0,
     DETAILS: 1,

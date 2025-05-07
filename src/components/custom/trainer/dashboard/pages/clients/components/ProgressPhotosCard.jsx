@@ -33,11 +33,15 @@ export const ProgressPhotosCard = ({ progressPhotos, onViewPhoto, onPhotoUpload,
                     className="group relative cursor-pointer overflow-hidden rounded-lg border border-[#333] bg-[rgba(30,30,30,0.6)]"
                     onClick={() => onViewPhoto(photo)}
                 >
-                    <Image
-                        src={photo.imageUrl}
-                        alt={`Progress photo from ${photo.date}`}
-                        className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
+                    <div className="relative aspect-square w-full">
+                        <Image
+                            src={photo.imageUrl}
+                            alt={`Progress photo from ${photo.date}`}
+                            fill
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                    </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                         <div className="absolute bottom-0 left-0 right-0 p-3">
                             <p className="text-sm font-medium text-white">{photo.date}</p>
