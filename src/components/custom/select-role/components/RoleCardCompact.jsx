@@ -1,27 +1,60 @@
 "use client";
 
-import { memo, useCallback, useState, useRef, useEffect } from "react";
+import Image from "next/image";
+import { memo, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Card } from "../../..";
-
-import {
-  AdminIcon,
-  ClientIcon,
-  GreekPatternBorder,
-  TrainerIcon,
-  UserIcon,
-} from "@/components/common/Icons";
-
-const roleIcons = {
-  trainer: TrainerIcon,
-  client: ClientIcon,
-  user: UserIcon,
-  admin: AdminIcon,
+// Default placeholder images with better quality images specific to each role
+export const DEFAULT_BACKGROUNDS = {
+  trainer: "https://blog.nasm.org/hubfs/top%205%20reasons%20to%20become%20a%20personal%20trainer%20header%20blog%20updated.jpg",
+  client: "https://images.pexels.com/photos/1954524/pexels-photo-1954524.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+  user: "https://evofitness.at/wp-content/uploads/2023/02/EVO-2025-PP-FEBRUARY_Banner_12-1200x675.jpg",
+  admin: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=600&auto=format&fit=crop",
 };
 
-// Create a shared height state
-let maxHeight = 0;
+// Role-specific icons and colors
+const ROLE_CONFIGS = {
+  trainer: {
+    mainIcon: "mdi mdi-dumbbell",
+    featureIcons: {
+      clients: "mdi mdi-account-group",
+      programs: "mdi mdi-clipboard-list",
+      tracking: "mdi mdi-chart-line"
+    },
+    color: "orange",
+    gradient: "from-orange-500 to-orange-600"
+  },
+  client: {
+    mainIcon: "mdi mdi-account-heart",
+    featureIcons: {
+      guidance: "mdi mdi-compass",
+      workouts: "mdi mdi-calendar-fitness",
+      progress: "mdi mdi-trending-up"
+    },
+    color: "blue",
+    gradient: "from-blue-500 to-blue-600"
+  },
+  user: {
+    mainIcon: "mdi mdi-account-cog",
+    featureIcons: {
+      workouts: "mdi mdi-run",
+      ai: "mdi mdi-robot",
+      goals: "mdi mdi-target"
+    },
+    color: "green",
+    gradient: "from-green-500 to-green-600"
+  },
+  admin: {
+    mainIcon: "mdi mdi-shield-account",
+    featureIcons: {
+      manage: "mdi mdi-cog",
+      users: "mdi mdi-account-multiple",
+      analytics: "mdi mdi-chart-box"
+    },
+    color: "purple",
+    gradient: "from-purple-500 to-purple-600"
+  }
+};
 
 export const RoleCardCompact = memo(({
   role,
@@ -30,32 +63,18 @@ export const RoleCardCompact = memo(({
   title,
   description,
   loading,
-  cardProps = {},
 }) => {
   const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
-  const cardRef = useRef(null);
-  const Icon = roleIcons[role];
-
-  useEffect(() => {
-    if (cardRef.current) {
-      const height = cardRef.current.offsetHeight;
-      if (height > maxHeight) {
-        maxHeight = height;
-      }
-      // Update all cards to match the max height
-      const allCards = document.querySelectorAll('.role-card');
-      allCards.forEach(card => {
-        card.style.height = `${maxHeight}px`;
-      });
-    }
-  }, [title, description, loading, isSelected, isHovered]);
-
-  const getRoleTranslation = (role) => {
-    const roleKey = role.toLowerCase();
-
-    return t(`role.${roleKey}.label`);
-  };
+  const [imageError, setImageError] = useState(false);
+  
+  // Get role-specific configuration
+  const roleConfig = ROLE_CONFIGS[role] || ROLE_CONFIGS.user;
+  
+  // Background image
+  const backgroundImage = imageError 
+    ? "https://evofitness.at/wp-content/uploads/2023/02/EVO-2025-PP-FEBRUARY_Banner_12-1200x675.jpg"
+    : DEFAULT_BACKGROUNDS[role] || DEFAULT_BACKGROUNDS.user;
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
@@ -71,132 +90,168 @@ export const RoleCardCompact = memo(({
     }
   }, [loading, onClick]);
 
-  if (!Icon) {
-    console.error(`No icon found for role: ${role}`);
-    return null;
-  }
+  const handleImageError = useCallback(() => {
+    setImageError(true);
+  }, []);
 
-  // Custom gradient backgrounds
-  const getBackgroundGradient = () => {
-    if (isSelected) {
-      return {
-        from: "#ff7800",
-        to: "#ff9500"
-      };
-    } else {
-      return {
-        from: "#1a1a1a",
-        to: "#0f0f0f"
-      };
-    }
-  };
-
-  const bg = getBackgroundGradient();
-
-  // Custom border style
-  const getBorderStyle = () => {
-    if (isSelected) {
-      return "#ff7800";
-    } else if (isHovered) {
-      return "#ff7800";
-    } else {
-      return "#333333";
-    }
-  };
-
-  // Custom shadow effects
-  const getShadowEffect = () => {
-    if (isSelected) {
-      return "0 8px 25px rgba(255, 120, 0, 0.4)";
-    } else if (isHovered) {
-      return "0 8px 20px rgba(255, 120, 0, 0.2)";
-    } else {
-      return "0 5px 15px rgba(0, 0, 0, 0.3)";
-    }
+  const getRoleTranslation = (role) => {
+    const roleKey = role.toLowerCase();
+    return t(`role.${roleKey}.label`);
   };
 
   return (
-    <div 
-      ref={cardRef}
-      className={`transition-all duration-300 role-card h-full ${isHovered ? "scale-105" : ""}`}
+    <div
+      className={`
+        group
+        relative w-full h-full overflow-hidden 
+        transition-all duration-400 ease-out
+        ${isHovered ? "scale-[1.01]" : ""}
+        ${isSelected ? "ring-2 ring-offset-2 ring-offset-black" : ""}
+        ${loading ? "cursor-wait opacity-80" : "cursor-pointer"}
+        rounded-xl
+      `}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
-      style={{ 
-        cursor: loading ? "wait" : "pointer",
-        willChange: "transform, opacity",
-        borderRadius: "15px",
-        overflow: "hidden"
-      }}
     >
-      <Card
-        width="100%"
-        maxWidth="none"
-        padding="24px"
-        borderRadius="15px"
-        bgGradientFrom={bg.from}
-        bgGradientTo={bg.to}
-        borderColor={getBorderStyle()}
-        shadow={getShadowEffect()}
-        className={`relative h-full flex flex-col ${isSelected ? "ring-4 ring-orange-300 ring-opacity-40" : ""}`}
-        borderTop={false}
-        topBorderColor={false}
-        {...cardProps}
-      >
-        <GreekPatternBorder isVisible={isSelected || isHovered} />
+      {/* Background image */}
+      <div className="absolute inset-0 overflow-hidden rounded-xl">
+        <Image
+          src={backgroundImage}
+          alt={t(`role.${role}.label`)}
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className={`object-cover transition-transform duration-700 ${isHovered ? 'scale-105 blur-[1px]' : 'scale-100'}`}
+          onError={handleImageError}
+          priority
+        />
         
-        <div className="flex flex-col items-center relative z-10 flex-grow">
-          <div
-            className={`relative transition-transform duration-300 ${
-              isHovered ? "scale-110" : ""
-            }`}>
-            <Icon 
-              className={`h-20 w-20 ${
-                loading ? "animate-pulse" : ""
-              } ${
-                isSelected ? "text-white" : "text-orange-500"
-              }`} 
-            />
-            {loading && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            )}
+        {/* Overlay gradients */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent z-10"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent z-10"></div>
+        
+        {/* Interactive overlay */}
+        <div 
+          className={`
+            absolute inset-0 z-10 transition-all duration-400
+            ${isSelected 
+              ? `bg-${roleConfig.color}-900/20` 
+              : isHovered 
+                ? 'bg-black/40' 
+                : 'bg-black/30'
+            }
+          `}
+        ></div>
+      </div>
+
+      {/* Corner accent - Dynamic colored corner tab animation */}
+      <div 
+        className={`
+          absolute -top-16 -right-16 w-32 h-32 
+          bg-gradient-to-br ${roleConfig.gradient}
+          rotate-45 transition-all duration-400
+          ${isSelected || isHovered ? 'translate-y-6 translate-x-6' : 'translate-y-2 translate-x-2'}
+          z-20
+        `}
+      ></div>
+      
+      {/* Bottom line/bar with dynamic color */}
+      <div 
+        className={`
+          absolute bottom-0 left-0 right-0 h-0.5
+          bg-gradient-to-r ${roleConfig.gradient}
+          transform transition-transform duration-400 ease-in-out
+          ${isSelected || isHovered ? 'translate-y-0' : 'translate-y-full'}
+          z-20
+        `}
+      ></div>
+
+      {/* Content container */}
+      <div className="relative z-30 flex flex-col justify-between h-full p-4 text-center">
+        {/* Role icon and title */}
+        <div className="flex items-center justify-between mb-4">
+          <div className={`w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-${roleConfig.color}-500`}>
+            <i className={`${roleConfig.mainIcon} text-2xl`}></i>
           </div>
-
-          <h3
-            className={`mt-4 text-2xl font-bold spartacus-font tracking-wide ${
-              isSelected ? "text-white" : "text-orange-500"
-            }`}>
-            {title}
-          </h3>
-
-          <p
-            className={`mt-3 text-sm text-center max-w-xs ${
-              isSelected ? "text-white" : "text-gray-300"
-            }`}>
-            {description}
-          </p>
-
-          <span
-            className={`mt-auto inline-block px-4 py-2 rounded-md text-base font-bold capitalize tracking-wider transition-all duration-300 ${
-              isSelected
-                ? "bg-orange-400 bg-opacity-30 text-white shadow-inner border border-orange-300 border-opacity-40 backdrop-blur-sm"
-                : "bg-gradient-to-r from-zinc-800 to-zinc-900 text-orange-400 border border-orange-500 border-opacity-40 hover:border-orange-400 hover:text-orange-300"
-            } ${isHovered ? "scale-105" : ""}`}>
-            {getRoleTranslation(role)}
-          </span>
+          
+          {/* Feature badges */}
+          <div className="flex gap-2">
+            {Object.entries(roleConfig.featureIcons).map(([key, icon], index) => (
+              <div 
+                key={key}
+                className={`
+                  w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm 
+                  flex items-center justify-center
+                  transform transition-all duration-300
+                  ${isHovered ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'}
+                `}
+                style={{ transitionDelay: `${index * 100}ms` }}
+              >
+                <i className={`${icon} text-lg text-${roleConfig.color}-500`}></i>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {isSelected && (
-          <div className="absolute inset-0 bg-orange-500 opacity-10 blur-lg -z-10"></div>
-        )}
-        
-        <GreekPatternBorder
-          position="bottom"
-          isVisible={isSelected || isHovered}
-        />
-      </Card>
+        {/* Title and description */}
+        <div className="space-y-1.5 mt-1">
+          <h3 className="text-lg md:text-xl font-bold spartacus-font tracking-wide text-white drop-shadow-md line-clamp-1">
+            {t(title)}
+          </h3>
+          
+          <p className="text-xs md:text-sm text-gray-200 mx-auto max-w-xs opacity-90 line-clamp-2">
+            {t(description)}
+          </p>
+        </div>
+
+        {/* Role banner/badge */}
+        <div className="mt-auto mb-1">
+          <div 
+            className={`
+              inline-flex items-center gap-2 px-5 py-2 rounded-md
+              font-bold text-sm tracking-wide uppercase
+              transform transition-all duration-400
+              ${isSelected
+                ? `bg-${roleConfig.color}-500 text-white shadow-md shadow-${roleConfig.color}-500/20`
+                : 'bg-white/10 text-white backdrop-blur-sm border border-white/20'
+              }
+              ${isHovered ? 'scale-105' : ''}
+            `}
+          >
+            <i className={`${roleConfig.mainIcon} text-lg`}></i>
+            {getRoleTranslation(role)}
+          </div>
+        </div>
+      </div>
+
+      {/* Loading overlay */}
+      {loading && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm rounded-xl">
+          <div className="flex flex-col items-center gap-3">
+            <div className={`w-8 h-8 border-2 border-${roleConfig.color}-500 border-t-transparent rounded-full animate-spin`}></div>
+            <span className="text-sm font-medium text-white">{t("common.loading")}</span>
+          </div>
+        </div>
+      )}
+      
+      {/* Selection indicator */}
+      {isSelected && (
+        <div className="absolute top-3 left-3 z-40">
+          <div className={`h-4 w-4 rounded-full bg-${roleConfig.color}-500 flex items-center justify-center animate-pulse`}>
+            <div className="h-1.5 w-1.5 rounded-full bg-white"></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 });
+
+RoleCardCompact.displayName = "RoleCardCompact";
+
+// Add CSS animations to globals.css
+// .animate-ping-slow {
+//   animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+// }
+// .animate-ping-slower {
+//   animation: ping 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+// }

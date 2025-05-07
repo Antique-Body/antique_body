@@ -19,7 +19,10 @@
       "title": "Wählen Sie Ihre Rolle",
       "description": "Wählen Sie die Rolle, die am besten zu Ihrer Fitness-Reise passt",
       "continue_as": "Sind Sie sicher, dass Sie als",
-      "confirm_path": "Bestätigen Sie Ihren Weg"
+      "continue_as_description": "Sie sind dabei, Ihre Fitness-Reise als {{role}} fortzusetzen. Dies bestimmt, welche Funktionen und Möglichkeiten Ihnen zur Verfügung stehen.",
+      "confirm_path": "Bestätigen Sie Ihren Weg",
+      "help_choosing": "Brauchen Sie Hilfe bei der Auswahl? Kontaktieren Sie uns für Beratung",
+      "confirm_description": "Sie sind dabei, Ihre Fitness-Reise als {{role}} fortzusetzen. Dies bestimmt, welche Funktionen und Möglichkeiten Ihnen zur Verfügung stehen."
     },
     "preparing": {
       "journey": "Ihre antike Reise wird vorbereitet",

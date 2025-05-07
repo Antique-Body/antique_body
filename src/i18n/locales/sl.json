@@ -11,37 +11,58 @@
     "search": "Išči",
     "continue": "Nadaljuj",
     "show": "Prikaži",
-    "hide": "Skrij"
+    "hide": "Skrij",
+    "unknown_error": "Prišlo je do neznane napake",
+    "back": "Nazaj"
   },
   "role": {
     "admin": "Administrator",
     "trainer": {
       "label": "Trener",
       "become": "Postanite trener",
-      "description": "Ustvarite svoj trenerski profil, pridobite stranke in spremljajte njihov napredek. Delite svoje znanje in pomagajte drugim doseči njihove fitnes cilje."
+      "description": "Ustvarite svoj trenerski profil, pridobite stranke in spremljajte njihov napredek. Delite svoje znanje in pomagajte drugim doseči njihove fitnes cilje.",
+      "feature1": "Upravljanje Strank",
+      "feature2": "Ustvarjanje Prilagojenih Programov",
+      "feature3": "Sledenje Uspešnosti"
     },
     "client": {
       "label": "Stranka",
       "train_with_coach": "Trenirajte s trenerjem",
-      "description": "Povežite se s profesionalnimi trenerji, ki vas bodo vodili skozi vaše potovanje po fitnesu, nudili prilagojene vadbe in nasvete o prehrani."
+      "description": "Povežite se s profesionalnimi trenerji, ki vas bodo vodili skozi vaše potovanje po fitnesu, nudili prilagojene vadbe in nasvete o prehrani.",
+      "feature1": "Strokovno Vodstvo",
+      "feature2": "Prilagojeni Treningi",
+      "feature3": "Spremljanje Napredka"
     },
     "user": {
       "label": "Uporabnik",
       "custom_workout": "Prilagojen načrt vadbe",
-      "description": "Dobite prilagojen načrt vadbe na podlagi vaših želja, ravni kondicije in ciljev. Vadite samostojno z vajami, ki jih je ustvarila umetna inteligenca."
+      "description": "Dobite prilagojen načrt vadbe na podlagi vaših želja, ravni kondicije in ciljev. Vadite samostojno z vajami, ki jih je ustvarila umetna inteligenca.",
+      "feature1": "Samostojno vodeni Treningi",
+      "feature2": "AI Priporočila",
+      "feature3": "Doseganje Ciljev"
     },
     "selection": {
       "title": "Izberite svojo vlogo",
-      "description": "Izberite vlogo, ki najbolje ustreza vašemu potovanju po fitnesu",
+      "description": "Izberite, kako želite uporabljati Antique Body. Svojo vlogo lahko spremenite kasneje v nastavitvah.",
       "continue_as": "Ali ste prepričani, da želite nadaljevati kot",
-      "confirm_path": "Potrdite svojo pot"
+      "continue_as_description": "Pripravljate se nadaljevati svoje fitnes potovanje kot {{role}}. To bo določilo, katere funkcije in zmogljivosti vam bodo na voljo.",
+      "confirm_path": "Potrdite svojo pot",
+      "help_choosing": "Potrebujete pomoč pri izbiri?",
+      "help_modal": {
+        "trainer_help": "Izberite to, če želite ustvarjati vadbene načrte za druge, upravljati stranke in razvijati svoj trenerski posel.",
+        "client_help": "Izberite to, če želite, da vas trenira profesionalni trener, ki bo za vas ustvaril prilagojene vadbe.",
+        "user_help": "Izberite to, če želite vadbe ustvarjene z umetno inteligenco na podlagi vaših ciljev in želja, brez človeškega trenerja.",
+        "contact_support": "Kontaktirajte podporo za več pomoči"
+      },
+      "confirm_description": "Pripravljate se nadaljevati svoje fitnes potovanje kot {{role}}. To bo določilo, katere funkcije in zmogljivosti vam bodo na voljo."
     },
     "preparing": {
       "journey": "Priprava vašega antičnega potovanja",
       "trainer": "Priprava vašega trenerskega potovanja",
       "client": "Priprava vašega potovanja stranke",
       "user": "Priprava vašega uporabniškega potovanja",
-      "admin": "Priprava vašega administratorskega potovanja"
+      "admin": "Priprava vašega administratorskega potovanja",
+      "please_wait": "Prosimo počakajte, medtem ko pripravljamo vse za vas"
     },
     "update": {
       "failed": "Posodobitev vloge ni uspela. Status: {{status}}"

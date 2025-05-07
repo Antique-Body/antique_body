@@ -11,40 +11,61 @@
     "search": "Pretraži",
     "continue": "Nastavi",
     "show": "Prikaži",
-    "hide": "Sakrij"
+    "hide": "Sakrij",
+    "unknown_error": "Došlo je do nepoznate greške",
+    "back": "Nazad"
   },
   "role": {
     "admin": "Administrator",
     "trainer": {
       "label": "Trener",
       "become": "Postanite trener",
-      "description": "Kreirajte svoj trenerski profil, pronađite klijente i pratite njihov napredak. Podijelite svoje znanje i pomozite drugima postići njihove fitness ciljeve."
+      "description": "Kreirajte svoj trenerski profil, pronađite klijente i pratite njihov napredak. Podijelite svoje znanje i pomozite drugima postići njihove fitness ciljeve.",
+      "feature1": "Upravljanje Klijentima",
+      "feature2": "Izrada Prilagođenih Programa",
+      "feature3": "Praćenje Učinka"
     },
     "client": {
       "label": "Klijent",
       "train_with_coach": "Trenirajte sa trenerom",
-      "description": "Povežite se sa profesionalnim trenerima koji će vas voditi kroz vaše putovanje fitnessom, pružajući personalizirane treninge i savjete o ishrani."
+      "description": "Povežite se sa profesionalnim trenerima koji će vas voditi kroz vaše putovanje fitnessom, pružajući personalizirane treninge i savjete o ishrani.",
+      "feature1": "Stručno Vodstvo",
+      "feature2": "Prilagođeni Treninzi",
+      "feature3": "Praćenje Napretka"
     },
     "user": {
       "label": "Korisnik",
       "custom_workout": "Prilagođeni plan treninga",
-      "description": "Dobijte personalizirani plan treninga zasnovan na vašim preferencijama, nivou kondicije i ciljevima. Trenirajte samostalno sa vježbama generisanim veštačkom inteligencijom."
+      "description": "Dobijte personalizirani plan treninga zasnovan na vašim preferencijama, nivou kondicije i ciljevima. Trenirajte samostalno sa vježbama generisanim vještačkom inteligencijom.",
+      "feature1": "Samostalno vođeni Treninzi",
+      "feature2": "AI Preporuke",
+      "feature3": "Postizanje Ciljeva"
     },
     "selection": {
       "title": "Izaberite svoju ulogu",
-      "description": "Izaberite ulogu koja najbolje odgovara vašem putovanju fitnessom",
+      "description": "Izaberite kako želite koristiti Antique Body. Svoju ulogu možete promijeniti kasnije u postavkama.",
       "continue_as": "Da li ste sigurni da želite nastaviti kao",
-      "confirm_path": "Potvrdite svoj put"
+      "continue_as_description": "Spremate se da nastavite svoje fitness putovanje kao {{role}}. Ovo će odrediti koje funkcije i mogućnosti će vam biti dostupne.",
+      "confirm_path": "Potvrdite svoj put",
+      "help_choosing": "Trebate pomoć pri izboru?",
+      "help_modal": {
+        "trainer_help": "Izaberite ovo ako želite kreirati planove treninga za druge, upravljati klijentima i razvijati svoj trenerski posao.",
+        "client_help": "Izaberite ovo ako želite da vas trenira profesionalni trener koji će kreirati personalizirane treninge za vas.",
+        "user_help": "Izaberite ovo ako želite treninge generisane vještačkom inteligencijom na osnovu vaših ciljeva i preferencija, bez ljudskog trenera.",
+        "contact_support": "Kontaktirajte podršku za više pomoći"
+      },
+      "confirm_description": "Spremate se da nastavite svoje fitness putovanje kao {{role}}. Ovo će odrediti koje funkcije i mogućnosti će vam biti dostupne."
     },
     "preparing": {
       "journey": "Priprema vašeg antičkog putovanja",
-      "trainer": "Priprema vašeg trenerskog putovanja",
-      "client": "Priprema vašeg klijentskog putovanja",
-      "user": "Priprema vašeg korisničkog putovanja",
-      "admin": "Priprema vašeg administratorskog putovanja"
+      "trainer": "Priprema vašeg trenerskog profila",
+      "client": "Priprema vašeg klijentskog profila",
+      "user": "Priprema vašeg plana treninga",
+      "admin": "Priprema vašeg administratorskog profila",
+      "please_wait": "Molimo sačekajte dok pripremamo sve za vas"
     },
     "update": {
-      "failed": "Neuspjelo ažuriranje uloge. Status: {{status}}"
+      "failed": "Ažuriranje uloge nije uspjelo. Status: {{status}}"
     }
   },
   "auth": {

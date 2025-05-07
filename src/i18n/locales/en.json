@@ -11,37 +11,58 @@
         "search": "Search",
         "continue": "Continue",
         "show": "Show",
-        "hide": "Hide"
+        "hide": "Hide",
+        "unknown_error": "An unknown error occurred",
+        "back": "Back"
     },
     "role": {
         "admin": "Administrator",
         "trainer": {
             "label": "Trainer",
             "become": "Become a Trainer",
-            "description": "Create your trainer profile, acquire clients, and track their progress. Share your expertise and help others achieve their fitness goals."
+            "description": "Create your trainer profile, acquire clients, and track their progress. Share your expertise and help others achieve their fitness goals.",
+            "feature1": "Client Management",
+            "feature2": "Create Custom Programs",
+            "feature3": "Performance Tracking"
         },
         "client": {
             "label": "Client",
             "train_with_coach": "Train with a Coach",
-            "description": "Connect with professional trainers who will guide your fitness journey, providing personalized workouts and nutrition advice."
+            "description": "Connect with professional trainers who will guide your fitness journey, providing personalized workouts and nutrition advice.",
+            "feature1": "Professional Guidance",
+            "feature2": "Customized Workouts",
+            "feature3": "Progress Monitoring"
         },
         "user": {
             "label": "User",
             "custom_workout": "Custom Workout Plan",
-            "description": "Get a personalized workout plan based on your preferences, fitness level, and goals. Train independently with AI-generated exercises."
+            "description": "Get a personalized workout plan based on your preferences, fitness level, and goals. Train independently with AI-generated exercises.",
+            "feature1": "Self-guided Workouts",
+            "feature2": "AI Recommendations",
+            "feature3": "Goal Achievement"
         },
         "selection": {
             "title": "Choose Your Role",
-            "description": "Select the role that best fits your fitness journey",
+            "description": "Select how you'd like to use Antique Body. You can change your role later in settings.",
             "continue_as": "Are you sure you want to continue as {{role}}?",
-            "confirm_path": "Confirm Your Path"
+            "continue_as_description": "You are about to continue your fitness journey as a {{role}}. This will determine what features and capabilities are available to you.",
+            "confirm_path": "Confirm Your Path",
+            "help_choosing": "Need help choosing?",
+            "help_modal": {
+                "trainer_help": "Choose this if you want to create workout plans for others, manage clients, and build your training business.",
+                "client_help": "Choose this if you want to be trained by a professional trainer who will create personalized workouts for you.",
+                "user_help": "Choose this if you want AI-generated workouts based on your goals and preferences, without a human trainer.",
+                "contact_support": "Contact support for more help"
+            },
+            "confirm_description": "You are about to continue your fitness journey as a {{role}}. This will determine what features and capabilities are available to you."
         },
         "preparing": {
             "journey": "Preparing your Ancient Journey",
-            "trainer": "Preparing your Trainer Journey",
-            "client": "Preparing your Client Journey",
-            "user": "Preparing your User Journey",
-            "admin": "Preparing your Admin Journey"
+            "trainer": "Setting up your Trainer Profile",
+            "client": "Setting up your Client Profile",
+            "user": "Setting up your Training Plan",
+            "admin": "Setting up your Admin Profile",
+            "please_wait": "Please wait while we prepare everything for you"
         },
         "update": {
             "failed": "Failed to update role. Status: {{status}}"
