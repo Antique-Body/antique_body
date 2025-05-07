@@ -165,6 +165,168 @@ const generateRandomHealthMetrics = () => {
     };
 };
 
+const HEALTH_PROVIDERS = [
+    {
+        id: 'google_fit',
+        name: 'Google Fit',
+        icon: '/icons/google-fit.png',
+        description: 'Track your activity with Google Fit',
+        connected: false
+    },
+    {
+        id: 'apple_health',
+        name: 'Apple Health',
+        icon: '/icons/apple-health.png',
+        description: 'Sync with Apple Health',
+        connected: false
+    },
+    {
+        id: 'samsung_health',
+        name: 'Samsung Health',
+        icon: '/icons/samsung-health.png',
+        description: 'Connect Samsung Health data',
+        connected: false
+    },
+    {
+        id: 'huawei_health',
+        name: 'Huawei Health',
+        icon: '/icons/huawei-health.png',
+        description: 'Integrate with Huawei Health',
+        connected: false
+    },
+    {
+        id: 'fitbit',
+        name: 'Fitbit',
+        icon: '/icons/fitbit.png',
+        description: 'Connect your Fitbit device',
+        connected: false
+    },
+    {
+        id: 'garmin',
+        name: 'Garmin Connect',
+        icon: '/icons/garmin.png',
+        description: 'Sync with Garmin Connect',
+        connected: false
+    }
+];
+
+const MOCK_HEALTH_DATA = {
+    steps: {
+        today: 8432,
+        goal: 10000,
+        weekly_avg: 7845,
+        history: [
+            { date: '2024-03-15', value: 8432 },
+            { date: '2024-03-14', value: 7654 },
+            { date: '2024-03-13', value: 9123 },
+            { date: '2024-03-12', value: 6789 },
+            { date: '2024-03-11', value: 8901 },
+            { date: '2024-03-10', value: 7654 },
+            { date: '2024-03-09', value: 9876 }
+        ]
+    },
+    sleep: {
+        last_night: {
+            total_hours: 7.5,
+            deep_sleep: 2.3,
+            light_sleep: 4.1,
+            rem: 1.1,
+            awake: 0.2
+        },
+        weekly_avg: 7.2,
+        history: [
+            { date: '2024-03-15', total: 7.5, deep: 2.3, light: 4.1, rem: 1.1 },
+            { date: '2024-03-14', total: 6.8, deep: 2.0, light: 3.8, rem: 1.0 },
+            { date: '2024-03-13', total: 7.2, deep: 2.2, light: 4.0, rem: 1.0 },
+            { date: '2024-03-12', total: 7.8, deep: 2.4, light: 4.2, rem: 1.2 },
+            { date: '2024-03-11', total: 6.5, deep: 1.9, light: 3.6, rem: 1.0 },
+            { date: '2024-03-10', total: 7.0, deep: 2.1, light: 3.9, rem: 1.0 },
+            { date: '2024-03-09', total: 7.4, deep: 2.2, light: 4.1, rem: 1.1 }
+        ]
+    },
+    heart_rate: {
+        current: 72,
+        resting: 62,
+        max_today: 142,
+        min_today: 58,
+        zones: {
+            fat_burn: 95,
+            cardio: 135,
+            peak: 165
+        },
+        history: [
+            { time: '08:00', value: 72 },
+            { time: '09:00', value: 75 },
+            { time: '10:00', value: 78 },
+            { time: '11:00', value: 82 },
+            { time: '12:00', value: 76 },
+            { time: '13:00', value: 74 },
+            { time: '14:00', value: 73 }
+        ]
+    },
+    stress: {
+        current_level: 'Medium',
+        score: 65,
+        history: [
+            { date: '2024-03-15', score: 65 },
+            { date: '2024-03-14', score: 58 },
+            { date: '2024-03-13', score: 72 },
+            { date: '2024-03-12', score: 45 },
+            { date: '2024-03-11', score: 68 },
+            { date: '2024-03-10', score: 51 },
+            { date: '2024-03-09', score: 63 }
+        ]
+    },
+    blood_oxygen: {
+        current: 98,
+        average: 97,
+        min: 95,
+        max: 99,
+        history: [
+            { date: '2024-03-15', value: 98 },
+            { date: '2024-03-14', value: 97 },
+            { date: '2024-03-13', value: 98 },
+            { date: '2024-03-12', value: 96 },
+            { date: '2024-03-11', value: 97 },
+            { date: '2024-03-10', value: 98 },
+            { date: '2024-03-09', value: 97 }
+        ]
+    },
+    workouts: {
+        today: {
+            type: 'Running',
+            duration: 45,
+            calories: 420,
+            distance: 5.2,
+            avg_pace: '5:30',
+            avg_heart_rate: 145
+        },
+        history: [
+            {
+                date: '2024-03-15',
+                type: 'Running',
+                duration: 45,
+                calories: 420,
+                distance: 5.2
+            },
+            {
+                date: '2024-03-14',
+                type: 'Strength',
+                duration: 60,
+                calories: 380,
+                exercises: 12
+            },
+            {
+                date: '2024-03-13',
+                type: 'Cycling',
+                duration: 30,
+                calories: 280,
+                distance: 8.5
+            }
+        ]
+    }
+};
+
 export default function HealthPage() {
     const { data: session } = useSession();
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -175,6 +337,8 @@ export default function HealthPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 7;
     const initializedRef = useRef(false);
+    const [activeTab, setActiveTab] = useState('google_fit');
+    const [selectedProvider, setSelectedProvider] = useState(null);
 
     // Function to disconnect Google Fit
     const handleDisconnect = async () => {
@@ -434,369 +598,442 @@ export default function HealthPage() {
     return (
         <div className="min-h-screen bg-[#0A0A0A] p-6">
             <div className="max-w-7xl mx-auto space-y-6">
-                {/* Header Section */}
+                {/* Header with Tabs */}
                 <Card variant="darkStrong" width="100%" maxWidth="none" className="p-6">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div>
+                    <div className="flex flex-col space-y-4">
+                        <div className="flex justify-between items-center">
                             <h1 className="text-2xl font-bold text-white">Health Dashboard</h1>
-                            <p className="text-gray-400 mt-1">Track your daily activity and health metrics</p>
                         </div>
-                        <div className="flex gap-3">
-                            {isConnected ? (
-                                <Button
-                                    onClick={handleDisconnect}
-                                    variant="outlineRed"
-                                    leftIcon={<DisconnectIcon size={16} />}
-                                >
-                                    Disconnect Google Fit
-                                </Button>
-                            ) : (
-                                <Button
-                                    onClick={handleConnect}
-                                    variant="orangeFilled"
-                                    leftIcon={<ConnectIcon size={16} />}
-                                >
-                                    Connect Google Fit
-                                </Button>
-                            )}
-                            {isConnected && (
-                                <Button
-                                    onClick={fetchHealthData}
-                                    variant="outlineLight"
-                                    leftIcon={<RefreshIcon size={16} />}
-                                >
-                                    Refresh Data
-                                </Button>
-                            )}
+                        <div className="flex space-x-1 border-b border-[#333]">
+                            <button
+                                onClick={() => setActiveTab('google_fit')}
+                                className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                                    activeTab === 'google_fit'
+                                        ? 'text-[#FF6B00] border-b-2 border-[#FF6B00]'
+                                        : 'text-gray-400 hover:text-gray-300'
+                                }`}
+                            >
+                                Google Fit
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('other_integrations')}
+                                className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                                    activeTab === 'other_integrations'
+                                        ? 'text-[#FF6B00] border-b-2 border-[#FF6B00]'
+                                        : 'text-gray-400 hover:text-gray-300'
+                                }`}
+                            >
+                                Health Integrations
+                            </button>
                         </div>
                     </div>
                 </Card>
 
-                {!isConnected && (
-                    <Card variant="darkStrong" width="100%" maxWidth="none" hover>
-                        <div className="text-center p-8">
-                            <div className="w-16 h-16 bg-[rgba(255,107,0,0.1)] rounded-full flex items-center justify-center mx-auto mb-4">
-                                <ActivityIcon size={32} className="text-[#FF6B00]" />
-                            </div>
-                            <h3 className="text-xl font-semibold text-white mb-2">Connect Your Health Data</h3>
-                            <p className="text-gray-400 mb-6 max-w-md mx-auto">
-                                Connect your Google Fit account to start tracking your daily activity, steps, and other health metrics.
-                            </p>
-                            <Button
-                                onClick={handleConnect}
-                                variant="orangeFilled"
-                                leftIcon={<ConnectIcon size={16} />}
-                                className="px-8"
-                            >
-                                Connect Google Fit
-                            </Button>
-                        </div>
-                    </Card>
-                )}
-
-                {isLoading && (
-                    <Card variant="darkStrong" width="100%" maxWidth="none">
-                        <div className="text-center p-8">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6B00] mx-auto"></div>
-                            <p className="mt-4 text-gray-400">Loading your health data...</p>
-                        </div>
-                    </Card>
-                )}
-
-                {error && (
-                    <Card variant="darkStrong" width="100%" maxWidth="none">
-                        <div className="text-center p-8">
-                            <div className="w-16 h-16 bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <ErrorIcon size={32} className="text-red-500" />
-                            </div>
-                            <p className="text-red-500 mb-4">{error}</p>
-                            <Button
-                                onClick={() => window.location.reload()}
-                                variant="orangeFilled"
-                                className="mt-4"
-                            >
-                                Retry
-                            </Button>
-                        </div>
-                    </Card>
-                )}
-
-                {isConnected && !isLoading && !error && healthData && (
+                {/* Content based on active tab */}
+                {activeTab === 'google_fit' ? (
                     <>
-                        {/* Daily Overview Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <Card variant="darkStrong" width="100%" hover>
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-10 h-10 bg-[rgba(255,107,0,0.1)] rounded-full flex items-center justify-center">
-                                        <ChartBarIcon size={20} className="text-[#FF6B00]" />
-                                    </div>
-                                    <h3 className="text-lg font-semibold text-white">
-                                        {formatDate(getSelectedData().date)}
-                                    </h3>
-                                </div>
-                                <div className="space-y-4">
-                                    <div>
-                                        <p className="text-sm text-gray-400">Steps</p>
-                                        <p className="text-2xl font-bold text-[#FF6B00]">
-                                            {getSelectedData().steps.toLocaleString()}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-gray-400">Calories</p>
-                                        <p className="text-2xl font-bold text-[#FF6B00]">
-                                            {Math.round(getSelectedData().calories)}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-gray-400">Distance</p>
-                                        <p className="text-2xl font-bold text-[#FF6B00]">
-                                            {getSelectedData().distance} km
-                                        </p>
-                                    </div>
-                                </div>
-                            </Card>
-
-                            <Card variant="darkStrong" width="100%" hover>
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-10 h-10 bg-[rgba(255,107,0,0.1)] rounded-full flex items-center justify-center">
-                                        <TimerIcon size={20} className="text-[#FF6B00]" />
-                                    </div>
-                                    <h3 className="text-lg font-semibold text-white">Activity</h3>
-                                </div>
-                                <div className="space-y-4">
-                                    <div>
-                                        <p className="text-sm text-gray-400">Active Minutes</p>
-                                        <p className="text-2xl font-bold text-[#FF6B00]">
-                                            {getSelectedData().activeMinutes}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-gray-400">Floors</p>
-                                        <p className="text-2xl font-bold text-[#FF6B00]">
-                                            {getSelectedData().floors}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-gray-400">Elevation</p>
-                                        <p className="text-2xl font-bold text-[#FF6B00]">
-                                            {getSelectedData().elevation} m
-                                        </p>
-                                    </div>
-                                </div>
-                            </Card>
-
-                            <Card variant="darkStrong" width="100%" hover>
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-10 h-10 bg-[rgba(255,107,0,0.1)] rounded-full flex items-center justify-center">
-                                        <TargetIcon size={20} className="text-[#FF6B00]" />
-                                    </div>
-                                    <h3 className="text-lg font-semibold text-white">Health Metrics</h3>
-                                </div>
-                                <div className="space-y-4">
-                                    <div>
-                                        <p className="text-sm text-gray-400">Heart Rate</p>
-                                        <p className="text-2xl font-bold text-[#FF6B00]">
-                                            {getSelectedData().heartRate?.average || 0} bpm
-                                        </p>
-                                        <div className="flex gap-2 mt-1">
-                                            <span className="text-xs text-gray-400">Min: {getSelectedData().heartRate?.min || 0}</span>
-                                            <span className="text-xs text-gray-400">Max: {getSelectedData().heartRate?.max || 0}</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-gray-400">Speed</p>
-                                        <p className="text-2xl font-bold text-[#FF6B00]">
-                                            {getSelectedData().speed?.average || 0} km/h
-                                        </p>
-                                        <div className="flex gap-2 mt-1">
-                                            <span className="text-xs text-gray-400">Max: {getSelectedData().speed?.max || 0} km/h</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </Card>
-                        </div>
-
-                        {/* Steps Chart */}
-                        <Card variant="darkStrong" width="100%" maxWidth="none" hover>
-                            {renderChart()}
-                        </Card>
-
-                        {/* Progress Section */}
-                        <Card variant="darkStrong" width="100%" maxWidth="none" hover>
-                            <h3 className="text-lg font-semibold text-white mb-6">Daily Progress</h3>
-                            <div className="space-y-6">
+                        {/* Header Section */}
+                        <Card variant="darkStrong" width="100%" maxWidth="none" className="p-6">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                 <div>
-                                    <div className="mb-2 flex items-center justify-between">
-                                        <span className="text-sm font-medium text-gray-300">Daily Step Goal</span>
-                                        <span className="text-sm font-medium text-gray-300">
-                                            {getSelectedData().steps.toLocaleString()} / 10,000
-                                        </span>
-                                    </div>
-                                    <div className="h-3 w-full overflow-hidden rounded-full bg-gray-800">
-                                        <div 
-                                            className="h-full rounded-full bg-[#FF6B00] transition-all duration-500" 
-                                            style={{ width: `${Math.min((getSelectedData().steps / 10000) * 100, 100)}%` }}
-                                        ></div>
-                                    </div>
+                                    <h1 className="text-2xl font-bold text-white">Health Dashboard</h1>
+                                    <p className="text-gray-400 mt-1">Track your daily activity and health metrics</p>
                                 </div>
-                                <div>
-                                    <div className="mb-2 flex items-center justify-between">
-                                        <span className="text-sm font-medium text-gray-300">Active Minutes Goal</span>
-                                        <span className="text-sm font-medium text-gray-300">
-                                            {getSelectedData().activeMinutes} / 30
-                                        </span>
-                                    </div>
-                                    <div className="h-3 w-full overflow-hidden rounded-full bg-gray-800">
-                                        <div 
-                                            className="h-full rounded-full bg-[#FF6B00] transition-all duration-500" 
-                                            style={{ width: `${Math.min((getSelectedData().activeMinutes / 30) * 100, 100)}%` }}
-                                        ></div>
-                                    </div>
+                                <div className="flex gap-3">
+                                    {isConnected ? (
+                                        <Button
+                                            onClick={handleDisconnect}
+                                            variant="outlineRed"
+                                            leftIcon={<DisconnectIcon size={16} />}
+                                        >
+                                            Disconnect Google Fit
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            onClick={handleConnect}
+                                            variant="orangeFilled"
+                                            leftIcon={<ConnectIcon size={16} />}
+                                        >
+                                            Connect Google Fit
+                                        </Button>
+                                    )}
+                                    {isConnected && (
+                                        <Button
+                                            onClick={fetchHealthData}
+                                            variant="outlineLight"
+                                            leftIcon={<RefreshIcon size={16} />}
+                                        >
+                                            Refresh Data
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
                         </Card>
 
-                        {/* Data Table Section */}
-                        <Card variant="darkStrong" width="100%" maxWidth="none" hover>
-                            <div className="p-6 border-b border-gray-800">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="text-lg font-semibold text-white">Activity History</h3>
+                        {!isConnected && (
+                            <Card variant="darkStrong" width="100%" maxWidth="none" hover>
+                                <div className="text-center p-8">
+                                    <div className="w-16 h-16 bg-[rgba(255,107,0,0.1)] rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <ActivityIcon size={32} className="text-[#FF6B00]" />
+                                    </div>
+                                    <h3 className="text-xl font-semibold text-white mb-2">Connect Your Health Data</h3>
+                                    <p className="text-gray-400 mb-6 max-w-md mx-auto">
+                                        Connect your Google Fit account to start tracking your daily activity, steps, and other health metrics.
+                                    </p>
                                     <Button
-                                        variant="outlineLight"
-                                        size="sm"
-                                        leftIcon={<CalendarIcon size={16} />}
+                                        onClick={handleConnect}
+                                        variant="orangeFilled"
+                                        leftIcon={<ConnectIcon size={16} />}
+                                        className="px-8"
                                     >
-                                        View Calendar
+                                        Connect Google Fit
                                     </Button>
                                 </div>
-                            </div>
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-800">
-                                    <thead className="bg-gray-900/50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Steps</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Calories</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Distance</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Active Minutes</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Floors</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Elevation</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-800">
-                                        {getPaginatedData().map((day) => (
-                                            <tr 
-                                                key={day.date}
-                                                className={`hover:bg-gray-800/50 cursor-pointer transition-colors ${
-                                                    day.date === selectedDate ? 'bg-[rgba(255,107,0,0.05)]' : ''
-                                                }`}
-                                                onClick={() => setSelectedDate(day.date)}
+                            </Card>
+                        )}
+
+                        {isLoading && (
+                            <Card variant="darkStrong" width="100%" maxWidth="none">
+                                <div className="text-center p-8">
+                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6B00] mx-auto"></div>
+                                    <p className="mt-4 text-gray-400">Loading your health data...</p>
+                                </div>
+                            </Card>
+                        )}
+
+                        {error && (
+                            <Card variant="darkStrong" width="100%" maxWidth="none">
+                                <div className="text-center p-8">
+                                    <div className="w-16 h-16 bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <ErrorIcon size={32} className="text-red-500" />
+                                    </div>
+                                    <p className="text-red-500 mb-4">{error}</p>
+                                    <Button
+                                        onClick={() => window.location.reload()}
+                                        variant="orangeFilled"
+                                        className="mt-4"
+                                    >
+                                        Retry
+                                    </Button>
+                                </div>
+                            </Card>
+                        )}
+
+                        {isConnected && !isLoading && !error && healthData && (
+                            <>
+                                {/* Daily Overview Cards */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <Card variant="darkStrong" width="100%" hover>
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="w-10 h-10 bg-[rgba(255,107,0,0.1)] rounded-full flex items-center justify-center">
+                                                <ChartBarIcon size={20} className="text-[#FF6B00]" />
+                                            </div>
+                                            <h3 className="text-lg font-semibold text-white">
+                                                {formatDate(getSelectedData().date)}
+                                            </h3>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <p className="text-sm text-gray-400">Steps</p>
+                                                <p className="text-2xl font-bold text-[#FF6B00]">
+                                                    {getSelectedData().steps.toLocaleString()}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-400">Calories</p>
+                                                <p className="text-2xl font-bold text-[#FF6B00]">
+                                                    {Math.round(getSelectedData().calories)}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-400">Distance</p>
+                                                <p className="text-2xl font-bold text-[#FF6B00]">
+                                                    {getSelectedData().distance} km
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </Card>
+
+                                    <Card variant="darkStrong" width="100%" hover>
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="w-10 h-10 bg-[rgba(255,107,0,0.1)] rounded-full flex items-center justify-center">
+                                                <TimerIcon size={20} className="text-[#FF6B00]" />
+                                            </div>
+                                            <h3 className="text-lg font-semibold text-white">Activity</h3>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <p className="text-sm text-gray-400">Active Minutes</p>
+                                                <p className="text-2xl font-bold text-[#FF6B00]">
+                                                    {getSelectedData().activeMinutes}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-400">Floors</p>
+                                                <p className="text-2xl font-bold text-[#FF6B00]">
+                                                    {getSelectedData().floors}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-400">Elevation</p>
+                                                <p className="text-2xl font-bold text-[#FF6B00]">
+                                                    {getSelectedData().elevation} m
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </Card>
+
+                                    <Card variant="darkStrong" width="100%" hover>
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="w-10 h-10 bg-[rgba(255,107,0,0.1)] rounded-full flex items-center justify-center">
+                                                <TargetIcon size={20} className="text-[#FF6B00]" />
+                                            </div>
+                                            <h3 className="text-lg font-semibold text-white">Health Metrics</h3>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <p className="text-sm text-gray-400">Heart Rate</p>
+                                                <p className="text-2xl font-bold text-[#FF6B00]">
+                                                    {getSelectedData().heartRate?.average || 0} bpm
+                                                </p>
+                                                <div className="flex gap-2 mt-1">
+                                                    <span className="text-xs text-gray-400">Min: {getSelectedData().heartRate?.min || 0}</span>
+                                                    <span className="text-xs text-gray-400">Max: {getSelectedData().heartRate?.max || 0}</span>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-400">Speed</p>
+                                                <p className="text-2xl font-bold text-[#FF6B00]">
+                                                    {getSelectedData().speed?.average || 0} km/h
+                                                </p>
+                                                <div className="flex gap-2 mt-1">
+                                                    <span className="text-xs text-gray-400">Max: {getSelectedData().speed?.max || 0} km/h</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Card>
+                                </div>
+
+                                {/* Steps Chart */}
+                                <Card variant="darkStrong" width="100%" maxWidth="none" hover>
+                                    {renderChart()}
+                                </Card>
+
+                                {/* Progress Section */}
+                                <Card variant="darkStrong" width="100%" maxWidth="none" hover>
+                                    <h3 className="text-lg font-semibold text-white mb-6">Daily Progress</h3>
+                                    <div className="space-y-6">
+                                        <div>
+                                            <div className="mb-2 flex items-center justify-between">
+                                                <span className="text-sm font-medium text-gray-300">Daily Step Goal</span>
+                                                <span className="text-sm font-medium text-gray-300">
+                                                    {getSelectedData().steps.toLocaleString()} / 10,000
+                                                </span>
+                                            </div>
+                                            <div className="h-3 w-full overflow-hidden rounded-full bg-gray-800">
+                                                <div 
+                                                    className="h-full rounded-full bg-[#FF6B00] transition-all duration-500" 
+                                                    style={{ width: `${Math.min((getSelectedData().steps / 10000) * 100, 100)}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="mb-2 flex items-center justify-between">
+                                                <span className="text-sm font-medium text-gray-300">Active Minutes Goal</span>
+                                                <span className="text-sm font-medium text-gray-300">
+                                                    {getSelectedData().activeMinutes} / 30
+                                                </span>
+                                            </div>
+                                            <div className="h-3 w-full overflow-hidden rounded-full bg-gray-800">
+                                                <div 
+                                                    className="h-full rounded-full bg-[#FF6B00] transition-all duration-500" 
+                                                    style={{ width: `${Math.min((getSelectedData().activeMinutes / 30) * 100, 100)}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Card>
+
+                                {/* Data Table Section */}
+                                <Card variant="darkStrong" width="100%" maxWidth="none" hover>
+                                    <div className="p-6 border-b border-gray-800">
+                                        <div className="flex items-center justify-between">
+                                            <h3 className="text-lg font-semibold text-white">Activity History</h3>
+                                            <Button
+                                                variant="outlineLight"
+                                                size="sm"
+                                                leftIcon={<CalendarIcon size={16} />}
                                             >
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                                    {formatDate(day.date)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                                    {day.steps.toLocaleString()}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                                    {Math.round(day.calories)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                                    {day.distance} km
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                                    {day.activeMinutes}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                                    {day.floors}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                                    {day.elevation} m
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                            
-                            {/* Updated Pagination */}
-                            <div className="bg-gray-900/50 px-4 py-3 flex items-center justify-between border-t border-gray-800 sm:px-6">
-                                <div className="flex-1 flex justify-between sm:hidden">
-                                    <Button
-                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                        disabled={currentPage === 1}
-                                        variant="outlineLight"
-                                        size="sm"
-                                    >
-                                        Previous
-                                    </Button>
-                                    <Button
-                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                        disabled={currentPage === totalPages}
-                                        variant="outlineLight"
-                                        size="sm"
-                                    >
-                                        Next
-                                    </Button>
-                                </div>
-                                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                                    <div>
-                                        <p className="text-sm text-gray-400">
-                                            Showing <span className="font-medium text-gray-300">{((currentPage - 1) * itemsPerPage) + 1}</span> to{' '}
-                                            <span className="font-medium text-gray-300">
-                                                {Math.min(currentPage * itemsPerPage, healthData?.dailyData?.length || 0)}
-                                            </span>{' '}
-                                            of <span className="font-medium text-gray-300">{healthData?.dailyData?.length || 0}</span> results
-                                        </p>
+                                                View Calendar
+                                            </Button>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                    <div className="overflow-x-auto">
+                                        <table className="min-w-full divide-y divide-gray-800">
+                                            <thead className="bg-gray-900/50">
+                                                <tr>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Steps</th>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Calories</th>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Distance</th>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Active Minutes</th>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Floors</th>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Elevation</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-800">
+                                                {getPaginatedData().map((day) => (
+                                                    <tr 
+                                                        key={day.date}
+                                                        className={`hover:bg-gray-800/50 cursor-pointer transition-colors ${
+                                                            day.date === selectedDate ? 'bg-[rgba(255,107,0,0.05)]' : ''
+                                                        }`}
+                                                        onClick={() => setSelectedDate(day.date)}
+                                                    >
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                                            {formatDate(day.date)}
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                                            {day.steps.toLocaleString()}
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                                            {Math.round(day.calories)}
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                                            {day.distance} km
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                                            {day.activeMinutes}
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                                            {day.floors}
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                                            {day.elevation} m
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    {/* Updated Pagination */}
+                                    <div className="bg-gray-900/50 px-4 py-3 flex items-center justify-between border-t border-gray-800 sm:px-6">
+                                        <div className="flex-1 flex justify-between sm:hidden">
                                             <Button
                                                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                                 disabled={currentPage === 1}
                                                 variant="outlineLight"
                                                 size="sm"
-                                                className="rounded-l-md"
                                             >
-                                                &laquo;
+                                                Previous
                                             </Button>
-                                            
-                                            {renderPaginationNumbers().map((page, index) => (
-                                                page === '...' ? (
-                                                    <span 
-                                                        key={`ellipsis-${index}`}
-                                                        className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-400"
-                                                    >
-                                                        ...
-                                                    </span>
-                                                ) : (
-                                                    <Button
-                                                        key={page}
-                                                        onClick={() => setCurrentPage(page)}
-                                                        variant={currentPage === page ? "orangeFilled" : "outlineLight"}
-                                                        size="sm"
-                                                        className='mx-1'
-                                                    >
-                                                        {page}
-                                                    </Button>
-                                                )
-                                            ))}
-                                            
                                             <Button
                                                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                                 disabled={currentPage === totalPages}
                                                 variant="outlineLight"
                                                 size="sm"
-                                                className="rounded-r-md"
                                             >
-                                                &raquo;
+                                                Next
                                             </Button>
-                                        </nav>
+                                        </div>
+                                        <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                            <div>
+                                                <p className="text-sm text-gray-400">
+                                                    Showing <span className="font-medium text-gray-300">{((currentPage - 1) * itemsPerPage) + 1}</span> to{' '}
+                                                    <span className="font-medium text-gray-300">
+                                                        {Math.min(currentPage * itemsPerPage, healthData?.dailyData?.length || 0)}
+                                                    </span>{' '}
+                                                    of <span className="font-medium text-gray-300">{healthData?.dailyData?.length || 0}</span> results
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                                    <Button
+                                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                                        disabled={currentPage === 1}
+                                                        variant="outlineLight"
+                                                        size="sm"
+                                                        className="rounded-l-md"
+                                                    >
+                                                        &laquo;
+                                                    </Button>
+                                                    
+                                                    {renderPaginationNumbers().map((page, index) => (
+                                                        page === '...' ? (
+                                                            <span 
+                                                                key={`ellipsis-${index}`}
+                                                                className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-400"
+                                                            >
+                                                                ...
+                                                            </span>
+                                                        ) : (
+                                                            <Button
+                                                                key={page}
+                                                                onClick={() => setCurrentPage(page)}
+                                                                variant={currentPage === page ? "orangeFilled" : "outlineLight"}
+                                                                size="sm"
+                                                                className='mx-1'
+                                                            >
+                                                                {page}
+                                                            </Button>
+                                                        )
+                                                    ))}
+                                                    
+                                                    <Button
+                                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                                        disabled={currentPage === totalPages}
+                                                        variant="outlineLight"
+                                                        size="sm"
+                                                        className="rounded-r-md"
+                                                    >
+                                                        &raquo;
+                                                    </Button>
+                                                </nav>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                </Card>
+                            </>
+                        )}
+                    </>
+                ) : (
+                    // New Health Integrations content
+                    <div className="space-y-6">
+                        {/* Available Integrations Grid */}
+                        <Card variant="darkStrong" width="100%" maxWidth="none" className="p-6">
+                            <h2 className="text-xl font-semibold text-white mb-6">Available Health Integrations</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {HEALTH_PROVIDERS.map(provider => (
+                                    <div
+                                        key={provider.id}
+                                        className="bg-[#1A1A1A] rounded-xl p-6 border border-[#333] hover:border-[#FF6B00] transition-colors cursor-pointer"
+                                        onClick={() => setSelectedProvider(provider.id)}
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 bg-[#222] rounded-full flex items-center justify-center">
+                                                {/* Provider icon would go here */}
+                                                <ActivityIcon size={24} className="text-[#FF6B00]" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-white font-medium">{provider.name}</h3>
+                                                <p className="text-sm text-gray-400">{provider.description}</p>
+                                            </div>
+                                        </div>
+                                        <Button
+                                            variant={provider.connected ? "outlineLight" : "orangeFilled"}
+                                            className="w-full mt-4"
+                                        >
+                                            {provider.connected ? 'Connected' : 'Connect'}
+                                        </Button>
+                                    </div>
+                                ))}
                             </div>
                         </Card>
-                    </>
+
+                        {/* Mock Health Data Display */}
+                        {/* We'll add the health metrics display components in the next edit */}
+                    </div>
                 )}
             </div>
         </div>

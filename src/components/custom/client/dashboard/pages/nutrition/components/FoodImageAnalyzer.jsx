@@ -160,6 +160,17 @@ export const FoodImageAnalyzer = ({ onAddToMeal, dailyGoals, dailyMacros }) => {
         const total = consumed + value;
         const consumedPercent = Math.round((consumed / goal) * 100);
         const thisItemPercent = Math.round((value / goal) * 100);
+        
+        // Define gradient based on color
+        const getGradient = () => {
+            switch(color) {
+                case "bg-[#FF6B00]": return "bg-gradient-to-r from-[#FF5000] to-[#FF8000]";
+                case "bg-blue-500": return "bg-gradient-to-r from-blue-600 to-blue-400";
+                case "bg-green-500": return "bg-gradient-to-r from-green-600 to-green-400";
+                case "bg-yellow-500": return "bg-gradient-to-r from-yellow-600 to-yellow-400";
+                default: return color;
+            }
+        };
 
         return (
             <div className="mb-3">
@@ -175,10 +186,24 @@ export const FoodImageAnalyzer = ({ onAddToMeal, dailyGoals, dailyMacros }) => {
                         </span>
                     </div>
                 </div>
-                <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#333]">
+                <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#222] shadow-inner">
                     <div className="flex h-full">
-                        <div className={`h-full ${color}`} style={{ width: `${consumedPercent}%` }}></div>
-                        <div className={`h-full ${color} opacity-50`} style={{ width: `${thisItemPercent}%` }}></div>
+                        {/* Already consumed */}
+                        <div 
+                            className={`h-full ${getGradient()} transition-all duration-500`} 
+                            style={{ width: `${consumedPercent}%` }}
+                        ></div>
+                        
+                        {/* This item's contribution */}
+                        <div 
+                            className={`h-full ${getGradient()} opacity-50 transition-all duration-500`} 
+                            style={{ width: `${thisItemPercent}%` }}
+                        >
+                            {/* Pulse animation if this item contributes significantly */}
+                            {thisItemPercent > 10 && (
+                                <div className="h-full w-full animate-pulse bg-white opacity-20"></div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -479,12 +504,20 @@ export const FoodImageAnalyzer = ({ onAddToMeal, dailyGoals, dailyMacros }) => {
 
                                     {/* Macro Distribution */}
                                     <div className="mb-6">
-                                        <h4 className="mb-2 text-sm font-medium">Macro Distribution for This Food</h4>
-                                        <MacroDistribution
-                                            protein={analysis.proteins * 4}
-                                            carbs={analysis.carbs * 4}
-                                            fat={analysis.fats * 9}
-                                        />
+                                        <h4 className="mb-2 text-sm font-medium flex items-center">
+                                            <svg className="w-4 h-4 mr-2 text-[#FF6B00]" fill="currentColor" viewBox="0 0 256 256">
+                                                <path d="M229.86,77.86a6,6,0,0,0-6,6v50.55l-88-88V26a6,6,0,0,0-12,0V57.86l-51.13-51.13a6,6,0,0,0-8.49,8.49L115.76,66.73,24.16,142.77a6,6,0,0,0,7.4,9.46L123.9,77.65l88,88H162a6,6,0,0,0,0,12h67.89a6,6,0,0,0,6-6V83.86A6,6,0,0,0,229.86,77.86Z"></path>
+                                            </svg>
+                                            Macro Distribution for This Food
+                                        </h4>
+                                        <div className="p-3 bg-[#0f0f0f]/50 rounded-xl border border-[#272727] shadow-inner">
+                                            <MacroDistribution
+                                                protein={analysis.proteins * 4}
+                                                carbs={analysis.carbs * 4}
+                                                fat={analysis.fats * 9}
+                                                size="small"
+                                            />
+                                        </div>
                                     </div>
 
                                     {/* Daily Goals Progress */}

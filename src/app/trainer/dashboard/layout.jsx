@@ -1,4 +1,5 @@
 "use client";
+import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -10,6 +11,7 @@ import { TrainerProfile } from "@/components/custom/trainer/dashboard/components
 export default function TrainerDashboardLayout({ children }) {
     const router = useRouter();
     const pathname = usePathname();
+    const { data: session } = useSession();
 
     // Map pathname to tab ID
     const getActiveTabFromPath = (path) => {
@@ -60,9 +62,9 @@ export default function TrainerDashboardLayout({ children }) {
 
     // Sample data for the trainer dashboard
     const trainerData = {
-        name: "Alex Miller",
+        name: session?.user?.name || "Loading...",
         specialty: "Football Conditioning Specialist",
-        avatarContent: "https://ai-previews.123rf.com/ai-txt2img/600nwm/74143221-4fc9-47bd-a919-0c6d55da9cc5.jpg",
+        avatarContent: session?.user?.image || "https://ai-previews.123rf.com/ai-txt2img/600nwm/74143221-4fc9-47bd-a919-0c6d55da9cc5.jpg",
         certifications: ["UEFA A License", "NSCA CSCS"],
         experience: "8 years",
         rating: 4.8,

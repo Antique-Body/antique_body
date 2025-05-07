@@ -91,6 +91,7 @@ export const authOptions = {
                     role: user.role?.toLowerCase(),
                     hasCompletedTrainingSetup: !!user.preferences,
                     language: user.language,
+                    image: user.image,
                 };
             },
         }),
@@ -124,7 +125,6 @@ export const authOptions = {
                     user.id = existingUser.id;
                     user.role = existingUser.role?.toLowerCase();
                     user.hasCompletedTrainingSetup = !!existingUser.preferences;
-                    // Don't set language here, it will be set from localStorage in the session callback
                 }
             } else {
                 // For credentials provider, check if there's a saved language in localStorage

@@ -7,17 +7,6 @@ import { StatCard, UserProfile } from "@/components/custom/shared";
 export const TrainerProfile = ({ trainerData }) => {
   const router = useRouter();
 
- const avatarContent = trainerData.avatarContent ? (
-    trainerData.avatarContent
-  ) : (
-    <span className="text-4xl">
-      {trainerData.name
-        .split(" ")
-        .map(n => n[0])
-        .join("")}
-    </span>
-  );
-
   const handleEditProfile = () => {
     router.push("/trainer/edit-profile");
   };
@@ -27,7 +16,7 @@ export const TrainerProfile = ({ trainerData }) => {
       <UserProfile
         userData={trainerData}
         profileType="trainer"
-        avatarContent={avatarContent}
+        avatarContent={trainerData.avatarContent}
         profileSubtitle={trainerData.specialty}
         profileTitle={trainerData.name}
         certifications={trainerData.certifications}

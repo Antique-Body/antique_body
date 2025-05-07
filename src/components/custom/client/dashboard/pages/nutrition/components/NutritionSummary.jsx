@@ -101,13 +101,25 @@ export const NutritionSummary = ({
                     </div>
                 </Card>
 
-                <Card variant="dark" width="100%" maxWidth="none">
-                    <h3 className="font-bold mb-4">Macro Distribution</h3>
+                <Card variant="dark" width="100%" maxWidth="none" className="bg-gradient-to-b from-[#1a1a1a] to-[#141414] hover:from-[#1d1d1d] hover:to-[#161616] transition-all duration-500">
+                    <h3 className="font-bold mb-4 flex items-center">
+                        <svg className="w-5 h-5 mr-2 text-[#FF6B00]" fill="currentColor" viewBox="0 0 256 256">
+                            <path d="M229.86,77.86a6,6,0,0,0-6,6v50.55l-88-88V26a6,6,0,0,0-12,0V57.86l-51.13-51.13a6,6,0,0,0-8.49,8.49L115.76,66.73,24.16,142.77a6,6,0,0,0,7.4,9.46L123.9,77.65l88,88H162a6,6,0,0,0,0,12h67.89a6,6,0,0,0,6-6V83.86A6,6,0,0,0,229.86,77.86Z"></path>
+                        </svg>
+                        Macro Distribution
+                    </h3>
 
-                    <MacroDistribution protein={totals.protein * 4} carbs={totals.carbs * 4} fat={totals.fat * 9} />
+                    <div className="p-4 bg-[#0f0f0f]/50 rounded-xl mb-4 border border-[#272727] shadow-inner">
+                        <MacroDistribution protein={totals.protein * 4} carbs={totals.carbs * 4} fat={totals.fat * 9} />
+                    </div>
 
-                    <div className="mt-4 bg-[rgba(30,30,30,0.7)] p-3 rounded-lg">
-                        <h4 className="text-sm font-medium mb-2">Training Focus</h4>
+                    <div className="mt-4 bg-[rgba(30,30,30,0.7)] p-4 rounded-lg border-l-4 border-[#FF6B00]/50">
+                        <h4 className="text-sm font-medium mb-2 flex items-center">
+                            <svg className="w-4 h-4 mr-2 text-[#FF6B00]" fill="currentColor" viewBox="0 0 256 256">
+                                <path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,16V88H40V56ZM40,200V104H216v96Z"></path>
+                            </svg>
+                            Training Focus
+                        </h4>
                         <div className="flex items-center text-sm">
                             <div className="mr-2 w-4 h-4 rounded-full bg-[rgba(255,107,0,0.3)] flex items-center justify-center">
                                 <div className="w-2 h-2 rounded-full bg-[#FF6B00]"></div>
@@ -163,23 +175,50 @@ export const NutritionSummary = ({
 };
 
 // Extracted component for macro progress bars
-const MacroProgressBar = ({ label, color, current, goal, getPercentage }) => (
-    <div>
-        <div className="mb-1 flex justify-between text-sm">
-            <div className="flex items-center">
-                <div className={`mr-2 h-3 w-3 rounded-full ${color}`}></div>
-                <p>{label}</p>
+const MacroProgressBar = ({ label, color, current, goal, getPercentage }) => {
+    // Calculate percentage
+    const percentage = getPercentage(current, goal);
+    
+    // Define gradients based on color type
+    const getGradient = () => {
+        switch(color) {
+            case "bg-blue-500": return "bg-gradient-to-r from-blue-600 to-blue-400";
+            case "bg-green-500": return "bg-gradient-to-r from-green-600 to-green-400";
+            case "bg-yellow-500": return "bg-gradient-to-r from-yellow-600 to-yellow-400";
+            case "bg-orange-800": return "bg-gradient-to-r from-orange-900 to-orange-700";
+            default: return color;
+        }
+    };
+
+    return (
+        <div className="relative">
+            <div className="mb-2 flex justify-between text-sm">
+                <div className="flex items-center">
+                    <div className={`mr-2 h-3 w-3 rounded-full ${color}`}></div>
+                    <p>{label}</p>
+                </div>
+                <p>
+                    <span className="text-white">{current}g</span>
+                    <span className="text-gray-400"> / {goal}g</span>
+                    <span className="ml-2 text-xs text-gray-400">({Math.round(percentage)}%)</span>
+                </p>
             </div>
-            <p>
-                <span className="text-white">{current}g</span>
-                <span className="text-gray-400"> / {goal}g</span>
-            </p>
+            <div className="h-3 w-full overflow-hidden rounded-full bg-[#222] shadow-inner">
+                <div 
+                    className={`h-full ${getGradient()} transition-all duration-700 ease-out shadow-lg`} 
+                    style={{ width: `${percentage}%` }}
+                ></div>
+            </div>
+            {/* Add subtle glow effect if over 90% */}
+            {percentage > 90 && (
+                <div 
+                    className={`absolute inset-0 opacity-20 blur-sm ${color}`}
+                    style={{ width: `${percentage}%` }}
+                ></div>
+            )}
         </div>
-        <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#333]">
-            <div className={`h-full ${color}`} style={{ width: `${getPercentage(current, goal)}%` }}></div>
-        </div>
-    </div>
-);
+    );
+};
 
 // Extracted component for action cards
 const ActionCard = ({ title, icon, description, onClick, color, footer, footerColor = "text-gray-500" }) => (

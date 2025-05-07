@@ -7,17 +7,6 @@ import { StatCard, UserProfile } from "@/components/custom/shared";
 export const ClientProfile = ({ userData }) => {
   const router = useRouter();
 
-  const avatarContent = userData.avatarContent ? (
-    userData.avatarContent
-  ) : (
-    <span className="text-4xl">
-      {userData.name
-        .split(" ")
-        .map(n => n[0])
-        .join("")}
-    </span>
-  );
-
   const handleEditProfile = () => {
     router.push("/client/edit-profile");
   };
@@ -27,7 +16,7 @@ export const ClientProfile = ({ userData }) => {
       <UserProfile
         userData={userData}
         profileType="client"
-        avatarContent={avatarContent}
+        avatarContent={userData.avatarContent}
         showProgressBar={true}
         progressData={userData.progress}
         profileTitle={userData.name}

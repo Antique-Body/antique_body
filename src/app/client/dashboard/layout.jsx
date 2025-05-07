@@ -1,4 +1,5 @@
 "use client";
+import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -10,6 +11,7 @@ import { ClientProfile } from "@/components/custom/client/dashboard/components";
 export default function ClientDashboardLayout({ children }) {
     const router = useRouter();
     const pathname = usePathname();
+    const { data: session } = useSession();
 
     // Map pathname to tab ID
     const getActiveTabFromPath = (path) => {
@@ -66,12 +68,11 @@ export default function ClientDashboardLayout({ children }) {
         }
     };
 
-    // Sample user data
+    // Sample user data with session data
     const userData = {
-        name: "Jamie Smith",
+        name: session?.user?.name || "Loading...",
         coach: "Alex Miller",
-        avatarContent:
-            "https://media.istockphoto.com/id/2072420635/photo/young-black-man-in-sports-clothing-smiling-while-doing-stretches-at-park.jpg?s=1024x1024&w=is&k=20&c=cikNQvFDPkL6PPJ0DZFfBrpT21EF_ZsbKO2eMUWiJa4=",
+        avatarContent: session?.user?.image || "https://media.istockphoto.com/id/2072420635/photo/young-black-man-in-sports-clothing-smiling-while-doing-stretches-at-park.jpg?s=1024x1024&w=is&k=20&c=cikNQvFDPkL6PPJ0DZFfBrpT21EF_ZsbKO2eMUWiJa4=",
         planName: "Strength Building",
         planStart: "Mar 15, 2025",
         planEnd: "Jun 15, 2025",

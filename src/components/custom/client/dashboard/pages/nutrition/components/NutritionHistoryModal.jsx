@@ -49,6 +49,19 @@ export const NutritionHistoryModal = ({
     return date.toISOString().split('T')[0];
   };
   
+  // Helper function to get gradient class based on color
+  const getGradient = (baseColor) => {
+    switch(baseColor) {
+      case "bg-blue-500": return "bg-gradient-to-r from-blue-600 to-blue-400";
+      case "bg-green-500": return "bg-gradient-to-r from-green-600 to-green-400";
+      case "bg-yellow-500": return "bg-gradient-to-r from-yellow-600 to-yellow-400";
+      case "bg-orange-500": return "bg-gradient-to-r from-orange-600 to-orange-400";
+      case "bg-[#FF6B00]": return "bg-gradient-to-r from-[#FF5500] to-[#FF8000]";
+      case "bg-blue-400": return "bg-gradient-to-r from-blue-500 to-blue-300";
+      default: return baseColor;
+    }
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -154,9 +167,9 @@ export const NutritionHistoryModal = ({
                       </div>
                       <p>{Math.round(getPercentage(totals.protein, dailyGoals.proteinGoal))}%</p>
                     </div>
-                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#333]">
+                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#222] shadow-inner">
                       <div 
-                        className="h-full bg-blue-500" 
+                        className={`h-full ${getGradient("bg-blue-500")} transition-all duration-500`} 
                         style={{ width: `${getPercentage(totals.protein, dailyGoals.proteinGoal)}%` }}
                       ></div>
                     </div>
@@ -169,9 +182,9 @@ export const NutritionHistoryModal = ({
                       </div>
                       <p>{Math.round(getPercentage(totals.carbs, dailyGoals.carbsGoal))}%</p>
                     </div>
-                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#333]">
+                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#222] shadow-inner">
                       <div 
-                        className="h-full bg-green-500" 
+                        className={`h-full ${getGradient("bg-green-500")} transition-all duration-500`} 
                         style={{ width: `${getPercentage(totals.carbs, dailyGoals.carbsGoal)}%` }}
                       ></div>
                     </div>
@@ -184,9 +197,9 @@ export const NutritionHistoryModal = ({
                       </div>
                       <p>{Math.round(getPercentage(totals.fat, dailyGoals.fatGoal))}%</p>
                     </div>
-                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#333]">
+                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#222] shadow-inner">
                       <div 
-                        className="h-full bg-yellow-500" 
+                        className={`h-full ${getGradient("bg-yellow-500")} transition-all duration-500`} 
                         style={{ width: `${getPercentage(totals.fat, dailyGoals.fatGoal)}%` }}
                       ></div>
                     </div>
@@ -194,28 +207,50 @@ export const NutritionHistoryModal = ({
                   <div>
                     <div className="mb-1.5 flex justify-between text-sm">
                       <div className="flex items-center">
-                        <div className="mr-2 h-3 w-3 rounded-full bg-orange-800"></div>
+                        <div className="mr-2 h-3 w-3 rounded-full bg-orange-500"></div>
                         <p>Fiber</p>
                       </div>
                       <p>{Math.round(getPercentage(totals.fiber, dailyGoals.fiberGoal))}%</p>
                     </div>
-                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#333]">
+                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#222] shadow-inner">
                       <div 
-                        className="h-full bg-orange-800" 
+                        className={`h-full ${getGradient("bg-orange-500")} transition-all duration-500`} 
                         style={{ width: `${getPercentage(totals.fiber, dailyGoals.fiberGoal)}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="mb-1.5 flex justify-between text-sm">
+                      <div className="flex items-center">
+                        <div className="mr-2 h-3 w-3 rounded-full bg-[#FF6B00]"></div>
+                        <p>Calories</p>
+                      </div>
+                      <p>{Math.round(getPercentage(totals.calories, dailyGoals.calorieGoal))}%</p>
+                    </div>
+                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#222] shadow-inner">
+                      <div 
+                        className={`h-full ${getGradient("bg-[#FF6B00]")} transition-all duration-500`} 
+                        style={{ width: `${getPercentage(totals.calories, dailyGoals.calorieGoal)}%` }}
                       ></div>
                     </div>
                   </div>
                 </div>
                 
                 <div className="mt-5 pt-4 border-t border-[#333]">
-                  <h5 className="text-sm font-medium mb-3">Macro Distribution</h5>
-                  <MacroDistribution 
-                    protein={totals.protein * 4} 
-                    carbs={totals.carbs * 4} 
-                    fat={totals.fat * 9} 
-                    size="small"
-                  />
+                  <h5 className="text-sm font-medium mb-3 flex items-center">
+                    <svg className="w-4 h-4 mr-2 text-[#FF6B00]" fill="currentColor" viewBox="0 0 256 256">
+                      <path d="M229.86,77.86a6,6,0,0,0-6,6v50.55l-88-88V26a6,6,0,0,0-12,0V57.86l-51.13-51.13a6,6,0,0,0-8.49,8.49L115.76,66.73,24.16,142.77a6,6,0,0,0,7.4,9.46L123.9,77.65l88,88H162a6,6,0,0,0,0,12h67.89a6,6,0,0,0,6-6V83.86A6,6,0,0,0,229.86,77.86Z"></path>
+                    </svg>
+                    Macro Distribution
+                  </h5>
+                  <div className="p-3 bg-[#0f0f0f]/50 rounded-xl border border-[#272727] shadow-inner">
+                    <MacroDistribution 
+                      protein={totals.protein * 4} 
+                      carbs={totals.carbs * 4} 
+                      fat={totals.fat * 9} 
+                      size="small"
+                    />
+                  </div>
                 </div>
               </Card>
               
@@ -228,9 +263,14 @@ export const NutritionHistoryModal = ({
                 </div>
                 <div className="h-5 overflow-hidden rounded-full bg-[#222] mb-3">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-blue-400 to-blue-600"
+                    className={`h-full rounded-full ${getGradient("bg-blue-400")} relative overflow-hidden transition-all duration-500`}
                     style={{ width: `${getPercentage(waterIntake, 3000)}%` }}
-                  ></div>
+                  >
+                    {/* Water wave effect */}
+                    <div className="absolute inset-0 opacity-30">
+                      <div className="water-wave"></div>
+                    </div>
+                  </div>
                 </div>
                 <div className="text-xs text-gray-400 mt-3">
                   {waterIntake >= 3000 ? "Great job! You've reached your hydration goal." : "Try to drink more water to reach your daily goal."}
@@ -331,6 +371,25 @@ export const NutritionHistoryModal = ({
           )}
         </div>
       </div>
+
+      <style jsx>{`
+        .water-wave {
+          position: absolute;
+          width: 200%;
+          height: 100%;
+          animation: wave 3s linear infinite;
+          top: -5px;
+          left: 0;
+          background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3E%3Cpath d='M800 56.9c-155.5 0-204.9-50-405.5-49.9-200 0-250 49.9-394.5 49.9v31.8h800v-.2-31.6z' fill='%23ffffff22'/%3E%3C/svg%3E");
+          background-position: 0 bottom;
+          background-size: 100% 100%;
+        }
+        
+        @keyframes wave {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
     </Modal>
   );
 }; 
