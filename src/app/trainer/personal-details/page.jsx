@@ -191,7 +191,7 @@ const TrainerRegistration = () => {
     // Handle form submission
     const handleSubmit = (e) => {
         e.preventDefault();
-        router.push("/trainer/dashboard");
+        router.push("/select-plan");
     };
 
     // Move to next step

@@ -43,7 +43,11 @@
         },
         "selection": {
             "title": "Choose Your Role",
+            "subtitle": "Begin Your Fitness Journey",
             "description": "Select how you'd like to use Antique Body. You can change your role later in settings.",
+            "step": "Step 1: Choose Your Path",
+            "select_role": "Select Role",
+            "can_change_later": "Don't worry, you can change your role later in settings.",
             "continue_as": "Are you sure you want to continue as {{role}}?",
             "continue_as_description": "You are about to continue your fitness journey as a {{role}}. This will determine what features and capabilities are available to you.",
             "confirm_path": "Confirm Your Path",

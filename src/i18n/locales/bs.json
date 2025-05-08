@@ -43,18 +43,22 @@
     },
     "selection": {
       "title": "Izaberite svoju ulogu",
-      "description": "Izaberite kako želite koristiti Antique Body. Svoju ulogu možete promijeniti kasnije u postavkama.",
-      "continue_as": "Da li ste sigurni da želite nastaviti kao",
-      "continue_as_description": "Spremate se da nastavite svoje fitness putovanje kao {{role}}. Ovo će odrediti koje funkcije i mogućnosti će vam biti dostupne.",
+      "subtitle": "Započnite svoje fitness putovanje",
+      "description": "Izaberite kako želite koristiti Antique Body. Svoju ulogu možete kasnije promijeniti u postavkama.",
+      "step": "Korak 1: Izaberite svoj put",
+      "select_role": "Izaberi ulogu",
+      "can_change_later": "Ne brinite, svoju ulogu možete kasnije promijeniti u postavkama.",
+      "continue_as": "Da li ste sigurni da želite nastaviti kao {{role}}?",
+      "continue_as_description": "Nastavićete svoje fitness putovanje kao {{role}}. Ovo će odrediti koje funkcije i mogućnosti će vam biti dostupne.",
       "confirm_path": "Potvrdite svoj put",
       "help_choosing": "Trebate pomoć pri izboru?",
       "help_modal": {
         "trainer_help": "Izaberite ovo ako želite kreirati planove treninga za druge, upravljati klijentima i razvijati svoj trenerski posao.",
         "client_help": "Izaberite ovo ako želite da vas trenira profesionalni trener koji će kreirati personalizirane treninge za vas.",
-        "user_help": "Izaberite ovo ako želite treninge generisane vještačkom inteligencijom na osnovu vaših ciljeva i preferencija, bez ljudskog trenera.",
+        "user_help": "Izaberite ovo ako želite treninge generisane umjetnom inteligencijom na osnovu vaših ciljeva i preferenci, bez ljudskog trenera.",
         "contact_support": "Kontaktirajte podršku za više pomoći"
       },
-      "confirm_description": "Spremate se da nastavite svoje fitness putovanje kao {{role}}. Ovo će odrediti koje funkcije i mogućnosti će vam biti dostupne."
+      "confirm_description": "Nastavićete svoje fitness putovanje kao {{role}}. Ovo će odrediti koje funkcije i mogućnosti će vam biti dostupne."
     },
     "preparing": {
       "journey": "Priprema vašeg antičkog putovanja",

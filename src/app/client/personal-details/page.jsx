@@ -242,7 +242,7 @@ const ClientRegistration = () => {
         e.preventDefault();
         "Submitting user profile data:", formData;
         // Here you would typically send data to your backend
-        router.push("/client/dashboard");
+        router.push("/select-plan");
     };
 
     // Move to next step

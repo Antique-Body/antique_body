@@ -1,5 +1,5 @@
-import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 export async function middleware(request) {
     const token = await getToken({ req: request });
@@ -12,46 +12,46 @@ export async function middleware(request) {
     // Check if the current path starts with any of the public paths
     const isPublicRoute = publicPaths.some((path) => pathname === path || pathname.startsWith(`${path}?`));
 
-    // Handle routes for verification and reset password that have query parameters
-    if (pathname.startsWith("/auth/reset-password") || pathname.startsWith("/auth/verify-email")) {
-        return NextResponse.next();
-    }
+    // // Handle routes for verification and reset password that have query parameters
+    // if (pathname.startsWith("/auth/reset-password") || pathname.startsWith("/auth/verify-email")) {
+    //     return NextResponse.next();
+    // }
 
-    // 1. Handle public routes
-    if (isPublicRoute) {
-        return NextResponse.next();
-    }
+    // // 1. Handle public routes
+    // if (isPublicRoute) {
+    //     return NextResponse.next();
+    // }
 
-    // 2. Handle unauthenticated users
-    if (!token) {
-        return NextResponse.redirect(new URL("/auth/login", request.url));
-    }
+    // // 2. Handle unauthenticated users
+    // if (!token) {
+    //     return NextResponse.redirect(new URL("/auth/login", request.url));
+    // }
 
-    // 3. Handle users without a role
-    if (!userRole) {
-        if (pathname !== "/select-role") {
-            return NextResponse.redirect(new URL("/select-role", request.url));
-        }
-        return NextResponse.next();
-    }
+    // // 3. Handle users without a role
+    // if (!userRole) {
+    //     if (pathname !== "/select-role") {
+    //         return NextResponse.redirect(new URL("/select-role", request.url));
+    //     }
+    //     return NextResponse.next();
+    // }
 
-    // Define valid routes for each role
-    const validRoutes = {
-        trainer: ["/trainer/dashboard"],
-        client: ["/client/dashboard"],
-        user: ["/user"]
-    };
+    // // Define valid routes for each role
+    // const validRoutes = {
+    //     trainer: ["/trainer/dashboard"],
+    //     client: ["/client/dashboard"],
+    //     user: ["/user"]
+    // };
 
-    // Check if the current path is valid for the user's role
-    const isValidRoute = validRoutes[userRole]?.some(route => pathname.startsWith(route));
+    // // Check if the current path is valid for the user's role
+    // const isValidRoute = validRoutes[userRole]?.some(route => pathname.startsWith(route));
 
-    // If the route is not valid for the user's role, redirect to their dashboard
-    if (!isValidRoute) {
-        return NextResponse.redirect(new URL(`/${userRole}/dashboard`, request.url));
-    }
+    // // If the route is not valid for the user's role, redirect to their dashboard
+    // if (!isValidRoute) {
+    //     return NextResponse.redirect(new URL(`/${userRole}/dashboard`, request.url));
+    // }
 
-    // If we get here, the route is valid for the user's role
-    return NextResponse.next();
+    // // If we get here, the route is valid for the user's role
+    // return NextResponse.next();
 }
 
 // Configure middleware to run on all routes except static files and API routes
