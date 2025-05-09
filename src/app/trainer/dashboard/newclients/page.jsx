@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
 
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
@@ -10,6 +11,7 @@ import { Modal } from "@/components/common/Modal";
 
 const NewClientsPage = () => {
     const router = useRouter();
+    const { data: session } = useSession();
     const [searchTerm, setSearchTerm] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedClient, setSelectedClient] = useState(null);
@@ -17,6 +19,21 @@ const NewClientsPage = () => {
     const [selectedProfileClient, setSelectedProfileClient] = useState(null);
     const [acceptedClients, setAcceptedClients] = useState([]);
     const [showConfirmation, setShowConfirmation] = useState(false);
+    const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+    const [inviteLink, setInviteLink] = useState("");
+    const [clientEmail, setClientEmail] = useState("");
+
+    // Mock trainer name - in real app this would come from user profile
+    const trainerName = "John Smith";
+
+    // Generate a unique invite link with trainer's name
+    const generateInviteLink = () => {
+        const uniqueId = Math.random().toString(36).substring(2, 15);
+        const formattedName = session?.user?.name?.toLowerCase().replace(/\s+/g, '-') || 'trainer';
+        const link = `${window.location.origin}/join/${formattedName}/${uniqueId}`;
+        setInviteLink(link);
+        return link;
+    };
 
     // Sample data for demo purposes
     const newClients = [
@@ -111,6 +128,10 @@ const NewClientsPage = () => {
         router.push('/trainer/dashboard/messages');
     };
 
+    const handleInviteClick = () => {
+        setIsInviteModalOpen(true);
+    };
+
     const handleAcceptClick = (client) => {
         setSelectedClient(client);
         setIsModalOpen(true);
@@ -153,14 +174,29 @@ const NewClientsPage = () => {
 
             <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-xl font-bold">New Client Requests</h2>
-                <FormField
-                    type="text"
-                    placeholder="Search requests..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="mb-0 w-full max-w-xs"
-                    backgroundStyle="semi-transparent"
-                />
+                <div className="flex items-center gap-4">
+                    <FormField
+                        type="text"
+                        placeholder="Search requests..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="mb-0 w-full max-w-xs"
+                        backgroundStyle="semi-transparent"
+                    />
+                    <Button
+                        variant="orangeFilled"
+                        size="default"
+                        className='flex w-[240px] h-[44px] items-center justify-center gap-3 py-0 whitespace-nowrap'
+                        onClick={handleInviteClick}
+                        leftIcon={
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                            </svg>
+                        }
+                    >
+                        <span className="tracking-wide font-medium leading-none whitespace-nowrap">Invite New Client</span>
+                    </Button>
+                </div>
             </div>
 
             <div className="space-y-5">
@@ -477,6 +513,111 @@ const NewClientsPage = () => {
                     setIsModalOpen(true);
                 }}
                 secondaryButtonAction={() => setIsProfileModalOpen(false)}
+                footerBorder={true}
+            />
+
+            {/* Add Invite Modal */}
+            <Modal
+                isOpen={isInviteModalOpen}
+                onClose={() => setIsInviteModalOpen(false)}
+                title="Invite New Client"
+                message={
+                    <div className="space-y-6">
+                        <div className="text-center mb-6">
+                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-500/10 mb-4">
+                                <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-xl font-bold mb-2">Grow Your Training Business</h3>
+                            <p className="text-gray-400">Invite potential clients to join your training program and help them achieve their fitness goals.</p>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="bg-[rgba(40,40,40,0.7)] p-4 rounded-lg">
+                                <h4 className="text-sm font-semibold mb-3 text-white/90">Invite via Email</h4>
+                                <FormField
+                                    type="email"
+                                    placeholder="Enter client's email address"
+                                    value={clientEmail}
+                                    onChange={(e) => setClientEmail(e.target.value)}
+                                    className="w-full mb-3"
+                                    backgroundStyle="semi-transparent"
+                                />
+                                <Button
+                                    variant="orangeFilled"
+                                    size="small"
+                                    onClick={() => {
+                                        // Here you would typically handle the email invitation
+                                        setIsInviteModalOpen(false);
+                                        setShowConfirmation(true);
+                                        setTimeout(() => {
+                                            setShowConfirmation(false);
+                                        }, 3000);
+                                    }}
+                                    className="w-full"
+                                >
+                                    Send Email Invitation
+                                </Button>
+                            </div>
+
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-gray-700"></div>
+                                </div>
+                                <div className="relative flex justify-center text-sm">
+                                    <span className="px-2 bg-[#1a1a1a] text-gray-400">or share this link</span>
+                                </div>
+                            </div>
+
+                            <div className="bg-[rgba(40,40,40,0.7)] p-4 rounded-lg">
+                                <h4 className="text-sm font-semibold mb-3 text-white/90">Share Invitation Link</h4>
+                                <div className="flex gap-2">
+                                    <div className="flex-1 bg-[rgba(30,30,30,0.7)] rounded-lg p-3 text-sm text-gray-300 break-all">
+                                        {inviteLink || `Click generate to create your personalized invitation link as ${session?.user?.name || 'trainer'}`}
+                                    </div>
+                                    <Button
+                                        variant="subtle"
+                                        size="small"
+                                        onClick={() => {
+                                            const link = generateInviteLink();
+                                            navigator.clipboard.writeText(link);
+                                            setShowConfirmation(true);
+                                            setTimeout(() => {
+                                                setShowConfirmation(false);
+                                            }, 3000);
+                                        }}
+                                        className="whitespace-nowrap group hover:bg-orange-500/10 transition-colors duration-300"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <svg className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={inviteLink ? "M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" : "M12 6v6m0 0v6m0-6h6m-6 0H6"} />
+                                            </svg>
+                                            <span>{inviteLink ? "Copy Link" : "Generate Link"}</span>
+                                        </div>
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <div className="bg-orange-500/10 p-4 rounded-lg">
+                                <div className="flex items-start gap-3">
+                                    <svg className="w-5 h-5 text-orange-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div>
+                                        <h4 className="text-sm font-semibold text-orange-500 mb-1">Pro Tip</h4>
+                                        <p className="text-sm text-gray-400">Share your unique invitation link on social media or directly with potential clients. The link will expire in 7 days.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                size="large"
+                primaryButtonText="Close"
+                secondaryButtonText=""
+                primaryButtonAction={() => setIsInviteModalOpen(false)}
+                secondaryButtonAction={() => {}}
                 footerBorder={true}
             />
         </div>
