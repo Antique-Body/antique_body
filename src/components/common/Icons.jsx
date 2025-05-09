@@ -750,6 +750,42 @@ export const ChevronUpIcon = ({ size = 20, className = "", ...props }) => (
     </svg>
 );
 
+export const ChevronLeftIcon = ({ size = 20, className = "", ...props }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+);
+
+export const ChevronRightIcon = ({ size = 20, className = "", ...props }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+);
+
 export const SearchIcon = ({ size = 20, className = "", ...props }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -766,6 +802,24 @@ export const SearchIcon = ({ size = 20, className = "", ...props }) => (
     >
         <circle cx="11" cy="11" r="8"></circle>
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+);
+
+export const FilterIcon = ({ size = 20, className = "", ...props }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
     </svg>
 );
 
@@ -1268,84 +1322,102 @@ export const CameraIcon = ({ size = 16, className = "", ...props }) => (
     </svg>
 );
 
+export const ImageIcon = ({ size = 16, className = "", ...props }) => (
+    <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+        <circle cx="8.5" cy="8.5" r="1.5" />
+        <polyline points="21 15 16 10 5 21" />
+    </svg>
+);
+
 export const ActivityIcon = ({ size = 16, className = "", ...props }) => (
     <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      {...props}
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        {...props}
     >
-      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
     </svg>
-  );
-  
-  export const ConnectIcon = ({ size = 16, className = "", ...props }) => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      {...props}
-    >
-      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-      <polyline points="10 17 15 12 10 7" />
-      <line x1="15" y1="12" x2="3" y2="12" />
-    </svg>
-  );
-  
-  export const DisconnectIcon = ({ size = 16, className = "", ...props }) => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      {...props}
-    >
-      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-      <polyline points="16 17 21 12 16 7" />
-      <line x1="21" y1="12" x2="9" y2="12" />
-    </svg>
-  );
-  
-  export const RefreshIcon = ({ size = 16, className = "", ...props }) => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      {...props}
-    >
-      <path d="M23 4v6h-6" />
-      <path d="M1 20v-6h6" />
-      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-    </svg>
-  );
+);
 
+export const ConnectIcon = ({ size = 16, className = "", ...props }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+        <polyline points="10 17 15 12 10 7" />
+        <line x1="15" y1="12" x2="3" y2="12" />
+    </svg>
+);
+
+export const DisconnectIcon = ({ size = 16, className = "", ...props }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <polyline points="16 17 21 12 16 7" />
+        <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+);
+
+export const RefreshIcon = ({ size = 16, className = "", ...props }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <path d="M23 4v6h-6" />
+        <path d="M1 20v-6h6" />
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+    </svg>
+);
 
 export const TrendingDownIcon = ({ size = 16, className = "", ...props }) => (
     <svg
@@ -1385,3 +1457,183 @@ export const TrendingUpIcon = ({ size = 16, className = "", ...props }) => (
     </svg>
 );
 
+export const DragIcon = ({ size = 16, className = "", ...props }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <circle cx="9" cy="12" r="1"></circle>
+        <circle cx="15" cy="12" r="1"></circle>
+        <circle cx="9" cy="6" r="1"></circle>
+        <circle cx="15" cy="6" r="1"></circle>
+        <circle cx="9" cy="18" r="1"></circle>
+        <circle cx="15" cy="18" r="1"></circle>
+    </svg>
+);
+
+export const CopyIcon = ({ size = 16, className = "", ...props }) => (
+    <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+    </svg>
+);
+
+// Adding UsersIcon for multiple users
+export const UsersIcon = ({ size = 16, className = "", ...props }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+    </svg>
+);
+
+// Adding DollarIcon for price
+export const DollarIcon = ({ size = 16, className = "", ...props }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <line x1="12" y1="1" x2="12" y2="23"></line>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+    </svg>
+);
+
+// Adding nutrition plan icon from CreatePlanCard
+export const NutritionPlanIcon = ({ size = 28, className = "", ...props }) => (
+    <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className={`text-white ${className}`}
+        {...props}
+    >
+        <path
+            d="M12 12C12 12 16 8.36364 16 5.63636C16 2.90909 14.2091 1 12 1C9.79086 1 8 2.90909 8 5.63636C8 8.36364 12 12 12 12Z"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
+        <path d="M12 12V23" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M8.5 17H15.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+// Adding training plan icon from CreatePlanCard
+export const TrainingPlanIcon = ({ size = 28, className = "", ...props }) => (
+    <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className={`text-white ${className}`}
+        {...props}
+    >
+        <path
+            d="M6.7 15H2C2 13 2.8 11.6 4.4 10.8C5.3 10.3 6.6 10 8 10C9.3 10 10.5 10.3 11.4 10.7C13.3 11.4 14 12.9 14 15H7.7M20 15H15M7 15H7.01M7 2.6V7.4C7 10.2 9.2 12.5 11.9 12.5H13.5C14.3 12.5 15 13.2 15 14V14C15 14.8 14.3 15.5 13.5 15.5H11C10.2 15.5 9.5 14.8 9.5 14V12.5"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
+        <path d="M7 15V19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M16.5 20V16.5H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M18 17L22 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+// Adding plus icon from CreatePlanCard
+export const CreatePlusBadgeIcon = ({ size = 18, className = "", ...props }) => (
+    <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className={className}
+        {...props}
+    >
+        <path d="M12 5V19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+// Adding Plan Management icon from page.jsx
+export const PlanManagementIcon = ({ size = 20, className = "", ...props }) => (
+    <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        className={className}
+        {...props}
+    >
+        <path d="M20 7L12 3L4 7M20 7L12 11M20 7V17L12 21M12 11L4 7M12 11V21M4 7V17L12 21" />
+    </svg>
+);
+
+export const CheckCircleIcon = ({ size = 16, className = "", ...props }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+    </svg>
+);

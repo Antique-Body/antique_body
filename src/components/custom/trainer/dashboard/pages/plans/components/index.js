@@ -1,9 +1,4 @@
-export { PlanTypeStep } from "./PlanTypeStep";
-export { PlanDetailsStep } from "./PlanDetailsStep";
-export { PlanNutritionStep } from "./PlanNutritionStep";
-export { PlanReviewStep } from "./PlanReviewStep";
-export { PlanDaysStep } from "./PlanDaysStep";
-export { PlanDetailTabs } from "./PlanDetailTabs";
-export { PlanCard } from "./PlanCard";
-export { PlansList } from "./PlansList";
 export { CreatePlanCard } from "./CreatePlanCard";
+export { PlanCard } from "./PlanCard";
+export { PlanPreviewModal } from "./PlanPreviewModal";
+export { TabsComponent } from "./TabsComponent";

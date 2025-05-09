@@ -1,11 +1,9 @@
 "use client";
 
-import React from "react";
 import "./background.css";
 
-import { ParthenonIcon, RunnerIcon, DiscusIcon, ColosseumIcon, ColumnIcon, VaseIcon } from "@/components/common/Icons";
-
-const Background = () => (
+import { ColosseumIcon, ColumnIcon, DiscusIcon, ParthenonIcon, RunnerIcon, VaseIcon } from "@/components/common/Icons";
+export const Background = () => (
     <div className="background-shapes visible">
         <div className="ancient-building parthenon" style={{ "--delay": "0.1s" }}>
             <ParthenonIcon className="w-full h-full" />
@@ -32,5 +30,3 @@ const Background = () => (
         </div>
     </div>
 );
-
-export default Background;

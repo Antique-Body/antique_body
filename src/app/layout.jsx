@@ -1,12 +1,13 @@
 "use client";
 
-import { Inter } from "next/font/google";
+import "@mdi/font/css/materialdesignicons.css";
 import { SessionProvider } from "next-auth/react";
-import '@mdi/font/css/materialdesignicons.css';
+import { Inter } from "next/font/google";
 
 import AuthProvider from "../components/auth/AuthProvider";
 import I18nProvider from "../components/I18nProvider";
 
+import HomeBackground from "@/components/custom/home-page/components/HomeBackground";
 import LanguageSelector from "@/components/LanguageSelector";
 import "./globals.css";
 
@@ -16,10 +17,7 @@ export default function RootLayout({ children }) {
     return (
         <html lang="en">
             <head>
-                <link
-                    rel="stylesheet"
-                    href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css"
-                />
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" />
             </head>
             <body className={inter.className}>
                 <SessionProvider>
@@ -28,6 +26,7 @@ export default function RootLayout({ children }) {
                             <div className="fixed top-4 left-4 z-50">
                                 <LanguageSelector />
                             </div>
+                            <HomeBackground />
                             {children}
                         </AuthProvider>
                     </I18nProvider>

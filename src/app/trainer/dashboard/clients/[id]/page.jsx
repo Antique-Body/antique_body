@@ -20,7 +20,7 @@ import {
     WorkoutScheduleModal,
 } from "@/components/custom/trainer/dashboard/pages/clients/components";
 import mockClients from "@/components/custom/trainer/dashboard/pages/clients/data/mockClients";
-import mockPlans from "@/components/custom/trainer/dashboard/pages/plans/data/mockPlans";
+import mockPlans from "@/components/custom/trainer/dashboard/pages/plans/training/create/data/mockPlans";
 
 // Dynamically generate performance fields based on client type
 const getPerformanceFields = (clientType, sport) => {

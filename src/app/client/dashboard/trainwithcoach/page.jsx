@@ -6,17 +6,59 @@ import { useState } from "react";
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { CertificateIcon, MessageIcon, TimerIcon, UserProfileIcon } from "@/components/common/Icons";
+import { Modal } from "@/components/common/Modal";
 import { Card } from "@/components/custom/Card";
-import { BookingSessionModal, TrainerProfileModal } from "@/components/custom/client/dashboard/pages/trainwithcoach/components";
+import { TrainerProfileModal } from "@/components/custom/client/dashboard/pages/trainwithcoach/components";
+
+// Custom SVG icons for the coaching request functionality
+const RequestCoachIcon = ({ size = 16, className = "", ...props }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+    </svg>
+);
+
+const AppliedIcon = ({ size = 16, className = "", ...props }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+    </svg>
+);
 
 export default function TrainWithCoachPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [goalFilter, setGoalFilter] = useState("");
     const [sportFilter, setSportFilter] = useState("");
     const [selectedTrainer, setSelectedTrainer] = useState(null);
-    const [showBookingModal, setShowBookingModal] = useState(false);
-    const [showProfileModal, setShowProfileModal] = useState(false); // New state for profile modal
-    
+    const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+    const [showProfileModal, setShowProfileModal] = useState(false);
+    const [requestedTrainers, setRequestedTrainers] = useState([]);
 
     const trainers = [
         {
@@ -104,10 +146,10 @@ export default function TrainWithCoachPage() {
         },
     ];
 
-    // Function to handle booking a session with a trainer
-    const handleBookSession = (trainer) => {
+    // Function to open the coaching request confirmation
+    const handleRequestCoaching = (trainer) => {
         setSelectedTrainer(trainer);
-        setShowBookingModal(true);
+        setShowConfirmationModal(true);
     };
 
     // Function to handle viewing a trainer's profile
@@ -116,17 +158,32 @@ export default function TrainWithCoachPage() {
         setShowProfileModal(true);
     };
 
-    // Function to close the booking modal
-    const closeBookingModal = () => {
-        setShowBookingModal(false);
-        setSelectedTrainer(null);
+    // Function to close the confirmation modal
+    const closeConfirmationModal = () => {
+        setShowConfirmationModal(false);
     };
 
     // Function to close the profile modal
     const closeProfileModal = () => {
         setShowProfileModal(false);
-        // Don't reset selectedTrainer here if you want to keep it for potential booking after viewing profile
     };
+
+    // Function to submit coaching request
+    const submitCoachingRequest = () => {
+        if (!selectedTrainer) return;
+
+        // In a real app, you would send this to your backend
+
+        // Add trainer to requested list
+        setRequestedTrainers((prev) => [...prev, selectedTrainer.id]);
+
+        // Close the modal
+        setShowConfirmationModal(false);
+        setSelectedTrainer(null);
+    };
+
+    // Check if user has already requested a trainer
+    const hasRequestedTrainer = (trainerId) => requestedTrainers.includes(trainerId);
 
     // Filter trainers based on search term and selected filters
     const filteredTrainers = trainers.filter((trainer) => {
@@ -207,8 +264,9 @@ export default function TrainWithCoachPage() {
                             <TrainerCard
                                 key={trainer.id}
                                 trainer={trainer}
-                                onBookSession={handleBookSession}
+                                onRequestCoaching={handleRequestCoaching}
                                 onViewProfile={handleViewProfile}
+                                hasRequested={hasRequestedTrainer(trainer.id)}
                             />
                         ))
                     ) : (
@@ -222,9 +280,56 @@ export default function TrainWithCoachPage() {
                 </div>
             </div>
 
-            {/* Booking Modal */}
-            {showBookingModal && selectedTrainer && (
-                <BookingSessionModal isOpen={showBookingModal} trainer={selectedTrainer} onClose={closeBookingModal} />
+            {/* Confirmation Modal using the Modal component */}
+            {showConfirmationModal && selectedTrainer && (
+                <Modal
+                    isOpen={showConfirmationModal}
+                    onClose={closeConfirmationModal}
+                    title={
+                        <div className="flex items-center gap-2">
+                            <RequestCoachIcon size={18} className="text-[#FF6B00]" />
+                            Request Coaching
+                        </div>
+                    }
+                    message={`You're about to request ${selectedTrainer.name} as your coach`}
+                    confirmButtonText="Confirm Request"
+                    cancelButtonText="Cancel"
+                    onConfirm={submitCoachingRequest}
+                    primaryButtonAction={submitCoachingRequest}
+                    secondaryButtonAction={closeConfirmationModal}
+                >
+                    <div className="mb-6 flex items-center gap-4">
+                        <div className="h-16 w-16 overflow-hidden rounded-full">
+                            {selectedTrainer.profileImage ? (
+                                <Image
+                                    src={selectedTrainer.profileImage}
+                                    alt={`${selectedTrainer.name} profile`}
+                                    width={64}
+                                    height={64}
+                                    className="h-full w-full object-cover"
+                                />
+                            ) : (
+                                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#FF6B00] to-[#FF9A00]">
+                                    <UserProfileIcon size={32} stroke="white" strokeWidth="1.5" />
+                                </div>
+                            )}
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-semibold text-white">{selectedTrainer.name}</h3>
+                            <p className="text-sm text-gray-400">{selectedTrainer.specialty}</p>
+                        </div>
+                    </div>
+
+                    <p className="mb-6 text-gray-300">
+                        If they accept your request, they will be able to create workout plans for you and provide guidance on
+                        your fitness journey.
+                    </p>
+
+                    <p className="mb-6 text-sm text-gray-400">
+                        Standard rate:{" "}
+                        <span className="text-base font-bold text-[#FF6B00]">${selectedTrainer.hourlyRate}/hour</span>
+                    </p>
+                </Modal>
             )}
 
             {/* Profile Modal */}
@@ -235,7 +340,7 @@ export default function TrainWithCoachPage() {
     );
 }
 
-const TrainerCard = ({ trainer, onBookSession, onViewProfile }) => {
+const TrainerCard = ({ trainer, onRequestCoaching, onViewProfile, hasRequested }) => {
     const router = useRouter();
     const renderStars = (rating) => {
         const stars = [];
@@ -270,7 +375,9 @@ const TrainerCard = ({ trainer, onBookSession, onViewProfile }) => {
     return (
         <Card
             variant="darkStrong"
-            className="group flex h-full flex-col overflow-hidden rounded-lg border border-[#222] transition-all duration-300 hover:border-[#FF6B00] hover:shadow-lg hover:translate-y-[-4px]"
+            className={`group flex h-full flex-col overflow-hidden rounded-lg border ${
+                hasRequested ? "border-[#FF6B00]" : "border-[#222]"
+            } transition-all duration-300 hover:border-[#FF6B00] hover:shadow-lg hover:translate-y-[-4px]`}
             padding="0"
             width="100%"
             maxWidth="100%"
@@ -300,9 +407,19 @@ const TrainerCard = ({ trainer, onBookSession, onViewProfile }) => {
 
                         {/* Trainer info */}
                         <div className="flex flex-1 flex-col">
-                            <h3 className="text-xl font-semibold text-white transition-colors duration-300 group-hover:text-[#FF6B00]">
-                                {trainer.name}
-                            </h3>
+                            <div className="flex justify-between items-start">
+                                <h3 className="text-xl font-semibold text-white transition-colors duration-300 group-hover:text-[#FF6B00]">
+                                    {trainer.name}
+                                </h3>
+
+                                {/* Pending status badge - small dot style */}
+                                {hasRequested && (
+                                    <div className="flex items-center gap-1 bg-[#FF6B00] rounded-full px-2 py-0.5 text-xs font-medium text-white">
+                                        <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span>
+                                        Pending
+                                    </div>
+                                )}
+                            </div>
                             <div className="flex flex-wrap items-center gap-2">
                                 <p className="text-sm text-gray-400">{trainer.specialty}</p>
                                 {/* Preferred badge */}
@@ -357,7 +474,16 @@ const TrainerCard = ({ trainer, onBookSession, onViewProfile }) => {
 
                     {/* Primary Gym */}
                     <div className="mt-2 flex items-center gap-1 text-sm text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                             <polyline points="9 22 9 12 15 12 15 22"></polyline>
                         </svg>
@@ -379,12 +505,21 @@ const TrainerCard = ({ trainer, onBookSession, onViewProfile }) => {
                         View Profile
                     </Button>
                     <Button
-                        variant="orangeFilled"
+                        variant={hasRequested ? "secondary" : "orangeFilled"}
                         size="small"
-                        onClick={() => onBookSession(trainer)}
+                        onClick={() => onRequestCoaching(trainer)}
+                        disabled={hasRequested}
                         className="w-full transition-transform duration-300 group-hover:-translate-y-1 group-hover:scale-105"
                     >
-                        Book Session
+                        {hasRequested ? (
+                            <>
+                                <AppliedIcon size={14} className="mr-1" /> Requested
+                            </>
+                        ) : (
+                            <>
+                                <RequestCoachIcon size={14} className="mr-1" /> Request Coach
+                            </>
+                        )}
                     </Button>
                     <div className="col-span-2">
                         <Button
