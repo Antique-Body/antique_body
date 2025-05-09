@@ -1,6 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { 
+  ChestIcon,
+  BackIcon,
+  ShouldersIcon,
+  ArmsIcon,
+  LegsIcon,
+  CoreIcon
+} from "../../../../components/common/Icons";
 
 const MuscleGroupSelector = ({ onBack }) => {
   const { t } = useTranslation();
@@ -52,7 +60,7 @@ const MuscleGroupSelector = ({ onBack }) => {
     {
       id: 1,
       name: "Chest",
-      icon: "💪",
+      icon: ChestIcon,
       color: "#e74c3c",
       description:
         "Build a strong and defined chest with these targeted exercises",
@@ -115,7 +123,7 @@ const MuscleGroupSelector = ({ onBack }) => {
     {
       id: 2,
       name: "Back",
-      icon: "🔙",
+      icon: BackIcon,
       color: "#3498db",
       description:
         "Develop a strong and wide back for improved posture and strength",
@@ -160,7 +168,7 @@ const MuscleGroupSelector = ({ onBack }) => {
     {
       id: 3,
       name: "Shoulders",
-      icon: "🎯",
+      icon: ShouldersIcon,
       color: "#9b59b6",
       description:
         "Build strong and defined shoulders for a balanced upper body",
@@ -205,7 +213,7 @@ const MuscleGroupSelector = ({ onBack }) => {
     {
       id: 4,
       name: "Arms",
-      icon: "💪",
+      icon: ArmsIcon,
       color: "#2ecc71",
       description:
         "Sculpt and strengthen your arms with these effective exercises",
@@ -250,7 +258,7 @@ const MuscleGroupSelector = ({ onBack }) => {
     {
       id: 5,
       name: "Legs",
-      icon: "🦵",
+      icon: LegsIcon,
       color: "#f1c40f",
       description:
         "Build powerful legs and improve overall strength with these exercises",
@@ -295,7 +303,7 @@ const MuscleGroupSelector = ({ onBack }) => {
     {
       id: 6,
       name: "Core",
-      icon: "🎯",
+      icon: CoreIcon,
       color: "#FF6B00",
       description:
         "Strengthen your core and improve stability with these targeted exercises",
@@ -603,7 +611,7 @@ const MuscleGroupSelector = ({ onBack }) => {
                       background: `linear-gradient(135deg, ${group.color}40, ${group.color}20)`,
                       boxShadow: `0 8px 20px -6px ${group.color}30`,
                     }}>
-                    <span className="text-3xl">{group.icon}</span>
+                    <group.icon size={32} style={{ color: group.color }} />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold mb-1">{group.name}</h3>
@@ -675,7 +683,7 @@ const MuscleGroupSelector = ({ onBack }) => {
                       border: `2px solid ${selectedMuscleGroup.color}40`,
                       boxShadow: `0 8px 20px -8px ${selectedMuscleGroup.color}40`,
                     }}>
-                    <span className="text-5xl">{selectedMuscleGroup.icon}</span>
+                    <selectedMuscleGroup.icon size={36} style={{ color: selectedMuscleGroup.color }} />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-4 mb-3">

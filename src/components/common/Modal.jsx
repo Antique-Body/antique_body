@@ -90,15 +90,19 @@ export const Modal = memo(
                     {/* Modal header */}
                     <div className="border-b border-[#333] p-4 sm:p-5">
                         <h2 className="text-lg sm:text-xl font-bold text-white pr-6">{title}</h2>
-                        {message && <p className="mt-1 text-sm sm:text-base text-gray-400">{message}</p>}
                     </div>
 
                     {/* Modal content - with scrolling */}
-                    <div className="flex-1 p-4 sm:p-5 overflow-y-auto">{children}</div>
+                    <div className="flex-1 overflow-y-auto">
+                        <div className="p-4 sm:p-5">
+                            {message}
+                            {children}
+                        </div>
+                    </div>
 
                     {/* Footer with action buttons */}
                     {footerButtons && (
-                        <div className={`${footerBorder ? "border-t border-[#333]" : ""} p-4 sm:p-5 flex justify-end gap-2 mt-auto`}>
+                        <div className={`${footerBorder ? "border-t border-[#333]" : ""} p-4 sm:p-5 flex justify-end gap-2 bg-[#121212]/95`}>
                             <Button
                                 variant="secondary"
                                 onClick={secondaryButtonAction || onClose}

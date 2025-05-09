@@ -1,8 +1,14 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { Icon } from "@iconify/react";
+
 import { TOTAL_STEPS, stepConfig } from "@/app/utils";
-import Background from "@/components/background";
 import { useWorkoutForm } from "@/hooks/useWorkoutForm";
+import { EffectBackground } from "@/components/background";
 import { ProgressBar, TrainerIcon } from "@components/common";
 import {
   BrandLogo,
@@ -14,10 +20,6 @@ import {
   SelectionCard,
   StepContainer,
 } from "@components/custom";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 // Constants
 const MEASUREMENT_CONSTRAINTS = {
@@ -248,13 +250,14 @@ const TrainingSetup = () => {
       }
 
       return (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {step.options.map((option) => (
             <SelectionCard
               key={option.value}
               selected={userSelections[step.field] === option.value}
               onClick={() => handleSelection(step.field, option.value)}
               icon={option.icon}
+              iconName={option.iconName}
               emoji={option.emoji}
               title={option.title}
               description={option.description}
@@ -273,13 +276,15 @@ const TrainingSetup = () => {
     return (
       <>
         {saveError && (
-          <div className="text-sm text-red-500 text-center mt-4 bg-red-500/10 p-3 rounded-lg">
+          <div className="text-sm text-red-500 text-center mt-4 bg-red-500/10 p-3 rounded-lg flex items-center justify-center gap-2">
+            <Icon icon="mdi:alert-circle" className="text-red-500" />
             {saveError}
           </div>
         )}
 
         {validationError && (
-          <div className="text-sm text-red-500 text-center mt-4 bg-red-500/10 p-3 rounded-lg">
+          <div className="text-sm text-red-500 text-center mt-4 bg-red-500/10 p-3 rounded-lg flex items-center justify-center gap-2">
+            <Icon icon="mdi:alert-circle" className="text-red-500" />
             {validationError}
           </div>
         )}
@@ -289,14 +294,19 @@ const TrainingSetup = () => {
 
   const renderLoadingState = () => {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <div className="text-white text-center">
-          <div className="mb-4">
+          <div className="mb-4 flex flex-col items-center">
+            <Icon
+              icon="line-md:loading-twotone-loop"
+              width="48"
+              height="48"
+              className="text-[#FF7800] mb-3"
+            />
             {isRedirecting
               ? t("training_setup.redirecting")
               : t("training_setup.saving")}
           </div>
-          <div className="w-10 h-10 border-t-2 border-[#FF7800] rounded-full animate-spin mx-auto"></div>
         </div>
       </div>
     );
@@ -308,17 +318,27 @@ const TrainingSetup = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white relative">
-      <Background />
+    <div className="min-h-screen  text-white relative">
+      <EffectBackground />
 
-      <div className="max-w-[550px] mx-auto px-5 py-5 relative z-20 min-h-screen flex flex-col items-center">
+      <div className="max-w-[600px] mx-auto px-5 py-5 relative z-20 min-h-screen flex flex-col items-center">
         <header className="pt-10 w-full text-center justify-center">
           <BrandLogo />
         </header>
 
-        <div className="mb-5">
-          <Card width="100%">
-            <div className="text-2xl sm:text-3xl font-bold mb-2">
+        <div className="mb-6 w-full">
+          <Card
+            width="100%"
+            borderTop={true}
+            hover={true}
+            hoverBorderColor="#FF7800">
+            <div className="text-2xl sm:text-3xl font-bold mb-2 flex items-center gap-2">
+              <Icon
+                icon="mdi:dumbbell"
+                className="text-[#FF7800]"
+                width="32"
+                height="32"
+              />
               {t("training_setup.title")}
             </div>
             <div className="text-[#aaa] text-base mb-4">
@@ -364,7 +384,7 @@ const TrainingSetup = () => {
 
         {renderErrorMessages()}
 
-        <div className="mt-4 flex w-full">
+        <div className="mt-6 flex w-full">
           <ProgressBar
             value={currentStep}
             maxValue={TOTAL_STEPS}

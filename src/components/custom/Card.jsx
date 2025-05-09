@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { BrandLogo } from "..";
 import "../components.scss";
 
@@ -27,10 +28,58 @@ export const Card = ({
     hoverShadow = "",
     hoverBgGradientFrom = "",
     hoverBgGradientTo = "",
+    // Animation props
+    animate = false,
+    animationVariant = "fadeIn",
+    // Additional style props
+    glowEffect = false,
+    glowColor = "#FF7800",
+    glowIntensity = "0.2",
+    borderWidth = "1px",
+    backdropBlur = "",
+    hoverScale = "",
+    textGradient = false,
+    accentCorner = false,
+    accentCornerPosition = "top-right",
+    accentCornerColor = "#FF7800",
+    // Remove these props from being passed to DOM
+    cardStyle,
+    customGradient,
     ...otherProps
 }) => {
+    // Remove any remaining custom props that shouldn't go to DOM
+    const { accentColor: _, ...finalProps } = otherProps;
+    
     // Set styles based on variant
     let variantClassName = "";
+    
+    // Animation variants
+    const animationVariants = {
+        fadeIn: {
+            hidden: { opacity: 0 },
+            visible: { opacity: 1, transition: { duration: 0.5 } }
+        },
+        slideUp: {
+            hidden: { opacity: 0, y: 20 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+        },
+        slideIn: {
+            hidden: { opacity: 0, x: -20 },
+            visible: { opacity: 1, x: 0, transition: { duration: 0.5 } }
+        },
+        scale: {
+            hidden: { opacity: 0, scale: 0.9 },
+            visible: { opacity: 1, scale: 1, transition: { duration: 0.5 } }
+        },
+        pulse: {
+            hidden: { opacity: 0 },
+            visible: { 
+                opacity: 1, 
+                transition: { duration: 0.5 },
+                boxShadow: `0 0 20px rgba(255,120,0,${glowIntensity})`
+            }
+        }
+    };
 
     if (variant === "darkStrong") {
         // Base dashboard styling
@@ -112,6 +161,46 @@ export const Card = ({
         hoverBgGradientTo = "rgba(28,28,28,0.6)";
         hoverShadow = "0 10px 15px -3px rgba(0, 0, 0, 0.2)";
         variantClassName = "text-center cursor-pointer border border-dashed transition-all duration-300";
+    } else if (variant === "glass") {
+        // New glass morphism card style
+        borderColor = "rgba(255,255,255,0.1)";
+        bgGradientFrom = "rgba(18,18,18,0.6)";
+        bgGradientTo = "rgba(24,24,24,0.6)";
+        backdropBlur = "md";
+        borderRadius = "20px";
+        shadow = "0 10px 30px rgba(0,0,0,0.1)";
+        hoverBorderColor = "rgba(255,120,0,0.5)";
+        hoverShadow = "0 15px 30px rgba(0,0,0,0.15), 0 5px 15px rgba(255,120,0,0.1)";
+        variantClassName = "backdrop-blur-md";
+    } else if (variant === "premium") {
+        // Premium card with gold accent
+        borderColor = "#3a3a3a";
+        bgGradientFrom = "rgba(28,28,28,0.95)";
+        bgGradientTo = "rgba(24,24,24,0.95)";
+        borderRadius = "16px";
+        shadow = "0 10px 25px rgba(0,0,0,0.4)";
+        padding = "24px";
+        glowEffect = true;
+        glowColor = "rgba(255,185,0,0.15)";
+        accentCorner = true;
+        accentCornerColor = "linear-gradient(135deg, #FFD700, #FFA500)";
+        variantClassName = "relative overflow-hidden";
+    } else {
+        // Default card styling improvements
+        borderRadius = "16px";
+        shadow = "0 10px 20px rgba(0,0,0,0.3)";
+        bgGradientFrom = "rgba(18,18,18,0.95)";
+        bgGradientTo = "rgba(24,24,24,0.95)";
+        variantClassName = "backdrop-blur-sm";
+        
+        if (hover) {
+            hoverTranslateY = "-3px";
+            hoverBorderColor = "#FF7800";
+            hoverShadow = "0 15px 30px rgba(0,0,0,0.4), 0 5px 15px rgba(255,120,0,0.15)";
+            hoverBgGradientFrom = "rgba(22,22,22,0.95)";
+            hoverBgGradientTo = "rgba(28,28,28,0.95)";
+            variantClassName += " transition-all duration-300 ease-in-out";
+        }
     }
 
     // If hover is true and no variant-specific hover effects are set
@@ -120,25 +209,46 @@ export const Card = ({
         hoverShadow = "0 15px 30px -10px rgba(255,107,0,0.2)";
         variantClassName += " transition-all duration-300 ease-in-out";
     }
+    
+    // Add backdrop blur class if specified
+    if (backdropBlur) {
+        variantClassName += ` backdrop-blur-${backdropBlur}`;
+    }
+    
+    // Add glow effect class if specified
+    const glowStyles = glowEffect ? {
+        boxShadow: `0 0 20px ${glowColor}`,
+    } : {};
+
+    // Calculate the Card component based on animation settings
+    const CardComponent = animate ? motion.div : 'div';
+    
+    // Set animation props
+    const animProps = animate ? {
+        initial: "hidden",
+        animate: "visible",
+        variants: animationVariants[animationVariant] || animationVariants.fadeIn
+    } : {};
 
     return (
-        <div
+        <CardComponent
             className={`relative z-10 flex flex-col ${variant?.startsWith("dark") ? "" : variant === "entityCard" ? "text-left" : variant === "planCard" || variant === "createPlanCard" ? "text-left" : "items-center text-center"} overflow-hidden ${variantClassName} ${className} min-h-max ${
                 hoverTranslateY ? `hover:translate-y-[${hoverTranslateY}]` : ""
             } transition-all duration-300`}
             style={{
                 width: width,
-                maxWidth: maxWidth,
                 padding: padding,
                 backgroundImage: `linear-gradient(to bottom right, ${bgGradientFrom}, ${bgGradientTo})`,
                 borderRadius: borderRadius,
                 boxShadow: shadow,
-                border: `1px solid ${borderColor}`,
+                border: `${borderWidth} solid ${borderColor}`,
                 "--hover-border-color": hoverBorderColor || borderColor,
                 "--hover-shadow": hoverShadow || shadow,
                 "--hover-bg-from": hoverBgGradientFrom || bgGradientFrom,
                 "--hover-bg-to": hoverBgGradientTo || bgGradientTo,
+                "--hover-scale": hoverScale || "1",
                 transition: "all 0.3s ease",
+                ...glowStyles
             }}
             onMouseEnter={(e) => {
                 if (hoverBorderColor) e.currentTarget.style.borderColor = hoverBorderColor;
@@ -146,15 +256,31 @@ export const Card = ({
                 if (hoverBgGradientFrom && hoverBgGradientTo) {
                     e.currentTarget.style.backgroundImage = `linear-gradient(to bottom right, ${hoverBgGradientFrom}, ${hoverBgGradientTo})`;
                 }
+                if (hoverTranslateY) {
+                    e.currentTarget.style.transform = `translateY(${hoverTranslateY})`;
+                }
+                if (hoverScale) {
+                    e.currentTarget.style.transform = `scale(${hoverScale}) ${hoverTranslateY ? `translateY(${hoverTranslateY})` : ''}`;
+                }
+                if (glowEffect) {
+                    e.currentTarget.style.boxShadow = `0 0 30px ${glowColor}`;
+                }
             }}
             onMouseLeave={(e) => {
                 e.currentTarget.style.borderColor = borderColor;
                 e.currentTarget.style.boxShadow = shadow;
                 e.currentTarget.style.backgroundImage = `linear-gradient(to bottom right, ${bgGradientFrom}, ${bgGradientTo})`;
+                e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                if (glowEffect) {
+                    e.currentTarget.style.boxShadow = `0 0 20px ${glowColor}`;
+                }
             }}
-            {...otherProps}
+            {...animProps}
+            {...finalProps}
         >
-            {borderTop && <div className="marble-effect"></div>}
+            {borderTop && (
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#FF7800] via-[#FFA500] to-[#FF7800] marble-effect" />
+            )}
 
             {topBorderColor && (
                 <div
@@ -167,6 +293,27 @@ export const Card = ({
                 ></div>
             )}
 
+            {/* Add accent corner if enabled */}
+            {accentCorner && (
+                <div className={`absolute ${accentCornerPosition === "top-right" ? "top-0 right-0" : 
+                                          accentCornerPosition === "top-left" ? "top-0 left-0" : 
+                                          accentCornerPosition === "bottom-right" ? "bottom-0 right-0" : 
+                                          "bottom-0 left-0"} w-20 h-20 overflow-hidden pointer-events-none`}>
+                    <div 
+                        className="absolute w-28 h-28 rotate-45 transform origin-top-left" 
+                        style={{
+                            background: typeof accentCornerColor === 'string' && accentCornerColor.includes('gradient') 
+                                ? accentCornerColor 
+                                : accentCornerColor,
+                            right: accentCornerPosition.includes('right') ? '-20px' : 'auto',
+                            left: accentCornerPosition.includes('left') ? '-20px' : 'auto',
+                            top: accentCornerPosition.includes('top') ? '-14px' : 'auto',
+                            bottom: accentCornerPosition.includes('bottom') ? '-14px' : 'auto',
+                        }}
+                    />
+                </div>
+            )}
+
             {/* Add left orange bar for trainer card variant */}
             {variant === "entityCard" && (
                 <div className="absolute left-0 top-0 h-full w-1 scale-y-[0.4] transform bg-[#FF6B00] transition-transform duration-300 ease-in-out hover:scale-y-100 group-hover:scale-y-100"></div>
@@ -177,7 +324,14 @@ export const Card = ({
 
             {showLogo && <BrandLogo logoTagline={logoTagline} />}
 
-            {children}
-        </div>
+            {/* Wrap children with text gradient if enabled */}
+            {textGradient ? (
+                <div className="bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+                    {children}
+                </div>
+            ) : (
+                children
+            )}
+        </CardComponent>
     );
 };

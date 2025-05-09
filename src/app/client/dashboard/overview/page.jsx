@@ -406,10 +406,11 @@ export default function OverviewPage() {
                             </div>
                         </Card>
                     </div>
-
-                    <Button variant="orangeOutline" fullWidth onClick={() => router.push("/client/dashboard/nutrition")}>
-                        Open Nutrition Tracker
-                    </Button>
+                    <div className="mt-4">
+                        <Button variant="orangeOutline" fullWidth onClick={() => router.push("/client/dashboard/nutrition")}>
+                            Open Nutrition Tracker
+                        </Button>
+                    </div>
                 </Card>
             </div>
 

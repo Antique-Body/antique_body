@@ -7,23 +7,23 @@ const animationStyles = {
   "@keyframes fadeIn": {
     "0%": {
       opacity: 0.5,
-      transform: "translateY(10px)"
+      transform: "translateY(10px)",
     },
     "100%": {
       opacity: 1,
-      transform: "translateY(0)"
-    }
+      transform: "translateY(0)",
+    },
   },
   ".animate-fadeIn": {
-    animation: "fadeIn 0.3s ease-out forwards"
+    animation: "fadeIn 0.3s ease-out forwards",
   },
   ".scrollbar-hide": {
     scrollbarWidth: "none",
     msOverflowStyle: "none",
     "&::-webkit-scrollbar": {
-      display: "none"
-    }
-  }
+      display: "none",
+    },
+  },
 };
 
 const ProgressDashboard = () => {
@@ -105,16 +105,36 @@ const ProgressDashboard = () => {
       macroDistribution: {
         protein: 35,
         carbs: 45,
-        fats: 20
+        fats: 20,
       },
       waterIntake: [2.2, 2.5, 2.3, 2.7, 2.4, 2.6, 2.5], // liters per day for the week
       supplements: [
-        { name: "Protein", dosage: "25g", frequency: "Daily", timing: "Post-workout" },
-        { name: "Creatine", dosage: "5g", frequency: "Daily", timing: "Morning" },
-        { name: "BCAA", dosage: "10g", frequency: "Workout days", timing: "During workout" },
-        { name: "Multivitamin", dosage: "1 tablet", frequency: "Daily", timing: "Morning" }
-      ]
-    }
+        {
+          name: "Protein",
+          dosage: "25g",
+          frequency: "Daily",
+          timing: "Post-workout",
+        },
+        {
+          name: "Creatine",
+          dosage: "5g",
+          frequency: "Daily",
+          timing: "Morning",
+        },
+        {
+          name: "BCAA",
+          dosage: "10g",
+          frequency: "Workout days",
+          timing: "During workout",
+        },
+        {
+          name: "Multivitamin",
+          dosage: "1 tablet",
+          frequency: "Daily",
+          timing: "Morning",
+        },
+      ],
+    },
   };
 
   const tabs = [
@@ -172,11 +192,27 @@ const ProgressDashboard = () => {
                   </div>
                 </div>
                 <p className="text-3xl font-bold">
-                  {progressData.bodyMeasurements.weight[progressData.bodyMeasurements.weight.length-1]}kg
+                  {
+                    progressData.bodyMeasurements.weight[
+                      progressData.bodyMeasurements.weight.length - 1
+                    ]
+                  }
+                  kg
                 </p>
                 <p className="text-sm text-gray-400">
-                  {progressData.bodyMeasurements.weight[0] > progressData.bodyMeasurements.weight[progressData.bodyMeasurements.weight.length-1] ? '↓' : '↑'} 
-                  {Math.abs(progressData.bodyMeasurements.weight[0] - progressData.bodyMeasurements.weight[progressData.bodyMeasurements.weight.length-1]).toFixed(1)}kg
+                  {progressData.bodyMeasurements.weight[0] >
+                  progressData.bodyMeasurements.weight[
+                    progressData.bodyMeasurements.weight.length - 1
+                  ]
+                    ? "↓"
+                    : "↑"}
+                  {Math.abs(
+                    progressData.bodyMeasurements.weight[0] -
+                      progressData.bodyMeasurements.weight[
+                        progressData.bodyMeasurements.weight.length - 1
+                      ]
+                  ).toFixed(1)}
+                  kg
                 </p>
               </div>
 
@@ -200,11 +236,27 @@ const ProgressDashboard = () => {
                   </div>
                 </div>
                 <p className="text-3xl font-bold">
-                  {progressData.bodyMeasurements.bodyFat[progressData.bodyMeasurements.bodyFat.length-1]}%
+                  {
+                    progressData.bodyMeasurements.bodyFat[
+                      progressData.bodyMeasurements.bodyFat.length - 1
+                    ]
+                  }
+                  %
                 </p>
                 <p className="text-sm text-gray-400">
-                  {progressData.bodyMeasurements.bodyFat[0] > progressData.bodyMeasurements.bodyFat[progressData.bodyMeasurements.bodyFat.length-1] ? '↓' : '↑'} 
-                  {Math.abs(progressData.bodyMeasurements.bodyFat[0] - progressData.bodyMeasurements.bodyFat[progressData.bodyMeasurements.bodyFat.length-1]).toFixed(1)}%
+                  {progressData.bodyMeasurements.bodyFat[0] >
+                  progressData.bodyMeasurements.bodyFat[
+                    progressData.bodyMeasurements.bodyFat.length - 1
+                  ]
+                    ? "↓"
+                    : "↑"}
+                  {Math.abs(
+                    progressData.bodyMeasurements.bodyFat[0] -
+                      progressData.bodyMeasurements.bodyFat[
+                        progressData.bodyMeasurements.bodyFat.length - 1
+                      ]
+                  ).toFixed(1)}
+                  %
                 </p>
               </div>
 
@@ -227,14 +279,30 @@ const ProgressDashboard = () => {
                   </div>
                 </div>
                 <p className="text-3xl font-bold">
-                  {progressData.bodyMeasurements.muscleMass[progressData.bodyMeasurements.muscleMass.length-1]}kg
+                  {
+                    progressData.bodyMeasurements.muscleMass[
+                      progressData.bodyMeasurements.muscleMass.length - 1
+                    ]
+                  }
+                  kg
                 </p>
                 <p className="text-sm text-gray-400">
-                  {progressData.bodyMeasurements.muscleMass[0] < progressData.bodyMeasurements.muscleMass[progressData.bodyMeasurements.muscleMass.length-1] ? '↑' : '↓'} 
-                  {Math.abs(progressData.bodyMeasurements.muscleMass[0] - progressData.bodyMeasurements.muscleMass[progressData.bodyMeasurements.muscleMass.length-1]).toFixed(1)}kg
+                  {progressData.bodyMeasurements.muscleMass[0] <
+                  progressData.bodyMeasurements.muscleMass[
+                    progressData.bodyMeasurements.muscleMass.length - 1
+                  ]
+                    ? "↑"
+                    : "↓"}
+                  {Math.abs(
+                    progressData.bodyMeasurements.muscleMass[0] -
+                      progressData.bodyMeasurements.muscleMass[
+                        progressData.bodyMeasurements.muscleMass.length - 1
+                      ]
+                  ).toFixed(1)}
+                  kg
                 </p>
               </div>
-              
+
               <div className="bg-gradient-to-br from-[#111] to-[#0a0a0a] border border-[#333] rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-lg font-medium">Calories</h3>
@@ -262,7 +330,7 @@ const ProgressDashboard = () => {
                 </p>
                 <p className="text-sm text-gray-400">This month</p>
               </div>
-              
+
               <div className="bg-gradient-to-br from-[#111] to-[#0a0a0a] border border-[#333] rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-lg font-medium">Workout Streak</h3>
@@ -383,30 +451,59 @@ const ProgressDashboard = () => {
                   ([measurement, values], index) => (
                     <div key={measurement} className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <h4 className="font-medium capitalize">{measurement}</h4>
+                        <h4 className="font-medium capitalize">
+                          {measurement}
+                        </h4>
                         <div className="flex items-center gap-2">
                           <span className="text-sm text-gray-400">
-                            {values[0]} {measurement === "weight" || measurement === "bodyFat" || measurement === "muscleMass" ? "kg" : "cm"}
+                            {values[0]}{" "}
+                            {measurement === "weight" ||
+                            measurement === "bodyFat" ||
+                            measurement === "muscleMass"
+                              ? "kg"
+                              : "cm"}
                           </span>
                           <span className="text-gray-400">→</span>
                           <span className="text-[#FF6B00] font-medium">
-                            {values[values.length - 1]} {measurement === "weight" || measurement === "bodyFat" || measurement === "muscleMass" ? "kg" : "cm"}
+                            {values[values.length - 1]}{" "}
+                            {measurement === "weight" ||
+                            measurement === "bodyFat" ||
+                            measurement === "muscleMass"
+                              ? "kg"
+                              : "cm"}
                           </span>
-                          <span className="text-xs px-2 py-1 rounded-full bg-opacity-20 font-medium ml-2 
+                          <span
+                            className="text-xs px-2 py-1 rounded-full bg-opacity-20 font-medium ml-2 
                             ${measurement === 'weight' || measurement === 'waist' || measurement === 'bodyFat' 
                               ? (values[0] > values[values.length - 1] ? 'bg-green-500 text-green-500' : 'bg-red-500 text-red-500')
                               : (values[0] < values[values.length - 1] ? 'bg-green-500 text-green-500' : 'bg-red-500 text-red-500')
-                            }"
-                          >
-                            {(measurement === 'weight' || measurement === 'waist' || measurement === 'bodyFat' 
-                              ? (values[0] > values[values.length - 1] 
-                                ? '-' + (values[0] - values[values.length - 1]).toFixed(1) 
-                                : '+' + (values[values.length - 1] - values[0]).toFixed(1))
-                              : (values[0] < values[values.length - 1] 
-                                ? '+' + (values[values.length - 1] - values[0]).toFixed(1) 
-                                : '-' + (values[0] - values[values.length - 1]).toFixed(1))
-                            )}
-                            {measurement === "weight" || measurement === "bodyFat" || measurement === "muscleMass" ? "kg" : "cm"}
+                            }">
+                            {measurement === "weight" ||
+                            measurement === "waist" ||
+                            measurement === "bodyFat"
+                              ? values[0] > values[values.length - 1]
+                                ? "-" +
+                                  (
+                                    values[0] - values[values.length - 1]
+                                  ).toFixed(1)
+                                : "+" +
+                                  (
+                                    values[values.length - 1] - values[0]
+                                  ).toFixed(1)
+                              : values[0] < values[values.length - 1]
+                                ? "+" +
+                                  (
+                                    values[values.length - 1] - values[0]
+                                  ).toFixed(1)
+                                : "-" +
+                                  (
+                                    values[0] - values[values.length - 1]
+                                  ).toFixed(1)}
+                            {measurement === "weight" ||
+                            measurement === "bodyFat" ||
+                            measurement === "muscleMass"
+                              ? "kg"
+                              : "cm"}
                           </span>
                         </div>
                       </div>
@@ -420,9 +517,18 @@ const ProgressDashboard = () => {
                                 className="h-full rounded-full bg-[#FF6B00]"
                                 style={{
                                   width: `${
-                                    measurement === 'weight' || measurement === 'waist' || measurement === 'bodyFat' 
-                                      ? (1 - ((value - Math.min(...values)) / ((Math.max(...values) - Math.min(...values)) || 1))) * 100
-                                      : ((value - Math.min(...values)) / ((Math.max(...values) - Math.min(...values)) || 1)) * 100
+                                    measurement === "weight" ||
+                                    measurement === "waist" ||
+                                    measurement === "bodyFat"
+                                      ? (1 -
+                                          (value - Math.min(...values)) /
+                                            (Math.max(...values) -
+                                              Math.min(...values) || 1)) *
+                                        100
+                                      : ((value - Math.min(...values)) /
+                                          (Math.max(...values) -
+                                            Math.min(...values) || 1)) *
+                                        100
                                   }%`,
                                 }}></div>
                             </div>
@@ -438,7 +544,7 @@ const ProgressDashboard = () => {
                 )}
               </div>
             </div>
-            
+
             <div className="bg-gradient-to-br from-[#111] to-[#0a0a0a] border border-[#333] rounded-2xl p-6">
               <h3 className="text-xl font-bold mb-6">Measurement Analysis</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -446,75 +552,108 @@ const ProgressDashboard = () => {
                   <h4 className="text-lg font-medium mb-4">Body Composition</h4>
                   <div className="flex items-center justify-center h-44">
                     <div className="w-44 h-44 relative">
-                      {/* Body Fat */}
+                      {/* Body Fat Circle */}
                       <div className="absolute inset-0">
                         <div className="w-full h-full rounded-full border-[16px] border-[#FF6B00] opacity-60"></div>
-                        <div className="absolute inset-0 flex items-center justify-center flex-col">
-                          <span className="text-lg font-bold text-[#FF6B00]">{progressData.bodyMeasurements.bodyFat[progressData.bodyMeasurements.bodyFat.length-1]}%</span>
-                          <span className="text-xs text-gray-400">Body Fat</span>
-                        </div>
                       </div>
                       
-                      {/* Muscle Mass */}
-                      <div className="absolute inset-0 transform rotate-[162deg]">
-                        <div className="w-full h-full rounded-full border-[16px] border-[#3498db] opacity-60"></div>
-                        <div className="absolute inset-0 transform -rotate-[162deg] flex items-center justify-center flex-col">
-                          <span className="text-lg font-bold text-[#3498db]">
-                            {Math.round((progressData.bodyMeasurements.muscleMass[progressData.bodyMeasurements.muscleMass.length-1] / 
-                              progressData.bodyMeasurements.weight[progressData.bodyMeasurements.weight.length-1]) * 100)}%
-                          </span>
-                          <span className="text-xs text-gray-400">Muscle Mass</span>
+                      {/* Muscle Mass Circle */}
+                      <div className="absolute inset-0">
+                        <div className="w-full h-full rounded-full border-[16px] border-[#3498db] opacity-60" style={{ transform: 'rotate(180deg)' }}></div>
+                      </div>
+
+                      {/* Content Container */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="flex flex-col items-center gap-4">
+                          {/* Body Fat Content */}
+                          <div className="flex flex-col items-center">
+                            <span className="text-lg font-bold text-[#FF6B00]">
+                              {
+                                progressData.bodyMeasurements.bodyFat[
+                                  progressData.bodyMeasurements.bodyFat.length - 1
+                                ]
+                              }
+                              %
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              Body Fat
+                            </span>
+                          </div>
+
+                          {/* Muscle Mass Content */}
+                          <div className="flex flex-col items-center">
+                            <span className="text-lg font-bold text-[#3498db]">
+                              {Math.round(
+                                (progressData.bodyMeasurements.muscleMass[
+                                  progressData.bodyMeasurements.muscleMass
+                                    .length - 1
+                                ] /
+                                  progressData.bodyMeasurements.weight[
+                                    progressData.bodyMeasurements.weight.length -
+                                      1
+                                  ]) *
+                                  100
+                              )}
+                              %
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              Muscle Mass
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-[#1A1A1A] rounded-xl p-6">
                   <h4 className="text-lg font-medium mb-4">Progress Summary</h4>
                   <div className="space-y-4">
                     <div>
                       <div className="flex justify-between mb-1">
-                        <span className="text-sm text-gray-400">Target Weight</span>
+                        <span className="text-sm text-gray-400">
+                          Target Weight
+                        </span>
                         <span className="text-sm font-medium">75kg</span>
                       </div>
                       <div className="h-2 bg-[#333] rounded-full">
-                        <div 
+                        <div
                           className="h-full bg-[#FF6B00] rounded-full"
-                          style={{ 
-                            width: `${Math.min(100, Math.max(0, 100 - ((progressData.bodyMeasurements.weight[progressData.bodyMeasurements.weight.length-1] - 75) / (progressData.bodyMeasurements.weight[0] - 75) * 100)))}%` 
-                          }}
-                        ></div>
+                          style={{
+                            width: `${Math.min(100, Math.max(0, 100 - ((progressData.bodyMeasurements.weight[progressData.bodyMeasurements.weight.length - 1] - 75) / (progressData.bodyMeasurements.weight[0] - 75)) * 100))}%`,
+                          }}></div>
                       </div>
                     </div>
-                    
+
                     <div>
                       <div className="flex justify-between mb-1">
-                        <span className="text-sm text-gray-400">Target Body Fat</span>
+                        <span className="text-sm text-gray-400">
+                          Target Body Fat
+                        </span>
                         <span className="text-sm font-medium">15%</span>
                       </div>
                       <div className="h-2 bg-[#333] rounded-full">
-                        <div 
+                        <div
                           className="h-full bg-[#FF6B00] rounded-full"
-                          style={{ 
-                            width: `${Math.min(100, Math.max(0, 100 - ((progressData.bodyMeasurements.bodyFat[progressData.bodyMeasurements.bodyFat.length-1] - 15) / (progressData.bodyMeasurements.bodyFat[0] - 15) * 100)))}%` 
-                          }}
-                        ></div>
+                          style={{
+                            width: `${Math.min(100, Math.max(0, 100 - ((progressData.bodyMeasurements.bodyFat[progressData.bodyMeasurements.bodyFat.length - 1] - 15) / (progressData.bodyMeasurements.bodyFat[0] - 15)) * 100))}%`,
+                          }}></div>
                       </div>
                     </div>
-                    
+
                     <div>
                       <div className="flex justify-between mb-1">
-                        <span className="text-sm text-gray-400">Target Muscle Mass</span>
+                        <span className="text-sm text-gray-400">
+                          Target Muscle Mass
+                        </span>
                         <span className="text-sm font-medium">65kg</span>
                       </div>
                       <div className="h-2 bg-[#333] rounded-full">
-                        <div 
+                        <div
                           className="h-full bg-[#FF6B00] rounded-full"
-                          style={{ 
-                            width: `${Math.min(100, Math.max(0, ((progressData.bodyMeasurements.muscleMass[progressData.bodyMeasurements.muscleMass.length-1] - progressData.bodyMeasurements.muscleMass[0]) / (65 - progressData.bodyMeasurements.muscleMass[0]) * 100)))}%` 
-                          }}
-                        ></div>
+                          style={{
+                            width: `${Math.min(100, Math.max(0, ((progressData.bodyMeasurements.muscleMass[progressData.bodyMeasurements.muscleMass.length - 1] - progressData.bodyMeasurements.muscleMass[0]) / (65 - progressData.bodyMeasurements.muscleMass[0])) * 100))}%`,
+                          }}></div>
                       </div>
                     </div>
                   </div>
@@ -529,13 +668,15 @@ const ProgressDashboard = () => {
   };
 
   return (
-    <div className="w-full bg-[#0A0A0A] rounded-3xl p-6 shadow-xl border border-[#222]">
+    <div className="w-full  rounded-3xl p-6 shadow-xl border border-[#222]">
       {/* Header with title */}
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-white">Progress Dashboard</h2>
-        <p className="text-gray-400">Track your fitness journey and achievements</p>
+        <p className="text-gray-400">
+          Track your fitness journey and achievements
+        </p>
       </div>
-      
+
       {/* Tabs */}
       <div className="flex gap-4 mb-8 overflow-x-auto pb-2 scrollbar-hide">
         {tabs.map((tab) => (
@@ -555,10 +696,8 @@ const ProgressDashboard = () => {
       </div>
 
       {/* Content */}
-      <div className="animate-fadeIn">
-        {renderContent()}
-      </div>
-      
+      <div className="animate-fadeIn">{renderContent()}</div>
+
       {/* Footer with last updated info */}
       <div className="mt-10 pt-4 border-t border-[#222] flex justify-between items-center text-sm text-gray-500">
         <p>Last updated: Today at 14:32</p>

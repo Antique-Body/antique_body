@@ -1637,3 +1637,140 @@ export const CheckCircleIcon = ({ size = 16, className = "", ...props }) => (
         <polyline points="22 4 12 14.01 9 11.01"></polyline>
     </svg>
 );
+
+// Muscle Group Icons
+export const ChestIcon = ({ size = 24, className = "", ...props }) => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width={size} 
+        height={size} 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <path d="M6 3C6 3 10 3 12 3C14 3 18 3 18 3C18 3 19 8 18 12C17 16 12 20 12 20C12 20 7 16 6 12C5 8 6 3 6 3Z" />
+        <path d="M12 8C13.1046 8 14 7.10457 14 6C14 5.5 13.8 5 13.48 4.64" />
+        <path d="M12 8C10.8954 8 10 7.10457 10 6C10 5.5 10.2 5 10.52 4.64" />
+    </svg>
+);
+
+export const BackIcon = ({ size = 24, className = "", ...props }) => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width={size} 
+        height={size} 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <path d="M7 5C7 5 7 3 12 3C17 3 17 5 17 5" />
+        <path d="M12 3V7" />
+        <path d="M7 5V17C7 19 9 21 12 21C15 21 17 19 17 17V5" />
+        <path d="M5 10L7 10" />
+        <path d="M19 10L17 10" />
+        <path d="M5 15L7 15" />
+        <path d="M19 15L17 15" />
+    </svg>
+);
+
+export const ShouldersIcon = ({ size = 24, className = "", ...props }) => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width={size} 
+        height={size} 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <path d="M12 4L12 18" />
+        <path d="M7 6C7 6 4 7 4 10C4 13 7 14 7 14" />
+        <path d="M17 6C17 6 20 7 20 10C20 13 17 14 17 14" />
+        <path d="M8 18L16 18" />
+    </svg>
+);
+
+export const ArmsIcon = ({ size = 24, className = "", ...props }) => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width={size} 
+        height={size} 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <path d="M4 7L8 7C10 7 12 9 12 11C12 13 10 15 8 15L4 15" />
+        <path d="M20 7L16 7C14 7 12 9 12 11C12 13 14 15 16 15L20 15" />
+        <path d="M4 7L4 15" />
+        <path d="M20 7L20 15" />
+        <path d="M8 15L8 19" />
+        <path d="M16 15L16 19" />
+    </svg>
+);
+
+export const LegsIcon = ({ size = 24, className = "", ...props }) => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width={size} 
+        height={size} 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <path d="M8 4L8 20" />
+        <path d="M16 4L16 20" />
+        <path d="M8 8L16 8" />
+        <path d="M8 12L16 12" />
+        <path d="M8 16L16 16" />
+        <path d="M10 20L6 20" />
+        <path d="M14 20L18 20" />
+    </svg>
+);
+
+export const CoreIcon = ({ size = 24, className = "", ...props }) => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width={size} 
+        height={size} 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <rect x="8" y="7" width="8" height="10" rx="2" />
+        <path d="M12 4L12 7" />
+        <path d="M12 17L12 20" />
+        <path d="M5 10L8 10" />
+        <path d="M19 10L16 10" />
+        <path d="M5 14L8 14" />
+        <path d="M19 14L16 14" />
+    </svg>
+);

@@ -1,10 +1,23 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { Card } from "@/components/custom/Card";
+import { Modal } from "@/components/common/Modal";
+
 const NewClientsPage = () => {
+    const router = useRouter();
+    const [searchTerm, setSearchTerm] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedClient, setSelectedClient] = useState(null);
+    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+    const [selectedProfileClient, setSelectedProfileClient] = useState(null);
+    const [acceptedClients, setAcceptedClients] = useState([]);
+    const [showConfirmation, setShowConfirmation] = useState(false);
+
     // Sample data for demo purposes
     const newClients = [
         {
@@ -18,6 +31,20 @@ const NewClientsPage = () => {
             preference: "In-person training",
             weight: "145 lbs",
             height: "5'7\"",
+            age: "28",
+            gender: "Female",
+            fitnessLevel: "Intermediate",
+            bio: "Former college athlete looking to get back in shape. I enjoy challenging workouts and am committed to achieving my fitness goals.",
+            dietaryPreferences: ["High Protein", "Gluten-Free"],
+            healthConditions: ["None"],
+            injuries: ["Recovered from ACL surgery 2 years ago"],
+            trainingFrequency: "3-4 times per week",
+            availableEquipment: ["Full Gym Access"],
+            preferredTrainingTime: ["Early Morning (5-8 AM)", "Evening (5-8 PM)"],
+            motivationLevel: "Highly self-motivated",
+            contactEmail: "emma.roberts@email.com",
+            contactPhone: "+1 (555) 123-4567",
+            imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaSVbl2vBA5nMPrRs9_o9unOyKuPjwjD8UPw&s"
         },
         {
             id: 2,
@@ -30,6 +57,20 @@ const NewClientsPage = () => {
             preference: "Virtual sessions",
             weight: "210 lbs",
             height: "5'9\"",
+            age: "35",
+            gender: "Male",
+            fitnessLevel: "Beginner",
+            bio: "Office worker looking to improve overall health and fitness. Prefers virtual training sessions.",
+            dietaryPreferences: ["No Special Diet"],
+            healthConditions: ["None"],
+            injuries: ["None"],
+            trainingFrequency: "1-2 times per week",
+            availableEquipment: ["No Equipment"],
+            preferredTrainingTime: ["Evening (5-8 PM)"],
+            motivationLevel: "Moderately self-motivated",
+            contactEmail: "david.wang@email.com",
+            contactPhone: "+1 (555) 234-5678",
+            imageUrl: "https://cdn.muscleandstrength.com/sites/default/files/field/feature-wide-image/workout/john-cena-workout-wide.jpg"
         },
         {
             id: 3,
@@ -42,10 +83,22 @@ const NewClientsPage = () => {
             preference: "Hybrid training",
             weight: "132 lbs",
             height: "5'4\"",
+            age: "26",
+            gender: "Female",
+            fitnessLevel: "Intermediate",
+            bio: "Former runner recovering from knee injury. Looking to rebuild strength and return to running.",
+            dietaryPreferences: ["Vegetarian"],
+            healthConditions: ["None"],
+            injuries: ["Knee injury"],
+            trainingFrequency: "3-4 times per week",
+            availableEquipment: ["Basic Home Equipment"],
+            preferredTrainingTime: ["Morning (8-11 AM)"],
+            motivationLevel: "Highly self-motivated",
+            contactEmail: "aisha.johnson@email.com",
+            contactPhone: "+1 (555) 345-6789",
+            imageUrl: "https://static.wikia.nocookie.net/p__/images/a/a2/AishaCobraKai.webp/revision/latest?cb=20240516210408&path-prefix=protagonist"
         },
     ];
-
-    const [searchTerm, setSearchTerm] = useState("");
 
     // Filter new clients based on search
     const filteredClients = newClients.filter(
@@ -54,8 +107,50 @@ const NewClientsPage = () => {
             client.goals.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const handleMessageClick = () => {
+        router.push('/trainer/dashboard/messages');
+    };
+
+    const handleAcceptClick = (client) => {
+        setSelectedClient(client);
+        setIsModalOpen(true);
+    };
+
+    const handleAcceptConfirm = () => {
+        // Add client to accepted clients list
+        setAcceptedClients([...acceptedClients, selectedClient.id]);
+        
+        // Show confirmation message
+        setShowConfirmation(true);
+        
+        // Close modal immediately
+        setIsModalOpen(false);
+        
+        // Hide confirmation after 3 seconds
+        setTimeout(() => {
+            setShowConfirmation(false);
+        }, 3000);
+    };
+
+    const handleImageClick = (client) => {
+        setSelectedProfileClient(client);
+        setIsProfileModalOpen(true);
+    };
+
     return (
         <div className="px-4 py-6">
+            {/* Confirmation Toast */}
+            {showConfirmation && (
+                <div className="fixed top-4 right-4 z-50 animate-slideIn">
+                    <div className="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Client successfully accepted!</span>
+                    </div>
+                </div>
+            )}
+
             <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-xl font-bold">New Client Requests</h2>
                 <FormField
@@ -76,31 +171,50 @@ const NewClientsPage = () => {
                 ) : (
                     filteredClients.map((client) => (
                         <Card key={client.id} variant="entityCard" width="100%" maxWidth="100%" className="overflow-hidden">
-                            {/* Card content goes here */}
                             <div className="flex-1">
-                                {/* Header with name and date */}
                                 <div className="-mx-5 -mt-5 mb-4 flex items-center justify-between border-b border-[#333] bg-[rgba(30,30,30,0.9)] px-5 py-3">
-                                    <div>
-                                        <h3 className="text-lg font-semibold transition-colors duration-300 group-hover:text-[#FF6B00]">
-                                            {client.name}
-                                        </h3>
-                                        <p className="text-xs text-gray-400">Requested: {client.requestDate}</p>
+                                    <div className="flex items-center gap-4">
+                                        <div className="relative h-12 w-12 overflow-hidden rounded-full cursor-pointer hover:opacity-80 transition-opacity" onClick={() => handleImageClick(client)}>
+                                            <Image
+                                                src={client.imageUrl}
+                                                alt={client.name}
+                                                fill
+                                                className="object-cover"
+                                            />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-semibold transition-colors duration-300 group-hover:text-[#FF6B00]">
+                                                {client.name}
+                                            </h3>
+                                            <p className="text-xs text-gray-400">Requested: {client.requestDate}</p>
+                                        </div>
                                     </div>
                                     <div className="flex space-x-2">
                                         <Button
                                             variant="subtle"
                                             size="small"
+                                            onClick={handleMessageClick}
                                             className="transition-transform duration-300 group-hover:-translate-y-0.5"
                                         >
                                             Message
                                         </Button>
-                                        <Button
-                                            variant="orangeFilled"
-                                            size="small"
-                                            className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:scale-105"
-                                        >
-                                            Accept
-                                        </Button>
+                                        {acceptedClients.includes(client.id) ? (
+                                            <div className="flex items-center gap-2 px-4 py-2 bg-green-500/20 text-green-400 rounded-lg">
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                <span className="text-sm font-medium">Accepted</span>
+                                            </div>
+                                        ) : (
+                                            <Button
+                                                variant="orangeFilled"
+                                                size="small"
+                                                onClick={() => handleAcceptClick(client)}
+                                                className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:scale-105"
+                                            >
+                                                Accept
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
 
@@ -142,6 +256,229 @@ const NewClientsPage = () => {
                     ))
                 )}
             </div>
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onConfirm={handleAcceptConfirm}
+                title="Accept Client Request"
+                message={
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-4">
+                            <div className="relative h-16 w-16 overflow-hidden rounded-full">
+                                {selectedClient && (
+                                    <Image
+                                        src={selectedClient.imageUrl}
+                                        alt={selectedClient.name}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                )}
+                            </div>
+                            <div className="text-base text-gray-300">
+                                Are you sure you want to accept {selectedClient?.name}'s training request?
+                            </div>
+                        </div>
+                        <div className="rounded-lg bg-[rgba(40,40,40,0.7)] p-4">
+                            <h4 className="mb-2 text-sm font-semibold text-white/90">Client Details</h4>
+                            <div className="grid grid-cols-2 gap-3 text-sm">
+                                <div>
+                                    <span className="text-gray-400">Plan:</span>
+                                    <div className="font-medium text-white">{selectedClient?.plan}</div>
+                                </div>
+                                <div>
+                                    <span className="text-gray-400">Location:</span>
+                                    <div className="font-medium text-white">{selectedClient?.location}</div>
+                                </div>
+                                <div>
+                                    <span className="text-gray-400">Preference:</span>
+                                    <div className="font-medium text-white">{selectedClient?.preference}</div>
+                                </div>
+                                <div>
+                                    <span className="text-gray-400">Physical Stats:</span>
+                                    <div className="font-medium text-white">
+                                        {selectedClient?.height} / {selectedClient?.weight}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mt-3">
+                                <span className="text-gray-400">Goals:</span>
+                                <div className="mt-1 font-medium text-white">{selectedClient?.goals}</div>
+                            </div>
+                            {selectedClient?.notes && (
+                                <div className="mt-3">
+                                    <span className="text-gray-400">Notes:</span>
+                                    <div className="mt-1 italic text-white/80">{selectedClient?.notes}</div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                }
+                confirmButtonText="Accept Client"
+                cancelButtonText="Cancel"
+                size="large"
+                primaryButtonText="Accept Client"
+                secondaryButtonText="Cancel"
+                primaryButtonAction={handleAcceptConfirm}
+                secondaryButtonAction={() => setIsModalOpen(false)}
+                footerBorder={true}
+            />
+
+            {/* Add Profile Modal */}
+            <Modal
+                isOpen={isProfileModalOpen}
+                onClose={() => setIsProfileModalOpen(false)}
+                title={`${selectedProfileClient?.name}'s Profile`}
+                message={
+                    selectedProfileClient && (
+                        <div className="space-y-6">
+                            {/* Profile Header */}
+                            <div className="flex flex-col items-center">
+                                <div className="relative h-32 w-32 overflow-hidden rounded-full mb-4">
+                                    <Image
+                                        src={selectedProfileClient.imageUrl}
+                                        alt={selectedProfileClient.name}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-xl font-bold mb-1">{selectedProfileClient.name}</div>
+                                    <div className="text-gray-400">Requested: {selectedProfileClient.requestDate}</div>
+                                </div>
+                            </div>
+
+                            {/* Profile Content */}
+                            <div className="space-y-4">
+                                {/* Basic Info */}
+                                <div className="bg-[rgba(40,40,40,0.7)] p-4 rounded-lg">
+                                    <div className="text-lg font-semibold mb-3">Basic Information</div>
+                                    <div className="grid grid-cols-2 gap-4 text-sm">
+                                        <div>
+                                            <span className="text-gray-400">Age:</span>
+                                            <div className="font-medium text-white">{selectedProfileClient.age}</div>
+                                        </div>
+                                        <div>
+                                            <span className="text-gray-400">Gender:</span>
+                                            <div className="font-medium text-white">{selectedProfileClient.gender}</div>
+                                        </div>
+                                        <div>
+                                            <span className="text-gray-400">Fitness Level:</span>
+                                            <div className="font-medium text-white">{selectedProfileClient.fitnessLevel}</div>
+                                        </div>
+                                        <div>
+                                            <span className="text-gray-400">Motivation Level:</span>
+                                            <div className="font-medium text-white">{selectedProfileClient.motivationLevel}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Physical Stats */}
+                                <div className="bg-[rgba(40,40,40,0.7)] p-4 rounded-lg">
+                                    <div className="text-lg font-semibold mb-3">Physical Stats</div>
+                                    <div className="grid grid-cols-2 gap-4 text-sm">
+                                        <div>
+                                            <span className="text-gray-400">Height:</span>
+                                            <div className="font-medium text-white">{selectedProfileClient.height}</div>
+                                        </div>
+                                        <div>
+                                            <span className="text-gray-400">Weight:</span>
+                                            <div className="font-medium text-white">{selectedProfileClient.weight}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Training Goals */}
+                                <div className="bg-[rgba(40,40,40,0.7)] p-4 rounded-lg">
+                                    <div className="text-lg font-semibold mb-3">Training Goals</div>
+                                    <div className="text-white/90">{selectedProfileClient.goals}</div>
+                                </div>
+
+                                {/* Training Preferences */}
+                                <div className="bg-[rgba(40,40,40,0.7)] p-4 rounded-lg">
+                                    <div className="text-lg font-semibold mb-3">Training Preferences</div>
+                                    <div className="grid grid-cols-2 gap-4 text-sm">
+                                        <div>
+                                            <span className="text-gray-400">Frequency:</span>
+                                            <div className="font-medium text-white">{selectedProfileClient.trainingFrequency || "Not specified"}</div>
+                                        </div>
+                                        <div>
+                                            <span className="text-gray-400">Preference:</span>
+                                            <div className="font-medium text-white">{selectedProfileClient.preference || "Not specified"}</div>
+                                        </div>
+                                        <div>
+                                            <span className="text-gray-400">Preferred Times:</span>
+                                            <div className="font-medium text-white">
+                                                {(selectedProfileClient.preferredTrainingTime || []).join(", ") || "Not specified"}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span className="text-gray-400">Available Equipment:</span>
+                                            <div className="font-medium text-white">
+                                                {(selectedProfileClient.availableEquipment || []).join(", ") || "Not specified"}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Health & Dietary Info */}
+                                <div className="bg-[rgba(40,40,40,0.7)] p-4 rounded-lg">
+                                    <div className="text-lg font-semibold mb-3">Health & Dietary Information</div>
+                                    <div className="space-y-3 text-sm">
+                                        <div>
+                                            <span className="text-gray-400">Dietary Preferences:</span>
+                                            <div className="font-medium text-white">
+                                                {(selectedProfileClient.dietaryPreferences || []).join(", ") || "Not specified"}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span className="text-gray-400">Health Conditions:</span>
+                                            <div className="font-medium text-white">
+                                                {(selectedProfileClient.healthConditions || []).join(", ") || "None"}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span className="text-gray-400">Injuries:</span>
+                                            <div className="font-medium text-white">
+                                                {(selectedProfileClient.injuries || []).join(", ") || "None"}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Bio & Contact */}
+                                <div className="bg-[rgba(40,40,40,0.7)] p-4 rounded-lg">
+                                    <div className="text-lg font-semibold mb-3">Bio & Contact</div>
+                                    <div className="space-y-3 text-sm">
+                                        <div>
+                                            <span className="text-gray-400">Bio:</span>
+                                            <div className="font-medium text-white mt-1">{selectedProfileClient.bio}</div>
+                                        </div>
+                                        <div>
+                                            <span className="text-gray-400">Contact Email:</span>
+                                            <div className="font-medium text-white">{selectedProfileClient.contactEmail}</div>
+                                        </div>
+                                        <div>
+                                            <span className="text-gray-400">Contact Phone:</span>
+                                            <div className="font-medium text-white">{selectedProfileClient.contactPhone}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                }
+                size="large"
+                primaryButtonText="Accept Client"
+                secondaryButtonText="Close"
+                primaryButtonAction={() => {
+                    setSelectedClient(selectedProfileClient);
+                    setIsProfileModalOpen(false);
+                    setIsModalOpen(true);
+                }}
+                secondaryButtonAction={() => setIsProfileModalOpen(false)}
+                footerBorder={true}
+            />
         </div>
     );
 };

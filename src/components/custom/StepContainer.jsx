@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from '@iconify/react';
 import { useTranslation } from "react-i18next";
 
 export const StepContainer = ({
@@ -7,6 +8,7 @@ export const StepContainer = ({
   stepNumber,
   title,
   emoji,
+  icon,
   children,
 }) => {
   const { t } = useTranslation();
@@ -17,10 +19,17 @@ export const StepContainer = ({
         currentStep === stepNumber ? "block" : "hidden"
       } w-full animate-[fadeIn_0.5s_ease] cursor-pointer`}>
       <div className="mb-8 w-full">
-        <div className="text-xl font-semibold mb-4 flex items-center justify-center gap-2 text-center">
-          <span>{emoji}</span> {t(title)}
+        <div className="text-xl font-semibold mb-6 flex items-center justify-center gap-3 text-center">
+          {icon ? (
+            <Icon icon={icon} className="text-[#FF7800]" width="32" height="32" />
+          ) : (
+            <span className="text-2xl">{emoji}</span>
+          )}
+          <span className="bg-gradient-to-r from-[#FF7800] to-[#FFA500] bg-clip-text text-transparent font-bold">{t(title)}</span>
         </div>
-        {children}
+        <div className="transition-all duration-300 ease-in-out">
+          {children}
+        </div>
       </div>
     </div>
   );

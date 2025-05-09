@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { AuthForm } from "@/components/auth/AuthForm";
-import Background from "@/components/background";
+import { EffectBackground } from "@/components/background";
 import { Button } from "@/components/common/index";
 import { Card } from "@/components/custom/index";
 
@@ -100,8 +100,8 @@ export default function LoginPage() {
     };
 
     return (
-        <main className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#161616] text-white relative">
-            <Background />
+        <main className="min-h-screen bg-gradient-to-b text-white relative">
+            <EffectBackground />
 
             <div className="relative z-10 flex items-center justify-center min-h-screen">
                 <Card

@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 
 import { Modal } from "@/components/common/Modal";
 import { DEFAULT_BACKGROUNDS } from "@/components/custom/select-role/components/RoleCardCompact";
+import { Card } from "@/components/custom/index";
 
 // Role configuration with clear visual identifiers
 const ROLES_CONFIG = {
@@ -176,21 +177,68 @@ const RoleOption = ({ role, config, isSelected, onClick, loading }) => {
     const { t } = useTranslation();
     const [isHovered, setIsHovered] = useState(false);
 
+    // Define card style properties based on role
+    const getCardStyleProps = () => {
+        let styleProps = {
+            accentColor: config.color,
+            animate: true,
+            animationVariant: "fadeIn",
+            backdropBlur: "sm",
+            glowEffect: isSelected,
+            glowColor: `${config.color}40`,
+            borderWidth: isSelected ? "2px" : "1px",
+            hoverScale: "1.02",
+        };
+
+        // Role-specific enhancements
+        if (role === "trainer") {
+            styleProps = {
+                ...styleProps,
+                cardStyle: "gradient",
+                customGradient: "rgba(40,20,10,0.8),rgba(30,15,5,0.8)",
+                animationVariant: "slideUp",
+            };
+        } else if (role === "client") {
+            styleProps = {
+                ...styleProps,
+                cardStyle: "glass",
+                animationVariant: "slideIn",
+            };
+        } else if (role === "user") {
+            styleProps = {
+                ...styleProps,
+                accentCorner: isSelected,
+                accentCornerPosition: "top-right",
+                accentCornerColor: config.color,
+                cardStyle: "premium",
+                animationVariant: "scale",
+            };
+        }
+
+        return styleProps;
+    };
+
     return (
-        <motion.div
-            className={`relative overflow-hidden rounded-2xl cursor-pointer h-full ${
-                isSelected
-                    ? `ring-2 ring-[${config.color}] ring-offset-2 ring-offset-black shadow-[0_0_15px_rgba(255,255,255,0.1)]`
-                    : "border border-white/10"
-            }`}
-            initial="hidden"
-            animate="visible"
-            variants={itemVariants}
-            whileHover="hover"
-            whileTap="tap"
+        <Card
+            className={`relative overflow-hidden cursor-pointer h-full`}
+            borderTop={false}
+            borderColor={isSelected ? config.color : "rgba(255,255,255,0.1)"}
+            shadow={isSelected ? `0 0 20px ${config.color}30` : "0 5px 15px rgba(0,0,0,0.2)"}
+            bgGradientFrom={isSelected ? "rgba(22,22,22,0.95)" : "rgba(18,18,18,0.85)"}
+            bgGradientTo={isSelected ? "rgba(28,28,28,0.95)" : "rgba(24,24,24,0.85)"}
+            padding="0"
+            width="100%"
             onClick={() => onClick(role)}
-            onHoverStart={() => setIsHovered(true)}
-            onHoverEnd={() => setIsHovered(false)}
+            // Hover effects
+            hoverTranslateY="-5px"
+            hoverBorderColor={config.color}
+            hoverShadow={`0 15px 30px rgba(0,0,0,0.3), 0 5px 15px ${config.color}20`}
+            hoverBgGradientFrom="rgba(25,25,25,0.9)"
+            hoverBgGradientTo="rgba(30,30,30,0.9)"
+            // Enhanced props
+            {...getCardStyleProps()}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
         >
             {/* Background image with improved visibility */}
             <div className="relative aspect-[16/9] md:aspect-video w-full overflow-hidden">
@@ -224,9 +272,14 @@ const RoleOption = ({ role, config, isSelected, onClick, loading }) => {
                     </div>
 
                     {isSelected && (
-                        <div className="bg-white/20 backdrop-blur-sm rounded-full p-1.5 ml-auto">
+                        <motion.div 
+                            className="bg-white/20 backdrop-blur-sm rounded-full p-1.5 ml-auto"
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                        >
                             <span className="mdi mdi-check text-lg"></span>
-                        </div>
+                        </motion.div>
                     )}
                 </div>
 
@@ -238,7 +291,10 @@ const RoleOption = ({ role, config, isSelected, onClick, loading }) => {
                 <div className="space-y-2 mb-4">
                     {config.features.map((feature, idx) => (
                         <div key={idx} className="flex items-center gap-2 text-xs sm:text-sm text-gray-300">
-                            <span className={`mdi ${feature.icon} text-base sm:text-lg`} style={{ color: config.color }}></span>
+                            <span 
+                                className={`mdi ${feature.icon} text-base sm:text-lg`} 
+                                style={{ color: config.color }}
+                            ></span>
                             <span>{t(feature.text)}</span>
                         </div>
                     ))}
@@ -264,7 +320,7 @@ const RoleOption = ({ role, config, isSelected, onClick, loading }) => {
                     </div>
                 </div>
             )}
-        </motion.div>
+        </Card>
     );
 };
 

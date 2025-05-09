@@ -7,9 +7,9 @@ import { Inter } from "next/font/google";
 import AuthProvider from "../components/auth/AuthProvider";
 import I18nProvider from "../components/I18nProvider";
 
-import HomeBackground from "@/components/custom/home-page/components/HomeBackground";
 import LanguageSelector from "@/components/LanguageSelector";
 import "./globals.css";
+import { EffectBackground } from "@/components/background";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,7 +26,7 @@ export default function RootLayout({ children }) {
                             <div className="fixed top-4 left-4 z-50">
                                 <LanguageSelector />
                             </div>
-                            <HomeBackground />
+                            {/* <EffectBackground /> */}
                             {children}
                         </AuthProvider>
                     </I18nProvider>

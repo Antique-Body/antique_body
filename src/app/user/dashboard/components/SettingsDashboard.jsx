@@ -7,6 +7,9 @@ import {
 } from "@components/custom";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Icon } from '@iconify/react';
+import { Card } from "@/components/custom";
+import { SelectionCard } from "@/components/custom";
 
 const SettingsDashboard = () => {
   const { t } = useTranslation();
@@ -81,6 +84,40 @@ const SettingsDashboard = () => {
     }));
   }, []);
 
+  // Map of Material Symbols icons for different training options
+  const trainingIcons = {
+    hasInjury: {
+      no: "mdi:run-fast",
+      past: "mdi:history",
+      current: "mdi:medical-bag",
+      chronic: "mdi:alert-circle-outline"
+    },
+    environment: {
+      gym: "mdi:dumbbell",
+      outside: "mdi:tree"
+    },
+    equipment: {
+      with_equipment: "mdi:weight-lifter",
+      no_equipment: "mdi:meditation"
+    },
+    experience: {
+      beginner: "mdi:sprout",
+      intermediate: "mdi:refresh",
+      advanced: "mdi:arm-flex",
+      expert: "mdi:trophy"
+    },
+    goal: {
+      strength: "mdi:weight",
+      muscle: "mdi:human-handsup",
+      lose_weight: "mdi:fire",
+      endurance: "mdi:run-fast"
+    },
+    wantsRehabilitation: {
+      yes: "mdi:brain",
+      no: "mdi:arm-flex"
+    }
+  };
+
   const renderTrainingStepContent = useCallback(
     (step) => {
       if (step.isFrequencyStep) {
@@ -98,10 +135,14 @@ const SettingsDashboard = () => {
 
       if (step.isInjuryLocationStep) {
         return (
+          <div className="flex w-full justify-center">
+          <div className="w-[52%]">
           <InjuryLocationSelector
             selectedLocations={trainingSettings.injuryLocations}
             onSelect={handleInjuryLocations}
           />
+          </div>
+          </div>
         );
       }
 
@@ -110,31 +151,29 @@ const SettingsDashboard = () => {
       }
 
       return (
-        <div className="grid grid-cols-2 gap-4">
-          {step.options.map((option) => (
-            <button
-              key={option.value}
-              onClick={() =>
-                handleTrainingOptionSelect(step.field, option.value)
-              }
-              className={`p-6 bg-[#222] rounded-xl hover:bg-[#333] transition-all duration-300 group text-left ${
-                trainingSettings[step.field] === option.value
-                  ? "border-2 border-[#FF6B00]"
-                  : "border border-[#333]"
-              }`}>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-[#FF6B00] bg-opacity-10 flex items-center justify-center">
-                  <span className="text-2xl">{option.emoji}</span>
-                </div>
-                <div>
-                  <h4 className="font-medium text-lg">{t(option.title)}</h4>
-                  <p className="text-sm text-gray-400">
-                    {t(option.description)}
-                  </p>
-                </div>
-              </div>
-            </button>
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {step.options.map((option) => {
+            const isSelected = trainingSettings[step.field] === option.value;
+            const iconName = trainingIcons[step.field]?.[option.value] || option.icon || "material-symbols:help-outline";
+            
+            return (
+              <SelectionCard
+                key={option.value}
+                selected={isSelected}
+                onClick={() => handleTrainingOptionSelect(step.field, option.value)}
+                iconName={iconName}
+                title={option.title}
+                description={option.description}
+                accentColor="#FF6B00"
+                animateSelection={true}
+                cardStyle="premium"
+                iconBackground={true}
+                iconSize="24"
+                className="!p-3 !min-h-0"
+                aspect="aspect-auto"
+              />
+            );
+          })}
         </div>
       );
     },
@@ -205,17 +244,24 @@ const SettingsDashboard = () => {
             {stepConfig.map(
               (step) =>
                 shouldShowStep(step) && (
-                  <div
+                  <Card
                     key={step.stepNumber}
-                    className="bg-gradient-to-br from-[#111] to-[#0a0a0a] border border-[#333] rounded-2xl p-6">
+                    variant="darkStrong"
+                    className="overflow-hidden"
+                  >
                     <div className="flex items-center gap-4 mb-6">
                       <div className="w-10 h-10 rounded-full bg-[#FF6B00] bg-opacity-10 flex items-center justify-center">
-                        <span className="text-xl">{step.emoji}</span>
+                        <Icon 
+                          icon={step.icon || "material-symbols:help-outline"} 
+                          width="24" 
+                          height="24" 
+                          className="text-[#FF6B00]" 
+                        />
                       </div>
                       <h3 className="text-xl font-bold">{t(step.title)}</h3>
                     </div>
                     {renderTrainingStepContent(step)}
-                  </div>
+                  </Card>
                 )
             )}
           </div>
@@ -223,12 +269,12 @@ const SettingsDashboard = () => {
 
         {activeSection === "profile" && (
           <div className="space-y-6">
-            <div className="bg-gradient-to-br from-[#111] to-[#0a0a0a] border border-[#333] rounded-2xl p-6">
+            <Card variant="darkStrong">
               <h3 className="text-xl font-bold mb-6">Personal Information</h3>
               <div className="space-y-4">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-24 h-24 rounded-full bg-[#222] flex items-center justify-center overflow-hidden">
-                    <span className="text-3xl">👤</span>
+                    <Icon icon="material-symbols:account-circle-outline" width="48" height="48" className="text-gray-400" />
                   </div>
                   <button className="px-4 py-2 bg-[#222] hover:bg-[#333] rounded-lg text-sm transition-colors">
                     Change Photo
@@ -275,34 +321,48 @@ const SettingsDashboard = () => {
                   />
                 </div>
               </div>
-            </div>
+            </Card>
           </div>
         )}
 
         {activeSection === "notifications" && (
           <div className="space-y-6">
-            <div className="bg-gradient-to-br from-[#111] to-[#0a0a0a] border border-[#333] rounded-2xl p-6">
+            <Card variant="darkStrong">
               <h3 className="text-xl font-bold mb-6">Push Notifications</h3>
               <div className="space-y-4">
                 {Object.entries({
-                  workoutReminders: "Get notified about scheduled workouts",
-                  progressUpdates:
-                    "Weekly progress and achievement notifications",
-                  nutritionReminders:
-                    "Meal tracking and water intake reminders",
-                  communityUpdates:
-                    "News and updates from your fitness community",
-                }).map(([key, description]) => (
+                  workoutReminders: {
+                    icon: "material-symbols:notifications-active-outline",
+                    description: "Get notified about scheduled workouts"
+                  },
+                  progressUpdates: {
+                    icon: "material-symbols:trending-up-outline",
+                    description: "Weekly progress and achievement notifications"
+                  },
+                  nutritionReminders: {
+                    icon: "material-symbols:restaurant-outline",
+                    description: "Meal tracking and water intake reminders"
+                  },
+                  communityUpdates: {
+                    icon: "material-symbols:groups-outline",
+                    description: "News and updates from your fitness community"
+                  },
+                }).map(([key, { icon, description }]) => (
                   <div
                     key={key}
                     className="flex items-center justify-between p-4 bg-[#222] rounded-xl">
-                    <div>
-                      <h4 className="font-medium">
-                        {key
-                          .replace(/([A-Z])/g, " $1")
-                          .replace(/^./, (str) => str.toUpperCase())}
-                      </h4>
-                      <p className="text-sm text-gray-400">{description}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#333] flex items-center justify-center">
+                        <Icon icon={icon} width="20" height="20" className="text-gray-400" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium">
+                          {key
+                            .replace(/([A-Z])/g, " $1")
+                            .replace(/^./, (str) => str.toUpperCase())}
+                        </h4>
+                        <p className="text-sm text-gray-400">{description}</p>
+                      </div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
@@ -321,29 +381,40 @@ const SettingsDashboard = () => {
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
           </div>
         )}
 
         {activeSection === "appearance" && (
           <div className="space-y-6">
-            <div className="bg-gradient-to-br from-[#111] to-[#0a0a0a] border border-[#333] rounded-2xl p-6">
+            <Card variant="darkStrong">
               <h3 className="text-xl font-bold mb-6">Theme Settings</h3>
               <div className="space-y-4">
                 {Object.entries({
-                  darkMode: "Use dark theme throughout the app",
-                  animations: "Enable smooth transitions and animations",
-                }).map(([key, description]) => (
+                  darkMode: {
+                    icon: "material-symbols:dark-mode-outline",
+                    description: "Use dark theme throughout the app"
+                  },
+                  animations: {
+                    icon: "material-symbols:animation-outline",
+                    description: "Enable smooth transitions and animations"
+                  },
+                }).map(([key, { icon, description }]) => (
                   <div
                     key={key}
                     className="flex items-center justify-between p-4 bg-[#222] rounded-xl">
-                    <div>
-                      <h4 className="font-medium">
-                        {key
-                          .replace(/([A-Z])/g, " $1")
-                          .replace(/^./, (str) => str.toUpperCase())}
-                      </h4>
-                      <p className="text-sm text-gray-400">{description}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#333] flex items-center justify-center">
+                        <Icon icon={icon} width="20" height="20" className="text-gray-400" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium">
+                          {key
+                            .replace(/([A-Z])/g, " $1")
+                            .replace(/^./, (str) => str.toUpperCase())}
+                        </h4>
+                        <p className="text-sm text-gray-400">{description}</p>
+                      </div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
@@ -362,29 +433,40 @@ const SettingsDashboard = () => {
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
           </div>
         )}
 
         {activeSection === "devices" && (
           <div className="space-y-6">
-            <div className="bg-gradient-to-br from-[#111] to-[#0a0a0a] border border-[#333] rounded-2xl p-6">
+            <Card variant="darkStrong">
               <h3 className="text-xl font-bold mb-6">Device Settings</h3>
               <div className="space-y-4">
                 {Object.entries({
-                  autoSync: "Automatically sync data from devices",
-                  backgroundSync: "Sync data when app is in background",
-                }).map(([key, description]) => (
+                  autoSync: {
+                    icon: "material-symbols:sync-outline",
+                    description: "Automatically sync data from devices"
+                  },
+                  backgroundSync: {
+                    icon: "material-symbols:sync-saved-locally-outline",
+                    description: "Sync data when app is in background"
+                  },
+                }).map(([key, { icon, description }]) => (
                   <div
                     key={key}
                     className="flex items-center justify-between p-4 bg-[#222] rounded-xl">
-                    <div>
-                      <h4 className="font-medium">
-                        {key
-                          .replace(/([A-Z])/g, " $1")
-                          .replace(/^./, (str) => str.toUpperCase())}
-                      </h4>
-                      <p className="text-sm text-gray-400">{description}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#333] flex items-center justify-center">
+                        <Icon icon={icon} width="20" height="20" className="text-gray-400" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium">
+                          {key
+                            .replace(/([A-Z])/g, " $1")
+                            .replace(/^./, (str) => str.toUpperCase())}
+                        </h4>
+                        <p className="text-sm text-gray-400">{description}</p>
+                      </div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
@@ -403,30 +485,44 @@ const SettingsDashboard = () => {
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
           </div>
         )}
 
         {activeSection === "privacy" && (
           <div className="space-y-6">
-            <div className="bg-gradient-to-br from-[#111] to-[#0a0a0a] border border-[#333] rounded-2xl p-6">
+            <Card variant="darkStrong">
               <h3 className="text-xl font-bold mb-6">Privacy Settings</h3>
               <div className="space-y-4">
                 {Object.entries({
-                  profileVisibility: "Make your profile visible to others",
-                  activitySharing: "Share your workout activities",
-                  locationServices: "Allow access to your location",
-                }).map(([key, description]) => (
+                  profileVisibility: {
+                    icon: "material-symbols:visibility-outline",
+                    description: "Make your profile visible to others"
+                  },
+                  activitySharing: {
+                    icon: "material-symbols:share-outline",
+                    description: "Share your workout activities"
+                  },
+                  locationServices: {
+                    icon: "material-symbols:location-on-outline",
+                    description: "Allow access to your location"
+                  },
+                }).map(([key, { icon, description }]) => (
                   <div
                     key={key}
                     className="flex items-center justify-between p-4 bg-[#222] rounded-xl">
-                    <div>
-                      <h4 className="font-medium">
-                        {key
-                          .replace(/([A-Z])/g, " $1")
-                          .replace(/^./, (str) => str.toUpperCase())}
-                      </h4>
-                      <p className="text-sm text-gray-400">{description}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#333] flex items-center justify-center">
+                        <Icon icon={icon} width="20" height="20" className="text-gray-400" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium">
+                          {key
+                            .replace(/([A-Z])/g, " $1")
+                            .replace(/^./, (str) => str.toUpperCase())}
+                        </h4>
+                        <p className="text-sm text-gray-400">{description}</p>
+                      </div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
@@ -445,7 +541,7 @@ const SettingsDashboard = () => {
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
           </div>
         )}
       </div>

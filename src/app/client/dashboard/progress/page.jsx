@@ -17,7 +17,7 @@ import {
 import { Modal } from "@/components/common";
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
-import { ChartBarIcon, LineChartIcon, PlusIcon, TrendingDownIcon, TrendingUpIcon } from "@/components/common/Icons";
+import { ChartBarIcon, LineChartIcon, PlusIcon, TrendingDownIcon, TrendingUpIcon, StrengthIcon } from "@/components/common/Icons";
 import { Card } from "@/components/custom/Card";
 
 export default function ProgressPage() {
@@ -602,68 +602,139 @@ export default function ProgressPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Body Measurements */}
                 <Card variant="dark" width="100%" maxWidth="none">
-                    <h2 className="text-xl font-bold mb-6 flex items-center">
-                        <ChartBarIcon size={20} className="mr-2 text-[#FF6B00]" />
-                        Body Measurements
-                    </h2>
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 rounded-lg bg-[rgba(255,107,0,0.1)]">
+                                <ChartBarIcon size={20} className="text-[#FF6B00]" />
+                            </div>
+                            <h2 className="text-xl font-bold">Body Measurements</h2>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-400">Progress:</span>
+                            <span className="text-sm font-medium text-[#FF6B00]">
+                                {progress && Object.values(progress.measurements).filter(v => v < 0).length} / {Object.keys(progress.measurements).length} Goals
+                            </span>
+                        </div>
+                    </div>
 
                     <div className="space-y-4">
-                        {progress && Object.entries(progress.measurements).map(([key, value]) => (
-                            <div key={key} className="bg-[#1a1a1a] rounded-xl p-4 border border-[#333] hover:border-[#444] transition-colors duration-300">
-                                <div className="flex justify-between items-center mb-3">
-                                    <span className="text-sm font-medium capitalize">{key}</span>
-                                    <span className={`text-sm font-medium px-3 py-1 rounded-full ${value < 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
-                                        {value < 0 ? '-' : '+'}{Math.abs(value).toFixed(1)} cm
-                                    </span>
+                        {progress && Object.entries(progress.measurements).map(([key, value]) => {
+                            const isPositive = key === 'waist' ? value < 0 : value > 0;
+                            const currentValue = progressData[0].measurements[key];
+                            const startValue = progressData[progressData.length - 1].measurements[key];
+                            const percentage = Math.abs((currentValue - startValue) / startValue * 100);
+
+                            return (
+                                <div key={key} className="bg-gradient-to-br from-[#1a1a1a] to-[#111] rounded-xl p-4 border border-[#333] hover:border-[#444] transition-all duration-300">
+                                    <div className="flex justify-between items-center mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <div className={`w-2 h-2 rounded-full ${isPositive ? 'bg-green-500' : 'bg-red-500'}`} />
+                                            <span className="text-sm font-medium capitalize">{key}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className={`text-sm font-medium ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
+                                                {isPositive ? '+' : '-'}{Math.abs(value).toFixed(1)} cm
+                                            </span>
+                                            <span className="text-xs text-gray-400">
+                                                ({percentage.toFixed(1)}%)
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex justify-between text-sm text-gray-400 mb-2">
+                                        <span>Start: {startValue} cm</span>
+                                        <span>Current: {currentValue} cm</span>
+                                    </div>
+
+                                    <div className="relative h-2 bg-[#333] rounded-full overflow-hidden">
+                                        <div 
+                                            className={`absolute h-full rounded-full transition-all duration-500 ${
+                                                isPositive ? 'bg-green-500' : 'bg-red-500'
+                                            }`}
+                                            style={{ 
+                                                width: `${percentage}%`,
+                                                left: isPositive ? '0' : 'auto',
+                                                right: isPositive ? 'auto' : '0'
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+                                        <span>Goal: {isPositive ? 'Increase' : 'Decrease'}</span>
+                                        <span>Progress: {percentage.toFixed(1)}%</span>
+                                    </div>
                                 </div>
-                                <div className="flex justify-between text-sm text-gray-400 mb-2">
-                                    <span>{progressData[progressData.length - 1].measurements[key]} cm</span>
-                                    <span>{progressData[0].measurements[key]} cm</span>
-                                </div>
-                                <div className="h-3 bg-[#333] rounded-full overflow-hidden">
-                                    <div 
-                                        className={`h-full rounded-full transition-all duration-500 ${value < 0 ? 'bg-green-500' : 'bg-red-500'}`}
-                                        style={{ 
-                                            width: `${Math.abs(value) / Math.max(...Object.values(progress.measurements).map(Math.abs)) * 100}%`,
-                                            transform: `translateX(${value < 0 ? '0' : '100%'}) translateX(${value < 0 ? '0' : '-100%'})`
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </Card>
 
                 {/* Performance Metrics */}
                 <Card variant="dark" width="100%" maxWidth="none">
-                    <h2 className="text-xl font-bold mb-6 flex items-center">
-                        <ChartBarIcon size={20} className="mr-2 text-[#FF6B00]" />
-                        Performance Metrics
-                    </h2>
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 rounded-lg bg-[rgba(255,107,0,0.1)]">
+                                <StrengthIcon size={20} className="text-[#FF6B00]" />
+                            </div>
+                            <h2 className="text-xl font-bold">Performance Metrics</h2>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-400">Total Progress:</span>
+                            <span className="text-sm font-medium text-[#FF6B00]">
+                                {progress && Object.values(progress.performance).reduce((acc, val) => acc + val, 0).toFixed(1)} kg
+                            </span>
+                        </div>
+                    </div>
                     
                     <div className="space-y-4">
-                        {progress && Object.entries(progress.performance).map(([key, value]) => (
-                            <div key={key} className="bg-[#1a1a1a] rounded-xl p-4 border border-[#333] hover:border-[#444] transition-colors duration-300">
-                                <div className="flex justify-between items-center mb-3">
-                                    <span className="text-sm font-medium capitalize">{key}</span>
-                                    <span className="text-sm font-medium px-3 py-1 rounded-full bg-[#FF6B00]/20 text-[#FF6B00]">
-                                        +{value.toFixed(1)} kg
-                                    </span>
+                        {progress && Object.entries(progress.performance).map(([key, value]) => {
+                            const currentValue = progressData[0].performance[key];
+                            const startValue = progressData[progressData.length - 1].performance[key];
+                            const percentage = ((currentValue - startValue) / startValue * 100);
+
+                            return (
+                                <div key={key} className="bg-gradient-to-br from-[#1a1a1a] to-[#111] rounded-xl p-4 border border-[#333] hover:border-[#444] transition-all duration-300">
+                                    <div className="flex justify-between items-center mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full bg-[#FF6B00]" />
+                                            <span className="text-sm font-medium capitalize">{key}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm font-medium text-[#FF6B00]">
+                                                +{value.toFixed(1)} kg
+                                            </span>
+                                            <span className="text-xs text-gray-400">
+                                                ({percentage.toFixed(1)}%)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex justify-between text-sm text-gray-400 mb-2">
+                                        <span>Start: {startValue} kg</span>
+                                        <span>Current: {currentValue} kg</span>
+                                    </div>
+
+                                    <div className="relative h-2 bg-[#333] rounded-full overflow-hidden">
+                                        <div 
+                                            className="absolute h-full rounded-full bg-[#FF6B00] transition-all duration-500"
+                                            style={{ width: `${percentage}%` }}
+                                        />
+                                    </div>
+
+                                    <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+                                        <span>Goal: Increase Strength</span>
+                                        <span>Progress: {percentage.toFixed(1)}%</span>
+                                    </div>
+
+                                    <div className="mt-3 pt-3 border-t border-[#333]">
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-gray-400">Weekly Target</span>
+                                            <span className="text-[#FF6B00] font-medium">+2.5 kg</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="flex justify-between text-sm text-gray-400 mb-2">
-                                    <span>{progressData[progressData.length - 1].performance[key]} kg</span>
-                                    <span>{progressData[0].performance[key]} kg</span>
-                                </div>
-                                <div className="h-3 bg-[#333] rounded-full overflow-hidden">
-                                    <div 
-                                        className="h-full rounded-full bg-[#FF6B00] transition-all duration-500"
-                                        style={{ 
-                                            width: `${value / Math.max(...Object.values(progress.performance)) * 100}%`
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </Card>
             </div>

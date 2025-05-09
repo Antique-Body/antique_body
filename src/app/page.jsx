@@ -7,9 +7,10 @@ import { useRef } from "react";
 
 import { Button } from "@/components/common/Button";
 import { Footer } from "@/components/common/Footer";
+import { EffectBackground } from "@/components/background";
 import {
     Navigation,
-    HomeBackground,
+
     ModernFeaturesSection,
     ModernCta,
     EnhancedTrainerScroll,
@@ -214,7 +215,7 @@ export default function Home() {
                     <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20"></div>
                 </div>
 
-                <HomeBackground />
+                <EffectBackground />
 
                 <Navigation />
 

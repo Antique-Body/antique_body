@@ -1,8 +1,10 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Background from "@/components/background";
+
 import { BrandLogo } from "@components/custom";
+import { EffectBackground } from "@/components/background";
+
 
 const LoadingScreen = () => {
   const [progress, setProgress] = useState(0);
@@ -55,8 +57,8 @@ const LoadingScreen = () => {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col relative overflow-hidden">
-      <Background />
+    <div className="min-h-screen  text-white flex flex-col relative overflow-hidden">
+      <EffectBackground />
 
       {/* Enhanced background effects */}
       <div className="absolute inset-0 overflow-hidden">

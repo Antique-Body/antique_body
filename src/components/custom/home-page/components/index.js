@@ -1,5 +1,4 @@
 export { Navigation } from "./Navigation";
-export { default as HomeBackground } from "./HomeBackground";
 export { ModernFeaturesSection } from "./ModernFeaturesSection";
 export { ModernCta } from "./ModernCta";
 export { FeaturePreviews } from "./FeaturePreviews";
