@@ -1,7 +1,7 @@
 "use client";
 import { FrequencySelector, InjuryLocationSelector, MeasurementsInput, SelectionCard } from "@components/custom";
 import { Icon } from "@iconify/react";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { stepConfig } from "@/app/utils/stepConfig";
@@ -81,38 +81,41 @@ const SettingsDashboard = () => {
     }, []);
 
     // Map of Material Symbols icons for different training options
-    const trainingIcons = {
-        hasInjury: {
-            no: "mdi:run-fast",
-            past: "mdi:history",
-            current: "mdi:medical-bag",
-            chronic: "mdi:alert-circle-outline",
-        },
-        environment: {
-            gym: "mdi:dumbbell",
-            outside: "mdi:tree",
-        },
-        equipment: {
-            with_equipment: "mdi:weight-lifter",
-            no_equipment: "mdi:meditation",
-        },
-        experience: {
-            beginner: "mdi:sprout",
-            intermediate: "mdi:refresh",
-            advanced: "mdi:arm-flex",
-            expert: "mdi:trophy",
-        },
-        goal: {
-            strength: "mdi:weight",
-            muscle: "mdi:human-handsup",
-            lose_weight: "mdi:fire",
-            endurance: "mdi:run-fast",
-        },
-        wantsRehabilitation: {
-            yes: "mdi:brain",
-            no: "mdi:arm-flex",
-        },
-    };
+    const trainingIcons = useMemo(
+        () => ({
+            hasInjury: {
+                no: "mdi:run-fast",
+                past: "mdi:history",
+                current: "mdi:medical-bag",
+                chronic: "mdi:alert-circle-outline",
+            },
+            environment: {
+                gym: "mdi:dumbbell",
+                outside: "mdi:tree",
+            },
+            equipment: {
+                with_equipment: "mdi:weight-lifter",
+                no_equipment: "mdi:meditation",
+            },
+            experience: {
+                beginner: "mdi:sprout",
+                intermediate: "mdi:refresh",
+                advanced: "mdi:arm-flex",
+                expert: "mdi:trophy",
+            },
+            goal: {
+                strength: "mdi:weight",
+                muscle: "mdi:human-handsup",
+                lose_weight: "mdi:fire",
+                endurance: "mdi:run-fast",
+            },
+            wantsRehabilitation: {
+                yes: "mdi:brain",
+                no: "mdi:arm-flex",
+            },
+        }),
+        []
+    );
 
     const renderTrainingStepContent = useCallback(
         (step) => {
