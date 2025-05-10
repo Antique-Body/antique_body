@@ -1,12 +1,12 @@
 "use client";
-import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
+import { EffectBackground } from "@/components/background";
 import { DashboardTabs } from "@/components/custom";
 import { BrandLogo } from "@/components/custom/BrandLogo";
 import { ClientProfile } from "@/components/custom/client/dashboard/components";
-import { EffectBackground } from "@/components/background";
 
 export default function ClientDashboardLayout({ children }) {
   const router = useRouter();

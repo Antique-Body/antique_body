@@ -16,7 +16,6 @@ import {
   TrainingPreferencesStep,
 } from "@/components/custom/client/personal-details/steps";
 import { TipsSection } from "@/components/custom/shared/TipsSection";
-import { EffectBackground } from "@/components/background";
 
 const ClientRegistration = () => {
   const router = useRouter();

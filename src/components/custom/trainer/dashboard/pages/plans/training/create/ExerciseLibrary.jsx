@@ -11,7 +11,7 @@ import { Card } from "@/components/custom/Card";
 // Mock exercise categories for demonstration
 const EXERCISE_CATEGORIES = ["All", "Strength", "Cardio", "Flexibility", "Balance", "Core", "Upper Body", "Lower Body"];
 
-export const ExerciseLibrary = ({ exerciseLibrary, updateExerciseLibrary }) => {
+export const ExerciseLibrary = ({  updateExerciseLibrary }) => {
     const [activeCategory, setActiveCategory] = useState("All");
     const [searchTerm, setSearchTerm] = useState("");
     const [newExercise, setNewExercise] = useState({

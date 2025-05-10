@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+
 import { BrandLogo } from "..";
 import "../components.scss";
 
@@ -43,8 +44,6 @@ export const Card = ({
     accentCornerPosition = "top-right",
     accentCornerColor = "#FF7800",
     // Remove these props from being passed to DOM
-    cardStyle,
-    customGradient,
     ...otherProps
 }) => {
     // Remove any remaining custom props that shouldn't go to DOM
@@ -139,7 +138,7 @@ export const Card = ({
         borderRadius = "12px";
         shadow = "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)";
         width = "100%";
-        maxWidth = "100%";
+        // maxWidth = "100%";
         hoverTranslateY = "-2px";
         hoverBorderColor = "#FF6B00";
         hoverShadow = "0 10px 15px -3px rgba(0, 0, 0, 0.2)";
@@ -154,7 +153,6 @@ export const Card = ({
         borderRadius = "12px";
         shadow = "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)";
         width = "100%";
-        maxWidth = "100%";
         hoverTranslateY = "-2px";
         hoverBorderColor = "#FF6B00";
         hoverBgGradientFrom = "rgba(25,25,25,0.6)";

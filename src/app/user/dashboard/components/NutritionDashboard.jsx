@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
+
 import FoodSearch from "./FoodSearch";
 
 const NutritionDashboard = () => {
-  const [activeTab, setActiveTab] = useState("overview");
   const [showFoodSearch, setShowFoodSearch] = useState(false);
   const [allergies, setAllergies] = useState("");
   const [searchHistory, setSearchHistory] = useState([]);

@@ -13,7 +13,6 @@ export const CreatePlanCard = ({ type, index = 0 }) => {
     const url = isNutrition ? "/trainer/dashboard/plans/nutrition/create" : "/trainer/dashboard/plans/training/create";
 
     // Configuration for each plan type
-    console.log(url);
     const config = {
         nutrition: {
             title: "Create Nutrition Plan",

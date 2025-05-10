@@ -1,5 +1,18 @@
 "use client";
 
+import { useSession } from "next-auth/react";
+import { useEffect, useRef, useState } from "react";
+import { SiApple, SiFitbit, SiGarmin, SiGooglefit, SiHuawei, SiSamsung } from "react-icons/si";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+
 import { Button } from "@/components/common/Button";
 import {
   ActivityIcon,
@@ -13,23 +26,12 @@ import {
   TimerIcon,
 } from "@/components/common/Icons";
 import { Card } from "@/components/custom/Card";
-import { useSession } from "next-auth/react";
-import { useEffect, useRef, useState } from "react";
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-import { SiGooglefit, SiApple, SiSamsung, SiHuawei, SiFitbit, SiGarmin } from "react-icons/si";
+
 
 // Mock data generator
 
 // Custom Chart Component
-const CustomChart = ({ data, selectedDate, onPointClick }) => {
+const CustomChart = ({ data, onPointClick }) => {
   // Format data for Recharts
   const chartData = data.map((day) => ({
     date: new Date(day.date).toLocaleDateString("en-US", {
@@ -162,8 +164,7 @@ const CustomChart = ({ data, selectedDate, onPointClick }) => {
 };
 
 // Add this function near the top of the file, after the imports
-const generateRandomHealthMetrics = () => {
-  return {
+const generateRandomHealthMetrics = () => ({
     heartRate: {
       average: Math.floor(Math.random() * 20) + 70, // 70-90 bpm
       min: Math.floor(Math.random() * 10) + 60, // 60-70 bpm
@@ -174,8 +175,7 @@ const generateRandomHealthMetrics = () => {
       average: (Math.random() * 2 + 3).toFixed(1), // 3-5 km/h
       max: (Math.random() * 3 + 5).toFixed(1), // 5-8 km/h
     },
-  };
-};
+  });
 
 const HEALTH_PROVIDERS = [
   {
@@ -221,123 +221,6 @@ const HEALTH_PROVIDERS = [
     connected: false,
   },
 ];
-
-const MOCK_HEALTH_DATA = {
-  steps: {
-    today: 8432,
-    goal: 10000,
-    weekly_avg: 7845,
-    history: [
-      { date: "2024-03-15", value: 8432 },
-      { date: "2024-03-14", value: 7654 },
-      { date: "2024-03-13", value: 9123 },
-      { date: "2024-03-12", value: 6789 },
-      { date: "2024-03-11", value: 8901 },
-      { date: "2024-03-10", value: 7654 },
-      { date: "2024-03-09", value: 9876 },
-    ],
-  },
-  sleep: {
-    last_night: {
-      total_hours: 7.5,
-      deep_sleep: 2.3,
-      light_sleep: 4.1,
-      rem: 1.1,
-      awake: 0.2,
-    },
-    weekly_avg: 7.2,
-    history: [
-      { date: "2024-03-15", total: 7.5, deep: 2.3, light: 4.1, rem: 1.1 },
-      { date: "2024-03-14", total: 6.8, deep: 2.0, light: 3.8, rem: 1.0 },
-      { date: "2024-03-13", total: 7.2, deep: 2.2, light: 4.0, rem: 1.0 },
-      { date: "2024-03-12", total: 7.8, deep: 2.4, light: 4.2, rem: 1.2 },
-      { date: "2024-03-11", total: 6.5, deep: 1.9, light: 3.6, rem: 1.0 },
-      { date: "2024-03-10", total: 7.0, deep: 2.1, light: 3.9, rem: 1.0 },
-      { date: "2024-03-09", total: 7.4, deep: 2.2, light: 4.1, rem: 1.1 },
-    ],
-  },
-  heart_rate: {
-    current: 72,
-    resting: 62,
-    max_today: 142,
-    min_today: 58,
-    zones: {
-      fat_burn: 95,
-      cardio: 135,
-      peak: 165,
-    },
-    history: [
-      { time: "08:00", value: 72 },
-      { time: "09:00", value: 75 },
-      { time: "10:00", value: 78 },
-      { time: "11:00", value: 82 },
-      { time: "12:00", value: 76 },
-      { time: "13:00", value: 74 },
-      { time: "14:00", value: 73 },
-    ],
-  },
-  stress: {
-    current_level: "Medium",
-    score: 65,
-    history: [
-      { date: "2024-03-15", score: 65 },
-      { date: "2024-03-14", score: 58 },
-      { date: "2024-03-13", score: 72 },
-      { date: "2024-03-12", score: 45 },
-      { date: "2024-03-11", score: 68 },
-      { date: "2024-03-10", score: 51 },
-      { date: "2024-03-09", score: 63 },
-    ],
-  },
-  blood_oxygen: {
-    current: 98,
-    average: 97,
-    min: 95,
-    max: 99,
-    history: [
-      { date: "2024-03-15", value: 98 },
-      { date: "2024-03-14", value: 97 },
-      { date: "2024-03-13", value: 98 },
-      { date: "2024-03-12", value: 96 },
-      { date: "2024-03-11", value: 97 },
-      { date: "2024-03-10", value: 98 },
-      { date: "2024-03-09", value: 97 },
-    ],
-  },
-  workouts: {
-    today: {
-      type: "Running",
-      duration: 45,
-      calories: 420,
-      distance: 5.2,
-      avg_pace: "5:30",
-      avg_heart_rate: 145,
-    },
-    history: [
-      {
-        date: "2024-03-15",
-        type: "Running",
-        duration: 45,
-        calories: 420,
-        distance: 5.2,
-      },
-      {
-        date: "2024-03-14",
-        type: "Strength",
-        duration: 60,
-        calories: 380,
-        exercises: 12,
-      },
-      {
-        date: "2024-03-13",
-        type: "Cycling",
-        duration: 30,
-        calories: 280,
-        distance: 8.5,
-      },
-    ],
-  },
-};
 
 // Add this function after the imports and before the CustomChart component
 const generateMockHealthData = () => {
@@ -629,7 +512,7 @@ export default function HealthPage() {
           selectedDate={selectedDate}
           onPointClick={(date) => {
             // Convert the formatted date back to ISO string
-            const [weekday, month, day] = date.split(" ");
+            const [ month, day] = date.split(" ");
             const year = new Date().getFullYear();
             const dateObj = new Date(`${month} ${day}, ${year}`);
             setSelectedDate(dateObj.toISOString().split("T")[0]);

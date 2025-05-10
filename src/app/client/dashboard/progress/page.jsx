@@ -1,6 +1,5 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import {
@@ -17,11 +16,10 @@ import {
 import { Modal } from "@/components/common";
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
-import { ChartBarIcon, LineChartIcon, PlusIcon, TrendingDownIcon, TrendingUpIcon, StrengthIcon } from "@/components/common/Icons";
+import { ChartBarIcon, LineChartIcon, PlusIcon, StrengthIcon, TrendingDownIcon, TrendingUpIcon } from "@/components/common/Icons";
 import { Card } from "@/components/custom/Card";
 
 export default function ProgressPage() {
-    const { data: session } = useSession();
     
     // Sample user data with progress photos
     const [progressData, setProgressData] = useState([

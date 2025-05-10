@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useState } from "react";
 
 export const ModernFeaturesSection = ({ features }) => {
     const [activeFeature, setActiveFeature] = useState(0);

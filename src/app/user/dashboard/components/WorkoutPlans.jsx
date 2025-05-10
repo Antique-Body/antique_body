@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+
 import TrainingPlanModal from "./TrainingPlanModal";
 
 const WorkoutPlans = ({ trainingTypes, onShowMuscleGroups }) => {

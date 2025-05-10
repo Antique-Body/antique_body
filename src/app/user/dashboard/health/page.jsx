@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useState } from "react";
 
 export default function HealthPage() {
@@ -171,7 +172,6 @@ export default function HealthPage() {
     const handleMeasurementSubmit = (e) => {
         e.preventDefault();
         // Here you would typically save the measurement to your database
-        console.log('New measurement:', newMeasurement);
         setShowMeasurementModal(false);
         setNewMeasurement({
             date: new Date().toISOString().split('T')[0],
@@ -185,7 +185,6 @@ export default function HealthPage() {
         const file = e.target.files[0];
         if (file) {
             // Here you would typically upload the photo to your storage
-            console.log('New photo:', { ...newPhoto, file });
             setShowPhotoModal(false);
             setNewPhoto({
                 date: new Date().toISOString().split('T')[0],
@@ -706,7 +705,7 @@ export default function HealthPage() {
                                     {healthData.progressPhotos.map((photo) => (
                                         <div key={photo.id} className="bg-[#333] rounded-xl overflow-hidden">
                                             <div className="aspect-square bg-[#444] relative">
-                                                <img 
+                                                <Image 
                                                     src={photo.url} 
                                                     alt={`Progress photo from ${photo.date}`}
                                                     className="w-full h-full object-cover"

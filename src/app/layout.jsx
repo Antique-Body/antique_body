@@ -9,7 +9,6 @@ import I18nProvider from "../components/I18nProvider";
 
 import LanguageSelector from "@/components/LanguageSelector";
 import "./globals.css";
-import { EffectBackground } from "@/components/background";
 
 const inter = Inter({ subsets: ["latin"] });
 

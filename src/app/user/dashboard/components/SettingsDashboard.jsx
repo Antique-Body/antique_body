@@ -1,15 +1,16 @@
 "use client";
-import { stepConfig } from "@/app/utils/stepConfig";
 import {
   FrequencySelector,
   InjuryLocationSelector,
   MeasurementsInput,
+  SelectionCard,
 } from "@components/custom";
+import { Icon } from '@iconify/react';
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Icon } from '@iconify/react';
+
+import { stepConfig } from "@/app/utils/stepConfig";
 import { Card } from "@/components/custom";
-import { SelectionCard } from "@/components/custom";
 
 const SettingsDashboard = () => {
   const { t } = useTranslation();

@@ -5,7 +5,6 @@ const prisma = new PrismaClient();
 
 export async function GET() {
     try {
-        console.log('Checking Google Fit status...');
 
         // First check if any account exists
         const account = await prisma.googleFitAccount.findFirst({
@@ -20,14 +19,6 @@ export async function GET() {
             }
         });
 
-        console.log('Account found:', {
-            hasAccount: !!account,
-            id: account?.id,
-            providerAccountId: account?.providerAccountId,
-            hasAccessToken: !!account?.access_token,
-            hasRefreshToken: !!account?.refresh_token,
-            expiresAt: account?.expires_at
-        });
 
         if (!account) {
             console.log('No Google Fit account found');
@@ -42,12 +33,10 @@ export async function GET() {
 
         // Check if token is expired
         const isExpired = account.expires_at && new Date(account.expires_at * 1000) < new Date();
-        console.log('Token status:', { isExpired });
 
         // If token is expired and we have a refresh token, try to refresh it
         if (isExpired && account.refresh_token) {
             try {
-                console.log('Attempting to refresh token...');
                 const oauth2Client = new google.auth.OAuth2(
                     process.env.GOOGLE_FIT_CLIENT_ID,
                     process.env.GOOGLE_FIT_CLIENT_SECRET,
@@ -59,7 +48,6 @@ export async function GET() {
                 });
 
                 const { credentials } = await oauth2Client.refreshAccessToken();
-                console.log('Token refresh successful');
                 
                 // Update the account with new tokens
                 await prisma.googleFitAccount.update({
@@ -72,7 +60,6 @@ export async function GET() {
                     }
                 });
 
-                console.log('Account updated with new tokens');
 
                 // Return updated connection status
                 return new Response(JSON.stringify({

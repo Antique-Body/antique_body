@@ -1,11 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 const AnticBodyWorkout = ({ workout, onComplete, onCancel }) => {
-  const { t } = useTranslation();
-  const [activeExerciseIndex, setActiveExerciseIndex] = useState(0);
   const [timer, setTimer] = useState("01:00");
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [exercises, setExercises] = useState([]);
@@ -340,7 +337,6 @@ const AnticBodyWorkout = ({ workout, onComplete, onCancel }) => {
       active: ex.id === id,
     }));
     setExercises(updatedExercises);
-    setActiveExerciseIndex(id - 1);
   };
 
   const markExerciseComplete = (id) => {
@@ -382,11 +378,7 @@ const AnticBodyWorkout = ({ workout, onComplete, onCancel }) => {
     }
   };
 
-  const cancelWorkout = () => {
-    if (onCancel) {
-      onCancel();
-    }
-  };
+ 
 
   const progressPercentage =
     (exercises.filter((ex) => ex.completed).length / exercises.length) * 100;
@@ -717,7 +709,7 @@ const AnticBodyWorkout = ({ workout, onComplete, onCancel }) => {
                 <p className="text-center text-sm text-gray-400 mb-3">Coming up next:</p>
                 <div className="flex items-center gap-3">
                   <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                    <img 
+                    <Image 
                       src={activeExercise.thumbnailUrl} 
                       alt={activeExercise.name} 
                       className="w-full h-full object-cover"
@@ -798,7 +790,7 @@ const AnticBodyWorkout = ({ workout, onComplete, onCancel }) => {
                 <div className="w-full aspect-video rounded-lg overflow-hidden mb-6 relative cursor-pointer shadow-xl" 
                   onClick={toggleVideoDisplay}
                 >
-                  <img 
+                  <Image 
                     src={activeExercise.thumbnailUrl} 
                     alt={activeExercise.name} 
                     className="w-full h-full object-cover"
@@ -983,7 +975,7 @@ const AnticBodyWorkout = ({ workout, onComplete, onCancel }) => {
                           toggleVideoDisplay();
                         }}
                       >
-                        <img 
+                        <Image 
                           src={exercise.thumbnailUrl} 
                           alt={exercise.name} 
                           className="w-full h-full object-cover"
@@ -1023,7 +1015,7 @@ const AnticBodyWorkout = ({ workout, onComplete, onCancel }) => {
         </div>
 
         {/* Custom scrollbar styles */}
-        <style jsx global>{`
+        <style jsx >{`
           .custom-scrollbar::-webkit-scrollbar {
             width: 4px;
           }

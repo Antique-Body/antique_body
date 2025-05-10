@@ -5,9 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
 
+import { EffectBackground } from "@/components/background";
 import { Button } from "@/components/common/Button";
 import { Footer } from "@/components/common/Footer";
-import { EffectBackground } from "@/components/background";
 import {
     Navigation,
 

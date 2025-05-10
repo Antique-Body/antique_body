@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
+
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
-import { PlusIcon, TrashIcon, DragIcon } from "@/components/common/Icons";
-import Image from "next/image";
+import { DragIcon, PlusIcon, TrashIcon } from "@/components/common/Icons";
 
 export const SessionExercises = ({ sessionExercises, updateSessionExercises, exerciseLibrary }) => {
     const [newExercise, setNewExercise] = useState({

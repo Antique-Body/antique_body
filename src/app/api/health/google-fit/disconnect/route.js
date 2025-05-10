@@ -2,9 +2,8 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function POST(req) {
+export async function POST() {
     try {
-        console.log('Disconnecting Google Fit account');
 
         // Delete the Google Fit account
         const deletedAccount = await prisma.googleFitAccount.delete({
@@ -13,7 +12,6 @@ export async function POST(req) {
             }
         });
 
-        console.log('Deleted account:', deletedAccount);
 
         return new Response(JSON.stringify({ 
             success: true,

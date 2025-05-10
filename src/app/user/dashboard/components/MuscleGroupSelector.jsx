@@ -1,17 +1,16 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { 
-  ChestIcon,
-  BackIcon,
-  ShouldersIcon,
+
+import {
   ArmsIcon,
+  BackIcon,
+  ChestIcon,
+  CoreIcon,
   LegsIcon,
-  CoreIcon
+  ShouldersIcon
 } from "../../../../components/common/Icons";
 
 const MuscleGroupSelector = ({ onBack }) => {
-  const { t } = useTranslation();
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState(null);
   const [hoveredExercise, setHoveredExercise] = useState(null);
   const [selectedExercise, setSelectedExercise] = useState(null);

@@ -1,13 +1,13 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
-import { Card } from "@/components/custom/Card";
 import { Modal } from "@/components/common/Modal";
+import { Card } from "@/components/custom/Card";
+import { Button } from "@/omponents/common/Button";
 
 const NewClientsPage = () => {
     const router = useRouter();
@@ -24,7 +24,6 @@ const NewClientsPage = () => {
     const [clientEmail, setClientEmail] = useState("");
 
     // Mock trainer name - in real app this would come from user profile
-    const trainerName = "John Smith";
 
     // Generate a unique invite link with trainer's name
     const generateInviteLink = () => {
@@ -186,7 +185,7 @@ const NewClientsPage = () => {
                     <Button
                         variant="orangeFilled"
                         size="default"
-                        className='flex w-[240px] h-[44px] items-center justify-center gap-3 py-0 whitespace-nowrap'
+                        className="flex w-[240px] h-[44px] items-center justify-center gap-3 py-0 whitespace-nowrap"
                         onClick={handleInviteClick}
                         leftIcon={
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

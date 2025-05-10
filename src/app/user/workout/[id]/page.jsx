@@ -14,14 +14,7 @@ const WorkoutPage = () => {
   const [workoutProgress, setWorkoutProgress] = useState(0);
   const [weights, setWeights] = useState({});
   const [reps, setReps] = useState({});
-  const [showVideo, setShowVideo] = useState(false);
-  const [showProgressModal, setShowProgressModal] = useState(false);
-  const [activeTab, setActiveTab] = useState("home");
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [notifications, setNotifications] = useState(true);
-  const [soundEffects, setSoundEffects] = useState(true);
-  const [darkMode, setDarkMode] = useState(true);
-  const [units, setUnits] = useState("metric");
+
   const [showCompletionModal, setShowCompletionModal] = useState(false);
 
   // Fetch workout data

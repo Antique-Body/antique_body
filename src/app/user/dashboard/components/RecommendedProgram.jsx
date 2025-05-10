@@ -1,9 +1,7 @@
 "use client";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 
 const RecommendedProgram = ({ program }) => {
-  const { t } = useTranslation();
   const [showDetails, setShowDetails] = useState(false);
   const [showTrainingModal, setShowTrainingModal] = useState(false);
 

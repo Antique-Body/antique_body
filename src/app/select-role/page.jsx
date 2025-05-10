@@ -1,15 +1,15 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Modal } from "@/components/common/Modal";
-import { DEFAULT_BACKGROUNDS } from "@/components/custom/select-role/components/RoleCardCompact";
 import { Card } from "@/components/custom/index";
+import { DEFAULT_BACKGROUNDS } from "@/components/custom/select-role/components/RoleCardCompact";
 
 // Role configuration with clear visual identifiers
 const ROLES_CONFIG = {
@@ -70,20 +70,7 @@ const containerVariants = {
     },
 };
 
-const itemVariants = {
-    hidden: { y: 30, opacity: 0 },
-    visible: {
-        y: 0,
-        opacity: 1,
-        transition: { type: "spring", damping: 12, stiffness: 100 },
-    },
-    hover: {
-        scale: 1.02,
-        boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-        transition: { type: "spring", stiffness: 400, damping: 10 },
-    },
-    tap: { scale: 0.98 },
-};
+
 
 // Help text component with sleek design
 const HelpText = () => {
@@ -192,16 +179,17 @@ const RoleOption = ({ role, config, isSelected, onClick, loading }) => {
 
         // Role-specific enhancements
         if (role === "trainer") {
+            const [fromColor, toColor] = "rgba(40,20,10,0.8),rgba(30,15,5,0.8)".split(',');
             styleProps = {
                 ...styleProps,
-                cardStyle: "gradient",
-                customGradient: "rgba(40,20,10,0.8),rgba(30,15,5,0.8)",
+                bgGradientFrom: fromColor,
+                bgGradientTo: toColor,
                 animationVariant: "slideUp",
             };
         } else if (role === "client") {
             styleProps = {
                 ...styleProps,
-                cardStyle: "glass",
+                variant: "glass",
                 animationVariant: "slideIn",
             };
         } else if (role === "user") {
@@ -210,7 +198,7 @@ const RoleOption = ({ role, config, isSelected, onClick, loading }) => {
                 accentCorner: isSelected,
                 accentCornerPosition: "top-right",
                 accentCornerColor: config.color,
-                cardStyle: "premium",
+                variant: "premium",
                 animationVariant: "scale",
             };
         }

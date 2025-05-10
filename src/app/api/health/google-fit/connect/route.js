@@ -8,18 +8,12 @@ const oauth2Client = new google.auth.OAuth2(
 
 export async function GET() {
     try {
-        console.log('Starting Google Fit connect...');
         
         // Validate environment variables
         if (!process.env.GOOGLE_FIT_CLIENT_ID || !process.env.GOOGLE_FIT_CLIENT_SECRET || !process.env.GOOGLE_FIT_REDIRECT_URI) {
             throw new Error('Missing required environment variables for Google Fit connection');
         }
 
-        console.log('Environment variables:', {
-            clientId: process.env.GOOGLE_FIT_CLIENT_ID ? 'Set' : 'Not set',
-            clientSecret: process.env.GOOGLE_FIT_CLIENT_SECRET ? 'Set' : 'Not set',
-            redirectUri: process.env.GOOGLE_FIT_REDIRECT_URI
-        });
 
         const scopes = [
             'https://www.googleapis.com/auth/fitness.activity.read',
@@ -46,7 +40,6 @@ export async function GET() {
             redirect_uri: process.env.GOOGLE_FIT_REDIRECT_URI
         });
 
-        console.log('Generated auth URL:', authUrl);
 
         return new Response(JSON.stringify({ 
             success: true,

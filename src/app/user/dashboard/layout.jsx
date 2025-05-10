@@ -1,11 +1,11 @@
 "use client";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-
-import  { EffectBackground } from "@/components/background";
+import { EffectBackground } from "@/components/background";
 import { DashboardTabs } from "@/components/custom";
 import { BrandLogo } from "@/components/custom/BrandLogo";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function UserDashboardLayout({ children }) {
   const router = useRouter();
@@ -85,7 +85,7 @@ export default function UserDashboardLayout({ children }) {
               {/* User avatar */}
               <div className="w-24 h-24 rounded-full overflow-hidden flex-shrink-0 bg-[#333]">
                 {session?.user?.image ? (
-                  <img
+                  <Image
                     src={session.user.image}
                     alt={session.user.name || "User"}
                     className="h-full w-full object-cover"

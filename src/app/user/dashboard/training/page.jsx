@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
-import WorkoutPlans from "../components/WorkoutPlans";
+
 import AnticBodyWorkout from "../components/AnticBodyWorkout";
+import WorkoutPlans from "../components/WorkoutPlans";
 
 export default function TrainingPage() {
     const [selectedView, setSelectedView] = useState("plans");

@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useState } from "react";
 
 const FoodSearch = ({ onAddFood }) => {
@@ -213,7 +214,7 @@ const FoodSearch = ({ onAddFood }) => {
                 </div>
               ) : (
                 <div>
-                  <img
+                  <Image
                     src={selectedImage}
                     alt="Food"
                     className="w-full h-64 object-cover rounded-xl mb-4"

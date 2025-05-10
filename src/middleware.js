@@ -2,15 +2,15 @@ import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 export async function middleware(request) {
-    const token = await getToken({ req: request });
-    const { pathname } = request.nextUrl;
-    const userRole = token?.role?.toLowerCase();
+    // const token = await getToken({ req: request });
+    // const { pathname } = request.nextUrl;
+    // const userRole = token?.role?.toLowerCase();
 
     // Public routes that don't require authentication
-    const publicPaths = ["/", "/auth/login", "/auth/register", "/auth/reset-password", "/auth/verify-email", "/contact"];
+    // const publicPaths = ["/", "/auth/login", "/auth/register", "/auth/reset-password", "/auth/verify-email", "/contact"];
 
     // Check if the current path starts with any of the public paths
-    const isPublicRoute = publicPaths.some((path) => pathname === path || pathname.startsWith(`${path}?`));
+    // const isPublicRoute = publicPaths.some((path) => pathname === path || pathname.startsWith(`${path}?`));
 
     // // Handle routes for verification and reset password that have query parameters
     // if (pathname.startsWith("/auth/reset-password") || pathname.startsWith("/auth/verify-email")) {

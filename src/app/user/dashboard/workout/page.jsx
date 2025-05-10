@@ -1,97 +1,16 @@
 "use client";
+import Image from "next/image";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import MuscleGroupSelector from "../components/MuscleGroupSelector";
-import RecommendedProgram from "../components/RecommendedProgram";
-import WorkoutPlans from "../components/WorkoutPlans";
+
 import AnticBodyWorkout from "../components/AnticBodyWorkout";
+import MuscleGroupSelector from "../components/MuscleGroupSelector";
+import WorkoutPlans from "../components/WorkoutPlans";
 
 export default function WorkoutPage() {
-    const router = useRouter();
     const [showMuscleGroups, setShowMuscleGroups] = useState(false);
     const [selectedWorkout, setSelectedWorkout] = useState(null);
     const [activeWorkout, setActiveWorkout] = useState(false);
     const [currentExerciseVideo, setCurrentExerciseVideo] = useState(null);
-
-    // Recommended custom training program for client
-    const recommendedTraining = {
-        name: "Advanced Hypertrophy Program - Week 1",
-        icon: "crown",
-        summary: "Customized 4-Day Split for Your First Week",
-        description:
-            "This personalized program was designed based on your goals, experience level, and schedule. Week 1 follows an optimized upper/lower split to establish a foundation for progressive muscle growth while providing sufficient recovery between sessions.",
-        color: "#9d4edd",
-        preferences: {
-            location: "Gym",
-            equipment: "Full Equipment",
-            duration: "60-75 min",
-            frequency: "4 days/week",
-        },
-        days: [
-            {
-                name: "Week 1, Day 1: Upper Body Push",
-                exercises: [
-                    {
-                        name: "Incline Barbell Bench Press",
-                        sets: 4,
-                        reps: "8-10",
-                        restTime: "90-120 sec",
-                        notes: "Focus on controlled eccentric",
-                    },
-                    {
-                        name: "Seated Dumbbell Shoulder Press",
-                        sets: 4,
-                        reps: "10-12",
-                        restTime: "90 sec",
-                        notes: "Full range of motion",
-                    },
-                    {
-                        name: "Cable Flyes",
-                        sets: 3,
-                        reps: "12-15",
-                        restTime: "60 sec",
-                        notes: "Squeeze at peak contraction",
-                    },
-                    {
-                        name: "Lateral Raises",
-                        sets: 4,
-                        reps: "12-15",
-                        restTime: "60 sec",
-                        notes: "Maintain tension throughout",
-                    },
-                    {
-                        name: "Skull Crushers",
-                        sets: 3,
-                        reps: "10-12",
-                        restTime: "60-90 sec",
-                        notes: "Keep elbows fixed",
-                    },
-                    {
-                        name: "Rope Pushdowns",
-                        sets: 3,
-                        reps: "12-15",
-                        restTime: "60 sec",
-                        notes: "Focus on mind-muscle connection",
-                    },
-                ]
-            },
-            // other days would be included here but omitted for brevity
-        ],
-        notes: [
-            "This is your Week 1 starting plan - we'll adjust intensity for subsequent weeks",
-            "Start each workout with a 5-10 minute dynamic warm-up",
-            "Rest 48 hours between training similar muscle groups",
-            "First week focus: Learn proper form before increasing weights",
-            "Track your Week 1 workouts to establish your baseline",
-            "Nutrition: Aim for 1.8-2g protein per kg bodyweight daily",
-            "Sleep 7-9 hours for optimal recovery and growth",
-        ],
-        progressionStrategy: {
-            weekTwo: "Increase weights by 5-10% where form allows",
-            weekThree: "Add 1 set to main compound exercises",
-            weekFour: "Reduce rest periods by 15-30 seconds",
-        },
-    };
 
     // Training types with preferences
     const trainingTypes = [
@@ -509,7 +428,7 @@ export default function WorkoutPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <div className="col-span-1">
                         <div className="h-48 rounded-xl overflow-hidden mb-4">
-                            <img src={tailoredProgram.image} alt={tailoredProgram.title} className="w-full h-full object-cover" />
+                            <Image src={tailoredProgram.image} alt={tailoredProgram.title} className="w-full h-full object-cover" />
                         </div>
 
                         <div className="bg-[#252525] rounded-xl p-4 space-y-3">

@@ -1,6 +1,5 @@
 "use client";
 
-import { Card } from "@/components/custom/Card";
 import { useEffect, useState } from 'react';
 import {
     Area,
@@ -11,6 +10,8 @@ import {
     XAxis,
     YAxis
 } from 'recharts';
+
+import { Card } from "@/components/custom/Card";
 
 export const WeeklyProgressChart = ({ data, measurement = "weight", unit = "kg", title = "Progress Chart" }) => {
   const [isAnimating, setIsAnimating] = useState(false);

@@ -2,6 +2,7 @@
 
 import { Icon } from '@iconify/react';
 import { useTranslation } from "react-i18next";
+
 import { Card } from "..";
 
 export const FrequencySelector = ({ selectedFrequency, onSelect }) => {

@@ -45,9 +45,7 @@ export const NutritionHistoryModal = ({
   };
 
   // Format date for input
-  const formatDateForInput = (date) => {
-    return date.toISOString().split('T')[0];
-  };
+  const formatDateForInput = (date) => date.toISOString().split('T')[0];
   
   // Helper function to get gradient class based on color
   const getGradient = (baseColor) => {

@@ -106,17 +106,7 @@ export async function GET(req) {
             }
         });
 
-        console.log('Detailed account info:', {
-            id: account?.id,
-            providerAccountId: account?.providerAccountId,
-            hasAccessToken: !!account?.access_token,
-            hasRefreshToken: !!account?.refresh_token,
-            tokenType: account?.token_type,
-            scope: account?.scope,
-            expiresAt: account?.expires_at,
-            createdAt: account?.createdAt,
-            updatedAt: account?.updatedAt
-        });
+   
 
         if (!account) {
             return new Response(JSON.stringify({ 
@@ -172,10 +162,7 @@ export async function GET(req) {
         const endTimeMillis = Date.now();
         const startTimeMillis = endTimeMillis - (30 * 24 * 60 * 60 * 1000); // 30 days ago
 
-        console.log('Fetching data for date range:', {
-            start: new Date(startTimeMillis).toISOString(),
-            end: new Date(endTimeMillis).toISOString()
-        });
+      
 
         // Create requests for all data types with more specific aggregation
         const requests = [];
@@ -229,14 +216,7 @@ export async function GET(req) {
 
         // Execute all requests in parallel
         const responses = await Promise.all(requests);
-        console.log('Received responses:', responses.length);
 
-        // Log raw data for debugging
-        responses.forEach((response, index) => {
-            if (response?.data?.bucket) {
-                console.log(`Raw data for response ${index}:`, JSON.stringify(response.data, null, 2));
-            }
-        });
 
         // Process the responses into daily data
         const dailyData = [];
@@ -270,16 +250,7 @@ export async function GET(req) {
             const dateStr = new Date(parseInt(bucket.startTimeMillis)).toISOString().split('T')[0];
             if (dateMap.has(dateStr)) {
                 const points = bucket.dataset?.[0]?.point || [];
-                console.log(`Raw step data for ${dateStr}:`, {
-                    startTime: new Date(parseInt(bucket.startTimeMillis)).toISOString(),
-                    endTime: new Date(parseInt(bucket.endTimeMillis)).toISOString(),
-                    pointsCount: points.length,
-                    rawPoints: points.map(p => ({
-                        value: p.value?.[0]?.intVal,
-                        startTime: new Date(parseInt(p.startTimeNanos) / 1000000).toISOString(),
-                        endTime: new Date(parseInt(p.endTimeNanos) / 1000000).toISOString()
-                    }))
-                });
+               
                 
                 // Sum up all step counts for the day
                 const totalSteps = points.reduce((sum, point) => {
@@ -288,7 +259,6 @@ export async function GET(req) {
                 }, 0);
                 
                 if (totalSteps > 0) {
-                    console.log(`Total steps for ${dateStr}: ${totalSteps}`);
                     const dayData = dateMap.get(dateStr);
                     // Only update if the new total is higher than the existing one
                     if (totalSteps > dayData.steps) {
@@ -313,7 +283,6 @@ export async function GET(req) {
                 }, 0);
                 
                 if (totalDistance > 0) {
-                    console.log(`Distance for ${dateStr}: ${totalDistance} km`);
                     dateMap.get(dateStr).distance = Number(totalDistance.toFixed(2));
                 }
             }
@@ -326,7 +295,6 @@ export async function GET(req) {
                 const points = bucket.dataset?.[0]?.point || [];
                 const totalMinutes = points.reduce((sum, point) => sum + (point.value?.[0]?.intVal || 0), 0);
                 if (totalMinutes > 0) {
-                    console.log(`Active minutes for ${dateStr}: ${totalMinutes}`);
                     dateMap.get(dateStr).activeMinutes = totalMinutes;
                 }
             }

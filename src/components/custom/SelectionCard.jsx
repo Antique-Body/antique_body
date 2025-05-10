@@ -3,6 +3,7 @@
 import { Icon } from '@iconify/react';
 import { motion } from 'framer-motion';
 import { useTranslation } from "react-i18next";
+
 import { Card } from "..";
 
 export const SelectionCard = ({
@@ -20,7 +21,6 @@ export const SelectionCard = ({
     accentColor = "#FF7800",
     iconSize = "48",
     animateSelection = true,
-    glassEffect = false,
     cardStyle = "default", // default, premium, minimal, gradient
     customGradient = "",
     showBadge = false,

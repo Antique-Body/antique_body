@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+
 import MuscleGroupSelector from "./MuscleGroupSelector";
 import RecommendedProgram from "./RecommendedProgram";
 import WorkoutPlans from "./WorkoutPlans";
@@ -1047,7 +1048,7 @@ export default function WorkoutDashboard() {
       {renderWorkoutDetails()}
 
       {/* Global CSS for animations */}
-      <style jsx global>{`
+      <style jsx>{`
         @keyframes fadeIn {
           from {
             opacity: 0;

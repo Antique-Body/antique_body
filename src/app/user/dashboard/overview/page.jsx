@@ -1,7 +1,9 @@
 "use client";
-import { useState } from "react";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 
 export default function OverviewPage() {
     const { data: session } = useSession();
@@ -135,7 +137,7 @@ export default function OverviewPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="md:col-span-1">
                             <div className="h-48 rounded-xl overflow-hidden">
-                                <img src={userStats.tailoredProgram.image} alt={userStats.tailoredProgram.title} className="w-full h-full object-cover" />
+                                <Image src={userStats.tailoredProgram.image} alt={userStats.tailoredProgram.title} className="w-full h-full object-cover" />
                             </div>
                             <div className="mt-4 space-y-3">
                                 <div className="flex justify-between items-center">

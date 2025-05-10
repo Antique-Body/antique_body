@@ -1,5 +1,5 @@
-import { google } from 'googleapis';
 import { PrismaClient } from '@prisma/client';
+import { google } from 'googleapis';
 
 const prisma = new PrismaClient();
 const oauth2Client = new google.auth.OAuth2(
@@ -10,13 +10,10 @@ const oauth2Client = new google.auth.OAuth2(
 
 export async function GET(request) {
     try {
-        console.log('Received Google Fit callback...');
         const searchParams = request.nextUrl.searchParams;
         const code = searchParams.get('code');
         const error = searchParams.get('error');
-        const scope = searchParams.get('scope');
 
-        console.log('Callback parameters:', { code: !!code, error, scope });
 
         // Check for OAuth errors
         if (error) {
@@ -34,12 +31,7 @@ export async function GET(request) {
         try {
             // Exchange the code for tokens
             const { tokens } = await oauth2Client.getToken(code);
-            console.log('Successfully obtained tokens:', {
-                hasAccessToken: !!tokens.access_token,
-                hasRefreshToken: !!tokens.refresh_token,
-                expiresAt: tokens.expiry_date,
-                scope: tokens.scope
-            });
+      
 
             // Get user profile information
             oauth2Client.setCredentials(tokens);
@@ -79,13 +71,6 @@ export async function GET(request) {
                 }
             });
 
-            console.log('Successfully created new Google Fit account:', {
-                id: account.id,
-                providerAccountId: account.providerAccountId,
-                hasAccessToken: !!account.access_token,
-                hasRefreshToken: !!account.refresh_token,
-                expiresAt: account.expires_at
-            });
 
             // Verify the account was created
             const verifyAccount = await prisma.googleFitAccount.findUnique({
@@ -96,11 +81,7 @@ export async function GET(request) {
                 throw new Error('Failed to verify account creation');
             }
 
-            console.log('Verified account exists:', {
-                id: verifyAccount.id,
-                providerAccountId: verifyAccount.providerAccountId
-            });
-
+        
             // Redirect to the health dashboard with success message
             return Response.redirect(new URL('/client/dashboard/health?success=true', request.url));
         } catch (tokenError) {

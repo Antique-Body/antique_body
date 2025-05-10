@@ -1,20 +1,10 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+
 import "./EffectBackground.css";
 
-import {
-  ColosseumIcon,
-  ColumnIcon,
-  DiscusIcon,
-  ParthenonIcon,
-  RunnerIcon,
-  VaseIcon,
-} from "@/components/common/Icons";
 
-export const EffectBackground = () => {
-  return (
+export const EffectBackground = () => (
     <div className="home-background-container">
       {/* Gradient overlays */}
       <div className="gradient-overlay top-gradient"></div>
@@ -30,61 +20,7 @@ export const EffectBackground = () => {
       </div>
 
       {/* Ancient icons with enhanced animations */}
-      <div className="ancient-elements visible">
-        <motion.div
-          className="ancient-building parthenon"
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 0.4, y: 0 }}
-          transition={{ duration: 1.5, delay: 0.1 }}
-          whileHover={{ scale: 1.05, opacity: 0.5 }}>
-          <ParthenonIcon className="w-full h-full" />
-        </motion.div>
-
-        <motion.div
-          className="olympian runner"
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 0.4, x: 0 }}
-          transition={{ duration: 1.5, delay: 0.3 }}
-          whileHover={{ scale: 1.05, opacity: 0.5 }}>
-          <RunnerIcon className="w-full h-full" />
-        </motion.div>
-
-        <motion.div
-          className="olympian discus"
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 0.4, x: 0 }}
-          transition={{ duration: 1.5, delay: 0.5 }}
-          whileHover={{ scale: 1.05, opacity: 0.5 }}>
-          <DiscusIcon className="w-full h-full" />
-        </motion.div>
-
-        <motion.div
-          className="ancient-building colosseum"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 0.4, y: 0 }}
-          transition={{ duration: 1.5, delay: 0.2 }}
-          whileHover={{ scale: 1.05, opacity: 0.5 }}>
-          <ColosseumIcon className="w-full h-full" />
-        </motion.div>
-
-        <motion.div
-          className="ancient-building column"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 0.4, y: 0 }}
-          transition={{ duration: 1.5, delay: 0.4 }}
-          whileHover={{ scale: 1.05, opacity: 0.5 }}>
-          <ColumnIcon className="w-full h-full" />
-        </motion.div>
-
-        <motion.div
-          className="ancient-building vase"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 0.4, y: 0 }}
-          transition={{ duration: 1.5, delay: 0.6 }}
-          whileHover={{ scale: 1.05, opacity: 0.5 }}>
-          <VaseIcon className="w-full h-full" />
-        </motion.div>
-      </div>
+   
 
       {/* Floating elements */}
       <div className="floating-elements">
@@ -147,4 +83,3 @@ export const EffectBackground = () => {
       </div>
     </div>
   );
-};

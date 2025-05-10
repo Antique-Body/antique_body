@@ -1,30 +1,8 @@
 "use client";
 import { useState } from "react";
-import DeviceIntegration from "./DeviceIntegration";
 
-// Custom CSS with keyframe animations
-const animationStyles = {
-  "@keyframes fadeIn": {
-    "0%": {
-      opacity: 0.5,
-      transform: "translateY(10px)",
-    },
-    "100%": {
-      opacity: 1,
-      transform: "translateY(0)",
-    },
-  },
-  ".animate-fadeIn": {
-    animation: "fadeIn 0.3s ease-out forwards",
-  },
-  ".scrollbar-hide": {
-    scrollbarWidth: "none",
-    msOverflowStyle: "none",
-    "&::-webkit-scrollbar": {
-      display: "none",
-    },
-  },
-};
+
+
 
 const ProgressDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -448,7 +426,7 @@ const ProgressDashboard = () => {
               <h3 className="text-xl font-bold mb-6">Body Measurements</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {Object.entries(progressData.bodyMeasurements).map(
-                  ([measurement, values], index) => (
+                  ([measurement, values], ) => (
                     <div key={measurement} className="space-y-3">
                       <div className="flex justify-between items-center">
                         <h4 className="font-medium capitalize">

@@ -1,8 +1,9 @@
 "use client";
 
-import { Card } from "@/components/custom/Card";
 import Image from "next/image";
 import { useEffect, useState } from 'react';
+
+import { Card } from "@/components/custom/Card";
 
 export const BodyMeasurementsVisual = ({ measurements, previousMeasurements = null, highlightedMeasurement = null }) => {
   const [animatingPart, setAnimatingPart] = useState(null);
@@ -35,7 +36,6 @@ export const BodyMeasurementsVisual = ({ measurements, previousMeasurements = nu
 
   // Get highlighted status
   const isHighlighted = (part) => part === highlightedMeasurement;
-  const isAnimating = (part) => part === animatingPart;
 
   // Create an array of all measurements for easy display
   const measurementDetails = [

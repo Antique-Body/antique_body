@@ -1,14 +1,5 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { Icon } from "@iconify/react";
-
-import { TOTAL_STEPS, stepConfig } from "@/app/utils";
-import { useWorkoutForm } from "@/hooks/useWorkoutForm";
-import { EffectBackground } from "@/components/background";
 import { ProgressBar, TrainerIcon } from "@components/common";
 import {
   BrandLogo,
@@ -20,6 +11,16 @@ import {
   SelectionCard,
   StepContainer,
 } from "@components/custom";
+import { Icon } from "@iconify/react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import { TOTAL_STEPS, stepConfig } from "@/app/utils";
+import { EffectBackground } from "@/components/background";
+import { useWorkoutForm } from "@/hooks/useWorkoutForm";
+
 
 // Constants
 const MEASUREMENT_CONSTRAINTS = {
@@ -32,7 +33,7 @@ const MEASUREMENT_CONSTRAINTS = {
 const TrainingSetup = () => {
   const { t } = useTranslation();
   const router = useRouter();
-  const { data: session, update } = useSession();
+  const {  update } = useSession();
   const {
     currentStep,
     userSelections,
@@ -216,9 +217,7 @@ const TrainingSetup = () => {
     }
   }, [saveUserData, router, t]);
 
-  const areMeasurementsValid = useCallback(() => {
-    return currentStep !== 9 || userSelections.measurements?.isValid === true;
-  }, [currentStep, userSelections.measurements]);
+  const areMeasurementsValid = useCallback(() => currentStep !== 9 || userSelections.measurements?.isValid === true, [currentStep, userSelections.measurements]);
 
   // Render functions
   const renderStepContent = useCallback(
@@ -292,8 +291,7 @@ const TrainingSetup = () => {
     );
   };
 
-  const renderLoadingState = () => {
-    return (
+  const renderLoadingState = () => (
       <div className="min-h-screen  flex items-center justify-center">
         <div className="text-white text-center">
           <div className="mb-4 flex flex-col items-center">
@@ -310,7 +308,6 @@ const TrainingSetup = () => {
         </div>
       </div>
     );
-  };
 
   // Show loading indicator while saving or redirecting
   if (isSaving || isRedirecting) {
