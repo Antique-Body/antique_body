@@ -1,8 +1,8 @@
 "use client";
 
 import "@mdi/font/css/materialdesignicons.css";
-import { SessionProvider } from "next-auth/react";
 import { Inter } from "next/font/google";
+import { SessionProvider } from "next-auth/react";
 
 import AuthProvider from "../components/auth/AuthProvider";
 import I18nProvider from "../components/I18nProvider";

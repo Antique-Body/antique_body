@@ -6,7 +6,7 @@ import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { DragIcon, PlusIcon, TrashIcon } from "@/components/common/Icons";
 
-export const SessionExercises = ({ sessionExercises, updateSessionExercises, exerciseLibrary }) => {
+export const SessionExercises = ({ sessionExercises, updateSessionExercises }) => {
     const [newExercise, setNewExercise] = useState({
         name: "",
         sets: "",

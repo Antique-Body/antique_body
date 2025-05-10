@@ -1,9 +1,9 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -69,8 +69,6 @@ const containerVariants = {
         },
     },
 };
-
-
 
 // Help text component with sleek design
 const HelpText = () => {
@@ -179,7 +177,7 @@ const RoleOption = ({ role, config, isSelected, onClick, loading }) => {
 
         // Role-specific enhancements
         if (role === "trainer") {
-            const [fromColor, toColor] = "rgba(40,20,10,0.8),rgba(30,15,5,0.8)".split(',');
+            const [fromColor, toColor] = "rgba(40,20,10,0.8),rgba(30,15,5,0.8)".split(",");
             styleProps = {
                 ...styleProps,
                 bgGradientFrom: fromColor,
@@ -260,7 +258,7 @@ const RoleOption = ({ role, config, isSelected, onClick, loading }) => {
                     </div>
 
                     {isSelected && (
-                        <motion.div 
+                        <motion.div
                             className="bg-white/20 backdrop-blur-sm rounded-full p-1.5 ml-auto"
                             initial={{ scale: 0, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
@@ -279,10 +277,7 @@ const RoleOption = ({ role, config, isSelected, onClick, loading }) => {
                 <div className="space-y-2 mb-4">
                     {config.features.map((feature, idx) => (
                         <div key={idx} className="flex items-center gap-2 text-xs sm:text-sm text-gray-300">
-                            <span 
-                                className={`mdi ${feature.icon} text-base sm:text-lg`} 
-                                style={{ color: config.color }}
-                            ></span>
+                            <span className={`mdi ${feature.icon} text-base sm:text-lg`} style={{ color: config.color }}></span>
                             <span>{t(feature.text)}</span>
                         </div>
                     ))}

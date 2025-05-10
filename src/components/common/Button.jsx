@@ -18,48 +18,56 @@ export const Button = ({
 }) => {
     // Base styles applied to all buttons
     const baseStyles =
-        "font-medium cursor-pointer transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl relative";
+        "font-medium cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg relative focus:outline-none focus:ring-2 focus:ring-[#FF7800]/30";
 
-    // Size variations
+    // Size variations - adjusted for better proportions
     const sizes = {
-        small: "px-3 py-1.5 text-sm",
-        default: "px-6 py-2.5",
-        large: "px-8 py-3 text-lg",
-        compact: "min-w-[60px] h-[42px] px-3 py-2 text-sm",
+        small: "px-3 py-1.5 text-xs",
+        default: "px-4 py-2 text-sm",
+        large: "px-6 py-2.5 text-base",
+        compact: "min-w-[50px] h-[36px] px-2.5 py-1.5 text-xs",
     };
 
-    // Style variations
+    // Style variations - enhanced with improved gradients and transitions
     const variants = {
-        // Main variants
-        primary: "bg-gradient-to-r from-[#FF7800] to-[#FF5F00] text-white hover:from-[#FF5F00] hover:to-[#FF7800] hover:shadow-lg hover:shadow-[#FF7800]/20 transform hover:-translate-y-[2px]",
-        secondary: "bg-[#1A1A1A] text-white border border-[#333] hover:border-[#FF7800] transform hover:-translate-y-[2px] hover:shadow-md",
-        outline: "border border-[#FF7800] text-[#FF7800] hover:bg-[rgba(255,107,0,0.15)] transform hover:-translate-y-[2px]",
+        // Main variants with refined styles
+        primary:
+            "bg-gradient-to-r from-[#FF7800] to-[#FF5F00] text-white hover:from-[#FF5F00] hover:to-[#FF7800] hover:shadow-md hover:shadow-[#FF7800]/20 transform hover:-translate-y-[1px]",
+        secondary:
+            "bg-[#242424] text-white border border-[#333] hover:border-[#FF7800] transform hover:-translate-y-[1px] hover:shadow-sm",
+        outline:
+            "border border-[#FF7800] text-[#FF7800] bg-[rgba(255,107,0,0.07)] hover:bg-[rgba(255,107,0,0.15)] transform hover:-translate-y-[1px]",
 
         // Modal variants
-        modalCancel: "bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-600 text-zinc-300 transform hover:-translate-y-[2px]",
-        modalConfirm: "bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20 transform hover:-translate-y-[2px]",
+        modalCancel:
+            "bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-600 text-zinc-300 transform hover:-translate-y-[1px]",
+        modalConfirm:
+            "bg-orange-500 hover:bg-orange-600 text-white shadow shadow-orange-500/20 transform hover:-translate-y-[1px]",
 
-        // Nutrition page variants
+        // Nutrition page variants - improved contrast and transitions
         orangeOutline:
-            "bg-[rgba(255,107,0,0.15)] border border-[rgba(255,107,0,0.3)] text-[#FF6B00] hover:bg-[rgba(255,107,0,0.25)] hover:text-[#FF9A00] transform hover:-translate-y-[2px]",
-        orangeFilled: "bg-[#FF6B00] text-white hover:bg-[#FF9A00] transform hover:-translate-y-[2px] hover:shadow-md hover:shadow-[#FF7800]/20",
-        compactOrange: "bg-[#FF6B00] text-white hover:bg-[#FF9A00] text-xs font-medium transform hover:-translate-y-[2px]",
+            "bg-[rgba(255,107,0,0.07)] border border-[rgba(255,107,0,0.3)] text-[#FF6B00] hover:bg-[rgba(255,107,0,0.15)] hover:text-[#FF9A00] transform hover:-translate-y-[1px]",
+        outlineOrange:
+            "bg-[rgba(255,107,0,0.07)] border border-[rgba(255,107,0,0.3)] text-[#FF6B00] hover:bg-[rgba(255,107,0,0.15)] hover:text-[#FF9A00] transform hover:-translate-y-[1px]",
+        orangeFilled:
+            "bg-[#FF6B00] text-white hover:bg-[#FF9A00] transform hover:-translate-y-[1px] hover:shadow-sm hover:shadow-[#FF7800]/20",
+        compactOrange: "bg-[#FF6B00] text-white hover:bg-[#FF9A00] text-xs font-medium transform hover:-translate-y-[1px]",
         orangeText: "text-[#FF6B00] hover:text-[#FF9A00] bg-transparent hover:bg-transparent p-0",
 
         // Water tracker variants
         blueOutline:
-            "bg-[rgba(0,149,255,0.15)] border border-[rgba(0,149,255,0.3)] text-blue-400 hover:bg-[rgba(0,149,255,0.25)] transform hover:-translate-y-[2px]",
+            "bg-[rgba(0,149,255,0.07)] border border-[rgba(0,149,255,0.3)] text-blue-400 hover:bg-[rgba(0,149,255,0.15)] transform hover:-translate-y-[1px]",
 
-        // Dashboard variants
-        ghost: "text-gray-400 hover:text-white hover:bg-[#333] bg-transparent",
-        ghostOrange: "text-[#FF6B00] hover:text-[#FF9A00] hover:bg-transparent bg-transparent",
-        subtle: "text-white/80 hover:text-white border border-[#444] hover:border-[#666] transform hover:-translate-y-[2px]",
+        // Dashboard variants - improved visibility and interaction states
+        ghost: "text-gray-400 hover:text-white hover:bg-[#2a2a2a] bg-transparent",
+        ghostOrange: "text-[#FF6B00] hover:text-[#FF9A00] hover:bg-[rgba(255,107,0,0.07)] bg-transparent",
+        subtle: "text-white/80 hover:text-white border border-[#444] hover:border-[#666] transform hover:-translate-y-[1px]",
 
         // Tab variants
-        tab: "py-3 px-4 font-medium text-sm border-b-2 whitespace-nowrap bg-transparent rounded-none",
+        tab: "py-2 px-3 font-medium text-sm border-b-2 whitespace-nowrap bg-transparent rounded-none",
     };
 
-    const contentClasses = "flex items-center justify-center gap-2";
+    const contentClasses = "flex items-center justify-center gap-1.5";
 
     return (
         <button
@@ -84,10 +92,10 @@ export const Button = ({
                 {rightIcon && <span className="flex-shrink-0">{rightIcon}</span>}
             </div>
 
-            {/* Loading spinner overlay */}
+            {/* Loading spinner overlay - refined spinner */}
             {loading && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                 </div>
             )}
         </button>

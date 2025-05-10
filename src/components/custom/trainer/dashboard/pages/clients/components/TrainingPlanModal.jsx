@@ -299,23 +299,34 @@ export const TrainingPlanModal = ({ isOpen, onClose, onAssignPlan, client, exist
                                                     >
                                                         <div className="flex items-center justify-between">
                                                             <div className="font-medium text-white">Day {day.day}</div>
-                                                            <div className="rounded-full bg-[#222] px-2 py-0.5 text-xs text-gray-400">
-                                                                {day.exercises.length} exercises
-                                                            </div>
-                                                        </div>
-                                                        <div className="mt-1 text-sm text-gray-300">{day.focus}</div>
-                                                        <div className="mt-2">
-                                                            {day.exercises.slice(0, 3).map((ex, idx) => (
-                                                                <div key={idx} className="text-xs text-gray-400">
-                                                                    • {ex.name}
-                                                                </div>
-                                                            ))}
-                                                            {day.exercises.length > 3 && (
-                                                                <div className="text-xs text-gray-500">
-                                                                    + {day.exercises.length - 3} more
+                                                            {day.exercises && (
+                                                                <div className="rounded-full bg-[#222] px-2 py-0.5 text-xs text-gray-400">
+                                                                    {day.exercises.length} exercises
                                                                 </div>
                                                             )}
                                                         </div>
+                                                        <div className="mt-1 text-sm text-gray-300">{day.focus}</div>
+                                                        {day.exercises && (
+                                                            <div className="mt-2">
+                                                                {day.exercises.slice(0, 3).map((ex, idx) => (
+                                                                    <div key={idx} className="text-xs text-gray-400">
+                                                                        • {ex.name}
+                                                                    </div>
+                                                                ))}
+                                                                {day.exercises.length > 3 && (
+                                                                    <div className="text-xs text-gray-500">
+                                                                        + {day.exercises.length - 3} more
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        {day.type && !day.exercises && (
+                                                            <div className="mt-2 text-xs text-gray-400">
+                                                                <span className="rounded-full bg-[#333] px-2 py-0.5">
+                                                                    {day.type}
+                                                                </span>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 ))}
                                         </div>
@@ -327,41 +338,54 @@ export const TrainingPlanModal = ({ isOpen, onClose, onAssignPlan, client, exist
                                             <span className="font-medium text-white">Nutrition Guide</span>
                                         </div>
                                         <div className="rounded-md border border-[#444] bg-[rgba(20,20,20,0.3)] p-3">
-                                            <div className="mb-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                                                <div className="rounded-md bg-[rgba(30,30,30,0.6)] p-2 text-center">
-                                                    <div className="text-xs text-gray-400">Calories</div>
-                                                    <div className="text-sm font-medium text-white">
-                                                        {
-                                                            mockPlans.find((p) => p.id === selectedPlanId)?.nutrition
-                                                                .dailyCalories
-                                                        }
+                                            {mockPlans.find((p) => p.id === selectedPlanId)?.nutrition ? (
+                                                <>
+                                                    <div className="mb-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                                                        <div className="rounded-md bg-[rgba(30,30,30,0.6)] p-2 text-center">
+                                                            <div className="text-xs text-gray-400">Calories</div>
+                                                            <div className="text-sm font-medium text-white">
+                                                                {mockPlans.find((p) => p.id === selectedPlanId)?.nutrition
+                                                                    ?.dailyCalories || "N/A"}
+                                                            </div>
+                                                        </div>
+                                                        <div className="rounded-md bg-[rgba(30,30,30,0.6)] p-2 text-center">
+                                                            <div className="text-xs text-gray-400">Protein</div>
+                                                            <div className="text-sm font-medium text-white">
+                                                                {mockPlans.find((p) => p.id === selectedPlanId)?.nutrition
+                                                                    ?.macros?.protein || "N/A"}
+                                                            </div>
+                                                        </div>
+                                                        <div className="rounded-md bg-[rgba(30,30,30,0.6)] p-2 text-center">
+                                                            <div className="text-xs text-gray-400">Carbs</div>
+                                                            <div className="text-sm font-medium text-white">
+                                                                {mockPlans.find((p) => p.id === selectedPlanId)?.nutrition
+                                                                    ?.macros?.carbs || "N/A"}
+                                                            </div>
+                                                        </div>
+                                                        <div className="rounded-md bg-[rgba(30,30,30,0.6)] p-2 text-center">
+                                                            <div className="text-xs text-gray-400">Fats</div>
+                                                            <div className="text-sm font-medium text-white">
+                                                                {mockPlans.find((p) => p.id === selectedPlanId)?.nutrition
+                                                                    ?.macros?.fats || "N/A"}
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div className="rounded-md bg-[rgba(30,30,30,0.6)] p-2 text-center">
-                                                    <div className="text-xs text-gray-400">Protein</div>
-                                                    <div className="text-sm font-medium text-white">
-                                                        {
-                                                            mockPlans.find((p) => p.id === selectedPlanId)?.nutrition.macros
-                                                                .protein
-                                                        }
+                                                    <div className="mt-2 text-sm text-gray-300">
+                                                        {mockPlans.find((p) => p.id === selectedPlanId)?.nutrition?.mealPlan ||
+                                                            "No specific meal plan provided."}
                                                     </div>
+                                                </>
+                                            ) : (
+                                                <div className="text-center py-2">
+                                                    <p className="text-sm text-gray-400">
+                                                        No nutrition information available for this plan.
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        You can assign a nutrition plan separately or create a custom plan with
+                                                        nutrition details.
+                                                    </p>
                                                 </div>
-                                                <div className="rounded-md bg-[rgba(30,30,30,0.6)] p-2 text-center">
-                                                    <div className="text-xs text-gray-400">Carbs</div>
-                                                    <div className="text-sm font-medium text-white">
-                                                        {mockPlans.find((p) => p.id === selectedPlanId)?.nutrition.macros.carbs}
-                                                    </div>
-                                                </div>
-                                                <div className="rounded-md bg-[rgba(30,30,30,0.6)] p-2 text-center">
-                                                    <div className="text-xs text-gray-400">Fats</div>
-                                                    <div className="text-sm font-medium text-white">
-                                                        {mockPlans.find((p) => p.id === selectedPlanId)?.nutrition.macros.fats}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="mt-2 text-sm text-gray-300">
-                                                {mockPlans.find((p) => p.id === selectedPlanId)?.nutrition.mealPlan}
-                                            </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

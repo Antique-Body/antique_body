@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 import { Button } from "@/components/common/Button";
 
@@ -13,7 +13,7 @@ export const EnhancedTrainerScroll = ({ trainers }) => {
     const [canScrollRight, setCanScrollRight] = useState(true);
 
     // Function to check if scrolling is possible and update visible index
-    const checkScrollPosition = () => {
+    const checkScrollPosition = useCallback(() => {
         if (scrollContainerRef.current) {
             const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
 
@@ -27,7 +27,7 @@ export const EnhancedTrainerScroll = ({ trainers }) => {
             const newVisibleIndex = Math.min(Math.floor(centerPosition / cardWidth), trainers.length - 1);
             setVisibleIndex(Math.max(0, newVisibleIndex));
         }
-    };
+    }, [trainers.length]);
 
     // Set up scroll event listener
     useEffect(() => {
@@ -41,7 +41,7 @@ export const EnhancedTrainerScroll = ({ trainers }) => {
                 scrollContainer.removeEventListener("scroll", checkScrollPosition);
             };
         }
-    }, [trainers.length]);
+    }, [checkScrollPosition]);
 
     const scrollToCard = (index) => {
         if (scrollContainerRef.current) {

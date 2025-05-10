@@ -1,11 +1,12 @@
 "use client";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+
 import { EffectBackground } from "@/components/background";
 import { DashboardTabs } from "@/components/custom";
 import { BrandLogo } from "@/components/custom/BrandLogo";
-import { useSession } from "next-auth/react";
-import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function UserDashboardLayout({ children }) {
   const router = useRouter();

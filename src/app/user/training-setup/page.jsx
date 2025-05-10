@@ -12,8 +12,8 @@ import {
   StepContainer,
 } from "@components/custom";
 import { Icon } from "@iconify/react";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 

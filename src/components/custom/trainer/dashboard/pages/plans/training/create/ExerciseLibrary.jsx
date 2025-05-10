@@ -11,7 +11,7 @@ import { Card } from "@/components/custom/Card";
 // Mock exercise categories for demonstration
 const EXERCISE_CATEGORIES = ["All", "Strength", "Cardio", "Flexibility", "Balance", "Core", "Upper Body", "Lower Body"];
 
-export const ExerciseLibrary = ({  updateExerciseLibrary }) => {
+export const ExerciseLibrary = ({ updateExerciseLibrary, exerciseLibrary = [] }) => {
     const [activeCategory, setActiveCategory] = useState("All");
     const [searchTerm, setSearchTerm] = useState("");
     const [newExercise, setNewExercise] = useState({
@@ -55,7 +55,7 @@ export const ExerciseLibrary = ({  updateExerciseLibrary }) => {
                 image: previewImage || null,
             };
 
-            updateExerciseLibrary([...exerciseLibrary, exercise]);
+            updateExerciseLibrary([exercise]);
 
             // Reset form
             setNewExercise({

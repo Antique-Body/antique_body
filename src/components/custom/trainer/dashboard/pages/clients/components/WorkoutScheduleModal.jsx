@@ -124,12 +124,14 @@ export const WorkoutScheduleModal = ({ isOpen, onClose, onScheduleWorkout, exist
         // Extract all exercises from the client's assigned plan
         const suggestions = [];
         existingPlan.days.forEach((day) => {
-            day.exercises.forEach((exercise) => {
-                suggestions.push({
-                    name: exercise.name,
-                    planned: `${exercise.sets} sets × ${exercise.reps}`,
+            if (day.exercises) {
+                day.exercises.forEach((exercise) => {
+                    suggestions.push({
+                        name: exercise.name,
+                        planned: `${exercise.sets} sets × ${exercise.reps}`,
+                    });
                 });
-            });
+            }
         });
 
         return suggestions;
@@ -233,7 +235,7 @@ export const WorkoutScheduleModal = ({ isOpen, onClose, onScheduleWorkout, exist
                         <WorkoutIcon size={18} stroke="#FF6B00" className="mr-2" />
                         <span className="font-medium text-white">Exercises</span>
                         <Button
-                            variant="outlineOrange"
+                            variant="outlineLight"
                             size="xs"
                             leftIcon={<PlusIcon size={14} />}
                             onClick={handleAddExercise}

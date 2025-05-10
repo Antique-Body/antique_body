@@ -102,14 +102,18 @@ export const Modal = memo(
 
                     {/* Footer with action buttons */}
                     {footerButtons && (
-                        <div className={`${footerBorder ? "border-t border-[#333]" : ""} p-4 sm:p-5 flex justify-end gap-2 bg-[#121212]/95`}>
-                            <Button
-                                variant="secondary"
-                                onClick={secondaryButtonAction || onClose}
-                                className="cursor-pointer rounded-lg px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base font-medium transition-all duration-300"
-                            >
-                                {secondaryButtonText || cancelButtonText}
-                            </Button>
+                        <div
+                            className={`${footerBorder ? "border-t border-[#333]" : ""} p-4 sm:p-5 flex justify-end gap-2 bg-[#121212]/95`}
+                        >
+                            {secondaryButtonText && (
+                                <Button
+                                    variant="secondary"
+                                    onClick={secondaryButtonAction || onClose}
+                                    className="cursor-pointer rounded-lg px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base font-medium transition-all duration-300"
+                                >
+                                    {secondaryButtonText || cancelButtonText}
+                                </Button>
+                            )}
 
                             <Button
                                 variant="orangeFilled"

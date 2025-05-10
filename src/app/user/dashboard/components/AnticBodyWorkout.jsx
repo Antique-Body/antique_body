@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-const AnticBodyWorkout = ({ workout, onComplete, onCancel }) => {
+const AnticBodyWorkout = ({ workout, onComplete }) => {
   const [timer, setTimer] = useState("01:00");
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [exercises, setExercises] = useState([]);

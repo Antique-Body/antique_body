@@ -1,7 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
-
 import { BrandLogo } from "..";
 import "../components.scss";
 
@@ -9,7 +7,7 @@ export const Card = ({
     children,
     topBorderColor,
     width = "90%",
-    maxWidth = "500px",
+    maxWidth,
     padding = "30px 30px",
     bgGradientFrom = "#0f0f0f",
     bgGradientTo = "#1a1a1a",
@@ -48,39 +46,57 @@ export const Card = ({
 }) => {
     // Remove any remaining custom props that shouldn't go to DOM
     const { accentColor: _, ...finalProps } = otherProps;
-    
+
     // Set styles based on variant
     let variantClassName = "";
-    
+
     // Animation variants
     const animationVariants = {
         fadeIn: {
             hidden: { opacity: 0 },
-            visible: { opacity: 1, transition: { duration: 0.5 } }
+            visible: { opacity: 1, transition: { duration: 0.5 } },
         },
         slideUp: {
             hidden: { opacity: 0, y: 20 },
-            visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+            visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
         },
         slideIn: {
             hidden: { opacity: 0, x: -20 },
-            visible: { opacity: 1, x: 0, transition: { duration: 0.5 } }
+            visible: { opacity: 1, x: 0, transition: { duration: 0.5 } },
         },
         scale: {
             hidden: { opacity: 0, scale: 0.9 },
-            visible: { opacity: 1, scale: 1, transition: { duration: 0.5 } }
+            visible: { opacity: 1, scale: 1, transition: { duration: 0.5 } },
         },
         pulse: {
             hidden: { opacity: 0 },
-            visible: { 
-                opacity: 1, 
+            visible: {
+                opacity: 1,
                 transition: { duration: 0.5 },
-                boxShadow: `0 0 20px rgba(255,120,0,${glowIntensity})`
-            }
-        }
+                boxShadow: `0 0 20px rgba(255,120,0,${glowIntensity})`,
+            },
+        },
     };
 
-    if (variant === "darkStrong") {
+    if (variant === "clientCard") {
+        // Client card styling
+        borderColor = "#2a2a2a";
+        bgGradientFrom = "rgba(17,17,17,0.8)";
+        bgGradientTo = "rgba(24,24,24,0.9)";
+        borderTop = false;
+        padding = "12px"; // No padding to allow for custom inner layout
+        borderRadius = "14px";
+        shadow = "0 8px 16px rgba(0,0,0,0.2)";
+        variantClassName = "z-20 backdrop-blur-sm transition-all duration-300";
+
+        // Apply hover effects if hover prop is true
+        if (hover) {
+            hoverBorderColor = hoverBorderColor || "#FF6B00";
+            hoverShadow = hoverShadow || "0 12px 24px rgba(0,0,0,0.3), 0 6px 12px rgba(255,107,0,0.1)";
+            hoverBgGradientFrom = "rgba(22,22,22,0.9)";
+            hoverBgGradientTo = "rgba(28,28,28,0.95)";
+        }
+    } else if (variant === "darkStrong") {
         // Base dashboard styling
         borderColor = "#222";
         bgGradientFrom = "rgba(20,20,20,0.95)";
@@ -190,7 +206,7 @@ export const Card = ({
         bgGradientFrom = "rgba(18,18,18,0.95)";
         bgGradientTo = "rgba(24,24,24,0.95)";
         variantClassName = "backdrop-blur-sm";
-        
+
         if (hover) {
             hoverTranslateY = "-3px";
             hoverBorderColor = "#FF7800";
@@ -207,34 +223,38 @@ export const Card = ({
         hoverShadow = "0 15px 30px -10px rgba(255,107,0,0.2)";
         variantClassName += " transition-all duration-300 ease-in-out";
     }
-    
+
     // Add backdrop blur class if specified
     if (backdropBlur) {
         variantClassName += ` backdrop-blur-${backdropBlur}`;
     }
-    
+
     // Add glow effect class if specified
-    const glowStyles = glowEffect ? {
-        boxShadow: `0 0 20px ${glowColor}`,
-    } : {};
+    const glowStyles = glowEffect
+        ? {
+              boxShadow: `0 0 20px ${glowColor}`,
+          }
+        : {};
 
     // Calculate the Card component based on animation settings
-    const CardComponent = animate ? motion.div : 'div';
-    
+
     // Set animation props
-    const animProps = animate ? {
-        initial: "hidden",
-        animate: "visible",
-        variants: animationVariants[animationVariant] || animationVariants.fadeIn
-    } : {};
+    const animProps = animate
+        ? {
+              initial: "hidden",
+              animate: "visible",
+              variants: animationVariants[animationVariant] || animationVariants.fadeIn,
+          }
+        : {};
 
     return (
-        <CardComponent
-            className={`relative z-10 flex flex-col ${variant?.startsWith("dark") ? "" : variant === "entityCard" ? "text-left" : variant === "planCard" || variant === "createPlanCard" ? "text-left" : "items-center text-center"} overflow-hidden ${variantClassName} ${className} min-h-max ${
+        <div
+            className={`relative z-10 flex flex-col ${variant?.startsWith("dark") ? "" : variant === "entityCard" ? "text-left" : variant === "planCard" || variant === "createPlanCard" || variant === "clientCard" ? "text-left" : "items-center text-center"} overflow-hidden ${variantClassName} ${className} min-h-max ${
                 hoverTranslateY ? `hover:translate-y-[${hoverTranslateY}]` : ""
             } transition-all duration-300`}
             style={{
                 width: width,
+                maxWidth: maxWidth,
                 padding: padding,
                 backgroundImage: `linear-gradient(to bottom right, ${bgGradientFrom}, ${bgGradientTo})`,
                 borderRadius: borderRadius,
@@ -246,7 +266,7 @@ export const Card = ({
                 "--hover-bg-to": hoverBgGradientTo || bgGradientTo,
                 "--hover-scale": hoverScale || "1",
                 transition: "all 0.3s ease",
-                ...glowStyles
+                ...glowStyles,
             }}
             onMouseEnter={(e) => {
                 if (hoverBorderColor) e.currentTarget.style.borderColor = hoverBorderColor;
@@ -258,7 +278,7 @@ export const Card = ({
                     e.currentTarget.style.transform = `translateY(${hoverTranslateY})`;
                 }
                 if (hoverScale) {
-                    e.currentTarget.style.transform = `scale(${hoverScale}) ${hoverTranslateY ? `translateY(${hoverTranslateY})` : ''}`;
+                    e.currentTarget.style.transform = `scale(${hoverScale}) ${hoverTranslateY ? `translateY(${hoverTranslateY})` : ""}`;
                 }
                 if (glowEffect) {
                     e.currentTarget.style.boxShadow = `0 0 30px ${glowColor}`;
@@ -268,7 +288,7 @@ export const Card = ({
                 e.currentTarget.style.borderColor = borderColor;
                 e.currentTarget.style.boxShadow = shadow;
                 e.currentTarget.style.backgroundImage = `linear-gradient(to bottom right, ${bgGradientFrom}, ${bgGradientTo})`;
-                e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                e.currentTarget.style.transform = "translateY(0) scale(1)";
                 if (glowEffect) {
                     e.currentTarget.style.boxShadow = `0 0 20px ${glowColor}`;
                 }
@@ -293,20 +313,28 @@ export const Card = ({
 
             {/* Add accent corner if enabled */}
             {accentCorner && (
-                <div className={`absolute ${accentCornerPosition === "top-right" ? "top-0 right-0" : 
-                                          accentCornerPosition === "top-left" ? "top-0 left-0" : 
-                                          accentCornerPosition === "bottom-right" ? "bottom-0 right-0" : 
-                                          "bottom-0 left-0"} w-20 h-20 overflow-hidden pointer-events-none`}>
-                    <div 
-                        className="absolute w-28 h-28 rotate-45 transform origin-top-left" 
+                <div
+                    className={`absolute ${
+                        accentCornerPosition === "top-right"
+                            ? "top-0 right-0"
+                            : accentCornerPosition === "top-left"
+                              ? "top-0 left-0"
+                              : accentCornerPosition === "bottom-right"
+                                ? "bottom-0 right-0"
+                                : "bottom-0 left-0"
+                    } w-20 h-20 overflow-hidden pointer-events-none`}
+                >
+                    <div
+                        className="absolute w-28 h-28 rotate-45 transform origin-top-left"
                         style={{
-                            background: typeof accentCornerColor === 'string' && accentCornerColor.includes('gradient') 
-                                ? accentCornerColor 
-                                : accentCornerColor,
-                            right: accentCornerPosition.includes('right') ? '-20px' : 'auto',
-                            left: accentCornerPosition.includes('left') ? '-20px' : 'auto',
-                            top: accentCornerPosition.includes('top') ? '-14px' : 'auto',
-                            bottom: accentCornerPosition.includes('bottom') ? '-14px' : 'auto',
+                            background:
+                                typeof accentCornerColor === "string" && accentCornerColor.includes("gradient")
+                                    ? accentCornerColor
+                                    : accentCornerColor,
+                            right: accentCornerPosition.includes("right") ? "-20px" : "auto",
+                            left: accentCornerPosition.includes("left") ? "-20px" : "auto",
+                            top: accentCornerPosition.includes("top") ? "-14px" : "auto",
+                            bottom: accentCornerPosition.includes("bottom") ? "-14px" : "auto",
                         }}
                     />
                 </div>
@@ -330,6 +358,6 @@ export const Card = ({
             ) : (
                 children
             )}
-        </CardComponent>
+        </div>
     );
 };

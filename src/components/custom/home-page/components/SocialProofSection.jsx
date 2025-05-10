@@ -13,7 +13,7 @@ export const SocialProofSection = () => {
         }, 7000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [testimonials.length]);
 
     // Testimonial data
     const testimonials = [
