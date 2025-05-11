@@ -93,7 +93,6 @@ const HelpText = () => {
                 title={t("role.selection.help_choosing")}
                 confirmButtonText={t("common.continue")}
                 confirmButtonColor="bg-[#ff7800] hover:bg-[#e66e00]"
-                size="small"
                 primaryButtonAction={() => setShowHelpModal(false)}
             >
                 <div className="py-3">
@@ -177,7 +176,7 @@ const RoleOption = ({ role, config, isSelected, onClick, loading }) => {
 
         // Role-specific enhancements
         if (role === "trainer") {
-            const [fromColor, toColor] = "rgba(40,20,10,0.8),rgba(30,15,5,0.8)".split(",");
+            const [fromColor, toColor] = "rgba(50,25,10,0.8),rgba(40,20,5,0.8)".split(",");
             styleProps = {
                 ...styleProps,
                 bgGradientFrom: fromColor,
@@ -185,18 +184,19 @@ const RoleOption = ({ role, config, isSelected, onClick, loading }) => {
                 animationVariant: "slideUp",
             };
         } else if (role === "client") {
+            const [fromColor, toColor] = "rgba(15,25,50,0.8),rgba(10,20,45,0.8)".split(",");
             styleProps = {
                 ...styleProps,
-                variant: "glass",
-                animationVariant: "slideIn",
+                bgGradientFrom: fromColor,
+                bgGradientTo: toColor,
+                animationVariant: "scale",
             };
         } else if (role === "user") {
+            const [fromColor, toColor] = "rgba(10,40,30,0.8),rgba(5,35,25,0.8)".split(",");
             styleProps = {
                 ...styleProps,
-                accentCorner: isSelected,
-                accentCornerPosition: "top-right",
-                accentCornerColor: config.color,
-                variant: "premium",
+                bgGradientFrom: fromColor,
+                bgGradientTo: toColor,
                 animationVariant: "scale",
             };
         }
@@ -206,7 +206,7 @@ const RoleOption = ({ role, config, isSelected, onClick, loading }) => {
 
     return (
         <Card
-            className={`relative overflow-hidden cursor-pointer h-full`}
+            className={`relative overflow-hidden cursor-pointer h-full flex flex-col`}
             borderTop={false}
             borderColor={isSelected ? config.color : "rgba(255,255,255,0.1)"}
             shadow={isSelected ? `0 0 20px ${config.color}30` : "0 5px 15px rgba(0,0,0,0.2)"}
@@ -248,7 +248,7 @@ const RoleOption = ({ role, config, isSelected, onClick, loading }) => {
             </div>
 
             {/* Content */}
-            <div className="relative z-30 p-4 sm:p-5 lg:p-6">
+            <div className="relative z-30 p-4 sm:p-5 lg:p-6 flex flex-col flex-grow">
                 {/* Role badge */}
                 <div className="flex items-center gap-3 mb-3 sm:mb-4">
                     <div
@@ -283,7 +283,7 @@ const RoleOption = ({ role, config, isSelected, onClick, loading }) => {
                     ))}
                 </div>
 
-                {/* Call to action button - responsive adjustments */}
+                {/* Call to action button - positioned at the bottom */}
                 <div className="mt-auto pt-2">
                     <button
                         className={`w-full py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg bg-gradient-to-r ${config.gradient} text-white text-sm sm:text-base font-medium transition-all hover:opacity-90 flex items-center justify-center gap-2`}
@@ -323,7 +323,6 @@ const RoleConfirmDialog = ({ isOpen, onClose, onConfirm, role }) => {
             confirmButtonText={t("common.continue")}
             cancelButtonText={t("common.back")}
             confirmButtonColor={`bg-[${config.color}] hover:opacity-90`}
-            size="small"
         >
             <div className="py-4 text-center">
                 <div className="flex flex-col items-center">

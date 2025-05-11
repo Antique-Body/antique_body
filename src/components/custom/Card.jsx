@@ -38,9 +38,6 @@ export const Card = ({
     backdropBlur = "",
     hoverScale = "",
     textGradient = false,
-    accentCorner = false,
-    accentCornerPosition = "top-right",
-    accentCornerColor = "#FF7800",
     // Remove these props from being passed to DOM
     ...otherProps
 }) => {
@@ -196,8 +193,6 @@ export const Card = ({
         padding = "24px";
         glowEffect = true;
         glowColor = "rgba(255,185,0,0.15)";
-        accentCorner = true;
-        accentCornerColor = "linear-gradient(135deg, #FFD700, #FFA500)";
         variantClassName = "relative overflow-hidden";
     } else {
         // Default card styling improvements
@@ -309,35 +304,6 @@ export const Card = ({
                         }, ${topBorderColor})`,
                     }}
                 ></div>
-            )}
-
-            {/* Add accent corner if enabled */}
-            {accentCorner && (
-                <div
-                    className={`absolute ${
-                        accentCornerPosition === "top-right"
-                            ? "top-0 right-0"
-                            : accentCornerPosition === "top-left"
-                              ? "top-0 left-0"
-                              : accentCornerPosition === "bottom-right"
-                                ? "bottom-0 right-0"
-                                : "bottom-0 left-0"
-                    } w-20 h-20 overflow-hidden pointer-events-none`}
-                >
-                    <div
-                        className="absolute w-28 h-28 rotate-45 transform origin-top-left"
-                        style={{
-                            background:
-                                typeof accentCornerColor === "string" && accentCornerColor.includes("gradient")
-                                    ? accentCornerColor
-                                    : accentCornerColor,
-                            right: accentCornerPosition.includes("right") ? "-20px" : "auto",
-                            left: accentCornerPosition.includes("left") ? "-20px" : "auto",
-                            top: accentCornerPosition.includes("top") ? "-14px" : "auto",
-                            bottom: accentCornerPosition.includes("bottom") ? "-14px" : "auto",
-                        }}
-                    />
-                </div>
             )}
 
             {/* Add left orange bar for trainer card variant */}
