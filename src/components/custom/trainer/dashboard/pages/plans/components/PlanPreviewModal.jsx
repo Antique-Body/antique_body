@@ -73,6 +73,7 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
 
             if (success) {
                 // You could add a toast notification here if you have a toast component
+                // eslint-disable-next-line no-console
                 console.log("PDF generated successfully");
             }
         } catch (error) {
@@ -185,7 +186,6 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
     );
 
     // Render daily schedule content based on plan type
-    console.log("weeklySchedule", weeklySchedule);
     const renderDailySchedule = () => {
         if (!weeklySchedule || !weeklySchedule[activeDay]) {
             return (

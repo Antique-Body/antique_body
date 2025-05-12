@@ -37,7 +37,7 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal = null, onSave 
 
         // Reset current mode when modal opens/closes
         setCurrentMode(mode);
-    }, [isOpen, meal, mode]);
+    }, [isOpen, meal, mode, defaultMeal]);
 
     if (!isOpen) return null;
 

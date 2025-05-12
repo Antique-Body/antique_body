@@ -13,11 +13,11 @@ import { Card } from "@/components/custom/Card";
 // Animation variants
 const cardVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-        opacity: 1, 
+    visible: {
+        opacity: 1,
         y: 0,
-        transition: { duration: 0.4 }
-    }
+        transition: { duration: 0.4 },
+    },
 };
 
 const containerVariants = {
@@ -25,9 +25,9 @@ const containerVariants = {
     visible: {
         opacity: 1,
         transition: {
-            staggerChildren: 0.1
-        }
-    }
+            staggerChildren: 0.1,
+        },
+    },
 };
 
 // Mock exercises data
@@ -38,13 +38,13 @@ const mockExercises = [
         sets: [
             { id: 1, weight: 80, reps: 12, completed: false },
             { id: 2, weight: 80, reps: 12, completed: false },
-            { id: 3, weight: 80, reps: 12, completed: false }
+            { id: 3, weight: 80, reps: 12, completed: false },
         ],
         notes: "Focus on form and depth",
         videoUrl: null,
         imageUrl: null,
         muscleGroup: "Legs",
-        backgroundImage: "https://cdn.mos.cms.futurecdn.net/4gmHkwb28RFFM2QKFBZHJ7.jpg"
+        backgroundImage: "https://cdn.mos.cms.futurecdn.net/4gmHkwb28RFFM2QKFBZHJ7.jpg",
     },
     {
         id: 2,
@@ -53,13 +53,14 @@ const mockExercises = [
             { id: 1, weight: 65, reps: 10, completed: false },
             { id: 2, weight: 65, reps: 10, completed: false },
             { id: 3, weight: 65, reps: 10, completed: false },
-            { id: 4, weight: 65, reps: 10, completed: false }
+            { id: 4, weight: 65, reps: 10, completed: false },
         ],
         notes: "Keep elbows at 45 degrees",
         videoUrl: null,
         imageUrl: null,
         muscleGroup: "Chest",
-        backgroundImage: "https://www.gymshark.com/_next/image?url=https%3A%2F%2Fimages.ctfassets.net%2F8urtyqugdt2l%2F2bMyO0jZaRJjfRptw60iwG%2F17c391156dd01ae6920c672cc2744fb1%2Fdesktop-bench-press.jpg&w=3840&q=85"
+        backgroundImage:
+            "https://www.gymshark.com/_next/image?url=https%3A%2F%2Fimages.ctfassets.net%2F8urtyqugdt2l%2F2bMyO0jZaRJjfRptw60iwG%2F17c391156dd01ae6920c672cc2744fb1%2Fdesktop-bench-press.jpg&w=3840&q=85",
     },
     {
         id: 3,
@@ -67,13 +68,13 @@ const mockExercises = [
         sets: [
             { id: 1, weight: "Bodyweight", reps: "Max", completed: false },
             { id: 2, weight: "Bodyweight", reps: "Max", completed: false },
-            { id: 3, weight: "Bodyweight", reps: "Max", completed: false }
+            { id: 3, weight: "Bodyweight", reps: "Max", completed: false },
         ],
         notes: "Full range of motion",
         videoUrl: null,
         imageUrl: null,
         muscleGroup: "Back",
-        backgroundImage: "https://hips.hearstapps.com/hmg-prod/images/mh0418-fit-pul-01-1558554157.jpg"
+        backgroundImage: "https://hips.hearstapps.com/hmg-prod/images/mh0418-fit-pul-01-1558554157.jpg",
     },
 ];
 
@@ -84,19 +85,21 @@ const exerciseLibrary = [
         name: "Deadlift",
         muscleGroup: "Back",
         description: "Compound exercise targeting the entire posterior chain",
-        imageUrl: "https://images.ctfassets.net/8urtyqugdt2l/5ZN0GgcR2fSncFwnKuL1RP/e603ba111e193d35510142c7eff9aae4/desktop-deadlift.jpg",
+        imageUrl:
+            "https://images.ctfassets.net/8urtyqugdt2l/5ZN0GgcR2fSncFwnKuL1RP/e603ba111e193d35510142c7eff9aae4/desktop-deadlift.jpg",
         defaultSets: 3,
-        defaultReps: 8
+        defaultReps: 8,
     },
     {
         id: 102,
         name: "Overhead Press",
         muscleGroup: "Shoulders",
         description: "Compound movement for shoulder development",
-        imageUrl: "https://shop.bodybuilding.com/cdn/shop/articles/how-to-overhead-press-a-beginners-guide-312661.jpg?v=1731882791",
+        imageUrl:
+            "https://shop.bodybuilding.com/cdn/shop/articles/how-to-overhead-press-a-beginners-guide-312661.jpg?v=1731882791",
         defaultSets: 3,
-        defaultReps: 10
-    }
+        defaultReps: 10,
+    },
 ];
 
 const muscleGroups = ["All", "Back", "Chest", "Legs", "Shoulders", "Arms", "Core"];
@@ -105,147 +108,83 @@ const muscleGroups = ["All", "Back", "Chest", "Legs", "Shoulders", "Arms", "Core
 export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastTraining = false }) => {
     const [exercises, setExercises] = useState(mockExercises);
     const [expandedExercise, setExpandedExercise] = useState(1);
-    const [view, setView] = useState('main'); // 'main' or 'addExercise'
-    const [selectedExerciseToAdd, setSelectedExerciseToAdd] = useState(null);
+    const [view, setView] = useState("main"); // 'main' or 'addExercise'
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedMuscleGroup, setSelectedMuscleGroup] = useState("");
-    const [isCompleted, setIsCompleted] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
 
-    const handleExerciseSelect = (exercise) => {
-        setSelectedExerciseToAdd(exercise);
-    };
-
     const handleDeleteExercise = (exerciseId) => {
-        setExercises(prevExercises => prevExercises.filter(ex => ex.id !== exerciseId));
+        setExercises((prevExercises) => prevExercises.filter((ex) => ex.id !== exerciseId));
     };
 
     const handleFinishTraining = () => {
-        setIsCompleted(true);
-        onSave({ ...training, exercises, status: 'completed' });
+        onSave({ ...training, exercises, status: "completed" });
         onClose();
     };
 
-    const handleConfirmAddExercise = () => {
-        if (!selectedExerciseToAdd) return;
-
-        const newExercise = {
-            id: exercises.length + 1,
-            name: selectedExerciseToAdd.name,
-            sets: Array(selectedExerciseToAdd.defaultSets).fill().map((_, index) => ({
-                id: index + 1,
-                weight: "",
-                reps: selectedExerciseToAdd.defaultReps,
-                completed: true
-            })),
-            notes: "",
-            videoUrl: null,
-            imageUrl: null,
-            muscleGroup: selectedExerciseToAdd.muscleGroup,
-            backgroundImage: selectedExerciseToAdd.imageUrl
-        };
-
-        setExercises(prevExercises => [...prevExercises, newExercise]);
-        setView('main');
-        setSelectedExerciseToAdd(null);
-        setSearchTerm("");
-        setSelectedMuscleGroup("");
-    };
-
     const handleSetCompleted = (exerciseId, setId) => {
-        setExercises(prevExercises => 
-            prevExercises.map(ex => 
-                ex.id === exerciseId 
+        setExercises((prevExercises) =>
+            prevExercises.map((ex) =>
+                ex.id === exerciseId
                     ? {
-                        ...ex,
-                        sets: ex.sets.map(set => 
-                            set.id === setId 
-                                ? { ...set, completed: !set.completed } 
-                                : set
-                        )
-                    } 
+                          ...ex,
+                          sets: ex.sets.map((set) => (set.id === setId ? { ...set, completed: !set.completed } : set)),
+                      }
                     : ex
             )
         );
     };
 
     const handleSetWeightChange = (exerciseId, setId, newWeight) => {
-        setExercises(prevExercises => 
-            prevExercises.map(ex => 
-                ex.id === exerciseId 
+        setExercises((prevExercises) =>
+            prevExercises.map((ex) =>
+                ex.id === exerciseId
                     ? {
-                        ...ex,
-                        sets: ex.sets.map(set => 
-                            set.id === setId 
-                                ? { ...set, weight: newWeight } 
-                                : set
-                        )
-                    } 
+                          ...ex,
+                          sets: ex.sets.map((set) => (set.id === setId ? { ...set, weight: newWeight } : set)),
+                      }
                     : ex
             )
         );
     };
 
     const handleSetRepsChange = (exerciseId, setId, newReps) => {
-        setExercises(prevExercises => 
-            prevExercises.map(ex => 
-                ex.id === exerciseId 
+        setExercises((prevExercises) =>
+            prevExercises.map((ex) =>
+                ex.id === exerciseId
                     ? {
-                        ...ex,
-                        sets: ex.sets.map(set => 
-                            set.id === setId 
-                                ? { ...set, reps: newReps } 
-                                : set
-                        )
-                    } 
+                          ...ex,
+                          sets: ex.sets.map((set) => (set.id === setId ? { ...set, reps: newReps } : set)),
+                      }
                     : ex
             )
         );
     };
 
     const handleNotesChange = (exerciseId, newNotes) => {
-        setExercises(prevExercises => 
-            prevExercises.map(ex => 
-                ex.id === exerciseId 
-                    ? { ...ex, notes: newNotes } 
-                    : ex
-            )
-        );
+        setExercises((prevExercises) => prevExercises.map((ex) => (ex.id === exerciseId ? { ...ex, notes: newNotes } : ex)));
     };
 
     const toggleExpandExercise = (exerciseId) => {
-        setExpandedExercise(prev => prev === exerciseId ? null : exerciseId);
-    };
-
-    const handleResetProgress = (exerciseId) => {
-        setExercises(prevExercises => 
-            prevExercises.map(ex => 
-                ex.id === exerciseId 
-                    ? {
-                        ...ex,
-                        sets: ex.sets.map(set => ({ ...set, completed: false }))
-                    } 
-                    : ex
-            )
-        );
+        setExpandedExercise((prev) => (prev === exerciseId ? null : exerciseId));
     };
 
     const handleAddSet = (exerciseId) => {
-        setExercises(prevExercises => 
-            prevExercises.map(ex => 
-                ex.id === exerciseId 
+        setExercises((prevExercises) =>
+            prevExercises.map((ex) =>
+                ex.id === exerciseId
                     ? {
-                        ...ex,
-                        sets: [
-                            ...ex.sets,
-                            {
-                                id: ex.sets.length + 1,
-                                weight: "",
-                                reps: "",
-                                completed: false
-                            }
-                        ]
-                    }
+                          ...ex,
+                          sets: [
+                              ...ex.sets,
+                              {
+                                  id: ex.sets.length + 1,
+                                  weight: "",
+                                  reps: "",
+                                  completed: false,
+                              },
+                          ],
+                      }
                     : ex
             )
         );
@@ -253,15 +192,15 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
 
     // Calculate progress
     const totalSets = exercises.reduce((total, ex) => total + ex.sets.length, 0);
-    const completedSets = exercises.reduce((total, ex) => 
-        total + ex.sets.filter(set => set.completed).length, 0);
+    const completedSets = exercises.reduce((total, ex) => total + ex.sets.filter((set) => set.completed).length, 0);
     const progressPercentage = totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
 
-    const filteredExercises = exerciseLibrary.filter(exercise => {
-        const matchesSearch = exercise.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            exercise.description.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesMuscleGroup = selectedMuscleGroup === "All" || selectedMuscleGroup === "" || 
-                                 exercise.muscleGroup === selectedMuscleGroup;
+    const filteredExercises = exerciseLibrary.filter((exercise) => {
+        const matchesSearch =
+            exercise.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            exercise.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesMuscleGroup =
+            selectedMuscleGroup === "All" || selectedMuscleGroup === "" || exercise.muscleGroup === selectedMuscleGroup;
         return matchesSearch && matchesMuscleGroup;
     });
 
@@ -269,30 +208,36 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title={view === 'main' ? `Manage Training - ${training.clientName}` : "Add Exercise"}
+            title={view === "main" ? `Manage Training - ${training.clientName}` : "Add Exercise"}
             size="large"
             confirmButtonText={isPastTraining ? (isEditing ? "Save Changes" : "Close") : "Finish Training"}
-            onConfirm={isPastTraining ? (isEditing ? () => {
-                onSave({ ...training, exercises });
-                setIsEditing(false);
-            } : onClose) : handleFinishTraining}
+            onConfirm={
+                isPastTraining
+                    ? isEditing
+                        ? () => {
+                              onSave({ ...training, exercises });
+                              setIsEditing(false);
+                          }
+                        : onClose
+                    : handleFinishTraining
+            }
             footerButtons={
-                view === 'main' ? (
+                view === "main" ? (
                     <>
                         <Button variant="outlineLight" onClick={onClose}>
                             Cancel
                         </Button>
                         {!isPastTraining ? (
-                            <Button 
-                                variant="orangeFilled" 
+                            <Button
+                                variant="orangeFilled"
                                 onClick={handleFinishTraining}
                                 leftIcon={<Icon icon="mdi:content-save" width={16} />}
                             >
                                 Finish Training
                             </Button>
                         ) : (
-                            <Button 
-                                variant="orangeFilled" 
+                            <Button
+                                variant="orangeFilled"
                                 onClick={() => setIsEditing(!isEditing)}
                                 leftIcon={<Icon icon={isEditing ? "mdi:check" : "mdi:pencil"} width={16} />}
                             >
@@ -303,8 +248,8 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
                 ) : null
             }
         >
-            {view === 'main' ? (
-                <motion.div 
+            {view === "main" ? (
+                <motion.div
                     className="space-y-6 w-full overflow-y-auto h-[calc(100vh-240px)] overflow-x-hidden pr-1 pb-4"
                     variants={containerVariants}
                     initial="hidden"
@@ -327,19 +272,19 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
 
                     {/* Progress Bar - Only show for active trainings */}
                     {!isPastTraining && (
-                        <motion.div 
+                        <motion.div
                             className="sticky top-0 z-20 bg-[#111] pt-2 pb-4 shadow-lg"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ duration: 0.5 }}
                         >
-                            <motion.div 
+                            <motion.div
                                 className="w-full bg-[#222] rounded-full h-2.5 mb-2 overflow-hidden"
                                 initial={{ width: 0 }}
                                 animate={{ width: "100%" }}
                                 transition={{ duration: 0.5 }}
                             >
-                                <motion.div 
+                                <motion.div
                                     className="bg-gradient-to-r from-[#FF6B00] to-[#FFA500] h-2.5 rounded-full"
                                     initial={{ width: "0%" }}
                                     animate={{ width: `${progressPercentage}%` }}
@@ -348,19 +293,18 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
                             </motion.div>
                             <div className="flex justify-between items-center text-sm text-gray-400 px-1">
                                 <span>Training Progress</span>
-                                <span className="text-white font-medium">{completedSets} of {totalSets} sets completed ({progressPercentage}%)</span>
+                                <span className="text-white font-medium">
+                                    {completedSets} of {totalSets} sets completed ({progressPercentage}%)
+                                </span>
                             </div>
                         </motion.div>
                     )}
 
                     {/* Training Info */}
-                    <motion.div 
-                        className="relative w-full overflow-hidden rounded-xl"
-                        variants={cardVariants}
-                    >
+                    <motion.div className="relative w-full overflow-hidden rounded-xl" variants={cardVariants}>
                         <div className="absolute inset-0">
-                            <Image 
-                                src="https://images.pexels.com/photos/1552252/pexels-photo-1552252.jpeg" 
+                            <Image
+                                src="https://images.pexels.com/photos/1552252/pexels-photo-1552252.jpeg"
                                 alt="Training background"
                                 fill
                                 className="object-cover opacity-30"
@@ -368,7 +312,7 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
                             />
                             <div className="absolute inset-0 bg-gradient-to-r from-[#111]/80 to-[#222]/70"></div>
                         </div>
-                        
+
                         <div className="relative p-6 bg-gradient-to-br from-black/60 to-[#222]/70 border border-[#444] w-full backdrop-blur-sm shadow-xl">
                             <div className="flex items-center gap-2 mb-6">
                                 <span className="w-8 h-8 rounded-full bg-[#FF6B00]/20 flex items-center justify-center">
@@ -429,16 +373,14 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
                                     <Button
                                         variant="orangeOutline"
                                         size="small"
-                                        onClick={() => setView('addExercise')}
+                                        onClick={() => setView("addExercise")}
                                         className="flex items-center gap-2"
                                     >
                                         <Icon icon="mdi:plus" width={16} />
                                         Add Exercise
                                     </Button>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-sm text-gray-400">
-                                            {exercises.length} exercises
-                                        </span>
+                                        <span className="text-sm text-gray-400">{exercises.length} exercises</span>
                                         <span className="h-4 w-0.5 bg-gray-700"></span>
                                         <Icon icon="mdi:chart-bar" className="text-[#FF6B00]" width={16} />
                                         <span className="text-sm text-white font-medium">{progressPercentage}%</span>
@@ -449,24 +391,24 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
 
                         {/* Exercise Cards */}
                         {exercises.map((exercise, index) => (
-                            <motion.div 
-                                key={exercise.id} 
+                            <motion.div
+                                key={exercise.id}
                                 variants={cardVariants}
                                 className="w-full"
                                 transition={{ delay: index * 0.1 }}
                             >
-                                <div 
+                                <div
                                     className={`relative w-full border backdrop-blur-sm transition-all duration-300 cursor-pointer rounded-xl overflow-hidden ${
-                                        expandedExercise === exercise.id 
-                                            ? 'bg-gradient-to-br from-black/60 to-[#222]/70 border-[#444] shadow-xl'
-                                            : 'bg-gradient-to-br from-black/40 to-[#222]/50 border-[#444] hover:from-black/60 hover:to-[#222]/70'
+                                        expandedExercise === exercise.id
+                                            ? "bg-gradient-to-br from-black/60 to-[#222]/70 border-[#444] shadow-xl"
+                                            : "bg-gradient-to-br from-black/40 to-[#222]/50 border-[#444] hover:from-black/60 hover:to-[#222]/70"
                                     }`}
                                     onClick={() => toggleExpandExercise(exercise.id)}
                                 >
                                     {/* Background Image */}
                                     <div className="absolute inset-0 overflow-hidden">
-                                        <Image 
-                                            src={exercise.backgroundImage} 
+                                        <Image
+                                            src={exercise.backgroundImage}
                                             alt={exercise.name}
                                             fill
                                             className="object-cover opacity-30"
@@ -488,20 +430,22 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <Icon 
-                                                    icon={expandedExercise === exercise.id ? "mdi:chevron-up" : "mdi:chevron-down"} 
-                                                    className="text-[#FF6B00]" 
-                                                    width={20} 
+                                                <Icon
+                                                    icon={
+                                                        expandedExercise === exercise.id ? "mdi:chevron-up" : "mdi:chevron-down"
+                                                    }
+                                                    className="text-[#FF6B00]"
+                                                    width={20}
                                                 />
                                             </div>
                                         </div>
-                                        
+
                                         {/* Exercise Name */}
                                         <h4 className="text-xl font-bold text-white mb-4">{exercise.name}</h4>
-                                        
+
                                         {/* Expanded Content */}
                                         {expandedExercise === exercise.id && (
-                                            <motion.div 
+                                            <motion.div
                                                 className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4 border-t border-[#444]"
                                                 initial={{ opacity: 0, height: 0 }}
                                                 animate={{ opacity: 1, height: "auto" }}
@@ -512,7 +456,7 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
                                                     {/* Sets List */}
                                                     <div className="space-y-3">
                                                         {exercise.sets.map((set) => (
-                                                            <motion.div 
+                                                            <motion.div
                                                                 key={set.id}
                                                                 className="p-4 rounded-lg border border-[#444] bg-black/80 backdrop-blur-sm"
                                                                 whileHover={{ scale: 1.01 }}
@@ -530,7 +474,9 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
                                                                     </span>
                                                                     {!isPastTraining && isEditing && (
                                                                         <Button
-                                                                            variant={set.completed ? "orangeFilled" : "orangeOutline"}
+                                                                            variant={
+                                                                                set.completed ? "orangeFilled" : "orangeOutline"
+                                                                            }
                                                                             size="small"
                                                                             onClick={(e) => {
                                                                                 e.stopPropagation();
@@ -546,12 +492,20 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
                                                                     {isPastTraining && !isEditing ? (
                                                                         <>
                                                                             <div className="p-2 rounded bg-black/40">
-                                                                                <p className="text-xs text-[#FF6B00] mb-1">Weight</p>
-                                                                                <p className="text-white font-medium">{set.weight}</p>
+                                                                                <p className="text-xs text-[#FF6B00] mb-1">
+                                                                                    Weight
+                                                                                </p>
+                                                                                <p className="text-white font-medium">
+                                                                                    {set.weight}
+                                                                                </p>
                                                                             </div>
                                                                             <div className="p-2 rounded bg-black/40">
-                                                                                <p className="text-xs text-[#FF6B00] mb-1">Reps</p>
-                                                                                <p className="text-white font-medium">{set.reps}</p>
+                                                                                <p className="text-xs text-[#FF6B00] mb-1">
+                                                                                    Reps
+                                                                                </p>
+                                                                                <p className="text-white font-medium">
+                                                                                    {set.reps}
+                                                                                </p>
                                                                             </div>
                                                                         </>
                                                                     ) : (
@@ -560,7 +514,13 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
                                                                                 label="Weight"
                                                                                 type="text"
                                                                                 value={set.weight}
-                                                                                onChange={(e) => handleSetWeightChange(exercise.id, set.id, e.target.value)}
+                                                                                onChange={(e) =>
+                                                                                    handleSetWeightChange(
+                                                                                        exercise.id,
+                                                                                        set.id,
+                                                                                        e.target.value
+                                                                                    )
+                                                                                }
                                                                                 className="mb-0 bg-black/40"
                                                                                 onClick={(e) => e.stopPropagation()}
                                                                             />
@@ -568,7 +528,13 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
                                                                                 label="Reps"
                                                                                 type="text"
                                                                                 value={set.reps}
-                                                                                onChange={(e) => handleSetRepsChange(exercise.id, set.id, e.target.value)}
+                                                                                onChange={(e) =>
+                                                                                    handleSetRepsChange(
+                                                                                        exercise.id,
+                                                                                        set.id,
+                                                                                        e.target.value
+                                                                                    )
+                                                                                }
                                                                                 className="mb-0 bg-black/40"
                                                                                 onClick={(e) => e.stopPropagation()}
                                                                             />
@@ -660,22 +626,16 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
                                                                         // Implement recording functionality
-                                                                        console.log("Record video for exercise:", exercise.id);
                                                                     }}
                                                                 >
                                                                     <Icon icon="mdi:camera" width={16} className="mr-1" />
                                                                     Record
                                                                 </Button>
-                                                                <label className="cursor-pointer" onClick={(e) => e.stopPropagation()}>
-                                                                    <input
-                                                                        type="file"
-                                                                        accept="image/*"
-                                                                        onChange={(e) => {
-                                                                            // Implement image upload
-                                                                            console.log("Upload image for exercise:", exercise.id);
-                                                                        }}
-                                                                        className="hidden"
-                                                                    />
+                                                                <label
+                                                                    className="cursor-pointer"
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                >
+                                                                    <input type="file" accept="image/*" className="hidden" />
                                                                     <Button variant="orangeOutline" size="small">
                                                                         <Icon icon="mdi:image" width={16} className="mr-1" />
                                                                         Upload
@@ -684,10 +644,10 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
                                                             </div>
                                                         )}
                                                     </div>
-                                                    
+
                                                     <div className="space-y-3">
                                                         {exercise.videoUrl ? (
-                                                            <motion.div 
+                                                            <motion.div
                                                                 className="relative aspect-video w-full overflow-hidden rounded-lg border border-[#444] bg-black/40 shadow-xl"
                                                                 initial={{ opacity: 0, scale: 0.95 }}
                                                                 animate={{ opacity: 1, scale: 1 }}
@@ -701,7 +661,7 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
                                                                 />
                                                             </motion.div>
                                                         ) : exercise.imageUrl ? (
-                                                            <motion.div 
+                                                            <motion.div
                                                                 className="relative aspect-video w-full overflow-hidden rounded-lg border border-[#444] shadow-xl"
                                                                 initial={{ opacity: 0, scale: 0.95 }}
                                                                 animate={{ opacity: 1, scale: 1 }}
@@ -719,9 +679,15 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
                                                             <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-[#444] bg-black/40 flex flex-col items-center justify-center shadow-xl">
                                                                 <div className="text-center p-6">
                                                                     <div className="w-12 h-12 rounded-full bg-[#222] flex items-center justify-center mx-auto mb-4">
-                                                                        <Icon icon="mdi:image" width={24} className="text-[#444]" />
+                                                                        <Icon
+                                                                            icon="mdi:image"
+                                                                            width={24}
+                                                                            className="text-[#444]"
+                                                                        />
                                                                     </div>
-                                                                    <p className="text-[#666] text-sm mb-2">No media available</p>
+                                                                    <p className="text-[#666] text-sm mb-2">
+                                                                        No media available
+                                                                    </p>
                                                                 </div>
                                                             </div>
                                                         )}
@@ -740,7 +706,7 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
                     <div className="flex items-center justify-between mb-6">
                         <Button
                             variant="ghost"
-                            onClick={() => setView('main')}
+                            onClick={() => setView("main")}
                             className="text-gray-400 hover:text-white flex items-center gap-2"
                         >
                             <Icon icon="mdi:arrow-left" width={20} />
@@ -760,7 +726,7 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
                             type="select"
                             value={selectedMuscleGroup}
                             onChange={(e) => setSelectedMuscleGroup(e.target.value)}
-                            options={muscleGroups.map(group => ({ value: group, label: group }))}
+                            options={muscleGroups.map((group) => ({ value: group, label: group }))}
                             className="min-w-[150px] mb-0"
                         />
                     </div>
@@ -775,20 +741,22 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
                                     const newExercise = {
                                         id: exercises.length + 1,
                                         name: exercise.name,
-                                        sets: Array(exercise.defaultSets).fill().map((_, index) => ({
-                                            id: index + 1,
-                                            weight: "",
-                                            reps: exercise.defaultReps,
-                                            completed: true
-                                        })),
+                                        sets: Array(exercise.defaultSets)
+                                            .fill()
+                                            .map((_, index) => ({
+                                                id: index + 1,
+                                                weight: "",
+                                                reps: exercise.defaultReps,
+                                                completed: true,
+                                            })),
                                         notes: "",
                                         videoUrl: null,
                                         imageUrl: null,
                                         muscleGroup: exercise.muscleGroup,
-                                        backgroundImage: exercise.imageUrl
+                                        backgroundImage: exercise.imageUrl,
                                     };
-                                    setExercises(prevExercises => [...prevExercises, newExercise]);
-                                    setView('main');
+                                    setExercises((prevExercises) => [...prevExercises, newExercise]);
+                                    setView("main");
                                     setSearchTerm("");
                                     setSelectedMuscleGroup("");
                                 }}
@@ -817,4 +785,4 @@ export const ManageTrainingModal = ({ isOpen, onClose, onSave, training, isPastT
             )}
         </Modal>
     );
-}; 
+};
