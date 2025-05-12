@@ -10,7 +10,6 @@ import { ScheduleSessionModal } from "@/components/custom/trainer/dashboard/comp
 export default function TrainerUpcomingTrainingsPage() {
     const [expandedTrainingId, setExpandedTrainingId] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
-    const [filterStatus, setFilterStatus] = useState("");
     const [filterType, setFilterType] = useState("");
     const [selectedTraining, setSelectedTraining] = useState(null);
     const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false);
@@ -133,9 +132,8 @@ export default function TrainerUpcomingTrainingsPage() {
             training.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
             training.focus.toLowerCase().includes(searchTerm.toLowerCase()) ||
             training.trainingName.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = filterStatus ? training.status === filterStatus : true;
         const matchesType = filterType ? training.type === filterType : true;
-        return matchesSearch && matchesStatus && matchesType;
+        return matchesSearch && matchesType;
     });
 
     const toggleExpandTraining = (id) => {
@@ -168,27 +166,23 @@ export default function TrainerUpcomingTrainingsPage() {
     };
 
     const handleManageTraining = (updatedTraining) => {
-        if (updatedTraining.status === 'completed') {
+        if (updatedTraining.status === "completed") {
             // Remove from upcoming trainings
-            setTrainings(prevTrainings => 
-                prevTrainings.filter(training => training.id !== updatedTraining.id)
-            );
-            
+            setTrainings((prevTrainings) => prevTrainings.filter((training) => training.id !== updatedTraining.id));
+
             // Add to past trainings
             const pastTraining = {
                 ...updatedTraining,
                 feedback: "Training completed successfully",
             };
-            setPastTrainings(prevPastTrainings => [pastTraining, ...prevPastTrainings]);
+            setPastTrainings((prevPastTrainings) => [pastTraining, ...prevPastTrainings]);
         } else {
             // Update in upcoming trainings
-            setTrainings(prevTrainings => 
-                prevTrainings.map(training => 
-                    training.id === updatedTraining.id ? updatedTraining : training
-                )
+            setTrainings((prevTrainings) =>
+                prevTrainings.map((training) => (training.id === updatedTraining.id ? updatedTraining : training))
             );
         }
-        
+
         setManageTrainingModalOpen(false);
     };
 
@@ -210,13 +204,6 @@ export default function TrainerUpcomingTrainingsPage() {
         setRescheduleModalOpen(false);
     };
 
-    const statusOptions = [
-        { value: "", label: "All Statuses" },
-        { value: "confirmed", label: "Confirmed" },
-        { value: "pending", label: "Pending" },
-        { value: "canceled", label: "Canceled" },
-    ];
-
     const typeOptions = [
         { value: "", label: "All Types" },
         { value: "In-person", label: "In-person" },
@@ -224,11 +211,11 @@ export default function TrainerUpcomingTrainingsPage() {
     ];
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 px-4 md:px-6">
             <style dangerouslySetInnerHTML={{ __html: animationStyle }} />
 
-            <div className="mb-6 flex flex-col items-center justify-between md:flex-row">
-                <h2 className="mb-4 text-xl font-bold md:mb-0">Upcoming Trainings</h2>
+            <div className="mb-6 flex flex-col items-center justify-between gap-4 md:flex-row">
+                <h2 className="text-xl font-bold">Upcoming Trainings</h2>
 
                 <Button variant="orangeFilled" onClick={openNewTrainingModal} leftIcon={<span className="text-xl">+</span>}>
                     New Training
@@ -236,29 +223,23 @@ export default function TrainerUpcomingTrainingsPage() {
             </div>
 
             {/* Search and filter controls */}
-            <div className="mb-6 flex flex-col gap-3 md:flex-row">
+            <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 md:flex md:flex-row">
                 <div className="flex-1">
                     <FormField
                         type="text"
                         placeholder="Search trainings..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="mb-0"
+                        className="mb-0 w-full"
                     />
                 </div>
-                <FormField
-                    type="select"
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    options={statusOptions}
-                    className="mb-0 min-w-[150px]"
-                />
+
                 <FormField
                     type="select"
                     value={filterType}
                     onChange={(e) => setFilterType(e.target.value)}
                     options={typeOptions}
-                    className="mb-0 min-w-[150px]"
+                    className="mb-0 w-full md:max-w-[200px]"
                 />
             </div>
 
@@ -289,9 +270,9 @@ export default function TrainerUpcomingTrainingsPage() {
 
                                 {index === 0 && <div className="absolute left-0 top-0 h-full w-1 bg-[#FF6B00]"></div>}
 
-                                <div className="flex items-start justify-between">
+                                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
                                     <div className="flex-1">
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex flex-wrap items-center gap-2">
                                             <h3 className={`text-lg font-bold ${index === 0 ? "text-[#FF6B00]" : ""}`}>
                                                 {training.date}
                                             </h3>
@@ -313,7 +294,7 @@ export default function TrainerUpcomingTrainingsPage() {
                                                 </span>
                                             )}
                                         </div>
-                                        <div className="mt-1 flex items-center text-sm text-gray-300">
+                                        <div className="mt-1 flex flex-wrap items-center text-sm text-gray-300">
                                             <span>{training.clientName}</span>
                                             <span className="mx-2">•</span>
                                             <span>{training.type === "In-person" ? training.location : "Virtual Session"}</span>
@@ -324,11 +305,11 @@ export default function TrainerUpcomingTrainingsPage() {
                                             )}
                                         </div>
                                     </div>
-                                    <div className="flex flex-col items-end">
+                                    <div className="mt-2 flex items-center justify-between sm:mt-0 sm:flex-col sm:items-end">
                                         <span className="rounded border border-[rgba(255,107,0,0.3)] bg-[rgba(255,107,0,0.15)] px-2 py-1 text-xs font-medium text-[#FF6B00]">
                                             {training.type}
                                         </span>
-                                        <p className="mt-1 text-right text-sm font-medium text-gray-300">
+                                        <p className="text-sm font-medium text-gray-300 sm:mt-1 sm:text-right">
                                             {training.trainingName}
                                         </p>
                                     </div>
@@ -336,19 +317,25 @@ export default function TrainerUpcomingTrainingsPage() {
 
                                 <div className={`mt-3 ${expandedTrainingId === training.id ? "block" : "hidden"}`}>
                                     <div className="mt-2 border-t border-[#444] pt-3">
-                                        <p className="mb-1 font-medium text-[#FF6B00]">Focus:</p>
-                                        <p className="mb-3 text-gray-300">{training.focus}</p>
+                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+                                            <div>
+                                                <p className="mb-1 font-medium text-[#FF6B00]">Focus:</p>
+                                                <p className="mb-3 text-gray-300">{training.focus}</p>
+                                            </div>
+                                            <div>
+                                                <p className="mb-1 font-medium text-[#FF6B00]">Location:</p>
+                                                <p className="mb-3 text-gray-300">{training.location}</p>
+                                            </div>
+                                            <div>
+                                                <p className="mb-1 font-medium text-[#FF6B00]">Notes:</p>
+                                                <p className="mb-3 text-gray-300">{training.notes}</p>
+                                            </div>
+                                        </div>
 
-                                        <p className="mb-1 font-medium text-[#FF6B00]">Location:</p>
-                                        <p className="mb-3 text-gray-300">{training.location}</p>
-
-                                        <p className="mb-1 font-medium text-[#FF6B00]">Notes:</p>
-                                        <p className="mb-3 text-gray-300">{training.notes}</p>
-
-                                        <div className="mt-4 flex space-x-3">
+                                        <div className="mt-4 flex flex-col space-y-3 sm:flex-row sm:space-x-3 sm:space-y-0">
                                             <Button
                                                 variant="orangeFilled"
-                                                className="flex-1"
+                                                className="w-full sm:flex-1"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     openManageTrainingModal(training);
@@ -358,7 +345,7 @@ export default function TrainerUpcomingTrainingsPage() {
                                             </Button>
                                             <Button
                                                 variant="orangeOutline"
-                                                className="flex-1"
+                                                className="w-full sm:flex-1"
                                                 onClick={(e) => openRescheduleModal(e, training)}
                                             >
                                                 Reschedule
@@ -386,44 +373,52 @@ export default function TrainerUpcomingTrainingsPage() {
                             maxWidth="none"
                             onClick={() => toggleExpandTraining(training.id)}
                         >
-                            <div className="flex items-start justify-between">
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
                                 <div className="flex-1">
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex flex-wrap items-center gap-2">
                                         <h3 className="text-lg font-bold">{training.date}</h3>
                                         <p className="text-gray-400">{training.time}</p>
                                         <span className="rounded bg-blue-900/60 px-2 py-0.5 text-xs text-blue-200">
                                             Completed
                                         </span>
                                     </div>
-                                    <div className="mt-1 flex items-center text-sm text-gray-300">
+                                    <div className="mt-1 flex flex-wrap items-center text-sm text-gray-300">
                                         <span>{training.clientName}</span>
                                         <span className="mx-2">•</span>
                                         <span>{training.type === "In-person" ? training.location : "Virtual Session"}</span>
                                     </div>
                                 </div>
-                                <div className="flex flex-col items-end">
+                                <div className="mt-2 flex items-center justify-between sm:mt-0 sm:flex-col sm:items-end">
                                     <span className="rounded bg-[rgba(40,40,40,0.8)] px-2 py-1 text-xs font-medium text-gray-300">
                                         {training.type}
                                     </span>
-                                    <p className="mt-1 text-right text-sm font-medium text-gray-300">{training.trainingName}</p>
+                                    <p className="text-sm font-medium text-gray-300 sm:mt-1 sm:text-right">
+                                        {training.trainingName}
+                                    </p>
                                 </div>
                             </div>
 
                             <div className={`mt-3 ${expandedTrainingId === training.id ? "block" : "hidden"}`}>
                                 <div className="mt-2 border-t border-[#444] pt-3">
-                                    <p className="mb-1 font-medium text-[#FF6B00]">Focus:</p>
-                                    <p className="mb-3 text-gray-300">{training.focus}</p>
+                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+                                        <div>
+                                            <p className="mb-1 font-medium text-[#FF6B00]">Focus:</p>
+                                            <p className="mb-3 text-gray-300">{training.focus}</p>
+                                        </div>
+                                        <div>
+                                            <p className="mb-1 font-medium text-[#FF6B00]">Your Feedback:</p>
+                                            <p className="mb-3 text-gray-300">{training.feedback}</p>
+                                        </div>
+                                        <div>
+                                            <p className="mb-1 font-medium text-[#FF6B00]">Notes:</p>
+                                            <p className="mb-3 text-gray-300">{training.notes}</p>
+                                        </div>
+                                    </div>
 
-                                    <p className="mb-1 font-medium text-[#FF6B00]">Your Feedback:</p>
-                                    <p className="mb-3 text-gray-300">{training.feedback}</p>
-
-                                    <p className="mb-1 font-medium text-[#FF6B00]">Notes:</p>
-                                    <p className="mb-3 text-gray-300">{training.notes}</p>
-
-                                    <div className="mt-4 flex space-x-3">
-                                        <Button 
-                                            variant="orangeFilled" 
-                                            className="flex-1"
+                                    <div className="mt-4 flex flex-col space-y-3 sm:flex-row sm:space-x-3 sm:space-y-0">
+                                        <Button
+                                            variant="orangeFilled"
+                                            className="w-full sm:flex-1"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 openViewPastTrainingModal(training);
@@ -433,7 +428,7 @@ export default function TrainerUpcomingTrainingsPage() {
                                         </Button>
                                         <Button
                                             variant="orangeOutline"
-                                            className="flex-1"
+                                            className="w-full sm:flex-1"
                                             onClick={(e) =>
                                                 openRescheduleModal(e, {
                                                     clientId: training.clientId,

@@ -22,6 +22,7 @@ export const PlanCard = ({
     clientCount = 0,
     price,
     editUrl,
+    weeklySchedule,
     index = 0,
 }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -87,6 +88,7 @@ export const PlanCard = ({
         clientCount,
         price,
         editUrl,
+        weeklySchedule,
     };
 
     return (

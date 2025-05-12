@@ -1640,35 +1640,35 @@ export const CheckCircleIcon = ({ size = 16, className = "", ...props }) => (
 
 // Muscle Group Icons
 export const ChestIcon = ({ size = 24, className = "", ...props }) => (
-    <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width={size} 
-        height={size} 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
         strokeLinejoin="round"
         className={className}
         {...props}
     >
-        <path d="M6 3C6 3 10 3 12 3C14 3 18 3 18 3C18 3 19 8 18 12C17 16 12 20 12 20C12 20 7 16 6 12C5 8 6 3 6 3Z" />
-        <path d="M12 8C13.1046 8 14 7.10457 14 6C14 5.5 13.8 5 13.48 4.64" />
-        <path d="M12 8C10.8954 8 10 7.10457 10 6C10 5.5 10.2 5 10.52 4.64" />
+        <path d="M12 3C9.5 3 7.5 4.5 7.5 6.5C7.5 8.5 9 9.5 12 9.5C15 9.5 16.5 8.5 16.5 6.5C16.5 4.5 14.5 3 12 3Z" />
+        <path d="M17 10C17.5 11 19 13 19 16C19 17.1 17.5 17.5 17 17.5C16.5 17.5 16 17.1 16 16C16 14.9 15.1 14 14 14H10C8.9 14 8 14.9 8 16C8 17.1 7.5 17.5 7 17.5C6.5 17.5 5 17.1 5 16C5 13 6.5 11 7 10" />
+        <path d="M12 14V21" />
     </svg>
 );
 
 export const BackIcon = ({ size = 24, className = "", ...props }) => (
-    <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width={size} 
-        height={size} 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
         strokeLinejoin="round"
         className={className}
         {...props}
@@ -1684,15 +1684,15 @@ export const BackIcon = ({ size = 24, className = "", ...props }) => (
 );
 
 export const ShouldersIcon = ({ size = 24, className = "", ...props }) => (
-    <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width={size} 
-        height={size} 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
         strokeLinejoin="round"
         className={className}
         {...props}
@@ -1705,15 +1705,15 @@ export const ShouldersIcon = ({ size = 24, className = "", ...props }) => (
 );
 
 export const ArmsIcon = ({ size = 24, className = "", ...props }) => (
-    <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width={size} 
-        height={size} 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
         strokeLinejoin="round"
         className={className}
         {...props}
@@ -1728,15 +1728,15 @@ export const ArmsIcon = ({ size = 24, className = "", ...props }) => (
 );
 
 export const LegsIcon = ({ size = 24, className = "", ...props }) => (
-    <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width={size} 
-        height={size} 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
         strokeLinejoin="round"
         className={className}
         {...props}
@@ -1752,15 +1752,15 @@ export const LegsIcon = ({ size = 24, className = "", ...props }) => (
 );
 
 export const CoreIcon = ({ size = 24, className = "", ...props }) => (
-    <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width={size} 
-        height={size} 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
         strokeLinejoin="round"
         className={className}
         {...props}
@@ -1772,5 +1772,25 @@ export const CoreIcon = ({ size = 24, className = "", ...props }) => (
         <path d="M19 10L16 10" />
         <path d="M5 14L8 14" />
         <path d="M19 14L16 14" />
+    </svg>
+);
+
+export const DownloadIcon = ({ size = 16, className = "", ...props }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+    >
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
     </svg>
 );

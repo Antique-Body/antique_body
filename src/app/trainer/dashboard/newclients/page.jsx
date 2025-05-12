@@ -15,7 +15,7 @@ import {
     ToastNotification,
 } from "@/components/custom/trainer/dashboard/pages/newclients/components";
 
-const NewClientsPage = () => {
+export default function NewClientsPage() {
     const router = useRouter();
     const { data: session } = useSession();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -243,6 +243,4 @@ const NewClientsPage = () => {
             />
         </div>
     );
-};
-
-export default NewClientsPage;
+}

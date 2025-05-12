@@ -69,7 +69,7 @@ const getPerformanceFields = (clientType, sport) => {
     ];
 };
 
-const ClientId = () => {
+export default function ClientId() {
     const { id } = useParams();
     const client = useMemo(() => mockClients.find((c) => c.id === id), [id]);
 
@@ -485,6 +485,4 @@ const ClientId = () => {
             </div>
         </div>
     );
-};
-
-export default ClientId;
+}

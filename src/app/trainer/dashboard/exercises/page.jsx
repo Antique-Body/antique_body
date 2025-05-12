@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { ExercisesList } from "@/components/custom/trainer/dashboard/pages/exercises/components";
 import mockExercises from "@/components/custom/trainer/dashboard/pages/exercises/data/mockExercises";
 
-const ExercisesPage = () => {
+export default function ExercisesPage() {
     const [exercises, setExercises] = useState([]);
 
     useEffect(() => {
@@ -35,6 +35,4 @@ const ExercisesPage = () => {
             </div>
         </div>
     );
-};
-
-export default ExercisesPage;
+}

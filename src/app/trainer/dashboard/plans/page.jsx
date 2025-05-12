@@ -7,82 +7,7 @@ import { FormField } from "@/components/common/FormField";
 import { NutritionPlanIcon, PlanManagementIcon, TrainingPlanIcon, UsersIcon } from "@/components/common/Icons";
 import { Card } from "@/components/custom/Card";
 import { CreatePlanCard, PlanCard, TabsComponent } from "@/components/custom/trainer/dashboard/pages/plans/components";
-
-const MOCK_NUTRITION_PLANS = [
-    {
-        id: 1,
-        title: "Weight Loss Nutrition",
-        description:
-            "Balanced nutrition plan focused on gradual weight loss with sufficient protein intake and moderate carbs.",
-        image: "https://cdn.squats.in/kc_articles/16571113701456e93e41b1330b0dc.png",
-        createdAt: "2023-10-15",
-        planType: "nutrition",
-        duration: "8 weeks",
-        clientCount: 24,
-        editUrl: "/trainer/dashboard/plans/nutrition/1",
-    },
-    {
-        id: 2,
-        title: "Muscle Gain Diet",
-        description: "High protein nutrition plan designed for clients focused on muscle building with strategic carb timing.",
-        image: "https://www.jefit.com/wp/wp-content/uploads/2021/12/healthy-food-high-protein-scaled.jpg",
-        createdAt: "2023-11-20",
-        planType: "nutrition",
-        duration: "12 weeks",
-        clientCount: 18,
-        editUrl: "/trainer/dashboard/plans/nutrition/2",
-    },
-    {
-        id: 3,
-        title: "Mediterranean Diet Plan",
-        description: "A balanced nutrition plan based on the Mediterranean diet principles for overall health improvement.",
-        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQSWDAepuRv2LXa-Gekvn8nfG59pkg3RD8MaIt8hN9Nfvr-S5SSEqMPeQVFxQ1bNvRubQo&usqp=CAU",
-        createdAt: "2024-01-05",
-        planType: "nutrition",
-        duration: "8 weeks",
-        clientCount: 12,
-        editUrl: "/trainer/dashboard/plans/nutrition/3",
-    },
-];
-
-const MOCK_TRAINING_PLANS = [
-    {
-        id: 4,
-        title: "Beginner Strength Program",
-        description: "Full body strength program for beginners with progressive overload and proper technique focus.",
-        image: "https://cdn.gymaholic.co/articles/best-workout-plans-for-women/woman.jpg",
-        price: 99,
-        createdAt: "2023-09-10",
-        planType: "training",
-        duration: "6 weeks",
-        clientCount: 32,
-        editUrl: "/trainer/dashboard/plans/training/4",
-    },
-    {
-        id: 5,
-        title: "HIIT Cardio Challenge",
-        description: "High intensity interval training program designed to boost cardiovascular fitness and burn fat.",
-        image: "https://media.istockphoto.com/id/1332405544/photo/asian-indian-mid-adult-macho-man-practicing-battle-rope-in-gym.jpg?s=612x612&w=0&k=20&c=pYcFTEk8u8TSfbyui90HPCAjctjvenjHnHT6rNy1-qA=",
-        price: 89,
-        createdAt: "2023-10-05",
-        planType: "training",
-        duration: "4 weeks",
-        clientCount: 28,
-        editUrl: "/trainer/dashboard/plans/training/5",
-    },
-    {
-        id: 6,
-        title: "Advanced Strength Training",
-        description: "A comprehensive plan designed for building strength and muscle mass with compound exercises.",
-        image: "https://wallpapers.com/images/hd/man-picking-up-a-fitness-barbell-vdiphsb8pi2ktc5c.jpg",
-        price: 129,
-        createdAt: "2024-02-20",
-        planType: "training",
-        duration: "10 weeks",
-        clientCount: 15,
-        editUrl: "/trainer/dashboard/plans/training/6",
-    },
-];
+import { mockTrainingPlans, mockNutritionPlans } from "@/components/custom/trainer/dashboard/pages/plans/data";
 
 const PlanManagementPage = () => {
     // Initialize with "training" as the default active tab
@@ -96,18 +21,18 @@ const PlanManagementPage = () => {
         if (searchQuery) {
             const query = searchQuery.toLowerCase();
             setFilteredNutritionPlans(
-                MOCK_NUTRITION_PLANS.filter(
+                mockNutritionPlans.filter(
                     (plan) => plan.title.toLowerCase().includes(query) || plan.description.toLowerCase().includes(query)
                 )
             );
             setFilteredTrainingPlans(
-                MOCK_TRAINING_PLANS.filter(
+                mockTrainingPlans.filter(
                     (plan) => plan.title.toLowerCase().includes(query) || plan.description.toLowerCase().includes(query)
                 )
             );
         } else {
-            setFilteredNutritionPlans(MOCK_NUTRITION_PLANS);
-            setFilteredTrainingPlans(MOCK_TRAINING_PLANS);
+            setFilteredNutritionPlans(mockNutritionPlans);
+            setFilteredTrainingPlans(mockTrainingPlans);
         }
     }, [searchQuery]);
 
@@ -179,7 +104,7 @@ const PlanManagementPage = () => {
                             <div>
                                 <p className="text-xs text-gray-400">Total Plans</p>
                                 <p className="text-lg font-semibold text-white">
-                                    {MOCK_NUTRITION_PLANS.length + MOCK_TRAINING_PLANS.length}
+                                    {mockNutritionPlans.length + mockTrainingPlans.length}
                                 </p>
                             </div>
                         </div>
@@ -220,7 +145,11 @@ const PlanManagementPage = () => {
                             </div>
                             <div>
                                 <p className="text-xs text-gray-400">Active Clients</p>
-                                <p className="text-lg font-semibold text-white">{activeTab === "nutrition" ? "54" : "75"}</p>
+                                <p className="text-lg font-semibold text-white">
+                                    {activeTab === "nutrition"
+                                        ? filteredNutritionPlans.reduce((total, plan) => total + (plan.clientCount || 0), 0)
+                                        : filteredTrainingPlans.reduce((total, plan) => total + (plan.clientCount || 0), 0)}
+                                </p>
                             </div>
                         </div>
                     </Card>

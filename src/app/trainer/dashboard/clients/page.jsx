@@ -8,7 +8,7 @@ import { FormField } from "@/components/common/FormField";
 import { Card } from "@/components/custom/Card";
 import mockClients from "@/components/custom/trainer/dashboard/pages/clients/data/mockClients";
 
-const ClientsPage = () => {
+export default function ClientsPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [filterStatus, setFilterStatus] = useState("");
     const [filterGoalType, setFilterGoalType] = useState("");
@@ -383,6 +383,4 @@ const ClientsPage = () => {
             )}
         </div>
     );
-};
-
-export default ClientsPage;
+}
