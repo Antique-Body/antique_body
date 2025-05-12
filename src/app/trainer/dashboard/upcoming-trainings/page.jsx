@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { Card } from "@/components/custom/Card";
+import { ManageTrainingModal } from "@/components/custom/trainer/dashboard/components/ManageTrainingModal";
 import { ScheduleSessionModal } from "@/components/custom/trainer/dashboard/components/ScheduleSessionModal";
 
 export default function TrainerUpcomingTrainingsPage() {
@@ -13,29 +14,9 @@ export default function TrainerUpcomingTrainingsPage() {
     const [filterType, setFilterType] = useState("");
     const [selectedTraining, setSelectedTraining] = useState(null);
     const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false);
-
-    // Add custom animation style
-    const animationStyle = `
-    @keyframes gradient-x {
-      0% {
-        background-position: 0% 50%;
-      }
-      50% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0% 50%;
-      }
-    }
-    
-    .animate-gradient-x {
-      animation: gradient-x 3s ease infinite;
-      background-size: 200% 100%;
-    }
-  `;
-
-    // Sample trainings data
-    const trainings = [
+    const [manageTrainingModalOpen, setManageTrainingModalOpen] = useState(false);
+    const [isViewingPastTraining, setIsViewingPastTraining] = useState(false);
+    const [trainings, setTrainings] = useState([
         {
             id: 1,
             clientName: "John Doe",
@@ -92,10 +73,8 @@ export default function TrainerUpcomingTrainingsPage() {
             notes: "First session - evaluation and goal setting",
             trainingName: "Assessment",
         },
-    ];
-
-    // Sample past trainings
-    const pastTrainings = [
+    ]);
+    const [pastTrainings, setPastTrainings] = useState([
         {
             id: 5,
             clientName: "John Doe",
@@ -126,7 +105,27 @@ export default function TrainerUpcomingTrainingsPage() {
             feedback: "Excellent effort on planks, improved endurance since last session",
             trainingName: "Core Blast",
         },
-    ];
+    ]);
+
+    // Add custom animation style
+    const animationStyle = `
+    @keyframes gradient-x {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+    
+    .animate-gradient-x {
+      animation: gradient-x 3s ease infinite;
+      background-size: 200% 100%;
+    }
+  `;
 
     // Filter and search functionality
     const filteredTrainings = trainings.filter((training) => {
@@ -153,6 +152,44 @@ export default function TrainerUpcomingTrainingsPage() {
 
     const openManageTrainingModal = (training) => {
         setSelectedTraining(training);
+        setIsViewingPastTraining(false);
+        setManageTrainingModalOpen(true);
+    };
+
+    const openViewPastTrainingModal = (training) => {
+        setSelectedTraining(training);
+        setIsViewingPastTraining(true);
+        setManageTrainingModalOpen(true);
+    };
+
+    const closeManageTrainingModal = () => {
+        setManageTrainingModalOpen(false);
+        setIsViewingPastTraining(false);
+    };
+
+    const handleManageTraining = (updatedTraining) => {
+        if (updatedTraining.status === 'completed') {
+            // Remove from upcoming trainings
+            setTrainings(prevTrainings => 
+                prevTrainings.filter(training => training.id !== updatedTraining.id)
+            );
+            
+            // Add to past trainings
+            const pastTraining = {
+                ...updatedTraining,
+                feedback: "Training completed successfully",
+            };
+            setPastTrainings(prevPastTrainings => [pastTraining, ...prevPastTrainings]);
+        } else {
+            // Update in upcoming trainings
+            setTrainings(prevTrainings => 
+                prevTrainings.map(training => 
+                    training.id === updatedTraining.id ? updatedTraining : training
+                )
+            );
+        }
+        
+        setManageTrainingModalOpen(false);
     };
 
     const openRescheduleModal = (e, training) => {
@@ -384,8 +421,15 @@ export default function TrainerUpcomingTrainingsPage() {
                                     <p className="mb-3 text-gray-300">{training.notes}</p>
 
                                     <div className="mt-4 flex space-x-3">
-                                        <Button variant="orangeFilled" className="flex-1">
-                                            Edit Feedback
+                                        <Button 
+                                            variant="orangeFilled" 
+                                            className="flex-1"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                openViewPastTrainingModal(training);
+                                            }}
+                                        >
+                                            View Exercises
                                         </Button>
                                         <Button
                                             variant="orangeOutline"
@@ -424,6 +468,17 @@ export default function TrainerUpcomingTrainingsPage() {
                         id: selectedTraining.clientId,
                         name: selectedTraining.clientName,
                     }}
+                />
+            )}
+
+            {/* Manage Training Modal */}
+            {manageTrainingModalOpen && selectedTraining && (
+                <ManageTrainingModal
+                    isOpen={manageTrainingModalOpen}
+                    onClose={closeManageTrainingModal}
+                    onSave={handleManageTraining}
+                    training={selectedTraining}
+                    isPastTraining={isViewingPastTraining}
                 />
             )}
         </div>
