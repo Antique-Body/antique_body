@@ -115,21 +115,21 @@ export const TrainerCard = ({ trainer, onClick }) => {
                         {trainer.bio || "No biography provided for this trainer."}
                     </p>
 
-                    {/* Stats - More flexible layout */}
+                    {/* Stats - FIXED layout for "km away" text */}
                     <div className="grid grid-cols-2 gap-3 mb-5">
-                        <div className="bg-zinc-900 rounded-lg p-3 flex items-center">
-                            <Icon icon="mdi:account-group" className="w-5 h-5 text-[#FF6B00] mr-3 flex-shrink-0" />
-                            <div>
+                        <div className="bg-zinc-900 rounded-lg p-3 flex items-start">
+                            <Icon icon="mdi:account-group" className="w-5 h-5 text-[#FF6B00] mr-3 flex-shrink-0 mt-0.5" />
+                            <div className="overflow-hidden">
                                 <div className="text-xs text-zinc-400">Clients</div>
-                                <div className="text-sm font-medium">{trainer.clientCount || 0}</div>
+                                <div className="text-sm font-medium truncate">{trainer.clientCount || 0}</div>
                             </div>
                         </div>
 
-                        <div className="bg-zinc-900 rounded-lg p-3 flex items-center">
-                            <Icon icon="mdi:map" className="w-5 h-5 text-[#FF6B00] mr-3 flex-shrink-0" />
-                            <div>
+                        <div className="bg-zinc-900 rounded-lg p-3 flex items-start">
+                            <Icon icon="mdi:map" className="w-5 h-5 text-[#FF6B00] mr-3 flex-shrink-0 mt-0.5" />
+                            <div className="overflow-hidden">
                                 <div className="text-xs text-zinc-400">Distance</div>
-                                <div className="text-sm font-medium truncate">{trainer.proximity || "Unknown"}</div>
+                                <div className="text-sm font-medium truncate w-full">{trainer.proximity || "Unknown"}</div>
                             </div>
                         </div>
                     </div>
