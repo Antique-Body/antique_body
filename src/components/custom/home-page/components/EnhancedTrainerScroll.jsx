@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Icon } from "@iconify/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -73,7 +74,7 @@ export const EnhancedTrainerScroll = ({ trainers }) => {
                     <div>
                         <div className="inline-flex items-center px-3 py-1 gap-2 mb-4 rounded-full bg-[#FF6B00]/10 border border-[#FF6B00]/20">
                             <span className="text-[#FF6B00]">
-                                <span className="mdi mdi-account-group text-sm" />
+                                <Icon icon="mdi:account-group" className="text-sm" />
                             </span>
                             <span className="text-sm font-medium text-[#FF6B00]">Expert Trainers</span>
                         </div>
@@ -90,10 +91,10 @@ export const EnhancedTrainerScroll = ({ trainers }) => {
                         </p>
                     </div>
 
-                    <Link href="/trainers" className="hidden md:block">
+                    <Link href="/trainers-marketplace" className="hidden md:block">
                         <Button variant="orangeOutline" size="small" className="flex items-center gap-2">
                             View All
-                            <span className="mdi mdi-arrow-right" />
+                            <Icon icon="mdi:arrow-right" />
                         </Button>
                     </Link>
                 </div>
@@ -110,8 +111,9 @@ export const EnhancedTrainerScroll = ({ trainers }) => {
                     }`}
                     disabled={!canScrollLeft}
                 >
-                    <span
-                        className={`mdi mdi-chevron-left text-2xl transform transition-transform ${canScrollLeft ? "group-hover:-translate-x-0.5" : "opacity-50"}`}
+                    <Icon
+                        icon="mdi:chevron-left"
+                        className={`text-2xl transform transition-transform ${canScrollLeft ? "group-hover:-translate-x-0.5" : "opacity-50"}`}
                     />
                 </button>
             </div>
@@ -126,8 +128,9 @@ export const EnhancedTrainerScroll = ({ trainers }) => {
                     }`}
                     disabled={!canScrollRight}
                 >
-                    <span
-                        className={`mdi mdi-chevron-right text-2xl transform transition-transform ${canScrollRight ? "group-hover:translate-x-0.5" : "opacity-50"}`}
+                    <Icon
+                        icon="mdi:chevron-right"
+                        className={`text-2xl transform transition-transform ${canScrollRight ? "group-hover:translate-x-0.5" : "opacity-50"}`}
                     />
                 </button>
             </div>
@@ -192,7 +195,7 @@ export const EnhancedTrainerScroll = ({ trainers }) => {
                                         />
                                     ) : (
                                         <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
-                                            <span className="mdi mdi-account text-4xl text-gray-700" />
+                                            <Icon icon="mdi:account" className="text-4xl text-gray-700" />
                                         </div>
                                     )}
 
@@ -208,7 +211,7 @@ export const EnhancedTrainerScroll = ({ trainers }) => {
                                     <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-0 transition-transform duration-300 group-hover:translate-y-1">
                                         <h3 className="text-xl font-bold text-white mb-1 line-clamp-1">{trainer.name}</h3>
                                         <p className="text-sm text-gray-400 flex items-center">
-                                            <span className="mdi mdi-map-marker text-[#FF6B00] mr-1"></span>
+                                            <Icon icon="mdi:map-marker" className="text-[#FF6B00] mr-1" />
                                             {trainer.location}
                                         </p>
                                     </div>
@@ -221,10 +224,10 @@ export const EnhancedTrainerScroll = ({ trainers }) => {
                                         <div className="flex items-center">
                                             <div className="flex mr-1">
                                                 {[...Array(Math.floor(trainer.rating))].map((_, i) => (
-                                                    <span key={i} className="mdi mdi-star text-[#FF6B00] text-sm" />
+                                                    <Icon key={i} icon="mdi:star" className="text-[#FF6B00] text-sm" />
                                                 ))}
                                                 {trainer.rating % 1 !== 0 && (
-                                                    <span className="mdi mdi-star-half text-[#FF6B00] text-sm" />
+                                                    <Icon icon="mdi:star-half" className="text-[#FF6B00] text-sm" />
                                                 )}
                                             </div>
                                             <span className="text-white text-sm font-semibold">{trainer.rating}</span>
@@ -240,14 +243,17 @@ export const EnhancedTrainerScroll = ({ trainers }) => {
                                     <p className="text-gray-400 text-sm mb-4 line-clamp-2">{trainer.bio}</p>
 
                                     {/* CTA button */}
-                                    <Link href={`/trainers/${trainer.id}`}>
+                                    <Link href="/trainers-marketplace">
                                         <Button
                                             variant="outline"
                                             size="small"
                                             className="w-full group border-gray-700 hover:border-[#FF6B00] transition-colors"
                                         >
                                             <span className="group-hover:text-[#FF6B00] transition-colors">View Profile</span>
-                                            <span className="mdi mdi-arrow-right ml-2 group-hover:translate-x-1 transition-transform group-hover:text-[#FF6B00]" />
+                                            <Icon
+                                                icon="mdi:arrow-right"
+                                                className="ml-2 group-hover:translate-x-1 transition-transform group-hover:text-[#FF6B00]"
+                                            />
                                         </Button>
                                     </Link>
                                 </div>
@@ -301,10 +307,10 @@ export const EnhancedTrainerScroll = ({ trainers }) => {
 
             {/* Mobile CTA */}
             <div className="flex justify-center mt-8 md:hidden">
-                <Link href="/trainers">
+                <Link href="/trainers-marketplace">
                     <Button variant="orangeOutline" size="small" className="flex items-center gap-2">
                         View All Trainers
-                        <span className="mdi mdi-arrow-right" />
+                        <Icon icon="mdi:arrow-right" />
                     </Button>
                 </Link>
             </div>

@@ -1,0 +1,17 @@
+/* Add this to your globals.css file */
+
+/* Hide scrollbar while maintaining scroll functionality */
+.hide-scrollbar {
+    -ms-overflow-style: none; /* Internet Explorer and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+}
+
+/* Mask image fade for horizontal scrolling elements */
+.mask-image-fade-horizontal {
+    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent 100%);
+}
