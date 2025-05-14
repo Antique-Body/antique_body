@@ -20,30 +20,6 @@ export const ImprovedTestimonial = ({ testimonialImage }) => {
             transition={{ duration: 0.8 }}
             className="relative mt-40 overflow-hidden"
         >
-            {/* Animated background elements - more subtle and layered */}
-            <div className="absolute w-full h-full max-w-[1800px] mx-auto inset-0 overflow-hidden">
-                <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-[#FF6B00]/5 blur-[120px]"></div>
-                <div className="absolute -bottom-20 -right-40 w-[500px] h-[500px] rounded-full bg-[#FF9A00]/5 blur-[100px]"></div>
-                <motion.div
-                    animate={{
-                        rotate: 360,
-                        scale: [1, 1.1, 1],
-                    }}
-                    transition={{
-                        rotate: { duration: 40, repeat: Infinity, ease: "linear" },
-                        scale: { duration: 8, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" },
-                    }}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[800px] opacity-10"
-                >
-                    <div className="absolute top-0 left-1/4 w-[2px] h-full bg-gradient-to-b from-transparent via-[#FF6B00]/30 to-transparent"></div>
-                    <div className="absolute top-0 left-2/4 w-[2px] h-full bg-gradient-to-b from-transparent via-[#FF6B00]/20 to-transparent"></div>
-                    <div className="absolute top-0 left-3/4 w-[2px] h-full bg-gradient-to-b from-transparent via-[#FF6B00]/30 to-transparent"></div>
-                    <div className="absolute top-1/4 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#FF6B00]/30 to-transparent"></div>
-                    <div className="absolute top-2/4 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#FF6B00]/20 to-transparent"></div>
-                    <div className="absolute top-3/4 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#FF6B00]/30 to-transparent"></div>
-                </motion.div>
-            </div>
-
             {/* Section heading - Added for better context */}
             <div className="relative z-10 text-center mb-16">
                 <div className="inline-flex items-center px-3 py-1 mb-4 rounded-full bg-[#FF6B00]/10 border border-[#FF6B00]/20">

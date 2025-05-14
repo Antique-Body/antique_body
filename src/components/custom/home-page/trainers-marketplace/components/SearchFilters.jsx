@@ -7,6 +7,7 @@ import { PriceRangeSlider } from "./PriceRangeSlider";
 import { RatingStars } from "./RatingStars";
 
 import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/common/FormField";
 import { getAllSpecialties, getAllLocations, getAllAvailabilityDays, getAllTags } from "@/data/trainersData";
 
 export const SearchFilters = ({ searchQuery, setSearchQuery, filters, setFilters, onClearFilters }) => {
@@ -154,18 +155,16 @@ export const SearchFilters = ({ searchQuery, setSearchQuery, filters, setFilters
                         >
                             <div className="space-y-2 mt-2">
                                 {specialties.map((specialty) => (
-                                    <div key={specialty} className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id={`specialty-${specialty}`}
-                                            checked={filters.specialty.includes(specialty)}
-                                            onChange={() => handleSpecialtyChange(specialty)}
-                                            className="h-4 w-4 rounded border-zinc-600 text-[#FF6B00] focus:ring-[#FF6B00]/20 bg-zinc-800"
-                                        />
-                                        <label htmlFor={`specialty-${specialty}`} className="ml-2 text-sm text-zinc-300">
-                                            {specialty}
-                                        </label>
-                                    </div>
+                                    <FormField
+                                        key={specialty}
+                                        type="checkbox"
+                                        id={`specialty-${specialty}`}
+                                        name={`specialty-${specialty}`}
+                                        label={specialty}
+                                        checked={filters.specialty.includes(specialty)}
+                                        onChange={() => handleSpecialtyChange(specialty)}
+                                        className="text-sm text-zinc-300"
+                                    />
                                 ))}
                             </div>
                         </motion.div>
@@ -194,18 +193,16 @@ export const SearchFilters = ({ searchQuery, setSearchQuery, filters, setFilters
                         >
                             <div className="space-y-2 mt-2">
                                 {locations.map((location) => (
-                                    <div key={location} className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id={`location-${location}`}
-                                            checked={filters.location.includes(location)}
-                                            onChange={() => handleLocationChange(location)}
-                                            className="h-4 w-4 rounded border-zinc-600 text-[#FF6B00] focus:ring-[#FF6B00]/20 bg-zinc-800"
-                                        />
-                                        <label htmlFor={`location-${location}`} className="ml-2 text-sm text-zinc-300">
-                                            {location}
-                                        </label>
-                                    </div>
+                                    <FormField
+                                        key={location}
+                                        type="checkbox"
+                                        id={`location-${location}`}
+                                        name={`location-${location}`}
+                                        label={location}
+                                        checked={filters.location.includes(location)}
+                                        onChange={() => handleLocationChange(location)}
+                                        className="text-sm text-zinc-300"
+                                    />
                                 ))}
                             </div>
                         </motion.div>
@@ -303,37 +300,31 @@ export const SearchFilters = ({ searchQuery, setSearchQuery, filters, setFilters
                         >
                             <div className="space-y-2 mt-2">
                                 {[5, 4, 3, 2, 1].map((rating) => (
-                                    <div key={rating} className="flex items-center">
-                                        <input
-                                            type="radio"
-                                            id={`rating-${rating}`}
-                                            name="rating"
-                                            checked={filters.rating === rating}
-                                            onChange={() => handleRatingChange(rating)}
-                                            className="h-4 w-4 rounded-full border-zinc-600 text-[#FF6B00] focus:ring-[#FF6B00]/20 bg-zinc-800"
-                                        />
-                                        <label
-                                            htmlFor={`rating-${rating}`}
-                                            className="ml-2 text-sm text-zinc-300 flex items-center"
-                                        >
-                                            <RatingStars rating={rating} size={14} className="mr-1" />& up
-                                        </label>
-                                    </div>
+                                    <FormField
+                                        key={rating}
+                                        type="radio"
+                                        id={`rating-${rating}`}
+                                        name="rating"
+                                        label={
+                                            <div className="flex items-center">
+                                                <RatingStars rating={rating} size={14} className="mr-1" />& up
+                                            </div>
+                                        }
+                                        checked={filters.rating === rating}
+                                        onChange={() => handleRatingChange(rating)}
+                                        className="text-sm text-zinc-300"
+                                    />
                                 ))}
                                 {filters.rating > 0 && (
-                                    <div className="flex items-center">
-                                        <input
-                                            type="radio"
-                                            id="rating-0"
-                                            name="rating"
-                                            checked={filters.rating === 0}
-                                            onChange={() => handleRatingChange(0)}
-                                            className="h-4 w-4 rounded-full border-zinc-600 text-[#FF6B00] focus:ring-[#FF6B00]/20 bg-zinc-800"
-                                        />
-                                        <label htmlFor="rating-0" className="ml-2 text-sm text-zinc-300">
-                                            Any rating
-                                        </label>
-                                    </div>
+                                    <FormField
+                                        type="radio"
+                                        id="rating-0"
+                                        name="rating"
+                                        label="Any rating"
+                                        checked={filters.rating === 0}
+                                        onChange={() => handleRatingChange(0)}
+                                        className="text-sm text-zinc-300"
+                                    />
                                 )}
                             </div>
                         </motion.div>

@@ -5,12 +5,12 @@ import { useState, useEffect } from "react";
 
 import { Button } from "@/components/common/Button";
 import { Footer } from "@/components/common/Footer";
+import { Navigation } from "@/components/custom/home-page/shared";
 import {
     TrainersList,
     SearchFilters,
-    MarketplaceHeader,
     TrainerProfileModal,
-} from "@/components/custom/trainers-marketplace/components";
+} from "@/components/custom/home-page/trainers-marketplace/components";
 import { extendedTrainers } from "@/data/trainersData";
 
 export default function TrainersMarketplace() {
@@ -149,9 +149,9 @@ export default function TrainersMarketplace() {
 
             {/* Content */}
             <div className="relative z-10">
-                <MarketplaceHeader />
+                <Navigation />
 
-                <main className="container mx-auto px-4 py-16">
+                <main className="container mx-auto px-4 py-16 mt-24">
                     {/* Page Title with search stats - Made more flexible for translations */}
                     <div className="mb-12">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">

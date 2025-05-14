@@ -1,4 +1,4 @@
-export { Navigation } from "./Navigation";
+export { Navigation } from "../../shared/Navigation";
 export { HeroSection } from "./HeroSection";
 export { ContactSection } from "./ContactSection";
 export { ContactInfoCard } from "./ContactInfoCard";

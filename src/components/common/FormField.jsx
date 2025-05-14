@@ -49,6 +49,7 @@ export const FormField = ({
               disabled,
               ...(type === "file" && { accept }),
               ...(type === "checkbox" && { checked }),
+              ...(type === "radio" && { checked }),
           };
 
     // Define background styles based on the backgroundStyle prop
@@ -78,12 +79,52 @@ export const FormField = ({
     // Checkbox styling
     if (type === "checkbox") {
         return (
-            <label htmlFor={id || name} className="flex items-center gap-2">
-                <input
-                    {...inputProps}
-                    className={`rounded border-[#333] bg-[#1a1a1a] text-[#FF6B00] focus:ring-[#FF6B00] focus:ring-opacity-25 ${className}`}
-                />
-                {label}
+            <label htmlFor={id || name} className="flex items-center gap-3 cursor-pointer select-none">
+                <div className="relative">
+                    <input {...inputProps} className="absolute opacity-0 w-0 h-0" />
+                    <div
+                        className={`w-4 h-4 rounded border ${checked ? "bg-[#FF6B00] border-[#FF6B00]" : "bg-[#1a1a1a] border-[#444]"} transition-colors flex items-center justify-center`}
+                    >
+                        {checked && (
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-3.5 w-3.5 text-white"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                            >
+                                <path
+                                    fillRule="evenodd"
+                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                    clipRule="evenodd"
+                                />
+                            </svg>
+                        )}
+                    </div>
+                </div>
+                <span className={`text-gray-200 ${className}`}>{label}</span>
+                {error && (
+                    <p className="mt-1 flex items-center text-sm text-red-500">
+                        <ErrorIcon size={16} className="mr-1" />
+                        {error}
+                    </p>
+                )}
+            </label>
+        );
+    }
+
+    // Radio button styling
+    if (type === "radio") {
+        return (
+            <label htmlFor={id || name} className="flex items-center gap-3 cursor-pointer select-none">
+                <div className="relative">
+                    <input {...inputProps} className="absolute opacity-0 w-0 h-0" />
+                    <div
+                        className={`w-4 h-4 rounded-full border ${checked ? "border-[#FF6B00]" : "border-[#444]"} bg-[#1a1a1a] transition-colors flex items-center justify-center`}
+                    >
+                        {checked && <div className="w-2 h-2 rounded-full bg-[#FF6B00]"></div>}
+                    </div>
+                </div>
+                <span className={`text-gray-200 ${className}`}>{label}</span>
                 {error && (
                     <p className="mt-1 flex items-center text-sm text-red-500">
                         <ErrorIcon size={16} className="mr-1" />

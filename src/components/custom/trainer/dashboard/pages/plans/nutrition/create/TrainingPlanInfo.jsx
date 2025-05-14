@@ -117,27 +117,23 @@ export const TrainingPlanInfo = ({ planData, handleChange, handleImageChange }) 
                     <h4 className="font-medium text-white mb-3">Session Format</h4>
 
                     <div className="flex gap-6">
-                        <label className="flex items-center space-x-2">
-                            <input
-                                type="checkbox"
-                                name="sessionFormat.inPerson"
-                                checked={planData.sessionFormat.inPerson}
-                                onChange={handleChange}
-                                className="rounded border-[#333] bg-[#1a1a1a] text-[#FF6B00] focus:ring-[#FF6B00] focus:ring-opacity-25"
-                            />
-                            <span>In-Person</span>
-                        </label>
+                        <FormField
+                            type="checkbox"
+                            name="sessionFormat.inPerson"
+                            id="sessionFormat.inPerson"
+                            label="In-Person"
+                            checked={planData.sessionFormat.inPerson}
+                            onChange={handleChange}
+                        />
 
-                        <label className="flex items-center space-x-2">
-                            <input
-                                type="checkbox"
-                                name="sessionFormat.online"
-                                checked={planData.sessionFormat.online}
-                                onChange={handleChange}
-                                className="rounded border-[#333] bg-[#1a1a1a] text-[#FF6B00] focus:ring-[#FF6B00] focus:ring-opacity-25"
-                            />
-                            <span>Online</span>
-                        </label>
+                        <FormField
+                            type="checkbox"
+                            name="sessionFormat.online"
+                            id="sessionFormat.online"
+                            label="Online"
+                            checked={planData.sessionFormat.online}
+                            onChange={handleChange}
+                        />
                     </div>
                 </div>
 

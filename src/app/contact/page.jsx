@@ -6,7 +6,7 @@ import { useRef } from "react";
 
 import { Button } from "@/components/common/Button";
 import { Footer } from "@/components/common/Footer";
-import { Navigation } from "@/components/custom/home-page/components";
+import { Navigation } from "@/components/custom/home-page/shared";
 
 export default function ContactPage() {
     const formRef = useRef(null);

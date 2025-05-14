@@ -9,14 +9,13 @@ import { EffectBackground } from "@/components/background";
 import { Button } from "@/components/common/Button";
 import { Footer } from "@/components/common/Footer";
 import {
-    Navigation,
-
     ModernFeaturesSection,
     ModernCta,
     EnhancedTrainerScroll,
     FeaturePreviews,
     ImprovedTestimonial,
-} from "@/components/custom/home-page/components";
+} from "@/components/custom/home-page/home/components";
+import { Navigation } from "@/components/custom/home-page/shared";
 
 const images = {
     hero: {
