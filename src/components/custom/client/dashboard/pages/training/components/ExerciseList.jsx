@@ -1,10 +1,10 @@
 import { Button } from "@/components/common/Button";
-import { ArrowRight, CheckIcon, PlayIcon, WorkoutIcon } from "@/components/common/Icons";
+import { Icon } from "@iconify/react";
 
 export const ExerciseList = ({ exercises, completedExercises, onViewExercise }) => (
     <>
       <h3 className="mb-3 flex items-center text-sm font-semibold text-white">
-        <WorkoutIcon size={16} className="mr-2 text-[#FF6B00]" />
+        <Icon icon="mdi:dumbbell" className="mr-2 text-[#FF6B00] text-lg" />
         Your Exercises
       </h3>
       
@@ -22,11 +22,11 @@ export const ExerciseList = ({ exercises, completedExercises, onViewExercise }) 
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 {completedExercises[exercise.id] ? (
-                  <div className="mr-3 flex h-7 w-7 items-center justify-center rounded-full bg-[rgba(76,175,80,0.15)]">
-                    <CheckIcon size={14} className="text-[#4CAF50]" />
+                  <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(76,175,80,0.15)]">
+                    <Icon icon="mdi:check-circle" className="text-[#4CAF50] text-lg" />
                   </div>
                 ) : (
-                  <div className="mr-3 flex h-7 w-7 items-center justify-center rounded-full bg-[rgba(255,107,0,0.15)]">
+                  <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(255,107,0,0.15)]">
                     <span className="text-xs font-medium text-[#FF6B00]">{exercise.sets}x</span>
                   </div>
                 )}
@@ -42,13 +42,13 @@ export const ExerciseList = ({ exercises, completedExercises, onViewExercise }) 
                   <Button
                     variant="ghost"
                     size="small"
-                    leftIcon={<PlayIcon size={16} className="text-[#FF6B00]" />}
+                    leftIcon={<Icon icon="mdi:play-circle" className="text-[#FF6B00]" />}
                     className="mr-1"
                   >
                     View
                   </Button>
                 )}
-                <ArrowRight size={16} className="text-gray-500" />
+                <Icon icon="mdi:chevron-right" className="text-gray-500" />
               </div>
             </div>
           </div>
