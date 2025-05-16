@@ -66,8 +66,8 @@ export const TrainerCard = ({ trainer, onClick }) => {
                     </div>
                 )}
 
-                {/* Price badge - Made more spacious for translations */}
-                <div className="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm px-3 py-1.5 rounded-md text-sm">
+                {/* Price badge - Repositioned to bottom center */}
+                <div className="absolute bottom-20 right-3 bg-black/70 backdrop-blur-sm px-3 py-1.5 rounded-md text-sm">
                     <span className="font-semibold text-white">${trainer.price}</span>
                     <span className="text-zinc-400 mx-1">/{trainer.priceUnit || "session"}</span>
                 </div>
