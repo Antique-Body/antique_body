@@ -204,7 +204,10 @@ export default function LoginPage() {
             </div>
           ) : (
             <>
-              <p className="text-gray-400 mb-8 text-center" >
+              <h1 className="text-2xl font-bold mb-2 text-center">
+                {t("auth.login.welcome_back")}
+              </h1>
+              <p className="text-gray-400 mb-8 text-center">
                 {t("auth.login.sign_in_to_account")}
               </p>
 
@@ -225,7 +228,7 @@ export default function LoginPage() {
               </div>
 
               <div className="mt-6 text-center">
-                <p className="text-gray-400" >
+                <p className="text-gray-400">
                   {t("auth.login.no_account")}{" "}
                   <Link
                     href="/auth/register"

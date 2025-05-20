@@ -1,15 +1,40 @@
 import { PrismaClient } from "@prisma/client";
 import { compare } from "bcrypt";
+import crypto from "crypto";
 import CredentialsProvider from "next-auth/providers/credentials";
+import FacebookProvider from "next-auth/providers/facebook";
 import GoogleProvider from "next-auth/providers/google";
 
 const prismaClient = new PrismaClient();
+
+const handleEmailVerification = async (user) => {
+  const verificationToken = crypto.randomBytes(32).toString("hex");
+  await prismaClient.user.update({
+    where: { id: user.id },
+    data: { emailVerificationToken: verificationToken },
+  });
+
+  try {
+    const { sendVerificationEmail } = await import("@/app/utils/email");
+    await sendVerificationEmail(user.email, verificationToken);
+  } catch (error) {
+    console.error("Error sending verification email:", error);
+  }
+
+  throw new Error(
+    "Email not verified. We've sent a verification email. Please check your inbox."
+  );
+};
 
 export const authOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
+    FacebookProvider({
+      clientId: process.env.FACEBOOK_CLIENT_ID,
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -24,7 +49,7 @@ export const authOptions = {
 
         const user = await prismaClient.user.findUnique({
           where: { email: credentials.email },
-          include: { preferences: true }
+          include: { preferences: true },
         });
 
         if (!user) {
@@ -35,53 +60,14 @@ export const authOptions = {
           throw new Error("No password set for this user");
         }
 
-        // Only enforce email verification if there is a token
-        if (!user.emailVerified && user.emailVerificationToken) {
-          // Generate new verification token if needed
-          const crypto = require('crypto');
-          const verificationToken = crypto.randomBytes(32).toString("hex");
-          await prismaClient.user.update({
-            where: { id: user.id },
-            data: { emailVerificationToken: verificationToken }
-          });
-          
-          // Send verification email
-          try {
-            const { sendVerificationEmail } = await import('@/app/utils/email');
-            await sendVerificationEmail(user.email, verificationToken);
-          } catch (error) {
-            console.error("Error sending verification email during login:", error);
-          }
-          
-          throw new Error("Email not verified. We've sent a new verification email. Please check your inbox.");
-        }
-
-        // Don't auto-fix verification status - require proper verification
         if (!user.emailVerified) {
-          // Generate new verification token
-          const crypto = require('crypto');
-          const verificationToken = crypto.randomBytes(32).toString("hex");
-          await prismaClient.user.update({
-            where: { id: user.id },
-            data: { emailVerificationToken: verificationToken }
-          });
-          
-          // Send verification email
-          try {
-            const { sendVerificationEmail } = await import('@/app/utils/email');
-            await sendVerificationEmail(user.email, verificationToken);
-          } catch (error) {
-            console.error("Error sending verification email during login:", error);
-          }
-          
-          throw new Error("Email not verified. We've sent a verification email. Please check your inbox.");
+          await handleEmailVerification(user);
         }
 
         const isPasswordValid = await compare(
           credentials.password,
           user.password
         );
-
         if (!isPasswordValid) {
           throw new Error("Invalid password");
         }
@@ -92,21 +78,20 @@ export const authOptions = {
           email: user.email,
           role: user.role?.toLowerCase(),
           hasCompletedTrainingSetup: !!user.preferences,
-          language: user.language
+          language: user.language,
         };
       },
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
-      if (account?.provider === "google") {
+    async signIn({ user, account }) {
+      if (account?.provider === "google" || account?.provider === "facebook") {
         const existingUser = await prismaClient.user.findUnique({
           where: { email: user.email },
-          include: { preferences: true }
+          include: { preferences: true },
         });
 
         if (!existingUser) {
-          // Create new user with default role and verified email (since Google auth is verified)
           const newUser = await prismaClient.user.create({
             data: {
               name: user.name,
@@ -114,14 +99,16 @@ export const authOptions = {
               lastName: "",
               role: null,
               emailVerified: true,
-              language: 'en' // Default language
+              language: "en",
             },
           });
 
+          user.id = newUser.id;
           user.role = newUser.role?.toLowerCase();
           user.hasCompletedTrainingSetup = false;
           user.language = newUser.language;
         } else {
+          user.id = existingUser.id;
           user.role = existingUser.role?.toLowerCase();
           user.hasCompletedTrainingSetup = !!existingUser.preferences;
           user.language = existingUser.language;
@@ -134,32 +121,32 @@ export const authOptions = {
       if (token) {
         session.user.id = token.id;
         session.user.role = token.role?.toLowerCase();
-        session.user.hasCompletedTrainingSetup = token.hasCompletedTrainingSetup;
+        session.user.hasCompletedTrainingSetup =
+          token.hasCompletedTrainingSetup;
         session.user.language = token.language;
       }
-
       return session;
     },
-    async jwt({ token, user, account, trigger, session }) {
-      // Handle session update
+    async jwt({ token, user, trigger, session }) {
       if (trigger === "update" && session) {
-        if (session.role) {
-          token.role = session.role.toLowerCase();
-        }
-        if (session.hasCompletedTrainingSetup !== undefined) {
-          token.hasCompletedTrainingSetup = session.hasCompletedTrainingSetup;
-        }
-        if (session.language) {
-          token.language = session.language;
-        }
+        return {
+          ...token,
+          ...(session.role && { role: session.role.toLowerCase() }),
+          ...(session.hasCompletedTrainingSetup !== undefined && {
+            hasCompletedTrainingSetup: session.hasCompletedTrainingSetup,
+          }),
+          ...(session.language && { language: session.language }),
+        };
       }
 
-      // Handle initial sign in
       if (user) {
-        token.id = user.id;
-        token.role = user.role?.toLowerCase();
-        token.hasCompletedTrainingSetup = user.hasCompletedTrainingSetup;
-        token.language = user.language;
+        return {
+          ...token,
+          id: user.id,
+          role: user.role?.toLowerCase(),
+          hasCompletedTrainingSetup: user.hasCompletedTrainingSetup,
+          language: user.language,
+        };
       }
 
       return token;
@@ -174,4 +161,4 @@ export const authOptions = {
     strategy: "jwt",
   },
   secret: process.env.NEXTAUTH_SECRET,
-}; 
+};

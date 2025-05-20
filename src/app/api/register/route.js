@@ -1,21 +1,18 @@
-import { sendVerificationEmail } from "@/app/utils/email";
 import { PrismaClient } from "@prisma/client";
 import { hash } from "bcrypt";
-import crypto from "crypto";
 import { NextResponse } from "next/server";
+import { verifyEmailCode } from "../auth/send-email-code/route";
 
 const prisma = new PrismaClient();
 
 export async function POST(request) {
   try {
     const body = await request.json();
+    const { email, password, name, lastName, code } = body;
 
-    const { email, password, name, lastName } = body;
-
-    if (!email || !password || !name || !lastName) {
-     
+    if (!email || !password || !name || !lastName || !code) {
       return NextResponse.json(
-        { error: "All fields are required" },
+        { error: "All fields and code are required" },
         { status: 400 }
       );
     }
@@ -37,59 +34,42 @@ export async function POST(request) {
       );
     }
 
-    try {
-      // Check if user already exists
-      const existingUser = await prisma.user.findUnique({
-        where: { email },
-      });
-
-      if (existingUser) {
-        return NextResponse.json(
-          { error: "User already exists" },
-          { status: 400 }
-        );
-      }
-
-      // Generate verification token
-      const verificationToken = crypto.randomBytes(32).toString("hex");
-
-      // Hash password
-      const hashedPassword = await hash(password, 12);
-
-      // Create user
-      const user = await prisma.user.create({
-        data: {
-          email,
-          name,
-          lastName,
-          password: hashedPassword,
-          emailVerificationToken: verificationToken,
-          emailVerified: false,
-        },
-      });
-
-
-      // Send verification email
-      try {
-        const emailSent = await sendVerificationEmail(email, verificationToken);
-        if (!emailSent) {
-          // Don't return error here, just log it
-        }
-      } catch (emailError) {
-        console.error("Error sending verification email:", emailError);
-        // Don't return error here, just log it
-      }
-
-      return NextResponse.json({
-        message: "Registration successful. Please check your email to verify your account.",
-      });
-    } catch (prismaError) {
-      console.error("Prisma error:", prismaError);
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+    if (existingUser) {
       return NextResponse.json(
-        { error: "Database error occurred" },
-        { status: 500 }
+        { error: "User already exists" },
+        { status: 400 }
       );
     }
+
+    // Verify the 6-digit code
+    if (!verifyEmailCode(email, code)) {
+      return NextResponse.json(
+        { error: "Invalid or expired verification code" },
+        { status: 400 }
+      );
+    }
+
+    // Hash password
+    const hashedPassword = await hash(password, 12);
+
+    // Create user (email is considered verified)
+    const user = await prisma.user.create({
+      data: {
+        email,
+        name,
+        lastName,
+        password: hashedPassword,
+        emailVerified: true,
+      },
+    });
+
+    return NextResponse.json({
+      message: "Registration successful. You can now log in.",
+    });
   } catch (error) {
     console.error("Registration error details:", error);
     return NextResponse.json(

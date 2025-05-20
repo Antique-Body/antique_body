@@ -155,7 +155,10 @@ export default function RegisterPage() {
             </div>
           ) : (
             <>
-              <p className="text-gray-400 mb-8 text-center" >
+              <h1 className="text-2xl font-bold mb-2 text-center">
+                {t("auth.register.create_account")}
+              </h1>
+              <p className="text-gray-400 mb-8 text-center">
                 {t("auth.register.join_fitness_community")}
               </p>
 
@@ -167,7 +170,7 @@ export default function RegisterPage() {
               />
 
               <div className="mt-6 text-center">
-                <p className="text-gray-400" >
+                <p className="text-gray-400">
                   {t("auth.register.have_account")}{" "}
                   <Link
                     href="/auth/login"
