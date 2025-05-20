@@ -32,9 +32,11 @@ export const FormField = ({
   register, // For react-hook-form integration
   rules = {}, // For react-hook-form validation rules
   checked,
-  countryCode = false, // custom prop
   ...props
 }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
   // Handle react-hook-form props
   const inputProps = register
     ? { ...register(name, rules), type, placeholder }
@@ -186,24 +188,19 @@ export const FormField = ({
     );
   }
 
-  if (type === "select" && countryCode) {
-    const [searchTerm, setSearchTerm] = useState("");
-    const [isOpen, setIsOpen] = useState(false);
+  if (type === "searchableSelect") {
     const selectedOption = options.find((opt) => opt.value === value) || null;
-
     const filteredOptions = options.filter((option) =>
       option.label.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
       <div className={`mb-4 ${className}`}>
-        <div className="flex items-center justify-between">
-          {label && (
-            <label className="block text-gray-300" htmlFor={id || name}>
-              {label}
-            </label>
-          )}
-        </div>
+        {label && (
+          <label className="block text-gray-300 mb-2" htmlFor={id || name}>
+            {label}
+          </label>
+        )}
         {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
 
         <div className="relative">
@@ -212,7 +209,9 @@ export const FormField = ({
             onClick={() => setIsOpen(!isOpen)}
           >
             <span className="text-white truncate flex-1 mr-2">
-              {selectedOption ? selectedOption.label : "Select country code"}
+              {selectedOption
+                ? selectedOption.label
+                : placeholder || "Select an option"}
             </span>
             <svg
               className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${
@@ -264,14 +263,16 @@ export const FormField = ({
                     }}
                   >
                     <div className="text-white truncate">{option.label}</div>
-                    <div className="text-sm text-gray-400 truncate">
-                      {option.shortCode}
-                    </div>
+                    {option.shortCode && (
+                      <div className="text-sm text-gray-400 truncate">
+                        {option.shortCode}
+                      </div>
+                    )}
                   </div>
                 ))}
                 {filteredOptions.length === 0 && (
                   <div className="px-4 py-2 text-gray-400">
-                    No countries found
+                    No options found
                   </div>
                 )}
               </div>
@@ -293,7 +294,7 @@ export const FormField = ({
     // Standard select
     return (
       <div className={`mb-4 ${className}`}>
-        <div className="mb-2 flex items-center justify-between">
+        <div className="flex items-center justify-between">
           {label && (
             <label className="block text-gray-300" htmlFor={id || name}>
               {label}

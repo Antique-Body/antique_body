@@ -1,6 +1,5 @@
-import { sendEmailVerificationCode } from "@/app/utils/email";
+import { sendVerificationCodeEmail } from "@/lib/email";
 import { PrismaClient } from "@prisma/client";
-import { NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
@@ -38,31 +37,19 @@ export async function verifyEmailCode(email, code) {
   }
 }
 
-export async function POST(request) {
+export async function POST(req) {
   try {
-    const { email } = await request.json();
+    const { email } = await req.json();
 
     if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+      return new Response(JSON.stringify({ error: "Email is required" }), {
+        status: 400,
+      });
     }
 
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
-      return NextResponse.json(
-        { error: "User with this email already exists" },
-        { status: 400 }
-      );
-    }
-
-    // Generate 6-digit code
+    // Generate a 6-digit code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // Calculate expiration time (15 minutes from now)
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     // Delete any existing unused codes for this email
     await prisma.emailVerificationCode.deleteMany({
@@ -72,7 +59,7 @@ export async function POST(request) {
       },
     });
 
-    // Store new code in database
+    // Create new verification code
     await prisma.emailVerificationCode.create({
       data: {
         email,
@@ -81,23 +68,21 @@ export async function POST(request) {
       },
     });
 
-    // Send email
-    const emailSent = await sendEmailVerificationCode(email, code);
+    // Send email with verification code
+    const emailSent = await sendVerificationCodeEmail(email, code);
 
     if (!emailSent) {
-      return NextResponse.json(
-        { error: "Failed to send verification code" },
-        { status: 500 }
-      );
+      throw new Error("Failed to send verification email");
     }
 
-    return NextResponse.json({
-      message: "Verification code sent successfully",
-    });
+    return new Response(
+      JSON.stringify({ message: "Verification code sent successfully" }),
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error sending verification code:", error);
-    return NextResponse.json(
-      { error: "Failed to send verification code" },
+    return new Response(
+      JSON.stringify({ error: "Failed to send verification code" }),
       { status: 500 }
     );
   }
