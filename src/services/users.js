@@ -39,14 +39,23 @@ export const userService = {
   async getUserById(id) {
     const user = await prisma.user.findUnique({
       where: { id },
+      select: {
+        id: true,
+        name: true,
+        lastName: true,
+        phone: true,
+        role: true,
+        language: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
     if (!user) {
       throw new Error("User not found");
     }
 
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return user;
   },
 
   // Get user by email
@@ -80,8 +89,8 @@ export const userService = {
         select: {
           id: true,
           name: true,
-          email: true,
           lastName: true,
+          phone: true,
           role: true,
           createdAt: true,
           updatedAt: true,
@@ -111,13 +120,13 @@ export const userService = {
       const user = await this.getUserById(userId);
 
       const updatedUser = await prisma.user.update({
-        where: { email: user.email },
+        where: { id: userId },
         data: { role },
         select: {
           id: true,
           name: true,
-          email: true,
           lastName: true,
+          phone: true,
           role: true,
           language: true,
           createdAt: true,
@@ -136,28 +145,30 @@ export const userService = {
   async updateUserProfile(userId, userData) {
     try {
       const user = await this.getUserById(userId);
-      const { name, lastName, email } = userData;
+      const { name, lastName, phone } = userData;
 
-      // Check if email is being changed and if it's already in use
-      if (email && email !== user.email) {
-        const existingUser = await this.findUserByEmail(email);
+      // Check if phone is being changed and if it's already in use
+      if (phone && phone !== user.phone) {
+        const existingUser = await prisma.user.findFirst({
+          where: { phone },
+        });
         if (existingUser) {
-          throw new Error("Email already in use");
+          throw new Error("Phone number already in use");
         }
       }
 
       const updatedUser = await prisma.user.update({
-        where: { email: user.email },
+        where: { id: userId },
         data: {
           ...(name && { name }),
           ...(lastName && { lastName }),
-          ...(email && { email }),
+          ...(phone && { phone }),
         },
         select: {
           id: true,
           name: true,
-          email: true,
           lastName: true,
+          phone: true,
           role: true,
           language: true,
           createdAt: true,
@@ -239,18 +250,14 @@ export const userService = {
         throw new Error("User ID and language are required");
       }
 
-      // Get user by ID first to get their email
-      const user = await this.getUserByEmail(userId);
-
-      // Update using email
       const updatedUser = await prisma.user.update({
-        where: { email: user.email },
+        where: { id: userId },
         data: { language },
         select: {
           id: true,
           name: true,
-          email: true,
           lastName: true,
+          phone: true,
           role: true,
           language: true,
           createdAt: true,

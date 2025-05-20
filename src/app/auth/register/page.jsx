@@ -18,21 +18,21 @@ export default function RegisterPage() {
   const [sendingCode, setSendingCode] = useState(false);
   const [codeError, setCodeError] = useState("");
 
-  const handleSendCode = async (email) => {
-    if (!email) {
-      setCodeError(t("validation.email_required"));
+  const handleSendCode = async (phone) => {
+    if (!phone) {
+      setCodeError(t("validation.phone_required"));
       return;
     }
 
     setCodeError("");
     setSendingCode(true);
     try {
-      const response = await fetch("/api/auth/send-email-code", {
+      const response = await fetch("/api/auth/send-phone-code", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ phone }),
       });
 
       const data = await response.json();
@@ -45,65 +45,62 @@ export default function RegisterPage() {
     } catch (err) {
       console.error("Error sending code:", err);
       setCodeError(err.message);
+      setCodeSent(false);
     } finally {
       setSendingCode(false);
     }
   };
 
   const handleSubmit = async (data) => {
-    console.log("Register page received data:", data);
     setLoading(true);
     setError("");
 
     try {
-      // Validate required fields
-      if (
-        !data.email ||
-        !data.password ||
-        !data.firstName ||
-        !data.lastName ||
-        !data.code
-      ) {
-        console.log("Missing required fields:", {
-          email: !data.email,
-          password: !data.password,
-          firstName: !data.firstName,
-          lastName: !data.lastName,
-          code: !data.code,
-        });
-        setError("All fields are required");
-        setLoading(false);
-        return;
-      }
+      // Determine which registration endpoint to use based on the data
+      const endpoint = data.email
+        ? "/api/auth/register"
+        : "/api/register-phone";
+      const requestBody = data.email
+        ? {
+            email: data.email,
+            password: data.password,
+            name: data.firstName,
+            lastName: data.lastName,
+            code: verificationCode,
+          }
+        : {
+            phone: data.phone,
+            name: data.firstName,
+            lastName: data.lastName,
+            code: verificationCode,
+          };
 
-      console.log("Sending registration request with data:", data);
-      const registerResponse = await fetch("/api/register", {
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-          name: data.firstName,
-          lastName: data.lastName,
-          code: data.code,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
-      console.log("Register response status:", registerResponse.status);
-      const responseData = await registerResponse.json();
-      console.log("Register response data:", responseData);
-
-      if (!registerResponse.ok) {
+      if (!response.ok) {
+        const responseData = await response.json();
         throw new Error(responseData.error || "Registration failed");
       }
 
+      const responseData = await response.json();
+
       // After successful registration, sign in the user
-      console.log("Registration successful, signing in...");
       const signInResult = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
+        ...(data.email
+          ? {
+              email: data.email,
+              password: data.password,
+            }
+          : {
+              phone: data.phone,
+              code: verificationCode,
+            }),
         redirect: false,
       });
 
@@ -111,12 +108,13 @@ export default function RegisterPage() {
         throw new Error(signInResult.error);
       }
 
-      // After successful sign in, redirect to select-role page
-      console.log("Sign in successful, redirecting to select-role...");
+      // Redirect to select-role page after successful registration and sign in
       router.push("/select-role");
     } catch (err) {
       console.error("Register - Error:", err);
       setError(err.message || "Registration failed");
+      setCodeSent(false);
+      setVerificationCode("");
     } finally {
       setLoading(false);
     }
@@ -158,6 +156,7 @@ export default function RegisterPage() {
             codeSent={codeSent}
             sendingCode={sendingCode}
             codeError={codeError}
+            phoneOnly={false}
           />
 
           <div className="mt-6 text-center">

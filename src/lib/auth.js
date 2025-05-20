@@ -1,167 +1,184 @@
 import { PrismaClient } from "@prisma/client";
 import { compare } from "bcrypt";
-import crypto from "crypto";
+import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import FacebookProvider from "next-auth/providers/facebook";
-import GoogleProvider from "next-auth/providers/google";
+import {
+  deleteVerificationCode,
+  findUserByPhone,
+  verifyPhoneCode,
+} from "./utils";
 
-const prismaClient = new PrismaClient();
+const prisma = new PrismaClient();
 
-const handleEmailVerification = async (user) => {
-  const verificationToken = crypto.randomBytes(32).toString("hex");
-  await prismaClient.user.update({
-    where: { id: user.id },
-    data: { emailVerificationToken: verificationToken },
-  });
-
-  try {
-    const { sendVerificationEmail } = await import("@/app/utils/email");
-    await sendVerificationEmail(user.email, verificationToken);
-  } catch (error) {
-    console.error("Error sending verification email:", error);
-  }
-
-  throw new Error(
-    "Email not verified. We've sent a verification email. Please check your inbox."
-  );
-};
-
-export const authOptions = {
+export const authConfig = {
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
-    FacebookProvider({
-      clientId: process.env.FACEBOOK_CLIENT_ID,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
-    }),
     CredentialsProvider({
-      name: "Credentials",
+      name: "Email",
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Missing credentials");
-        }
-
-        const user = await prismaClient.user.findUnique({
-          where: { email: credentials.email },
-          include: {
-            accounts: true,
-            sessions: true,
-          },
+        console.log("=== Starting Email Authentication ===");
+        console.log("Received credentials:", {
+          email: credentials?.email,
+          hasPassword: !!credentials?.password,
         });
 
-        if (!user) {
-          throw new Error("User not found");
-        }
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            throw new Error("Email and password are required");
+          }
 
-        if (!user.password) {
-          throw new Error("No password set for this user");
-        }
+          console.log("Looking for user in database...");
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email },
+          });
 
-        if (!user.emailVerified) {
-          await handleEmailVerification(user);
-        }
+          console.log("User found:", {
+            exists: !!user,
+            hasPassword: !!user?.password,
+            id: user?.id,
+            email: user?.email,
+          });
 
-        const isPasswordValid = await compare(
-          credentials.password,
-          user.password
-        );
-        if (!isPasswordValid) {
-          throw new Error("Invalid password");
-        }
+          if (!user) {
+            throw new Error("User not found");
+          }
 
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role?.toLowerCase(),
-          hasCompletedTrainingSetup: !!user.preferences,
-          language: user.language,
-        };
+          if (!user.password) {
+            throw new Error("User has no password set");
+          }
+
+          console.log("Comparing passwords...");
+          const isPasswordValid = await compare(
+            credentials.password,
+            user.password
+          );
+          console.log("Password valid:", isPasswordValid);
+
+          if (!isPasswordValid) {
+            throw new Error("Invalid password");
+          }
+
+          console.log("Authentication successful, returning user data");
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error("Auth error:", error);
+          console.error("Error stack:", error.stack);
+          throw error;
+        }
+      },
+    }),
+    CredentialsProvider({
+      name: "Phone",
+      credentials: {
+        phone: { label: "Phone", type: "text" },
+        code: { label: "Verification Code", type: "text" },
+      },
+      async authorize(credentials) {
+        console.log("=== Starting Phone Authentication ===");
+        console.log("Received credentials:", {
+          phone: credentials?.phone,
+          hasCode: !!credentials?.code,
+        });
+
+        try {
+          if (!credentials?.phone || !credentials?.code) {
+            throw new Error("Phone number and verification code are required");
+          }
+
+          console.log("Verifying phone code...");
+          const verification = await verifyPhoneCode(
+            credentials.phone,
+            credentials.code
+          );
+          console.log("Verification result:", !!verification);
+
+          if (!verification) {
+            throw new Error("Invalid or expired verification code");
+          }
+
+          console.log("Looking for user by phone...");
+          const user = await findUserByPhone(credentials.phone);
+          console.log("User found:", {
+            exists: !!user,
+            id: user?.id,
+            phone: user?.phone,
+          });
+
+          if (!user) {
+            throw new Error("User not found");
+          }
+
+          console.log("Deleting verification code...");
+          await deleteVerificationCode(verification.id);
+
+          console.log("Authentication successful, returning user data");
+          return {
+            id: user.id,
+            name: user.name,
+            phone: user.phone,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error("Auth error:", error);
+          console.error("Error stack:", error.stack);
+          throw error;
+        }
       },
     }),
   ],
   callbacks: {
-    async signIn({ user, account }) {
-      if (account?.provider === "google" || account?.provider === "facebook") {
-        const existingUser = await prismaClient.user.findUnique({
-          where: { email: user.email },
-          include: { preferences: true },
-        });
-
-        if (!existingUser) {
-          const newUser = await prismaClient.user.create({
-            data: {
-              name: user.name,
-              email: user.email,
-              lastName: "",
-              role: null,
-              emailVerified: true,
-              language: "en",
-            },
-          });
-
-          user.id = newUser.id;
-          user.role = newUser.role?.toLowerCase();
-          user.hasCompletedTrainingSetup = false;
-          user.language = newUser.language;
-        } else {
-          user.id = existingUser.id;
-          user.role = existingUser.role?.toLowerCase();
-          user.hasCompletedTrainingSetup = !!existingUser.preferences;
-          user.language = existingUser.language;
-        }
-      }
-
-      return true;
-    },
-    async session({ session, token }) {
-      if (token) {
-        session.user.id = token.id;
-        session.user.role = token.role?.toLowerCase();
-        session.user.hasCompletedTrainingSetup =
-          token.hasCompletedTrainingSetup;
-        session.user.language = token.language;
-      }
-      return session;
-    },
-    async jwt({ token, user, trigger, session }) {
-      if (trigger === "update" && session) {
-        return {
-          ...token,
-          ...(session.role && { role: session.role.toLowerCase() }),
-          ...(session.hasCompletedTrainingSetup !== undefined && {
-            hasCompletedTrainingSetup: session.hasCompletedTrainingSetup,
-          }),
-          ...(session.language && { language: session.language }),
-        };
-      }
+    async jwt({ token, user }) {
+      console.log("=== JWT Callback ===");
+      console.log("Token before:", token);
+      console.log("User data:", user);
 
       if (user) {
-        return {
-          ...token,
-          id: user.id,
-          role: user.role?.toLowerCase(),
-          hasCompletedTrainingSetup: user.hasCompletedTrainingSetup,
-          language: user.language,
-        };
+        token.id = user.id;
+        token.role = user.role;
+        token.phone = user.phone;
+        token.email = user.email;
       }
 
+      console.log("Token after:", token);
       return token;
+    },
+    async session({ session, token }) {
+      console.log("=== Session Callback ===");
+      console.log("Session before:", session);
+      console.log("Token:", token);
+
+      if (token) {
+        session.user.id = token.id;
+        session.user.role = token.role;
+        session.user.phone = token.phone;
+        session.user.email = token.email;
+      }
+
+      console.log("Session after:", session);
+      return session;
     },
   },
   pages: {
     signIn: "/auth/login",
-    signOut: "/auth/logout",
     error: "/auth/error",
   },
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
+
+// Export for App Router
+export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
+
+// Export for Pages Router
+export const authOptions = authConfig;

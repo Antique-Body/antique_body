@@ -1,7 +1,6 @@
 "use client";
 
 import Background from "@/components/background";
-import { Button } from "@/components/common";
 import { AuthForm, Card } from "@/components/custom";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
@@ -14,130 +13,113 @@ export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [forgotPasswordStatus, setForgotPasswordStatus] = useState("");
-  const [manualFixingVerification, setManualFixingVerification] =
-    useState(false);
-  const [currentLoginEmail, setCurrentLoginEmail] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [codeSent, setCodeSent] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [codeError, setCodeError] = useState("");
+
+  const handleSendCode = async (phone) => {
+    if (!phone) {
+      setCodeError(t("validation.phone_required"));
+      return;
+    }
+
+    setCodeError("");
+    setSendingCode(true);
+    try {
+      const response = await fetch("/api/auth/send-phone-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ phone }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || t("auth.login.code_send_error"));
+      }
+
+      setCodeSent(true);
+      setVerificationCode(""); // Reset verification code when sending new one
+    } catch (err) {
+      console.error("Error sending code:", err);
+      setCodeError(err.message);
+    } finally {
+      setSendingCode(false);
+    }
+  };
 
   const handleSubmit = async (data) => {
     setLoading(true);
     setError("");
-    setCurrentLoginEmail(data.email);
 
     try {
-      const result = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-      });
+      if (data.email) {
+        // Email login - no verification code needed
+        const result = await signIn("credentials", {
+          email: data.email,
+          password: data.password,
+          redirect: false,
+        });
 
-      if (result?.error) {
-        if (
-          result.error.includes("not verified") ||
-          result.error.includes("verify")
-        ) {
-          try {
-            const resetResponse = await fetch(
-              `/api/email-verification/resend`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ email: data.email }),
-                cache: "no-store",
-              }
-            );
-
-            const resetData = await resetResponse.json();
-
-            if (resetResponse.ok) {
-              setError(t("auth.register.verification_email_sent"));
-              return;
-            } else {
-              console.error("Verification reset error:", resetData.message);
-            }
-          } catch (fixError) {
-            console.error("Verification fix error:", fixError);
+        if (result?.error) {
+          // Extract the error message from the URL if it's a credentials error
+          if (result.error === "CredentialsSignin") {
+            const errorUrl = new URL(result.url);
+            const errorMessage = errorUrl.searchParams.get("error");
+            throw new Error(errorMessage || "Authentication failed");
           }
+          throw new Error(result.error);
+        }
+      } else {
+        // Phone login - verification code required
+        if (!verificationCode) {
+          throw new Error(t("validation.verification_code_required"));
         }
 
-        throw new Error(result.error);
+        // First verify the code
+        const verifyResponse = await fetch("/api/auth/verify-phone-code", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            phone: data.phone,
+            code: verificationCode,
+          }),
+        });
+
+        const verifyData = await verifyResponse.json();
+
+        if (!verifyResponse.ok) {
+          throw new Error(verifyData.error || "Verification failed");
+        }
+
+        // If verification successful, proceed with sign in
+        const result = await signIn("credentials", {
+          phone: data.phone,
+          code: verificationCode,
+          redirect: false,
+        });
+
+        if (result?.error) {
+          // Extract the error message from the URL if it's a credentials error
+          if (result.error === "CredentialsSignin") {
+            const errorUrl = new URL(result.url);
+            const errorMessage = errorUrl.searchParams.get("error");
+            throw new Error(errorMessage || "Authentication failed");
+          }
+          throw new Error(result.error);
+        }
       }
 
+      // Redirect to select-role page after successful login
       router.push("/select-role");
     } catch (err) {
       console.error("Login - Error:", err);
       setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleForgotPassword = async (e) => {
-    e.preventDefault();
-    setForgotPasswordStatus("sending");
-    console.log(
-      "Sending forgot password request for email:",
-      forgotPasswordEmail
-    );
-
-    try {
-      const response = await fetch("/api/auth/forgot-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: forgotPasswordEmail }),
-      });
-
-      console.log("Forgot password response status:", response.status);
-      const data = await response.json();
-      console.log("Forgot password response data:", data);
-
-      if (!response.ok) {
-        throw new Error(data.error || t("auth.password_reset.failed"));
-      }
-
-      setForgotPasswordStatus("success");
-      setTimeout(() => {
-        setShowForgotPassword(false);
-        setForgotPasswordEmail("");
-        setForgotPasswordStatus("");
-      }, 3000);
-    } catch (err) {
-      console.error("Forgot password error:", err);
-      setForgotPasswordStatus("error");
-      setError(err.message);
-    }
-  };
-
-  const handleManualVerification = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/email-verification/resend`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: currentLoginEmail }),
-        cache: "no-store",
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message || t("auth.register.verification_email_failed")
-        );
-      }
-
-      setError(t("auth.register.verification_email_sent"));
-    } catch (err) {
-      console.error("Verification error:", err);
-      setError(t("auth.register.verification_email_failed"));
     } finally {
       setLoading(false);
     }
@@ -161,95 +143,38 @@ export default function LoginPage() {
           showLogo={true}
           logoTagline="STRENGTH OF THE ANCIENTS"
         >
-          {showForgotPassword ? (
-            <div className="w-full">
-              <h2 className="text-xl font-semibold mb-4 text-center">
-                {t("auth.password_reset.title")}
-              </h2>
-              <form onSubmit={handleForgotPassword} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
-                    {t("auth.form.email")}
-                  </label>
-                  <input
-                    type="email"
-                    value={forgotPasswordEmail}
-                    onChange={(e) => setForgotPasswordEmail(e.target.value)}
-                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff7800]"
-                    required
-                  />
-                </div>
-                {forgotPasswordStatus === "error" && (
-                  <p className="text-red-500 text-sm">
-                    {t("auth.password_reset.failed")}
-                  </p>
-                )}
-                {forgotPasswordStatus === "success" && (
-                  <p className="text-green-500 text-sm">
-                    {t("auth.password_reset.instructions")}
-                  </p>
-                )}
-                <Button
-                  type="submit"
-                  disabled={forgotPasswordStatus === "sending"}
-                  loading={forgotPasswordStatus === "sending"}
-                  className="w-full"
-                >
-                  {t("auth.form.submit")}
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => {
-                    setShowForgotPassword(false);
-                    setForgotPasswordEmail("");
-                    setForgotPasswordStatus("");
-                  }}
-                  className="w-full"
-                >
-                  {t("auth.login.back_to_login")}
-                </Button>
-              </form>
-            </div>
-          ) : (
-            <>
-              <h1 className="text-2xl font-bold mb-2 text-center">
-                {t("auth.login.welcome_back")}
-              </h1>
-              <p className="text-gray-400 mb-8 text-center">
-                {t("auth.login.sign_in_to_account")}
-              </p>
+          <h1 className="text-2xl font-bold mb-2 text-center">
+            {t("auth.login.welcome_back")}
+          </h1>
+          <p className="text-gray-400 mb-8 text-center">
+            {t("auth.login.sign_in_to_account")}
+          </p>
 
-              <AuthForm
-                onSubmit={handleSubmit}
-                loading={loading}
-                error={error}
-                isLogin={true}
-              />
+          <AuthForm
+            onSubmit={handleSubmit}
+            loading={loading}
+            error={error}
+            isLogin={true}
+            onSendCode={handleSendCode}
+            verificationCode={verificationCode}
+            setVerificationCode={setVerificationCode}
+            codeSent={codeSent}
+            sendingCode={sendingCode}
+            codeError={codeError}
+            phoneOnly={false}
+          />
 
-              <div className="mt-4 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setShowForgotPassword(true)}
-                  className="text-sm text-gray-400 hover:text-[#ff7800] transition-colors duration-300 cursor-pointer"
-                >
-                  {t("auth.login.forgot_password")}
-                </button>
-              </div>
-
-              <div className="mt-6 text-center">
-                <p className="text-gray-400">
-                  {t("auth.login.no_account")}{" "}
-                  <Link
-                    href="/auth/register"
-                    className="text-[#ff7800] hover:text-[#ff5f00] transition-colors"
-                  >
-                    {t("auth.register.title")}
-                  </Link>
-                </p>
-              </div>
-            </>
-          )}
+          <div className="mt-6 text-center">
+            <p className="text-gray-400">
+              {t("auth.login.no_account")}{" "}
+              <Link
+                href="/auth/register"
+                className="text-[#ff7800] hover:text-[#ff5f00] transition-colors"
+              >
+                {t("auth.register.title")}
+              </Link>
+            </p>
+          </div>
         </Card>
       </div>
     </main>

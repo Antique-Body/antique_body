@@ -10,7 +10,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
 import { PhoneInput } from "./PhoneInput";
 import { VerificationCodeInput } from "./VerificationCodeInput";
 
@@ -24,16 +23,17 @@ export const AuthForm = ({
   verificationCode,
   setVerificationCode,
   codeSent: externalCodeSent,
-  sendingCode,
+  sendingCode: externalSendingCode,
   codeError: externalCodeError,
+  phoneOnly = true,
 }) => {
-  const { t } = useTranslation();
   const { isLoading: authLoading } = useAuth();
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [loginMethod, setLoginMethod] = useState("email");
   const [phoneValue, setPhoneValue] = useState("");
   const [codeError, setCodeError] = useState("");
   const [codeSent, setCodeSent] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
   const {
     register,
     handleSubmit,
@@ -51,6 +51,10 @@ export const AuthForm = ({
   useEffect(() => {
     if (externalCodeSent) setCodeSent(externalCodeSent);
   }, [externalCodeSent]);
+
+  useEffect(() => {
+    if (externalSendingCode !== undefined) setSendingCode(externalSendingCode);
+  }, [externalSendingCode]);
 
   const password = watch("password");
   const countryCode = watch("countryCode");
@@ -72,15 +76,76 @@ export const AuthForm = ({
   };
 
   const handleSendCode = async () => {
-    const email = getValues("email");
-    onSendCode(email);
+    if (loginMethod === "email") {
+      const email = getValues("email");
+      if (!email) {
+        setCodeError("Email is required");
+        return;
+      }
+      setCodeError("");
+      setSendingCode(true);
+      try {
+        const response = await fetch("/api/auth/send-email-code", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to send verification code");
+        }
+
+        setCodeSent(true);
+        setVerificationCode(""); // Reset verification code when sending new one
+      } catch (err) {
+        console.error("Error sending code:", err);
+        setCodeError(err.message);
+      } finally {
+        setSendingCode(false);
+      }
+    } else {
+      const phone = getValues("phone");
+      if (!phone) {
+        setCodeError("Phone number is required");
+        return;
+      }
+      setCodeError("");
+      setSendingCode(true);
+      try {
+        const response = await fetch("/api/auth/send-phone-code", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ phone }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to send verification code");
+        }
+
+        setCodeSent(true);
+        setVerificationCode(""); // Reset verification code when sending new one
+      } catch (err) {
+        console.error("Error sending code:", err);
+        setCodeError(err.message);
+      } finally {
+        setSendingCode(false);
+      }
+    }
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     const formData = getValues();
 
-    if (!isLogin) {
+    if (loginMethod === "phone" || !isLogin) {
       if (!verificationCode) {
         setError("Verification code is required");
         setCodeError("Verification code is required");
@@ -92,11 +157,9 @@ export const AuthForm = ({
         setCodeError("Verification code must be 6 digits");
         return;
       }
-
-      onSubmit({ ...formData, code: verificationCode });
-    } else {
-      onSubmit(formData);
     }
+
+    onSubmit({ ...formData, code: verificationCode });
   };
 
   const getFieldClassName = (fieldName) =>
@@ -114,9 +177,7 @@ export const AuthForm = ({
           onClick={() => setShowEmailForm(true)}
           className="w-full bg-gradient-to-r from-[#ff7800] to-[#ff5f00] py-2 rounded font-medium text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 disabled:opacity-50"
         >
-          {isLogin
-            ? t("auth.login.continue_with_email_phone")
-            : t("auth.register.register_with_email_phone")}
+          {isLogin ? "Continue with Email/Phone" : "Register with Email/Phone"}
         </Button>
 
         <Button
@@ -125,9 +186,7 @@ export const AuthForm = ({
           className="w-full bg-white text-[#1a1a1a] hover:bg-gray-100 hover:scale-[1.02] transition-all duration-200"
           leftIcon={<GoogleIcon />}
         >
-          {isLogin
-            ? t("auth.login.continue_with_google")
-            : t("auth.register.register_with_google")}
+          {isLogin ? "Continue with Google" : "Register with Google"}
         </Button>
         <Button
           onClick={handleFacebookSignIn}
@@ -135,9 +194,7 @@ export const AuthForm = ({
           className="w-full bg-white text-[#1a1a1a] hover:bg-gray-100 hover:scale-[1.02] transition-all duration-200"
           leftIcon={<FacebookIcon />}
         >
-          {isLogin
-            ? t("auth.login.continue_with_facebook")
-            : t("auth.register.register_with_facebook")}
+          {isLogin ? "Continue with Facebook" : "Register with Facebook"}
         </Button>
       </div>
     );
@@ -158,7 +215,7 @@ export const AuthForm = ({
           }}
           className="flex-1 py-3 text-base font-medium"
         >
-          {t("auth.login.use_email")}
+          Use Email
         </Button>
         <Button
           type="button"
@@ -170,7 +227,7 @@ export const AuthForm = ({
           }}
           className="flex-1 py-3 text-base font-medium"
         >
-          {t("auth.login.use_phone")}
+          Use Phone
         </Button>
       </div>
 
@@ -179,9 +236,9 @@ export const AuthForm = ({
           <FormField
             name="firstName"
             type="text"
-            placeholder={t("auth.form.first_name")}
+            placeholder="First Name"
             register={register}
-            rules={{ required: t("validation.first_name_required") }}
+            rules={{ required: "First name is required" }}
             error={errors.firstName?.message}
             required
             className={`flex-1 ${getFieldClassName("firstName")}`}
@@ -190,9 +247,9 @@ export const AuthForm = ({
           <FormField
             name="lastName"
             type="text"
-            placeholder={t("auth.form.last_name")}
+            placeholder="Last Name"
             register={register}
-            rules={{ required: t("validation.last_name_required") }}
+            rules={{ required: "Last name is required" }}
             error={errors.lastName?.message}
             required
             className={`flex-1 ${getFieldClassName("lastName")}`}
@@ -206,13 +263,13 @@ export const AuthForm = ({
           <FormField
             name="email"
             type="email"
-            placeholder={t("auth.form.email")}
+            placeholder="Email"
             register={register}
             rules={{
-              required: t("validation.email_required"),
+              required: "Email is required",
               pattern: {
                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: t("validation.email_invalid"),
+                message: "Invalid email address",
               },
             }}
             error={errors.email?.message}
@@ -223,13 +280,13 @@ export const AuthForm = ({
           <FormField
             name="password"
             type="password"
-            placeholder={t("auth.form.password")}
+            placeholder="Password"
             register={register}
             rules={{
-              required: t("validation.password_required"),
+              required: "Password is required",
               minLength: {
                 value: 6,
-                message: t("validation.password_min_length"),
+                message: "Password must be at least 6 characters",
               },
             }}
             error={errors.password?.message}
@@ -238,37 +295,50 @@ export const AuthForm = ({
             autoComplete={isLogin ? "current-password" : "new-password"}
             onChange={(e) => handleFieldChange(e, "password")}
           />
+          {!isLogin && (
+            <VerificationCodeInput
+              verificationCode={verificationCode}
+              setVerificationCode={setVerificationCode}
+              codeError={codeError}
+              setCodeError={setCodeError}
+              handleSendCode={handleSendCode}
+              sendingCode={sendingCode}
+              codeSent={codeSent}
+              setCodeSent={setCodeSent}
+              isEmail={true}
+            />
+          )}
         </>
       ) : (
-        <PhoneInput
-          register={register}
-          errors={errors}
-          countryCode={countryCode}
-          setValue={setValue}
-          phoneValue={phoneValue}
-          setPhoneValue={setPhoneValue}
-          t={t}
-        />
+        <>
+          <PhoneInput
+            register={register}
+            errors={errors}
+            countryCode={countryCode}
+            setValue={setValue}
+            phoneValue={phoneValue}
+            setPhoneValue={setPhoneValue}
+          />
+          <VerificationCodeInput
+            verificationCode={verificationCode}
+            setVerificationCode={setVerificationCode}
+            codeError={codeError}
+            setCodeError={setCodeError}
+            handleSendCode={handleSendCode}
+            sendingCode={sendingCode}
+            codeSent={codeSent}
+            setCodeSent={setCodeSent}
+            isEmail={false}
+          />
+        </>
       )}
-
-      <VerificationCodeInput
-        verificationCode={verificationCode}
-        setVerificationCode={setVerificationCode}
-        codeError={codeError}
-        setCodeError={setCodeError}
-        handleSendCode={handleSendCode}
-        sendingCode={sendingCode}
-        codeSent={codeSent}
-        setCodeSent={setCodeSent}
-        t={t}
-      />
 
       <Button
         type="submit"
         loading={loading || authLoading}
         className="w-full py-3 bg-gradient-to-r from-[#ff7800] to-[#ff5f00] rounded-lg font-medium text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 disabled:opacity-50"
       >
-        {isLogin ? t("auth.login.sign_in") : t("auth.register.title")}
+        {isLogin ? "Sign In" : "Register"}
       </Button>
 
       <Button
@@ -277,7 +347,7 @@ export const AuthForm = ({
         onClick={() => setShowEmailForm(false)}
         className="w-full py-3 text-gray-400 hover:text-[#ff7800] transition-colors"
       >
-        {t("auth.login.back")}
+        Back
       </Button>
     </form>
   );
