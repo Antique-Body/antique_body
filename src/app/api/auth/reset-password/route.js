@@ -3,8 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(request) {
   try {
-    const body = await request.json();
-    const { token, password } = body;
+    const { token, password } = await request.json();
 
     if (!token || !password) {
       return NextResponse.json(
@@ -13,26 +12,21 @@ export async function POST(request) {
       );
     }
 
-    try {
-      const updatedUser = await userService.resetPassword(token, password);
-      return NextResponse.json({
-        message: "Password has been reset successfully",
-        user: updatedUser
-      });
-    } catch (error) {
-      if (error.message === "Invalid or expired reset token") {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 400 }
-        );
-      }
-      throw error;
-    }
+    await userService.resetPassword(token, password);
+
+    return NextResponse.json({
+      message: "Password has been reset successfully",
+    });
   } catch (error) {
     console.error("Password reset error:", error);
+
+    if (error.message === "Invalid or expired reset token") {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
     return NextResponse.json(
       { error: "Failed to reset password" },
       { status: 500 }
     );
   }
-} 
+}

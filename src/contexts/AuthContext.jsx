@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext(null);
 
@@ -31,4 +31,4 @@ export function useAuth() {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-} 
+}
