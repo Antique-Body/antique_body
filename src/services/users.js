@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { hash, compare } from "bcrypt";
+import { compare, hash } from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -109,7 +109,7 @@ export const userService = {
   async updateUserRole(userId, role) {
     try {
       const user = await this.getUserById(userId);
-      
+
       const updatedUser = await prisma.user.update({
         where: { email: user.email },
         data: { role },
@@ -241,7 +241,7 @@ export const userService = {
 
       // Get user by ID first to get their email
       const user = await this.getUserByEmail(userId);
-      
+
       // Update using email
       const updatedUser = await prisma.user.update({
         where: { email: user.email },
@@ -261,7 +261,7 @@ export const userService = {
       return updatedUser;
     } catch (error) {
       console.error("Error in updateUserLanguage:", error);
-      if (error.code === 'P2025') {
+      if (error.code === "P2025") {
         throw new Error("User not found");
       }
       throw error;
@@ -274,19 +274,19 @@ export const userService = {
       const user = await prisma.user.findFirst({
         where: {
           email: email,
-          emailVerificationToken: token
-        }
+          emailVerificationToken: token,
+        },
       });
 
       if (!user) {
-        throw new Error('Invalid verification token or email');
+        throw new Error("Invalid verification token or email");
       }
 
       return await prisma.user.update({
         where: { id: user.id },
         data: {
           emailVerified: true,
-          emailVerificationToken: null
+          emailVerificationToken: null,
         },
         select: {
           id: true,
@@ -298,7 +298,7 @@ export const userService = {
           emailVerified: true,
           createdAt: true,
           updatedAt: true,
-        }
+        },
       });
     } catch (error) {
       console.error("Error in verifyEmail:", error);
@@ -306,82 +306,78 @@ export const userService = {
     }
   },
 
-  // Reset password
-  async resetPassword(token, newPassword) {
+  // Initiate password reset
+  async initiatePasswordReset(email) {
     try {
-      const user = await prisma.user.findFirst({
-        where: {
-          resetToken: token,
-          resetTokenExpiry: {
-            gt: new Date()
-          }
-        }
+      const user = await prisma.user.findUnique({
+        where: { email },
       });
 
       if (!user) {
-        throw new Error('Invalid or expired reset token');
+        return null;
       }
 
-      const hashedPassword = await hash(newPassword, 12);
-      
-      return await prisma.user.update({
+      // Generate reset token and expiry
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
+
+      // Update user with reset token
+      await prisma.user.update({
         where: { id: user.id },
         data: {
-          password: hashedPassword,
-          resetToken: null,
-          resetTokenExpiry: null
+          resetToken,
+          resetTokenExpiry,
         },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          lastName: true,
-          role: true,
-          language: true,
-          emailVerified: true,
-          createdAt: true,
-          updatedAt: true,
-        }
       });
+
+      return {
+        email: user.email,
+        resetToken,
+      };
     } catch (error) {
-      console.error("Error in resetPassword:", error);
+      console.error("Password reset initiation error:", error);
       throw error;
     }
   },
 
-  // Initiate password reset
-  async initiatePasswordReset(email) {
-    try {
-      const user = await this.findUserByEmail(email);
-      
-      if (!user) {
-        return null; // Return null instead of throwing to maintain security
-      }
-
-      const resetToken = crypto.randomBytes(32).toString("hex");
-      const resetTokenExpiry = new Date(Date.now() + 3600000);
-
-      return await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          resetToken,
-          resetTokenExpiry
+  // Reset password
+  async resetPassword(token, newPassword) {
+    const user = await prisma.user.findFirst({
+      where: {
+        resetToken: token,
+        resetTokenExpiry: {
+          gt: new Date(),
         },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          lastName: true,
-          role: true,
-          language: true,
-          emailVerified: true,
-          createdAt: true,
-          updatedAt: true,
-        }
+      },
+    });
+
+    if (!user) {
+      throw new Error("Invalid or expired reset token");
+    }
+
+    const hashedPassword = await hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetToken: null,
+        resetTokenExpiry: null,
+      },
+    });
+
+    return true;
+  },
+
+  async updateUser(userId, data) {
+    try {
+      return await prisma.user.update({
+        where: { id: userId },
+        data: data,
       });
     } catch (error) {
-      console.error("Error in initiatePasswordReset:", error);
-      throw error;
+      console.error("Error updating user:", error);
+      throw new Error("Failed to update user");
     }
   },
 };

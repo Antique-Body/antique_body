@@ -1,34 +1,104 @@
-import { sendEmailVerificationCode } from '@/app/utils/email';
-import { NextResponse } from 'next/server';
+import { sendEmailVerificationCode } from "@/app/utils/email";
+import { PrismaClient } from "@prisma/client";
+import { NextResponse } from "next/server";
 
-// Simple in-memory store (for demo only!)
-const emailCodeStore = global.emailCodeStore || (global.emailCodeStore = {});
+const prisma = new PrismaClient();
+
+export async function verifyEmailCode(email, code) {
+  try {
+    // Find the most recent unused code for this email
+    const verificationCode = await prisma.emailVerificationCode.findFirst({
+      where: {
+        email,
+        code,
+        used: false,
+        expiresAt: {
+          gt: new Date(),
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    if (!verificationCode) {
+      return false;
+    }
+
+    // Mark the code as used
+    await prisma.emailVerificationCode.update({
+      where: { id: verificationCode.id },
+      data: { used: true },
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Error verifying code:", error);
+    return false;
+  }
+}
 
 export async function POST(request) {
   try {
     const { email } = await request.json();
+
     if (!email) {
-      return NextResponse.json({ success: false, message: 'Email is required' }, { status: 400 });
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
+
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "User with this email already exists" },
+        { status: 400 }
+      );
+    }
+
     // Generate 6-digit code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-    // Store code for this email (expires in 10 min)
-    emailCodeStore[email] = { code, expires: Date.now() + 10 * 60 * 1000 };
+
+    // Calculate expiration time (15 minutes from now)
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    // Delete any existing unused codes for this email
+    await prisma.emailVerificationCode.deleteMany({
+      where: {
+        email,
+        used: false,
+      },
+    });
+
+    // Store new code in database
+    await prisma.emailVerificationCode.create({
+      data: {
+        email,
+        code,
+        expiresAt,
+      },
+    });
+
     // Send email
-    const sent = await sendEmailVerificationCode(email, code);
-    if (!sent) {
-      return NextResponse.json({ success: false, message: 'Failed to send code' }, { status: 500 });
+    const emailSent = await sendEmailVerificationCode(email, code);
+
+    if (!emailSent) {
+      return NextResponse.json(
+        { error: "Failed to send verification code" },
+        { status: 500 }
+      );
     }
-    return NextResponse.json({ success: true, message: 'Code sent' });
+
+    return NextResponse.json({
+      message: "Verification code sent successfully",
+    });
   } catch (error) {
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    console.error("Error sending verification code:", error);
+    return NextResponse.json(
+      { error: "Failed to send verification code" },
+      { status: 500 }
+    );
   }
 }
-
-// Helper for other endpoints to verify code
-export function verifyEmailCode(email, code) {
-  const entry = emailCodeStore[email];
-  if (!entry) return false;
-  if (entry.expires < Date.now()) return false;
-  return entry.code === code;
-} 

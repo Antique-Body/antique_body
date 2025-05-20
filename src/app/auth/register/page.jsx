@@ -1,9 +1,8 @@
 "use client";
 
-import { AuthForm } from "@/components/auth/AuthForm";
 import Background from "@/components/background";
-import { Button } from "@/components/common/index";
-import { Card } from "@/components/custom/index";
+import { AuthForm, Card } from "@/components/custom";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -14,68 +13,112 @@ export default function RegisterPage() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [registrationSuccess, setRegistrationSuccess] = useState(false);
-  const [registeredEmail, setRegisteredEmail] = useState("");
-  const [resendingEmail, setResendingEmail] = useState(false);
-  const [resendSuccess, setResendSuccess] = useState(false);
-  const [resendError, setResendError] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [codeSent, setCodeSent] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [codeError, setCodeError] = useState("");
 
-  const handleSubmit = async (data) => {
-    setLoading(true);
-    setError("");
-
-    try {
-      const registerResponse = await fetch("/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const responseData = await registerResponse.json();
-
-      if (!registerResponse.ok) {
-        throw new Error(responseData.error || t("register_failed"));
-      }
-
-      setRegisteredEmail(data.email);
-      setRegistrationSuccess(true);
-    } catch (err) {
-      console.error("Register - Error:", err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
+  const handleSendCode = async (email) => {
+    if (!email) {
+      setCodeError(t("validation.email_required"));
+      return;
     }
-  };
 
-  const handleResendEmail = async () => {
-    setResendingEmail(true);
-    setResendSuccess(false);
-    setResendError("");
-
+    setCodeError("");
+    setSendingCode(true);
     try {
-      const response = await fetch("/api/email-verification/resend", {
+      const response = await fetch("/api/auth/send-email-code", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: registeredEmail }),
-        cache: "no-store",
+        body: JSON.stringify({ email }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || t("verification_email_failed"));
+        throw new Error(data.error || t("auth.login.code_send_error"));
       }
 
-      setResendSuccess(true);
+      setCodeSent(true);
     } catch (err) {
-      console.error("Resend email error:", err);
-      setResendError(err.message);
+      console.error("Error sending code:", err);
+      setCodeError(err.message);
     } finally {
-      setResendingEmail(false);
+      setSendingCode(false);
+    }
+  };
+
+  const handleSubmit = async (data) => {
+    console.log("Register page received data:", data);
+    setLoading(true);
+    setError("");
+
+    try {
+      // Validate required fields
+      if (
+        !data.email ||
+        !data.password ||
+        !data.firstName ||
+        !data.lastName ||
+        !data.code
+      ) {
+        console.log("Missing required fields:", {
+          email: !data.email,
+          password: !data.password,
+          firstName: !data.firstName,
+          lastName: !data.lastName,
+          code: !data.code,
+        });
+        setError("All fields are required");
+        setLoading(false);
+        return;
+      }
+
+      console.log("Sending registration request with data:", data);
+      const registerResponse = await fetch("/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+          name: data.firstName,
+          lastName: data.lastName,
+          code: data.code,
+        }),
+      });
+
+      console.log("Register response status:", registerResponse.status);
+      const responseData = await registerResponse.json();
+      console.log("Register response data:", responseData);
+
+      if (!registerResponse.ok) {
+        throw new Error(responseData.error || "Registration failed");
+      }
+
+      // After successful registration, sign in the user
+      console.log("Registration successful, signing in...");
+      const signInResult = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      });
+
+      if (signInResult?.error) {
+        throw new Error(signInResult.error);
+      }
+
+      // After successful sign in, redirect to select-role page
+      console.log("Sign in successful, redirecting to select-role...");
+      router.push("/select-role");
+    } catch (err) {
+      console.error("Register - Error:", err);
+      setError(err.message || "Registration failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -95,92 +138,39 @@ export default function RegisterPage() {
           className="w-full max-w-md p-8 bg-zinc-900/80 backdrop-blur-md border border-zinc-800 rounded-xl shadow-2xl"
           borderTop={true}
           showLogo={true}
-          logoTagline="STRENGTH OF THE ANCIENTS">
-          {registrationSuccess ? (
-            <div className="text-center">
-              <div className="flex justify-center mb-6">
-                <div className="bg-green-500/20 p-3 rounded-full">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-12 w-12 text-green-500"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
-              </div>
-              <h2 className="text-2xl font-semibold mb-4 text-green-500">
-                {t("registration_successful")}
-              </h2>
-              <p className="text-gray-400 mb-2">
-                {t("auth.register.verification.email_sent_to")}
-              </p>
-              <p className="font-medium text-white mb-6">{registeredEmail}</p>
-              <p className="text-gray-400 mb-6">
-                {t("check_inbox_verification")}
-              </p>
+          logoTagline="STRENGTH OF THE ANCIENTS"
+        >
+          <h1 className="text-2xl font-bold mb-2 text-center">
+            {t("auth.register.create_account")}
+          </h1>
+          <p className="text-gray-400 mb-8 text-center">
+            {t("auth.register.join_fitness_community")}
+          </p>
 
-              {resendSuccess ? (
-                <div className="mb-6 p-3 bg-green-500/10 rounded-lg">
-                  <p className="text-green-500">
-                    {t("verification_email_sent_again")}
-                  </p>
-                </div>
-              ) : resendError ? (
-                <div className="mb-6 p-3 bg-red-500/10 rounded-lg">
-                  <p className="text-red-500">{resendError}</p>
-                </div>
-              ) : null}
+          <AuthForm
+            onSubmit={handleSubmit}
+            loading={loading}
+            error={error}
+            isLogin={false}
+            onSendCode={handleSendCode}
+            verificationCode={verificationCode}
+            setVerificationCode={setVerificationCode}
+            codeSent={codeSent}
+            sendingCode={sendingCode}
+            codeError={codeError}
+          />
 
-              <div className="space-y-3">
-                <Button
-                  onClick={handleResendEmail}
-                  loading={resendingEmail}
-                  variant="outline"
-                  className="w-full">
-                  {t("resend_verification_email")}
-                </Button>
-                <Link
-                  href="/auth/login"
-                  className="inline-block w-full bg-gradient-to-r from-[#ff7800] to-[#ff5f00] text-white px-6 py-3 rounded-lg font-medium transition-all hover:shadow-lg hover:from-[#ff5f00] hover:to-[#ff7800]">
-                  {t("go_to_login")}
-                </Link>
-              </div>
-            </div>
-          ) : (
-            <>
-              <h1 className="text-2xl font-bold mb-2 text-center">
-                {t("auth.register.create_account")}
-              </h1>
-              <p className="text-gray-400 mb-8 text-center">
-                {t("auth.register.join_fitness_community")}
-              </p>
-
-              <AuthForm
-                onSubmit={handleSubmit}
-                loading={loading}
-                error={error}
-                isLogin={false}
-              />
-
-              <div className="mt-6 text-center">
-                <p className="text-gray-400">
-                  {t("auth.register.have_account")}{" "}
-                  <Link
-                    href="/auth/login"
-                    className="text-[#ff7800] hover:text-[#ff5f00] transition-colors">
-                    {t("auth.register.sign_in")}
-                  </Link>
-                </p>
-              </div>
-            </>
-          )}
+          <div className="mt-6 text-center">
+            <p className="text-gray-400">
+              {t("auth.register.have_account")}{" "}
+              <Link
+                href="/auth/login"
+                className="text-[#ff7800] hover:text-[#ff5f00] transition-colors"
+              >
+                {t("auth.register.sign_in")}
+              </Link>
+            </p>
+          </div>
         </Card>
       </div>
     </main>

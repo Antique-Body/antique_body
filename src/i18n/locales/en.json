@@ -108,7 +108,7 @@
     },
     "password_reset": {
       "title": "Password Reset",
-      "instructions": "Enter your email and we'll send you instructions to reset your password",
+      "instructions": "If this email is associated with an account, we will send you instructions to reset your password",
       "failed": "Failed to reset password",
       "success": "Password reset instructions sent"
     },
@@ -355,4 +355,4 @@
   "register_failed": "Registration failed",
   "verification_email_failed": "Failed to send verification email",
   "verification_email_sent_again": "Verification email sent again"
-} 
+}

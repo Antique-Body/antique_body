@@ -46,7 +46,8 @@ export async function POST(request) {
     }
 
     // Verify the 6-digit code
-    if (!verifyEmailCode(email, code)) {
+    const isCodeValid = await verifyEmailCode(email, code);
+    if (!isCodeValid) {
       return NextResponse.json(
         { error: "Invalid or expired verification code" },
         { status: 400 }
@@ -64,17 +65,25 @@ export async function POST(request) {
         lastName,
         password: hashedPassword,
         emailVerified: true,
+        language: "en", // Set default language
       },
     });
 
     return NextResponse.json({
-      message: "Registration successful. You can now log in.",
+      message: "Registration successful",
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        lastName: user.lastName,
+        role: user.role,
+      },
     });
   } catch (error) {
-    console.error("Registration error details:", error);
+    console.error("Registration error:", error);
     return NextResponse.json(
       { error: "Failed to register user. Please try again." },
       { status: 500 }
     );
   }
-} 
+}

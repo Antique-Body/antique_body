@@ -1,13 +1,12 @@
 "use client";
 
-import { AuthForm } from "@/components/auth/AuthForm";
 import Background from "@/components/background";
-import { Button } from "@/components/common/index";
-import { Card } from "@/components/custom/index";
+import { Button } from "@/components/common";
+import { AuthForm, Card } from "@/components/custom";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 export default function LoginPage() {
@@ -18,10 +17,9 @@ export default function LoginPage() {
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordStatus, setForgotPasswordStatus] = useState("");
-  const [manualFixingVerification, setManualFixingVerification] = useState(false);
+  const [manualFixingVerification, setManualFixingVerification] =
+    useState(false);
   const [currentLoginEmail, setCurrentLoginEmail] = useState("");
-
-
 
   const handleSubmit = async (data) => {
     setLoading(true);
@@ -81,6 +79,10 @@ export default function LoginPage() {
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     setForgotPasswordStatus("sending");
+    console.log(
+      "Sending forgot password request for email:",
+      forgotPasswordEmail
+    );
 
     try {
       const response = await fetch("/api/auth/forgot-password", {
@@ -91,7 +93,9 @@ export default function LoginPage() {
         body: JSON.stringify({ email: forgotPasswordEmail }),
       });
 
+      console.log("Forgot password response status:", response.status);
       const data = await response.json();
+      console.log("Forgot password response data:", data);
 
       if (!response.ok) {
         throw new Error(data.error || t("auth.password_reset.failed"));
@@ -104,8 +108,9 @@ export default function LoginPage() {
         setForgotPasswordStatus("");
       }, 3000);
     } catch (err) {
-      setForgotPasswordStatus("error");
       console.error("Forgot password error:", err);
+      setForgotPasswordStatus("error");
+      setError(err.message);
     }
   };
 
@@ -124,7 +129,9 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || t("auth.register.verification_email_failed"));
+        throw new Error(
+          data.message || t("auth.register.verification_email_failed")
+        );
       }
 
       setError(t("auth.register.verification_email_sent"));
@@ -135,7 +142,6 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#161616] text-white relative">
@@ -153,7 +159,8 @@ export default function LoginPage() {
           className="w-full max-w-md p-8 bg-zinc-900/80 backdrop-blur-md border border-zinc-800 rounded-xl shadow-2xl"
           borderTop={true}
           showLogo={true}
-          logoTagline="STRENGTH OF THE ANCIENTS">
+          logoTagline="STRENGTH OF THE ANCIENTS"
+        >
           {showForgotPassword ? (
             <div className="w-full">
               <h2 className="text-xl font-semibold mb-4 text-center">
@@ -186,7 +193,8 @@ export default function LoginPage() {
                   type="submit"
                   disabled={forgotPasswordStatus === "sending"}
                   loading={forgotPasswordStatus === "sending"}
-                  className="w-full">
+                  className="w-full"
+                >
                   {t("auth.form.submit")}
                 </Button>
                 <Button
@@ -197,7 +205,8 @@ export default function LoginPage() {
                     setForgotPasswordEmail("");
                     setForgotPasswordStatus("");
                   }}
-                  className="w-full">
+                  className="w-full"
+                >
                   {t("auth.login.back_to_login")}
                 </Button>
               </form>
@@ -222,7 +231,8 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowForgotPassword(true)}
-                  className="text-sm text-gray-400 hover:text-[#ff7800] transition-colors duration-300 cursor-pointer">
+                  className="text-sm text-gray-400 hover:text-[#ff7800] transition-colors duration-300 cursor-pointer"
+                >
                   {t("auth.login.forgot_password")}
                 </button>
               </div>
@@ -232,7 +242,8 @@ export default function LoginPage() {
                   {t("auth.login.no_account")}{" "}
                   <Link
                     href="/auth/register"
-                    className="text-[#ff7800] hover:text-[#ff5f00] transition-colors">
+                    className="text-[#ff7800] hover:text-[#ff5f00] transition-colors"
+                  >
                     {t("auth.register.title")}
                   </Link>
                 </p>

@@ -1,10 +1,10 @@
 "use client";
 
 import LanguageSelector from "@/components/LanguageSelector";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { SessionProvider } from "next-auth/react";
 import { Inter } from "next/font/google";
 import I18nProvider from "../components/I18nProvider";
-import AuthProvider from "../components/auth/AuthProvider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
