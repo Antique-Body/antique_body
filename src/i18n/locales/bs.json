@@ -54,11 +54,27 @@
       "sign_in_to_account": "Prijavite se na svoj račun",
       "forgot_password": "Zaboravili ste lozinku?",
       "no_account": "Nemate račun?",
-      "or_continue_with": "Ili nastavite sa",
-      "sign_in_with_google": "Prijavite se sa Google-om"
+      "back_to_login": "Povratak na prijavu",
+      "sign_in_with_google": "Prijavite se sa Google-om",
+      "sign_in_with_facebook": "Prijavite se sa Facebook-om",
+      "welcome_back": "Dobrodošli nazad",
+      "use_phone_email": "Nastavite sa brojem telefona ili emailom",
+      "continue_with_google": "Nastavite sa Google-om",
+      "continue_with_facebook": "Nastavite sa Facebook-om",
+      "back": "Nazad",
+      "use_phone": "Broj telefona",
+      "use_email": "Email",
+      "phone_number": "Unesite svoj broj telefona",
+      "send_code": "Pošalji kod",
+      "code_sent": "Kod poslan!",
+      "enter_code": "Unesite 6-cifreni kod koji smo vam poslali",
+      "resend_code": "Pošalji kod ponovo",
+      "code_placeholder": "Unesite 6-cifreni kod",
+      "phone_placeholder": "npr. +387 61 123 456"
     },
     "register": {
       "title": "Registracija",
+      "create_account": "Kreiraj račun",
       "join_fitness_community": "Pridružite se našoj fitness zajednici",
       "have_account": "Već imate račun?",
       "sign_in": "Prijava",
@@ -71,11 +87,18 @@
       }
     },
     "form": {
-      "email": "E-mail",
+      "email": "Email",
       "password": "Lozinka",
       "confirm_password": "Potvrdi lozinku",
       "first_name": "Ime",
-      "last_name": "Prezime"
+      "last_name": "Prezime",
+      "submit": "Pošalji",
+      "back": "Nazad",
+      "sign_in": "Prijava",
+      "sign_up": "Registracija",
+      "forgot_password": "Zaboravili ste lozinku?",
+      "remember_me": "Zapamti me",
+      "terms": "Nastavkom pristajete na naše Uslove korištenja i Politiku privatnosti"
     },
     "password_reset": {
       "title": "Resetiranje lozinke",
@@ -166,7 +189,11 @@
     "first_name_required": "Ime je obavezno",
     "last_name_required": "Prezime je obavezno",
     "confirm_password_required": "Molimo potvrdite svoju lozinku",
-    "passwords_do_not_match": "Lozinke se ne podudaraju"
+    "passwords_do_not_match": "Lozinke se ne podudaraju",
+    "phone_required": "Molimo unesite svoj broj telefona",
+    "phone_invalid": "Molimo unesite važeći broj telefona (npr. +387 61 123 456)",
+    "code_required": "Molimo unesite verifikacioni kod",
+    "code_invalid": "Molimo unesite važeći 6-cifreni kod"
   },
   "errors": {
     "login_failed": "Prijava nije uspjela. Molimo provjerite svoje podatke za prijavu.",

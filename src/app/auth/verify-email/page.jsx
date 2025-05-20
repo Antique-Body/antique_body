@@ -100,7 +100,7 @@ export default function VerifyEmailPage() {
           logoTagline="STRENGTH OF THE ANCIENTS">
           {status === "verifying" && (
             <div className="text-center">
-              <h2 className="text-xl font-semibold mb-4">{t("verifying_email")}</h2>
+              <h2 className="text-xl font-semibold mb-4">{t("verification.verifying_email")}</h2>
               <div className="flex justify-center mb-4">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ff7800]"></div>
               </div>
