@@ -173,7 +173,7 @@ export const AuthForm = ({
   if (!showEmailForm) {
     return (
       <div className="space-y-4 w-full">
-        <ErrorMessage error={error} />
+        <ErrorMessage error={error || codeError} />
         <Button
           onClick={() => setShowEmailForm(true)}
           className="w-full bg-gradient-to-r from-[#ff7800] to-[#ff5f00] py-2 rounded font-medium text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 disabled:opacity-50"
@@ -203,7 +203,7 @@ export const AuthForm = ({
 
   return (
     <form onSubmit={handleFormSubmit} className="space-y-6 w-full" noValidate>
-      <ErrorMessage error={error} />
+      <ErrorMessage error={error || codeError} />
 
       <div className="flex space-x-3 mb-6">
         <Button
@@ -302,7 +302,6 @@ export const AuthForm = ({
             <VerificationCodeInput
               verificationCode={verificationCode}
               setVerificationCode={setVerificationCode}
-              codeError={codeError}
               setCodeError={setCodeError}
               handleSendCode={handleSendCode}
               sendingCode={sendingCode}
@@ -325,7 +324,6 @@ export const AuthForm = ({
           <VerificationCodeInput
             verificationCode={verificationCode}
             setVerificationCode={setVerificationCode}
-            codeError={codeError}
             setCodeError={setCodeError}
             handleSendCode={handleSendCode}
             sendingCode={sendingCode}
