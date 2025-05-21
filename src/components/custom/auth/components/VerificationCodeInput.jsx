@@ -13,6 +13,15 @@ export const VerificationCodeInput = ({
 }) => {
   const { t, i18n } = useTranslation();
 
+  const handleSendCodeWithError = async () => {
+    try {
+      await handleSendCode();
+      setCodeSent(true);
+    } catch (error) {
+      setCodeError(error.message);
+    }
+  };
+
   return (
     <div className="flex flex-col space-y-2">
       <div className="flex space-x-3 items-start">
@@ -35,10 +44,7 @@ export const VerificationCodeInput = ({
         />
         <Button
           type="button"
-          onClick={() => {
-            handleSendCode();
-            setCodeSent(true);
-          }}
+          onClick={handleSendCodeWithError}
           loading={sendingCode}
           disabled={sendingCode || codeSent}
           className="!mb-0 h-[50px] bg-gradient-to-r from-[#ff7800] to-[#ff5f00] text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 disabled:opacity-50 rounded-lg font-medium text-sm whitespace-nowrap"
@@ -49,10 +55,7 @@ export const VerificationCodeInput = ({
       {codeSent && (
         <Button
           type="button"
-          onClick={() => {
-            handleSendCode();
-            setCodeSent(true);
-          }}
+          onClick={handleSendCodeWithError}
           loading={sendingCode}
           disabled={sendingCode}
           variant="ghost"

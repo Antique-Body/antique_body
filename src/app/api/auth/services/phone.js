@@ -1,8 +1,15 @@
 import { findUserByPhone } from "@/app/api/users/services";
 import { formatPhoneNumber } from "@/lib/utils";
 import { PrismaClient } from "@prisma/client";
+import twilio from "twilio";
 
 const prisma = new PrismaClient();
+
+// Initialize Twilio client
+const twilioClient = twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
 
 export async function sendVerificationCode(phone) {
   try {
@@ -28,8 +35,18 @@ export async function sendVerificationCode(phone) {
       },
     });
 
-    // TODO: Integrate with SMS service
-    console.log(`Verification code for ${formattedPhone}: ${code}`);
+    // Send SMS using Twilio
+    try {
+      await twilioClient.messages.create({
+        body: `Your verification code is: ${code}. It will expire in 10 minutes.`,
+        to: formattedPhone,
+        from: process.env.TWILIO_PHONE_NUMBER,
+      });
+    } catch (smsError) {
+      console.error("Error sending SMS:", smsError);
+      // If SMS fails, we still want to return true since the code was generated
+      // and stored in the database
+    }
 
     return true;
   } catch (error) {

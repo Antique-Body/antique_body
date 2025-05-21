@@ -1,3 +1,4 @@
+import { formatPhoneNumber } from "@/lib/utils";
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { sendVerificationCode as sendEmailCode } from "../services/email";
@@ -35,7 +36,25 @@ export async function POST(request) {
       success = await sendEmailCode(email);
       type = "email";
     } else {
-      success = await sendPhoneCode(phone);
+      // Format phone number
+      const formattedPhone = formatPhoneNumber(phone);
+
+      // Check if user already exists with this phone
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          phone: formattedPhone,
+          phoneVerified: true,
+        },
+      });
+
+      if (existingUser) {
+        return NextResponse.json(
+          { error: "User with this phone number already exists" },
+          { status: 400 }
+        );
+      }
+
+      success = await sendPhoneCode(formattedPhone);
       type = "phone";
     }
 
