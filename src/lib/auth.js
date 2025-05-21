@@ -1,4 +1,7 @@
-import { findUserByPhone, verifyCode as verifyPhoneCode } from "@/app/api/auth/services/phone";
+import {
+  findUserByPhone,
+  verifyCode as verifyPhoneCode,
+} from "@/app/api/auth/services/phone";
 import { PrismaClient } from "@prisma/client";
 import { compare } from "bcrypt";
 import NextAuth from "next-auth";
@@ -40,10 +43,15 @@ export const authConfig = {
           }
 
           if (!user.password) {
-            throw new Error("This account was created with phone number. Please use phone login.");
+            throw new Error(
+              "This account was created with phone number. Please use phone login."
+            );
           }
 
-          const isPasswordValid = await compare(credentials.password, user.password);
+          const isPasswordValid = await compare(
+            credentials.password,
+            user.password
+          );
           if (!isPasswordValid) {
             throw new Error("Invalid email or password");
           }
@@ -82,7 +90,10 @@ export const authConfig = {
             throw new Error("Phone number is not verified");
           }
 
-          const isCodeValid = await verifyPhoneCode(credentials.phone, credentials.code);
+          const isCodeValid = await verifyPhoneCode(
+            credentials.phone,
+            credentials.code
+          );
           if (!isCodeValid) {
             throw new Error("Invalid or expired verification code");
           }
@@ -101,6 +112,35 @@ export const authConfig = {
     }),
   ],
   callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google" || account?.provider === "facebook") {
+        try {
+          // Check if user already exists
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email },
+          });
+
+          if (!existingUser) {
+            // Create new user if doesn't exist
+            await prisma.user.create({
+              data: {
+                email: user.email,
+                name: user.name || profile.name,
+                lastName: profile.family_name || "",
+                emailVerified: true,
+                phoneVerified: false,
+                language: "en",
+              },
+            });
+          }
+          return true;
+        } catch (error) {
+          console.error("Error in signIn callback:", error);
+          return false;
+        }
+      }
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
