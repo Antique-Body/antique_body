@@ -7,10 +7,6 @@ export function formatPhoneNumber(phone) {
   const cleaned = phone.replace(/\D/g, "");
 
   // Add country code if not present
-  if (!cleaned.startsWith("1")) {
-    return `1${cleaned}`;
-  }
-
   return cleaned;
 }
 
@@ -23,19 +19,18 @@ export async function sendVerificationCode(phone) {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     // Delete any existing unused codes for this phone
-    await prisma.phoneVerificationCode.deleteMany({
+    await prisma.phoneVerification.deleteMany({
       where: {
         phone: formattedPhone,
-        used: false,
       },
     });
 
     // Create new verification code
-    await prisma.phoneVerificationCode.create({
+    await prisma.phoneVerification.create({
       data: {
         phone: formattedPhone,
         code,
-        expiresAt,
+        expires: expiresAt,
       },
     });
 
@@ -49,17 +44,17 @@ export async function sendVerificationCode(phone) {
   }
 }
 
-export async function verifyCode(phone, code) {
+export async function verifyCode(phone, code, isRegistration = false) {
   try {
     const formattedPhone = formatPhoneNumber(phone);
 
     // Find the most recent unused code for this phone
-    const verificationCode = await prisma.phoneVerificationCode.findFirst({
+    const verificationCode = await prisma.phoneVerification.findFirst({
       where: {
         phone: formattedPhone,
         code,
         used: false,
-        expiresAt: {
+        expires: {
           gt: new Date(),
         },
       },
@@ -72,11 +67,13 @@ export async function verifyCode(phone, code) {
       return false;
     }
 
-    // Mark the code as used
-    await prisma.phoneVerificationCode.update({
-      where: { id: verificationCode.id },
-      data: { used: true },
-    });
+    // Only mark as used if it's not a registration verification
+    if (!isRegistration) {
+      await prisma.phoneVerification.update({
+        where: { id: verificationCode.id },
+        data: { used: true },
+      });
+    }
 
     return true;
   } catch (error) {

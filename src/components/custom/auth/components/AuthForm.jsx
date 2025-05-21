@@ -85,7 +85,7 @@ export const AuthForm = ({
       setCodeError("");
       setSendingCode(true);
       try {
-        const response = await fetch("/api/auth/send-email-code", {
+        const response = await fetch("/api/auth/send-verification-code", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -116,7 +116,7 @@ export const AuthForm = ({
       setCodeError("");
       setSendingCode(true);
       try {
-        const response = await fetch("/api/auth/send-phone-code", {
+        const response = await fetch("/api/auth/send-verification-code", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

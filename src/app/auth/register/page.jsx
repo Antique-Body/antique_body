@@ -27,7 +27,7 @@ export default function RegisterPage() {
     setCodeError("");
     setSendingCode(true);
     try {
-      const response = await fetch("/api/auth/send-phone-code", {
+      const response = await fetch("/api/auth/send-verification-code", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -56,26 +56,21 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      // Determine which registration endpoint to use based on the data
-      const endpoint = data.email
-        ? "/api/auth/register"
-        : "/api/register-phone";
-      const requestBody = data.email
-        ? {
-            email: data.email,
-            password: data.password,
-            name: data.firstName,
-            lastName: data.lastName,
-            code: verificationCode,
-          }
-        : {
-            phone: data.phone,
-            name: data.firstName,
-            lastName: data.lastName,
-            code: verificationCode,
-          };
+      const requestBody = {
+        name: data.firstName,
+        lastName: data.lastName,
+        code: verificationCode,
+        ...(data.email
+          ? {
+              email: data.email,
+              password: data.password,
+            }
+          : {
+              phone: data.phone,
+            }),
+      };
 
-      const response = await fetch(endpoint, {
+      const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -88,10 +83,8 @@ export default function RegisterPage() {
         throw new Error(responseData.error || "Registration failed");
       }
 
-      const responseData = await response.json();
-
       // After successful registration, sign in the user
-      const signInResult = await signIn("credentials", {
+      const signInResult = await signIn(data.email ? "email" : "phone", {
         ...(data.email
           ? {
               email: data.email,

@@ -45,7 +45,7 @@ export default function LoginPage() {
     setResendDisabled(false);
 
     try {
-      const response = await fetch("/api/auth/forgot-password", {
+      const response = await fetch("/api/auth/password-reset", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -73,7 +73,7 @@ export default function LoginPage() {
     setResendDisabled(true);
 
     try {
-      const response = await fetch("/api/auth/forgot-password", {
+      const response = await fetch("/api/auth/password-reset", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -105,7 +105,7 @@ export default function LoginPage() {
     setCodeError("");
     setSendingCode(true);
     try {
-      const response = await fetch("/api/auth/send-phone-code", {
+      const response = await fetch("/api/auth/send-verification-code", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -136,19 +136,13 @@ export default function LoginPage() {
     try {
       if (data.email) {
         // Email login - no verification code needed
-        const result = await signIn("credentials", {
+        const result = await signIn("email", {
           email: data.email,
           password: data.password,
           redirect: false,
         });
 
         if (result?.error) {
-          // Extract the error message from the URL if it's a credentials error
-          if (result.error === "CredentialsSignin") {
-            const errorUrl = new URL(result.url);
-            const errorMessage = errorUrl.searchParams.get("error");
-            throw new Error(errorMessage || "Authentication failed");
-          }
           throw new Error(result.error);
         }
       } else {
@@ -157,38 +151,13 @@ export default function LoginPage() {
           throw new Error(t("validation.verification_code_required"));
         }
 
-        // First verify the code
-        const verifyResponse = await fetch("/api/auth/verify-phone-code", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            phone: data.phone,
-            code: verificationCode,
-          }),
-        });
-
-        const verifyData = await verifyResponse.json();
-
-        if (!verifyResponse.ok) {
-          throw new Error(verifyData.error || "Verification failed");
-        }
-
-        // If verification successful, proceed with sign in
-        const result = await signIn("credentials", {
+        const result = await signIn("phone", {
           phone: data.phone,
           code: verificationCode,
           redirect: false,
         });
 
         if (result?.error) {
-          // Extract the error message from the URL if it's a credentials error
-          if (result.error === "CredentialsSignin") {
-            const errorUrl = new URL(result.url);
-            const errorMessage = errorUrl.searchParams.get("error");
-            throw new Error(errorMessage || "Authentication failed");
-          }
           throw new Error(result.error);
         }
       }
