@@ -1,7 +1,6 @@
 import { Button, FormField } from "@/components/common";
-import { useEffect, useState } from "react";
+import { useVerificationCode } from "@/hooks";
 import { useTranslation } from "react-i18next";
-
 export const VerificationCodeInput = ({
   verificationCode,
   setVerificationCode,
@@ -15,30 +14,15 @@ export const VerificationCodeInput = ({
   email,
   phone,
 }) => {
-  const { t, i18n } = useTranslation();
-  const [countdown, setCountdown] = useState(0);
+  const { t } = useTranslation();
 
-  useEffect(() => {
-    let timer;
-    if (countdown > 0) {
-      timer = setInterval(() => {
-        setCountdown((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [countdown]);
-
-  const handleSendCodeWithError = async () => {
-    try {
-      await handleSendCode();
-      setCodeSent(true);
-      setCountdown(30); // Start 30 second countdown
-    } catch (error) {
-      setCodeError(error.message);
-    }
-  };
-
-  const isInputValid = isEmail ? email : phone;
+  const { countdown, handleSendCodeWithError, isInputValid } =
+    useVerificationCode({
+      handleSendCode,
+      isEmail,
+      email,
+      phone,
+    });
 
   return (
     <div className="flex flex-col space-y-2">

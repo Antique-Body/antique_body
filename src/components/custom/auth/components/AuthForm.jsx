@@ -7,10 +7,9 @@ import {
 } from "@/components/common";
 import { ErrorMessage } from "@/components/custom/ErrorMessage";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAuthForm } from "@/hooks";
 import { Icon } from "@iconify/react";
 import { signIn } from "next-auth/react";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
 import { PhoneInput } from "./PhoneInput";
 import { VerificationCodeInput } from "./VerificationCodeInput";
 
@@ -29,40 +28,38 @@ export const AuthForm = ({
   phoneOnly = true,
 }) => {
   const { isLoading: authLoading } = useAuth();
-  const [showEmailForm, setShowEmailForm] = useState(false);
-  const [loginMethod, setLoginMethod] = useState("email");
-  const [phoneValue, setPhoneValue] = useState("");
-  const [codeError, setCodeError] = useState("");
-  const [codeSent, setCodeSent] = useState(false);
-  const [sendingCode, setSendingCode] = useState(false);
+
   const {
+    showEmailForm,
+    setShowEmailForm,
+    loginMethod,
+    setLoginMethod,
+    phoneValue,
+    setPhoneValue,
+    codeError,
+    setCodeError,
+    codeSent,
+    setCodeSent,
+    sendingCode,
+    setSendingCode,
     register,
     handleSubmit,
-    formState: { errors },
+    errors,
     getValues,
     watch,
     setValue,
     setError,
-  } = useForm();
-
-  useEffect(() => {
-    if (externalCodeError) setCodeError(externalCodeError);
-  }, [externalCodeError]);
-
-  useEffect(() => {
-    if (externalCodeSent) setCodeSent(externalCodeSent);
-  }, [externalCodeSent]);
-
-  useEffect(() => {
-    if (externalSendingCode !== undefined) setSendingCode(externalSendingCode);
-  }, [externalSendingCode]);
-
-  const password = watch("password");
-  const countryCode = watch("countryCode");
-
-  useEffect(() => {
-    if (countryCode) setPhoneValue(countryCode);
-  }, [countryCode]);
+    handleSendCode,
+    handleFormSubmit,
+    getFieldClassName,
+    handleFieldChange,
+  } = useAuthForm({
+    onSubmit,
+    externalCodeError,
+    externalCodeSent,
+    externalSendingCode,
+    isLogin,
+  });
 
   const handleGoogleSignIn = (e) => {
     e.preventDefault();
@@ -74,100 +71,6 @@ export const AuthForm = ({
     e.preventDefault();
     e.stopPropagation();
     signIn("facebook", { callbackUrl: "/select-role" });
-  };
-
-  const handleSendCode = async () => {
-    if (loginMethod === "email") {
-      const email = getValues("email");
-      if (!email) {
-        setCodeError("Email is required");
-        return;
-      }
-      setCodeError("");
-      setSendingCode(true);
-      try {
-        const response = await fetch("/api/auth/send-verification-code", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || "Failed to send verification code");
-        }
-
-        setCodeSent(true);
-        setVerificationCode(""); // Reset verification code when sending new one
-      } catch (err) {
-        console.error("Error sending code:", err);
-        setCodeError(err.message);
-      } finally {
-        setSendingCode(false);
-      }
-    } else {
-      const phone = getValues("phone");
-      if (!phone) {
-        setCodeError("Phone number is required");
-        return;
-      }
-      setCodeError("");
-      setSendingCode(true);
-      try {
-        const response = await fetch("/api/auth/send-verification-code", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ phone }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || "Failed to send verification code");
-        }
-
-        setCodeSent(true);
-        setVerificationCode(""); // Reset verification code when sending new one
-      } catch (err) {
-        console.error("Error sending code:", err);
-        setCodeError(err.message);
-      } finally {
-        setSendingCode(false);
-      }
-    }
-  };
-
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    const formData = getValues();
-
-    if (loginMethod === "phone" || !isLogin) {
-      if (!verificationCode) {
-        setError("Verification code is required");
-        setCodeError("Verification code is required");
-        return;
-      }
-
-      if (verificationCode.length !== 6) {
-        setError("Verification code must be 6 digits");
-        setCodeError("Verification code must be 6 digits");
-        return;
-      }
-    }
-
-    onSubmit({ ...formData, code: verificationCode });
-  };
-
-  const getFieldClassName = (fieldName) =>
-    errors[fieldName]?.message ? "border-red-500" : "";
-
-  const handleFieldChange = (e, fieldName) => {
-    if (errors[fieldName]) setError(fieldName, { message: "" });
   };
 
   if (!showEmailForm) {
@@ -318,7 +221,7 @@ export const AuthForm = ({
           <PhoneInput
             register={register}
             errors={errors}
-            countryCode={countryCode}
+            countryCode={watch("countryCode")}
             setValue={setValue}
             phoneValue={phoneValue}
             setPhoneValue={setPhoneValue}
