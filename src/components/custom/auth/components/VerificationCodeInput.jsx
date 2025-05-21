@@ -22,7 +22,7 @@ export const VerificationCodeInput = ({
           placeholder={"Enter 6-digit code"}
           value={verificationCode}
           onChange={(e) => {
-            const value = e.target.value.replace(/[^0-9]/g, "").slice(0, 6);
+            const value = e.target.value.replace(/\D/g, "").slice(0, 6);
             setVerificationCode(value);
             if (codeError) setCodeError("");
           }}

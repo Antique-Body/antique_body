@@ -22,12 +22,13 @@ model User {
   id                    String    @id @default(cuid())
   name                  String
   lastName              String?
-  email                 String    @unique
+  email                 String?   @unique
+  phone                 String?   @unique
   password              String?
   role                  UserRole?
   language              String    @default("en")
   emailVerified         Boolean   @default(false)
-  emailVerificationToken String?
+  phoneVerified         Boolean   @default(false)
   resetToken            String?
   resetTokenExpiry      DateTime?
   createdAt             DateTime  @default(now())
@@ -37,8 +38,8 @@ model User {
   preferences           Json?     @default("{}")
 
   @@index([email])
+  @@index([phone])
   @@index([role])
-  @@index([emailVerificationToken])
   @@index([resetToken])
 }
 
@@ -97,6 +98,7 @@ model PhoneVerification {
   id        String   @id @default(cuid())
   phone     String
   code      String
+  used      Boolean  @default(false)
   expires   DateTime
   createdAt DateTime @default(now())
 

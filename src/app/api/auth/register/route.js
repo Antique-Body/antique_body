@@ -52,6 +52,8 @@ export async function POST(request) {
       );
     }
 
+    let user;
+
     // Email registration specific validation
     if (isEmailRegistration) {
       if (!password) {
@@ -93,7 +95,7 @@ export async function POST(request) {
       const hashedPassword = await hash(password, 12);
 
       // Create user
-      const user = await prisma.user.create({
+      user = await prisma.user.create({
         data: {
           email,
           name,
@@ -112,11 +114,6 @@ export async function POST(request) {
           emailVerified: true,
           phoneVerified: true,
         },
-      });
-
-      return NextResponse.json({
-        message: "Registration successful",
-        user,
       });
     }
 
@@ -145,7 +142,7 @@ export async function POST(request) {
       }
 
       // Verify phone code
-      const isCodeValid = await verifyPhoneCode(formattedPhone, code);
+      const isCodeValid = await verifyPhoneCode(formattedPhone, code, true);
       if (!isCodeValid) {
         return NextResponse.json(
           { error: "Invalid or expired verification code" },
@@ -154,11 +151,13 @@ export async function POST(request) {
       }
 
       // Create user
-      const user = await prisma.user.create({
+      user = await prisma.user.create({
         data: {
           phone: formattedPhone,
           name,
           lastName,
+          email: null, // Allow null email for phone registration
+          password: null, // Allow null password for phone registration
           emailVerified: false,
           phoneVerified: true,
           language: "en", // Set default language
@@ -173,12 +172,12 @@ export async function POST(request) {
           phoneVerified: true,
         },
       });
-
-      return NextResponse.json({
-        message: "Registration successful",
-        user,
-      });
     }
+
+    return NextResponse.json({
+      message: "Registration successful",
+      user,
+    });
   } catch (error) {
     console.error("Registration error:", error);
     return NextResponse.json(

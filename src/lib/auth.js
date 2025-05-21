@@ -19,6 +19,7 @@ export const authConfig = {
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
     }),
     CredentialsProvider({
+      id: "email",
       name: "Email",
       credentials: {
         email: { label: "Email", type: "email" },
@@ -60,6 +61,7 @@ export const authConfig = {
       },
     }),
     CredentialsProvider({
+      id: "phone",
       name: "Phone",
       credentials: {
         phone: { label: "Phone", type: "text" },
@@ -71,14 +73,18 @@ export const authConfig = {
             throw new Error("Phone number and verification code are required");
           }
 
-          const isCodeValid = await verifyPhoneCode(credentials.phone, credentials.code);
-          if (!isCodeValid) {
-            throw new Error("Invalid or expired verification code");
-          }
-
           const user = await findUserByPhone(credentials.phone);
           if (!user) {
             throw new Error("User not found");
+          }
+
+          if (!user.phoneVerified) {
+            throw new Error("Phone number is not verified");
+          }
+
+          const isCodeValid = await verifyPhoneCode(credentials.phone, credentials.code);
+          if (!isCodeValid) {
+            throw new Error("Invalid or expired verification code");
           }
 
           return {
