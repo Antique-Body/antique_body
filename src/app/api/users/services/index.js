@@ -1,13 +1,14 @@
+import { formatPhoneNumber } from "@/lib/utils";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
 /**
- * Finds a user by their ID
- * @param {string} id - The user's ID
- * @returns {Promise<Object|null>} - The user object or null if not found
+ * User Service - Handles all user-related operations
  */
+
+// Find user by different identifiers
 export async function findUserById(id) {
   return await prisma.user.findUnique({
     where: { id },
@@ -27,11 +28,6 @@ export async function findUserById(id) {
   });
 }
 
-/**
- * Finds a user by their email
- * @param {string} email - The user's email
- * @returns {Promise<Object|null>} - The user object or null if not found
- */
 export async function findUserByEmail(email) {
   return await prisma.user.findUnique({
     where: { email },
@@ -51,12 +47,27 @@ export async function findUserByEmail(email) {
   });
 }
 
-/**
- * Updates a user's information
- * @param {string} id - The user's ID
- * @param {Object} data - The data to update
- * @returns {Promise<Object|null>} - The updated user object or null if not found
- */
+export async function findUserByPhone(phone) {
+  const formattedPhone = formatPhoneNumber(phone);
+  return await prisma.user.findFirst({
+    where: { phone: formattedPhone },
+    select: {
+      id: true,
+      email: true,
+      phone: true,
+      name: true,
+      lastName: true,
+      role: true,
+      emailVerified: true,
+      phoneVerified: true,
+      language: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+}
+
+// User management operations
 export async function updateUser(id, data) {
   return await prisma.user.update({
     where: { id },
@@ -77,23 +88,12 @@ export async function updateUser(id, data) {
   });
 }
 
-/**
- * Deletes a user
- * @param {string} id - The user's ID
- * @returns {Promise<Object>} - The deleted user object
- */
 export async function deleteUser(id) {
   return await prisma.user.delete({
     where: { id },
   });
 }
 
-/**
- * Lists users with pagination
- * @param {number} page - The page number (1-based)
- * @param {number} limit - The number of items per page
- * @returns {Promise<Object>} - The paginated users and metadata
- */
 export async function listUsers(page = 1, limit = 10) {
   const skip = (page - 1) * limit;
 
@@ -130,14 +130,8 @@ export async function listUsers(page = 1, limit = 10) {
   };
 }
 
-/**
- * Resets a user's password using a reset token
- * @param {string} token - The reset token
- * @param {string} newPassword - The new password
- * @returns {Promise<boolean>} - True if password was reset successfully
- */
+// Authentication related operations
 export async function resetPassword(token, newPassword) {
-  // Find user with valid reset token
   const user = await prisma.user.findFirst({
     where: {
       resetToken: token,
@@ -151,10 +145,8 @@ export async function resetPassword(token, newPassword) {
     throw new Error("Invalid or expired reset token");
   }
 
-  // Hash the new password
   const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-  // Update user with new password and clear reset token
   await prisma.user.update({
     where: { id: user.id },
     data: {
@@ -165,4 +157,30 @@ export async function resetPassword(token, newPassword) {
   });
 
   return true;
+}
+
+export async function verifyUserPassword(userId, password) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { password: true },
+  });
+
+  if (!user || !user.password) {
+    return false;
+  }
+
+  return await bcrypt.compare(password, user.password);
+}
+
+export async function updateUserVerification(
+  userId,
+  { emailVerified, phoneVerified }
+) {
+  return await prisma.user.update({
+    where: { id: userId },
+    data: {
+      emailVerified: emailVerified ?? undefined,
+      phoneVerified: phoneVerified ?? undefined,
+    },
+  });
 }

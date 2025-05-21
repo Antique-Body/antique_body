@@ -1,10 +1,6 @@
-import { verifyCode as verifyEmailCode } from "@/app/api/auth/services/email";
-import {
-  findUserByPhone,
-  formatPhoneNumber,
-  verifyCode as verifyPhoneCode,
-} from "@/app/api/auth/services/phone";
-import { checkRateLimit } from "@/lib/utils";
+import { verifyEmailCode } from "@/app/api/auth/services/email";
+import { verifyPhoneCode } from "@/app/api/auth/services/phone";
+import { checkRateLimit, formatPhoneNumber } from "@/lib/utils";
 import { PrismaClient } from "@prisma/client";
 import { hash } from "bcrypt";
 import { NextResponse } from "next/server";
@@ -70,9 +66,12 @@ export async function POST(request) {
         );
       }
 
-      // Check if user already exists
-      const existingUser = await prisma.user.findUnique({
-        where: { email },
+      // Check if user already exists with this email
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          email,
+          emailVerified: true,
+        },
       });
 
       if (existingUser) {
@@ -132,8 +131,14 @@ export async function POST(request) {
       // Format phone number
       const formattedPhone = formatPhoneNumber(phone);
 
-      // Check if user already exists
-      const existingUser = await findUserByPhone(formattedPhone);
+      // Check if user already exists with this phone
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          phone: formattedPhone,
+          phoneVerified: true,
+        },
+      });
+
       if (existingUser) {
         return NextResponse.json(
           { error: "User with this phone number already exists" },

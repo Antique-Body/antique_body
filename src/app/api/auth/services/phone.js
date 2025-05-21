@@ -1,14 +1,8 @@
+import { findUserByPhone } from "@/app/api/users/services";
+import { formatPhoneNumber } from "@/lib/utils";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
-
-export function formatPhoneNumber(phone) {
-  // Remove all non-digit characters
-  const cleaned = phone.replace(/\D/g, "");
-
-  // Add country code if not present
-  return cleaned;
-}
 
 export async function sendVerificationCode(phone) {
   try {
@@ -44,7 +38,7 @@ export async function sendVerificationCode(phone) {
   }
 }
 
-export async function verifyCode(phone, code, isRegistration = false) {
+export async function verifyPhoneCode(phone, code, isRegistration = false) {
   try {
     const formattedPhone = formatPhoneNumber(phone);
 
@@ -82,14 +76,5 @@ export async function verifyCode(phone, code, isRegistration = false) {
   }
 }
 
-export async function findUserByPhone(phone) {
-  try {
-    const formattedPhone = formatPhoneNumber(phone);
-    return await prisma.user.findUnique({
-      where: { phone: formattedPhone },
-    });
-  } catch (error) {
-    console.error("Error finding user by phone:", error);
-    return null;
-  }
-}
+// Re-export findUserByPhone from user services
+export { findUserByPhone };
