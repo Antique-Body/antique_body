@@ -1,6 +1,9 @@
+import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { sendVerificationCode as sendEmailCode } from "../services/email";
 import { sendVerificationCode as sendPhoneCode } from "../services/phone";
+
+const prisma = new PrismaClient();
 
 export async function POST(request) {
   try {
@@ -17,6 +20,18 @@ export async function POST(request) {
     let type;
 
     if (email) {
+      // Check if user already exists
+      const existingUser = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (existingUser) {
+        return NextResponse.json(
+          { error: "User with this email already exists" },
+          { status: 400 }
+        );
+      }
+
       success = await sendEmailCode(email);
       type = "email";
     } else {
