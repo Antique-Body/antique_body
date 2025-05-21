@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -127,4 +128,41 @@ export async function listUsers(page = 1, limit = 10) {
     limit,
     totalPages: Math.ceil(total / limit),
   };
+}
+
+/**
+ * Resets a user's password using a reset token
+ * @param {string} token - The reset token
+ * @param {string} newPassword - The new password
+ * @returns {Promise<boolean>} - True if password was reset successfully
+ */
+export async function resetPassword(token, newPassword) {
+  // Find user with valid reset token
+  const user = await prisma.user.findFirst({
+    where: {
+      resetToken: token,
+      resetTokenExpiry: {
+        gt: new Date(),
+      },
+    },
+  });
+
+  if (!user) {
+    throw new Error("Invalid or expired reset token");
+  }
+
+  // Hash the new password
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  // Update user with new password and clear reset token
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      password: hashedPassword,
+      resetToken: null,
+      resetTokenExpiry: null,
+    },
+  });
+
+  return true;
 }
