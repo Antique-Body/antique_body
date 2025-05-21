@@ -90,12 +90,12 @@ export default function ResetPasswordPage() {
                 {t("invalid_reset_link")}
               </h2>
               <p className="text-gray-400 mb-4">{t("reset_link_expired")}</p>
-              <button
+              <Button
                 onClick={() => router.push("/auth/login")}
-                className="text-[#ff7800] hover:text-[#ff5f00] transition-colors"
+                variant="ghostOrange"
               >
                 {t("return_to_login")}
-              </button>
+              </Button>
             </div>
           </Card>
         </div>

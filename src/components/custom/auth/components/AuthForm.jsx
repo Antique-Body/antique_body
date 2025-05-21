@@ -7,6 +7,7 @@ import {
 } from "@/components/common";
 import { ErrorMessage } from "@/components/custom/ErrorMessage";
 import { useAuth } from "@/contexts/AuthContext";
+import { Icon } from "@iconify/react";
 import { signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -214,6 +215,7 @@ export const AuthForm = ({
             setCodeSent(false);
           }}
           className="flex-1 py-3 text-base font-medium"
+          leftIcon={<Icon icon="mdi:email" className="w-5 h-5" />}
         >
           Use Email
         </Button>
@@ -226,6 +228,7 @@ export const AuthForm = ({
             setCodeSent(false);
           }}
           className="flex-1 py-3 text-base font-medium"
+          leftIcon={<Icon icon="mdi:phone" className="w-5 h-5" />}
         >
           Use Phone
         </Button>
