@@ -1,7 +1,7 @@
-import { sendPasswordResetEmail } from "@/app/utils/email";
-import { userService } from "@/services/users";
+import { sendPasswordResetEmail } from "@/lib/email";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
+import { userService } from "../../../../services/users";
 
 export async function POST(request) {
   console.log("=== Forgot password API route called ===");
@@ -68,6 +68,11 @@ export async function POST(request) {
 
     if (!emailSent) {
       console.error("Failed to send password reset email");
+      // Revert the token update since email failed
+      await userService.updateUser(user.id, {
+        resetToken: null,
+        resetTokenExpiry: null,
+      });
       return NextResponse.json(
         { error: "Failed to send reset email. Please try again later." },
         { status: 500 }

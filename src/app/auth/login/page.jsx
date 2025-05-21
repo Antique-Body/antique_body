@@ -1,6 +1,7 @@
 "use client";
 
 import Background from "@/components/background";
+import { Button } from "@/components/common";
 import { AuthForm, Card } from "@/components/custom";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
@@ -17,6 +18,83 @@ export default function LoginPage() {
   const [codeSent, setCodeSent] = useState(false);
   const [sendingCode, setSendingCode] = useState(false);
   const [codeError, setCodeError] = useState("");
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordStatus, setForgotPasswordStatus] = useState("");
+  const [resendDisabled, setResendDisabled] = useState(false);
+  const [resendCountdown, setResendCountdown] = useState(0);
+
+  const startResendCountdown = () => {
+    setResendDisabled(true);
+    setResendCountdown(30);
+    const timer = setInterval(() => {
+      setResendCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setResendDisabled(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setForgotPasswordStatus("sending");
+    setResendDisabled(false);
+
+    try {
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: forgotPasswordEmail }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || t("auth.password_reset.failed"));
+      }
+
+      setForgotPasswordStatus("success");
+    } catch (err) {
+      setForgotPasswordStatus("error");
+      console.error("Forgot password error:", err);
+    }
+  };
+
+  const handleResendToken = async () => {
+    if (resendDisabled) return;
+
+    setForgotPasswordStatus("sending");
+    setResendDisabled(true);
+
+    try {
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: forgotPasswordEmail }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || t("auth.password_reset.failed"));
+      }
+
+      setForgotPasswordStatus("success");
+      startResendCountdown();
+    } catch (err) {
+      setForgotPasswordStatus("error");
+      setResendDisabled(false);
+      console.error("Resend token error:", err);
+    }
+  };
 
   const handleSendCode = async (phone) => {
     if (!phone) {
@@ -143,38 +221,122 @@ export default function LoginPage() {
           showLogo={true}
           logoTagline="STRENGTH OF THE ANCIENTS"
         >
-          <h1 className="text-2xl font-bold mb-2 text-center">
-            {t("auth.login.welcome_back")}
-          </h1>
-          <p className="text-gray-400 mb-8 text-center">
-            {t("auth.login.sign_in_to_account")}
-          </p>
+          {showForgotPassword ? (
+            <div className="w-full">
+              <h2 className="text-xl font-semibold mb-4 text-center">
+                {t("auth.password_reset.title")}
+              </h2>
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    {t("auth.form.email")}
+                  </label>
+                  <input
+                    type="email"
+                    value={forgotPasswordEmail}
+                    onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff7800]"
+                    required
+                  />
+                </div>
+                {forgotPasswordStatus === "error" && (
+                  <p className="text-red-500 text-sm">
+                    {t("auth.password_reset.failed")}
+                  </p>
+                )}
+                {forgotPasswordStatus === "success" && (
+                  <p className="text-green-500 text-sm">
+                    {t("auth.password_reset.instructions")}
+                  </p>
+                )}
+                <Button
+                  type="submit"
+                  disabled={forgotPasswordStatus === "sending"}
+                  loading={forgotPasswordStatus === "sending"}
+                  variant="primary"
+                  fullWidth
+                >
+                  {forgotPasswordStatus === "sending"
+                    ? t("auth.form.sending")
+                    : t("auth.form.submit")}
+                </Button>
+                {forgotPasswordStatus === "success" && (
+                  <Button
+                    type="button"
+                    onClick={handleResendToken}
+                    disabled={resendDisabled}
+                    variant="secondary"
+                    fullWidth
+                  >
+                    {resendDisabled
+                      ? `${t("auth.password_reset.resend_countdown", {
+                          count: resendCountdown,
+                        })}`
+                      : t("auth.password_reset.resend_token")}
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setShowForgotPassword(false);
+                    setForgotPasswordEmail("");
+                    setForgotPasswordStatus("");
+                    setResendDisabled(false);
+                    setResendCountdown(0);
+                  }}
+                  variant="secondary"
+                  fullWidth
+                >
+                  {t("auth.login.back_to_login")}
+                </Button>
+              </form>
+            </div>
+          ) : (
+            <>
+              <h1 className="text-2xl font-bold mb-2 text-center">
+                {t("auth.login.welcome_back")}
+              </h1>
+              <p className="text-gray-400 mb-8 text-center">
+                {t("auth.login.sign_in_to_account")}
+              </p>
 
-          <AuthForm
-            onSubmit={handleSubmit}
-            loading={loading}
-            error={error}
-            isLogin={true}
-            onSendCode={handleSendCode}
-            verificationCode={verificationCode}
-            setVerificationCode={setVerificationCode}
-            codeSent={codeSent}
-            sendingCode={sendingCode}
-            codeError={codeError}
-            phoneOnly={false}
-          />
+              <AuthForm
+                onSubmit={handleSubmit}
+                loading={loading}
+                error={error}
+                isLogin={true}
+                onSendCode={handleSendCode}
+                verificationCode={verificationCode}
+                setVerificationCode={setVerificationCode}
+                codeSent={codeSent}
+                sendingCode={sendingCode}
+                codeError={codeError}
+                phoneOnly={false}
+              />
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-400">
-              {t("auth.login.no_account")}{" "}
-              <Link
-                href="/auth/register"
-                className="text-[#ff7800] hover:text-[#ff5f00] transition-colors"
-              >
-                {t("auth.register.title")}
-              </Link>
-            </p>
-          </div>
+              <div className="mt-4 flex justify-end">
+                <Button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  variant="ghostOrange"
+                >
+                  {t("auth.login.forgot_password")}
+                </Button>
+              </div>
+
+              <div className="mt-6 text-center">
+                <p className="text-gray-400">
+                  {t("auth.login.no_account")}{" "}
+                  <Link
+                    href="/auth/register"
+                    className="text-[#ff7800] hover:text-[#ff5f00] transition-colors"
+                  >
+                    {t("auth.register.title")}
+                  </Link>
+                </p>
+              </div>
+            </>
+          )}
         </Card>
       </div>
     </main>

@@ -1,41 +1,189 @@
+import { verifyCode as verifyEmailCode } from "@/app/api/auth/services/email";
+import {
+  findUserByPhone,
+  formatPhoneNumber,
+  verifyCode as verifyPhoneCode,
+} from "@/app/api/auth/services/phone";
+import { checkRateLimit } from "@/lib/utils";
+import { PrismaClient } from "@prisma/client";
+import { hash } from "bcrypt";
 import { NextResponse } from "next/server";
-import { validateRegistration } from "@/middleware/validation";
-import { userService } from "@/services/users";
+
+const prisma = new PrismaClient();
 
 export async function POST(request) {
-    try {
-        const data = await request.json();
+  try {
+    const body = await request.json();
+    const { name, lastName, email, phone, password, code } = body;
 
-        // Validate the input
-        const validation = validateRegistration(data);
-
-        if (!validation.valid) {
-            return NextResponse.json({ error: "Validation failed", details: validation.errors }, { status: 400 });
-        }
-
-        const { name, lastName, email, password } = data;
-
-        try {
-            // Create user using the service
-            const user = await userService.createUser({
-                name,
-                lastName,
-                email,
-                password,
-            });
-
-            return NextResponse.json({ message: "User created successfully", user }, { status: 201 });
-        } catch (error) {
-            // Handle known errors
-            if (error.message === "Email already in use") {
-                return NextResponse.json({ error: error.message }, { status: 400 });
-            }
-
-            // Re-throw unknown errors
-            throw error;
-        }
-    } catch (error) {
-        console.error("Registration error:", error);
-        return NextResponse.json({ error: "An error occurred during registration" }, { status: 500 });
+    // Validate required fields based on registration type
+    if (!name || !lastName || !code) {
+      return NextResponse.json(
+        { error: "Name, last name, and verification code are required" },
+        { status: 400 }
+      );
     }
+
+    // Validate name fields
+    if (name.length < 2 || lastName.length < 2) {
+      return NextResponse.json(
+        {
+          error: "Name and last name must be at least 2 characters long",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Determine registration type and validate accordingly
+    const isEmailRegistration = !!email;
+    const isPhoneRegistration = !!phone;
+
+    if (!isEmailRegistration && !isPhoneRegistration) {
+      return NextResponse.json(
+        { error: "Either email or phone number is required" },
+        { status: 400 }
+      );
+    }
+
+    if (isEmailRegistration && isPhoneRegistration) {
+      return NextResponse.json(
+        { error: "Please provide either email or phone number, not both" },
+        { status: 400 }
+      );
+    }
+
+    // Email registration specific validation
+    if (isEmailRegistration) {
+      if (!password) {
+        return NextResponse.json(
+          { error: "Password is required for email registration" },
+          { status: 400 }
+        );
+      }
+
+      if (password.length < 6) {
+        return NextResponse.json(
+          { error: "Password must be at least 6 characters long" },
+          { status: 400 }
+        );
+      }
+
+      // Check if user already exists
+      const existingUser = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (existingUser) {
+        return NextResponse.json(
+          { error: "User with this email already exists" },
+          { status: 400 }
+        );
+      }
+
+      // Verify email code
+      const isCodeValid = await verifyEmailCode(email, code);
+      if (!isCodeValid) {
+        return NextResponse.json(
+          { error: "Invalid or expired verification code" },
+          { status: 400 }
+        );
+      }
+
+      // Hash password
+      const hashedPassword = await hash(password, 12);
+
+      // Create user
+      const user = await prisma.user.create({
+        data: {
+          email,
+          name,
+          lastName,
+          password: hashedPassword,
+          emailVerified: true,
+          phoneVerified: false,
+          language: "en", // Set default language
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          lastName: true,
+          role: true,
+          emailVerified: true,
+          phoneVerified: true,
+        },
+      });
+
+      return NextResponse.json({
+        message: "Registration successful",
+        user,
+      });
+    }
+
+    // Phone registration specific validation
+    if (isPhoneRegistration) {
+      // Check rate limit
+      const rateLimitKey = `register_${phone}`;
+      const isAllowed = await checkRateLimit(rateLimitKey, 3, 60 * 60 * 1000); // 3 attempts per hour
+      if (!isAllowed) {
+        return NextResponse.json(
+          { error: "Too many registration attempts. Please try again later." },
+          { status: 429 }
+        );
+      }
+
+      // Format phone number
+      const formattedPhone = formatPhoneNumber(phone);
+
+      // Check if user already exists
+      const existingUser = await findUserByPhone(formattedPhone);
+      if (existingUser) {
+        return NextResponse.json(
+          { error: "User with this phone number already exists" },
+          { status: 400 }
+        );
+      }
+
+      // Verify phone code
+      const isCodeValid = await verifyPhoneCode(formattedPhone, code);
+      if (!isCodeValid) {
+        return NextResponse.json(
+          { error: "Invalid or expired verification code" },
+          { status: 400 }
+        );
+      }
+
+      // Create user
+      const user = await prisma.user.create({
+        data: {
+          phone: formattedPhone,
+          name,
+          lastName,
+          emailVerified: false,
+          phoneVerified: true,
+          language: "en", // Set default language
+        },
+        select: {
+          id: true,
+          phone: true,
+          name: true,
+          lastName: true,
+          role: true,
+          emailVerified: true,
+          phoneVerified: true,
+        },
+      });
+
+      return NextResponse.json({
+        message: "Registration successful",
+        user,
+      });
+    }
+  } catch (error) {
+    console.error("Registration error:", error);
+    return NextResponse.json(
+      { error: "Failed to register user. Please try again." },
+      { status: 500 }
+    );
+  }
 }
