@@ -63,6 +63,18 @@ const baseStyles = `
     border-radius: 8px;
     border: 1px dashed #d7c8b6;
   }
+  .button {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: #8b4513;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 6px;
+    margin: 20px 0;
+  }
+  .button:hover {
+    background-color: #a0522d;
+  }
 `;
 
 export async function sendEmail({ to, subject, html }) {
@@ -116,6 +128,53 @@ export async function sendVerificationCodeEmail(email, code) {
   return sendEmail({
     to: email,
     subject: "Your Antique Body Verification Code",
+    html,
+  });
+}
+
+export async function sendPasswordResetEmail(email, resetToken) {
+  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${resetToken}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Password Reset</title>
+      <style>${baseStyles}</style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="logo">ANTIQUE BODY</div>
+          <div class="tagline">Strength of the Ancients</div>
+        </div>
+        <div class="content">
+          <h1>Reset Your Password</h1>
+          <p>We received a request to reset your password. Click the button below to create a new password:</p>
+          
+          <div style="text-align: center;">
+            <a href="${resetUrl}" class="button">Reset Password</a>
+          </div>
+          
+          <p>If the button above doesn't work, you can copy and paste this link into your browser:</p>
+          <p style="word-break: break-all; background: #f7f5f0; padding: 10px; border-radius: 4px; font-size: 14px;">
+            ${resetUrl}
+          </p>
+          
+          <p>If you didn't request this password reset, you can safely ignore this email. Your password will remain unchanged.</p>
+          
+          <p style="font-style: italic; text-align: center;">"The body achieves what the mind believes."</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: "Reset Your Antique Body Password",
     html,
   });
 }

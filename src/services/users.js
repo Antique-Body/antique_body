@@ -1,188 +1,9 @@
 import { PrismaClient } from "@prisma/client";
-import { compare, hash } from "bcrypt";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
 export const userService = {
-  // Create a new user
-  async createUser(userData) {
-    const { name, lastName, email, password } = userData;
-
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
-      throw new Error("Email already in use");
-    }
-
-    // Hash the password
-    const hashedPassword = await hash(password, 10);
-
-    // Create the user
-    const user = await prisma.user.create({
-      data: {
-        name,
-        lastName,
-        email,
-        password: hashedPassword,
-      },
-    });
-
-    // Return user without password
-    const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
-  },
-
-  // Get user by ID
-  async getUserById(id) {
-    const user = await prisma.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        lastName: true,
-        phone: true,
-        role: true,
-        language: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    return user;
-  },
-
-  // Get user by email
-  async getUserByEmail(email) {
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    // Return full user with password for authentication
-    return user;
-  },
-
-  // Get all users with pagination
-  async getAllUsers(page = 1, limit = 10, role = null) {
-    const skip = (page - 1) * limit;
-
-    const whereClause = role ? { role } : {};
-
-    const [users, totalCount] = await Promise.all([
-      prisma.user.findMany({
-        where: whereClause,
-        skip,
-        take: limit,
-        orderBy: {
-          createdAt: "desc",
-        },
-        select: {
-          id: true,
-          name: true,
-          lastName: true,
-          phone: true,
-          role: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      }),
-      prisma.user.count({ where: whereClause }),
-    ]);
-
-    const totalPages = Math.ceil(totalCount / limit);
-
-    return {
-      users,
-      pagination: {
-        total: totalCount,
-        page,
-        limit,
-        totalPages,
-        hasNext: page < totalPages,
-        hasPrev: page > 1,
-      },
-    };
-  },
-
-  // Update user role
-  async updateUserRole(userId, role) {
-    try {
-      const user = await this.getUserById(userId);
-
-      const updatedUser = await prisma.user.update({
-        where: { id: userId },
-        data: { role },
-        select: {
-          id: true,
-          name: true,
-          lastName: true,
-          phone: true,
-          role: true,
-          language: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
-
-      return updatedUser;
-    } catch (error) {
-      console.error("Error in updateUserRole:", error);
-      throw error;
-    }
-  },
-
-  // Update user profile
-  async updateUserProfile(userId, userData) {
-    try {
-      const user = await this.getUserById(userId);
-      const { name, lastName, phone } = userData;
-
-      // Check if phone is being changed and if it's already in use
-      if (phone && phone !== user.phone) {
-        const existingUser = await prisma.user.findFirst({
-          where: { phone },
-        });
-        if (existingUser) {
-          throw new Error("Phone number already in use");
-        }
-      }
-
-      const updatedUser = await prisma.user.update({
-        where: { id: userId },
-        data: {
-          ...(name && { name }),
-          ...(lastName && { lastName }),
-          ...(phone && { phone }),
-        },
-        select: {
-          id: true,
-          name: true,
-          lastName: true,
-          phone: true,
-          role: true,
-          language: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
-
-      return updatedUser;
-    } catch (error) {
-      console.error("Error in updateUserProfile:", error);
-      throw error;
-    }
-  },
-
   async findUserByEmail(email) {
     const user = await prisma.user.findUnique({
       where: { email },
@@ -195,160 +16,15 @@ export const userService = {
     return user;
   },
 
-  // Setup training profile
-  async setupTrainingProfile(userId, trainingData) {
-    // This would be implemented based on your specific requirements
-    // for training setup
-
-    // Example implementation:
-    const updatedUser = await prisma.user.update({
+  async updateUser(userId, data) {
+    return prisma.user.update({
       where: { id: userId },
-      data: {
-        trainingProfile: {
-          create: trainingData,
-        },
-      },
-      include: {
-        trainingProfile: true,
-      },
+      data,
     });
-
-    const { password, ...userWithoutPassword } = updatedUser;
-    return userWithoutPassword;
   },
 
-  // Verify password
-  async verifyPassword(email, password) {
-    try {
-      const user = await this.getUserByEmail(email);
-
-      if (!user || !user.password) {
-        return false;
-      }
-
-      const isValid = await compare(password, user.password);
-      return isValid;
-    } catch (error) {
-      console.error("Password verification error:", error);
-      return false;
-    }
-  },
-
-  // Delete user
-  async deleteUser(userId) {
-    await prisma.user.delete({
-      where: { id: userId },
-    });
-
-    return { success: true };
-  },
-
-  // Update user language
-  async updateUserLanguage(userId, language) {
-    try {
-      if (!userId || !language) {
-        throw new Error("User ID and language are required");
-      }
-
-      const updatedUser = await prisma.user.update({
-        where: { id: userId },
-        data: { language },
-        select: {
-          id: true,
-          name: true,
-          lastName: true,
-          phone: true,
-          role: true,
-          language: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
-
-      return updatedUser;
-    } catch (error) {
-      console.error("Error in updateUserLanguage:", error);
-      if (error.code === "P2025") {
-        throw new Error("User not found");
-      }
-      throw error;
-    }
-  },
-
-  // Verify email
-  async verifyEmail(email, token) {
-    try {
-      const user = await prisma.user.findFirst({
-        where: {
-          email: email,
-          emailVerificationToken: token,
-        },
-      });
-
-      if (!user) {
-        throw new Error("Invalid verification token or email");
-      }
-
-      return await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          emailVerified: true,
-          emailVerificationToken: null,
-        },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          lastName: true,
-          role: true,
-          language: true,
-          emailVerified: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
-    } catch (error) {
-      console.error("Error in verifyEmail:", error);
-      throw error;
-    }
-  },
-
-  // Initiate password reset
-  async initiatePasswordReset(email) {
-    try {
-      const user = await prisma.user.findUnique({
-        where: { email },
-      });
-
-      if (!user) {
-        return null;
-      }
-
-      // Generate reset token and expiry
-      const resetToken = crypto.randomBytes(32).toString("hex");
-      const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
-
-      // Update user with reset token
-      await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          resetToken,
-          resetTokenExpiry,
-        },
-      });
-
-      return {
-        email: user.email,
-        resetToken,
-      };
-    } catch (error) {
-      console.error("Password reset initiation error:", error);
-      throw error;
-    }
-  },
-
-  // Reset password
   async resetPassword(token, newPassword) {
+    // Find user with valid reset token
     const user = await prisma.user.findFirst({
       where: {
         resetToken: token,
@@ -362,8 +38,10 @@ export const userService = {
       throw new Error("Invalid or expired reset token");
     }
 
-    const hashedPassword = await hash(newPassword, 10);
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
 
+    // Update user with new password and clear reset token
     await prisma.user.update({
       where: { id: user.id },
       data: {
@@ -374,17 +52,5 @@ export const userService = {
     });
 
     return true;
-  },
-
-  async updateUser(userId, data) {
-    try {
-      return await prisma.user.update({
-        where: { id: userId },
-        data: data,
-      });
-    } catch (error) {
-      console.error("Error updating user:", error);
-      throw new Error("Failed to update user");
-    }
   },
 };

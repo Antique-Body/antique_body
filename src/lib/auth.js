@@ -1,17 +1,23 @@
+import { findUserByPhone, verifyCode as verifyPhoneCode } from "@/app/api/auth/services/phone";
 import { PrismaClient } from "@prisma/client";
 import { compare } from "bcrypt";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import {
-  deleteVerificationCode,
-  findUserByPhone,
-  verifyPhoneCode,
-} from "./utils";
+import FacebookProvider from "next-auth/providers/facebook";
+import GoogleProvider from "next-auth/providers/google";
 
 const prisma = new PrismaClient();
 
 export const authConfig = {
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
+    FacebookProvider({
+      clientId: process.env.FACEBOOK_CLIENT_ID,
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+    }),
     CredentialsProvider({
       name: "Email",
       credentials: {
@@ -19,49 +25,28 @@ export const authConfig = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        console.log("=== Starting Email Authentication ===");
-        console.log("Received credentials:", {
-          email: credentials?.email,
-          hasPassword: !!credentials?.password,
-        });
-
         try {
           if (!credentials?.email || !credentials?.password) {
             throw new Error("Email and password are required");
           }
 
-          console.log("Looking for user in database...");
           const user = await prisma.user.findUnique({
             where: { email: credentials.email },
           });
 
-          console.log("User found:", {
-            exists: !!user,
-            hasPassword: !!user?.password,
-            id: user?.id,
-            email: user?.email,
-          });
-
           if (!user) {
-            throw new Error("User not found");
+            throw new Error("Invalid email or password");
           }
 
           if (!user.password) {
-            throw new Error("User has no password set");
+            throw new Error("This account was created with phone number. Please use phone login.");
           }
 
-          console.log("Comparing passwords...");
-          const isPasswordValid = await compare(
-            credentials.password,
-            user.password
-          );
-          console.log("Password valid:", isPasswordValid);
-
+          const isPasswordValid = await compare(credentials.password, user.password);
           if (!isPasswordValid) {
-            throw new Error("Invalid password");
+            throw new Error("Invalid email or password");
           }
 
-          console.log("Authentication successful, returning user data");
           return {
             id: user.id,
             name: user.name,
@@ -70,7 +55,6 @@ export const authConfig = {
           };
         } catch (error) {
           console.error("Auth error:", error);
-          console.error("Error stack:", error.stack);
           throw error;
         }
       },
@@ -82,44 +66,21 @@ export const authConfig = {
         code: { label: "Verification Code", type: "text" },
       },
       async authorize(credentials) {
-        console.log("=== Starting Phone Authentication ===");
-        console.log("Received credentials:", {
-          phone: credentials?.phone,
-          hasCode: !!credentials?.code,
-        });
-
         try {
           if (!credentials?.phone || !credentials?.code) {
             throw new Error("Phone number and verification code are required");
           }
 
-          console.log("Verifying phone code...");
-          const verification = await verifyPhoneCode(
-            credentials.phone,
-            credentials.code
-          );
-          console.log("Verification result:", !!verification);
-
-          if (!verification) {
+          const isCodeValid = await verifyPhoneCode(credentials.phone, credentials.code);
+          if (!isCodeValid) {
             throw new Error("Invalid or expired verification code");
           }
 
-          console.log("Looking for user by phone...");
           const user = await findUserByPhone(credentials.phone);
-          console.log("User found:", {
-            exists: !!user,
-            id: user?.id,
-            phone: user?.phone,
-          });
-
           if (!user) {
             throw new Error("User not found");
           }
 
-          console.log("Deleting verification code...");
-          await deleteVerificationCode(verification.id);
-
-          console.log("Authentication successful, returning user data");
           return {
             id: user.id,
             name: user.name,
@@ -128,7 +89,6 @@ export const authConfig = {
           };
         } catch (error) {
           console.error("Auth error:", error);
-          console.error("Error stack:", error.stack);
           throw error;
         }
       },
@@ -136,33 +96,21 @@ export const authConfig = {
   ],
   callbacks: {
     async jwt({ token, user }) {
-      console.log("=== JWT Callback ===");
-      console.log("Token before:", token);
-      console.log("User data:", user);
-
       if (user) {
         token.id = user.id;
         token.role = user.role;
         token.phone = user.phone;
         token.email = user.email;
       }
-
-      console.log("Token after:", token);
       return token;
     },
     async session({ session, token }) {
-      console.log("=== Session Callback ===");
-      console.log("Session before:", session);
-      console.log("Token:", token);
-
       if (token) {
         session.user.id = token.id;
         session.user.role = token.role;
         session.user.phone = token.phone;
         session.user.email = token.email;
       }
-
-      console.log("Session after:", session);
       return session;
     },
   },
