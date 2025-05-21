@@ -1,3 +1,4 @@
+
 import { sendVerificationCodeEmail } from "@/lib/email";
 import { PrismaClient } from "@prisma/client";
 
@@ -15,7 +16,7 @@ export async function sendVerificationCode(email) {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     // Delete any existing unused codes for this email
-    await prisma.emailVerificationCode.deleteMany({
+    await prisma.emailVerification.deleteMany({
       where: {
         email,
         used: false,
@@ -23,7 +24,7 @@ export async function sendVerificationCode(email) {
     });
 
     // Create new verification code
-    await prisma.emailVerificationCode.create({
+    await prisma.emailVerification.create({
       data: {
         email,
         code,
@@ -51,10 +52,10 @@ export async function sendVerificationCode(email) {
  * @param {string} code - The code to verify
  * @returns {Promise<boolean>} - Whether the code is valid
  */
-export async function verifyCode(email, code) {
+export async function verifyEmailCode(email, code) {
   try {
     // Find the most recent unused code for this email
-    const verificationCode = await prisma.emailVerificationCode.findFirst({
+    const verificationCode = await prisma.emailVerification.findFirst({
       where: {
         email,
         code,
@@ -73,7 +74,7 @@ export async function verifyCode(email, code) {
     }
 
     // Mark the code as used
-    await prisma.emailVerificationCode.update({
+    await prisma.emailVerification.update({
       where: { id: verificationCode.id },
       data: { used: true },
     });

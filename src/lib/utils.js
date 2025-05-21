@@ -46,35 +46,6 @@ export function formatPhoneNumber(phone) {
   return cleaned;
 }
 
-// Verify phone code
-export async function verifyPhoneCode(phone, code) {
-  const formattedPhone = formatPhoneNumber(phone);
-  return await prisma.phoneVerification.findFirst({
-    where: {
-      phone: formattedPhone,
-      code: code,
-      expires: {
-        gt: new Date(),
-      },
-    },
-  });
-}
-
-// Delete verification code
-export async function deleteVerificationCode(id) {
-  return await prisma.phoneVerification.delete({
-    where: { id },
-  });
-}
-
-// Find user by phone
-export async function findUserByPhone(phone) {
-  const formattedPhone = formatPhoneNumber(phone);
-  return await prisma.user.findFirst({
-    where: { phone: formattedPhone },
-  });
-}
-
 // Generate secure random code
 export function generateSecureCode(length = 6) {
   const digits = "0123456789";

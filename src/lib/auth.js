@@ -1,9 +1,10 @@
+import { verifyPhoneCode } from "@/app/api/auth/services/phone";
 import {
+  findUserByEmail,
   findUserByPhone,
-  verifyCode as verifyPhoneCode,
-} from "@/app/api/auth/services/phone";
+  verifyUserPassword,
+} from "@/app/api/users/services";
 import { PrismaClient } from "@prisma/client";
-import { compare } from "bcrypt";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import FacebookProvider from "next-auth/providers/facebook";
@@ -34,23 +35,34 @@ export const authConfig = {
             throw new Error("Email and password are required");
           }
 
-          const user = await prisma.user.findUnique({
-            where: { email: credentials.email },
-          });
+          const user = await findUserByEmail(credentials.email);
 
           if (!user) {
             throw new Error("Invalid email or password");
           }
 
-          if (!user.password) {
-            throw new Error(
-              "This account was created with phone number. Please use phone login."
-            );
+          // Check if user has email verification
+          if (!user.emailVerified) {
+            throw new Error("Please verify your email first");
           }
 
-          const isPasswordValid = await compare(
-            credentials.password,
-            user.password
+          // Check if user has password set
+          if (!user.password) {
+            // If user just registered, allow them to proceed
+            if (user.emailVerified && !user.phoneVerified) {
+              return {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+              };
+            }
+            throw new Error("No password set for this account ");
+          }
+
+          const isPasswordValid = await verifyUserPassword(
+            user.id,
+            credentials.password
           );
           if (!isPasswordValid) {
             throw new Error("Invalid email or password");
@@ -116,9 +128,7 @@ export const authConfig = {
       if (account?.provider === "google" || account?.provider === "facebook") {
         try {
           // Check if user already exists
-          const existingUser = await prisma.user.findUnique({
-            where: { email: user.email },
-          });
+          const existingUser = await findUserByEmail(user.email);
 
           if (!existingUser) {
             // Create new user if doesn't exist

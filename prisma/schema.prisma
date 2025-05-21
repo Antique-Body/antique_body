@@ -74,7 +74,7 @@ model Session {
   @@index([userId])
 }
 
-model EmailVerificationCode {
+model EmailVerification {
   id        String   @id @default(cuid())
   email     String
   code      String
