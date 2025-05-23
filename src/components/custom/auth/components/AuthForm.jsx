@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAuthForm } from "@/hooks";
 import { Icon } from "@iconify/react";
 import { signIn } from "next-auth/react";
+import { useTranslation } from "react-i18next";
 import { PhoneInput } from "./PhoneInput";
 import { VerificationCodeInput } from "./VerificationCodeInput";
 
@@ -28,7 +29,7 @@ export const AuthForm = ({
   phoneOnly = true,
 }) => {
   const { isLoading: authLoading } = useAuth();
-
+  const { t } = useTranslation();
   const {
     showEmailForm,
     setShowEmailForm,
@@ -81,7 +82,9 @@ export const AuthForm = ({
           onClick={() => setShowEmailForm(true)}
           className="w-full bg-gradient-to-r from-[#ff7800] to-[#ff5f00] py-2 rounded font-medium text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 disabled:opacity-50"
         >
-          {isLogin ? "Continue with Email/Phone" : "Register with Email/Phone"}
+          {isLogin
+            ? t("auth.login.continue_with_email_phone")
+            : t("auth.register.register_with_email_phone")}
         </Button>
 
         <Button
@@ -90,7 +93,9 @@ export const AuthForm = ({
           className="w-full bg-white text-[#1a1a1a] hover:bg-gray-100 hover:scale-[1.02] transition-all duration-200"
           leftIcon={<GoogleIcon />}
         >
-          {isLogin ? "Continue with Google" : "Register with Google"}
+          {isLogin
+            ? t("auth.login.continue_with_google")
+            : t("auth.register.register_with_google")}
         </Button>
         <Button
           onClick={handleFacebookSignIn}
@@ -98,7 +103,9 @@ export const AuthForm = ({
           className="w-full bg-white text-[#1a1a1a] hover:bg-gray-100 hover:scale-[1.02] transition-all duration-200"
           leftIcon={<FacebookIcon />}
         >
-          {isLogin ? "Continue with Facebook" : "Register with Facebook"}
+          {isLogin
+            ? t("auth.login.continue_with_facebook")
+            : t("auth.register.register_with_facebook")}
         </Button>
       </div>
     );
@@ -120,7 +127,7 @@ export const AuthForm = ({
           className="flex-1 py-3 text-base font-medium"
           leftIcon={<Icon icon="mdi:email" className="w-5 h-5" />}
         >
-          Use Email
+          {t("auth.login.use_email")}
         </Button>
         <Button
           type="button"
@@ -133,7 +140,7 @@ export const AuthForm = ({
           className="flex-1 py-3 text-base font-medium"
           leftIcon={<Icon icon="mdi:phone" className="w-5 h-5" />}
         >
-          Use Phone
+          {t("auth.login.use_phone")}
         </Button>
       </div>
 
