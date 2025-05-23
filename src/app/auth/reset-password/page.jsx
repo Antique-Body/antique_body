@@ -1,8 +1,8 @@
 "use client";
 
 import Background from "@/components/background";
-import { Button, TextField } from "@/components/common/index";
-import { Card } from "@/components/custom/index";
+import { Button, FormField } from "@/components/common";
+import { Card } from "@/components/custom";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -39,14 +39,14 @@ export default function ResetPasswordPage() {
     }
 
     try {
-      const response = await fetch("/api/auth/reset-password", {
+      const response = await fetch("/api/auth/password-reset", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           token,
-          password: formData.password,
+          newPassword: formData.password,
         }),
       });
 
@@ -83,17 +83,19 @@ export default function ResetPasswordPage() {
             className="w-full max-w-md p-8 bg-zinc-900/80 backdrop-blur-md border border-zinc-800 rounded-xl shadow-2xl"
             borderTop={true}
             showLogo={true}
-            logoTagline="STRENGTH OF THE ANCIENTS">
+            logoTagline="STRENGTH OF THE ANCIENTS"
+          >
             <div className="text-center">
-              <h2 className="text-xl font-semibold mb-4">{t("invalid_reset_link")}</h2>
-              <p className="text-gray-400 mb-4">
-                {t("reset_link_expired")}
-              </p>
-              <button
+              <h2 className="text-xl font-semibold mb-4">
+                {t("invalid_reset_link")}
+              </h2>
+              <p className="text-gray-400 mb-4">{t("reset_link_expired")}</p>
+              <Button
                 onClick={() => router.push("/auth/login")}
-                className="text-[#ff7800] hover:text-[#ff5f00] transition-colors">
+                variant="ghostOrange"
+              >
                 {t("return_to_login")}
-              </button>
+              </Button>
             </div>
           </Card>
         </div>
@@ -116,15 +118,14 @@ export default function ResetPasswordPage() {
           className="w-full max-w-md p-8 bg-zinc-900/80 backdrop-blur-md border border-zinc-800 rounded-xl shadow-2xl"
           borderTop={true}
           showLogo={true}
-          logoTagline="STRENGTH OF THE ANCIENTS">
+          logoTagline="STRENGTH OF THE ANCIENTS"
+        >
           {success ? (
             <div className="text-center">
               <h2 className="text-xl font-semibold mb-4 text-green-500">
                 {t("password_reset_successful")}
               </h2>
-              <p className="text-gray-400">
-                {t("password_reset_redirect")}
-              </p>
+              <p className="text-gray-400">{t("password_reset_redirect")}</p>
             </div>
           ) : (
             <div className="w-full">
@@ -132,7 +133,7 @@ export default function ResetPasswordPage() {
                 {t("reset_password")}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <TextField
+                <FormField
                   id="password"
                   name="password"
                   label={t("new_password")}
@@ -144,11 +145,13 @@ export default function ResetPasswordPage() {
                   required
                   placeholder={t("enter_new_password")}
                   error={
-                    error && error.includes(t("password_min_length")) ? error : ""
+                    error && error.includes(t("password_min_length"))
+                      ? error
+                      : ""
                   }
                   className="w-full"
                 />
-                <TextField
+                <FormField
                   id="confirmPassword"
                   name="confirmPassword"
                   label={t("confirm_new_password")}
@@ -177,7 +180,8 @@ export default function ResetPasswordPage() {
                   type="submit"
                   loading={loading}
                   variant="primary"
-                  className="w-full">
+                  className="w-full"
+                >
                   {t("reset_password")}
                 </Button>
               </form>

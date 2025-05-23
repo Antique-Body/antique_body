@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
 import LanguageSelector from "@/components/LanguageSelector";
-import { SessionProvider } from 'next-auth/react';
+import { AuthProvider } from "@/contexts/AuthContext";
+import { SessionProvider } from "next-auth/react";
 import { Inter } from "next/font/google";
-import I18nProvider from '../components/I18nProvider';
-import AuthProvider from '../components/auth/AuthProvider';
+import I18nProvider from "../components/I18nProvider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -26,4 +26,4 @@ export default function RootLayout({ children }) {
       </body>
     </html>
   );
-} 
+}

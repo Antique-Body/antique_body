@@ -55,7 +55,8 @@
       "forgot_password": "Zaboravili ste lozinku?",
       "no_account": "Nemate račun?",
       "or_continue_with": "Ili nastavite s",
-      "sign_in_with_google": "Prijavite se s Googleom"
+      "sign_in_with_google": "Prijavite se s Googleom",
+      "sign_in_with_facebook": "Prijavite se s Facebookom"
     },
     "register": {
       "title": "Registracija",

@@ -56,10 +56,27 @@
       "no_account": "Don't have an account?",
       "back_to_login": "Back to Login",
       "sign_in_with_google": "Sign in with Google",
-      "or_continue_with": "Or continue with"
+      "sign_in_with_facebook": "Sign in with Facebook",
+      "welcome_back": "Welcome Back",
+      "use_phone_email": "Continue with phone or email",
+      "continue_with_google": "Continue with Google",
+      "continue_with_facebook": "Continue with Facebook",
+      "back": "Back",
+      "use_phone": "Phone Number",
+      "use_email": "Email",
+      "phone_number": "Enter your phone number",
+      "send_code": "Get Code",
+      "code_sent": "Code Sent!",
+      "enter_code": "Enter the 6-digit code we sent you",
+      "resend_code": "Resend Code",
+      "code_placeholder": "Enter 6-digit code",
+      "phone_placeholder": "e.g. +387 61 123 456",
+      "continue_with": "Continue with",
+      "continue_with_email_phone": "Continue with email or phone number"
     },
     "register": {
       "title": "Register",
+      "create_account": "Create Account",
       "join_fitness_community": "Join our fitness community",
       "have_account": "Already have an account?",
       "sign_in": "Sign In",
@@ -69,16 +86,29 @@
         "email_sent_to": "A verification email has been sent to",
         "check_inbox": "Please check your inbox and follow the instructions to verify your account",
         "resend": "Resend verification email"
-      }
+      },
+      "register_with": "Register with",
+      "register_with_email_phone": "Register with email or phone number",
+      "register_with_google": "Register with Google",
+      "register_with_facebook": "Register with Facebook"
     },
     "form": {
       "email": "Email",
       "password": "Password",
-      "submit": "Submit"
+      "confirm_password": "Confirm Password",
+      "first_name": "First Name",
+      "last_name": "Last Name",
+      "submit": "Submit",
+      "back": "Back",
+      "sign_in": "Sign In",
+      "sign_up": "Sign Up",
+      "forgot_password": "Forgot Password?",
+      "remember_me": "Remember me",
+      "terms": "By continuing, you agree to our Terms of Service and Privacy Policy"
     },
     "password_reset": {
       "title": "Password Reset",
-      "instructions": "Enter your email and we'll send you instructions to reset your password",
+      "instructions": "If this email is associated with an account, we will send you instructions to reset your password",
       "failed": "Failed to reset password",
       "success": "Password reset instructions sent"
     },
@@ -160,7 +190,13 @@
     "first_name_required": "First name is required",
     "last_name_required": "Last name is required",
     "confirm_password_required": "Please confirm your password",
-    "passwords_do_not_match": "Passwords do not match"
+    "passwords_do_not_match": "Passwords do not match",
+    "phone_required": "Please enter your phone number",
+    "phone_invalid": "Please enter a valid phone number (e.g. +387 61 123 456)",
+    "username_required": "Username is required",
+    "username_min_length": "Username must be at least 3 characters long",
+    "code_required": "Please enter the verification code",
+    "code_invalid": "Please enter a valid 6-digit code"
   },
   "errors": {
     "login_failed": "Login failed. Please check your credentials.",
@@ -319,4 +355,4 @@
   "register_failed": "Registration failed",
   "verification_email_failed": "Failed to send verification email",
   "verification_email_sent_again": "Verification email sent again"
-} 
+}

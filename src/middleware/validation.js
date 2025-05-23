@@ -75,7 +75,7 @@ export const validateUserUpdate = (data) => {
     return { valid: false, errors: { general: "No data provided" } };
   }
 
-  const { name, lastName, email } = data;
+  const { name, lastName, phone } = data;
 
   if (name !== undefined && isEmpty(name)) {
     errors.name = "Name cannot be empty";
@@ -85,11 +85,11 @@ export const validateUserUpdate = (data) => {
     errors.lastName = "Last name cannot be empty";
   }
 
-  if (email !== undefined) {
-    if (isEmpty(email)) {
-      errors.email = "Email cannot be empty";
-    } else if (!emailRegex.test(email)) {
-      errors.email = "Please provide a valid email";
+  if (phone !== undefined) {
+    if (isEmpty(phone)) {
+      errors.phone = "Phone cannot be empty";
+    } else if (!phone.startsWith("+")) {
+      errors.phone = "Phone number must start with +";
     }
   }
 
@@ -107,12 +107,18 @@ export const validateRoleUpdate = (data) => {
     return { valid: false, errors: { general: "No data provided" } };
   }
 
-  const { role } = data;
+  const { role, userId } = data;
+
+  if (!userId) {
+    errors.userId = "User ID is required";
+  }
 
   if (isEmpty(role)) {
     errors.role = "Role is required";
-  } else if (!["user", "client", "trainer"].includes(role.toLowerCase())) {
-    errors.role = "Role must be either user, client or trainer";
+  } else if (
+    !["user", "client", "trainer", "admin"].includes(role.toLowerCase())
+  ) {
+    errors.role = "Invalid role";
   }
 
   return {
