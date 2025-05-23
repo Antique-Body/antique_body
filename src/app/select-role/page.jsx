@@ -74,7 +74,8 @@ export default function SelectRole() {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
-          errorData.error || t("role.update.failed", { status: response.status })
+          errorData.error ||
+            t("role.update.failed", { status: response.status })
         );
       }
 
@@ -126,7 +127,7 @@ export default function SelectRole() {
           />
         </div>
 
-        <div className="max-w-md mx-auto w-full">
+        <div className="w-full max-w-md mx-auto">
           <RoleCardCompact
             title={t("role.user.custom_workout")}
             description={t("role.user.description")}
@@ -143,15 +144,15 @@ export default function SelectRole() {
 
   return (
     <div className="relative z-10 max-w-4xl mx-auto px-4 py-12 text-center">
-      <h1 className="text-4xl font-bold mb-6 spartacus-font text-[#ff7800]" >
+      <h1 className="text-4xl font-bold mb-6 spartacus-font text-[#ff7800]">
         {t("role.selection.title")}
       </h1>
-      <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto" >
+      <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
         {t("role.selection.description")}
       </p>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-200" >
+        <div className="mb-6 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-200">
           {error}
         </div>
       )}
@@ -165,7 +166,9 @@ export default function SelectRole() {
         title={t("role.selection.confirm_path")}
         message={
           pendingRole
-            ? t("role.selection.continue_as", { role: t(ROLE_DESCRIPTIONS[pendingRole]) })
+            ? t("role.selection.continue_as", {
+                role: t(ROLE_DESCRIPTIONS[pendingRole]),
+              })
             : ""
         }
         confirmButtonText={t("common.continue")}

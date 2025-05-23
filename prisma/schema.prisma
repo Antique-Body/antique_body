@@ -36,11 +36,25 @@ model User {
   accounts              Account[]
   sessions              Session[]
   preferences           Json?     @default("{}")
+  theme                 Theme?    @relation(fields: [themeId], references: [id])
+  themeId               String?   @unique
 
   @@index([email])
   @@index([phone])
   @@index([role])
   @@index([resetToken])
+}
+
+// Theme model for user customization
+model Theme {
+  id                    String    @id @default(cuid())
+  name                  String
+  colors                Json      // Stores theme colors
+  design                Json      // Stores design preferences
+  isCustom              Boolean   @default(false)
+  user                  User?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 }
 
 // NextAuth models

@@ -1,387 +1,167 @@
 "use client";
 
+import { ThemeContext } from "@/app/utils/themeConfig";
+import { useContext } from "react";
 import { BrandLogo } from "..";
 import "../components.scss";
 
 export const Card = ({
   children,
-  topBorderColor,
-  width = "90%",
-  maxWidth,
-  padding = "30px 30px",
-  bgGradientFrom = "#0f0f0f",
-  bgGradientTo = "#1a1a1a",
-  borderRadius = "15px",
-  shadow = "0 15px 25px rgba(0,0,0,0.6)",
-  borderColor = "#222",
+  variant = "default",
   className = "",
   borderTop = true,
   showLogo = false,
   logoTagline = "",
-  // New variant and hover props
-  variant,
   hover = false,
-  // Hover props
-  hoverTranslateY = "",
-  hoverBorderColor = "",
-  hoverShadow = "",
-  hoverBgGradientFrom = "",
-  hoverBgGradientTo = "",
-  // Animation props
-  animate = false,
-  animationVariant = "fadeIn",
-  // Additional style props
-  glowEffect = false,
-  glowColor = "#FF7800",
-  glowIntensity = "0.2",
-  borderWidth = "1px",
-  backdropBlur = "",
-  hoverScale = "",
-  textGradient = false,
-  // New props for border radius control
-  noTopRightRadius = false,
-  noBottomRightRadius = false,
-  noTopLeftRadius = false,
-  noBottomLeftRadius = false,
-  // Remove these props from being passed to DOM
-  ...otherProps
+  elevation = "md",
+  ...props
 }) => {
-  // Remove any remaining custom props that shouldn't go to DOM
-  const { accentColor: _, ...finalProps } = otherProps;
-
-  // Set styles based on variant
-  let variantClassName = "";
-
-  // Animation variants
-  const animationVariants = {
-    fadeIn: {
-      hidden: { opacity: 0 },
-      visible: { opacity: 1, transition: { duration: 0.5 } },
-    },
-    slideUp: {
-      hidden: { opacity: 0, y: 20 },
-      visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-    },
-    slideIn: {
-      hidden: { opacity: 0, x: -20 },
-      visible: { opacity: 1, x: 0, transition: { duration: 0.5 } },
-    },
-    scale: {
-      hidden: { opacity: 0, scale: 0.9 },
-      visible: { opacity: 1, scale: 1, transition: { duration: 0.5 } },
-    },
-    pulse: {
-      hidden: { opacity: 0 },
-      visible: {
-        opacity: 1,
-        transition: { duration: 0.5 },
-        boxShadow: `0 0 20px rgba(255,120,0,${glowIntensity})`,
+  const themeContext = useContext(ThemeContext);
+  const theme = themeContext?.theme || {
+    colors: {
+      primary: "#FF6B00",
+      secondary: "#FF8C00",
+      accent: "#FFA500",
+      background: {
+        light: "#1A1A1A",
+        dark: "#121212",
       },
+      text: {
+        primary: "#FFFFFF",
+        secondary: "#A0A0A0",
+      },
+      border: "#333333",
+    },
+    design: {
+      borderRadius: "8px",
+      shadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+      animation: "ease-in-out",
     },
   };
 
-  if (variant === "clientCard") {
-    // Client card styling
-    borderColor = "#2a2a2a";
-    bgGradientFrom = "rgba(17,17,17,0.8)";
-    bgGradientTo = "rgba(24,24,24,0.9)";
-    borderTop = false;
-    padding = "12px"; // No padding to allow for custom inner layout
-    borderRadius = "14px";
-    shadow = "0 8px 16px rgba(0,0,0,0.2)";
-    variantClassName = "z-20 backdrop-blur-sm transition-all duration-300";
+  // Shadow intensity based on elevation
+  const elevationShadows = {
+    none: "none",
+    sm: `0 4px 8px ${theme.colors.background.dark}20`,
+    md: `0 8px 16px ${theme.colors.background.dark}25`,
+    lg: `0 12px 24px ${theme.colors.background.dark}30`,
+    xl: `0 20px 30px ${theme.colors.background.dark}40`,
+  };
 
-    // Apply hover effects if hover prop is true
-    if (hover) {
-      hoverBorderColor = hoverBorderColor || "#FF6B00";
-      hoverShadow =
-        hoverShadow ||
-        "0 12px 24px rgba(0,0,0,0.3), 0 6px 12px rgba(255,107,0,0.1)";
-      hoverBgGradientFrom = "rgba(22,22,22,0.9)";
-      hoverBgGradientTo = "rgba(28,28,28,0.95)";
-    }
-  } else if (variant === "darkStrong") {
-    // Base dashboard styling
-    borderColor = "#222";
-    bgGradientFrom = "rgba(20,20,20,0.95)";
-    bgGradientTo = "rgba(20,20,20,0.95)";
-    borderTop = false;
-    padding = "24px"; // p-6
-    borderRadius = "16px"; // rounded-2xl
-    shadow =
-      "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)"; // shadow-lg
-    variantClassName = "z-30 backdrop-blur-lg";
+  // Base styles
+  const baseStyles = {
+    backgroundColor: theme.colors.background.light,
+    borderColor: theme.colors.border,
+    borderRadius: theme.design.borderRadius,
+    boxShadow: elevationShadows[elevation],
+    transition: `all 0.4s ${theme.design.animation}`,
+    position: "relative",
+    overflow: "hidden",
+    border: "1px solid transparent",
+  };
 
-    // Apply hover effects if hover prop is true
-    if (hover && !hoverBorderColor) {
-      hoverBorderColor = "#FF6B00";
-      hoverShadow = "0 15px 30px -10px rgba(255,107,0,0.2)";
-      variantClassName += " transition-all duration-300 ease-in-out";
-    }
-  } else if (variant === "dark") {
-    // New dark variant styling
-    borderColor = "#333";
-    bgGradientFrom = "rgba(30,30,30,0.8)";
-    bgGradientTo = "rgba(30,30,30,0.8)";
-    borderTop = false;
-    padding = "16px"; // p-4
-    borderRadius = "16px"; // rounded-2xl
-    shadow =
-      "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)"; // shadow-lg
-    variantClassName = "backdrop-blur-lg";
+  // Variant styles
+  const variantStyles = {
+    default: {
+      padding: "24px",
+      backgroundColor: theme.colors.background.light,
+    },
+    dark: {
+      backgroundColor: theme.colors.background.dark,
+      padding: "24px",
+      border: `1px solid ${theme.colors.background.dark}`,
+    },
+    glass: {
+      backgroundColor: `${theme.colors.background.light}99`,
+      backdropFilter: "blur(12px)",
+      padding: "24px",
+      border: `1px solid ${theme.colors.background.light}30`,
+    },
+    premium: {
+      padding: "32px",
+      border: `2px solid ${theme.colors.accent}40`,
+      boxShadow: `0 15px 30px ${theme.colors.accent}30`,
+      background: `linear-gradient(135deg, ${theme.colors.background.dark} 0%, ${theme.colors.background.light} 100%)`,
+    },
+    highlight: {
+      padding: "24px",
+      border: `1px solid ${theme.colors.primary}30`,
+      boxShadow: `0 12px 24px ${theme.colors.primary}20`,
+      background: `linear-gradient(145deg, ${theme.colors.background.light}, ${theme.colors.background.dark})`,
+    },
+  };
 
-    // Apply hover effects if hover prop is true
-    if (hover && !hoverBorderColor) {
-      hoverBorderColor = "#FF6B00";
-      hoverShadow = "0 15px 30px -10px rgba(255,107,0,0.2)";
-      variantClassName += " transition-all duration-300 ease-in-out";
-    }
-  } else if (variant === "entityCard") {
-    // Trainer card specific styling
-    borderColor = "#333";
-    bgGradientFrom = "rgba(30,30,30,0.8)";
-    bgGradientTo = "rgba(30,30,30,0.8)";
-    borderTop = false;
-    padding = "20px"; // p-5
-    borderRadius = "16px"; // rounded-2xl
-    shadow =
-      "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)"; // shadow-lg
-    hoverTranslateY = "-3px";
-    hoverBorderColor = "#FF6B00";
-    hoverShadow =
-      "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"; // shadow-xl
-    variantClassName =
-      "flex flex-row gap-5 overflow-hidden relative w-full max-w-full md:w-[calc(50%-10px)] md:min-w-[450px] transition-all duration-300 group";
-  } else if (variant === "planCard") {
-    // Specific styling for plan cards based on the screenshots
-    borderColor = "#333";
-    bgGradientFrom = "rgba(20,20,20,0.95)";
-    bgGradientTo = "rgba(22,22,22,0.95)";
-    borderTop = false;
-    padding = "0"; // No padding to allow for custom inner layout
-    borderRadius = "12px";
-    shadow = "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)";
-    width = "100%";
-    // maxWidth = "100%";
-    hoverTranslateY = "-2px";
-    hoverBorderColor = "#FF6B00";
-    hoverShadow = "0 10px 15px -3px rgba(0, 0, 0, 0.2)";
-    variantClassName =
-      "text-left overflow-hidden relative transition-all duration-300";
-  } else if (variant === "createPlanCard") {
-    // Styling for the "Create New Plan" card
-    borderColor = "#333";
-    bgGradientFrom = "rgba(20,20,20,0.5)";
-    bgGradientTo = "rgba(22,22,22,0.5)";
-    borderTop = false;
-    padding = "24px";
-    borderRadius = "12px";
-    shadow = "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)";
-    width = "100%";
-    hoverTranslateY = "-2px";
-    hoverBorderColor = "#FF6B00";
-    hoverBgGradientFrom = "rgba(25,25,25,0.6)";
-    hoverBgGradientTo = "rgba(28,28,28,0.6)";
-    hoverShadow = "0 10px 15px -3px rgba(0, 0, 0, 0.2)";
-    variantClassName =
-      "text-center cursor-pointer border border-dashed transition-all duration-300";
-  } else if (variant === "glass") {
-    // New glass morphism card style
-    borderColor = "rgba(255,255,255,0.1)";
-    bgGradientFrom = "rgba(18,18,18,0.6)";
-    bgGradientTo = "rgba(24,24,24,0.6)";
-    backdropBlur = "md";
-    borderRadius = "20px";
-    shadow = "0 10px 30px rgba(0,0,0,0.1)";
-    hoverBorderColor = "rgba(255,120,0,0.5)";
-    hoverShadow =
-      "0 15px 30px rgba(0,0,0,0.15), 0 5px 15px rgba(255,120,0,0.1)";
-    variantClassName = "backdrop-blur-md";
-  } else if (variant === "premium") {
-    // Premium card with gold accent
-    borderColor = "#3a3a3a";
-    bgGradientFrom = "rgba(28,28,28,0.95)";
-    bgGradientTo = "rgba(24,24,24,0.95)";
-    borderRadius = "16px";
-    shadow = "0 10px 25px rgba(0,0,0,0.4)";
-    padding = "24px";
-    glowEffect = true;
-    glowColor = "rgba(255,185,0,0.15)";
-    variantClassName = "relative overflow-hidden";
-  } else {
-    // Default card styling improvements
-    borderRadius = "16px";
-    shadow = "0 10px 20px rgba(0,0,0,0.3)";
-    bgGradientFrom = "rgba(18,18,18,0.95)";
-    bgGradientTo = "rgba(24,24,24,0.95)";
-    variantClassName = "backdrop-blur-sm";
-
-    if (hover) {
-      hoverTranslateY = "-3px";
-      hoverBorderColor = "#FF7800";
-      hoverShadow =
-        "0 15px 30px rgba(0,0,0,0.4), 0 5px 15px rgba(255,120,0,0.15)";
-      hoverBgGradientFrom = "rgba(22,22,22,0.95)";
-      hoverBgGradientTo = "rgba(28,28,28,0.95)";
-      variantClassName += " transition-all duration-300 ease-in-out";
-    }
-  }
-
-  // If hover is true and no variant-specific hover effects are set
-  if (hover && !hoverBorderColor) {
-    hoverBorderColor = "#FF6B00";
-    hoverShadow = "0 15px 30px -10px rgba(255,107,0,0.2)";
-    variantClassName += " transition-all duration-300 ease-in-out";
-  }
-
-  // Add backdrop blur class if specified
-  if (backdropBlur) {
-    variantClassName += ` backdrop-blur-${backdropBlur}`;
-  }
-
-  // Add glow effect class if specified
-  const glowStyles = glowEffect
+  // Hover styles
+  const hoverStyles = hover
     ? {
-        boxShadow: `0 0 20px ${glowColor}`,
+        transform: "translateY(-6px)",
+        boxShadow: `0 20px 30px ${theme.colors.primary}25`,
+        borderColor: `${theme.colors.primary}50`,
       }
     : {};
-
-  // Calculate the Card component based on animation settings
-
-  // Set animation props
-  const animProps = animate
-    ? {
-        initial: "hidden",
-        animate: "visible",
-        variants:
-          animationVariants[animationVariant] || animationVariants.fadeIn,
-      }
-    : {};
-
-  // Calculate border radius string
-  let borderRadiusValue = borderRadius;
-  if (
-    noTopLeftRadius &&
-    noTopRightRadius &&
-    noBottomRightRadius &&
-    noBottomLeftRadius
-  ) {
-    borderRadiusValue = `0px 0px 0px 0px`;
-  } else if (noTopLeftRadius && noTopRightRadius && noBottomRightRadius) {
-    borderRadiusValue = `0px 0px 0px ${borderRadius}`;
-  } else if (noTopLeftRadius && noTopRightRadius && noBottomLeftRadius) {
-    borderRadiusValue = `0px 0px ${borderRadius} 0px`;
-  } else if (noTopLeftRadius && noBottomRightRadius && noBottomLeftRadius) {
-    borderRadiusValue = `0px ${borderRadius} 0px 0px`;
-  } else if (noTopRightRadius && noBottomRightRadius && noBottomLeftRadius) {
-    borderRadiusValue = `${borderRadius} 0px 0px 0px`;
-  } else if (noTopLeftRadius && noTopRightRadius) {
-    borderRadiusValue = `0px 0px ${borderRadius} ${borderRadius}`;
-  } else if (noTopLeftRadius && noBottomRightRadius) {
-    borderRadiusValue = `0px ${borderRadius} 0px ${borderRadius}`;
-  } else if (noTopLeftRadius && noBottomLeftRadius) {
-    borderRadiusValue = `0px ${borderRadius} ${borderRadius} 0px`;
-  } else if (noTopRightRadius && noBottomRightRadius) {
-    borderRadiusValue = `${borderRadius} 0px 0px ${borderRadius}`;
-  } else if (noTopRightRadius && noBottomLeftRadius) {
-    borderRadiusValue = `${borderRadius} 0px ${borderRadius} 0px`;
-  } else if (noBottomRightRadius && noBottomLeftRadius) {
-    borderRadiusValue = `${borderRadius} ${borderRadius} 0px 0px`;
-  } else if (noTopLeftRadius) {
-    borderRadiusValue = `0px ${borderRadius} ${borderRadius} ${borderRadius}`;
-  } else if (noTopRightRadius) {
-    borderRadiusValue = `${borderRadius} 0px ${borderRadius} ${borderRadius}`;
-  } else if (noBottomRightRadius) {
-    borderRadiusValue = `${borderRadius} ${borderRadius} 0px ${borderRadius}`;
-  } else if (noBottomLeftRadius) {
-    borderRadiusValue = `${borderRadius} ${borderRadius} ${borderRadius} 0px`;
-  }
 
   return (
     <div
-      className={`relative z-10 flex flex-col ${variant?.startsWith("dark") ? "" : variant === "entityCard" ? "text-left" : variant === "planCard" || variant === "createPlanCard" || variant === "clientCard" ? "text-left" : "items-center text-center"} overflow-hidden ${variantClassName} ${className} min-h-max ${
-        hoverTranslateY ? `hover:translate-y-[${hoverTranslateY}]` : ""
-      } transition-all duration-300`}
+      className={`card-component relative ${className}`}
       style={{
-        width: width,
-        maxWidth: maxWidth,
-        padding: padding,
-        backgroundImage: `linear-gradient(to bottom right, ${bgGradientFrom}, ${bgGradientTo})`,
-        borderRadius: borderRadiusValue,
-        boxShadow: shadow,
-        border: `${borderWidth} solid ${borderColor}`,
-        "--hover-border-color": hoverBorderColor || borderColor,
-        "--hover-shadow": hoverShadow || shadow,
-        "--hover-bg-from": hoverBgGradientFrom || bgGradientFrom,
-        "--hover-bg-to": hoverBgGradientTo || bgGradientTo,
-        "--hover-scale": hoverScale || "1",
-        transition: "all 0.3s ease",
-        ...glowStyles,
+        ...baseStyles,
+        ...variantStyles[variant],
+        ...hoverStyles,
       }}
-      onMouseEnter={(e) => {
-        if (hoverBorderColor)
-          e.currentTarget.style.borderColor = hoverBorderColor;
-        if (hoverShadow) e.currentTarget.style.boxShadow = hoverShadow;
-        if (hoverBgGradientFrom && hoverBgGradientTo) {
-          e.currentTarget.style.backgroundImage = `linear-gradient(to bottom right, ${hoverBgGradientFrom}, ${hoverBgGradientTo})`;
-        }
-        if (hoverTranslateY) {
-          e.currentTarget.style.transform = `translateY(${hoverTranslateY})`;
-        }
-        if (hoverScale) {
-          e.currentTarget.style.transform = `scale(${hoverScale}) ${hoverTranslateY ? `translateY(${hoverTranslateY})` : ""}`;
-        }
-        if (glowEffect) {
-          e.currentTarget.style.boxShadow = `0 0 30px ${glowColor}`;
-        }
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = borderColor;
-        e.currentTarget.style.boxShadow = shadow;
-        e.currentTarget.style.backgroundImage = `linear-gradient(to bottom right, ${bgGradientFrom}, ${bgGradientTo})`;
-        e.currentTarget.style.transform = "translateY(0) scale(1)";
-        if (glowEffect) {
-          e.currentTarget.style.boxShadow = `0 0 20px ${glowColor}`;
-        }
-      }}
-      {...animProps}
-      {...finalProps}
+      {...props}
     >
-      {borderTop && (
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#FF7800] via-[#FFA500] to-[#FF7800] marble-effect" />
-      )}
-
-      {topBorderColor && (
+      {/* Subtle background gradient for premium and highlight variants */}
+      {(variant === "premium" || variant === "highlight") && (
         <div
-          className="absolute left-0 top-0 h-[5px] w-full bg-gradient-to-r bg-[length:200%_100%]"
+          className="absolute inset-0 opacity-20 pointer-events-none"
           style={{
-            backgroundImage: `linear-gradient(to right, ${topBorderColor}, ${
-              topBorderColor === "#ff7800" ? "#ffa500" : topBorderColor
-            }, ${topBorderColor})`,
+            background:
+              variant === "premium"
+                ? `radial-gradient(circle at top right, ${theme.colors.accent}, transparent 70%)`
+                : `radial-gradient(circle at top right, ${theme.colors.primary}, transparent 70%)`,
           }}
-        ></div>
+        />
       )}
 
-      {/* Add left orange bar for trainer card variant */}
-      {variant === "entityCard" && (
-        <div className="absolute left-0 top-0 h-full w-1 scale-y-[0.4] transform bg-[#FF6B00] transition-transform duration-300 ease-in-out hover:scale-y-100 group-hover:scale-y-100"></div>
+      {borderTop && (
+        <div
+          className="absolute top-0 left-0 right-0 h-2"
+          style={{
+            background: `linear-gradient(to right, ${theme.colors.primary}, ${theme.colors.secondary})`,
+            borderTopLeftRadius: theme.design.borderRadius,
+            borderTopRightRadius: theme.design.borderRadius,
+          }}
+        />
       )}
 
-      {/* Add left orange bar for plan card variant */}
-      {variant === "planCard" && (
-        <div className="absolute left-0 top-0 h-full w-1 bg-[#FF6B00]"></div>
-      )}
+      {/* Inner border effect */}
+      <div
+        className="absolute inset-0 pointer-events-none z-0"
+        style={{
+          borderRadius: `calc(${theme.design.borderRadius} - 1px)`,
+          border:
+            variant === "glass"
+              ? `1px solid ${theme.colors.primary}10`
+              : `1px solid ${theme.colors.background.dark}10`,
+          opacity: 0.5,
+        }}
+      />
 
-      {showLogo && <BrandLogo logoTagline={logoTagline} />}
-
-      {/* Wrap children with text gradient if enabled */}
-      {textGradient ? (
-        <div className="bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
-          {children}
+      {showLogo && (
+        <div className="mb-6 text-center relative z-10">
+          <BrandLogo />
+          {logoTagline && (
+            <p
+              className="mt-2 text-sm"
+              style={{ color: theme.colors.text.secondary }}
+            >
+              {logoTagline}
+            </p>
+          )}
         </div>
-      ) : (
-        children
       )}
+
+      <div className="relative z-10">{children}</div>
     </div>
   );
 };

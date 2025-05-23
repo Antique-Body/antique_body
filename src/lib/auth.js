@@ -12,6 +12,24 @@ import GoogleProvider from "next-auth/providers/google";
 
 const prisma = new PrismaClient();
 
+const createDefaultTheme = async () => {
+  return await prisma.theme.create({
+    data: {
+      name: "Default Theme",
+      colors: {
+        primary: "#000000",
+        secondary: "#ffffff",
+        accent: "#4a90e2",
+      },
+      design: {
+        fontFamily: "Arial",
+        borderRadius: "4px",
+      },
+      isCustom: false,
+    },
+  });
+};
+
 export const authConfig = {
   providers: [
     GoogleProvider({
@@ -131,7 +149,10 @@ export const authConfig = {
           const existingUser = await findUserByEmail(user.email);
 
           if (!existingUser) {
-            // Create new user if doesn't exist
+            // Create default theme first
+            const defaultTheme = await createDefaultTheme();
+
+            // Create new user with theme
             await prisma.user.create({
               data: {
                 email: user.email,
@@ -140,6 +161,7 @@ export const authConfig = {
                 emailVerified: true,
                 phoneVerified: false,
                 language: "en",
+                themeId: defaultTheme.id,
               },
             });
           }
@@ -162,10 +184,34 @@ export const authConfig = {
     },
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.id;
-        session.user.role = token.role;
-        session.user.phone = token.phone;
+        // Get user with theme from database using email
+        let user = await prisma.user.findUnique({
+          where: { email: token.email },
+          include: { theme: true },
+        });
+
+        // If user exists but has no theme, create one
+        if (user && !user.theme) {
+          const defaultTheme = await createDefaultTheme();
+          user = await prisma.user.update({
+            where: { id: user.id },
+            data: { themeId: defaultTheme.id },
+            include: { theme: true },
+          });
+        }
+
+        console.log("User data from database:", {
+          email: user?.email,
+          themeId: user?.themeId,
+          theme: user?.theme,
+        });
+
+        session.user.id = user?.id || token.id;
+        session.user.role = user?.role || token.role;
+        session.user.phone = user?.phone || token.phone;
         session.user.email = token.email;
+        session.user.theme = user?.theme || null;
+        session.user.themeId = user?.themeId || null;
       }
       return session;
     },
