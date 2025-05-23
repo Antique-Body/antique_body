@@ -1,0 +1,64 @@
+import { CountrySelect, FormField } from "@/components/common";
+import { usePhoneInput } from "@/hooks";
+
+export const PhoneInput = ({
+  register,
+  errors,
+  countryCode,
+  setValue,
+  phoneValue,
+  setPhoneValue,
+}) => {
+  const {
+    displayValue,
+    handlePhoneChange,
+    handleCountryCodeChange,
+    handlePaste,
+  } = usePhoneInput({
+    register,
+    setValue,
+    countryCode,
+  });
+
+  return (
+    <div className="flex gap-2 mb-2">
+      <CountrySelect
+        register={register}
+        value={countryCode}
+        onChange={handleCountryCodeChange}
+        className="max-w-[300px]"
+        required
+        displayMode="full"
+        placeholder="Select country code"
+      />
+      <FormField
+        name="phone"
+        type="tel"
+        placeholder="61 123 456"
+        register={register}
+        value={displayValue}
+        onChange={handlePhoneChange}
+        onKeyDown={(e) => {
+          if (
+            e.key === "Backspace" &&
+            countryCode &&
+            displayValue.length <= countryCode.length
+          ) {
+            e.preventDefault();
+          }
+        }}
+        onPaste={handlePaste}
+        rules={{
+          required: "Phone required",
+          pattern: {
+            value: /^\+?[0-9]{6,12}$/,
+            message: "Invalid phone",
+          },
+        }}
+        error={errors.phone?.message}
+        required
+        className="flex-1"
+      />
+    </div>
+  );
+};

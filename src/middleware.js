@@ -1,82 +1,65 @@
-import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { NextResponse } from "next/server";
 
 export async function middleware(request) {
   const token = await getToken({ req: request });
   const { pathname } = request.nextUrl;
-  const userRole = token?.role?.toLowerCase();
 
-  // Public routes that don't require authentication
-  const publicPaths = ["/", "/auth/login", "/auth/register", "/auth/reset-password", "/auth/verify-email"];
-  
-  // Check if the current path starts with any of the public paths
-  const isPublicRoute = publicPaths.some(path => pathname === path || pathname.startsWith(`${path}?`));
-
-  // Handle routes for verification and reset password that have query parameters
-  if (pathname.startsWith("/auth/reset-password") || pathname.startsWith("/auth/verify-email")) {
+  // Public paths that don't require authentication
+  const publicPaths = [
+    "/",
+    "/auth/login",
+    "/auth/register",
+    "/auth/reset-password",
+  ];
+  if (publicPaths.includes(pathname)) {
     return NextResponse.next();
   }
 
-  // 1. Handle public routes
-  if (isPublicRoute) {
-    return NextResponse.next();
-  }
-
-  // 2. Handle unauthenticated users
+  // Check if user is authenticated
   if (!token) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
-  // 3. Handle users without a role
+  // Special handling for select-role page
+  if (pathname === "/select-role") {
+    // If user already has a role, redirect to appropriate dashboard
+    if (token.role) {
+      const rolePaths = {
+        trainer: "/trainer/dashboard",
+        client: "/client/dashboard",
+        user: "/user/dashboard",
+      };
+      const targetPath = rolePaths[token.role.toLowerCase()];
+      if (targetPath) {
+        return NextResponse.redirect(new URL(targetPath, request.url));
+      }
+    }
+    // If no role, allow access to select-role page
+    return NextResponse.next();
+  }
+
+  // Handle role-based access for other pages
+  const userRole = token.role?.toLowerCase();
   if (!userRole) {
-    if (pathname !== "/select-role") {
-      return NextResponse.redirect(new URL("/select-role", request.url));
-    }
-    return NextResponse.next();
+    return NextResponse.redirect(new URL("/select-role", request.url));
   }
 
-  // 4. Role-based routing
-  if (userRole === "trainer") {
-    if (pathname !== "/trainer/dashboard") {
-      return NextResponse.redirect(new URL("/trainer/dashboard", request.url));
-    }
-    return NextResponse.next();
+  // Role-based routing
+  const rolePaths = {
+    trainer: "/trainer/dashboard",
+    client: "/client/dashboard",
+    user: "/user/dashboard",
+  };
+
+  const targetPath = rolePaths[userRole];
+  if (targetPath && !pathname.startsWith(targetPath)) {
+    return NextResponse.redirect(new URL(targetPath, request.url));
   }
 
-  if (userRole === "client") {
-    if (pathname !== "/client/dashboard") {
-      return NextResponse.redirect(new URL("/client/dashboard", request.url));
-    }
-    return NextResponse.next();
-  }
-
-  if (userRole === "user") {
-    const hasPreferences = token?.hasCompletedTrainingSetup;
-    const targetPath = hasPreferences ? "/user/dashboard" : "/user/training-setup";
-    
-    // Allow access to both training-setup and dashboard for users
-    if (pathname.startsWith("/user/")) {
-      return NextResponse.next();
-    }
-    
-    // Redirect to appropriate path if not already there
-    if (pathname !== targetPath) {
-      return NextResponse.redirect(new URL(targetPath, request.url));
-    }
-    return NextResponse.next();
-  }
-
-  // Check if the request is for email verification
-  if (pathname.startsWith('/api/email-verification')) {
-    // Let the request continue to the API route
-    return NextResponse.next();
-  }
-
-  // Default fallback
   return NextResponse.next();
 }
 
-// Configure middleware to run on all routes except static files and API routes
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|public).*)"],
+  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico).*)"],
 };

@@ -1,177 +1,188 @@
+import { verifyPhoneCode } from "@/app/api/auth/services/phone";
+import {
+  findUserByEmail,
+  findUserByPhone,
+  verifyUserPassword,
+} from "@/app/api/users/services";
 import { PrismaClient } from "@prisma/client";
-import { compare } from "bcrypt";
+import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import FacebookProvider from "next-auth/providers/facebook";
 import GoogleProvider from "next-auth/providers/google";
 
-const prismaClient = new PrismaClient();
+const prisma = new PrismaClient();
 
-export const authOptions = {
+export const authConfig = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
+    FacebookProvider({
+      clientId: process.env.FACEBOOK_CLIENT_ID,
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+    }),
     CredentialsProvider({
-      name: "Credentials",
+      id: "email",
+      name: "Email",
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Missing credentials");
-        }
-
-        const user = await prismaClient.user.findUnique({
-          where: { email: credentials.email },
-          include: { preferences: true }
-        });
-
-        if (!user) {
-          throw new Error("User not found");
-        }
-
-        if (!user.password) {
-          throw new Error("No password set for this user");
-        }
-
-        // Only enforce email verification if there is a token
-        if (!user.emailVerified && user.emailVerificationToken) {
-          // Generate new verification token if needed
-          const crypto = require('crypto');
-          const verificationToken = crypto.randomBytes(32).toString("hex");
-          await prismaClient.user.update({
-            where: { id: user.id },
-            data: { emailVerificationToken: verificationToken }
-          });
-          
-          // Send verification email
-          try {
-            const { sendVerificationEmail } = await import('@/app/utils/email');
-            await sendVerificationEmail(user.email, verificationToken);
-          } catch (error) {
-            console.error("Error sending verification email during login:", error);
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            throw new Error("Email and password are required");
           }
-          
-          throw new Error("Email not verified. We've sent a new verification email. Please check your inbox.");
-        }
 
-        // Don't auto-fix verification status - require proper verification
-        if (!user.emailVerified) {
-          // Generate new verification token
-          const crypto = require('crypto');
-          const verificationToken = crypto.randomBytes(32).toString("hex");
-          await prismaClient.user.update({
-            where: { id: user.id },
-            data: { emailVerificationToken: verificationToken }
-          });
-          
-          // Send verification email
-          try {
-            const { sendVerificationEmail } = await import('@/app/utils/email');
-            await sendVerificationEmail(user.email, verificationToken);
-          } catch (error) {
-            console.error("Error sending verification email during login:", error);
+          const user = await findUserByEmail(credentials.email);
+
+          if (!user) {
+            throw new Error("Invalid email or password");
           }
-          
-          throw new Error("Email not verified. We've sent a verification email. Please check your inbox.");
+
+          // Check if user has email verification
+          if (!user.emailVerified) {
+            throw new Error("Please verify your email first");
+          }
+
+          // Check if user has password set
+          if (!user.password) {
+            // If user just registered, allow them to proceed
+            if (user.emailVerified && !user.phoneVerified) {
+              return {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+              };
+            }
+            throw new Error("No password set for this account ");
+          }
+
+          const isPasswordValid = await verifyUserPassword(
+            user.id,
+            credentials.password
+          );
+          if (!isPasswordValid) {
+            throw new Error("Invalid email or password");
+          }
+
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error("Auth error:", error);
+          throw error;
         }
+      },
+    }),
+    CredentialsProvider({
+      id: "phone",
+      name: "Phone",
+      credentials: {
+        phone: { label: "Phone", type: "text" },
+        code: { label: "Verification Code", type: "text" },
+      },
+      async authorize(credentials) {
+        try {
+          if (!credentials?.phone || !credentials?.code) {
+            throw new Error("Phone number and verification code are required");
+          }
 
-        const isPasswordValid = await compare(
-          credentials.password,
-          user.password
-        );
+          const user = await findUserByPhone(credentials.phone);
+          if (!user) {
+            throw new Error("User not found");
+          }
 
-        if (!isPasswordValid) {
-          throw new Error("Invalid password");
+          if (!user.phoneVerified) {
+            throw new Error("Phone number is not verified");
+          }
+
+          const isCodeValid = await verifyPhoneCode(
+            credentials.phone,
+            credentials.code
+          );
+          if (!isCodeValid) {
+            throw new Error("Invalid or expired verification code");
+          }
+
+          return {
+            id: user.id,
+            name: user.name,
+            phone: user.phone,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error("Auth error:", error);
+          throw error;
         }
-
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role?.toLowerCase(),
-          hasCompletedTrainingSetup: !!user.preferences,
-          language: user.language
-        };
       },
     }),
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
-      if (account?.provider === "google") {
-        const existingUser = await prismaClient.user.findUnique({
-          where: { email: user.email },
-          include: { preferences: true }
-        });
+      if (account?.provider === "google" || account?.provider === "facebook") {
+        try {
+          // Check if user already exists
+          const existingUser = await findUserByEmail(user.email);
 
-        if (!existingUser) {
-          // Create new user with default role and verified email (since Google auth is verified)
-          const newUser = await prismaClient.user.create({
-            data: {
-              name: user.name,
-              email: user.email,
-              lastName: "",
-              role: null,
-              emailVerified: true,
-              language: 'en' // Default language
-            },
-          });
-
-          user.role = newUser.role?.toLowerCase();
-          user.hasCompletedTrainingSetup = false;
-          user.language = newUser.language;
-        } else {
-          user.role = existingUser.role?.toLowerCase();
-          user.hasCompletedTrainingSetup = !!existingUser.preferences;
-          user.language = existingUser.language;
+          if (!existingUser) {
+            // Create new user if doesn't exist
+            await prisma.user.create({
+              data: {
+                email: user.email,
+                name: user.name || profile.name,
+                lastName: profile.family_name || "",
+                emailVerified: true,
+                phoneVerified: false,
+                language: "en",
+              },
+            });
+          }
+          return true;
+        } catch (error) {
+          console.error("Error in signIn callback:", error);
+          return false;
         }
       }
-
       return true;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.role = user.role;
+        token.phone = user.phone;
+        token.email = user.email;
+      }
+      return token;
     },
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
-        session.user.role = token.role?.toLowerCase();
-        session.user.hasCompletedTrainingSetup = token.hasCompletedTrainingSetup;
-        session.user.language = token.language;
+        session.user.role = token.role;
+        session.user.phone = token.phone;
+        session.user.email = token.email;
       }
-
       return session;
-    },
-    async jwt({ token, user, account, trigger, session }) {
-      // Handle session update
-      if (trigger === "update" && session) {
-        if (session.role) {
-          token.role = session.role.toLowerCase();
-        }
-        if (session.hasCompletedTrainingSetup !== undefined) {
-          token.hasCompletedTrainingSetup = session.hasCompletedTrainingSetup;
-        }
-        if (session.language) {
-          token.language = session.language;
-        }
-      }
-
-      // Handle initial sign in
-      if (user) {
-        token.id = user.id;
-        token.role = user.role?.toLowerCase();
-        token.hasCompletedTrainingSetup = user.hasCompletedTrainingSetup;
-        token.language = user.language;
-      }
-
-      return token;
     },
   },
   pages: {
     signIn: "/auth/login",
-    signOut: "/auth/logout",
     error: "/auth/error",
   },
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
-}; 
+};
+
+// Export for App Router
+export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
+
+// Export for Pages Router
+export const authOptions = authConfig;
