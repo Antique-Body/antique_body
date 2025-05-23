@@ -59,10 +59,10 @@
       "sign_in_with_facebook": "Sign in with Facebook",
       "welcome_back": "Welcome Back",
       "use_phone_email": "Continue with phone or email",
-      "continue_with_google": "Continue with Google",
-      "continue_with_facebook": "Continue with Facebook",
+      "continue_with_google": "Sign in with Google",
+      "continue_with_facebook": "Sign in with Facebook",
       "back": "Back",
-      "use_phone": "Phone Number",
+      "use_phone": "Phone",
       "use_email": "Email",
       "phone_number": "Enter your phone number",
       "send_code": "Get Code",
@@ -72,7 +72,7 @@
       "code_placeholder": "Enter 6-digit code",
       "phone_placeholder": "e.g. +387 61 123 456",
       "continue_with": "Continue with",
-      "continue_with_email_phone": "Continue with email or phone number"
+      "continue_with_email_phone": "Sign in with email or phone"
     },
     "register": {
       "title": "Register",
@@ -88,7 +88,7 @@
         "resend": "Resend verification email"
       },
       "register_with": "Register with",
-      "register_with_email_phone": "Register with email or phone number",
+      "register_with_email_phone": "Register with email or phone",
       "register_with_google": "Register with Google",
       "register_with_facebook": "Register with Facebook"
     },
@@ -354,5 +354,7 @@
   "go_to_login": "Go to Login",
   "register_failed": "Registration failed",
   "verification_email_failed": "Failed to send verification email",
-  "verification_email_sent_again": "Verification email sent again"
+  "verification_email_sent_again": "Verification email sent again",
+  "use_email": "Email",
+  "use_phone": "Phone"
 }

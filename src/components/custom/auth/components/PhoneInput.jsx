@@ -1,5 +1,6 @@
 import { CountrySelect, FormField } from "@/components/common";
 import { usePhoneInput } from "@/hooks";
+import { useTranslation } from "react-i18next";
 
 export const PhoneInput = ({
   register,
@@ -9,6 +10,7 @@ export const PhoneInput = ({
   phoneValue,
   setPhoneValue,
 }) => {
+  const { t } = useTranslation();
   const {
     displayValue,
     handlePhoneChange,
@@ -29,7 +31,7 @@ export const PhoneInput = ({
         className="max-w-[300px]"
         required
         displayMode="full"
-        placeholder="Select country code"
+        placeholder={t("select_country_code")}
       />
       <FormField
         name="phone"
@@ -49,10 +51,14 @@ export const PhoneInput = ({
         }}
         onPaste={handlePaste}
         rules={{
-          required: "Phone required",
+          required: t("phone_required", {
+            defaultValue: t("validation.phone_required"),
+          }),
           pattern: {
             value: /^\+?[0-9]{6,12}$/,
-            message: "Invalid phone",
+            message: t("phone_invalid", {
+              defaultValue: t("validation.phone_invalid"),
+            }),
           },
         }}
         error={errors.phone?.message}

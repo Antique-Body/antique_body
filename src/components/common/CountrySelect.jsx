@@ -1,5 +1,6 @@
 import countryOptions from "@/app/utils/countryOptions";
 import { FormField } from "@/components/common";
+import { useTranslation } from "react-i18next";
 
 export const CountrySelect = ({
   register,
@@ -8,10 +9,11 @@ export const CountrySelect = ({
   className,
   required = false,
   displayMode = "full", // 'full', 'flag', 'flagAndName', 'code'
-  placeholder = "Select country",
+  placeholder,
   error,
   name = "countryCode",
 }) => {
+  const { t } = useTranslation();
   const getDisplayValue = (option) => {
     switch (displayMode) {
       case "flag":
@@ -40,7 +42,7 @@ export const CountrySelect = ({
       className={className}
       value={value || ""}
       onChange={onChange}
-      placeholder={placeholder}
+      placeholder={placeholder || t("select_country")}
       error={error}
     />
   );
