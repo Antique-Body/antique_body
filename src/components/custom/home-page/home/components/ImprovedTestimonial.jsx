@@ -1,7 +1,7 @@
+import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
-import { Icon } from "@iconify/react";
 
 export const ImprovedTestimonial = ({ testimonialImage }) => {
     const [activeMetric, setActiveMetric] = useState(0);

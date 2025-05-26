@@ -1,9 +1,10 @@
-import { verifyEmailCode } from "@/app/api/auth/services/email";
-import { verifyPhoneCode } from "@/app/api/auth/services/phone";
-import { checkRateLimit, formatPhoneNumber } from "@/lib/utils";
 import { PrismaClient } from "@prisma/client";
 import { hash } from "bcrypt";
 import { NextResponse } from "next/server";
+
+import { verifyEmailCode } from "@/app/api/auth/services/email";
+import { verifyPhoneCode } from "@/app/api/auth/services/phone";
+import { checkRateLimit, formatPhoneNumber } from "@/lib/utils";
 
 const prisma = new PrismaClient();
 

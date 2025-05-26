@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { isAuthenticated, hasRole } from "@/middleware/auth";
 import { userService } from "@/services/users";
 import { parseQueryParams } from "@/utils/api";

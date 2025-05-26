@@ -1,5 +1,5 @@
-import { motion } from "framer-motion";
 import { Icon } from "@iconify/react";
+import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";

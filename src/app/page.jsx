@@ -1,10 +1,10 @@
 "use client";
 
+import { Icon } from "@iconify/react";
 import { motion, LazyMotion, domAnimation } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
-import { Icon } from "@iconify/react";
 
 import { EffectBackground } from "@/components/background";
 import { Button } from "@/components/common/Button";

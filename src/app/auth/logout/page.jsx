@@ -1,10 +1,11 @@
 "use client";
 
-import { EffectBackground } from "@/components/background";
-import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+
+import { EffectBackground } from "@/components/background";
 
 export default function LogoutPage() {
     const { t } = useTranslation();

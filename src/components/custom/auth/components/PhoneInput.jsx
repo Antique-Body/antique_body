@@ -1,8 +1,9 @@
-import { CountrySelect, FormField } from "@/components/common";
-import { usePhoneInput } from "@/hooks";
 import { useTranslation } from "react-i18next";
 
-export const PhoneInput = ({ register, errors, countryCode, setValue, phoneValue, setPhoneValue }) => {
+import { CountrySelect, FormField } from "@/components/common";
+import { usePhoneInput } from "@/hooks";
+
+export const PhoneInput = ({ register, errors, countryCode, setValue }) => {
     const { t } = useTranslation();
     const { displayValue, handlePhoneChange, handleCountryCodeChange, handlePaste } = usePhoneInput({
         register,

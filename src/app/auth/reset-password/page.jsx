@@ -1,11 +1,12 @@
 "use client";
 
-import { EffectBackground } from "@/components/background";
-import { Button, FormField } from "@/components/common";
-import { Card } from "@/components/custom";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { EffectBackground } from "@/components/background";
+import { Button, FormField } from "@/components/common";
+import { Card } from "@/components/custom";
 
 export default function ResetPasswordPage() {
     const { t } = useTranslation();

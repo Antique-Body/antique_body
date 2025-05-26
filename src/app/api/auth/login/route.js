@@ -1,7 +1,8 @@
-import { userService } from "@/app/api/users/services";
-import { formatPhoneNumber } from "@/lib/utils";
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+
+import { userService } from "@/app/api/users/services";
+import { formatPhoneNumber } from "@/lib/utils";
 
 const prisma = new PrismaClient();
 

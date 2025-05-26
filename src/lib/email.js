@@ -1,12 +1,12 @@
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-  debug: true,
+    service: "gmail",
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+    },
+    debug: true,
 });
 
 // Shared styling elements
@@ -78,24 +78,25 @@ const baseStyles = `
 `;
 
 export async function sendEmail({ to, subject, html }) {
-  try {
-    const info = await transporter.sendMail({
-      from: `"Antique Body" <${process.env.EMAIL_USER}>`,
-      to,
-      subject,
-      html,
-    });
+    try {
+        const info = await transporter.sendMail({
+            from: `"Antique Body" <${process.env.EMAIL_USER}>`,
+            to,
+            subject,
+            html,
+        });
 
-    console.log("Email sent:", info.messageId);
-    return true;
-  } catch (error) {
-    console.error("Error sending email:", error);
-    return false;
-  }
+        // eslint-disable-next-line no-console
+        console.log("Email sent:", info.messageId);
+        return true;
+    } catch (error) {
+        console.error("Error sending email:", error);
+        return false;
+    }
 }
 
 export async function sendVerificationCodeEmail(email, code) {
-  const html = `
+    const html = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -125,17 +126,17 @@ export async function sendVerificationCodeEmail(email, code) {
     </html>
   `;
 
-  return sendEmail({
-    to: email,
-    subject: "Your Antique Body Verification Code",
-    html,
-  });
+    return sendEmail({
+        to: email,
+        subject: "Your Antique Body Verification Code",
+        html,
+    });
 }
 
 export async function sendPasswordResetEmail(email, resetToken) {
-  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${resetToken}`;
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${resetToken}`;
 
-  const html = `
+    const html = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -172,9 +173,9 @@ export async function sendPasswordResetEmail(email, resetToken) {
     </html>
   `;
 
-  return sendEmail({
-    to: email,
-    subject: "Reset Your Antique Body Password",
-    html,
-  });
+    return sendEmail({
+        to: email,
+        subject: "Reset Your Antique Body Password",
+        html,
+    });
 }
