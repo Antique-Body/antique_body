@@ -1,6 +1,7 @@
+import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Icon } from "@iconify/react";
+
 import { Button } from "@/components/common/Button";
 
 export function CTASection() {

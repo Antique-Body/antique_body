@@ -1,7 +1,7 @@
+import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
-import { Icon } from "@iconify/react";
 
 export const ModernFeaturesSection = ({ features }) => {
     const [activeFeature, setActiveFeature] = useState(0);

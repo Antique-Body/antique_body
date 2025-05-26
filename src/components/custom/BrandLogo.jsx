@@ -1,5 +1,4 @@
-export const BrandLogo = ({ logoTitle = "ANTIQUE BODY", logoTagline = "" }) => {
-    return (
+export const BrandLogo = ({ logoTitle = "ANTIQUE BODY", logoTagline = "" }) => (
         <div className="logo" style={{ marginBottom: "15px" }}>
             <h1 style={{ marginTop: "0", marginBottom: "6px" }}>
                 {logoTitle.split(" ").map((part, index) => (
@@ -17,4 +16,3 @@ export const BrandLogo = ({ logoTitle = "ANTIQUE BODY", logoTagline = "" }) => {
             {logoTagline.length > 0 && <div className="logo-tagline">{logoTagline}</div>}
         </div>
     );
-};

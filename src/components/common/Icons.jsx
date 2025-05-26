@@ -596,8 +596,7 @@ export const GreekPatternIcon = ({ className = "", ...props }) => (
   />
 );
 
-export const GreekPatternBorder = ({ position = "top", isVisible = true }) => {
-  return (
+export const GreekPatternBorder = ({ position = "top", isVisible = true }) => (
     <div
       className={`absolute ${position}-0 left-0 right-0 h-3 bg-repeat-x transition-all duration-500 ${
         isVisible ? "opacity-100" : "opacity-30"
@@ -608,7 +607,6 @@ export const GreekPatternBorder = ({ position = "top", isVisible = true }) => {
       }}
     />
   );
-};
 
 export const AdminIcon = ({
   className = "h-12 w-12",
@@ -659,8 +657,7 @@ export const IconButton = ({
   defaultColor = "text-zinc-400",
   hoverBg = "hover:bg-zinc-700/30",
   ...props
-}) => {
-  return (
+}) => (
     <button
       onClick={onClick}
       className={`${defaultColor} hover:${hoverColor} cursor-pointer p-2 rounded-full ${hoverBg} ${className}`}
@@ -669,7 +666,6 @@ export const IconButton = ({
       {typeof Icon === "function" ? <Icon size={size} /> : Icon}
     </button>
   );
-};
 
 export const ErrorIcon = ({ size = 16, className = "", ...props }) => (
   <svg

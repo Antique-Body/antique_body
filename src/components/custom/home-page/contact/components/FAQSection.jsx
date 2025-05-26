@@ -1,5 +1,5 @@
-import { motion } from "framer-motion";
 import { Icon } from "@iconify/react";
+import { motion } from "framer-motion";
 
 export function FAQSection() {
     const faqs = [

@@ -1,6 +1,7 @@
-import { formatPhoneNumber } from "@/lib/utils";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
+
+import { formatPhoneNumber } from "@/lib/utils";
 
 const prisma = new PrismaClient();
 

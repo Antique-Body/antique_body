@@ -1,8 +1,9 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
+
 import countryOptions from "@/app/utils/countryOptions";
 import { FormField } from "@/components/common";
-import { useTranslation } from "react-i18next";
 
 export const CountrySelect = ({
   register,

@@ -1,7 +1,8 @@
-import { findUserByPhone } from "@/app/api/users/services";
-import { formatPhoneNumber } from "@/lib/utils";
 import { PrismaClient } from "@prisma/client";
 import twilio from "twilio";
+
+import { findUserByPhone } from "@/app/api/users/services";
+import { formatPhoneNumber } from "@/lib/utils";
 
 const prisma = new PrismaClient();
 

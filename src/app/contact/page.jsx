@@ -2,10 +2,10 @@
 
 import { LazyMotion, domAnimation } from "framer-motion";
 
-import { Footer } from "@/components/common/Footer";
-import { Navigation } from "@/components/custom/home-page/shared";
-import { ContactHero, FAQSection, MapSection, CTASection } from "@/components/custom/home-page/contact/components";
 import { EffectBackground } from "@/components/background";
+import { Footer } from "@/components/common/Footer";
+import { ContactHero, FAQSection, MapSection, CTASection } from "@/components/custom/home-page/contact/components";
+import { Navigation } from "@/components/custom/home-page/shared";
 export default function ContactPage() {
     return (
         <LazyMotion features={domAnimation}>
