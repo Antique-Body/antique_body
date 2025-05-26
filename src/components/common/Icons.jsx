@@ -597,16 +597,16 @@ export const GreekPatternIcon = ({ className = "", ...props }) => (
 );
 
 export const GreekPatternBorder = ({ position = "top", isVisible = true }) => (
-    <div
-      className={`absolute ${position}-0 left-0 right-0 h-3 bg-repeat-x transition-all duration-500 ${
-        isVisible ? "opacity-100" : "opacity-30"
-      } ${position === "bottom" ? "rotate-180 bottom-0" : ""}`}
-      style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='12' viewBox='0 0 40 12'%3E%3Cpath d='M0,8 C2,5 5,5 8,8 C11,11 14,11 17,8 C20,5 23,5 26,8 C29,11 32,11 35,8 C38,5 40,5 40,8 L40,12 L0,12 Z' fill='%23ff7800'/%3E%3C/svg%3E")`,
-        backgroundSize: "40px 12px",
-      }}
-    />
-  );
+  <div
+    className={`absolute ${position}-0 left-0 right-0 h-3 bg-repeat-x transition-all duration-500 ${
+      isVisible ? "opacity-100" : "opacity-30"
+    } ${position === "bottom" ? "rotate-180 bottom-0" : ""}`}
+    style={{
+      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='12' viewBox='0 0 40 12'%3E%3Cpath d='M0,8 C2,5 5,5 8,8 C11,11 14,11 17,8 C20,5 23,5 26,8 C29,11 32,11 35,8 C38,5 40,5 40,8 L40,12 L0,12 Z' fill='%23ff7800'/%3E%3C/svg%3E")`,
+      backgroundSize: "40px 12px",
+    }}
+  />
+);
 
 export const AdminIcon = ({
   className = "h-12 w-12",
@@ -658,14 +658,14 @@ export const IconButton = ({
   hoverBg = "hover:bg-zinc-700/30",
   ...props
 }) => (
-    <button
-      onClick={onClick}
-      className={`${defaultColor} hover:${hoverColor} cursor-pointer p-2 rounded-full ${hoverBg} ${className}`}
-      {...props}
-    >
-      {typeof Icon === "function" ? <Icon size={size} /> : Icon}
-    </button>
-  );
+  <button
+    onClick={onClick}
+    className={`${defaultColor} hover:${hoverColor} cursor-pointer p-2 rounded-full ${hoverBg} ${className}`}
+    {...props}
+  >
+    {typeof Icon === "function" ? <Icon size={size} /> : Icon}
+  </button>
+);
 
 export const ErrorIcon = ({ size = 16, className = "", ...props }) => (
   <svg
