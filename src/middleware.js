@@ -1,65 +1,68 @@
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 
-export async function middleware(request) {
-  const token = await getToken({ req: request });
-  const { pathname } = request.nextUrl;
+const PUBLIC_PATHS = ["/", "/auth/reset-password"];
+const AUTH_PATHS = ["/auth/login", "/auth/register"];
 
-  // Public paths that don't require authentication
-  const publicPaths = [
-    "/",
-    "/auth/login",
-    "/auth/register",
-    "/auth/reset-password",
-  ];
-  if (publicPaths.includes(pathname)) {
+function isPageNavigation(request) {
+  return request.headers.get("accept")?.includes("text/html");
+}
+
+export async function middleware(request) {
+  const { pathname } = request.nextUrl;
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+
+  // Log samo za page navigacije
+  if (isPageNavigation(request)) {
+    console.log("token u middleware:", token, "pathname:", pathname);
+  }
+
+  // 1. Public paths: svi mogu pristupiti
+  if (PUBLIC_PATHS.includes(pathname)) {
     return NextResponse.next();
   }
 
-  // Check if user is authenticated
+  // 2. Ako korisnik ima token i rolu i pokušava na /auth/login ili /auth/register, redirectaj ga na dashboard
+  if (AUTH_PATHS.includes(pathname) && token?.role) {
+    const dashboardPath = `/${token.role.toLowerCase()}/dashboard`;
+    return NextResponse.redirect(new URL(dashboardPath, request.url));
+  }
+
+  // 3. Auth paths: svi mogu pristupiti ako nisu prijavljeni
+  if (AUTH_PATHS.includes(pathname)) {
+    return NextResponse.next();
+  }
+
+  // 4. Ako nema token, redirect na login
   if (!token) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
-  // Special handling for select-role page
-  if (pathname === "/select-role") {
-    // If user already has a role, redirect to appropriate dashboard
-    if (token.role) {
-      const rolePaths = {
-        trainer: "/trainer/dashboard",
-        client: "/client/dashboard",
-        user: "/user/dashboard",
-      };
-      const targetPath = rolePaths[token.role.toLowerCase()];
-      if (targetPath) {
-        return NextResponse.redirect(new URL(targetPath, request.url));
-      }
-    }
-    // If no role, allow access to select-role page
-    return NextResponse.next();
-  }
-
-  // Handle role-based access for other pages
+  // 5. Ako nema rolu, pusti samo na /select-role, inače redirect na /select-role
   const userRole = token.role?.toLowerCase();
   if (!userRole) {
+    if (pathname === "/select-role") {
+      return NextResponse.next();
+    }
     return NextResponse.redirect(new URL("/select-role", request.url));
   }
 
-  // Role-based routing
-  const rolePaths = {
-    trainer: "/trainer/dashboard",
-    client: "/client/dashboard",
-    user: "/user/dashboard",
-  };
-
-  const targetPath = rolePaths[userRole];
-  if (targetPath && !pathname.startsWith(targetPath)) {
-    return NextResponse.redirect(new URL(targetPath, request.url));
+  // 6. Ako ima rolu i nije na svom dashboardu, redirectaj ga na dashboard
+  const dashboardPath = `/${userRole}/dashboard`;
+  if (pathname !== dashboardPath) {
+    return NextResponse.redirect(new URL(dashboardPath, request.url));
   }
 
+  // 7. Ako je već na svom dashboardu, pusti ga
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    // Sve osim API ruta, statike, slika i favicon-a
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+  ],
 };

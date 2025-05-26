@@ -66,28 +66,34 @@ export default function SelectRole() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: session.user.email,
+          userId: session.user.id,
           role: pendingRole,
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.error("API error:", errorData);
         throw new Error(
-          errorData.error || t("role.update.failed", { status: response.status })
+          errorData.error ||
+            t("role.update.failed", { status: response.status })
         );
       }
 
       const data = await response.json();
+      console.log("API success, response data:", data);
 
-      await update({
+      const updateResult = await update({
         role: pendingRole,
         hasCompletedTrainingSetup: pendingRole !== "user",
       });
+      console.log("Session update result:", updateResult);
 
-      const redirectPath = ROLE_REDIRECTS[pendingRole];
+      const redirectPath = `/${pendingRole}/personal-details`;
       if (redirectPath) {
         router.push(redirectPath);
+      } else {
+        setLoading(false);
       }
     } catch (error) {
       console.error("Error updating role:", error);
@@ -143,15 +149,15 @@ export default function SelectRole() {
 
   return (
     <div className="relative z-10 max-w-4xl mx-auto px-4 py-12 text-center">
-      <h1 className="text-4xl font-bold mb-6 spartacus-font text-[#ff7800]" >
+      <h1 className="text-4xl font-bold mb-6 spartacus-font text-[#ff7800]">
         {t("role.selection.title")}
       </h1>
-      <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto" >
+      <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
         {t("role.selection.description")}
       </p>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-200" >
+        <div className="mb-6 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-200">
           {error}
         </div>
       )}
@@ -165,7 +171,9 @@ export default function SelectRole() {
         title={t("role.selection.confirm_path")}
         message={
           pendingRole
-            ? t("role.selection.continue_as", { role: t(ROLE_DESCRIPTIONS[pendingRole]) })
+            ? t("role.selection.continue_as", {
+                role: t(ROLE_DESCRIPTIONS[pendingRole]),
+              })
             : ""
         }
         confirmButtonText={t("common.continue")}
