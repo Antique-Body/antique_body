@@ -1,12 +1,7 @@
-import {
-  findUserByEmail,
-  findUserByPhone,
-  verifyUserPassword,
-} from "@/app/api/users/services";
+import { userService } from "@/app/api/users/services";
 import { formatPhoneNumber } from "@/lib/utils";
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
-import { verifyPhoneCode } from "../../services/phone";
 
 const prisma = new PrismaClient();
 
@@ -43,7 +38,7 @@ export async function POST(request) {
       }
 
       // Find user by email
-      const user = await findUserByEmail(email);
+      const user = await userService.findUserByEmail(email);
 
       if (!user) {
         return NextResponse.json(
@@ -63,7 +58,10 @@ export async function POST(request) {
       }
 
       // Verify password
-      const isPasswordValid = await verifyUserPassword(user.id, password);
+      const isPasswordValid = await userService.verifyUserPassword(
+        user.id,
+        password
+      );
       if (!isPasswordValid) {
         return NextResponse.json(
           { error: "Invalid email or password" },
@@ -98,7 +96,7 @@ export async function POST(request) {
       const formattedPhone = formatPhoneNumber(phone);
 
       // Find user by phone
-      const user = await findUserByPhone(formattedPhone);
+      const user = await userService.findUserByPhone(formattedPhone);
 
       if (!user) {
         return NextResponse.json(
@@ -108,7 +106,10 @@ export async function POST(request) {
       }
 
       // Verify code
-      const isCodeValid = await verifyPhoneCode(formattedPhone, code);
+      const isCodeValid = await userService.verifyPhoneCode(
+        formattedPhone,
+        code
+      );
       if (!isCodeValid) {
         return NextResponse.json(
           { error: "Invalid phone number or verification code" },
