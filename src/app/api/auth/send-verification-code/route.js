@@ -13,7 +13,7 @@ export async function POST(request) {
     if (!email && !phone) {
       return NextResponse.json(
         { error: "Either email or phone number is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -29,7 +29,7 @@ export async function POST(request) {
       if (existingUser) {
         return NextResponse.json(
           { error: "User with this email already exists" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -50,7 +50,7 @@ export async function POST(request) {
       if (!existingUser) {
         return NextResponse.json(
           { error: "User with this phone number does not exist" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -61,7 +61,7 @@ export async function POST(request) {
     if (!success) {
       return NextResponse.json(
         { error: `Failed to send verification code to ${type}` },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -73,7 +73,7 @@ export async function POST(request) {
     console.error("Error sending verification code:", error);
     return NextResponse.json(
       { error: "Failed to send verification code" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

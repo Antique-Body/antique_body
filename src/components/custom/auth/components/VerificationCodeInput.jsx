@@ -68,8 +68,8 @@ export const VerificationCodeInput = ({
           {sendingCode
             ? "Sending..."
             : countdown > 0
-            ? `Resend in ${countdown}s`
-            : "Resend Code"}
+              ? `Resend in ${countdown}s`
+              : "Resend Code"}
         </Button>
       )}
     </div>

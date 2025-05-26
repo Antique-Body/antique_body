@@ -76,7 +76,7 @@ export default function SelectRole() {
         console.error("API error:", errorData);
         throw new Error(
           errorData.error ||
-            t("role.update.failed", { status: response.status })
+            t("role.update.failed", { status: response.status }),
         );
       }
 
@@ -144,7 +144,7 @@ export default function SelectRole() {
         </div>
       </>
     ),
-    [handleRoleClick, loading, selectedRole, t]
+    [handleRoleClick, loading, selectedRole, t],
   );
 
   return (
