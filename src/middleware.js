@@ -1,8 +1,13 @@
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/", "/auth/reset-password"];
-const AUTH_PATHS = ["/auth/login", "/auth/register"];
+const PUBLIC_PATHS = [
+  "/auth/login",
+  "/auth/register",
+  "/auth/reset-password",
+  "/",
+];
+const SELECT_ROLE_PATH = "/select-role";
 
 function isPageNavigation(request) {
   return request.headers.get("accept")?.includes("text/html");
@@ -20,43 +25,34 @@ export async function middleware(request) {
     console.log("token u middleware:", token, "pathname:", pathname);
   }
 
-  // 1. Public paths: svi mogu pristupiti
-  if (PUBLIC_PATHS.includes(pathname)) {
-    return NextResponse.next();
-  }
-
-  // 2. Ako korisnik ima token i rolu i pokušava na /auth/login ili /auth/register, redirectaj ga na dashboard
-  if (AUTH_PATHS.includes(pathname) && token?.role) {
-    const dashboardPath = `/${token.role.toLowerCase()}/dashboard`;
-    return NextResponse.redirect(new URL(dashboardPath, request.url));
-  }
-
-  // 3. Auth paths: svi mogu pristupiti ako nisu prijavljeni
-  if (AUTH_PATHS.includes(pathname)) {
-    return NextResponse.next();
-  }
-
-  // 4. Ako nema token, redirect na login
+  // 1. Ako nije loginovan (nema token)
   if (!token) {
+    // Dozvoli pristup samo na login/register/reset-password/public
+    if (PUBLIC_PATHS.includes(pathname)) {
+      return NextResponse.next();
+    }
+    // Sve ostalo redirect na login
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
-  // 5. Ako nema rolu, pusti samo na /select-role, inače redirect na /select-role
+  // 2. Ako je loginovan, ali nema role
   const userRole = token.role?.toLowerCase();
   if (!userRole) {
-    if (pathname === "/select-role") {
+    // Dozvoli pristup samo na /select-role
+    if (pathname === SELECT_ROLE_PATH) {
       return NextResponse.next();
     }
-    return NextResponse.redirect(new URL("/select-role", request.url));
+    // Sve ostalo redirect na /select-role
+    return NextResponse.redirect(new URL(SELECT_ROLE_PATH, request.url));
   }
 
-  // 6. Ako ima rolu i nije na svom dashboardu, redirectaj ga na dashboard
-  const dashboardPath = `/${userRole}/dashboard`;
+  // 3. Ako ima role
+  const dashboardPath = `/${userRole}/personal-details`;
   if (pathname !== dashboardPath) {
     return NextResponse.redirect(new URL(dashboardPath, request.url));
   }
 
-  // 7. Ako je već na svom dashboardu, pusti ga
+  // Ako je već na svom dashboardu, pusti ga
   return NextResponse.next();
 }
 
