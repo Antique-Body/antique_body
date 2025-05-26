@@ -1,5 +1,5 @@
+import { userService } from "@/app/api/users/services";
 import { isAuthenticated } from "@/lib/auth";
-import { userService } from "@/services/users";
 import { NextResponse } from "next/server";
 
 export async function PATCH(request) {

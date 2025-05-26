@@ -209,6 +209,7 @@ export const AuthForm = ({
                             isEmail={true}
                             email={getValues("email")}
                             phone={null}
+                            setValue={setValue}
                         />
                     )}
                 </>
@@ -233,6 +234,7 @@ export const AuthForm = ({
                         isEmail={false}
                         email={null}
                         phone={getValues("phone")}
+                        setValue={setValue}
                     />
                 </>
             )}

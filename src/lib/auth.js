@@ -1,9 +1,5 @@
 import { verifyPhoneCode } from "@/app/api/auth/services/phone";
-import {
-  findUserByEmail,
-  findUserByPhone,
-  verifyUserPassword,
-} from "@/app/api/users/services";
+import { userService } from "@/app/api/users/services";
 import { PrismaClient } from "@prisma/client";
 import NextAuth from "next-auth";
 import { getToken } from "next-auth/jwt";
@@ -36,7 +32,7 @@ export const authConfig = {
             throw new Error("Email and password are required");
           }
 
-          const user = await findUserByEmail(credentials.email);
+          const user = await userService.findUserByEmail(credentials.email);
 
           if (!user) {
             throw new Error("Invalid email or password");
@@ -49,19 +45,11 @@ export const authConfig = {
 
           // Check if user has password set
           if (!user.password) {
-            // If user just registered, allow them to proceed
-            if (user.emailVerified && !user.phoneVerified) {
-              return {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-              };
-            }
-            throw new Error("No password set for this account ");
+            console.log(user, "user");
+            throw new Error("No password set for this account");
           }
 
-          const isPasswordValid = await verifyUserPassword(
+          const isPasswordValid = await userService.verifyUserPassword(
             user.id,
             credentials.password
           );
@@ -94,7 +82,7 @@ export const authConfig = {
             throw new Error("Phone number and verification code are required");
           }
 
-          const user = await findUserByPhone(credentials.phone);
+          const user = await userService.findUserByPhone(credentials.phone);
           if (!user) {
             throw new Error("User not found");
           }
@@ -129,7 +117,7 @@ export const authConfig = {
       if (account?.provider === "google" || account?.provider === "facebook") {
         try {
           // Check if user already exists
-          const existingUser = await findUserByEmail(user.email);
+          const existingUser = await userService.findUserByEmail(user.email);
 
           if (!existingUser) {
             // Create new user if doesn't exist
