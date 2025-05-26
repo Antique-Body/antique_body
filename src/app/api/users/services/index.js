@@ -17,12 +17,13 @@ const userSelectFields = {
   language: true,
   createdAt: true,
   updatedAt: true,
+  password: true,
 };
 
 /**
  * Generička funkcija za dohvat korisnika po bilo kojem polju
  */
-export async function findUser(where) {
+async function findUser(where) {
   return await prisma.user.findFirst({
     where,
     select: userSelectFields,
@@ -30,21 +31,21 @@ export async function findUser(where) {
 }
 
 // Specifične funkcije za backward compatibility (opciono)
-export async function findUserById(id) {
+async function findUserById(id) {
   return await findUser({ id });
 }
 
-export async function findUserByEmail(email) {
+async function findUserByEmail(email) {
   return await findUser({ email });
 }
 
-export async function findUserByPhone(phone) {
+async function findUserByPhone(phone) {
   const formattedPhone = formatPhoneNumber(phone);
   return await findUser({ phone: formattedPhone });
 }
 
 // User management operations
-export async function updateUser(id, data) {
+async function updateUser(id, data) {
   return await prisma.user.update({
     where: { id },
     data,
@@ -52,13 +53,13 @@ export async function updateUser(id, data) {
   });
 }
 
-export async function deleteUser(id) {
+async function deleteUser(id) {
   return await prisma.user.delete({
     where: { id },
   });
 }
 
-export async function listUsers(page = 1, limit = 10) {
+async function listUsers(page = 1, limit = 10) {
   const skip = (page - 1) * limit;
 
   const [users, total] = await Promise.all([
@@ -83,7 +84,7 @@ export async function listUsers(page = 1, limit = 10) {
 }
 
 // Authentication related operations
-export async function resetPassword(token, newPassword) {
+async function resetPassword(token, newPassword) {
   const user = await prisma.user.findFirst({
     where: {
       resetToken: token,
@@ -111,20 +112,29 @@ export async function resetPassword(token, newPassword) {
   return true;
 }
 
-export async function verifyUserPassword(userId, password) {
+async function verifyUserPassword(userId, password) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { password: true },
   });
 
   if (!user || !user.password) {
+    console.log("verifyUserPassword: user not found or no password");
     return false;
   }
 
-  return await bcrypt.compare(password, user.password);
+  console.log(
+    "verifyUserPassword: comparing",
+    password,
+    "with hash",
+    user.password
+  );
+  const result = await bcrypt.compare(password, user.password);
+  console.log("verifyUserPassword: bcrypt.compare result:", result);
+  return result;
 }
 
-export async function updateUserVerification(
+async function updateUserVerification(
   userId,
   { emailVerified, phoneVerified }
 ) {
@@ -138,7 +148,7 @@ export async function updateUserVerification(
 }
 
 // Generička funkcija za update role
-export async function updateUserRole(where, role) {
+async function updateUserRole(where, role) {
   try {
     const result = await prisma.user.update({
       where,
@@ -153,3 +163,55 @@ export async function updateUserRole(where, role) {
     throw error;
   }
 }
+
+// Dodajem funkciju za ažuriranje profila korisnika
+async function updateUserProfile(userId, data) {
+  // Ovdje možeš dodati dodatnu logiku validacije ili filtriranja polja
+  return await updateUser(userId, data);
+}
+
+// Dodajem funkciju za ažuriranje jezika korisnika
+async function updateUserLanguage(userId, language) {
+  return await updateUser(userId, { language });
+}
+
+// Dodajem funkciju za dohvatanje svih korisnika sa opcionalnim filterom po roli
+async function getAllUsers(page = 1, limit = 10, role = null) {
+  const skip = (page - 1) * limit;
+  const where = role ? { role } : {};
+  const [users, total] = await Promise.all([
+    prisma.user.findMany({
+      skip,
+      take: limit,
+      where,
+      select: userSelectFields,
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.user.count({ where }),
+  ]);
+  return {
+    users,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
+}
+
+// Exportujem userService objekat sa svim funkcijama
+export const userService = {
+  findUser,
+  findUserById,
+  findUserByEmail,
+  findUserByPhone,
+  updateUser,
+  deleteUser,
+  listUsers,
+  resetPassword,
+  verifyUserPassword,
+  updateUserVerification,
+  updateUserRole,
+  updateUserProfile,
+  updateUserLanguage,
+  getAllUsers,
+};

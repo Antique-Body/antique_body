@@ -1,7 +1,6 @@
-import { auth } from "@/lib/auth";
+import { userService } from "@/app/api/users/services";
+import { auth, isAuthenticated } from "@/lib/auth";
 import { NextResponse } from "next/server";
-import { findUserById } from "../services";
-
 export async function GET(request) {
   try {
     const session = await auth();
@@ -10,7 +9,7 @@ export async function GET(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await findUserById(session.user.id);
+    const user = await userService.findUserById(session.user.id);
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });

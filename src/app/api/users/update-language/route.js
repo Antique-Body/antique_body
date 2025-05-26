@@ -1,5 +1,5 @@
-import { isAuthenticated } from "@/middleware/auth";
-import { userService } from "@/services/users";
+import { userService } from "@/app/api/users/services";
+import { isAuthenticated } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 export async function PATCH(request) {
