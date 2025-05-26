@@ -92,11 +92,14 @@ export default function SelectRole() {
                 }),
             });
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                console.error("API error:", errorData);
-                throw new Error(errorData.error || t("role.update.failed", { status: response.status }));
-            }
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("API error:", errorData);
+        throw new Error(
+          errorData.error ||
+            t("role.update.failed", { status: response.status })
+        );
+      }
 
             const data = await response.json();
 
@@ -126,29 +129,29 @@ export default function SelectRole() {
                 <div className="absolute inset-0 bg-radial-gradient pointer-events-none"></div>
             </div>
 
-            {/* Main content */}
-            <div className="flex-grow flex flex-col z-10 pt-16 sm:pt-20 pb-24 md:pb-32">
-                <div className="container mx-auto px-4 sm:px-6 flex flex-col h-full">
-                    {/* Header */}
-                    <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
-                        <div className="inline-flex items-center justify-center text-sm font-medium mb-5 bg-gradient-to-r from-[#FF6B00]/10 to-transparent backdrop-blur-sm px-4 py-2 rounded-full text-[#FF6B00] border border-[#FF6B00]/20">
-                            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#FF6B00]/20 mr-2">
-                                <span className="mdi mdi-account text-sm" />
-                            </span>
-                            {t("role.selection.step")}
-                        </div>
+        <div className="max-w-md mx-auto w-full">
+          <RoleCardCompact
+            title={t("role.user.custom_workout")}
+            description={t("role.user.description")}
+            role="user"
+            onClick={() => handleRoleClick("user")}
+            loading={loading && selectedRole === "user"}
+            isSelected={selectedRole === "user"}
+          />
+        </div>
+      </>
+    ),
+    [handleRoleClick, loading, selectedRole, t]
+  );
 
-                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-5 leading-tight">
-                            <span className="text-white block mb-2">{t("role.selection.title")}</span>
-                            <span className="bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] bg-clip-text text-transparent inline-block">
-                                {t("role.selection.subtitle")}
-                            </span>
-                        </h1>
-
-                        <p className="text-base sm:text-lg text-gray-300 max-w-2xl mx-auto">
-                            {t("role.selection.description")}
-                        </p>
-                    </div>
+  return (
+    <div className="relative z-10 max-w-4xl mx-auto px-4 py-12 text-center">
+      <h1 className="text-4xl font-bold mb-6 spartacus-font text-[#ff7800]">
+        {t("role.selection.title")}
+      </h1>
+      <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
+        {t("role.selection.description")}
+      </p>
 
                     {/* Error message */}
                     {error && (

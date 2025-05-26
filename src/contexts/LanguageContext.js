@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { createContext, useContext, useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { createContext, useContext, useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 const LanguageContext = createContext();
 
 export const LanguageProvider = ({ children }) => {
   const { i18n } = useTranslation();
-  const [currentLanguage, setCurrentLanguage] = useState('en');
+  const [currentLanguage, setCurrentLanguage] = useState("en");
 
   useEffect(() => {
     // Load language from localStorage on initial load
-    const savedLanguage = localStorage.getItem('language');
+    const savedLanguage = localStorage.getItem("language");
     if (savedLanguage) {
       setCurrentLanguage(savedLanguage);
       i18n.changeLanguage(savedLanguage);
@@ -21,7 +21,7 @@ export const LanguageProvider = ({ children }) => {
   const changeLanguage = (language) => {
     setCurrentLanguage(language);
     i18n.changeLanguage(language);
-    localStorage.setItem('language', language);
+    localStorage.setItem("language", language);
   };
 
   return (
@@ -34,7 +34,7 @@ export const LanguageProvider = ({ children }) => {
 export const useLanguage = () => {
   const context = useContext(LanguageContext);
   if (context === undefined) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
+    throw new Error("useLanguage must be used within a LanguageProvider");
   }
   return context;
-}; 
+};

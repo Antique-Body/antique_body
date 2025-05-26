@@ -13,31 +13,31 @@ import translationSR from './locales/sr.json';
 
 const resources = {
   bs: {
-    translation: translationBS
+    translation: translationBS,
   },
   hr: {
-    translation: translationHR
+    translation: translationHR,
   },
   sr: {
-    translation: translationSR
+    translation: translationSR,
   },
   sl: {
-    translation: translationSL
+    translation: translationSL,
   },
   en: {
-    translation: translationEN
+    translation: translationEN,
   },
   de: {
-    translation: translationDE
-  }
+    translation: translationDE,
+  },
 };
 
 // Get initial language from localStorage or default to English
 const getInitialLanguage = () => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('language') || 'en';
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("language") || "en";
   }
-  return 'en';
+  return "en";
 };
 
 i18n
@@ -47,15 +47,15 @@ i18n
   .init({
     resources,
     lng: getInitialLanguage(),
-    fallbackLng: 'en',
-    debug: process.env.NODE_ENV === 'development',
+    fallbackLng: "en",
+    debug: process.env.NODE_ENV === "development",
     interpolation: {
       escapeValue: false,
     },
     detection: {
-      order: ['localStorage', 'navigator'],
-      caches: ['localStorage'],
+      order: ["localStorage", "navigator"],
+      caches: ["localStorage"],
     },
   });
 
-export default i18n; 
+export default i18n;

@@ -14,7 +14,7 @@ export const ProgressBar = ({
 }) => {
   const percentage = Math.min(
     100,
-    Math.max(0, Math.round((value / maxValue) * 100))
+    Math.max(0, Math.round((value / maxValue) * 100)),
   );
 
   return (
@@ -40,10 +40,12 @@ export const ProgressBar = ({
         </div>
       )}
       <div
-        className={`${height} w-full ${bgColor} rounded-full overflow-hidden`}>
+        className={`${height} w-full ${bgColor} rounded-full overflow-hidden`}
+      >
         <div
           className={`h-full bg-gradient-to-r ${gradientFrom} ${gradientTo} transition-all duration-500 ease-out`}
-          style={{ width: `${percentage}%` }}></div>
+          style={{ width: `${percentage}%` }}
+        ></div>
       </div>
     </div>
   );

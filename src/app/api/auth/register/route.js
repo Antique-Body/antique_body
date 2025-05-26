@@ -17,7 +17,7 @@ export async function POST(request) {
     if (!name || !lastName || !code) {
       return NextResponse.json(
         { error: "Name, last name, and verification code are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -27,7 +27,7 @@ export async function POST(request) {
         {
           error: "Name and last name must be at least 2 characters long",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -38,14 +38,14 @@ export async function POST(request) {
     if (!isEmailRegistration && !isPhoneRegistration) {
       return NextResponse.json(
         { error: "Either email or phone number is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (isEmailRegistration && isPhoneRegistration) {
       return NextResponse.json(
         { error: "Please provide either email or phone number, not both" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -56,14 +56,14 @@ export async function POST(request) {
       if (!password) {
         return NextResponse.json(
           { error: "Password is required for email registration" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
       if (password.length < 6) {
         return NextResponse.json(
           { error: "Password must be at least 6 characters long" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -78,7 +78,7 @@ export async function POST(request) {
       if (existingUser) {
         return NextResponse.json(
           { error: "User with this email already exists" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -87,7 +87,7 @@ export async function POST(request) {
       if (!isCodeValid) {
         return NextResponse.json(
           { error: "Invalid or expired verification code" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -125,7 +125,7 @@ export async function POST(request) {
       if (!isAllowed) {
         return NextResponse.json(
           { error: "Too many registration attempts. Please try again later." },
-          { status: 429 }
+          { status: 429 },
         );
       }
 
@@ -143,7 +143,7 @@ export async function POST(request) {
       if (existingUser) {
         return NextResponse.json(
           { error: "User with this phone number already exists" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -152,7 +152,7 @@ export async function POST(request) {
       if (!isCodeValid) {
         return NextResponse.json(
           { error: "Invalid or expired verification code" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -188,7 +188,7 @@ export async function POST(request) {
     console.error("Registration error:", error);
     return NextResponse.json(
       { error: "Failed to register user. Please try again." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
