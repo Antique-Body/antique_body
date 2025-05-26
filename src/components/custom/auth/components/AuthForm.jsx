@@ -1,4 +1,11 @@
 "use client";
+import { Icon } from "@iconify/react";
+import { signIn } from "next-auth/react";
+import { useTranslation } from "react-i18next";
+
+import { PhoneInput } from "./PhoneInput";
+import { VerificationCodeInput } from "./VerificationCodeInput";
+
 import { Button, FacebookIcon, FormField, GoogleIcon } from "@/components/common";
 import { ErrorMessage } from "@/components/custom/ErrorMessage";
 import { useAuth } from "@/contexts/AuthContext";
