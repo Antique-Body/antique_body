@@ -10,7 +10,8 @@ export const ArrowLeft = ({ size = 18, className = "", ...props }) => (
     strokeLinecap="round"
     strokeLinejoin="round"
     className={className}
-    {...props}>
+    {...props}
+  >
     <path d="M19 12H5" />
     <path d="M12 19l-7-7 7-7" />
   </svg>
@@ -27,7 +28,8 @@ export const ArrowRight = ({ size = 18, className = "", ...props }) => (
     strokeLinecap="round"
     strokeLinejoin="round"
     className={className}
-    {...props}>
+    {...props}
+  >
     <path d="M5 12h14" />
     <path d="M12 5l7 7-7 7" />
   </svg>
@@ -44,7 +46,8 @@ export const ArrowUp = ({ size = 18, className = "", ...props }) => (
     strokeLinecap="round"
     strokeLinejoin="round"
     className={className}
-    {...props}>
+    {...props}
+  >
     <path d="M12 19V5" />
     <path d="M5 12l7-7 7 7" />
   </svg>
@@ -61,7 +64,8 @@ export const ArrowDown = ({ size = 18, className = "", ...props }) => (
     strokeLinecap="round"
     strokeLinejoin="round"
     className={className}
-    {...props}>
+    {...props}
+  >
     <path d="M12 5v14" />
     <path d="M19 12l-7 7-7-7" />
   </svg>
@@ -79,7 +83,8 @@ export const CheckIcon = ({ size = 16, className = "", ...props }) => (
     strokeLinecap="round"
     strokeLinejoin="round"
     className={className}
-    {...props}>
+    {...props}
+  >
     <path d="M20 6L9 17l-5-5" />
   </svg>
 );
@@ -94,7 +99,8 @@ export const PlayIcon = ({ size = 24, className = "", ...props }) => (
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
-    {...props}>
+    {...props}
+  >
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -119,7 +125,8 @@ export const PauseIcon = ({ size = 24, className = "", ...props }) => (
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
-    {...props}>
+    {...props}
+  >
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -135,7 +142,8 @@ export const SpinnerIcon = ({ size = 24, className = "", ...props }) => (
     className={`animate-spin h-5 w-5 ${className}`}
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
-    {...props}>
+    {...props}
+  >
     <circle
       className="opacity-25"
       cx="12"
@@ -164,7 +172,8 @@ export const TrainerIcon = ({
     viewBox="0 0 100 100"
     className={className}
     fill={fill}
-    {...props}>
+    {...props}
+  >
     <path d="M50,20 C53,20 55,22 55,25 C55,28 53,30 50,30 C47,30 45,28 45,25 C45,22 47,20 50,20 Z" />
     <path d="M50,35 L43,45 L28,40 C25,43 22,48 25,53 C28,55 35,53 43,50 L46,53 L43,75 L55,75 L58,53 L65,50 C72,53 77,50 75,45 C72,40 65,40 58,43 L50,35 Z" />
     <circle cx="28" cy="45" r="6" />
@@ -181,7 +190,8 @@ export const ClientIcon = ({
     viewBox="0 0 100 100"
     className={className}
     fill={fill}
-    {...props}>
+    {...props}
+  >
     <path d="M50,15 C53,15 56,18 56,21 C56,24 53,27 50,27 C47,27 44,24 44,21 C44,18 47,15 50,15 Z" />
     <path d="M50,32 L42,55 L30,40 C25,45 25,55 30,60 C35,65 42,63 50,60 L58,63 C66,65 73,65 78,60 C83,55 83,45 78,40 L66,55 L58,32 L50,32 Z" />
     <path d="M30,15 C25,22 22,30 25,38 C28,46 35,50 30,15 Z" />
@@ -199,7 +209,8 @@ export const UserIcon = ({
     viewBox="0 0 100 100"
     className={className}
     fill={fill}
-    {...props}>
+    {...props}
+  >
     <rect x="35" y="75" width="30" height="10" />
     <rect x="35" y="15" width="30" height="10" />
     <rect x="40" y="25" width="20" height="50" />
@@ -220,7 +231,8 @@ export const ParthenonIcon = ({
     viewBox="0 0 200 80"
     className={className}
     fill={fill}
-    {...props}>
+    {...props}
+  >
     <path d="M10,60 L190,60 L170,20 L30,20 Z M25,60 L25,40 L35,40 L35,60 Z M45,60 L45,40 L55,40 L55,60 Z M65,60 L65,40 L75,40 L75,60 Z M85,60 L85,40 L95,40 L95,60 Z M105,60 L105,40 L115,40 L115,60 Z M125,60 L125,40 L135,40 L135,60 Z M145,60 L145,40 L155,40 L155,60 Z M165,60 L165,40 L175,40 L175,60 Z" />
   </svg>
 );
@@ -235,7 +247,8 @@ export const ColosseumIcon = ({
     viewBox="0 0 200 100"
     className={className}
     fill={fill}
-    {...props}>
+    {...props}
+  >
     <ellipse
       cx="100"
       cy="60"
@@ -273,7 +286,8 @@ export const VaseIcon = ({
     viewBox="0 0 80 100"
     className={className}
     fill={fill}
-    {...props}>
+    {...props}
+  >
     <path
       d="M30,20 C30,10 50,10 50,20 L45,30 L35,30 Z M35,30 C25,35 25,75 30,85 C35,90 45,90 50,85 C55,75 55,35 45,30 Z M30,85 C30,90 50,90 50,85 L50,80 L30,80 Z"
       stroke="currentColor"
@@ -293,7 +307,8 @@ export const ColumnIcon = ({
     viewBox="0 0 80 120"
     className={className}
     fill={fill}
-    {...props}>
+    {...props}
+  >
     <path
       d="M35,10 L45,10 L44,110 L36,110 Z M40,10 L40,0 L40,110 L40,120"
       stroke="currentColor"
@@ -313,7 +328,8 @@ export const RunnerIcon = ({
     viewBox="0 0 80 120"
     className={className}
     fill={fill}
-    {...props}>
+    {...props}
+  >
     <path d="M40,20 C43,20 46,23 46,26 C46,29 43,32 40,32 C37,32 34,29 34,26 C34,23 37,20 40,20 Z M34,38 L40,45 L46,42 L52,53 L46,60 L40,53 L34,64 L40,82 L34,90 L28,75 L34,38 Z" />
   </svg>
 );
@@ -328,7 +344,8 @@ export const DiscusIcon = ({
     viewBox="0 0 100 100"
     className={className}
     fill={fill}
-    {...props}>
+    {...props}
+  >
     <path d="M50,20 C53,20 55,22 55,25 C55,28 53,30 50,30 C47,30 45,28 45,25 C45,22 47,20 50,20 Z M50,35 L43,45 L28,40 C25,43 22,48 25,53 C28,55 35,53 43,50 L46,53 L43,75 L55,75 L58,53 L65,50 C72,53 77,50 75,45 C72,40 65,40 58,43 L50,35 Z" />
     <circle cx="28" cy="45" r="6" />
   </svg>
@@ -345,7 +362,8 @@ export const BrandLogoIcon = ({
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 400 400"
     width="160"
-    height="160">
+    height="160"
+  >
     {/* Gradient definitions */}
     <defs>
       <linearGradient id="orangeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -448,7 +466,12 @@ export const GoogleIcon = ({ size = 24, className = "", ...props }) => (
 );
 
 export const FacebookIcon = ({ size = 24, className = "", ...props }) => (
-  <svg className={`w-5 h-5 ${className}`} viewBox="0 0 24 24" fill="currentColor" {...props}>
+  <svg
+    className={`w-5 h-5 ${className}`}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    {...props}
+  >
     <path d="M22.675 0h-21.35C.595 0 0 .592 0 1.326v21.348C0 23.408.595 24 1.325 24h11.495v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.797.143v3.24l-1.918.001c-1.504 0-1.797.715-1.797 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116C23.406 24 24 23.408 24 22.674V1.326C24 .592 23.406 0 22.675 0" />
   </svg>
 );
@@ -463,12 +486,14 @@ export const GreekLoaderIcon = ({ size = "lg", className = "", ...props }) => {
   return (
     <div
       className={`${sizeClasses[size]} relative mx-auto ${className}`}
-      {...props}>
+      {...props}
+    >
       <svg
         className="animate-spin"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 100 100"
-        fill="none">
+        fill="none"
+      >
         <circle
           cx="50"
           cy="50"
@@ -537,7 +562,8 @@ export const AdminIcon = ({
     viewBox="0 0 100 100"
     className={className}
     fill={fill}
-    {...props}>
+    {...props}
+  >
     <path d="M50,15 C53,15 56,18 56,21 C56,24 53,27 50,27 C47,27 44,24 44,21 C44,18 47,15 50,15 Z" />
     <path d="M50,32 L42,55 L30,40 C25,45 25,55 30,60 C35,65 42,63 50,60 L58,63 C66,65 73,65 78,60 C83,55 83,45 78,40 L66,55 L58,32 L50,32 Z" />
     <path d="M30,15 C25,22 22,30 25,38 C28,46 35,50 30,15 Z" />
@@ -559,7 +585,8 @@ export const CloseIcon = ({ size = 24, className = "", ...props }) => (
     strokeLinecap="round"
     strokeLinejoin="round"
     className={className}
-    {...props}>
+    {...props}
+  >
     <line x1="18" y1="6" x2="6" y2="18"></line>
     <line x1="6" y1="6" x2="18" y2="18"></line>
   </svg>
@@ -579,7 +606,8 @@ export const IconButton = ({
     <button
       onClick={onClick}
       className={`${defaultColor} hover:${hoverColor} cursor-pointer p-2 rounded-full ${hoverBg} ${className}`}
-      {...props}>
+      {...props}
+    >
       {typeof Icon === "function" ? <Icon size={size} /> : Icon}
     </button>
   );
@@ -587,18 +615,18 @@ export const IconButton = ({
 
 export const ErrorIcon = ({ size = 16, className = "", ...props }) => (
   <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 20 20"
-      fill="currentColor"
-      className={className}
-      {...props}
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 20 20"
+    fill="currentColor"
+    className={className}
+    {...props}
   >
-      <path
-          fillRule="evenodd"
-          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-          clipRule="evenodd"
-      />
+    <path
+      fillRule="evenodd"
+      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+      clipRule="evenodd"
+    />
   </svg>
 );

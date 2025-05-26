@@ -127,7 +127,7 @@ async function verifyUserPassword(userId, password) {
     "verifyUserPassword: comparing",
     password,
     "with hash",
-    user.password
+    user.password,
   );
   const result = await bcrypt.compare(password, user.password);
   console.log("verifyUserPassword: bcrypt.compare result:", result);
@@ -136,7 +136,7 @@ async function verifyUserPassword(userId, password) {
 
 async function updateUserVerification(
   userId,
-  { emailVerified, phoneVerified }
+  { emailVerified, phoneVerified },
 ) {
   return await prisma.user.update({
     where: { id: userId },
