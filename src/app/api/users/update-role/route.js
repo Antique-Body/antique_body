@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
+import { userService } from "@/app/api/users/services";
 import { isAuthenticated } from "@/lib/auth";
 import { validateRoleUpdate } from "@/middleware/validation";
-import { updateUserRole } from "../services";
 
 export async function PATCH(request) {
   try {
@@ -24,7 +24,10 @@ export async function PATCH(request) {
     }
 
     try {
-      const updatedUser = await updateUserRole({ id: data.userId }, data.role);
+      const updatedUser = await userService.updateUserRole(
+        { id: data.userId },
+        data.role
+      );
       return NextResponse.json({
         message: "Role updated successfully",
         user: updatedUser,
