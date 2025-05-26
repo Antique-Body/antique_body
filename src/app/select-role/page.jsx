@@ -1,39 +1,43 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { FullScreenLoader, RoleCardCompact } from "@/components";
+import { Modal } from "@/components/common";
 import { useSession } from "next-auth/react";
-import { useCallback, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { RoleCard, ActionFooter, LoadingOverlay } from "@/components/custom/select-role/components";
-
-const DEFAULT_BACKGROUNDS = {
-    trainer:
-        "https://blog.nasm.org/hubfs/top%205%20reasons%20to%20become%20a%20personal%20trainer%20header%20blog%20updated.jpg",
-    client: "https://goat-fitness.com/wp-content/uploads/2022/01/shutterstock_1822207589.jpg",
-};
-// Role redirects
-const ROLE_REDIRECTS = {
-    trainer: "/trainer/dashboard",
-    client: "/client/dashboard",
-};
-
-// Role titles for loading state
 const ROLE_TITLES = {
-    trainer: "role.preparing.trainer",
-    client: "role.preparing.client",
+  trainer: "role.preparing.trainer",
+  client: "role.preparing.client",
+  user: "role.preparing.user",
+  admin: "role.preparing.admin",
 };
 
-// Role configuration
+const ROLE_DESCRIPTIONS = {
+  trainer: "role.trainer",
+  client: "role.client",
+  user: "role.user",
+  admin: "role.admin",
+};
+
+const ROLE_REDIRECTS = {
+  trainer: "/trainer-dashboard",
+  client: "/client-dashboard",
+  user: "/user/training-setup",
+  admin: "/admin-dashboard",
+};
+
+// Role configuration with clear visual identifiers
 const ROLES_CONFIG = {
     trainer: {
         title: "role.preparing.trainer",
         description: "role.trainer.description",
         icon: "mdi mdi-dumbbell",
         color: "#FF7800",
-        secondaryColor: "#FFA94D",
         gradient: "from-orange-500 to-amber-500",
         background: DEFAULT_BACKGROUNDS.trainer,
+        redirect: "/trainer-dashboard",
         features: [
             { icon: "mdi-certificate", text: "role.trainer.feature1" },
             { icon: "mdi-account-multiple", text: "role.trainer.feature2" },
@@ -45,89 +49,440 @@ const ROLES_CONFIG = {
         description: "role.client.description",
         icon: "mdi mdi-account-group",
         color: "#3B82F6",
-        secondaryColor: "#60A5FA",
         gradient: "from-blue-500 to-indigo-500",
         background: DEFAULT_BACKGROUNDS.client,
+        redirect: "/client-dashboard",
         features: [
             { icon: "mdi-account-check", text: "role.client.feature1" },
             { icon: "mdi-calendar-check", text: "role.client.feature2" },
             { icon: "mdi-heart-pulse", text: "role.client.feature3" },
         ],
     },
+    user: {
+        title: "role.preparing.user",
+        description: "role.user.description",
+        icon: "mdi mdi-account-outline",
+        color: "#10B981",
+        gradient: "from-emerald-500 to-teal-500",
+        background: DEFAULT_BACKGROUNDS.user,
+        redirect: "/user/training-setup",
+        features: [
+            { icon: "mdi-run", text: "role.user.feature1" },
+            { icon: "mdi-database", text: "role.user.feature2" },
+            { icon: "mdi-trophy", text: "role.user.feature3" },
+        ],
+    },
+};
+
+// Animation configurations
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            when: "beforeChildren",
+            staggerChildren: 0.15,
+            duration: 0.8,
+        },
+    },
+};
+
+// Help text component with sleek design
+const HelpText = () => {
+    const { t } = useTranslation();
+    const [showHelpModal, setShowHelpModal] = useState(false);
+
+    return (
+        <>
+            <div className="flex justify-center mt-6 relative">
+                <button
+                    className="text-gray-300 hover:text-white text-sm flex items-center gap-2 transition-colors duration-200 hover:bg-white/10 rounded-full px-4 py-2 border border-white/10"
+                    onClick={() => setShowHelpModal(true)}
+                >
+                    <span className="mdi mdi-help-circle text-lg text-[#FF7800]"></span>
+                    {t("role.selection.help_choosing")}
+                </button>
+            </div>
+
+            <Modal
+                isOpen={showHelpModal}
+                onClose={() => setShowHelpModal(false)}
+                title={t("role.selection.help_choosing")}
+                confirmButtonText={t("common.continue")}
+                confirmButtonColor="bg-[#ff7800] hover:bg-[#e66e00]"
+                primaryButtonAction={() => setShowHelpModal(false)}
+            >
+                <div className="py-3">
+                    <div className="space-y-5">
+                        <div className="p-4 rounded-lg bg-gradient-to-br from-orange-500/10 to-transparent border border-orange-500/20">
+                            <div className="flex items-start gap-3">
+                                <div className="mt-1 bg-orange-500/20 p-2 rounded-full flex-shrink-0">
+                                    <span className="mdi mdi-dumbbell text-lg text-orange-400"></span>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-orange-400 mb-1">{t("role.trainer.label")}</h4>
+                                    <p className="text-sm text-gray-300 leading-relaxed">
+                                        {t("role.selection.help_modal.trainer_help")}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/20">
+                            <div className="flex items-start gap-3">
+                                <div className="mt-1 bg-blue-500/20 p-2 rounded-full flex-shrink-0">
+                                    <span className="mdi mdi-account-group text-lg text-blue-400"></span>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-blue-400 mb-1">{t("role.client.label")}</h4>
+                                    <p className="text-sm text-gray-300 leading-relaxed">
+                                        {t("role.selection.help_modal.client_help")}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-4 rounded-lg bg-gradient-to-br from-emerald-500/10 to-transparent border border-emerald-500/20">
+                            <div className="flex items-start gap-3">
+                                <div className="mt-1 bg-emerald-500/20 p-2 rounded-full flex-shrink-0">
+                                    <span className="mdi mdi-account-outline text-lg text-emerald-400"></span>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-emerald-400 mb-1">{t("role.user.label")}</h4>
+                                    <p className="text-sm text-gray-300 leading-relaxed">
+                                        {t("role.selection.help_modal.user_help")}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="pt-3 border-t border-gray-800 mt-2 text-center">
+                            <a
+                                href="mailto:support@antiquebody.com"
+                                className="inline-flex items-center text-[#FF7800] hover:text-orange-400 gap-1 text-sm"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <span className="mdi mdi-email-outline"></span>
+                                {t("role.selection.help_modal.contact_support")}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </Modal>
+        </>
+    );
+};
+
+// Role card component with clear visual differentiation
+const RoleOption = ({ role, config, isSelected, onClick, loading }) => {
+    const { t } = useTranslation();
+    const [isHovered, setIsHovered] = useState(false);
+
+    // Define card style properties based on role
+    const getCardStyleProps = () => {
+        let styleProps = {
+            accentColor: config.color,
+            animate: true,
+            animationVariant: "fadeIn",
+            backdropBlur: "sm",
+            glowEffect: isSelected,
+            glowColor: `${config.color}40`,
+            borderWidth: isSelected ? "2px" : "1px",
+            hoverScale: "1.02",
+        };
+
+        // Role-specific enhancements
+        if (role === "trainer") {
+            const [fromColor, toColor] = "rgba(50,25,10,0.8),rgba(40,20,5,0.8)".split(",");
+            styleProps = {
+                ...styleProps,
+                bgGradientFrom: fromColor,
+                bgGradientTo: toColor,
+                animationVariant: "slideUp",
+            };
+        } else if (role === "client") {
+            const [fromColor, toColor] = "rgba(15,25,50,0.8),rgba(10,20,45,0.8)".split(",");
+            styleProps = {
+                ...styleProps,
+                bgGradientFrom: fromColor,
+                bgGradientTo: toColor,
+                animationVariant: "scale",
+            };
+        } else if (role === "user") {
+            const [fromColor, toColor] = "rgba(10,40,30,0.8),rgba(5,35,25,0.8)".split(",");
+            styleProps = {
+                ...styleProps,
+                bgGradientFrom: fromColor,
+                bgGradientTo: toColor,
+                animationVariant: "scale",
+            };
+        }
+
+        return styleProps;
+    };
+
+    return (
+        <Card
+            className={`relative overflow-hidden cursor-pointer h-full flex flex-col`}
+            borderTop={false}
+            borderColor={isSelected ? config.color : "rgba(255,255,255,0.1)"}
+            shadow={isSelected ? `0 0 20px ${config.color}30` : "0 5px 15px rgba(0,0,0,0.2)"}
+            bgGradientFrom={isSelected ? "rgba(22,22,22,0.95)" : "rgba(18,18,18,0.85)"}
+            bgGradientTo={isSelected ? "rgba(28,28,28,0.95)" : "rgba(24,24,24,0.85)"}
+            padding="0"
+            width="100%"
+            onClick={() => onClick(role)}
+            // Hover effects
+            hoverTranslateY="-5px"
+            hoverBorderColor={config.color}
+            hoverShadow={`0 15px 30px rgba(0,0,0,0.3), 0 5px 15px ${config.color}20`}
+            hoverBgGradientFrom="rgba(25,25,25,0.9)"
+            hoverBgGradientTo="rgba(30,30,30,0.9)"
+            // Enhanced props
+            {...getCardStyleProps()}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            {/* Background image with improved visibility */}
+            <div className="relative aspect-[16/9] md:aspect-video w-full overflow-hidden">
+                <Image
+                    src={config.background}
+                    alt={t(config.title)}
+                    fill
+                    className="object-cover"
+                    style={{
+                        transform: isHovered ? "scale(1.05)" : "scale(1)",
+                        transition: "transform 0.5s ease-out",
+                    }}
+                    priority
+                />
+
+                {/* Gradient overlay with reduced opacity for better image visibility */}
+                <div className={`absolute inset-0 bg-gradient-to-b ${config.gradient} opacity-10 z-10`}></div>
+
+                {/* Dark overlay adjusted for better image visibility */}
+                <div className="absolute inset-0 bg-black/10 z-20"></div>
+            </div>
+
+            {/* Content */}
+            <div className="relative z-30 p-4 sm:p-5 lg:p-6 flex flex-col flex-grow">
+                {/* Role badge */}
+                <div className="flex items-center gap-3 mb-3 sm:mb-4">
+                    <div
+                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center bg-gradient-to-br ${config.gradient}`}
+                    >
+                        <i className={`${config.icon} text-xl sm:text-2xl text-white`}></i>
+                    </div>
+
+                    {isSelected && (
+                        <motion.div
+                            className="bg-white/20 backdrop-blur-sm rounded-full p-1.5 ml-auto"
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <span className="mdi mdi-check text-lg"></span>
+                        </motion.div>
+                    )}
+                </div>
+
+                {/* Role title and description */}
+                <h3 className="text-xl sm:text-2xl font-bold mb-2 text-white">{t(config.title)}</h3>
+                <p className="text-gray-200 mb-4 sm:mb-5 text-sm leading-relaxed">{t(config.description)}</p>
+
+                {/* Feature list for clarity - responsive adjustments */}
+                <div className="space-y-2 mb-4">
+                    {config.features.map((feature, idx) => (
+                        <div key={idx} className="flex items-center gap-2 text-xs sm:text-sm text-gray-300">
+                            <span className={`mdi ${feature.icon} text-base sm:text-lg`} style={{ color: config.color }}></span>
+                            <span>{t(feature.text)}</span>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Call to action button - positioned at the bottom */}
+                <div className="mt-auto pt-2">
+                    <button
+                        className={`w-full py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg bg-gradient-to-r ${config.gradient} text-white text-sm sm:text-base font-medium transition-all hover:opacity-90 flex items-center justify-center gap-2`}
+                    >
+                        <span>{t("role.selection.select_role")}</span>
+                        <span className="mdi mdi-arrow-right"></span>
+                    </button>
+                </div>
+            </div>
+
+            {/* Loading overlay */}
+            {loading && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+                    <div className="flex flex-col items-center gap-3">
+                        <div className="w-10 h-10 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                        <span className="text-white text-sm font-medium">Loading...</span>
+                    </div>
+                </div>
+            )}
+        </Card>
+    );
+};
+
+// Confirmation dialog with clear visual representation of the role
+const RoleConfirmDialog = ({ isOpen, onClose, onConfirm, role }) => {
+    const { t } = useTranslation();
+    const config = role ? ROLES_CONFIG[role] : null;
+
+    if (!config) return null;
+
+    return (
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            onConfirm={onConfirm}
+            title={t("role.selection.confirm_path")}
+            confirmButtonText={t("common.continue")}
+            cancelButtonText={t("common.back")}
+            confirmButtonColor={`bg-[${config.color}] hover:opacity-90`}
+        >
+            <div className="py-4 text-center">
+                <div className="flex flex-col items-center">
+                    {/* Role header with icon */}
+                    <div className="mb-6">
+                        <div
+                            className={`w-20 h-20 rounded-full bg-gradient-to-br ${config.gradient} mx-auto flex items-center justify-center mb-4`}
+                        >
+                            <i className={`${config.icon} text-4xl text-white`}></i>
+                        </div>
+                        <h3 className="text-2xl font-bold text-white">{t(config.title)}</h3>
+                    </div>
+
+                    <p className="text-gray-300 text-sm max-w-xs mx-auto leading-relaxed mb-6">
+                        {t("role.selection.confirm_description", { role: t(config.title).toLowerCase() })}
+                    </p>
+
+                    {/* Feature list */}
+                    <div className="space-y-3 w-full">
+                        {config.features.map((feature, idx) => (
+                            <div
+                                key={idx}
+                                className="flex items-center gap-3 text-left p-3 rounded-lg bg-white/5 border border-white/10"
+                            >
+                                <div
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center bg-${role}-100/20`}
+                                    style={{ backgroundColor: `${config.color}20` }}
+                                >
+                                    <i className={`mdi ${feature.icon}`} style={{ color: config.color }}></i>
+                                </div>
+                                <span className="text-sm text-gray-200">{t(feature.text)}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </Modal>
+    );
 };
 
 export default function SelectRole() {
-    const { t } = useTranslation();
-    const { data: session, update } = useSession();
-    const router = useRouter();
-    const [loading, setLoading] = useState(false);
-    const [selectedRole, setSelectedRole] = useState(null);
-    const [error, setError] = useState(null);
+  const { t } = useTranslation();
+  const { data: session, update } = useSession();
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [selectedRole, setSelectedRole] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [pendingRole, setPendingRole] = useState(null);
+  const [error, setError] = useState(null);
 
-    // Handle role selection
-    const handleRoleClick = useCallback(
-        (role) => {
-            setSelectedRole(role === selectedRole ? null : role);
-            setError(null);
+  useEffect(() => {
+    return () => {
+      setLoading(false);
+      setSelectedRole(null);
+    };
+  }, []);
+
+  const handleRoleClick = useCallback((role) => {
+    setPendingRole(role);
+    setIsModalOpen(true);
+    setError(null);
+  }, []);
+
+  const handleConfirmRole = useCallback(async () => {
+    if (!session?.user?.email || !pendingRole) return;
+
+    setIsModalOpen(false);
+    setSelectedRole(pendingRole);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/users/update-role", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
         },
-        [selectedRole]
-    );
-
-    // Handle role confirmation
-    const handleConfirmRole = useCallback(async () => {
-        if (!session?.user?.email || !selectedRole) return;
-
-        setLoading(true);
-        setError(null);
-
-        try {
-            const response = await fetch("/api/users/update-role", {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    userId: session.user.id,
-                    role: selectedRole,
-                }),
-            });
+        body: JSON.stringify({
+          userId: session.user.id,
+          role: pendingRole,
+        }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error("API error:", errorData);
         throw new Error(
           errorData.error ||
-            t("role.update.failed", { status: response.status })
+            t("role.update.failed", { status: response.status }),
         );
       }
 
-            const data = await response.json();
+      const data = await response.json();
+      console.log("API success, response data:", data);
 
-            await update({
-                role: selectedRole,
-                hasCompletedTrainingSetup: true,
-            });
+      const updateResult = await update({
+        role: pendingRole,
+        hasCompletedTrainingSetup: pendingRole !== "user",
+      });
+      console.log("Session update result:", updateResult);
 
-            const redirectPath = ROLE_REDIRECTS[selectedRole] || "/";
-            router.push(redirectPath);
-        } catch (error) {
-            console.error("Error updating role:", error);
-            setError(error.message || t("common.unknown_error"));
-            setLoading(false);
-        }
-    }, [session?.user?.email, selectedRole, router, update, t]);
+      const redirectPath = `/${pendingRole}/personal-details`;
+      if (redirectPath) {
+        router.push(redirectPath);
+      } else {
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Error updating role:", error);
+      setError(error.message || t("common.unknown_error"));
+      setLoading(false);
+      setSelectedRole(null);
+    }
+  }, [session?.user?.email, pendingRole, router, update, t]);
 
-    return (
-        <div className="relative min-h-screen w-full overflow-x-hidden bg-black text-white flex flex-col">
-            {/* Premium background with lighting effects */}
-            <div className="fixed inset-0 z-0">
-                <div className="absolute inset-0 bg-gradient-to-b from-black via-[#0a0a0a] to-black"></div>
-                <div className="absolute top-1/3 -left-40 w-[600px] h-[600px] rounded-full bg-[#FF6B00]/20 blur-[150px]"></div>
-                <div className="absolute bottom-1/3 -right-40 w-[600px] h-[600px] rounded-full bg-[#FF9A00]/20 blur-[150px]"></div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[#FF6B00]/10 blur-[200px]"></div>
-                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20"></div>
-                <div className="absolute inset-0 bg-radial-gradient pointer-events-none"></div>
-            </div>
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false);
+    setPendingRole(null);
+    setError(null);
+  }, []);
+
+  const roleCards = useMemo(
+    () => (
+      <>
+        <div className="grid md:grid-cols-2 gap-5 auto-rows-fr">
+          <RoleCardCompact
+            title={t("role.trainer.become")}
+            description={t("role.trainer.description")}
+            role="trainer"
+            onClick={() => handleRoleClick("trainer")}
+            loading={loading && selectedRole === "trainer"}
+            isSelected={selectedRole === "trainer"}
+          />
+
+          <RoleCardCompact
+            title={t("role.client.train_with_coach")}
+            description={t("role.client.description")}
+            role="client"
+            onClick={() => handleRoleClick("client")}
+            loading={loading && selectedRole === "client"}
+            isSelected={selectedRole === "client"}
+          />
+        </div>
 
         <div className="max-w-md mx-auto w-full">
           <RoleCardCompact
@@ -141,7 +496,7 @@ export default function SelectRole() {
         </div>
       </>
     ),
-    [handleRoleClick, loading, selectedRole, t]
+    [handleRoleClick, loading, selectedRole, t],
   );
 
   return (
@@ -153,63 +508,36 @@ export default function SelectRole() {
         {t("role.selection.description")}
       </p>
 
-                    {/* Error message */}
-                    {error && (
-                        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-200 text-sm max-w-lg mx-auto backdrop-blur-sm">
-                            <div className="flex items-center gap-3">
-                                <span className="mdi mdi-alert-circle text-xl text-red-400"></span>
-                                <span>{error}</span>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Role selection cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-                        {Object.entries(ROLES_CONFIG).map(([key, config]) => (
-                            <RoleCard
-                                key={key}
-                                role={key}
-                                config={config}
-                                isSelected={selectedRole === key}
-                                onClick={handleRoleClick}
-                                loading={loading}
-                                t={t}
-                            />
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* Action footer */}
-            {selectedRole && (
-                <ActionFooter
-                    selectedRole={selectedRole}
-                    config={ROLES_CONFIG[selectedRole]}
-                    loading={loading}
-                    onContinue={handleConfirmRole}
-                    t={t}
-                />
-            )}
-
-            {/* Loading overlay */}
-            {loading && selectedRole && (
-                <LoadingOverlay
-                    selectedRole={selectedRole}
-                    roleTitle={ROLE_TITLES[selectedRole] || "role.preparing.journey"}
-                    config={ROLES_CONFIG[selectedRole]}
-                    t={t}
-                />
-            )}
-
-            {/* MDI Icons */}
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" />
-
-            {/* CSS for premium effects */}
-            <style jsx>{`
-                .bg-radial-gradient {
-                    background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
-                }
-            `}</style>
+      {error && (
+        <div className="mb-6 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-200">
+          {error}
         </div>
-    );
+      )}
+
+      <div className="flex flex-col gap-6 max-w-3xl mx-auto">{roleCards}</div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onConfirm={handleConfirmRole}
+        title={t("role.selection.confirm_path")}
+        message={
+          pendingRole
+            ? t("role.selection.continue_as", {
+                role: t(ROLE_DESCRIPTIONS[pendingRole]),
+              })
+            : ""
+        }
+        confirmButtonText={t("common.continue")}
+        cancelButtonText={t("common.cancel")}
+        confirmButtonColor="bg-[#ff7800] hover:bg-[#e66e00]"
+      />
+
+      {loading && selectedRole && (
+        <FullScreenLoader
+          text={t(ROLE_TITLES[selectedRole] || "role.preparing.journey")}
+        />
+      )}
+    </div>
+  );
 }
