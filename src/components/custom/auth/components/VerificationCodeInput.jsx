@@ -10,6 +10,7 @@ export const VerificationCodeInput = ({
     handleSendCode,
     sendingCode,
     codeSent,
+    setCodeSent,
     isEmail,
     email,
     phone,
