@@ -359,5 +359,17 @@
   "use_phone": "Telefon",
   "select_country": "Odaberi državu",
   "search": "Pretraga",
-  "select_country_code": "Odaberi pozivni broj države"
+  "select_country_code": "Odaberi pozivni broj države",
+  "errorBoundary": {
+    "title": "Ups! Nešto je pošlo po zlu",
+    "message": "Ispričavamo se zbog neugodnosti. Došlo je do neočekivane greške. Ako se problem nastavi, možete kontaktirati našu podršku.",
+    "tryAgain": "Pokušaj ponovno",
+    "goHome": "Idi na početnu stranicu",
+    "hideDetails": "Sakrij detalje greške",
+    "showDetails": "Prikaži detalje greške (za developere)",
+    "messageLabel": "Poruka:",
+    "reportIssue": "Prijavi problem",
+    "contactSupport": "Kontaktiraj podršku",
+    "contactSupportDesc": "Ako trebaš pomoć, kontaktiraj nas:"
+  }
 }
