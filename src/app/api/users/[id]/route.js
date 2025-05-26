@@ -1,10 +1,10 @@
+import { userService } from "@/services/users";
 import { NextResponse } from "next/server";
-import { deleteUser, findUserById, updateUser } from "../services";
 
 // Get a user by ID
 export async function GET(request, { params }) {
   try {
-    const user = await findUserById(params.id);
+    const user = await userService.findUserById(params.id);
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -24,7 +24,7 @@ export async function GET(request, { params }) {
 export async function PUT(request, { params }) {
   try {
     const body = await request.json();
-    const user = await updateUser(params.id, body);
+    const user = await userService.updateUser(params.id, body);
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -43,7 +43,7 @@ export async function PUT(request, { params }) {
 // Delete a user by ID
 export async function DELETE(request, { params }) {
   try {
-    await deleteUser(params.id);
+    await userService.deleteUser(params.id);
     return NextResponse.json(
       { message: "User deleted successfully" },
       { status: 200 }
