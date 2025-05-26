@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 export default function ClientError({ error, reset }) {
   return (
@@ -12,4 +12,4 @@ export default function ClientError({ error, reset }) {
       </button>
     </div>
   );
-} 
+}

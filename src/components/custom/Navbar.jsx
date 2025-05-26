@@ -52,7 +52,8 @@ export const Navbar = () => {
       <div
         className={`transition-all duration-500 ${
           isVisible ? "opacity-100" : "opacity-0"
-        }`}>
+        }`}
+      >
         {isAuthenticated ? (
           <div className="flex items-center gap-4">
             <span className="text-white text-sm">
@@ -60,18 +61,20 @@ export const Navbar = () => {
             </span>
             <button
               onClick={handleLogout}
-              className="bg-gradient-to-r from-[#ff7800] to-[#ff5f00] px-4 py-2 rounded text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 transform hover:scale-105 cursor-pointer">
+              className="bg-gradient-to-r from-[#ff7800] to-[#ff5f00] px-4 py-2 rounded text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 transform hover:scale-105 cursor-pointer"
+            >
               Logout
             </button>
           </div>
         ) : (
           <Link
             href="/auth/login"
-            className="bg-gradient-to-r from-[#ff7800] to-[#ff5f00] px-4 py-2 rounded text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 transform hover:scale-105 cursor-pointer">
+            className="bg-gradient-to-r from-[#ff7800] to-[#ff5f00] px-4 py-2 rounded text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 transform hover:scale-105 cursor-pointer"
+          >
             Login
           </Link>
         )}
       </div>
     </nav>
   );
-}
+};

@@ -19,14 +19,14 @@ export async function PATCH(request) {
     if (!validation.valid) {
       return NextResponse.json(
         { error: "Validation failed", details: validation.errors },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     try {
       const updatedUser = await userService.updateUserRole(
         { id: data.userId },
-        data.role
+        data.role,
       );
       return NextResponse.json({
         message: "Role updated successfully",
@@ -38,7 +38,7 @@ export async function PATCH(request) {
       }
       return NextResponse.json(
         { error: "Failed to update role", details: error.message },
-        { status: 500 }
+        { status: 500 },
       );
     }
   } catch (error) {
@@ -47,7 +47,7 @@ export async function PATCH(request) {
         error: "An error occurred while processing the request",
         details: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
