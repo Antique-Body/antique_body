@@ -376,3 +376,4 @@ export const Card = ({
         </div>
     );
 };
+
