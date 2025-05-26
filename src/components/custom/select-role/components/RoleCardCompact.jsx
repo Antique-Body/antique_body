@@ -115,7 +115,9 @@ export const RoleCardCompact = memo(({ role, isSelected, onClick, title, descrip
                     alt={t(`role.${role}.label`)}
                     fill
                     sizes="(max-width: 768px) 100vw, 50vw"
-                    className={`object-cover transition-transform duration-700 ${isHovered ? "scale-105 blur-[1px]" : "scale-100"}`}
+                    className={`object-cover transition-transform duration-700 ${
+                        isHovered ? "scale-105 blur-[1px]" : "scale-100"
+                    }`}
                     onError={handleImageError}
                     priority
                 />
