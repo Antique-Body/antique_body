@@ -21,34 +21,43 @@ export async function middleware(request) {
         console.log("token u middleware:", token, "pathname:", pathname);
     }
 
-    // 1. Ako nije loginovan (nema token)
+    // 1. Public paths: svi mogu pristupiti
+    if (PUBLIC_PATHS.includes(pathname)) {
+        return NextResponse.next();
+    }
+
+    // 2. Ako korisnik ima token i rolu i pokušava na /auth/login ili /auth/register, redirectaj ga na dashboard
+    if (AUTH_PATHS.includes(pathname) && token?.role) {
+        const dashboardPath = `/${token.role.toLowerCase()}/dashboard`;
+        return NextResponse.redirect(new URL(dashboardPath, request.url));
+    }
+
+    // 3. Auth paths: svi mogu pristupiti ako nisu prijavljeni
+    if (AUTH_PATHS.includes(pathname)) {
+        return NextResponse.next();
+    }
+
+    // 4. Ako nema token, redirect na login
     if (!token) {
-        // Dozvoli pristup samo na login/register/reset-password/public
-        if (PUBLIC_PATHS.includes(pathname)) {
-            return NextResponse.next();
-        }
-        // Sve ostalo redirect na login
         return NextResponse.redirect(new URL("/auth/login", request.url));
     }
 
-    // 2. Ako je loginovan, ali nema role
+    // 5. Ako nema rolu, pusti samo na /select-role, inače redirect na /select-role
     const userRole = token.role?.toLowerCase();
     if (!userRole) {
-        // Dozvoli pristup samo na /select-role
-        if (pathname === SELECT_ROLE_PATH) {
+        if (pathname === "/select-role") {
             return NextResponse.next();
         }
-        // Sve ostalo redirect na /select-role
-        return NextResponse.redirect(new URL(SELECT_ROLE_PATH, request.url));
+        return NextResponse.redirect(new URL("/select-role", request.url));
     }
 
-    // 3. Ako ima role
-    const dashboardPath = `/${userRole}/personal-details`;
+    // 6. Ako ima rolu i nije na svom dashboardu, redirectaj ga na dashboard
+    const dashboardPath = `/${userRole}/dashboard`;
     if (pathname !== dashboardPath) {
         return NextResponse.redirect(new URL(dashboardPath, request.url));
     }
 
-    // Ako je već na svom dashboardu, pusti ga
+    // 7. Ako je već na svom dashboardu, pusti ga
     return NextResponse.next();
 }
 
