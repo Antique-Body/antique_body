@@ -6,6 +6,7 @@ import {
 } from "@/app/api/users/services";
 import { PrismaClient } from "@prisma/client";
 import NextAuth from "next-auth";
+import { getToken } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 import FacebookProvider from "next-auth/providers/facebook";
 import GoogleProvider from "next-auth/providers/google";
@@ -158,14 +159,40 @@ export const authConfig = {
         token.phone = user.phone;
         token.email = user.email;
       }
+      if (!token.role && token.email) {
+        const userFromDb = await prisma.user.findUnique({
+          where: { email: token.email },
+          select: { id: true, role: true, phone: true },
+        });
+        if (userFromDb) {
+          token.id = userFromDb.id;
+          token.role = userFromDb.role;
+          token.phone = userFromDb.phone;
+        }
+      }
       return token;
     },
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.id;
-        session.user.role = token.role;
-        session.user.phone = token.phone;
-        session.user.email = token.email;
+        let userFromDb = null;
+        if (token.email) {
+          userFromDb = await prisma.user.findUnique({
+            where: { email: token.email },
+            select: { id: true, role: true, email: true, phone: true },
+          });
+        } else if (token.phone) {
+          userFromDb = await prisma.user.findUnique({
+            where: { phone: token.phone },
+            select: { id: true, role: true, email: true, phone: true },
+          });
+        }
+        console.log("Session callback userFromDb:", userFromDb);
+        if (userFromDb) {
+          session.user.id = userFromDb.id;
+          session.user.role = userFromDb.role;
+          session.user.email = userFromDb.email;
+          session.user.phone = userFromDb.phone;
+        }
       }
       return session;
     },
@@ -186,3 +213,32 @@ export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
 
 // Export for Pages Router
 export const authOptions = authConfig;
+
+// Check if the user is authenticated
+export const isAuthenticated = async (req) => {
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  if (!token) return { authenticated: false };
+  return { authenticated: true, user: token };
+};
+
+// Check if the user has a specific role
+export const hasRole = async (req, allowedRoles) => {
+  const { authenticated, user } = await isAuthenticated(req);
+
+  if (!authenticated) {
+    return { authorized: false, message: "Not authenticated" };
+  }
+
+  if (!user.role) {
+    return { authorized: false, message: "User has no role assigned" };
+  }
+
+  if (allowedRoles.includes(user.role)) {
+    return { authorized: true, user };
+  }
+
+  return {
+    authorized: false,
+    message: "You don't have permission to access this resource",
+  };
+};

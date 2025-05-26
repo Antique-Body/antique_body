@@ -4,67 +4,43 @@ import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
-/**
- * User Service - Handles all user-related operations
- */
+// Zajednički select objekat za korisnika
+const userSelectFields = {
+  id: true,
+  email: true,
+  phone: true,
+  name: true,
+  lastName: true,
+  role: true,
+  emailVerified: true,
+  phoneVerified: true,
+  language: true,
+  createdAt: true,
+  updatedAt: true,
+};
 
-// Find user by different identifiers
-export async function findUserById(id) {
-  return await prisma.user.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      email: true,
-      phone: true,
-      name: true,
-      lastName: true,
-      role: true,
-      emailVerified: true,
-      phoneVerified: true,
-      language: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+/**
+ * Generička funkcija za dohvat korisnika po bilo kojem polju
+ */
+export async function findUser(where) {
+  return await prisma.user.findFirst({
+    where,
+    select: userSelectFields,
   });
 }
 
+// Specifične funkcije za backward compatibility (opciono)
+export async function findUserById(id) {
+  return await findUser({ id });
+}
+
 export async function findUserByEmail(email) {
-  return await prisma.user.findUnique({
-    where: { email },
-    select: {
-      id: true,
-      email: true,
-      phone: true,
-      name: true,
-      lastName: true,
-      role: true,
-      emailVerified: true,
-      phoneVerified: true,
-      language: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
+  return await findUser({ email });
 }
 
 export async function findUserByPhone(phone) {
   const formattedPhone = formatPhoneNumber(phone);
-  return await prisma.user.findFirst({
-    where: { phone: formattedPhone },
-    select: {
-      id: true,
-      email: true,
-      phone: true,
-      name: true,
-      lastName: true,
-      role: true,
-      emailVerified: true,
-      phoneVerified: true,
-      language: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
+  return await findUser({ phone: formattedPhone });
 }
 
 // User management operations
@@ -72,19 +48,7 @@ export async function updateUser(id, data) {
   return await prisma.user.update({
     where: { id },
     data,
-    select: {
-      id: true,
-      email: true,
-      phone: true,
-      name: true,
-      lastName: true,
-      role: true,
-      emailVerified: true,
-      phoneVerified: true,
-      language: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+    select: userSelectFields,
   });
 }
 
@@ -101,19 +65,7 @@ export async function listUsers(page = 1, limit = 10) {
     prisma.user.findMany({
       skip,
       take: limit,
-      select: {
-        id: true,
-        email: true,
-        phone: true,
-        name: true,
-        lastName: true,
-        role: true,
-        emailVerified: true,
-        phoneVerified: true,
-        language: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+      select: userSelectFields,
       orderBy: {
         createdAt: "desc",
       },
@@ -183,4 +135,21 @@ export async function updateUserVerification(
       phoneVerified: phoneVerified ?? undefined,
     },
   });
+}
+
+// Generička funkcija za update role
+export async function updateUserRole(where, role) {
+  try {
+    const result = await prisma.user.update({
+      where,
+      data: { role },
+      select: userSelectFields,
+    });
+    return result;
+  } catch (error) {
+    if (error.code === "P2025") {
+      throw new Error("User not found");
+    }
+    throw error;
+  }
 }
