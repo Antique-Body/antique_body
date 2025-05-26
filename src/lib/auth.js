@@ -1,3 +1,5 @@
+import { verifyPhoneCode } from "@/app/api/auth/services/phone";
+import { userService } from "@/app/api/users/services";
 import { PrismaClient } from "@prisma/client";
 import NextAuth from "next-auth";
 import { getToken } from "next-auth/jwt";
@@ -46,6 +48,7 @@ export const authConfig = {
 
                     // Check if user has password set
                     if (!user.password) {
+                        console.log(user, "user");
                         throw new Error("No password set for this account");
                     }
 
