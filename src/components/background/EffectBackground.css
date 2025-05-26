@@ -1,253 +1,278 @@
 .home-background-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    overflow: hidden;
-    background: linear-gradient(to bottom, #000000, #0a0a0a, #111111);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+  background: linear-gradient(to bottom, #000000, #0a0a0a, #111111);
 }
 
 /* Particle canvas */
 .particle-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    mix-blend-mode: screen;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  mix-blend-mode: screen;
 }
 
 /* Gradient overlays */
 .gradient-overlay {
-    position: absolute;
-    pointer-events: none;
-    z-index: 1;
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .top-gradient {
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 45%;
-    background: radial-gradient(ellipse at top, rgba(255, 107, 0, 0.25) 0%, rgba(0, 0, 0, 0) 70%);
-    animation: pulse 8s infinite alternate;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 45%;
+  background: radial-gradient(
+    ellipse at top,
+    rgba(255, 107, 0, 0.25) 0%,
+    rgba(0, 0, 0, 0) 70%
+  );
+  animation: pulse 8s infinite alternate;
 }
 
 .bottom-gradient {
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 45%;
-    background: radial-gradient(ellipse at bottom, rgba(255, 107, 0, 0.25) 0%, rgba(0, 0, 0, 0) 70%);
-    animation: pulse 8s infinite alternate-reverse;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 45%;
+  background: radial-gradient(
+    ellipse at bottom,
+    rgba(255, 107, 0, 0.25) 0%,
+    rgba(0, 0, 0, 0) 70%
+  );
+  animation: pulse 8s infinite alternate-reverse;
 }
 
 .center-gradient {
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at center, rgba(255, 107, 0, 0.06) 0%, rgba(0, 0, 0, 0) 50%);
-    animation: pulse 12s infinite alternate;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 107, 0, 0.06) 0%,
+    rgba(0, 0, 0, 0) 50%
+  );
+  animation: pulse 12s infinite alternate;
 }
 
 /* Greek patterns */
 .greek-pattern-container {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 2;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
 }
 
 .greek-pattern {
-    position: absolute;
-    background-repeat: repeat-x;
-    opacity: 0.18;
-    background-image: url("data:image/svg+xml,%3Csvg width='80' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,10 L10,0 L20,10 L30,0 L40,10 L50,0 L60,10 L70,0 L80,10' stroke='%23FF6B00' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+  position: absolute;
+  background-repeat: repeat-x;
+  opacity: 0.18;
+  background-image: url("data:image/svg+xml,%3Csvg width='80' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,10 L10,0 L20,10 L30,0 L40,10 L50,0 L60,10 L70,0 L80,10' stroke='%23FF6B00' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
 }
 
 .top-pattern {
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 20px;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 20px;
 }
 
 .bottom-pattern {
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 20px;
-    transform: rotate(180deg);
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  transform: rotate(180deg);
 }
 
 .left-pattern {
-    top: 0;
-    left: 0;
-    width: 20px;
-    height: 100%;
-    background-repeat: repeat-y;
-    transform: rotate(90deg) translateY(-20px);
-    transform-origin: top left;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 100%;
+  background-repeat: repeat-y;
+  transform: rotate(90deg) translateY(-20px);
+  transform-origin: top left;
 }
 
 .right-pattern {
-    top: 0;
-    right: 0;
-    width: 20px;
-    height: 100%;
-    background-repeat: repeat-y;
-    transform: rotate(-90deg) translateY(-20px);
-    transform-origin: top right;
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 100%;
+  background-repeat: repeat-y;
+  transform: rotate(-90deg) translateY(-20px);
+  transform-origin: top right;
 }
 
 /* Floating Elements */
 .floating-elements {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
 }
 
 .floating-element {
-    position: absolute;
-    border-radius: 50%;
-    background: radial-gradient(circle at center, rgba(255, 107, 0, 0.3) 0%, rgba(255, 154, 0, 0) 70%);
-    animation: float 15s infinite ease-in-out;
-    opacity: 0.5;
-    filter: blur(40px);
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 107, 0, 0.3) 0%,
+    rgba(255, 154, 0, 0) 70%
+  );
+  animation: float 15s infinite ease-in-out;
+  opacity: 0.5;
+  filter: blur(40px);
 }
 
 .element-1 {
-    width: 500px;
-    height: 500px;
-    top: 15%;
-    left: 10%;
-    animation-delay: 0s;
+  width: 500px;
+  height: 500px;
+  top: 15%;
+  left: 10%;
+  animation-delay: 0s;
 }
 
 .element-2 {
-    width: 600px;
-    height: 600px;
-    bottom: 5%;
-    right: 10%;
-    animation-delay: -2s;
+  width: 600px;
+  height: 600px;
+  bottom: 5%;
+  right: 10%;
+  animation-delay: -2s;
 }
 
 .element-3 {
-    width: 350px;
-    height: 350px;
-    top: 35%;
-    right: 20%;
-    animation-delay: -5s;
+  width: 350px;
+  height: 350px;
+  top: 35%;
+  right: 20%;
+  animation-delay: -5s;
 }
 
 .element-4 {
-    width: 450px;
-    height: 450px;
-    bottom: 30%;
-    left: 15%;
-    animation-delay: -7s;
+  width: 450px;
+  height: 450px;
+  bottom: 30%;
+  left: 15%;
+  animation-delay: -7s;
 }
 
 .element-5 {
-    width: 400px;
-    height: 400px;
-    top: 60%;
-    left: 45%;
-    animation-delay: -9s;
+  width: 400px;
+  height: 400px;
+  top: 60%;
+  left: 45%;
+  animation-delay: -9s;
 }
 
 /* Dynamic light effect that follows cursor */
 .dynamic-light {
-    position: fixed;
-    width: 800px;
-    height: 800px;
-    border-radius: 50%;
-    pointer-events: none;
-    background: radial-gradient(circle at center, rgba(255, 107, 0, 0.02) 0%, rgba(255, 154, 0, 0.01) 30%, transparent 70%);
-    transform: translate(-50%, -50%);
-    z-index: 3;
-    will-change: left, top;
-    filter: blur(60px);
+  position: fixed;
+  width: 800px;
+  height: 800px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 107, 0, 0.02) 0%,
+    rgba(255, 154, 0, 0.01) 30%,
+    transparent 70%
+  );
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  will-change: left, top;
+  filter: blur(60px);
 }
 
 /* Gold accents in the corners */
 .gold-accent {
-    position: absolute;
-    width: 150px;
-    height: 150px;
-    background: radial-gradient(circle at center, rgba(255, 107, 0, 0.05) 0%, transparent 70%);
-    z-index: 1;
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 107, 0, 0.05) 0%,
+    transparent 70%
+  );
+  z-index: 1;
 }
 
 .top-left {
-    top: 0;
-    left: 0;
+  top: 0;
+  left: 0;
 }
 
 .top-right {
-    top: 0;
-    right: 0;
+  top: 0;
+  right: 0;
 }
 
 .bottom-left {
-    bottom: 0;
-    left: 0;
+  bottom: 0;
+  left: 0;
 }
 
 .bottom-right {
-    bottom: 0;
-    right: 0;
+  bottom: 0;
+  right: 0;
 }
 
 /* Golden ratio decoration */
 .golden-ratio {
-    position: absolute;
-    bottom: 5%;
-    right: 5%;
-    width: 400px;
-    height: 400px;
-    opacity: 0.3;
-    z-index: 1;
-    pointer-events: none;
+  position: absolute;
+  bottom: 5%;
+  right: 5%;
+  width: 400px;
+  height: 400px;
+  opacity: 0.3;
+  z-index: 1;
+  pointer-events: none;
 }
 
 .golden-ratio-svg {
-    width: 100%;
-    height: 100%;
-    transform: rotate(10deg);
+  width: 100%;
+  height: 100%;
+  transform: rotate(10deg);
 }
 
 @keyframes pulse {
-    0% {
-        opacity: 0.5;
-    }
-    100% {
-        opacity: 0.9;
-    }
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0.9;
+  }
 }
 
 @keyframes float {
-    0%,
-    100% {
-        transform: translateY(0) translateX(0);
-    }
-    25% {
-        transform: translateY(-25px) translateX(25px);
-    }
-    50% {
-        transform: translateY(20px) translateX(-20px);
-    }
-    75% {
-        transform: translateY(-15px) translateX(15px);
-    }
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-25px) translateX(25px);
+  }
+  50% {
+    transform: translateY(20px) translateX(-20px);
+  }
+  75% {
+    transform: translateY(-15px) translateX(15px);
+  }
 }

@@ -10,7 +10,8 @@ export default function Error({ error, reset }) {
         <p className="text-gray-300 mb-6">{error.message}</p>
         <button
           onClick={() => reset()}
-          className="px-4 py-2 bg-[#ff7800] hover:bg-[#e66e00] text-white rounded-lg transition-colors">
+          className="px-4 py-2 bg-[#ff7800] hover:bg-[#e66e00] text-white rounded-lg transition-colors"
+        >
           Try again
         </button>
       </div>
