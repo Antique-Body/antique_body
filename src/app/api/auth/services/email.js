@@ -1,5 +1,6 @@
-import { sendVerificationCodeEmail } from "@/lib/email";
 import { PrismaClient } from "@prisma/client";
+
+import { sendVerificationCodeEmail } from "@/lib/email";
 
 const prisma = new PrismaClient();
 
