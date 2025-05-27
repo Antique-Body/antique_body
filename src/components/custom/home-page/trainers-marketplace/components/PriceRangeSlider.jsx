@@ -24,7 +24,7 @@ export const PriceRangeSlider = ({ min, max, value, onChange }) => {
         // Calculate percentage position
         const percent = Math.max(
           0,
-          Math.min(1, (e.clientX - trackLeft) / trackWidth),
+          Math.min(1, (e.clientX - trackLeft) / trackWidth)
         );
 
         // Calculate value based on percentage

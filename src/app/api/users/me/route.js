@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { userService } from "@/app/api/users/services";
 import { auth, isAuthenticated } from "@/lib/auth";
+
 export async function GET(request) {
   try {
     const session = await auth();
@@ -10,7 +11,6 @@ export async function GET(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await userService.findUserById(session.user.id);
     const user = await userService.findUserById(session.user.id);
 
     if (!user) {
@@ -22,7 +22,7 @@ export async function GET(request) {
     console.error("Error fetching current user:", error);
     return NextResponse.json(
       { error: "Failed to fetch current user" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -44,7 +44,7 @@ export async function PATCH(request) {
     if (!validation.valid) {
       return NextResponse.json(
         { error: "Validation failed", details: validation.errors },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -64,7 +64,7 @@ export async function PATCH(request) {
     console.error("Error updating user:", error);
     return NextResponse.json(
       { error: "An error occurred while updating user data" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

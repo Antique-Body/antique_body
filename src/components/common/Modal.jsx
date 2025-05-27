@@ -136,5 +136,5 @@ export const Modal = memo(
         </div>
       </div>
     );
-  },
+  }
 );
