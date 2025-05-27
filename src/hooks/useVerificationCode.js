@@ -12,6 +12,10 @@ export const useVerificationCode = ({
   const [sendingCode, setSendingCode] = useState(false);
   const [countdown, setCountdown] = useState(0);
 
+  // Email regex za validaciju
+  const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+  const isInputValid = isEmail ? email && emailRegex.test(email) : phone;
+
   useEffect(() => {
     let timer;
     if (countdown > 0) {
@@ -32,8 +36,6 @@ export const useVerificationCode = ({
     }
   };
 
-  const isInputValid = isEmail ? email : phone;
-
   return {
     verificationCode,
     setVerificationCode,
@@ -44,6 +46,7 @@ export const useVerificationCode = ({
     sendingCode,
     setSendingCode,
     countdown,
+    setCountdown,
     handleSendCodeWithError,
     isInputValid,
   };

@@ -3,9 +3,6 @@ import { NextResponse } from "next/server";
 import { userService } from "@/app/api/users/services";
 import { isAuthenticated } from "@/lib/auth";
 
-import { userService } from "@/app/api/users/services";
-import { isAuthenticated } from "@/lib/auth";
-
 export async function PATCH(request) {
   try {
     const { authenticated, user } = await isAuthenticated(request);

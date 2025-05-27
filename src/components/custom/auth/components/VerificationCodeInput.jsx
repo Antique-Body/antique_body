@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button, FormField } from "@/components/common";
@@ -10,7 +11,6 @@ export const VerificationCodeInput = ({
   handleSendCode,
   sendingCode,
   codeSent,
-  setCodeSent,
   isEmail,
   email,
   phone,
@@ -18,13 +18,17 @@ export const VerificationCodeInput = ({
 }) => {
   const { t } = useTranslation();
 
-  const { countdown, handleSendCodeWithError, isInputValid } =
+  const { countdown, setCountdown, handleSendCodeWithError, isInputValid } =
     useVerificationCode({
       handleSendCode,
       isEmail,
       email,
       phone,
     });
+
+  useEffect(() => {
+    setCountdown(0);
+  }, [isEmail ? email : phone, setCountdown]);
 
   return (
     <div className="flex flex-col space-y-2">

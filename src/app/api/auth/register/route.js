@@ -131,15 +131,15 @@ export async function POST(request) {
 
       // Format phone number
       const formattedPhone = formatPhoneNumber(phone);
+      console.log("Checking registration for phone:", formattedPhone);
 
       // Check if user already exists with this phone
       const existingUser = await prisma.user.findFirst({
         where: {
           phone: formattedPhone,
-          phoneVerified: true,
         },
       });
-
+      console.log("Existing user found:", existingUser);
       if (existingUser) {
         return NextResponse.json(
           { error: "User with this phone number already exists" },

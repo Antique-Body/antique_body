@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
