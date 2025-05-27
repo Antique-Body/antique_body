@@ -7,8 +7,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { EffectBackground } from "@/components/background";
-import { Button } from "@/components/common";
-import { AuthForm, Card } from "@/components/custom";
+import { Button, Card } from "@/components/common";
+import { AuthForm } from "@/components/custom/auth/components/AuthForm";
 
 export default function LoginPage() {
   const { t } = useTranslation();

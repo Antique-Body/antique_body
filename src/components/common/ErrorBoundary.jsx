@@ -8,9 +8,9 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "./Button";
 
-import { Card } from "@/components/custom";
+import { Card } from "@/components/common";
 
-export default function ErrorBoundary({ error, reset, className = "" }) {
+export const ErrorBoundary = ({ error, reset, className = "" }) => {
   const { t } = useTranslation();
   const router = useRouter();
   const [showDetails, setShowDetails] = useState(false);
@@ -182,4 +182,4 @@ export default function ErrorBoundary({ error, reset, className = "" }) {
       </div>
     </div>
   );
-}
+};
