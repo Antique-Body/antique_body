@@ -1,4 +1,6 @@
 "use client";
+import { memo } from "react";
+
 import { Button } from "@/components/common/Button";
 import {
   CloseIcon,
@@ -6,7 +8,6 @@ import {
   IconButton,
   VaseIcon,
 } from "@/components/common/Icons";
-import { memo } from "react";
 
 export const Modal = memo(
   ({
@@ -71,5 +72,5 @@ export const Modal = memo(
         </div>
       </div>
     );
-  },
+  }
 );

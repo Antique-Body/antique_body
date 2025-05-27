@@ -1,11 +1,12 @@
 "use client";
 
-import { FullScreenLoader, RoleCardCompact } from "@/components";
-import { Modal } from "@/components/common";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { FullScreenLoader, RoleCardCompact } from "@/components";
+import { Modal } from "@/components/common";
 
 const ROLE_TITLES = {
   trainer: "role.preparing.trainer",
@@ -38,12 +39,13 @@ export default function SelectRole() {
   const [pendingRole, setPendingRole] = useState(null);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       setLoading(false);
       setSelectedRole(null);
-    };
-  }, []);
+    },
+    []
+  );
 
   const handleRoleClick = useCallback((role) => {
     setPendingRole(role);
@@ -76,7 +78,7 @@ export default function SelectRole() {
         console.error("API error:", errorData);
         throw new Error(
           errorData.error ||
-            t("role.update.failed", { status: response.status }),
+            t("role.update.failed", { status: response.status })
         );
       }
 
@@ -144,7 +146,7 @@ export default function SelectRole() {
         </div>
       </>
     ),
-    [handleRoleClick, loading, selectedRole, t],
+    [handleRoleClick, loading, selectedRole, t]
   );
 
   return (

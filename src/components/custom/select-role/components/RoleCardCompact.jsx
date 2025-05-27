@@ -1,5 +1,10 @@
 "use client";
 
+import { memo, useCallback, useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+
+import { Card } from "../../..";
+
 import {
   AdminIcon,
   ClientIcon,
@@ -7,9 +12,6 @@ import {
   TrainerIcon,
   UserIcon,
 } from "@/components/common/Icons";
-import { memo, useCallback, useState, useRef, useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { Card } from "../../..";
 
 const roleIcons = {
   trainer: TrainerIcon,
@@ -200,5 +202,5 @@ export const RoleCardCompact = memo(
         </Card>
       </div>
     );
-  },
+  }
 );

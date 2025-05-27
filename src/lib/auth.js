@@ -1,11 +1,12 @@
-import { verifyPhoneCode } from "@/app/api/auth/services/phone";
-import { userService } from "@/app/api/users/services";
 import { PrismaClient } from "@prisma/client";
 import NextAuth from "next-auth";
 import { getToken } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 import FacebookProvider from "next-auth/providers/facebook";
 import GoogleProvider from "next-auth/providers/google";
+
+import { verifyPhoneCode } from "@/app/api/auth/services/phone";
+import { userService } from "@/app/api/users/services";
 
 const prisma = new PrismaClient();
 
@@ -51,7 +52,7 @@ export const authConfig = {
 
           const isPasswordValid = await userService.verifyUserPassword(
             user.id,
-            credentials.password,
+            credentials.password
           );
           if (!isPasswordValid) {
             throw new Error("Invalid email or password");
@@ -93,7 +94,7 @@ export const authConfig = {
 
           const isCodeValid = await verifyPhoneCode(
             credentials.phone,
-            credentials.code,
+            credentials.code
           );
           if (!isCodeValid) {
             throw new Error("Invalid or expired verification code");
