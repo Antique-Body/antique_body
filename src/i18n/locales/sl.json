@@ -18,30 +18,49 @@
     "trainer": {
       "label": "Trener",
       "become": "Postani trener",
-      "description": "Ustvari svoj profil trenerja, pridobi stranke in spremljaj njihov napredek. Deli svoje znanje in pomagaj drugim doseči njihove fitnes cilje."
+      "description": "Ustvari svoj profil trenerja, pridobi stranke in spremljaj njihov napredek. Deli svoje znanje in pomagaj drugim doseči njihove fitnes cilje.",
+      "feature1": "Certificirano znanje",
+      "feature2": "Upravljanje s strankami",
+      "feature3": "Sledenje napredku"
     },
     "client": {
       "label": "Stranka",
       "train_with_coach": "Treniraj s trenerjem",
-      "description": "Poveži se s profesionalnimi trenerji, ki te bodo vodili na tvoji fitnes poti in ti nudili prilagojene vadbe ter prehranske nasvete."
+      "description": "Poveži se s profesionalnimi trenerji, ki te bodo vodili na tvoji fitnes poti in ti nudili prilagojene vadbe ter prehranske nasvete.",
+      "feature1": "Osebni trener",
+      "feature2": "Prilagojeni načrti",
+      "feature3": "Sledenje zdravju"
     },
     "user": {
       "label": "Uporabnik",
       "custom_workout": "Prilagojen načrt vadbe",
-      "description": "Pridobi prilagojen načrt vadbe glede na tvoje želje, raven kondicije in cilje. Vadi samostojno z vajami, ki jih ustvari umetna inteligenca."
+      "description": "Pridobi prilagojen načrt vadbe glede na tvoje želje, raven kondicije in cilje. Vadi samostojno z vajami, ki jih ustvari umetna inteligenca.",
+      "feature1": "Individualno vadbo",
+      "feature2": "AI-podprte vaje",
+      "feature3": "Sledenje napredku"
     },
     "selection": {
-      "title": "Izberi svojo vlogo",
-      "description": "Izberi vlogo, ki najbolj ustreza tvoji fitnes poti",
-      "continue_as": "Ali si prepričan, da želiš nadaljevati kot",
-      "confirm_path": "Potrdi svojo pot"
+      "title": "Izberite svojo vlogo",
+      "subtitle": "Začnite svojo fitness pot",
+      "description": "Izberite vlogo, ki najbolj ustreza vaši fitness poti",
+      "step": "Korak 1: Izbira vloge",
+      "help_choosing": "Pomoč pri izbiri",
+      "select_role": "Izberi vlogo",
+      "can_change_later": "Svojo vlogo lahko kasneje spremenite",
+      "confirm_description": "Ali želite nadaljevati kot {{role}}?",
+      "help_modal": {
+        "trainer_help": "Kot trener lahko delite svoje znanje, pridobivate stranke in sledite njihovemu napredku. Idealno za fitness strokovnjake, ki želijo deliti svojo strokovnost.",
+        "client_help": "Kot stranka dobite osebno podporo od profesionalnih trenerjev, prilagojene vadbenične načrte in neprekinjeno pomoč na vaši fitness poti.",
+        "user_help": "Kot uporabnik dobite personaliziran vadbenični načrt, ki temelji na vaših željah in ciljih. Vadite samostojno z AI-generiranimi vajami.",
+        "contact_support": "Kontaktirajte podporo"
+      }
     },
     "preparing": {
-      "journey": "Pripravljamo tvojo starodavno pot",
-      "trainer": "Pripravljamo tvojo trenersko pot",
-      "client": "Pripravljamo tvojo strankino pot",
-      "user": "Pripravljamo tvojo uporabniško pot",
-      "admin": "Pripravljamo tvojo administratorsko pot"
+      "journey": "Priprava vaše poti",
+      "trainer": "Priprava vaše trenerske poti",
+      "client": "Priprava vaše poti stranke",
+      "user": "Priprava vaše uporabniške poti",
+      "please_wait": "Prosimo počakajte trenutek..."
     },
     "update": {
       "failed": "Posodobitev vloge ni uspela. Status: {{status}}"

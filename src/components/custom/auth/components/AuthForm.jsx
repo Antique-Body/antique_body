@@ -6,6 +6,29 @@ import { useTranslation } from "react-i18next";
 import { PhoneInput } from "./PhoneInput";
 import { VerificationCodeInput } from "./VerificationCodeInput";
 
+import { Icon } from "@iconify/react";
+import { signIn } from "next-auth/react";
+import { useTranslation } from "react-i18next";
+
+import { PhoneInput } from "./PhoneInput";
+import { VerificationCodeInput } from "./VerificationCodeInput";
+
+import {
+  Button,
+  FacebookIcon,
+  FormField,
+  GoogleIcon,
+} from "@/components/common";
+import { ErrorMessage } from "@/components/custom/ErrorMessage";
+import { useAuth } from "@/contexts/AuthContext";
+import { useAuthForm } from "@/hooks";
+import { Icon } from "@iconify/react";
+import { signIn } from "next-auth/react";
+import { useTranslation } from "react-i18next";
+
+import { PhoneInput } from "./PhoneInput";
+import { VerificationCodeInput } from "./VerificationCodeInput";
+
 import {
   Button,
   FacebookIcon,
@@ -214,6 +237,7 @@ export const AuthForm = ({
               email={watch("email")}
               phone={null}
               setValue={setValue}
+              setValue={setValue}
             />
           )}
         </>
@@ -235,7 +259,7 @@ export const AuthForm = ({
             setCodeSent={setCodeSent}
             isEmail={false}
             email={null}
-            phone={watch("phone")}
+            phone={getValues("phone")}
             setValue={setValue}
           />
         </>

@@ -86,6 +86,7 @@ export async function sendEmail({ to, subject, html }) {
       html,
     });
 
+    // eslint-disable-next-line no-console
     console.log("Email sent:", info.messageId);
     return true;
   } catch (error) {

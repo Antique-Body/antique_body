@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 import { sendVerificationCode as sendEmailCode } from "../services/email";
 import { sendVerificationCode as sendPhoneCode } from "../services/phone";
 
-import { userService } from "@/app/api/users/services";
 import { formatPhoneNumber } from "@/lib/utils";
 
 const prisma = new PrismaClient();
@@ -43,22 +42,18 @@ export async function POST(request) {
       const formattedPhone = formatPhoneNumber(phone);
       console.log("Checking send-code for phone:", formattedPhone);
 
-      if (mode === "register") {
-        // Ako user već postoji, ne šalji kod
-        const existingUser = await userService.findUserByPhone(formattedPhone);
-        console.log("Existing user found (register, send-code):", existingUser);
-        if (existingUser) {
-          return NextResponse.json(
-            { error: "User with this phone number already exists" },
-            { status: 400 }
-          );
-        }
-      } else {
-        // Check if user exists with this phone using userService
-        const existingUser = await userService.findUserByPhone(formattedPhone);
-        console.log(
-          "Existing user found (send-code, userService):",
-          existingUser
+      // Check if user exists with this phone
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          phone: formattedPhone,
+          // phoneVerified: true, // Dodaj ako želiš samo verifikovane
+        },
+      });
+
+      if (!existingUser) {
+        return NextResponse.json(
+          { error: "User with this phone number does not exist" },
+          { status: 400 }
         );
         if (!existingUser) {
           return NextResponse.json(

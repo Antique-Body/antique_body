@@ -1,6 +1,5 @@
 "use client";
 
-import React, { Suspense, lazy, useEffect, useState } from "react";
 import "./background.css";
 
 // Lazy load icons to reduce initial bundle size
@@ -30,9 +29,7 @@ const ColumnIcon = lazy(() =>
   }))
 );
 const VaseIcon = lazy(() =>
-  import("@/components/common/Icons").then((mod) => ({
-    default: mod.VaseIcon,
-  }))
+  import("@/components/common/Icons").then((mod) => ({ default: mod.VaseIcon }))
 );
 
 // Simple placeholder for icons while loading
