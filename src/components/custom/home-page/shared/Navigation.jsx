@@ -41,9 +41,7 @@ export const Navigation = () => {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.3, delay: 0.2 }}
       className={`fixed top-0 z-50 w-full transition-all duration-500 ${
-        scrolled
-          ? "bg-black/90 backdrop-blur-xl shadow-lg shadow-black/30 py-3"
-          : "bg-transparent py-6"
+        scrolled ? "bg-black/90 backdrop-blur-xl shadow-lg shadow-black/30 py-3" : "bg-transparent py-6"
       }`}
     >
       {/* Glass effect border */}
@@ -124,19 +122,11 @@ export const Navigation = () => {
           </Link>
 
           <Link href="/auth/register">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="relative group"
-            >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="relative group">
               {/* Button glow effect */}
               <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FF6B00]/0 to-[#FF9A00]/0 group-hover:from-[#FF6B00]/30 group-hover:to-[#FF9A00]/30 rounded-md blur-md transition-all duration-500"></div>
 
-              <Button
-                variant="orangeFilled"
-                size="small"
-                className="font-medium px-5 py-2 relative z-10 overflow-hidden group"
-              >
+              <Button variant="orangeFilled" size="small" className="font-medium px-5 py-2 relative z-10 overflow-hidden group">
                 <span className="absolute inset-0 w-0 bg-white transition-all duration-500 ease-out group-hover:w-full opacity-10"></span>
                 <span className="relative z-10">Register</span>
               </Button>
@@ -198,13 +188,9 @@ export const Navigation = () => {
                       className={`py-4 text-left text-xl font-semibold tracking-wide transition-all duration-300 border-b border-gray-800 flex items-center
                                             ${pathname === item.path ? "text-[#FF6B00]" : "text-gray-300"}`}
                     >
-                      <span className="mr-3 text-[#FF6B00] opacity-60">
-                        0{index + 1}
-                      </span>
+                      <span className="mr-3 text-[#FF6B00] opacity-60">0{index + 1}</span>
                       {item.label}
-                      {pathname === item.path && (
-                        <span className="ml-3 h-1 w-3 rounded-full bg-[#FF6B00]"></span>
-                      )}
+                      {pathname === item.path && <span className="ml-3 h-1 w-3 rounded-full bg-[#FF6B00]"></span>}
                     </Link>
                   </motion.div>
                 ))}
@@ -216,11 +202,7 @@ export const Navigation = () => {
                     transition={{ duration: 0.3, delay: 0.4 }}
                   >
                     <Link href="/auth/login">
-                      <Button
-                        variant="orangeOutline"
-                        size="medium"
-                        className="w-full py-3 text-base font-semibold"
-                      >
+                      <Button variant="orangeOutline" size="medium" className="w-full py-3 text-base font-semibold">
                         Login
                       </Button>
                     </Link>
@@ -232,11 +214,7 @@ export const Navigation = () => {
                     transition={{ duration: 0.3, delay: 0.5 }}
                   >
                     <Link href="/auth/register">
-                      <Button
-                        variant="orangeFilled"
-                        size="medium"
-                        className="w-full py-3 text-base font-semibold"
-                      >
+                      <Button variant="orangeFilled" size="medium" className="w-full py-3 text-base font-semibold">
                         Register
                       </Button>
                     </Link>

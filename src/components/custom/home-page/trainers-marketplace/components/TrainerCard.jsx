@@ -41,9 +41,7 @@ export const TrainerCard = ({ trainer, onClick }) => {
             alt={trainer.name || "Trainer profile"}
             width={500}
             height={300}
-            className={`w-full h-full object-cover transition-transform duration-700 ${
-              isHovered ? "scale-105" : "scale-100"
-            }`}
+            className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? "scale-105" : "scale-100"}`}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">

@@ -75,7 +75,7 @@ export default function SelectRole() {
       setSelectedRole(role === selectedRole ? null : role);
       setError(null);
     },
-    [selectedRole],
+    [selectedRole]
   );
 
   // Handle role confirmation
@@ -102,7 +102,7 @@ export default function SelectRole() {
         console.error("API error:", errorData);
         throw new Error(
           errorData.error ||
-            t("role.update.failed", { status: response.status }),
+            t("role.update.failed", { status: response.status })
         );
       }
 

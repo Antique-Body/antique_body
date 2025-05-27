@@ -208,11 +208,7 @@ export const ImprovedTestimonial = ({ testimonialImage }) => {
                                 {metric.label}
                               </span>
                               <span
-                                className={`text-sm ${
-                                  index === activeMetric
-                                    ? "text-white"
-                                    : "text-[#FF6B00]"
-                                }`}
+                                className={`text-sm ${index === activeMetric ? "text-white" : "text-[#FF6B00]"}`}
                               >
                                 {metric.value}
                               </span>
