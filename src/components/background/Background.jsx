@@ -1,5 +1,6 @@
 "use client";
 
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import "./background.css";
 
 // Lazy load icons to reduce initial bundle size

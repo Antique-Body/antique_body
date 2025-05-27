@@ -519,7 +519,7 @@ export const GoogleIcon = ({ className = "", ...props }) => (
   </svg>
 );
 
-export const FacebookIcon = ({ size = 24, className = "", ...props }) => (
+export const FacebookIcon = ({  className = "", ...props }) => (
   <svg
     className={`w-5 h-5 ${className}`}
     viewBox="0 0 24 24"

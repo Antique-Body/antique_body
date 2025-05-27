@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 
 export async function POST(request) {
   try {
-    const { email, phone, mode } = await request.json();
+    const { email, phone } = await request.json();
 
     if (!email && !phone) {
       return NextResponse.json(
@@ -55,12 +55,6 @@ export async function POST(request) {
           { error: "User with this phone number does not exist" },
           { status: 400 }
         );
-        if (!existingUser) {
-          return NextResponse.json(
-            { error: "User with this phone number does not exist" },
-            { status: 400 }
-          );
-        }
       }
 
       success = await sendPhoneCode(formattedPhone);
