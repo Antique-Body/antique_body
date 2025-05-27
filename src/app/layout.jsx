@@ -5,7 +5,7 @@ import { SessionProvider } from "next-auth/react";
 
 import I18nProvider from "../components/I18nProvider";
 
-import RootErrorBoundary from "@/components/RootErrorBoundary";
+// import RootErrorBoundary from "@/components/RootErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 import "./globals.css";
@@ -19,12 +19,12 @@ export default function RootLayout({ children }) {
         <SessionProvider>
           <I18nProvider>
             <AuthProvider>
-              <RootErrorBoundary>
-                {/* <div className="fixed top-4 left-4 z-50">
+              {/* <RootErrorBoundary> */}
+              {/* <div className="fixed top-4 left-4 z-50">
                   <LanguageSelector />
                 </div> */}
-                {children}
-              </RootErrorBoundary>
+              {children}
+              {/* </RootErrorBoundary> */}
             </AuthProvider>
           </I18nProvider>
         </SessionProvider>
