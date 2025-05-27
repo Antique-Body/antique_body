@@ -1,4 +1,11 @@
 "use client";
+import { Icon } from "@iconify/react";
+import { signIn } from "next-auth/react";
+import { useTranslation } from "react-i18next";
+
+import { PhoneInput } from "./PhoneInput";
+import { VerificationCodeInput } from "./VerificationCodeInput";
+
 import {
   Button,
   FacebookIcon,
@@ -8,25 +15,17 @@ import {
 import { ErrorMessage } from "@/components/custom/ErrorMessage";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthForm } from "@/hooks";
-import { Icon } from "@iconify/react";
-import { signIn } from "next-auth/react";
-import { useTranslation } from "react-i18next";
-import { PhoneInput } from "./PhoneInput";
-import { VerificationCodeInput } from "./VerificationCodeInput";
 
 export const AuthForm = ({
   onSubmit,
   loading,
   error,
   isLogin = true,
-  googleSignIn = true,
-  onSendCode,
   verificationCode,
   setVerificationCode,
   codeSent: externalCodeSent,
   sendingCode: externalSendingCode,
   codeError: externalCodeError,
-  phoneOnly = true,
 }) => {
   const { isLoading: authLoading } = useAuth();
   const { t } = useTranslation();
@@ -42,14 +41,11 @@ export const AuthForm = ({
     codeSent,
     setCodeSent,
     sendingCode,
-    setSendingCode,
     register,
-    handleSubmit,
     errors,
     getValues,
     watch,
     setValue,
-    setError,
     handleSendCode,
     handleFormSubmit,
     getFieldClassName,

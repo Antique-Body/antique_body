@@ -14,7 +14,7 @@ export const ProgressBar = ({
 }) => {
   const percentage = Math.min(
     100,
-    Math.max(0, Math.round((value / maxValue) * 100)),
+    Math.max(0, Math.round((value / maxValue) * 100))
   );
 
   return (

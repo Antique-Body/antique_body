@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+
 import { ErrorIcon } from "./Icons";
 
 /**
@@ -26,7 +27,6 @@ export const FormField = ({
   error,
   subLabel,
   accept,
-  showConstraints = false,
   rows = 4,
   disabled = false,
   register, // For react-hook-form integration
@@ -191,7 +191,7 @@ export const FormField = ({
   if (type === "searchableSelect") {
     const selectedOption = options.find((opt) => opt.value === value) || null;
     const filteredOptions = options.filter((option) =>
-      option.label.toLowerCase().includes(searchTerm.toLowerCase()),
+      option.label.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (

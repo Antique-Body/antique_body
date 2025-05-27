@@ -18,9 +18,7 @@ export const Modal = memo(
     message,
     confirmButtonText = "Confirm",
     cancelButtonText = "Cancel",
-    confirmButtonColor = "bg-orange-500 hover:bg-orange-600",
     showButtons = true,
-    icon = "vase",
   }) => {
     if (!isOpen) return null;
     return (

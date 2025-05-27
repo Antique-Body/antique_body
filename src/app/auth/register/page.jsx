@@ -1,12 +1,13 @@
 "use client";
 
-import Background from "@/components/background";
-import { AuthForm, Card } from "@/components/custom";
-import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import Background from "@/components/background";
+import { AuthForm, Card } from "@/components/custom";
 
 export default function RegisterPage() {
   const { t } = useTranslation();

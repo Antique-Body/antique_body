@@ -1,6 +1,7 @@
+import { useTranslation } from "react-i18next";
+
 import { Button, FormField } from "@/components/common";
 import { useVerificationCode } from "@/hooks";
-import { useTranslation } from "react-i18next";
 export const VerificationCodeInput = ({
   verificationCode,
   setVerificationCode,
@@ -9,7 +10,6 @@ export const VerificationCodeInput = ({
   handleSendCode,
   sendingCode,
   codeSent,
-  setCodeSent,
   isEmail,
   email,
   phone,
@@ -68,8 +68,8 @@ export const VerificationCodeInput = ({
           {sendingCode
             ? "Sending..."
             : countdown > 0
-              ? `Resend in ${countdown}s`
-              : "Resend Code"}
+            ? `Resend in ${countdown}s`
+            : "Resend Code"}
         </Button>
       )}
     </div>
