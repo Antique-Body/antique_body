@@ -33,7 +33,7 @@ export default function RegisterPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ phone, mode: "register" }),
       });
 
       const data = await response.json();

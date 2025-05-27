@@ -111,7 +111,7 @@ export default function LoginPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ phone, mode: "login" }),
       });
 
       const data = await response.json();

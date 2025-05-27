@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 
-export const usePhoneInput = ({ register, setValue, countryCode }) => {
+export const usePhoneInput = ({
+  register,
+  setValue,
+  countryCode,
+  setPhoneValue: setPhoneValueExternal,
+}) => {
   const [displayValue, setDisplayValue] = useState("");
   const [phoneValue, setPhoneValue] = useState("");
 
@@ -9,8 +14,9 @@ export const usePhoneInput = ({ register, setValue, countryCode }) => {
       setDisplayValue(countryCode);
       setPhoneValue(countryCode);
       setValue("phone", countryCode);
+      if (setPhoneValueExternal) setPhoneValueExternal(countryCode);
     }
-  }, [countryCode, setValue]);
+  }, [countryCode, setValue, setPhoneValueExternal]);
 
   const handlePhoneChange = (e) => {
     const value = e.target.value;
@@ -19,6 +25,7 @@ export const usePhoneInput = ({ register, setValue, countryCode }) => {
       setDisplayValue(countryCode);
       setPhoneValue(countryCode);
       setValue("phone", countryCode);
+      if (setPhoneValueExternal) setPhoneValueExternal(countryCode);
       return;
     }
 
@@ -31,6 +38,7 @@ export const usePhoneInput = ({ register, setValue, countryCode }) => {
     setDisplayValue(newValue);
     setValue("phone", newValue);
     register("phone").onChange(e);
+    if (setPhoneValueExternal) setPhoneValueExternal(newValue);
   };
 
   const handleCountryCodeChange = (e) => {
@@ -38,6 +46,7 @@ export const usePhoneInput = ({ register, setValue, countryCode }) => {
     setPhoneValue(e.target.value);
     setDisplayValue(e.target.value);
     setValue("phone", e.target.value);
+    if (setPhoneValueExternal) setPhoneValueExternal(e.target.value);
   };
 
   const handlePaste = (e) => {

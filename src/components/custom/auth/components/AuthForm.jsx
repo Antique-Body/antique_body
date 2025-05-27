@@ -34,8 +34,6 @@ export const AuthForm = ({
     setShowEmailForm,
     loginMethod,
     setLoginMethod,
-    phoneValue,
-    setPhoneValue,
     codeError,
     setCodeError,
     codeSent,
@@ -43,7 +41,6 @@ export const AuthForm = ({
     sendingCode,
     register,
     errors,
-    getValues,
     watch,
     setValue,
     handleSendCode,
@@ -209,12 +206,12 @@ export const AuthForm = ({
               verificationCode={verificationCode}
               setVerificationCode={setVerificationCode}
               setCodeError={setCodeError}
-              handleSendCode={handleSendCode}
+              handleSendCode={() => handleSendCode(false)}
               sendingCode={sendingCode}
               codeSent={codeSent}
               setCodeSent={setCodeSent}
               isEmail={true}
-              email={getValues("email")}
+              email={watch("email")}
               phone={null}
               setValue={setValue}
             />
@@ -227,20 +224,18 @@ export const AuthForm = ({
             errors={errors}
             countryCode={watch("countryCode")}
             setValue={setValue}
-            phoneValue={phoneValue}
-            setPhoneValue={setPhoneValue}
           />
           <VerificationCodeInput
             verificationCode={verificationCode}
             setVerificationCode={setVerificationCode}
             setCodeError={setCodeError}
-            handleSendCode={handleSendCode}
+            handleSendCode={() => handleSendCode(isLogin)}
             sendingCode={sendingCode}
             codeSent={codeSent}
             setCodeSent={setCodeSent}
             isEmail={false}
             email={null}
-            phone={getValues("phone")}
+            phone={watch("phone")}
             setValue={setValue}
           />
         </>
