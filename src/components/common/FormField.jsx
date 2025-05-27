@@ -1,4 +1,5 @@
 "use client";
+import { Icon } from "@iconify/react";
 import { useState } from "react";
 
 import { ErrorIcon } from "./Icons";
@@ -84,6 +85,14 @@ export const FormField = ({
     error ? "focus:ring-red-500/30" : "focus:ring-[#FF6B00]/30"
   } transition ${className}`;
 
+  // Consistent label component
+  const LabelComponent = ({ htmlFor }) =>
+    label && (
+      <label className="block text-gray-300 mb-2" htmlFor={htmlFor}>
+        {label}
+      </label>
+    );
+
   // Checkbox styling
   if (type === "checkbox") {
     return (
@@ -165,11 +174,7 @@ export const FormField = ({
   if (type === "file") {
     return (
       <div className={`mb-4 ${className}`}>
-        {label && (
-          <label className="mb-2 block text-gray-300" htmlFor={id || name}>
-            {label}
-          </label>
-        )}
+        <LabelComponent htmlFor={id || name} />
         {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
         <input {...inputProps} className="hidden" id={id || name} />
         <label
@@ -191,16 +196,12 @@ export const FormField = ({
   if (type === "searchableSelect") {
     const selectedOption = options.find((opt) => opt.value === value) || null;
     const filteredOptions = options.filter((option) =>
-      option.label.toLowerCase().includes(searchTerm.toLowerCase()),
+      option.label.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
       <div className={`mb-4 ${className}`}>
-        {label && (
-          <label className="block text-gray-300 mb-2" htmlFor={id || name}>
-            {label}
-          </label>
-        )}
+        <LabelComponent htmlFor={id || name} />
         {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
 
         <div className="relative">
@@ -294,25 +295,33 @@ export const FormField = ({
     // Standard select
     return (
       <div className={`mb-4 ${className}`}>
-        <div className="flex items-center justify-between">
-          {label && (
-            <label className="block text-gray-300" htmlFor={id || name}>
-              {label}
-            </label>
-          )}
-        </div>
+        <LabelComponent htmlFor={id || name} />
         {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
-        <select {...inputProps} className={inputClass} {...props}>
-          <option value="">{placeholder || "Select an option"}</option>
-          {options.map((option, index) => (
-            <option
-              key={index}
-              value={typeof option === "object" ? option.value : option}
-            >
-              {typeof option === "object" ? option.label : option}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            {...inputProps}
+            className={`${inputClass} appearance-none pr-10 cursor-pointer`}
+            {...props}
+          >
+            {options.map((option, index) => (
+              <option
+                key={index}
+                value={typeof option === "object" ? option.value : option}
+                className="bg-[#1a1a1a] text-white"
+              >
+                {typeof option === "object" ? option.label : option}
+              </option>
+            ))}
+          </select>
+          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <Icon
+              icon="mdi:chevron-down"
+              width={20}
+              height={20}
+              className="text-gray-400 transition-colors group-hover:text-[#FF6B00]"
+            />
+          </div>
+        </div>
         {error && (
           <p className="mt-1 flex items-center text-sm text-red-500">
             <ErrorIcon size={16} className="mr-1" />
@@ -326,13 +335,7 @@ export const FormField = ({
   if (type === "textarea") {
     return (
       <div className={`mb-4 ${className}`}>
-        <div className="mb-2 flex items-center justify-between">
-          {label && (
-            <label className="block text-gray-300" htmlFor={id || name}>
-              {label}
-            </label>
-          )}
-        </div>
+        <LabelComponent htmlFor={id || name} />
         {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
         <textarea {...inputProps} className={inputClass} rows={rows}></textarea>
         {error && (
@@ -347,6 +350,7 @@ export const FormField = ({
 
   return (
     <div className={`mb-4 ${className}`}>
+      <LabelComponent htmlFor={id || name} />
       {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
       <input
         {...inputProps}

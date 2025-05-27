@@ -19,8 +19,8 @@ const DEFAULT_BACKGROUNDS = {
 };
 // Role redirects
 const ROLE_REDIRECTS = {
-  trainer: "/trainer/dashboard",
-  client: "/client/dashboard",
+  trainer: "/trainer/personal-details",
+  client: "/client/personal-details",
 };
 
 // Role titles for loading state
