@@ -1,12 +1,13 @@
 "use client";
-import { Navbar } from "@/components";
-import LanguageSelector from "@/components/LanguageSelector";
-import Background from "@/components/background";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Navbar } from "@/components";
+import Background from "@/components/background";
+import LanguageSelector from "@/components/LanguageSelector";
+
 export default function Home() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -81,7 +82,7 @@ export default function Home() {
         </div>
       </div>
 
-      <style jsx global>{`
+      <style jsx>{`
         @keyframes fadeIn {
           from {
             opacity: 0;

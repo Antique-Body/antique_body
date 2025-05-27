@@ -22,13 +22,6 @@ const ROLE_DESCRIPTIONS = {
   admin: "role.admin",
 };
 
-const ROLE_REDIRECTS = {
-  trainer: "/trainer-dashboard",
-  client: "/client-dashboard",
-  user: "/user/training-setup",
-  admin: "/admin-dashboard",
-};
-
 export default function SelectRole() {
   const { t } = useTranslation();
   const { data: session, update } = useSession();

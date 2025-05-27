@@ -1,11 +1,14 @@
 "use client";
 
-import LanguageSelector from "@/components/LanguageSelector";
+import { Inter } from "next/font/google";
+import { SessionProvider } from "next-auth/react";
+
+import I18nProvider from "../components/I18nProvider";
+
+// import LanguageSelector from "@/components/LanguageSelector";
 import RootErrorBoundary from "@/components/RootErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { SessionProvider } from "next-auth/react";
-import { Inter } from "next/font/google";
-import I18nProvider from "../components/I18nProvider";
+
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -18,9 +21,9 @@ export default function RootLayout({ children }) {
           <I18nProvider>
             <AuthProvider>
               <RootErrorBoundary>
-                <div className="fixed top-4 left-4 z-50">
+                {/* <div className="fixed top-4 left-4 z-50">
                   <LanguageSelector />
-                </div>
+                </div> */}
                 {children}
               </RootErrorBoundary>
             </AuthProvider>

@@ -1,6 +1,7 @@
 "use client";
-import { FullScreenLoader } from "@/components";
 import { useTranslation } from "react-i18next";
+
+import { FullScreenLoader } from "@/components";
 
 export default function TrainerLoading() {
   const { t } = useTranslation();

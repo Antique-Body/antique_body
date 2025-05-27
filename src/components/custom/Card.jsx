@@ -299,7 +299,17 @@ export const Card = ({
 
   return (
     <div
-      className={`relative z-10 flex flex-col ${variant?.startsWith("dark") ? "" : variant === "entityCard" ? "text-left" : variant === "planCard" || variant === "createPlanCard" || variant === "clientCard" ? "text-left" : "items-center text-center"} overflow-hidden ${variantClassName} ${className} min-h-max ${
+      className={`relative z-10 flex flex-col ${
+        variant?.startsWith("dark")
+          ? ""
+          : variant === "entityCard"
+          ? "text-left"
+          : variant === "planCard" ||
+            variant === "createPlanCard" ||
+            variant === "clientCard"
+          ? "text-left"
+          : "items-center text-center"
+      } overflow-hidden ${variantClassName} ${className} min-h-max ${
         hoverTranslateY ? `hover:translate-y-[${hoverTranslateY}]` : ""
       } transition-all duration-300`}
       style={{
@@ -329,7 +339,9 @@ export const Card = ({
           e.currentTarget.style.transform = `translateY(${hoverTranslateY})`;
         }
         if (hoverScale) {
-          e.currentTarget.style.transform = `scale(${hoverScale}) ${hoverTranslateY ? `translateY(${hoverTranslateY})` : ""}`;
+          e.currentTarget.style.transform = `scale(${hoverScale}) ${
+            hoverTranslateY ? `translateY(${hoverTranslateY})` : ""
+          }`;
         }
         if (glowEffect) {
           e.currentTarget.style.boxShadow = `0 0 30px ${glowColor}`;

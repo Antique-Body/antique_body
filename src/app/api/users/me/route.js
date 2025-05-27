@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 
 import { userService } from "@/app/api/users/services";
 import { auth, isAuthenticated } from "@/lib/auth";
-export async function GET(request) {
+
+export async function GET() {
   try {
     const session = await auth();
 

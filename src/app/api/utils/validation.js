@@ -17,9 +17,8 @@ export const validatePassword = (password) => {
   return passwordRegex.test(password);
 };
 
-export const validateRequired = (value) => {
-  return value !== undefined && value !== null && value !== "";
-};
+export const validateRequired = (value) =>
+  value !== undefined && value !== null && value !== "";
 
 export const validateObject = (obj, schema) => {
   const errors = {};

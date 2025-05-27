@@ -6,7 +6,6 @@ export const useAuthForm = ({
   externalCodeError,
   externalCodeSent,
   externalSendingCode,
-  isLogin = true,
 }) => {
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [loginMethod, setLoginMethod] = useState("email");
@@ -37,7 +36,6 @@ export const useAuthForm = ({
     if (externalSendingCode !== undefined) setSendingCode(externalSendingCode);
   }, [externalSendingCode]);
 
-  const password = watch("password");
   const countryCode = watch("countryCode");
 
   useEffect(() => {

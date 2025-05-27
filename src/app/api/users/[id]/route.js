@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { userService } from "@/services/users";
 
 // Get a user by ID
-export async function GET(request, { params }) {
+export async function GET({ params }) {
   try {
     const user = await userService.findUserById(params.id);
 

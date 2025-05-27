@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import ErrorBoundary from "./common/ErrorBoundary";
 
 export default function RootErrorBoundary({ children }) {
