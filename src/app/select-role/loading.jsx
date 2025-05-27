@@ -2,7 +2,7 @@
 
 import { useTranslation } from "react-i18next";
 
-import { FullScreenLoader } from "@/components/custom/FullScreenLoader";
+import { FullScreenLoader } from "@/components/common";
 
 export default function Loading() {
   const { t } = useTranslation();
