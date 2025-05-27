@@ -1,8 +1,10 @@
-import { formatPhoneNumber } from "@/lib/utils";
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+
 import { sendVerificationCode as sendEmailCode } from "../services/email";
 import { sendVerificationCode as sendPhoneCode } from "../services/phone";
+
+import { formatPhoneNumber } from "@/lib/utils";
 
 const prisma = new PrismaClient();
 
@@ -13,7 +15,7 @@ export async function POST(request) {
     if (!email && !phone) {
       return NextResponse.json(
         { error: "Either email or phone number is required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -29,7 +31,7 @@ export async function POST(request) {
       if (existingUser) {
         return NextResponse.json(
           { error: "User with this email already exists" },
-          { status: 400 },
+          { status: 400 }
         );
       }
 
@@ -50,7 +52,7 @@ export async function POST(request) {
       if (!existingUser) {
         return NextResponse.json(
           { error: "User with this phone number does not exist" },
-          { status: 400 },
+          { status: 400 }
         );
       }
 
@@ -61,7 +63,7 @@ export async function POST(request) {
     if (!success) {
       return NextResponse.json(
         { error: `Failed to send verification code to ${type}` },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -73,7 +75,7 @@ export async function POST(request) {
     console.error("Error sending verification code:", error);
     return NextResponse.json(
       { error: "Failed to send verification code" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

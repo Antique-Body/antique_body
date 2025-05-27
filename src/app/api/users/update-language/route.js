@@ -1,6 +1,7 @@
+import { NextResponse } from "next/server";
+
 import { userService } from "@/app/api/users/services";
 import { isAuthenticated } from "@/lib/auth";
-import { NextResponse } from "next/server";
 
 export async function PATCH(request) {
   try {
@@ -15,7 +16,7 @@ export async function PATCH(request) {
     if (!language) {
       return NextResponse.json(
         { error: "Language is required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -24,14 +25,14 @@ export async function PATCH(request) {
     if (!validLanguages.includes(language)) {
       return NextResponse.json(
         { error: "Invalid language code" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     try {
       const updatedUser = await userService.updateUserLanguage(
         user.id,
-        language,
+        language
       );
 
       return NextResponse.json({
@@ -48,7 +49,7 @@ export async function PATCH(request) {
           error: "An error occurred while updating language",
           details: error.message,
         },
-        { status: 500 },
+        { status: 500 }
       );
     }
   } catch (error) {
@@ -57,7 +58,7 @@ export async function PATCH(request) {
         error: "An error occurred while processing the request",
         details: error.message,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

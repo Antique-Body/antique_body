@@ -1,7 +1,9 @@
+import crypto from "crypto";
+
+import { NextResponse } from "next/server";
+
 import { userService } from "@/app/api/users/services";
 import { sendPasswordResetEmail } from "@/lib/email";
-import crypto from "crypto";
-import { NextResponse } from "next/server";
 
 export async function POST(request) {
   try {
@@ -12,7 +14,7 @@ export async function POST(request) {
       if (!email) {
         return NextResponse.json(
           { error: "Email is required" },
-          { status: 400 },
+          { status: 400 }
         );
       }
 
@@ -58,7 +60,7 @@ export async function POST(request) {
         });
         return NextResponse.json(
           { error: "Failed to send reset email. Please try again later." },
-          { status: 500 },
+          { status: 500 }
         );
       }
 
@@ -71,7 +73,7 @@ export async function POST(request) {
     if (!newPassword) {
       return NextResponse.json(
         { error: "New password is required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -88,7 +90,7 @@ export async function POST(request) {
 
     return NextResponse.json(
       { error: "Unable to process your request. Please try again later." },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
