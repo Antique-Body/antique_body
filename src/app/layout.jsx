@@ -1,6 +1,7 @@
 "use client";
 
 import LanguageSelector from "@/components/LanguageSelector";
+import RootErrorBoundary from "@/components/RootErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SessionProvider } from "next-auth/react";
 import { Inter } from "next/font/google";
@@ -16,10 +17,12 @@ export default function RootLayout({ children }) {
         <SessionProvider>
           <I18nProvider>
             <AuthProvider>
-              <div className="fixed top-4 left-4 z-50">
-                <LanguageSelector />
-              </div>
-              {children}
+              <RootErrorBoundary>
+                <div className="fixed top-4 left-4 z-50">
+                  <LanguageSelector />
+                </div>
+                {children}
+              </RootErrorBoundary>
             </AuthProvider>
           </I18nProvider>
         </SessionProvider>
