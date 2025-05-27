@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 
-import { BrandLogo } from "@/components/custom/BrandLogo";
+import { BrandLogo } from "@/components/common/BrandLogo";
 
 export const Footer = () => (
   <footer className="mt-12 border-t border-[#222] py-6 text-center text-gray-400">

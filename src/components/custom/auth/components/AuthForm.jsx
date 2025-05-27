@@ -6,13 +6,8 @@ import { useTranslation } from "react-i18next";
 import { PhoneInput } from "./PhoneInput";
 import { VerificationCodeInput } from "./VerificationCodeInput";
 
-import {
-  Button,
-  FacebookIcon,
-  FormField,
-  GoogleIcon,
-} from "@/components/common";
-import { ErrorMessage } from "@/components/custom/ErrorMessage";
+import { Button, ErrorMessage, FormField } from "@/components/common";
+import { FacebookIcon, GoogleIcon } from "@/components/common/Icons";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthForm } from "@/hooks";
 
