@@ -13,6 +13,7 @@ export const VerificationCodeInput = ({
   isEmail,
   email,
   phone,
+  setValue,
 }) => {
   const { t } = useTranslation();
 
@@ -35,6 +36,7 @@ export const VerificationCodeInput = ({
           onChange={(e) => {
             const value = e.target.value.replace(/\D/g, "").slice(0, 6);
             setVerificationCode(value);
+            if (setValue) setValue("code", value);
             if (codeError) setCodeError("");
           }}
           maxLength={6}
@@ -66,8 +68,8 @@ export const VerificationCodeInput = ({
           {sendingCode
             ? "Sending..."
             : countdown > 0
-            ? `Resend in ${countdown}s`
-            : "Resend Code"}
+              ? `Resend in ${countdown}s`
+              : "Resend Code"}
         </Button>
       )}
     </div>

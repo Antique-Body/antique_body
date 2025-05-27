@@ -7,30 +7,32 @@ import "./background.css";
 const ParthenonIcon = lazy(() =>
   import("@/components/common/Icons").then((mod) => ({
     default: mod.ParthenonIcon,
-  }))
+  })),
 );
 const RunnerIcon = lazy(() =>
   import("@/components/common/Icons").then((mod) => ({
     default: mod.RunnerIcon,
-  }))
+  })),
 );
 const DiscusIcon = lazy(() =>
   import("@/components/common/Icons").then((mod) => ({
     default: mod.DiscusIcon,
-  }))
+  })),
 );
 const ColosseumIcon = lazy(() =>
   import("@/components/common/Icons").then((mod) => ({
     default: mod.ColosseumIcon,
-  }))
+  })),
 );
 const ColumnIcon = lazy(() =>
   import("@/components/common/Icons").then((mod) => ({
     default: mod.ColumnIcon,
-  }))
+  })),
 );
 const VaseIcon = lazy(() =>
-  import("@/components/common/Icons").then((mod) => ({ default: mod.VaseIcon }))
+  import("@/components/common/Icons").then((mod) => ({
+    default: mod.VaseIcon,
+  })),
 );
 
 // Simple placeholder for icons while loading
@@ -58,13 +60,13 @@ const Background = ({
 
   return (
     <div
-      className={`background-shapes ${className} ${
-        isVisible ? "visible" : ""
-      }`}>
+      className={`background-shapes ${className} ${isVisible ? "visible" : ""}`}
+    >
       {parthenon && (
         <div
           className="ancient-building parthenon"
-          style={{ "--delay": "0.1s" }}>
+          style={{ "--delay": "0.1s" }}
+        >
           <Suspense fallback={<IconPlaceholder />}>
             <ParthenonIcon className="w-full h-full" />
           </Suspense>
@@ -87,7 +89,8 @@ const Background = ({
       {colosseum && (
         <div
           className="ancient-building colosseum"
-          style={{ "--delay": "0.2s" }}>
+          style={{ "--delay": "0.2s" }}
+        >
           <Suspense fallback={<IconPlaceholder />}>
             <ColosseumIcon className="w-full h-full" />
           </Suspense>

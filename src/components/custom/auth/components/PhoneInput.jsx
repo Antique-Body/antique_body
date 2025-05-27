@@ -24,15 +24,17 @@ export const PhoneInput = ({
 
   return (
     <div className="flex gap-2 mb-2">
-      <CountrySelect
-        register={register}
-        value={countryCode}
-        onChange={handleCountryCodeChange}
-        className="max-w-[300px]"
-        required
-        displayMode="full"
-        placeholder={t("select_country_code")}
-      />
+      <div className="w-[55%]">
+        <CountrySelect
+          register={register}
+          value={countryCode}
+          onChange={handleCountryCodeChange}
+          className="max-w-[300px]"
+          required
+          displayMode="full"
+          placeholder={t("select_country_code")}
+        />
+      </div>
       <FormField
         name="phone"
         type="tel"

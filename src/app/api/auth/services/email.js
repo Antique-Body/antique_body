@@ -1,4 +1,3 @@
-
 import { sendVerificationCodeEmail } from "@/lib/email";
 import { PrismaClient } from "@prisma/client";
 

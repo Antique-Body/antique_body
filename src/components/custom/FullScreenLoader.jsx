@@ -14,7 +14,9 @@ export function FullScreenLoader({ text }) {
         <p className="text-xl text-white font-medium mt-4">
           {(text || defaultText).split(" ").slice(0, -1).join(" ")}
           <br />
-          <span className="text-[#ff7800]">{(text || defaultText).split(" ").slice(-1)}</span>
+          <span className="text-[#ff7800]">
+            {(text || defaultText).split(" ").slice(-1)}
+          </span>
         </p>
       </div>
     </div>
