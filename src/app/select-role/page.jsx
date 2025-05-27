@@ -96,7 +96,7 @@ export default function SelectRole() {
       setLoading(false);
       setSelectedRole(null);
     }
-  }, [session?.user?.email, pendingRole, router, update, t]);
+  }, [session?.user?.email, pendingRole, router, update, t, session?.user?.id]);
 
   const closeModal = useCallback(() => {
     setIsModalOpen(false);

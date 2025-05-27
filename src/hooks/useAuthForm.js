@@ -42,7 +42,7 @@ export const useAuthForm = ({
     if (countryCode) setPhoneValue(countryCode);
   }, [countryCode]);
 
-  const handleSendCode = async () => {
+  const handleSendCode = async (isLogin = true) => {
     if (loginMethod === "email") {
       const email = getValues("email");
       if (!email) {
@@ -57,7 +57,7 @@ export const useAuthForm = ({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ email }),
+          body: JSON.stringify({ email, mode: isLogin ? "login" : "register" }),
         });
 
         const data = await response.json();
@@ -87,7 +87,7 @@ export const useAuthForm = ({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ phone }),
+          body: JSON.stringify({ phone, mode: isLogin ? "login" : "register" }),
         });
 
         const data = await response.json();
