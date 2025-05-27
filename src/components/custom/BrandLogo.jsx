@@ -8,7 +8,8 @@ export const BrandLogo = ({ logoTitle = "ANTIQUE BODY", logoTagline = "" }) => {
             style={{
               color: index === 0 ? "#ff7800" : "#ffffff",
               marginRight: "4px",
-            }}>
+            }}
+          >
             {part}
           </span>
         ))}

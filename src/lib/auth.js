@@ -1,11 +1,8 @@
 import { verifyPhoneCode } from "@/app/api/auth/services/phone";
-import {
-  findUserByEmail,
-  findUserByPhone,
-  verifyUserPassword,
-} from "@/app/api/users/services";
+import { userService } from "@/app/api/users/services";
 import { PrismaClient } from "@prisma/client";
 import NextAuth from "next-auth";
+import { getToken } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 import FacebookProvider from "next-auth/providers/facebook";
 import GoogleProvider from "next-auth/providers/google";
@@ -35,7 +32,7 @@ export const authConfig = {
             throw new Error("Email and password are required");
           }
 
-          const user = await findUserByEmail(credentials.email);
+          const user = await userService.findUserByEmail(credentials.email);
 
           if (!user) {
             throw new Error("Invalid email or password");
@@ -48,21 +45,13 @@ export const authConfig = {
 
           // Check if user has password set
           if (!user.password) {
-            // If user just registered, allow them to proceed
-            if (user.emailVerified && !user.phoneVerified) {
-              return {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-              };
-            }
-            throw new Error("No password set for this account ");
+            console.log(user, "user");
+            throw new Error("No password set for this account");
           }
 
-          const isPasswordValid = await verifyUserPassword(
+          const isPasswordValid = await userService.verifyUserPassword(
             user.id,
-            credentials.password
+            credentials.password,
           );
           if (!isPasswordValid) {
             throw new Error("Invalid email or password");
@@ -93,7 +82,7 @@ export const authConfig = {
             throw new Error("Phone number and verification code are required");
           }
 
-          const user = await findUserByPhone(credentials.phone);
+          const user = await userService.findUserByPhone(credentials.phone);
           if (!user) {
             throw new Error("User not found");
           }
@@ -104,7 +93,7 @@ export const authConfig = {
 
           const isCodeValid = await verifyPhoneCode(
             credentials.phone,
-            credentials.code
+            credentials.code,
           );
           if (!isCodeValid) {
             throw new Error("Invalid or expired verification code");
@@ -128,7 +117,7 @@ export const authConfig = {
       if (account?.provider === "google" || account?.provider === "facebook") {
         try {
           // Check if user already exists
-          const existingUser = await findUserByEmail(user.email);
+          const existingUser = await userService.findUserByEmail(user.email);
 
           if (!existingUser) {
             // Create new user if doesn't exist
@@ -158,14 +147,40 @@ export const authConfig = {
         token.phone = user.phone;
         token.email = user.email;
       }
+      if (!token.role && token.email) {
+        const userFromDb = await prisma.user.findUnique({
+          where: { email: token.email },
+          select: { id: true, role: true, phone: true },
+        });
+        if (userFromDb) {
+          token.id = userFromDb.id;
+          token.role = userFromDb.role;
+          token.phone = userFromDb.phone;
+        }
+      }
       return token;
     },
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.id;
-        session.user.role = token.role;
-        session.user.phone = token.phone;
-        session.user.email = token.email;
+        let userFromDb = null;
+        if (token.email) {
+          userFromDb = await prisma.user.findUnique({
+            where: { email: token.email },
+            select: { id: true, role: true, email: true, phone: true },
+          });
+        } else if (token.phone) {
+          userFromDb = await prisma.user.findUnique({
+            where: { phone: token.phone },
+            select: { id: true, role: true, email: true, phone: true },
+          });
+        }
+        console.log("Session callback userFromDb:", userFromDb);
+        if (userFromDb) {
+          session.user.id = userFromDb.id;
+          session.user.role = userFromDb.role;
+          session.user.email = userFromDb.email;
+          session.user.phone = userFromDb.phone;
+        }
       }
       return session;
     },
@@ -186,3 +201,32 @@ export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
 
 // Export for Pages Router
 export const authOptions = authConfig;
+
+// Check if the user is authenticated
+export const isAuthenticated = async (req) => {
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  if (!token) return { authenticated: false };
+  return { authenticated: true, user: token };
+};
+
+// Check if the user has a specific role
+export const hasRole = async (req, allowedRoles) => {
+  const { authenticated, user } = await isAuthenticated(req);
+
+  if (!authenticated) {
+    return { authorized: false, message: "Not authenticated" };
+  }
+
+  if (!user.role) {
+    return { authorized: false, message: "User has no role assigned" };
+  }
+
+  if (allowedRoles.includes(user.role)) {
+    return { authorized: true, user };
+  }
+
+  return {
+    authorized: false,
+    message: "You don't have permission to access this resource",
+  };
+};
