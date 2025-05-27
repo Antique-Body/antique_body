@@ -106,7 +106,7 @@ export default function SelectRole() {
         );
       }
 
-      const data = await response.json();
+      // const data = await response.json();
 
       await update({
         role: selectedRole,
