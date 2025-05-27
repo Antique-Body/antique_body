@@ -1,45 +1,179 @@
 "use client";
 
-import React, { useState } from "react";
 import Background from "@/components/background";
+import { Button } from "@/components/common";
+import { AuthForm, Card } from "@/components/custom";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { t } = useTranslation();
+  const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [verificationCode, setVerificationCode] = useState("");
+  const [codeSent, setCodeSent] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [codeError, setCodeError] = useState("");
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordStatus, setForgotPasswordStatus] = useState("");
+  const [resendDisabled, setResendDisabled] = useState(false);
+  const [resendCountdown, setResendCountdown] = useState(0);
 
-  const handleSubmit = async (e) => {
+  const startResendCountdown = () => {
+    setResendDisabled(true);
+    setResendCountdown(30);
+    const timer = setInterval(() => {
+      setResendCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setResendDisabled(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const handleForgotPassword = async (e) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
+    setForgotPasswordStatus("sending");
+    setResendDisabled(false);
 
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
+      const response = await fetch("/api/auth/password-reset", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: forgotPasswordEmail }),
       });
 
-      if (result.error) {
-        setError("Invalid email or password");
-      } else {
-        router.push("/");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || t("auth.password_reset.failed"));
       }
-    } catch (error) {
-      setError("An error occurred during login");
-      console.error("Login error:", error);
+
+      setForgotPasswordStatus("success");
+    } catch (err) {
+      setForgotPasswordStatus("error");
+      console.error("Forgot password error:", err);
+    }
+  };
+
+  const handleResendToken = async () => {
+    if (resendDisabled) return;
+
+    setForgotPasswordStatus("sending");
+    setResendDisabled(true);
+
+    try {
+      const response = await fetch("/api/auth/password-reset", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: forgotPasswordEmail }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || t("auth.password_reset.failed"));
+      }
+
+      setForgotPasswordStatus("success");
+      startResendCountdown();
+    } catch (err) {
+      setForgotPasswordStatus("error");
+      setResendDisabled(false);
+      console.error("Resend token error:", err);
+    }
+  };
+
+  const handleSendCode = async (phone) => {
+    if (!phone) {
+      setCodeError(t("validation.phone_required"));
+      return;
+    }
+
+    setCodeError("");
+    setSendingCode(true);
+    try {
+      const response = await fetch("/api/auth/send-verification-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ phone }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || t("auth.login.code_send_error"));
+      }
+
+      setCodeSent(true);
+      setVerificationCode(""); // Reset verification code when sending new one
+    } catch (err) {
+      console.error("Error sending code:", err);
+      setCodeError(err.message);
+    } finally {
+      setSendingCode(false);
+    }
+  };
+
+  const handleSubmit = async (data) => {
+    setLoading(true);
+    setError("");
+
+    try {
+      if (data.email) {
+        // Email login - no verification code needed
+        const result = await signIn("email", {
+          email: data.email,
+          password: data.password,
+          redirect: false,
+        });
+
+        if (result?.error) {
+          throw new Error(result.error);
+        }
+      } else {
+        // Phone login - verification code required
+        if (!verificationCode) {
+          throw new Error(t("validation.verification_code_required"));
+        }
+
+        const result = await signIn("phone", {
+          phone: data.phone,
+          code: verificationCode,
+          redirect: false,
+        });
+
+        if (result?.error) {
+          throw new Error(result.error);
+        }
+      }
+
+      // Redirect to select-role page after successful login
+      router.push("/select-role");
+    } catch (err) {
+      console.error("Login - Error:", err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center relative bg-[#0a0a0a] text-white">
+    <main className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#161616] text-white relative">
       <Background
         parthenon={true}
         runner={true}
@@ -49,110 +183,131 @@ export default function LoginPage() {
         vase={false}
       />
 
-      <div className="w-[90%] max-w-[420px] p-[40px_30px] bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] rounded-[15px] shadow-[0_15px_25px_rgba(0,0,0,0.6)] relative z-10 backdrop-blur-sm border border-[#222] overflow-hidden opacity-0 translate-y-5 animate-[0.8s_ease_forwards_fadeIn,1s_ease_forwards_floatUp]">
-        {/* Marble effect */}
-        <div className="absolute top-0 left-0 w-full h-[5px] bg-gradient-to-r from-[#ff7800] via-[#ffa500] to-[#ff7800] bg-[length:200%_100%] animate-[2s_linear_infinite_shimmer]"></div>
+      <div className="relative z-10 flex items-center justify-center min-h-screen">
+        <Card
+          className="w-full max-w-md p-8 bg-zinc-900/80 backdrop-blur-md border border-zinc-800 rounded-xl shadow-2xl"
+          borderTop={true}
+          showLogo={true}
+          logoTagline="STRENGTH OF THE ANCIENTS"
+        >
+          {showForgotPassword ? (
+            <div className="w-full">
+              <h2 className="text-xl font-semibold mb-4 text-center">
+                {t("auth.password_reset.title")}
+              </h2>
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    {t("auth.form.email")}
+                  </label>
+                  <input
+                    type="email"
+                    value={forgotPasswordEmail}
+                    onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff7800]"
+                    required
+                  />
+                </div>
+                {forgotPasswordStatus === "error" && (
+                  <p className="text-red-500 text-sm">
+                    {t("auth.password_reset.failed")}
+                  </p>
+                )}
+                {forgotPasswordStatus === "success" && (
+                  <p className="text-green-500 text-sm">
+                    {t("auth.password_reset.instructions")}
+                  </p>
+                )}
+                <Button
+                  type="submit"
+                  disabled={forgotPasswordStatus === "sending"}
+                  loading={forgotPasswordStatus === "sending"}
+                  variant="primary"
+                  fullWidth
+                >
+                  {forgotPasswordStatus === "sending"
+                    ? t("auth.form.sending")
+                    : t("auth.form.submit")}
+                </Button>
+                {forgotPasswordStatus === "success" && (
+                  <Button
+                    type="button"
+                    onClick={handleResendToken}
+                    disabled={resendDisabled}
+                    variant="secondary"
+                    fullWidth
+                  >
+                    {resendDisabled
+                      ? `${t("auth.password_reset.resend_countdown", {
+                          count: resendCountdown,
+                        })}`
+                      : t("auth.password_reset.resend_token")}
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setShowForgotPassword(false);
+                    setForgotPasswordEmail("");
+                    setForgotPasswordStatus("");
+                    setResendDisabled(false);
+                    setResendCountdown(0);
+                  }}
+                  variant="secondary"
+                  fullWidth
+                >
+                  {t("auth.login.back_to_login")}
+                </Button>
+              </form>
+            </div>
+          ) : (
+            <>
+              <h1 className="text-2xl font-bold mb-2 text-center">
+                {t("auth.login.welcome_back")}
+              </h1>
+              <p className="text-gray-400 mb-8 text-center">
+                {t("auth.login.sign_in_to_account")}
+              </p>
 
-        {/* Copper detail */}
-        <div className="absolute w-[150px] h-[150px] bg-[radial-gradient(circle,rgba(184,115,51,0.05)_0%,transparent_70%)] rounded-full top-[-75px] right-[-75px] z-0"></div>
+              <AuthForm
+                onSubmit={handleSubmit}
+                loading={loading}
+                error={error}
+                isLogin={true}
+                onSendCode={handleSendCode}
+                verificationCode={verificationCode}
+                setVerificationCode={setVerificationCode}
+                codeSent={codeSent}
+                sendingCode={sendingCode}
+                codeError={codeError}
+                phoneOnly={false}
+              />
 
-        {/* Gold detail */}
-        <div className="absolute w-[100px] h-[100px] bg-[radial-gradient(circle,rgba(255,215,0,0.05)_0%,transparent_70%)] rounded-full bottom-[-50px] left-[-50px] z-0"></div>
+              <div className="mt-4 flex justify-end">
+                <Button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  variant="ghostOrange"
+                >
+                  {t("auth.login.forgot_password")}
+                </Button>
+              </div>
 
-        {/* Logo */}
-        <div className="text-center mb-[30px] flex flex-col items-center">
-          <h1 className="text-[28px] font-bold tracking-[2px] spartacus-font relative inline-block overflow-hidden after:content-[''] after:absolute after:w-1/2 after:h-[2px] after:bg-gradient-to-r after:from-transparent after:via-[#ff7800] after:to-transparent after:bottom-[-8px] after:left-1/4">
-            ANTIQUE <span className="text-[#ff7800]">BODY</span>
-          </h1>
-          <div className="text-[12px] font-normal tracking-[2px] text-[#777] mt-[5px] uppercase">
-            STRENGTH OF THE ANCIENTS
-          </div>
-        </div>
-
-        {/* Login Form */}
-        <form onSubmit={handleSubmit}>
-          {error && (
-            <div className="mb-4 text-red-500 text-center text-sm">{error}</div>
+              <div className="mt-6 text-center">
+                <p className="text-gray-400">
+                  {t("auth.login.no_account")}{" "}
+                  <Link
+                    href="/auth/register"
+                    className="text-[#ff7800] hover:text-[#ff5f00] transition-colors"
+                  >
+                    {t("auth.register.title")}
+                  </Link>
+                </p>
+              </div>
+            </>
           )}
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1" htmlFor="email">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 bg-[#1a1a1a] border border-[#333] rounded focus:outline-none focus:border-[#ff7800] text-white"
-              required
-            />
-          </div>
-
-          <div className="mb-6">
-            <label
-              className="block text-sm font-medium mb-1"
-              htmlFor="password"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 bg-[#1a1a1a] border border-[#333] rounded focus:outline-none focus:border-[#ff7800] text-white"
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-[#ff7800] to-[#ff5f00] py-2 rounded font-medium text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 disabled:opacity-50"
-          >
-            {loading ? "Logging in..." : "LOGIN"}
-          </button>
-
-          <p className="mt-4 text-center text-sm">
-            Don't have an account?{" "}
-            <Link
-              href="/auth/register"
-              className="text-[#ff7800] hover:underline"
-            >
-              Register
-            </Link>
-          </p>
-        </form>
+        </Card>
       </div>
-
-      {/* Add keyframe animations */}
-      <style jsx global>{`
-        @keyframes shimmer {
-          0% {
-            background-position: 0% 50%;
-          }
-          100% {
-            background-position: 200% 50%;
-          }
-        }
-        @keyframes fadeIn {
-          0% {
-            opacity: 0;
-          }
-          100% {
-            opacity: 1;
-          }
-        }
-        @keyframes floatUp {
-          0% {
-            transform: translateY(20px);
-          }
-          100% {
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </main>
   );
 }

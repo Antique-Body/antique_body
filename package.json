@@ -6,22 +6,37 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "migrate": "npx prisma migrate deploy",
+    "migrate:create": "npx prisma migrate dev --name ab-migration"
   },
   "dependencies": {
-    "@prisma/client": "^6.6.0",
-    "bcrypt": "^5.1.1",
-    "next": "15.3.1",
-    "next-auth": "^4.24.11",
-    "prisma": "^6.6.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "@auth/prisma-adapter": "^2.9.1",
+    "@iconify/react": "^6.0.0",
+    "@prisma/client": "^6.8.2",
+    "bcrypt": "^6.0.0",
+    "clsx": "^2.1.1",
+    "dotenv": "^16.5.0",
+    "i18next": "^25.2.1",
+    "i18next-browser-languagedetector": "^8.1.0",
+    "i18next-http-backend": "^3.0.2",
+    "next": "^15.3.2",
+    "next-auth": "^4.24.7",
+    "nodemailer": "^6.9.12",
+    "prisma": "^6.8.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-hook-form": "^7.56.4",
+    "react-i18next": "^15.5.2",
+    "sass": "^1.89.0",
+    "tailwind-merge": "^3.3.0",
+    "twilio": "^5.6.1"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4",
-    "eslint": "^9",
-    "eslint-config-next": "15.3.1",
-    "tailwindcss": "^4"
+    "@eslint/eslintrc": "^3.3.1",
+    "@tailwindcss/postcss": "^4.1.7",
+    "eslint": "^9.27.0",
+    "eslint-config-next": "^15.3.2",
+    "tailwindcss": "^4.1.7"
   }
 }

@@ -10,17 +10,37 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  trainer
+  client
+  user
+  admin
+}
+
 // Simple User model for authentication
 model User {
-  id                String    @id @default(cuid())
-  name              String
-  lastName          String?
-  email             String    @unique
-  password          String
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  accounts          Account[]
-  sessions          Session[]
+  id                    String    @id @default(cuid())
+  name                  String
+  lastName              String?
+  email                 String?   @unique
+  phone                 String?   @unique
+  password              String?
+  role                  UserRole?
+  language              String    @default("en")
+  emailVerified         Boolean   @default(false)
+  phoneVerified         Boolean   @default(false)
+  resetToken            String?
+  resetTokenExpiry      DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  accounts              Account[]
+  sessions              Session[]
+  preferences           Json?     @default("{}")
+
+  @@index([email])
+  @@index([phone])
+  @@index([role])
+  @@index([resetToken])
 }
 
 // NextAuth models
@@ -41,6 +61,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
@@ -49,12 +70,30 @@ model Session {
   userId        String
   expires       DateTime
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
-model VerificationToken {
-  identifier    String
-  token         String    @unique
-  expires       DateTime
+model EmailVerification {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  used      Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 
-  @@unique([identifier, token])
-} 
+  @@index([email])
+  @@index([code])
+}
+
+model PhoneVerification {
+  id        String   @id @default(cuid())
+  phone     String
+  code      String
+  used      Boolean  @default(false)
+  expires   DateTime
+  createdAt DateTime @default(now())
+
+  @@index([phone])
+  @@index([code])
+}

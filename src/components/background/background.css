@@ -4,6 +4,10 @@
   height: 100%;
   overflow: hidden;
   z-index: 1;
+  pointer-events: none;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .ancient-building,
@@ -15,125 +19,66 @@
   opacity: 0.4;
   filter: brightness(0) saturate(100%) invert(56%) sepia(83%) saturate(1500%)
     hue-rotate(360deg) brightness(100%) contrast(106%);
-  transition: opacity 0.8s ease, transform 1.2s ease;
+  pointer-events: auto;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
-/* Animation keyframes */
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes fadeInLeft {
-  0% {
-    opacity: 0;
-    transform: translateX(-30px) translateY(20%);
-  }
-  100% {
-    opacity: 0.4;
-    transform: translateX(0) translateY(20%);
-  }
-}
-
-@keyframes fadeInRight {
-  0% {
-    opacity: 0;
-    transform: translateX(30px) translateY(30%);
-  }
-  100% {
-    opacity: 0.4;
-    transform: translateX(0) translateY(30%);
-  }
-}
-
-@keyframes fadeInDown {
-  0% {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-60%);
-  }
-  100% {
-    opacity: 0.4;
-    transform: translateX(-50%) translateY(-40%);
-  }
-}
-
-@keyframes fadeInUp {
-  0% {
-    opacity: 0;
-    transform: translateX(-50%) translateY(60%);
-  }
-  100% {
-    opacity: 0.4;
-    transform: translateX(-50%) translateY(40%);
-  }
-}
-
-/* Parthenon at top */
+/* Elementi sa fiksnim pozicijama, bez animacija */
 .parthenon {
   width: 200px;
   height: 80px;
   top: 0;
   left: 50%;
-  transform: translateX(-50%) translateY(-40%);
-  animation: fadeInDown 1.5s ease forwards;
+  transform: translateX(-50%) translateY(-40%) scale(1) translateZ(0);
 }
 
-/* Runner near Parthenon */
 .runner {
   width: 80px;
   height: 120px;
   top: 0;
   left: 30%;
-  transform: translateY(20%);
-  animation: fadeInLeft 1.8s ease forwards;
+  transform: translateY(20%) scale(1) translateZ(0);
 }
 
-/* Discus thrower near Parthenon */
 .discus {
   width: 100px;
   height: 100px;
   top: 0;
   right: 30%;
-  transform: translateY(30%);
-  animation: fadeInRight 1.8s ease forwards;
+  transform: translateY(30%) scale(1) translateZ(0);
 }
 
-/* Colosseum at bottom */
 .colosseum {
   width: 200px;
   height: 100px;
   bottom: 0;
   left: 50%;
-  transform: translateX(-50%) translateY(40%);
-  animation: fadeInUp 1.5s ease forwards;
+  transform: translateX(-50%) translateY(40%) scale(1) translateZ(0);
 }
 
-/* Greek column near Colosseum */
 .column {
   width: 80px;
   height: 120px;
   bottom: 0;
   left: 30%;
-  transform: translateY(-30%);
-  animation: fadeInLeft 1.8s ease forwards;
+  transform: translateY(-30%) scale(1) translateZ(0);
 }
 
-/* Greek vase near Colosseum */
 .vase {
   width: 80px;
   height: 100px;
   bottom: 0;
   right: 30%;
-  transform: translateY(-20%);
-  animation: fadeInRight 1.8s ease forwards;
+  transform: translateY(-20%) scale(1) translateZ(0);
 }
 
-/* Hover effects for background elements */
+/* Hover efekti pretvoreni u brzi transition */
 .ancient-building:hover,
 .olympian:hover {
   opacity: 0.7;
+  transform: scale(1.05) translateZ(0);
+  transition: opacity 0.2s ease,
+    transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
