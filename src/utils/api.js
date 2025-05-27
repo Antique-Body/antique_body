@@ -4,29 +4,25 @@
 export const successResponse = (
   data,
   message = "Success",
-  statusCode = 200,
-) => {
-  return {
-    status: statusCode,
-    body: {
-      success: true,
-      message,
-      data,
-    },
-  };
-};
+  statusCode = 200
+) => ({
+  status: statusCode,
+  body: {
+    success: true,
+    message,
+    data,
+  },
+});
 
 // Generate an error response
-export const errorResponse = (message, details = null, statusCode = 400) => {
-  return {
-    status: statusCode,
-    body: {
-      success: false,
-      error: message,
-      ...(details && { details }),
-    },
-  };
-};
+export const errorResponse = (message, details = null, statusCode = 400) => ({
+  status: statusCode,
+  body: {
+    success: false,
+    error: message,
+    ...(details && { details }),
+  },
+});
 
 // Parse request query parameters
 export const parseQueryParams = (request) => {
@@ -41,11 +37,11 @@ export const parseQueryParams = (request) => {
 };
 
 // Format validation errors for client consumption
-export const formatValidationErrors = (errors) => {
-  return Object.entries(errors).reduce((acc, [field, message]) => {
-    return {
+export const formatValidationErrors = (errors) =>
+  Object.entries(errors).reduce(
+    (acc, [field, message]) => ({
       ...acc,
       [field]: message,
-    };
-  }, {});
-};
+    }),
+    {}
+  );

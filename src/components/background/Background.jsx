@@ -7,32 +7,32 @@ import "./background.css";
 const ParthenonIcon = lazy(() =>
   import("@/components/common/Icons").then((mod) => ({
     default: mod.ParthenonIcon,
-  })),
+  }))
 );
 const RunnerIcon = lazy(() =>
   import("@/components/common/Icons").then((mod) => ({
     default: mod.RunnerIcon,
-  })),
+  }))
 );
 const DiscusIcon = lazy(() =>
   import("@/components/common/Icons").then((mod) => ({
     default: mod.DiscusIcon,
-  })),
+  }))
 );
 const ColosseumIcon = lazy(() =>
   import("@/components/common/Icons").then((mod) => ({
     default: mod.ColosseumIcon,
-  })),
+  }))
 );
 const ColumnIcon = lazy(() =>
   import("@/components/common/Icons").then((mod) => ({
     default: mod.ColumnIcon,
-  })),
+  }))
 );
 const VaseIcon = lazy(() =>
   import("@/components/common/Icons").then((mod) => ({
     default: mod.VaseIcon,
-  })),
+  }))
 );
 
 // Simple placeholder for icons while loading
