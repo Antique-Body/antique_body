@@ -1,5 +1,2 @@
-import Background from "./Background";
-
-export { Background };
-
-export default Background;
+export { Background } from "./Background";
+export { EffectBackground } from "./EffectBackground";

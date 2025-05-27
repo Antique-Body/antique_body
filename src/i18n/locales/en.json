@@ -11,19 +11,26 @@
     "search": "Search",
     "continue": "Continue",
     "show": "Show",
-    "hide": "Hide"
+    "hide": "Hide",
+    "back": "Back"
   },
   "role": {
     "admin": "Administrator",
     "trainer": {
       "label": "Trainer",
       "become": "Become a Trainer",
-      "description": "Create your trainer profile, acquire clients, and track their progress. Share your expertise and help others achieve their fitness goals."
+      "description": "Create your trainer profile, acquire clients, and track their progress. Share your expertise and help others achieve their fitness goals.",
+      "feature1": "Create personalized training programs",
+      "feature2": "Build a client base and manage profiles",
+      "feature3": "Track client progress and performance"
     },
     "client": {
       "label": "Client",
       "train_with_coach": "Train with a Coach",
-      "description": "Connect with professional trainers who will guide your fitness journey, providing personalized workouts and nutrition advice."
+      "description": "Connect with professional trainers who will guide your fitness journey, providing personalized workouts and nutrition advice.",
+      "feature1": "Work with professional fitness coaches",
+      "feature2": "Access personalized workout schedules",
+      "feature3": "Track your progress with expert guidance"
     },
     "user": {
       "label": "User",
@@ -32,16 +39,31 @@
     },
     "selection": {
       "title": "Choose Your Role",
-      "description": "Select the role that best fits your fitness journey",
+      "subtitle": "Find Your Perfect Fit",
+      "description": "Select the role that best matches your fitness journey and goals",
       "continue_as": "Are you sure you want to continue as",
-      "confirm_path": "Confirm Your Path"
+      "confirm_path": "Confirm Your Path",
+      "confirm_path_as": "Continue as {{role}}?",
+      "select_role": "Select Role",
+      "selected": "Selected",
+      "change_selection": "Change Selection",
+      "help_choosing": "Need Help Choosing?",
+      "can_change_later": "You can change your role later in account settings",
+      "confirm_role": "Continue as {{role}}?",
+      "help_modal": {
+        "trainer_help": "Choose the Trainer role if you're a fitness professional looking to grow your business. You'll be able to create customized workout plans, build a client base, and track their progress through our powerful dashboard.",
+        "client_help": "Choose the Client role if you want to work directly with a professional fitness coach. You'll get personalized training, professional guidance, and a structured program tailored to your specific needs and goals.",
+        "contact_support": "Contact Support for More Help"
+      },
+      "confirm_description": "You're about to continue as a {{role}}. This will determine your dashboard experience and available features."
     },
     "preparing": {
       "journey": "Preparing your Ancient Journey",
       "trainer": "Preparing your Trainer Journey",
       "client": "Preparing your Client Journey",
       "user": "Preparing your User Journey",
-      "admin": "Preparing your Admin Journey"
+      "admin": "Preparing your Admin Journey",
+      "please_wait": "Please wait while we set up your experience..."
     },
     "update": {
       "failed": "Failed to update role. Status: {{status}}"

@@ -5,6 +5,8 @@ import { NextResponse } from "next/server";
 import { userService } from "@/app/api/users/services";
 import { sendPasswordResetEmail } from "@/lib/email";
 
+import { NextResponse } from "next/server";
+
 export async function POST(request) {
   try {
     const { email, token, newPassword } = await request.json();

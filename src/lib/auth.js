@@ -46,7 +46,6 @@ export const authConfig = {
 
           // Check if user has password set
           if (!user.password) {
-            console.log(user, "user");
             throw new Error("No password set for this account");
           }
 
@@ -175,7 +174,6 @@ export const authConfig = {
             select: { id: true, role: true, email: true, phone: true },
           });
         }
-        console.log("Session callback userFromDb:", userFromDb);
         if (userFromDb) {
           session.user.id = userFromDb.id;
           session.user.role = userFromDb.role;

@@ -16,35 +16,55 @@
   "role": {
     "admin": "Administrator",
     "trainer": {
-      "label": "Trener",
+      "label": "Тренер",
       "become": "Postani trener",
-      "description": "Kreiraj svoj profil trenera, stekni klijente i prati njihov napredak. Podeli svoje znanje i pomozi drugima da ostvare svoje fitnes ciljeve."
+      "description": "Kreiraj svoj profil trenera, stekni klijente i prati njihov napredak. Podeli svoje znanje i pomozi drugima da ostvare svoje fitnes ciljeve.",
+      "feature1": "Сертификована стручност",
+      "feature2": "Управљање клијентима",
+      "feature3": "Праћење напретка"
     },
     "client": {
-      "label": "Klijent",
+      "label": "Клијент",
       "train_with_coach": "Treniraj sa trenerom",
-      "description": "Poveži se sa profesionalnim trenerima koji će voditi tvoje fitnes putovanje, pružajući personalizovane treninge i savete o ishrani."
+      "description": "Poveži se sa profesionalnim trenerima koji će voditi tvoje fitnes putovanje, pružajući personalizovane treninge i savete o ishrani.",
+      "feature1": "Лични тренер",
+      "feature2": "Прилагођени планови",
+      "feature3": "Праћење здравља"
     },
     "user": {
-      "label": "Korisnik",
+      "label": "Корисник",
       "custom_workout": "Prilagođen plan treninga",
-      "description": "Dobij personalizovan plan treninga na osnovu tvojih preferencija, nivoa kondicije i ciljeva. Treniraj samostalno uz AI-generisane vežbe."
+      "description": "Dobij personalizovan plan treninga na osnovu tvojih preferencija, nivoa kondicije i ciljeva. Treniraj samostalno uz AI-generisane vežbe.",
+      "feature1": "Индивидулни тренинг",
+      "feature2": "AI-подржане вежбе",
+      "feature3": "Праћење напретка"
     },
     "selection": {
-      "title": "Izaberi svoju ulogu",
-      "description": "Odaberi ulogu koja najbolje odgovara tvom fitnes putovanju",
-      "continue_as": "Da li si siguran da želiš da nastaviš kao",
-      "confirm_path": "Potvrdi svoj put"
+      "title": "Изаберите своју улогу",
+      "subtitle": "Започните своје фитнес путовање",
+      "description": "Изаберите улогу која најбоље одговара вашем фитнес путовању",
+      "step": "Корак 1: Избор улоге",
+      "help_choosing": "Помоћ при избору",
+      "select_role": "Изабери улогу",
+      "can_change_later": "Своју улогу можете касније променити",
+      "confirm_description": "Да ли желите да наставите као {{role}}?",
+      "help_modal": {
+        "trainer_help": "Као тренер можете поделити своје знање, добити клијенте и пратити њихов напредак. Идеално за фитнес професионалце који желе да поделе своју стручност.",
+        "client_help": "Као клијент добијате личну подршку од професионалних тренера, прилагођене планове тренинга и континуирану помоћ на вашем фитнес путовању.",
+        "user_help": "Као корисник добијате персонализовани план тренинга заснован на вашим преференцијама и циљевима. Тренирајте самостално са AI-генерисаним вежбама.",
+        "contact_support": "Контактирајте подршку"
+      }
     },
     "preparing": {
-      "journey": "Pripremamo tvoje drevno putovanje",
-      "trainer": "Pripremamo tvoje trenersko putovanje",
-      "client": "Pripremamo tvoje klijentsko putovanje",
-      "user": "Pripremamo tvoje korisničko putovanje",
-      "admin": "Pripremamo tvoje administratorsko putovanje"
+      "journey": "Припрема вашег путовања",
+      "trainer": "Припрема вашег тренерског путовања",
+      "client": "Припрема вашег клијентског путовања",
+      "user": "Припрема вашег корисничког путовања",
+      "admin": "Pripremamo tvoje administratorsko putovanje",
+      "please_wait": "Молимо сачекајте тренутак..."
     },
     "update": {
-      "failed": "Neuspešno ažuriranje uloge. Status: {{status}}"
+      "failed": "Ажурирање улоге није успело. Статус: {{status}}"
     }
   },
   "auth": {

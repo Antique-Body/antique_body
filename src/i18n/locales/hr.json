@@ -18,33 +18,52 @@
     "trainer": {
       "label": "Trener",
       "become": "Postani trener",
-      "description": "Kreiraj svoj profil trenera, stekni klijente i prati njihov napredak. Podijeli svoje znanje i pomozi drugima da ostvare svoje fitness ciljeve."
+      "description": "Kreiraj svoj profil trenera, stekni klijente i prati njihov napredak. Podijeli svoje znanje i pomozi drugima da ostvare svoje fitness ciljeve.",
+      "feature1": "Certificirana stručnost",
+      "feature2": "Upravljanje klijentima",
+      "feature3": "Praćenje napretka"
     },
     "client": {
       "label": "Klijent",
       "train_with_coach": "Treniraj s trenerom",
-      "description": "Poveži se s profesionalnim trenerima koji će voditi tvoje fitness putovanje, pružajući personalizirane treninge i savjete o prehrani."
+      "description": "Poveži se s profesionalnim trenerima koji će voditi tvoje fitness putovanje, pružajući personalizirane treninge i savjete o prehrani.",
+      "feature1": "Osobni trener",
+      "feature2": "Prilagođeni planovi",
+      "feature3": "Praćenje zdravlja"
     },
     "user": {
       "label": "Korisnik",
       "custom_workout": "Prilagođeni plan treninga",
-      "description": "Dobij personalizirani plan treninga na temelju tvojih preferencija, razine kondicije i ciljeva. Treniraj samostalno uz AI-generirane vježbe."
+      "description": "Dobij personalizirani plan treninga na temelju tvojih preferencija, razine kondicije i ciljeva. Treniraj samostalno uz AI-generirane vježbe.",
+      "feature1": "Individualni trening",
+      "feature2": "AI-podržane vježbe",
+      "feature3": "Praćenje napretka"
     },
     "selection": {
-      "title": "Odaberi svoju ulogu",
-      "description": "Odaberi ulogu koja najbolje odgovara tvom fitness putovanju",
-      "continue_as": "Jesi li siguran da želiš nastaviti kao",
-      "confirm_path": "Potvrdi svoj put"
+      "title": "Odaberite svoju ulogu",
+      "subtitle": "Započnite svoju fitness putovanje",
+      "description": "Odaberite ulogu koja najbolje odgovara vašem fitness putovanju",
+      "step": "Korak 1: Odabir uloge",
+      "help_choosing": "Pomoć pri odabiru",
+      "select_role": "Odaberi ulogu",
+      "can_change_later": "Svoju ulogu možete promijeniti kasnije",
+      "confirm_description": "Želite li nastaviti kao {{role}}?",
+      "help_modal": {
+        "trainer_help": "Kao trener možete podijeliti svoje znanje, dobiti klijente i pratiti njihov napredak. Idealno za fitness profesionalce koji žele podijeliti svoju stručnost.",
+        "client_help": "Kao klijent dobivate osobnu podršku od profesionalnih trenera, prilagođene planove treninga i kontinuiranu pomoć na vašem fitness putovanju.",
+        "user_help": "Kao korisnik dobivate personalizirani plan treninga temeljen na vašim preferencijama i ciljevima. Trenirajte samostalno s AI-generiranim vježbama.",
+        "contact_support": "Kontaktirajte podršku"
+      }
     },
     "preparing": {
-      "journey": "Pripremamo tvoje drevno putovanje",
-      "trainer": "Pripremamo tvoje trenersko putovanje",
-      "client": "Pripremamo tvoje klijentsko putovanje",
-      "user": "Pripremamo tvoje korisničko putovanje",
-      "admin": "Pripremamo tvoje administratorsko putovanje"
+      "journey": "Priprema vašeg putovanja",
+      "trainer": "Priprema vašeg trenerskog putovanja",
+      "client": "Priprema vašeg klijentskog putovanja",
+      "user": "Priprema vašeg korisničkog putovanja",
+      "please_wait": "Molimo pričekajte trenutak..."
     },
     "update": {
-      "failed": "Neuspješno ažuriranje uloge. Status: {{status}}"
+      "failed": "Ažuriranje uloge nije uspjelo. Status: {{status}}"
     }
   },
   "auth": {

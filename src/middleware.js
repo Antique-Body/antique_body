@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-const PUBLIC_PATHS = ["/", "/auth/reset-password"];
+const PUBLIC_PATHS = [
+  "/",
+  "/contact",
+  "/trainers-marketplace",
+  "/auth/reset-password",
+];
 const AUTH_PATHS = ["/auth/login", "/auth/register"];
 
 function isPageNavigation(request) {
@@ -17,6 +22,7 @@ export async function middleware(request) {
 
   // Log samo za page navigacije
   if (isPageNavigation(request)) {
+    // eslint-disable-next-line no-console
     console.log("token u middleware:", token, "pathname:", pathname);
   }
 

@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import Background from "@/components/background";
+import { EffectBackground } from "@/components/background";
 import { Button, FormField } from "@/components/common";
 import { Card } from "@/components/custom";
 
@@ -71,17 +71,10 @@ export default function ResetPasswordPage() {
   if (!token) {
     return (
       <main className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#161616] text-white relative">
-        <Background
-          parthenon={true}
-          runner={true}
-          discus={true}
-          colosseum={true}
-          column={false}
-          vase={false}
-        />
+        <EffectBackground />
         <div className="relative z-10 flex items-center justify-center min-h-screen">
           <Card
-            className="w-full max-w-md p-8 bg-zinc-900/80 backdrop-blur-md border border-zinc-800 rounded-xl shadow-2xl"
+            className="w-full max-w-md p-8 bg-zinc-900/60 backdrop-blur-md border border-zinc-800/70 rounded-xl shadow-2xl"
             borderTop={true}
             showLogo={true}
             logoTagline="STRENGTH OF THE ANCIENTS"
@@ -106,17 +99,10 @@ export default function ResetPasswordPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#161616] text-white relative">
-      <Background
-        parthenon={true}
-        runner={true}
-        discus={true}
-        colosseum={true}
-        column={false}
-        vase={false}
-      />
+      <EffectBackground />
       <div className="relative z-10 flex items-center justify-center min-h-screen">
         <Card
-          className="w-full max-w-md p-8 bg-zinc-900/80 backdrop-blur-md border border-zinc-800 rounded-xl shadow-2xl"
+          className="w-full max-w-md p-8 bg-zinc-900/60 backdrop-blur-md border border-zinc-800/70 rounded-xl shadow-2xl"
           borderTop={true}
           showLogo={true}
           logoTagline="STRENGTH OF THE ANCIENTS"

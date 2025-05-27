@@ -17,30 +17,50 @@
     "admin": "Administrator",
     "trainer": {
       "label": "Trainer",
+      "feature1": "Zertifizierte Expertise",
+      "feature2": "Kundenverwaltung",
+      "feature3": "Fortschrittsverfolgung",
       "become": "Trainer werden",
       "description": "Erstelle dein Trainerprofil, gewinne Kunden und verfolge deren Fortschritt. Teile dein Wissen und hilf anderen, ihre Fitnessziele zu erreichen."
     },
     "client": {
       "label": "Kunde",
+      "feature1": "Persönlicher Coach",
+      "feature2": "Maßgeschneiderte Pläne",
+      "feature3": "Gesundheitsüberwachung",
       "train_with_coach": "Mit Coach trainieren",
       "description": "Verbinde dich mit professionellen Trainern, die dich auf deiner Fitnessreise begleiten und personalisierte Workouts und Ernährungstipps bieten."
     },
     "user": {
       "label": "Benutzer",
+      "feature1": "Individuelles Training",
+      "feature2": "KI-gestützte Übungen",
+      "feature3": "Fortschrittsverfolgung",
       "custom_workout": "Individueller Trainingsplan",
       "description": "Erhalte einen personalisierten Trainingsplan basierend auf deinen Vorlieben, deinem Fitnesslevel und deinen Zielen. Trainiere eigenständig mit KI-generierten Übungen."
     },
     "selection": {
-      "title": "Wähle deine Rolle",
-      "description": "Wähle die Rolle, die am besten zu deiner Fitnessreise passt",
-      "continue_as": "Bist du sicher, dass du fortfahren möchtest als",
-      "confirm_path": "Bestätige deinen Weg"
+      "title": "Wählen Sie Ihre Rolle",
+      "subtitle": "Beginnen Sie Ihre Fitness-Reise",
+      "description": "Wählen Sie die Rolle, die am besten zu Ihrer Fitness-Reise passt",
+      "step": "Schritt 1: Rolle auswählen",
+      "help_choosing": "Hilfe bei der Auswahl",
+      "select_role": "Rolle auswählen",
+      "can_change_later": "Sie können Ihre Rolle später jederzeit ändern",
+      "confirm_description": "Möchten Sie als {{role}} fortfahren?",
+      "help_modal": {
+        "trainer_help": "Als Trainer können Sie Ihr Fachwissen teilen, Kunden gewinnen und deren Fortschritt verfolgen. Ideal für Fitnessprofis, die ihre Expertise weitergeben möchten.",
+        "client_help": "Als Kunde erhalten Sie persönliche Betreuung von professionellen Trainern, maßgeschneiderte Trainingspläne und kontinuierliche Unterstützung auf Ihrem Fitnessweg.",
+        "user_help": "Als Benutzer erhalten Sie einen personalisierten Trainingsplan basierend auf Ihren Vorlieben und Zielen. Trainieren Sie unabhängig mit KI-generierten Übungen.",
+        "contact_support": "Kontaktieren Sie den Support"
+      }
     },
     "preparing": {
-      "journey": "Deine antike Reise wird vorbereitet",
-      "trainer": "Deine Trainerreise wird vorbereitet",
-      "client": "Deine Kundenreise wird vorbereitet",
-      "user": "Deine Benutzerreise wird vorbereitet",
+      "journey": "Bereite Ihre Reise vor",
+      "trainer": "Bereite Ihre Trainer-Reise vor",
+      "client": "Bereite Ihre Kunden-Reise vor",
+      "user": "Bereite Ihre Benutzer-Reise vor",
+      "please_wait": "Bitte warten Sie einen Moment...",
       "admin": "Deine Admin-Reise wird vorbereitet"
     },
     "update": {

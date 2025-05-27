@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { hasRole } from "@/lib/auth";
+import { isAuthenticated, hasRole } from "@/middleware/auth";
 import { userService } from "@/services/users";
 import { parseQueryParams } from "@/utils/api";
 
@@ -27,7 +27,7 @@ export async function GET(request) {
     console.error("Error fetching users:", error);
     return NextResponse.json(
       { error: "An error occurred while fetching users" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
