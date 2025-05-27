@@ -27,7 +27,6 @@ export const FormField = ({
   error,
   subLabel,
   accept,
-  showConstraints = false,
   rows = 4,
   disabled = false,
   register, // For react-hook-form integration

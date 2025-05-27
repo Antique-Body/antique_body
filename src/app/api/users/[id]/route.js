@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { userService } from "@/services/users";
 
 // Get a user by ID
-export async function GET(request, { params }) {
+export async function GET({ params }) {
   try {
     const user = await userService.findUserById(params.id);
 
@@ -44,7 +44,6 @@ export async function PUT(request, { params }) {
 // Delete a user by ID
 export async function DELETE(request, { params }) {
   try {
-    await userService.deleteUser(params.id);
     await userService.deleteUser(params.id);
     return NextResponse.json(
       { message: "User deleted successfully" },

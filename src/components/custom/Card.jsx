@@ -303,12 +303,12 @@ export const Card = ({
         variant?.startsWith("dark")
           ? ""
           : variant === "entityCard"
-            ? "text-left"
-            : variant === "planCard" ||
-                variant === "createPlanCard" ||
-                variant === "clientCard"
-              ? "text-left"
-              : "items-center text-center"
+          ? "text-left"
+          : variant === "planCard" ||
+            variant === "createPlanCard" ||
+            variant === "clientCard"
+          ? "text-left"
+          : "items-center text-center"
       } overflow-hidden ${variantClassName} ${className} min-h-max ${
         hoverTranslateY ? `hover:translate-y-[${hoverTranslateY}]` : ""
       } transition-all duration-300`}

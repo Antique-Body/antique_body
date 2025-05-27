@@ -378,5 +378,17 @@
   "use_email": "E-Mail",
   "use_phone": "Telefon",
   "select_country": "Land auswählen",
-  "select_country_code": "Ländervorwahl auswählen"
+  "select_country_code": "Ländervorwahl auswählen",
+  "errorBoundary": {
+    "title": "Ups! Etwas ist schief gelaufen",
+    "message": "Wir entschuldigen uns für die Unannehmlichkeiten. Ein unerwarteter Fehler ist aufgetreten. Wenn das Problem weiterhin besteht, kontaktieren Sie bitte unseren Support.",
+    "tryAgain": "Erneut versuchen",
+    "goHome": "Zur Startseite",
+    "hideDetails": "Fehlerdetails verbergen",
+    "showDetails": "Fehlerdetails anzeigen (für Entwickler)",
+    "messageLabel": "Nachricht:",
+    "reportIssue": "Problem melden",
+    "contactSupport": "Support kontaktieren",
+    "contactSupportDesc": "Wenn Sie Hilfe benötigen, kontaktieren Sie uns bitte:"
+  }
 }

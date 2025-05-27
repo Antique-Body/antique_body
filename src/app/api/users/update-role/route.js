@@ -6,7 +6,7 @@ import { validateRoleUpdate } from "@/middleware/validation";
 
 export async function PATCH(request) {
   try {
-    const { authenticated, user } = await isAuthenticated(request);
+    const { authenticated } = await isAuthenticated(request);
 
     if (!authenticated) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });

@@ -378,5 +378,17 @@
   "verification_email_failed": "Failed to send verification email",
   "verification_email_sent_again": "Verification email sent again",
   "use_email": "Email",
-  "use_phone": "Phone"
+  "use_phone": "Phone",
+  "errorBoundary": {
+    "title": "Oops! Something went wrong",
+    "message": "We apologize for the inconvenience. An unexpected error has occurred. If the problem persists, you may contact our support.",
+    "tryAgain": "Try again",
+    "goHome": "Go to homepage",
+    "hideDetails": "Hide error details",
+    "showDetails": "Show error details (for developers)",
+    "messageLabel": "Message:",
+    "reportIssue": "Report an issue",
+    "contactSupport": "Contact Support",
+    "contactSupportDesc": "If you need help, please contact us:"
+  }
 }

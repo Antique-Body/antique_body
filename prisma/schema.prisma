@@ -35,7 +35,6 @@ model User {
   updatedAt             DateTime  @updatedAt
   accounts              Account[]
   sessions              Session[]
-  preferences           Json?     @default("{}")
 
   @@index([email])
   @@index([phone])

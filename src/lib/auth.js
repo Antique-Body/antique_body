@@ -51,7 +51,7 @@ export const authConfig = {
 
           const isPasswordValid = await userService.verifyUserPassword(
             user.id,
-            credentials.password,
+            credentials.password
           );
           if (!isPasswordValid) {
             throw new Error("Invalid email or password");
@@ -93,7 +93,7 @@ export const authConfig = {
 
           const isCodeValid = await verifyPhoneCode(
             credentials.phone,
-            credentials.code,
+            credentials.code
           );
           if (!isCodeValid) {
             throw new Error("Invalid or expired verification code");

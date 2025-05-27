@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -33,7 +34,7 @@ export default function RegisterPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ phone, mode: "register" }),
       });
 
       const data = await response.json();

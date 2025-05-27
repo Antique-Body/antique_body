@@ -377,5 +377,17 @@
   "use_email": "E-pošta",
   "use_phone": "Telefon",
   "select_country": "Izberi državo",
-  "select_country_code": "Izberi klicno številko države"
+  "select_country_code": "Izberi klicno številko države",
+  "errorBoundary": {
+    "title": "Ups! Nekaj je šlo narobe",
+    "message": "Opravičujemo se za nevšečnosti. Prišlo je do nepričakovane napake. Če se težava ponavlja, nas lahko kontaktirate.",
+    "tryAgain": "Poskusi znova",
+    "goHome": "Pojdi na začetno stran",
+    "hideDetails": "Skrij podrobnosti napake",
+    "showDetails": "Prikaži podrobnosti napake (za razvijalce)",
+    "messageLabel": "Sporočilo:",
+    "reportIssue": "Prijavi težavo",
+    "contactSupport": "Kontaktiraj podporo",
+    "contactSupportDesc": "Če potrebuješ pomoč, nas kontaktiraj:"
+  }
 }

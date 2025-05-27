@@ -6,6 +6,13 @@ import { useTranslation } from "react-i18next";
 import { PhoneInput } from "./PhoneInput";
 import { VerificationCodeInput } from "./VerificationCodeInput";
 
+import { Icon } from "@iconify/react";
+import { signIn } from "next-auth/react";
+import { useTranslation } from "react-i18next";
+
+import { PhoneInput } from "./PhoneInput";
+import { VerificationCodeInput } from "./VerificationCodeInput";
+
 import {
   Button,
   FacebookIcon,
@@ -50,18 +57,13 @@ export const AuthForm = ({
     setShowEmailForm,
     loginMethod,
     setLoginMethod,
-    phoneValue,
-    setPhoneValue,
     codeError,
     setCodeError,
     codeSent,
     setCodeSent,
     sendingCode,
-    setSendingCode,
     register,
-    handleSubmit,
     errors,
-    getValues,
     watch,
     setValue,
     handleSendCode,
@@ -227,13 +229,14 @@ export const AuthForm = ({
               verificationCode={verificationCode}
               setVerificationCode={setVerificationCode}
               setCodeError={setCodeError}
-              handleSendCode={handleSendCode}
+              handleSendCode={() => handleSendCode(false)}
               sendingCode={sendingCode}
               codeSent={codeSent}
               setCodeSent={setCodeSent}
               isEmail={true}
-              email={getValues("email")}
+              email={watch("email")}
               phone={null}
+              setValue={setValue}
               setValue={setValue}
             />
           )}
@@ -245,14 +248,12 @@ export const AuthForm = ({
             errors={errors}
             countryCode={watch("countryCode")}
             setValue={setValue}
-            phoneValue={phoneValue}
-            setPhoneValue={setPhoneValue}
           />
           <VerificationCodeInput
             verificationCode={verificationCode}
             setVerificationCode={setVerificationCode}
             setCodeError={setCodeError}
-            handleSendCode={handleSendCode}
+            handleSendCode={() => handleSendCode(isLogin)}
             sendingCode={sendingCode}
             codeSent={codeSent}
             setCodeSent={setCodeSent}

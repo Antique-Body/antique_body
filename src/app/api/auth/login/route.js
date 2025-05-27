@@ -4,7 +4,8 @@ import { NextResponse } from "next/server";
 import { userService } from "@/app/api/users/services";
 import { formatPhoneNumber } from "@/lib/utils";
 
-const prisma = new PrismaClient();
+import { userService } from "@/app/api/users/services";
+import { formatPhoneNumber } from "@/lib/utils";
 
 export async function POST(request) {
   try {

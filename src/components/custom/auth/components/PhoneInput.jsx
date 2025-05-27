@@ -3,7 +3,13 @@ import { useTranslation } from "react-i18next";
 import { CountrySelect, FormField } from "@/components/common";
 import { usePhoneInput } from "@/hooks";
 
-export const PhoneInput = ({ register, errors, countryCode, setValue }) => {
+export const PhoneInput = ({
+  register,
+  errors,
+  countryCode,
+  setValue,
+  setPhoneValue,
+}) => {
   const { t } = useTranslation();
   const {
     displayValue,
@@ -14,6 +20,7 @@ export const PhoneInput = ({ register, errors, countryCode, setValue }) => {
     register,
     setValue,
     countryCode,
+    setPhoneValue,
   });
 
   return (
