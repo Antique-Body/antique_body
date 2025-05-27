@@ -1,14 +1,15 @@
-import { findUserByPhone } from "@/app/api/users/services";
-import { formatPhoneNumber } from "@/lib/utils";
 import { PrismaClient } from "@prisma/client";
 import twilio from "twilio";
+
+import { findUserByPhone } from "@/app/api/users/services";
+import { formatPhoneNumber } from "@/lib/utils";
 
 const prisma = new PrismaClient();
 
 // Initialize Twilio client
 const twilioClient = twilio(
   process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN,
+  process.env.TWILIO_AUTH_TOKEN
 );
 
 export async function sendVerificationCode(phone) {
