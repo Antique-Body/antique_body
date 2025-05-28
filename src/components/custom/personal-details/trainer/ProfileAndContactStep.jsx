@@ -61,44 +61,49 @@ export const ProfileAndContactStep = ({ formData, onChange, errors }) => {
         />
       </FormSection>
 
-      {/* Availability */}
+      {/* Pricing */}
       <FormSection
-        title="Availability"
-        description="When are you typically available for training sessions?"
-        icon={<Icon icon="mdi:clock-outline" width={20} height={20} />}
+        title="Pricing"
+        description="Set your session rates and pricing preferences"
+        icon={<Icon icon="mdi:currency-usd" width={20} height={20} />}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4">
           <FormField
-            label="Preferred Training Hours"
-            name="preferredHours"
+            label="Pricing Approach"
+            name="pricingType"
             type="select"
-            value={formData.preferredHours}
+            value={formData.pricingType}
             onChange={onChange}
             options={[
-              { value: "", label: "Select preferred hours" },
-              { value: "early_morning", label: "Early Morning (6-9 AM)" },
-              { value: "morning", label: "Morning (9-12 PM)" },
-              { value: "afternoon", label: "Afternoon (12-5 PM)" },
-              { value: "evening", label: "Evening (5-8 PM)" },
-              { value: "late_evening", label: "Late Evening (8-10 PM)" },
-              { value: "flexible", label: "Flexible/All Hours" },
+              { value: "", label: "Select pricing approach" },
+              { value: "fixed", label: "Fixed Rate - Set My Price" },
+              { value: "negotiable", label: "Negotiable - Will Discuss" },
+              { value: "package_deals", label: "Package Deals Available" },
+              { value: "contact_for_pricing", label: "Contact for Pricing" },
+              { value: "free_consultation", label: "Free Consultation First" },
+              { value: "prefer_not_to_say", label: "Prefer Not to Display" },
             ]}
           />
 
-          <FormField
-            label="Available Days"
-            name="availableDays"
-            type="select"
-            value={formData.availableDays}
-            onChange={onChange}
-            options={[
-              { value: "", label: "Select available days" },
-              { value: "weekdays", label: "Weekdays Only" },
-              { value: "weekends", label: "Weekends Only" },
-              { value: "all_week", label: "All Week" },
-              { value: "custom", label: "Custom Schedule" },
-            ]}
-          />
+          {/* Show price field only for specific pricing types */}
+          {(formData.pricingType === "fixed" ||
+            formData.pricingType === "package_deals") && (
+            <FormField
+              label={
+                formData.pricingType === "package_deals"
+                  ? "Starting Price per Session"
+                  : "Price per Session"
+              }
+              name="pricePerSession"
+              type="number"
+              value={formData.pricePerSession}
+              onChange={onChange}
+              placeholder="50"
+              min="0"
+              step="5"
+              error={errors.pricePerSession}
+            />
+          )}
         </div>
       </FormSection>
     </div>
