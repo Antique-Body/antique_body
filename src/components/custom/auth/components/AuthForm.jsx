@@ -38,7 +38,6 @@ export const AuthForm = ({
     sendingCode,
     register,
     errors,
-    getValues,
     watch,
     setValue,
     handleSendCode,
@@ -209,7 +208,7 @@ export const AuthForm = ({
               codeSent={codeSent}
               setCodeSent={setCodeSent}
               isEmail={true}
-              email={getValues("email")}
+              email={watch("email")}
               phone={null}
               setValue={setValue}
             />
@@ -235,7 +234,7 @@ export const AuthForm = ({
             setCodeSent={setCodeSent}
             isEmail={false}
             email={null}
-            phone={getValues("phone")}
+            phone={watch("phone")}
             setValue={setValue}
           />
         </>

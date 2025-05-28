@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { EffectBackground } from "@/components/background";
-import { Card } from "@/components/common";
+import { Card } from "@/components/common/Card";
 import { AuthForm } from "@/components/custom/auth/components/AuthForm";
 
 export default function RegisterPage() {
