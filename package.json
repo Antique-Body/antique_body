@@ -14,8 +14,10 @@
     "type-check": "tsc --noEmit",
     "check": "npm run lint && npm run format:check && npm run type-check",
     "fix": "npm run lint:fix && npm run format",
-    "migrate": "npx prisma migrate deploy",
-    "migrate:create": "npx prisma migrate dev --name ab-migration"
+    "db:migrate": "npx prisma migrate deploy",
+    "db:migrate:create": "npx prisma migrate dev --name ab-migration",
+    "db:reset": "npx prisma migrate reset",
+    "db:studio": "npx prisma studio"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.9.1",
