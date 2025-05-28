@@ -26,9 +26,12 @@ export const VerificationCodeInput = ({
       phone,
     });
 
+  // Extract dependency for useEffect
+  const contactValue = isEmail ? email : phone;
+
   useEffect(() => {
     setCountdown(0);
-  }, [isEmail ? email : phone, setCountdown]);
+  }, [contactValue, setCountdown]);
 
   return (
     <div className="flex flex-col space-y-2">
@@ -73,8 +76,8 @@ export const VerificationCodeInput = ({
           {sendingCode
             ? "Sending..."
             : countdown > 0
-              ? `Resend in ${countdown}s`
-              : "Resend Code"}
+            ? `Resend in ${countdown}s`
+            : "Resend Code"}
         </Button>
       )}
     </div>
