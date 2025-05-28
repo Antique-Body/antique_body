@@ -62,6 +62,8 @@ export const authConfig = {
             name: user.name,
             email: user.email,
             role: user.role,
+            firstName: user.firstName,
+            lastName: user.lastName,
           };
         } catch (error) {
           console.error("Auth error:", error);
@@ -104,6 +106,8 @@ export const authConfig = {
             name: user.name,
             phone: user.phone,
             role: user.role,
+            firstName: user.firstName,
+            lastName: user.lastName,
           };
         } catch (error) {
           console.error("Auth error:", error);
@@ -124,7 +128,8 @@ export const authConfig = {
             await prisma.user.create({
               data: {
                 email: user.email,
-                firstName: user.firstName || profile.name,
+                firstName:
+                  profile.given_name || user.name || profile.name || "",
                 lastName: profile.family_name || "",
                 emailVerified: true,
                 phoneVerified: false,
@@ -146,16 +151,26 @@ export const authConfig = {
         token.role = user.role;
         token.phone = user.phone;
         token.email = user.email;
+        token.firstName = user.firstName;
+        token.lastName = user.lastName;
       }
-      if (!token.role && token.email) {
+      if ((!token.role || !token.firstName || !token.lastName) && token.email) {
         const userFromDb = await prisma.user.findUnique({
           where: { email: token.email },
-          select: { id: true, role: true, phone: true },
+          select: {
+            id: true,
+            role: true,
+            phone: true,
+            firstName: true,
+            lastName: true,
+          },
         });
         if (userFromDb) {
           token.id = userFromDb.id;
           token.role = userFromDb.role;
           token.phone = userFromDb.phone;
+          token.firstName = userFromDb.firstName;
+          token.lastName = userFromDb.lastName;
         }
       }
       return token;
@@ -166,12 +181,26 @@ export const authConfig = {
         if (token.email) {
           userFromDb = await prisma.user.findUnique({
             where: { email: token.email },
-            select: { id: true, role: true, email: true, phone: true },
+            select: {
+              id: true,
+              role: true,
+              email: true,
+              phone: true,
+              firstName: true,
+              lastName: true,
+            },
           });
         } else if (token.phone) {
           userFromDb = await prisma.user.findUnique({
             where: { phone: token.phone },
-            select: { id: true, role: true, email: true, phone: true },
+            select: {
+              id: true,
+              role: true,
+              email: true,
+              phone: true,
+              firstName: true,
+              lastName: true,
+            },
           });
         }
         if (userFromDb) {
@@ -179,6 +208,12 @@ export const authConfig = {
           session.user.role = userFromDb.role;
           session.user.email = userFromDb.email;
           session.user.phone = userFromDb.phone;
+          session.user.firstName = userFromDb.firstName;
+          session.user.lastName = userFromDb.lastName;
+        } else {
+          // fallback from token if DB not found
+          session.user.firstName = token.firstName;
+          session.user.lastName = token.lastName;
         }
       }
       return session;
