@@ -11,22 +11,12 @@ const prisma = new PrismaClient();
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { firstName, lastName, email, phone, password, code } = body;
+    const { email, phone, password, code } = body;
 
     // Validate required fields based on registration type
-    if (!firstName || !lastName || !code) {
+    if (!code) {
       return NextResponse.json(
-        { error: "Name, last name, and verification code are required" },
-        { status: 400 }
-      );
-    }
-
-    // Validate name fields
-    if (firstName.length < 2 || lastName.length < 2) {
-      return NextResponse.json(
-        {
-          error: "Name and last name must be at least 2 characters long",
-        },
+        { error: "Verification code is required" },
         { status: 400 }
       );
     }
@@ -98,8 +88,6 @@ export async function POST(request) {
       user = await prisma.user.create({
         data: {
           email,
-          firstName,
-          lastName,
           password: hashedPassword,
           emailVerified: true,
           phoneVerified: false,
@@ -108,8 +96,6 @@ export async function POST(request) {
         select: {
           id: true,
           email: true,
-          firstName: true,
-          lastName: true,
           role: true,
           emailVerified: true,
           phoneVerified: true,
@@ -160,8 +146,6 @@ export async function POST(request) {
       user = await prisma.user.create({
         data: {
           phone: formattedPhone,
-          firstName,
-          lastName,
           email: null, // Allow null email for phone registration
           password: null, // Allow null password for phone registration
           emailVerified: false,
@@ -171,8 +155,6 @@ export async function POST(request) {
         select: {
           id: true,
           phone: true,
-          firstName: true,
-          lastName: true,
           role: true,
           emailVerified: true,
           phoneVerified: true,
