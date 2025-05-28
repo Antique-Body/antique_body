@@ -113,7 +113,7 @@ export const authConfig = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (account?.provider === "google" || account?.provider === "facebook") {
         try {
           // Check if user already exists
@@ -124,8 +124,6 @@ export const authConfig = {
             await prisma.user.create({
               data: {
                 email: user.email,
-                firstName: user.firstName || profile.name,
-                lastName: profile.family_name || "",
                 emailVerified: true,
                 phoneVerified: false,
                 language: "en",

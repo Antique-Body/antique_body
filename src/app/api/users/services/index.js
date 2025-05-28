@@ -10,8 +10,6 @@ const userSelectFields = {
   id: true,
   email: true,
   phone: true,
-  firstName: true,
-  lastName: true,
   role: true,
   emailVerified: true,
   phoneVerified: true,
