@@ -64,6 +64,28 @@ export const AuthForm = ({
     signIn("facebook", { callbackUrl: "/select-role" });
   };
 
+  // Provjera validnosti forme
+  const isFormValid = () => {
+    if (loginMethod === "email") {
+      if (!watch("email") || !watch("password")) return false;
+      if (
+        !isLogin &&
+        (!watch("firstName") || !watch("lastName") || !verificationCode)
+      )
+        return false;
+    } else {
+      if (!watch("phone")) return false;
+      if (
+        !isLogin &&
+        (!watch("firstName") || !watch("lastName") || !verificationCode)
+      )
+        return false;
+    }
+    // Provjeri ima li errora
+    if (Object.keys(errors).length > 0) return false;
+    return true;
+  };
+
   if (!showEmailForm) {
     return (
       <div className="space-y-4 w-full">
@@ -203,7 +225,7 @@ export const AuthForm = ({
               verificationCode={verificationCode}
               setVerificationCode={setVerificationCode}
               setCodeError={setCodeError}
-              handleSendCode={handleSendCode}
+              handleSendCode={() => handleSendCode(isLogin)}
               sendingCode={sendingCode}
               codeSent={codeSent}
               setCodeSent={setCodeSent}
@@ -228,7 +250,7 @@ export const AuthForm = ({
             verificationCode={verificationCode}
             setVerificationCode={setVerificationCode}
             setCodeError={setCodeError}
-            handleSendCode={handleSendCode}
+            handleSendCode={() => handleSendCode(isLogin)}
             sendingCode={sendingCode}
             codeSent={codeSent}
             setCodeSent={setCodeSent}
@@ -243,6 +265,7 @@ export const AuthForm = ({
       <Button
         type="submit"
         loading={loading || authLoading}
+        disabled={!isFormValid()}
         className="w-full py-3 bg-gradient-to-r from-[#ff7800] to-[#ff5f00] rounded-lg font-medium text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 disabled:opacity-50"
       >
         {isLogin ? "Sign In" : "Register"}

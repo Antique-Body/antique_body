@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 
 export async function POST(request) {
   try {
-    const { email, phone } = await request.json();
+    const { email, phone, mode } = await request.json();
 
     if (!email && !phone) {
       return NextResponse.json(
@@ -28,9 +28,17 @@ export async function POST(request) {
         where: { email },
       });
 
-      if (existingUser) {
+      if (mode === "register" && existingUser) {
         return NextResponse.json(
           { error: "User with this email already exists" },
+          { status: 400 }
+        );
+      }
+
+      console.log(mode, "  mode", existingUser, "  existingUser");
+      if (mode !== "register" && !existingUser) {
+        return NextResponse.json(
+          { error: "User with this email does not exist" },
           { status: 400 }
         );
       }
@@ -46,11 +54,16 @@ export async function POST(request) {
       const existingUser = await prisma.user.findFirst({
         where: {
           phone: formattedPhone,
-          // phoneVerified: true, // Dodaj ako želiš samo verifikovane
         },
       });
 
-      if (!existingUser) {
+      if (mode === "register" && existingUser) {
+        return NextResponse.json(
+          { error: "User with this phone number already exists" },
+          { status: 400 }
+        );
+      }
+      if (mode !== "register" && !existingUser) {
         return NextResponse.json(
           { error: "User with this phone number does not exist" },
           { status: 400 }

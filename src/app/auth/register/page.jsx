@@ -56,11 +56,11 @@ export default function RegisterPage() {
   const handleSubmit = async (data) => {
     setLoading(true);
     setError("");
-
+    // Spremi imena u session storage
+    if (data.firstName) sessionStorage.setItem("firstName", data.firstName);
+    if (data.lastName) sessionStorage.setItem("lastName", data.lastName);
     try {
       const requestBody = {
-        firstName: data.firstName,
-        lastName: data.lastName,
         code: verificationCode,
         ...(data.email
           ? {
