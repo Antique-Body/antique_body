@@ -72,8 +72,6 @@ export async function POST(request) {
         user: {
           id: user.id,
           email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
           role: user.role,
           emailVerified: user.emailVerified,
           phoneVerified: user.phoneVerified,
@@ -120,8 +118,6 @@ export async function POST(request) {
         user: {
           id: user.id,
           phone: user.phone,
-          firstName: user.firstName,
-          lastName: user.lastName,
           role: user.role,
           emailVerified: user.emailVerified,
           phoneVerified: user.phoneVerified,
