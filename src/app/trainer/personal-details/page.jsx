@@ -87,10 +87,10 @@ const TrainerRegistration = () => {
         },
       }));
     } else {
-      setFormData({
-        ...formData,
+      setFormData((prev) => ({
+        ...prev,
         [name]: value,
-      });
+      }));
     }
 
     // Clear error when user starts typing

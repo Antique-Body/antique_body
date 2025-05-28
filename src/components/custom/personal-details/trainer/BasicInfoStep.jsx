@@ -1,13 +1,25 @@
 "use client";
 import { Icon } from "@iconify/react";
+import { useSession } from "next-auth/react";
 
 import { FormSection, SpecialtySelector } from "../shared";
 
 import { FormField } from "@/components/common";
+import { usePrefillFromSession } from "@/hooks/usePrefillFromSession";
 
 export const BasicInfoStep = ({ formData, onChange, errors }) => {
+  const { data: session } = useSession();
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 50 }, (_, i) => currentYear - i);
+
+  usePrefillFromSession({
+    formData,
+    onChange,
+    fields: [
+      { formKey: "firstName", sessionKey: "firstName" },
+      { formKey: "lastName", sessionKey: "lastName" },
+    ],
+  });
 
   const handleSpecialtyChange = (specialties) => {
     onChange({
@@ -30,18 +42,18 @@ export const BasicInfoStep = ({ formData, onChange, errors }) => {
           <FormField
             label="First Name"
             name="firstName"
-            value={formData.firstName}
-            onChange={onChange}
+            value={formData.firstName ?? session?.user?.firstName ?? ""}
             placeholder="Your first name"
+            onChange={onChange}
             error={errors.firstName}
           />
 
           <FormField
             label="Last Name"
             name="lastName"
-            value={formData.lastName}
-            onChange={onChange}
+            value={formData.lastName ?? session?.user?.lastName ?? ""}
             placeholder="Your last name"
+            onChange={onChange}
             error={errors.lastName}
           />
         </div>
