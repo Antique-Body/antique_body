@@ -1,20 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { hasRole } from "@/middleware/auth";
+import {  hasRole } from "@/middleware/auth";
 import { userService } from "@/services/users";
-
-//TODO OVO CE BITI REWRITEAONO
-
-const parseQueryParams = (request) => {
-  const url = new URL(request.url);
-  const params = {};
-
-  for (const [key, value] of url.searchParams.entries()) {
-    params[key] = value;
-  }
-
-  return params;
-};
+import { parseQueryParams } from "@/utils/api";
 
 export async function GET(request) {
   try {
@@ -39,7 +27,7 @@ export async function GET(request) {
     console.error("Error fetching users:", error);
     return NextResponse.json(
       { error: "An error occurred while fetching users" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -62,8 +62,6 @@ export const authConfig = {
             name: user.name,
             email: user.email,
             role: user.role,
-            firstName: user.firstName,
-            lastName: user.lastName,
           };
         } catch (error) {
           console.error("Auth error:", error);
@@ -106,8 +104,6 @@ export const authConfig = {
             name: user.name,
             phone: user.phone,
             role: user.role,
-            firstName: user.firstName,
-            lastName: user.lastName,
           };
         } catch (error) {
           console.error("Auth error:", error);
@@ -117,33 +113,17 @@ export const authConfig = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (account?.provider === "google" || account?.provider === "facebook") {
         try {
           // Check if user already exists
           const existingUser = await userService.findUserByEmail(user.email);
 
           if (!existingUser) {
-            // Extract first and last name from the profile
-            let firstName = "";
-            let lastName = "";
-
-            if (profile?.given_name && profile?.family_name) {
-              firstName = profile.given_name;
-              lastName = profile.family_name;
-            } else if (user.name) {
-              // Fallback: split the full name
-              const nameParts = user.name.split(" ");
-              firstName = nameParts[0] || "";
-              lastName = nameParts.slice(1).join(" ") || "";
-            }
-
             // Create new user if doesn't exist
             await prisma.user.create({
               data: {
                 email: user.email,
-                firstName: firstName,
-                lastName: lastName,
                 emailVerified: true,
                 phoneVerified: false,
                 language: "en",
@@ -164,26 +144,16 @@ export const authConfig = {
         token.role = user.role;
         token.phone = user.phone;
         token.email = user.email;
-        token.firstName = user.firstName;
-        token.lastName = user.lastName;
       }
-      if ((!token.role || !token.firstName || !token.lastName) && token.email) {
+      if (!token.role && token.email) {
         const userFromDb = await prisma.user.findUnique({
           where: { email: token.email },
-          select: {
-            id: true,
-            role: true,
-            phone: true,
-            firstName: true,
-            lastName: true,
-          },
+          select: { id: true, role: true, phone: true },
         });
         if (userFromDb) {
           token.id = userFromDb.id;
           token.role = userFromDb.role;
           token.phone = userFromDb.phone;
-          token.firstName = userFromDb.firstName;
-          token.lastName = userFromDb.lastName;
         }
       }
       return token;
@@ -194,26 +164,12 @@ export const authConfig = {
         if (token.email) {
           userFromDb = await prisma.user.findUnique({
             where: { email: token.email },
-            select: {
-              id: true,
-              role: true,
-              email: true,
-              phone: true,
-              firstName: true,
-              lastName: true,
-            },
+            select: { id: true, role: true, email: true, phone: true },
           });
         } else if (token.phone) {
           userFromDb = await prisma.user.findUnique({
             where: { phone: token.phone },
-            select: {
-              id: true,
-              role: true,
-              email: true,
-              phone: true,
-              firstName: true,
-              lastName: true,
-            },
+            select: { id: true, role: true, email: true, phone: true },
           });
         }
         if (userFromDb) {
@@ -221,12 +177,6 @@ export const authConfig = {
           session.user.role = userFromDb.role;
           session.user.email = userFromDb.email;
           session.user.phone = userFromDb.phone;
-          session.user.firstName = userFromDb.firstName;
-          session.user.lastName = userFromDb.lastName;
-        } else {
-          // fallback from token if DB not found
-          session.user.firstName = token.firstName;
-          session.user.lastName = token.lastName;
         }
       }
       return session;
