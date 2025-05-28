@@ -5,10 +5,10 @@ import { useSession } from "next-auth/react";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { FullScreenLoader } from "@/components/common";
 import {
   RoleCard,
   ActionFooter,
-  LoadingOverlay,
 } from "@/components/custom/select-role/components";
 
 const DEFAULT_BACKGROUNDS = {
@@ -19,15 +19,11 @@ const DEFAULT_BACKGROUNDS = {
 };
 // Role redirects
 const ROLE_REDIRECTS = {
-  trainer: "/trainer/dashboard",
-  client: "/client/dashboard",
+  trainer: "/trainer/personal-details",
+  client: "/client/personal-details",
 };
 
 // Role titles for loading state
-const ROLE_TITLES = {
-  trainer: "role.preparing.trainer",
-  client: "role.preparing.client",
-};
 
 // Role configuration
 const ROLES_CONFIG = {
@@ -200,12 +196,7 @@ export default function SelectRole() {
 
       {/* Loading overlay */}
       {loading && selectedRole && (
-        <LoadingOverlay
-          selectedRole={selectedRole}
-          roleTitle={ROLE_TITLES[selectedRole] || "role.preparing.journey"}
-          config={ROLES_CONFIG[selectedRole]}
-          t={t}
-        />
+        <FullScreenLoader text={t("role.preparing.journey")} />
       )}
 
       {/* MDI Icons */}
