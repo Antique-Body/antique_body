@@ -123,33 +123,31 @@ export const authConfig = {
           // Check if user already exists
           const existingUser = await userService.findUserByEmail(user.email);
 
+          let firstName = "";
+          let lastName = "";
+          if (profile?.given_name && profile?.family_name) {
+            firstName = profile.given_name;
+            lastName = profile.family_name;
+          } else if (user.name) {
+            const nameParts = user.name.split(" ");
+            firstName = nameParts[0] || "";
+            lastName = nameParts.slice(1).join(" ") || "";
+          }
+
           if (!existingUser) {
-            // Extract first and last name from the profile
-            let firstName = "";
-            let lastName = "";
-
-            if (profile?.given_name && profile?.family_name) {
-              firstName = profile.given_name;
-              lastName = profile.family_name;
-            } else if (user.name) {
-              // Fallback: split the full name
-              const nameParts = user.name.split(" ");
-              firstName = nameParts[0] || "";
-              lastName = nameParts.slice(1).join(" ") || "";
-            }
-
-            // Create new user if doesn't exist
+            // Create new user if doesn't exist (bez imena u bazi)
             await prisma.user.create({
               data: {
                 email: user.email,
-                firstName: firstName,
-                lastName: lastName,
                 emailVerified: true,
                 phoneVerified: false,
                 language: "en",
               },
             });
           }
+          // Vraćam imena kroz user objekt
+          user.firstName = firstName;
+          user.lastName = lastName;
           return true;
         } catch (error) {
           console.error("Error in signIn callback:", error);
@@ -159,6 +157,7 @@ export const authConfig = {
       return true;
     },
     async jwt({ token, user }) {
+      // Ako je user iz signIn callbacka, proslijedi imena u token
       if (user) {
         token.id = user.id;
         token.role = user.role;
@@ -167,67 +166,24 @@ export const authConfig = {
         token.firstName = user.firstName;
         token.lastName = user.lastName;
       }
-      if ((!token.role || !token.firstName || !token.lastName) && token.email) {
-        const userFromDb = await prisma.user.findUnique({
-          where: { email: token.email },
-          select: {
-            id: true,
-            role: true,
-            phone: true,
-            firstName: true,
-            lastName: true,
-          },
-        });
-        if (userFromDb) {
-          token.id = userFromDb.id;
-          token.role = userFromDb.role;
-          token.phone = userFromDb.phone;
-          token.firstName = userFromDb.firstName;
-          token.lastName = userFromDb.lastName;
-        }
-      }
+      // Nemoj tražiti firstName/lastName iz baze
       return token;
     },
     async session({ session, token }) {
       if (token) {
-        let userFromDb = null;
+        let userIdFromDb = null;
         if (token.email) {
-          userFromDb = await prisma.user.findUnique({
-            where: { email: token.email },
-            select: {
-              id: true,
-              role: true,
-              email: true,
-              phone: true,
-              firstName: true,
-              lastName: true,
-            },
-          });
-        } else if (token.phone) {
-          userFromDb = await prisma.user.findUnique({
-            where: { phone: token.phone },
-            select: {
-              id: true,
-              role: true,
-              email: true,
-              phone: true,
-              firstName: true,
-              lastName: true,
-            },
-          });
+          const userFromDb = await userService.findUserByEmail(token.email);
+          if (userFromDb && userFromDb.id) {
+            userIdFromDb = userFromDb.id;
+          }
         }
-        if (userFromDb) {
-          session.user.id = userFromDb.id;
-          session.user.role = userFromDb.role;
-          session.user.email = userFromDb.email;
-          session.user.phone = userFromDb.phone;
-          session.user.firstName = userFromDb.firstName;
-          session.user.lastName = userFromDb.lastName;
-        } else {
-          // fallback from token if DB not found
-          session.user.firstName = token.firstName;
-          session.user.lastName = token.lastName;
-        }
+        session.user.id = userIdFromDb || token.id;
+        session.user.role = token.role;
+        session.user.email = token.email;
+        session.user.phone = token.phone;
+        session.user.firstName = token.firstName;
+        session.user.lastName = token.lastName;
       }
       return session;
     },

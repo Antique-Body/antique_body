@@ -20,8 +20,6 @@ enum UserRole {
 // Simple User model for authentication
 model User {
   id                    String    @id @default(cuid())
-  firstName             String
-  lastName              String?
   email                 String    @unique
   phone                 String?   @unique
   password              String?
@@ -36,6 +34,8 @@ model User {
   accounts              Account[]
   sessions              Session[]
   trainerInfo           TrainerPersonalInfo?
+  emailVerifications    EmailVerification[]
+  phoneVerifications    PhoneVerification[]
 
   @@index([email])
   @@index([phone])
@@ -81,9 +81,12 @@ model EmailVerification {
   used      Boolean  @default(false)
   expiresAt DateTime
   createdAt DateTime @default(now())
+  userId    String?
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([email])
   @@index([code])
+  @@index([userId])
 }
 
 model PhoneVerification {
@@ -93,15 +96,20 @@ model PhoneVerification {
   used      Boolean  @default(false)
   expires   DateTime
   createdAt DateTime @default(now())
+  userId    String?
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([phone])
   @@index([code])
+  @@index([userId])
 }
 
 // Trainer Personal Info
 model TrainerPersonalInfo {
   id                String   @id @default(cuid())
   userId            String   @unique
+  firstName         String
+  lastName          String?
   dateOfBirth       DateTime?
   gender            String?
   trainingSince     Int?     

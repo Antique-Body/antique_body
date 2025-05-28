@@ -18,11 +18,21 @@ export function usePrefillFromSession({ formData, onChange, fields }) {
     if (allCleared) {
       didPrefill.current = false;
     }
-    if (session?.user && !didPrefill.current && allCleared) {
+    if (!didPrefill.current && allCleared) {
       fields.forEach(({ formKey, sessionKey }) => {
-        if (session.user[sessionKey]) {
+        let value = session?.user?.[sessionKey];
+        // If not in session, try sessionStorage (only for firstName/lastName)
+        if (
+          !value &&
+          (sessionKey === "firstName" || sessionKey === "lastName")
+        ) {
+          if (typeof window !== "undefined") {
+            value = sessionStorage.getItem(sessionKey) || "";
+          }
+        }
+        if (value) {
           onChange({
-            target: { name: formKey, value: session.user[sessionKey] },
+            target: { name: formKey, value },
           });
         }
       });
