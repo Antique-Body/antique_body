@@ -1,6 +1,7 @@
 "use client";
 import { Icon } from "@iconify/react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 
 import { ErrorIcon } from "./Icons";
 
@@ -33,10 +34,29 @@ export const FormField = ({
   register, // For react-hook-form integration
   rules = {}, // For react-hook-form validation rules
   checked,
+  showShortCode = true,
+  asyncSearch,
+  onSelectOption,
   ...props
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
+  const [asyncOptions, setAsyncOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const inputRef = useRef(null);
+
+  // Fix: useEffect must not be called conditionally
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      setDropdownPos({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
+  }, [isOpen]);
 
   // Handle react-hook-form props
   const inputProps = register
@@ -194,18 +214,100 @@ export const FormField = ({
   }
 
   if (type === "searchableSelect") {
-    const selectedOption = options.find((opt) => opt.value === value) || null;
-    const filteredOptions = options.filter((option) =>
-      option.label.toLowerCase().includes(searchTerm.toLowerCase())
+    const safeOptions = Array.isArray(options) ? options : [];
+    const safeAsyncOptions = Array.isArray(asyncOptions) ? asyncOptions : [];
+    const selectedOption =
+      (asyncSearch
+        ? safeAsyncOptions.find((opt) => opt.value === value)
+        : safeOptions.find((opt) => opt.value === value)) ||
+      (value ? { value, label: value } : null);
+    const filteredOptions = asyncSearch
+      ? safeAsyncOptions
+      : safeOptions.filter((option) => {
+          if (
+            typeof option.label !== "string" ||
+            typeof searchTerm !== "string"
+          )
+            return false;
+          try {
+            return option.label
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase());
+          } catch {
+            return false;
+          }
+        });
+
+    const handleSearch = async (e) => {
+      setSearchTerm(e.target.value);
+      if (asyncSearch && e.target.value.length >= 2) {
+        setLoading(true);
+        const results = await asyncSearch(e.target.value);
+        setAsyncOptions(results);
+        setLoading(false);
+      }
+    };
+
+    const dropdown = (
+      <div
+        className="absolute z-[200] w-full mt-1 bg-[#1a1a1a] border border-[#333] rounded-lg shadow-lg"
+        style={{
+          position: "absolute",
+          top: dropdownPos.top,
+          left: dropdownPos.left,
+          width: dropdownPos.width,
+        }}
+      >
+        <div className="p-2">
+          <input
+            type="text"
+            className="w-full p-2 bg-[#333] text-white rounded border border-[#444] focus:border-[#FF6B00] focus:outline-none"
+            placeholder="Search"
+            value={searchTerm}
+            onChange={handleSearch}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+        <div className="max-h-60 overflow-y-auto">
+          {loading ? (
+            <div className="px-4 py-2 text-gray-400">Loading...</div>
+          ) : filteredOptions.length > 0 ? (
+            filteredOptions.map((option, index) => (
+              <div
+                key={index}
+                className={`px-4 py-2 cursor-pointer hover:bg-[#333] ${
+                  value === option.value ? "bg-[#333]" : ""
+                }`}
+                onClick={() => {
+                  if (onSelectOption) onSelectOption(option);
+                  if (onChange)
+                    onChange({ target: { name, value: option.value } });
+                  setIsOpen(false);
+                  setSearchTerm("");
+                }}
+              >
+                <div className="text-white truncate">{option.label}</div>
+                {showShortCode && option.shortCode && (
+                  <div className="text-sm text-gray-400 truncate">
+                    {option.shortCode}
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <div className="px-4 py-2 text-gray-400">No options found</div>
+          )}
+        </div>
+      </div>
     );
 
     return (
       <div className={`mb-4 ${className}`}>
         <LabelComponent htmlFor={id || name} />
         {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
-
         <div className="relative">
           <div
+            ref={inputRef}
             className={`${inputClass} cursor-pointer flex items-center justify-between`}
             onClick={() => setIsOpen(!isOpen)}
           >
@@ -230,57 +332,10 @@ export const FormField = ({
               />
             </svg>
           </div>
-
-          {isOpen && (
-            <div className="absolute z-50 w-full mt-1 bg-[#1a1a1a] border border-[#333] rounded-lg shadow-lg">
-              <div className="p-2">
-                <input
-                  type="text"
-                  className="w-full p-2 bg-[#333] text-white rounded border border-[#444] focus:border-[#FF6B00] focus:outline-none"
-                  placeholder="Search"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onClick={(e) => e.stopPropagation()}
-                />
-              </div>
-              <div className="max-h-60 overflow-y-auto">
-                {filteredOptions.map((option, index) => (
-                  <div
-                    key={index}
-                    className={`px-4 py-2 cursor-pointer hover:bg-[#333] ${
-                      value === option.value ? "bg-[#333]" : ""
-                    }`}
-                    onClick={() => {
-                      if (onChange) {
-                        onChange({ target: { value: option.value } });
-                      }
-                      if (register) {
-                        inputProps.onChange({
-                          target: { value: option.value },
-                        });
-                      }
-                      setIsOpen(false);
-                      setSearchTerm("");
-                    }}
-                  >
-                    <div className="text-white truncate">{option.label}</div>
-                    {option.shortCode && (
-                      <div className="text-sm text-gray-400 truncate">
-                        {option.shortCode}
-                      </div>
-                    )}
-                  </div>
-                ))}
-                {filteredOptions.length === 0 && (
-                  <div className="px-4 py-2 text-gray-400">
-                    No options found
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          {isOpen && typeof window !== "undefined"
+            ? createPortal(dropdown, document.body)
+            : null}
         </div>
-
         {error && (
           <p className="mt-1 flex items-center text-sm text-red-500">
             <ErrorIcon size={16} className="mr-1" />

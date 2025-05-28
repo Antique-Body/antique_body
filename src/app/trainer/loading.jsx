@@ -5,5 +5,5 @@ import { FullScreenLoader } from "@/components";
 
 export default function TrainerLoading() {
   const { t } = useTranslation();
-  return <FullScreenLoader text={t("role.preparing.trainer")} />;
+  return <FullScreenLoader text={t("role.preparing.journey")} />;
 }

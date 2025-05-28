@@ -72,18 +72,20 @@ const TrainerRegistration = () => {
 
   // Handle form input changes
   const handleChange = (e) => {
+    if (!e.target || typeof e.target.name !== "string") return;
     const { name, value } = e.target;
+    console.log("handleChange called:", name, value);
 
-    if (name.includes(".")) {
+    if (typeof name === "string" && name.includes(".")) {
       // Handle nested objects like location.city
       const [parent, child] = name.split(".");
-      setFormData({
-        ...formData,
+      setFormData((prev) => ({
+        ...prev,
         [parent]: {
-          ...formData[parent],
+          ...prev[parent],
           [child]: value,
         },
-      });
+      }));
     } else {
       setFormData({
         ...formData,
@@ -172,6 +174,22 @@ const TrainerRegistration = () => {
     window.scrollTo(0, 0);
   };
 
+  // Helper to check if Professional Details step is filled enough to continue
+  const canContinueProfessionalDetails = () => {
+    // Only allow continue if at least one language is selected
+    const hasLanguages = formData.languages && formData.languages.length > 0;
+    // Debug log
+    console.log("[canContinueProfessionalDetails]", {
+      languages: formData.languages,
+      hasLanguages,
+      certFields,
+      trainingEnvironment: formData.trainingEnvironment,
+      trainingTypes: formData.trainingTypes,
+      result: hasLanguages,
+    });
+    return hasLanguages;
+  };
+
   return (
     <div className="relative min-h-screen  text-white">
       <EffectBackground />
@@ -253,7 +271,11 @@ const TrainerRegistration = () => {
               )}
 
               {step < 4 ? (
-                <Button onClick={goToNextStep} type="button">
+                <Button
+                  onClick={goToNextStep}
+                  type="button"
+                  disabled={step === 2 && !canContinueProfessionalDetails()}
+                >
                   Continue
                 </Button>
               ) : (

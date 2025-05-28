@@ -1,7 +1,10 @@
 "use client";
-import { useState, useEffect } from "react";
-import { FormField } from "@/components/common";
 import { Icon } from "@iconify/react";
+
+import { fetchGeoapifySuggestions } from "@/app/utils/geoapify";
+import { FormField } from "@/components/common";
+
+// Country options from countryOptions.js
 
 export const LocationSelector = ({
   formData,
@@ -9,90 +12,35 @@ export const LocationSelector = ({
   title = "Location Information",
   description = "This helps clients find you in their area",
 }) => {
-  const [suggestions, setSuggestions] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-
-  // Mock function for location suggestions - in real app, integrate with Google Places API
-  const fetchLocationSuggestions = async (query) => {
-    if (query.length < 3) {
-      setSuggestions([]);
-      return;
+  // Helper za Geoapify za State i Country
+  const fetchStateSuggestions = async (query) => {
+    const results = await fetchGeoapifySuggestions(query);
+    // Filtriraj samo unique state
+    const unique = [];
+    const seen = new Set();
+    for (const r of results) {
+      if (r.state && !seen.has(r.state)) {
+        unique.push({ value: r.state, label: r.state });
+        seen.add(r.state);
+      }
     }
-
-    setIsLoading(true);
-
-    // Mock suggestions - replace with actual Google Places API call
-    const mockSuggestions = [
-      {
-        id: 1,
-        description: `${query}, Bosnia and Herzegovina`,
-        city: query,
-        country: "Bosnia and Herzegovina",
-      },
-      {
-        id: 2,
-        description: `${query}, Croatia`,
-        city: query,
-        country: "Croatia",
-      },
-      {
-        id: 3,
-        description: `${query}, Serbia`,
-        city: query,
-        country: "Serbia",
-      },
-      {
-        id: 4,
-        description: `${query}, Slovenia`,
-        city: query,
-        country: "Slovenia",
-      },
-      {
-        id: 5,
-        description: `${query}, Germany`,
-        city: query,
-        country: "Germany",
-      },
-    ];
-
-    setTimeout(() => {
-      setSuggestions(mockSuggestions);
-      setIsLoading(false);
-    }, 300);
+    return unique;
   };
-
-  const handleCityChange = (e) => {
-    const value = e.target.value;
-    onChange(e);
-
-    if (value.length >= 3) {
-      setShowSuggestions(true);
-      fetchLocationSuggestions(value);
-    } else {
-      setShowSuggestions(false);
-      setSuggestions([]);
+  const fetchCountrySuggestions = async (query) => {
+    const results = await fetchGeoapifySuggestions(query);
+    // Filtriraj samo unique country
+    const unique = [];
+    const seen = new Set();
+    for (const r of results) {
+      if (r.country && !seen.has(r.country)) {
+        unique.push({ value: r.country, label: r.country });
+        seen.add(r.country);
+      }
     }
+    return unique;
   };
 
-  const handleSuggestionSelect = (suggestion) => {
-    onChange({
-      target: {
-        name: "location.city",
-        value: suggestion.city,
-      },
-    });
-
-    onChange({
-      target: {
-        name: "location.country",
-        value: suggestion.country,
-      },
-    });
-
-    setShowSuggestions(false);
-    setSuggestions([]);
-  };
+  // Preporučeni gradovi (puni naziv iz Geoapify)
 
   return (
     <div className="space-y-4">
@@ -102,67 +50,71 @@ export const LocationSelector = ({
       </div>
 
       <div className="grid grid-cols-1 gap-4">
-        {/* City with autocomplete */}
-        <div className="relative">
-          <FormField
-            label="City"
-            name="location.city"
-            value={formData.location.city}
-            onChange={handleCityChange}
-            placeholder="Start typing your city..."
-          />
-
-          {/* Suggestions dropdown */}
-          {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute z-50 w-full mt-1 bg-[#1a1a1a] border border-[#333] rounded-lg shadow-lg max-h-60 overflow-y-auto">
-              {isLoading ? (
-                <div className="p-3 text-center text-gray-400">
-                  <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-[#FF6B00]"></div>
-                  <span className="ml-2">Searching...</span>
-                </div>
-              ) : (
-                suggestions.map((suggestion) => (
-                  <button
-                    key={suggestion.id}
-                    type="button"
-                    onClick={() => handleSuggestionSelect(suggestion)}
-                    className="w-full text-left p-3 hover:bg-[#333] text-gray-300 hover:text-white transition-colors border-b border-[#333] last:border-b-0"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Icon
-                        icon="mdi:map-marker"
-                        width={16}
-                        height={16}
-                        className="text-gray-400"
-                      />
-                      <span className="text-sm">{suggestion.description}</span>
-                    </div>
-                  </button>
-                ))
-              )}
-            </div>
-          )}
-        </div>
+        {/* City as async searchableSelect */}
+        <FormField
+          label="City"
+          name="location.city"
+          type="searchableSelect"
+          value={formData.location.city}
+          asyncSearch={fetchGeoapifySuggestions}
+          onSelectOption={(option) => {
+            onChange({
+              target: {
+                name: "location.city",
+                value: option.city || option.label || "",
+              },
+            });
+            onChange({
+              target: { name: "location.state", value: option.state || "" },
+            });
+            onChange({
+              target: { name: "location.country", value: option.country || "" },
+            });
+            onChange({
+              target: {
+                name: "location.postalCode",
+                value: option.postalCode || "",
+              },
+            });
+          }}
+          onChange={onChange}
+          placeholder="Start typing your city..."
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* State/Province as async searchableSelect */}
           <FormField
             label="State/Province"
             name="location.state"
+            type="searchableSelect"
             value={formData.location.state}
+            asyncSearch={fetchStateSuggestions}
+            onSelectOption={(option) => {
+              onChange({
+                target: { name: "location.state", value: option.value },
+              });
+            }}
             onChange={onChange}
-            placeholder="Your state or province"
+            placeholder="Type to search state/province..."
           />
-
+          {/* Country as async searchableSelect */}
           <FormField
             label="Country"
             name="location.country"
+            type="searchableSelect"
             value={formData.location.country}
+            asyncSearch={fetchCountrySuggestions}
+            onSelectOption={(option) => {
+              onChange({
+                target: { name: "location.country", value: option.value },
+              });
+            }}
             onChange={onChange}
-            placeholder="Your country"
+            placeholder="Type to search country..."
           />
         </div>
 
-        {/* Optional: Postal Code */}
+        {/* Postal Code as normal input, auto-filled if available */}
         <FormField
           label="Postal Code (Optional)"
           name="location.postalCode"
@@ -181,9 +133,9 @@ export const LocationSelector = ({
           </div>
           <p className="text-sm text-gray-300 mt-1">
             {formData.location.city}
+            {formData.location.postalCode && ` ${formData.location.postalCode}`}
             {formData.location.state && `, ${formData.location.state}`}
             {formData.location.country && `, ${formData.location.country}`}
-            {formData.location.postalCode && ` ${formData.location.postalCode}`}
           </p>
         </div>
       )}
