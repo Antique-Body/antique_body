@@ -124,7 +124,7 @@ export const authConfig = {
             await prisma.user.create({
               data: {
                 email: user.email,
-                name: user.name || profile.name,
+                firstName: user.firstName || profile.name,
                 lastName: profile.family_name || "",
                 emailVerified: true,
                 phoneVerified: false,

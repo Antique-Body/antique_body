@@ -12,10 +12,10 @@ export const validateRegistration = (data) => {
     return { valid: false, errors: { general: "No data provided" } };
   }
 
-  const { name, lastName, email, password } = data;
+  const { firstName, lastName, email, password } = data;
 
-  if (isEmpty(name)) {
-    errors.name = "Name is required";
+  if (isEmpty(firstName)) {
+    errors.firstName = "Name is required";
   }
 
   // lastName is optional, but if provided should not be just whitespace
@@ -75,10 +75,10 @@ export const validateUserUpdate = (data) => {
     return { valid: false, errors: { general: "No data provided" } };
   }
 
-  const { name, lastName, phone } = data;
+  const { firstName, lastName, phone } = data;
 
-  if (name !== undefined && isEmpty(name)) {
-    errors.name = "Name cannot be empty";
+  if (firstName !== undefined && isEmpty(firstName)) {
+    errors.firstName = "Name cannot be empty";
   }
 
   if (lastName !== undefined && isEmpty(lastName)) {

@@ -59,7 +59,7 @@ export default function RegisterPage() {
 
     try {
       const requestBody = {
-        name: data.firstName,
+        firstName: data.firstName,
         lastName: data.lastName,
         code: verificationCode,
         ...(data.email
