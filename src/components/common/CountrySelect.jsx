@@ -15,10 +15,6 @@ export const CountrySelect = ({
   placeholder,
   error,
   name = "countryCode",
-  showLanguageName = false,
-  displayLanguageOnly = false,
-  options,
-  showShortCode = true,
 }) => {
   const { t } = useTranslation();
   const getDisplayValue = (option) => {
@@ -30,20 +26,13 @@ export const CountrySelect = ({
       case "code":
         return option.value; // Returns only the country code
       default:
-        return `${option.flagName} ${option.countryWithCode}`; // Returns full format (flag + name + code)
+        return option.label; // Returns full format (flag + name + code)
     }
   };
 
-  const optionsToUse =
-    Array.isArray(options) && options.length > 0 ? options : countryOptions;
-  const formattedOptions = optionsToUse.map((option) => ({
+  const formattedOptions = countryOptions.map((option) => ({
     ...option,
-    label:
-      displayLanguageOnly && option.languageName
-        ? option.languageName
-        : showLanguageName && option.languageName
-        ? option.languageName
-        : getDisplayValue(option),
+    label: getDisplayValue(option),
   }));
 
   return (
@@ -58,7 +47,6 @@ export const CountrySelect = ({
       onChange={onChange}
       placeholder={placeholder || t("select_country")}
       error={error}
-      showShortCode={showShortCode}
     />
   );
 };
