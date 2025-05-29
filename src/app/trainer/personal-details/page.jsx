@@ -103,10 +103,26 @@ const TrainerRegistration = () => {
   };
 
   // Handle certification fields
-  const handleCertChange = (id, value) => {
-    const updatedFields = certFields.map((field) =>
-      field.id === id ? { ...field, value } : field
-    );
+  const handleCertChange = (
+    id,
+    value,
+    fieldName = "value",
+    fieldValue = null
+  ) => {
+    let updatedFields;
+
+    if (fieldName === "value") {
+      // Handle the main certification name (backward compatibility)
+      updatedFields = certFields.map((field) =>
+        field.id === id ? { ...field, value } : field
+      );
+    } else {
+      // Handle additional fields like issuer, expiryDate
+      updatedFields = certFields.map((field) =>
+        field.id === id ? { ...field, [fieldName]: fieldValue } : field
+      );
+    }
+
     setCertFields(updatedFields);
 
     // Update form data with certification values
