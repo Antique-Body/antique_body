@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { userService } from "@/app/api/users/services";
-import { isAuthenticated } from "@/lib/auth";
+import { isAuthenticated } from "@/lib/auth-helpers";
 import { validateRoleUpdate } from "@/middleware/validation";
 
 export async function PATCH(request) {
