@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+
 import { FormField } from "@/components/common/FormField";
 
 export const PriceRangeSlider = ({ min, max, value, onChange }) => {
@@ -131,21 +132,17 @@ export const PriceRangeSlider = ({ min, max, value, onChange }) => {
           <label className="block text-xs text-zinc-400 mb-1.5">
             Min Price
           </label>
-          <div className="relative flex items-center">
-            <div className="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center bg-zinc-700/50 border border-zinc-700 rounded-l-lg">
-              <span className="text-zinc-400">$</span>
-            </div>
-            <FormField
-              type="number"
-              name="minPrice"
-              value={localValues[0]}
-              onChange={handleInputChange(0)}
-              onBlur={handleInputBlur}
-              min={min}
-              max={localValues[1] - 5}
-              className="mb-0 pl-8 py-1.5 rounded-lg bg-zinc-800/80 border-zinc-700"
-            />
-          </div>
+          <FormField
+            type="number"
+            name="minPrice"
+            value={localValues[0]}
+            onChange={handleInputChange(0)}
+            onBlur={handleInputBlur}
+            min={min}
+            max={localValues[1] - 5}
+            className="mb-0 py-1.5 rounded-lg bg-zinc-800/80 border-zinc-700"
+            prefixIcon="mdi:currency-usd"
+          />
         </div>
 
         <div className="pt-5">
@@ -156,21 +153,17 @@ export const PriceRangeSlider = ({ min, max, value, onChange }) => {
           <label className="block text-xs text-zinc-400 mb-1.5">
             Max Price
           </label>
-          <div className="relative flex items-center">
-            <div className="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center bg-zinc-700/50 border border-zinc-700 rounded-l-lg">
-              <span className="text-zinc-400">$</span>
-            </div>
-            <FormField
-              type="number"
-              name="maxPrice"
-              value={localValues[1]}
-              onChange={handleInputChange(1)}
-              onBlur={handleInputBlur}
-              min={localValues[0] + 5}
-              max={max}
-              className="mb-0 pl-8 py-1.5 rounded-lg bg-zinc-800/80 border-zinc-700"
-            />
-          </div>
+          <FormField
+            type="number"
+            name="maxPrice"
+            value={localValues[1]}
+            onChange={handleInputChange(1)}
+            onBlur={handleInputBlur}
+            min={localValues[0] + 5}
+            max={max}
+            className="mb-0 py-1.5 rounded-lg bg-zinc-800/80 border-zinc-700"
+            prefixIcon="mdi:currency-usd"
+          />
         </div>
       </div>
 
