@@ -146,7 +146,8 @@ export const Navigation = () => {
 
         {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center">
-          <button
+          <Button
+            variant="ghost"
             className="text-white focus:outline-none relative z-50 w-10 h-10 flex items-center justify-center"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
@@ -170,7 +171,7 @@ export const Navigation = () => {
                 }`}
               ></span>
             </div>
-          </button>
+          </Button>
         </div>
       </div>
 

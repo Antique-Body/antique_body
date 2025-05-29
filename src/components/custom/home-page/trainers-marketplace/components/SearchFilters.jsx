@@ -110,29 +110,32 @@ export const SearchFilters = ({
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold">Filters</h3>
         {hasActiveFilters && (
-          <button
+          <Button
+            variant="orangeText"
+            size="small"
             onClick={onClearFilters}
-            className="text-sm text-[#FF6B00] hover:text-[#FF9A00] transition-colors"
+            className="text-sm"
           >
             Clear all
-          </button>
+          </Button>
         )}
       </div>
 
       {/* Search input */}
       <div className="relative mb-6">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Icon icon="mdi:magnify" className="h-5 w-5 text-zinc-400" />
-        </div>
-        <input
+        <FormField
           type="text"
+          name="searchTrainers"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="bg-zinc-800 border border-zinc-700 text-white rounded-lg block w-full pl-10 pr-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF6B00]/40 focus:border-[#FF6B00]"
+          className="mb-0 w-full bg-zinc-800 border-zinc-700 text-white rounded-lg focus:ring-2 focus:ring-[#FF6B00]/40 focus:border-[#FF6B00]"
           placeholder="Search trainers..."
+          prefixIcon="mdi:magnify"
         />
         {searchQuery && (
-          <button
+          <Button
+            variant="ghost"
+            size="small"
             className="absolute inset-y-0 right-0 pr-3 flex items-center"
             onClick={() => setSearchQuery("")}
           >
@@ -140,7 +143,7 @@ export const SearchFilters = ({
               icon="mdi:close"
               className="h-5 w-5 text-zinc-400 hover:text-white"
             />
-          </button>
+          </Button>
         )}
       </div>
 
@@ -158,7 +161,8 @@ export const SearchFilters = ({
 
       {/* Specialty filter */}
       <div className="mb-4 border-t border-zinc-800 pt-4">
-        <button
+        <Button
+          variant="ghost"
           className="flex items-center justify-between w-full text-left mb-2"
           onClick={() => toggleSection("specialty")}
         >
@@ -167,7 +171,7 @@ export const SearchFilters = ({
             icon={isExpanded.specialty ? "mdi:chevron-up" : "mdi:chevron-down"}
             className="h-5 w-5"
           />
-        </button>
+        </Button>
 
         <AnimatePresence>
           {isExpanded.specialty && (
@@ -199,7 +203,8 @@ export const SearchFilters = ({
 
       {/* Location filter */}
       <div className="mb-4 border-t border-zinc-800 pt-4">
-        <button
+        <Button
+          variant="ghost"
           className="flex items-center justify-between w-full text-left mb-2"
           onClick={() => toggleSection("location")}
         >
@@ -208,7 +213,7 @@ export const SearchFilters = ({
             icon={isExpanded.location ? "mdi:chevron-up" : "mdi:chevron-down"}
             className="h-5 w-5"
           />
-        </button>
+        </Button>
 
         <AnimatePresence>
           {isExpanded.location && (
@@ -240,7 +245,8 @@ export const SearchFilters = ({
 
       {/* Availability filter */}
       <div className="mb-4 border-t border-zinc-800 pt-4">
-        <button
+        <Button
+          variant="ghost"
           className="flex items-center justify-between w-full text-left mb-2"
           onClick={() => toggleSection("availability")}
         >
@@ -251,7 +257,7 @@ export const SearchFilters = ({
             }
             className="h-5 w-5"
           />
-        </button>
+        </Button>
 
         <AnimatePresence>
           {isExpanded.availability && (
@@ -264,17 +270,19 @@ export const SearchFilters = ({
             >
               <div className="flex flex-wrap gap-2 mt-2">
                 {availabilityDays.map((day) => (
-                  <button
+                  <Button
                     key={day}
-                    onClick={() => handleAvailabilityChange(day)}
-                    className={`px-2.5 py-1 text-xs font-medium rounded-full transition-colors ${
+                    variant={
                       filters.availability.includes(day)
-                        ? "bg-[#FF6B00] text-white"
-                        : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
-                    }`}
+                        ? "orangeFilled"
+                        : "secondary"
+                    }
+                    size="small"
+                    onClick={() => handleAvailabilityChange(day)}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-full`}
                   >
                     {day}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </motion.div>
@@ -284,7 +292,8 @@ export const SearchFilters = ({
 
       {/* Price range filter */}
       <div className="mb-4 border-t border-zinc-800 pt-4">
-        <button
+        <Button
+          variant="ghost"
           className="flex items-center justify-between w-full text-left mb-2"
           onClick={() => toggleSection("price")}
         >
@@ -293,7 +302,7 @@ export const SearchFilters = ({
             icon={isExpanded.price ? "mdi:chevron-up" : "mdi:chevron-down"}
             className="h-5 w-5"
           />
-        </button>
+        </Button>
 
         <AnimatePresence>
           {isExpanded.price && (
@@ -317,7 +326,8 @@ export const SearchFilters = ({
 
       {/* Rating filter */}
       <div className="mb-4 border-t border-zinc-800 pt-4">
-        <button
+        <Button
+          variant="ghost"
           className="flex items-center justify-between w-full text-left mb-2"
           onClick={() => toggleSection("rating")}
         >
@@ -326,7 +336,7 @@ export const SearchFilters = ({
             icon={isExpanded.rating ? "mdi:chevron-up" : "mdi:chevron-down"}
             className="h-5 w-5"
           />
-        </button>
+        </Button>
 
         <AnimatePresence>
           {isExpanded.rating && (
@@ -378,7 +388,8 @@ export const SearchFilters = ({
 
       {/* Tags filter */}
       <div className="mb-4 border-t border-zinc-800 pt-4">
-        <button
+        <Button
+          variant="ghost"
           className="flex items-center justify-between w-full text-left mb-2"
           onClick={() => toggleSection("tags")}
         >
@@ -387,7 +398,7 @@ export const SearchFilters = ({
             icon={isExpanded.tags ? "mdi:chevron-up" : "mdi:chevron-down"}
             className="h-5 w-5"
           />
-        </button>
+        </Button>
 
         <AnimatePresence>
           {isExpanded.tags && (
@@ -400,17 +411,17 @@ export const SearchFilters = ({
             >
               <div className="flex flex-wrap gap-2 mt-2">
                 {tags.map((tag) => (
-                  <button
+                  <Button
                     key={tag}
+                    variant={
+                      filters.tags.includes(tag) ? "orangeFilled" : "secondary"
+                    }
+                    size="small"
                     onClick={() => handleTagChange(tag)}
-                    className={`px-2.5 py-1 text-xs font-medium rounded-full transition-colors ${
-                      filters.tags.includes(tag)
-                        ? "bg-[#FF6B00] text-white"
-                        : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
-                    }`}
+                    className="px-2.5 py-1 text-xs font-medium rounded-full"
                   >
                     {tag}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </motion.div>

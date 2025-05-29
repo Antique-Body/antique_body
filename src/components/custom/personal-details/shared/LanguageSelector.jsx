@@ -2,6 +2,7 @@
 import { Icon } from "@iconify/react";
 import { useState } from "react";
 
+import { Button } from "@/components/common/Button";
 import countryOptions from "@/app/utils/countryOptions";
 import { CountrySelect } from "@/components/common/CountrySelect";
 
@@ -71,13 +72,14 @@ export const LanguageSelector = ({ selectedLanguages = [], onChange }) => {
                 className="flex items-center gap-2 rounded-full bg-[#FF6B00]/10 border border-[#FF6B00]/30 px-3 py-1 text-sm text-[#FF6B00]"
               >
                 <span>{languageName}</span>
-                <button
+                <Button
+                  variant="ghost"
                   type="button"
                   onClick={() => removeLanguage(languageName)}
                   className="ml-1 hover:text-red-400 transition-colors"
                 >
                   <Icon icon="mdi:close" width={14} height={14} />
-                </button>
+                </Button>
               </div>
             ))}
           </div>

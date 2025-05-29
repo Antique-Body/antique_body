@@ -1,6 +1,8 @@
 "use client";
 import { Icon } from "@iconify/react";
 
+import { Button } from "@/components/common/Button";
+
 const trainingEnvironments = [
   {
     id: "indoor",
@@ -61,14 +63,17 @@ export const TrainingTypeSelector = ({
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {trainingEnvironments.map((env) => (
-          <button
+          <Button
             key={env.id}
+            variant={
+              selectedEnvironment === env.id ? "orangeOutline" : "secondary"
+            }
             type="button"
             onClick={() => onEnvironmentChange(env.id)}
-            className={`p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+            className={`p-4 rounded-lg text-left ${
               selectedEnvironment === env.id
-                ? "border-[#FF6B00] bg-[#FF6B00]/10 text-[#FF6B00]"
-                : "border-[#333] bg-[rgba(30,30,30,0.5)] text-gray-300 hover:border-[#444] hover:bg-[rgba(40,40,40,0.7)]"
+                ? "bg-[#FF6B00]/10 text-[#FF6B00]"
+                : "bg-[rgba(30,30,30,0.5)] text-gray-300 hover:border-[#444] hover:bg-[rgba(40,40,40,0.7)]"
             }`}
           >
             <div className="flex items-center gap-3 mb-2">
@@ -76,7 +81,7 @@ export const TrainingTypeSelector = ({
               <span className="font-medium">{env.label}</span>
             </div>
             <p className="text-xs text-gray-400">{env.description}</p>
-          </button>
+          </Button>
         ))}
       </div>
     </div>
@@ -90,14 +95,17 @@ export const TrainingTypeSelector = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {trainingTypes.map((type) => (
-          <button
+          <Button
             key={type.id}
+            variant={
+              selectedTypes.includes(type.id) ? "orangeOutline" : "secondary"
+            }
             type="button"
             onClick={() => onTypeToggle(type.id)}
-            className={`p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+            className={`p-4 rounded-lg text-left ${
               selectedTypes.includes(type.id)
-                ? "border-[#FF6B00] bg-[#FF6B00]/10 text-[#FF6B00]"
-                : "border-[#333] bg-[rgba(30,30,30,0.5)] text-gray-300 hover:border-[#444] hover:bg-[rgba(40,40,40,0.7)]"
+                ? "bg-[#FF6B00]/10 text-[#FF6B00]"
+                : "bg-[rgba(30,30,30,0.5)] text-gray-300 hover:border-[#444] hover:bg-[rgba(40,40,40,0.7)]"
             }`}
           >
             <div className="flex items-center gap-3">
@@ -112,7 +120,7 @@ export const TrainingTypeSelector = ({
                 />
               )}
             </div>
-          </button>
+          </Button>
         ))}
       </div>
 

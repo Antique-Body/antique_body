@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
+import { Button } from "@/components/common/Button";
+
 export const SocialProofSection = () => {
   const testimonialRef = useRef(null);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
@@ -235,12 +237,17 @@ export const SocialProofSection = () => {
                 {/* Navigation dots */}
                 <div className="flex items-center gap-2 mt-8">
                   {testimonials.map((_, index) => (
-                    <button
+                    <Button
                       key={index}
-                      onClick={() => setActiveTestimonial(index)}
-                      className={`w-3 h-3 rounded-full transition-all ${
+                      variant={
                         activeTestimonial === index
-                          ? "bg-[#FF6B00] w-10"
+                          ? "orangeFilled"
+                          : "secondary"
+                      }
+                      onClick={() => setActiveTestimonial(index)}
+                      className={`w-3 h-3 rounded-full min-w-0 min-h-0 p-0 transition-all ${
+                        activeTestimonial === index
+                          ? "w-10"
                           : "bg-gray-600 hover:bg-gray-500"
                       }`}
                       aria-label={`View testimonial ${index + 1}`}

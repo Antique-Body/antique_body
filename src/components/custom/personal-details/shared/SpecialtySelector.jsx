@@ -2,6 +2,9 @@
 import { Icon } from "@iconify/react";
 import { useState } from "react";
 
+import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/common/FormField";
+
 const specialtyOptions = [
   { id: "weight-loss", label: "Weight Loss", icon: "mdi:scale-bathroom" },
   { id: "muscle-building", label: "Muscle Building", icon: "mdi:arm-flex" },
@@ -52,18 +55,14 @@ export const SpecialtySelector = ({ selectedSpecialties = [], onChange }) => {
     <div className="space-y-6">
       {/* Search Bar */}
       <div className="relative">
-        <Icon
-          icon="mdi:magnify"
-          width={18}
-          height={18}
-          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-        />
-        <input
+        <FormField
           type="text"
+          name="specialtySearch"
           placeholder="Search specialties..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm placeholder-gray-400 focus:border-[#FF6B00] focus:outline-none transition-colors"
+          className="mb-0 bg-[#1a1a1a] border-[#333] rounded-lg"
+          prefixIcon="mdi:magnify"
         />
       </div>
 
@@ -73,14 +72,15 @@ export const SpecialtySelector = ({ selectedSpecialties = [], onChange }) => {
           const isSelected = selectedSpecialties.includes(specialty.id);
 
           return (
-            <button
+            <Button
               key={specialty.id}
+              variant={isSelected ? "orangeFilled" : "secondary"}
               type="button"
               onClick={() => handleSpecialtyToggle(specialty.id)}
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                 isSelected
-                  ? "bg-[#FF6B00] text-white shadow-lg shadow-[#FF6B00]/25 scale-105"
-                  : "bg-[#1a1a1a] text-gray-300 border border-[#333] hover:border-[#FF6B00]/50 hover:text-white hover:bg-[#FF6B00]/10"
+                  ? "shadow-lg shadow-[#FF6B00]/25 scale-105"
+                  : "border border-[#333] hover:border-[#FF6B00]/50 hover:text-white hover:bg-[#FF6B00]/10"
               }`}
             >
               <Icon
@@ -98,7 +98,7 @@ export const SpecialtySelector = ({ selectedSpecialties = [], onChange }) => {
                   className="text-white"
                 />
               )}
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -118,13 +118,14 @@ export const SpecialtySelector = ({ selectedSpecialties = [], onChange }) => {
               {selectedSpecialties.length === 1 ? "y" : "ies"} selected
             </span>
           </div>
-          <button
+          <Button
+            variant="orangeText"
             type="button"
             onClick={() => onChange([])}
             className="text-xs text-[#FF6B00] hover:text-[#FF6B00]/80 font-medium transition-colors"
           >
             Clear All
-          </button>
+          </Button>
         </div>
       )}
 

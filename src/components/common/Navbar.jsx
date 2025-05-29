@@ -4,6 +4,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
+import { Button } from "@/components/common/Button";
+
 export const Navbar = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -59,12 +61,13 @@ export const Navbar = () => {
             <span className="text-white text-sm">
               Welcome, {session?.user?.name}
             </span>
-            <button
+            <Button
+              variant="primary"
               onClick={handleLogout}
-              className="bg-gradient-to-r from-[#ff7800] to-[#ff5f00] px-4 py-2 rounded text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 transform hover:scale-105 cursor-pointer"
+              className="px-4 py-2 rounded"
             >
               Logout
-            </button>
+            </Button>
           </div>
         ) : (
           <Link

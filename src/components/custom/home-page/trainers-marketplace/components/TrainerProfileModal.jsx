@@ -54,13 +54,14 @@ export const TrainerProfileModal = ({ trainer, isOpen, onClose }) => {
             {/* Header section with close button */}
             <div className="relative">
               {/* Close button */}
-              <button
+              <Button
+                variant="ghost"
                 onClick={onClose}
                 className="absolute top-4 right-4 z-20 bg-black/50 backdrop-blur-sm rounded-full p-2 text-white hover:text-[#FF6B00] transition-colors"
                 aria-label="Close profile"
               >
                 <Icon icon="mdi:close" className="h-6 w-6" />
-              </button>
+              </Button>
 
               {/* Banner image */}
               <div className="h-48 relative">
@@ -186,18 +187,16 @@ export const TrainerProfileModal = ({ trainer, isOpen, onClose }) => {
             <div className="px-4 border-b border-zinc-800">
               <div className="flex overflow-x-auto hide-scrollbar">
                 {tabs.map((tab) => (
-                  <button
+                  <Button
                     key={tab.id}
+                    variant="tab"
+                    isActive={activeTab === tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center px-4 py-3 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
-                      activeTab === tab.id
-                        ? "border-[#FF6B00] text-[#FF6B00]"
-                        : "border-transparent text-zinc-400 hover:text-white"
-                    }`}
+                    className="flex items-center px-4 py-3 font-medium text-sm"
                   >
                     <Icon icon={tab.icon} className="h-4 w-4 mr-2" />
                     {tab.label}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>

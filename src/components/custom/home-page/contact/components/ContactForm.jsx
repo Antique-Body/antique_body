@@ -1,10 +1,26 @@
 import { motion } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/common/FormField";
 
 export function ContactForm() {
   const formRef = useRef(null);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   return (
     <motion.div
@@ -20,50 +36,53 @@ export function ContactForm() {
         <h2 className="text-2xl font-bold mb-6">Send us a Message</h2>
         <form className="space-y-6" ref={formRef}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                First Name
-              </label>
-              <input
-                type="text"
-                className="w-full px-4 py-3 rounded-lg bg-gray-800/50 border border-gray-700 focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/20 outline-none transition-colors"
-                placeholder="John"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Last Name
-              </label>
-              <input
-                type="text"
-                className="w-full px-4 py-3 rounded-lg bg-gray-800/50 border border-gray-700 focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/20 outline-none transition-colors"
-                placeholder="Doe"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">Email</label>
-            <input
-              type="email"
-              className="w-full px-4 py-3 rounded-lg bg-gray-800/50 border border-gray-700 focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/20 outline-none transition-colors"
-              placeholder="john@example.com"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">Subject</label>
-            <input
+            <FormField
               type="text"
-              className="w-full px-4 py-3 rounded-lg bg-gray-800/50 border border-gray-700 focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/20 outline-none transition-colors"
-              placeholder="How can we help?"
+              name="firstName"
+              label="First Name"
+              value={formData.firstName}
+              onChange={handleChange}
+              placeholder="John"
+              backgroundStyle="transparent"
+            />
+            <FormField
+              type="text"
+              name="lastName"
+              label="Last Name"
+              value={formData.lastName}
+              onChange={handleChange}
+              placeholder="Doe"
+              backgroundStyle="transparent"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">Message</label>
-            <textarea
-              className="w-full px-4 py-3 rounded-lg bg-gray-800/50 border border-gray-700 focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/20 outline-none transition-colors h-32 resize-none"
-              placeholder="Your message here..."
-            ></textarea>
-          </div>
+          <FormField
+            type="email"
+            name="email"
+            label="Email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="john@example.com"
+            backgroundStyle="transparent"
+          />
+          <FormField
+            type="text"
+            name="subject"
+            label="Subject"
+            value={formData.subject}
+            onChange={handleChange}
+            placeholder="How can we help?"
+            backgroundStyle="transparent"
+          />
+          <FormField
+            type="textarea"
+            name="message"
+            label="Message"
+            value={formData.message}
+            onChange={handleChange}
+            placeholder="Your message here..."
+            backgroundStyle="transparent"
+            rows={6}
+          />
           <Button
             variant="orangeFilled"
             size="large"

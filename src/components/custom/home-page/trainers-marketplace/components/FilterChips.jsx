@@ -1,6 +1,8 @@
 import { Icon } from "@iconify/react";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { Button } from "@/components/common/Button";
+
 export const FilterChips = ({
   filters,
   setFilters,
@@ -93,12 +95,14 @@ export const FilterChips = ({
             <span className="text-xs text-white truncate max-w-[150px]">
               {searchQuery}
             </span>
-            <button
+            <Button
+              variant="ghostOrange"
+              size="small"
               onClick={() => setSearchQuery("")}
-              className="ml-1.5 text-[#FF6B00] hover:text-white"
+              className="ml-1.5 p-0"
             >
               <Icon icon="mdi:close" className="w-3.5 h-3.5" />
-            </button>
+            </Button>
           </motion.div>
         )}
 
@@ -114,12 +118,14 @@ export const FilterChips = ({
             <span className="text-xs text-zinc-300 truncate max-w-[120px]">
               {specialty}
             </span>
-            <button
+            <Button
+              variant="ghost"
+              size="small"
               onClick={() => removeSpecialty(specialty)}
-              className="ml-1.5 text-zinc-400 hover:text-white"
+              className="ml-1.5 p-0"
             >
               <Icon icon="mdi:close" className="w-3.5 h-3.5" />
-            </button>
+            </Button>
           </motion.div>
         ))}
 
@@ -139,12 +145,14 @@ export const FilterChips = ({
             <span className="text-xs text-zinc-300 truncate max-w-[120px]">
               {location}
             </span>
-            <button
+            <Button
+              variant="ghost"
+              size="small"
               onClick={() => removeLocation(location)}
-              className="ml-1.5 text-zinc-400 hover:text-white"
+              className="ml-1.5 p-0"
             >
               <Icon icon="mdi:close" className="w-3.5 h-3.5" />
-            </button>
+            </Button>
           </motion.div>
         ))}
 
@@ -162,12 +170,14 @@ export const FilterChips = ({
               className="w-3.5 h-3.5 text-[#FF6B00] mr-1"
             />
             <span className="text-xs text-zinc-300">{day}</span>
-            <button
+            <Button
+              variant="ghost"
+              size="small"
               onClick={() => removeAvailability(day)}
-              className="ml-1.5 text-zinc-400 hover:text-white"
+              className="ml-1.5 p-0"
             >
               <Icon icon="mdi:close" className="w-3.5 h-3.5" />
-            </button>
+            </Button>
           </motion.div>
         ))}
 
@@ -187,12 +197,14 @@ export const FilterChips = ({
             <span className="text-xs text-zinc-300">
               ${filters.price.min} - ${filters.price.max}
             </span>
-            <button
+            <Button
+              variant="ghost"
+              size="small"
               onClick={resetPrice}
-              className="ml-1.5 text-zinc-400 hover:text-white"
+              className="ml-1.5 p-0"
             >
               <Icon icon="mdi:close" className="w-3.5 h-3.5" />
-            </button>
+            </Button>
           </motion.div>
         )}
 
@@ -209,12 +221,14 @@ export const FilterChips = ({
             <span className="text-xs text-zinc-300">
               {filters.rating}+ Stars
             </span>
-            <button
+            <Button
+              variant="ghost"
+              size="small"
               onClick={resetRating}
-              className="ml-1.5 text-zinc-400 hover:text-white"
+              className="ml-1.5 p-0"
             >
               <Icon icon="mdi:close" className="w-3.5 h-3.5" />
-            </button>
+            </Button>
           </motion.div>
         )}
 
@@ -231,12 +245,14 @@ export const FilterChips = ({
             <span className="text-xs text-zinc-300 truncate max-w-[100px]">
               {tag}
             </span>
-            <button
+            <Button
+              variant="ghost"
+              size="small"
               onClick={() => removeTag(tag)}
-              className="ml-1.5 text-zinc-400 hover:text-white"
+              className="ml-1.5 p-0"
             >
               <Icon icon="mdi:close" className="w-3.5 h-3.5" />
-            </button>
+            </Button>
           </motion.div>
         ))}
       </AnimatePresence>

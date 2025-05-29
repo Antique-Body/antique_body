@@ -4,6 +4,8 @@ import { useState } from "react";
 
 import { TrainerCard } from "./TrainerCard";
 
+import { Button } from "@/components/common/Button";
+
 export const TrainersList = ({ trainers, onTrainerClick }) => {
   const [sortOption, setSortOption] = useState("rating");
   const [sortOrder, setSortOrder] = useState("desc");
@@ -62,7 +64,9 @@ export const TrainersList = ({ trainers, onTrainerClick }) => {
             <option value="name">Name</option>
           </select>
 
-          <button
+          <Button
+            variant="secondary"
+            size="small"
             onClick={toggleSortOrder}
             className="bg-zinc-800 border border-zinc-700 rounded-lg p-1.5 hover:bg-zinc-700 transition-colors"
             aria-label={
@@ -77,7 +81,7 @@ export const TrainersList = ({ trainers, onTrainerClick }) => {
               }
               className="w-5 h-5 text-zinc-300"
             />
-          </button>
+          </Button>
         </div>
       </div>
 

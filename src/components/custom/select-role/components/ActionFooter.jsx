@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/common/Button";
+
 export function ActionFooter({ selectedRole, config, loading, onContinue, t }) {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl border-t border-white/10 bg-gradient-to-t from-black to-black/90">
@@ -30,7 +32,8 @@ export function ActionFooter({ selectedRole, config, loading, onContinue, t }) {
           </div>
 
           {/* Continue button */}
-          <button
+          <Button
+            variant="primary"
             onClick={onContinue}
             disabled={loading}
             className={`
@@ -60,7 +63,7 @@ export function ActionFooter({ selectedRole, config, loading, onContinue, t }) {
                 <span className="mdi mdi-arrow-right group-hover:translate-x-1 transition-transform duration-300"></span>
               </>
             )}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
