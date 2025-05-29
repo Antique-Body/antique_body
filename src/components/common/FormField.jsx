@@ -37,6 +37,8 @@ export const FormField = ({
   showShortCode = true,
   asyncSearch,
   onSelectOption,
+  prefixIcon, // New prop for icon prefix
+  suffixIcon, // New prop for icon suffix
   ...props
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -96,6 +98,14 @@ export const FormField = ({
   // Determine padding based on size
   const getPadding = () => (size === "small" ? "p-2" : "p-3");
 
+  // Adjust padding if prefix or suffix icons are present
+  const getInputPadding = () => {
+    let padding = "";
+    if (prefixIcon) padding += " pl-10";
+    if (suffixIcon) padding += " pr-10";
+    return padding;
+  };
+
   // Base input class with conditional styling
   const inputClass = `w-full ${getPadding()} rounded-lg ${getBgStyle()} border ${
     error
@@ -103,7 +113,7 @@ export const FormField = ({
       : "border-[#333] focus:border-[#FF6B00]"
   } text-white focus:outline-none focus:ring-2 ${
     error ? "focus:ring-red-500/30" : "focus:ring-[#FF6B00]/30"
-  } transition ${className}`;
+  } transition ${getInputPadding()} ${className}`;
 
   // Consistent label component
   const LabelComponent = ({ htmlFor }) =>
@@ -407,18 +417,40 @@ export const FormField = ({
     <div className={`mb-4 ${className}`}>
       <LabelComponent htmlFor={id || name} />
       {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
-      <input
-        {...inputProps}
-        className={inputClass}
-        onChange={(e) => {
-          if (onChange) {
-            onChange(e);
-          }
-          if (inputProps.onChange) {
-            inputProps.onChange(e);
-          }
-        }}
-      />
+      <div className="relative">
+        {prefixIcon && (
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            {typeof prefixIcon === "string" ? (
+              <Icon icon={prefixIcon} className="h-5 w-5 text-zinc-400" />
+            ) : (
+              prefixIcon
+            )}
+          </div>
+        )}
+
+        <input
+          {...inputProps}
+          className={inputClass}
+          onChange={(e) => {
+            if (onChange) {
+              onChange(e);
+            }
+            if (inputProps.onChange) {
+              inputProps.onChange(e);
+            }
+          }}
+        />
+
+        {suffixIcon && (
+          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            {typeof suffixIcon === "string" ? (
+              <Icon icon={suffixIcon} className="h-5 w-5 text-zinc-400" />
+            ) : (
+              suffixIcon
+            )}
+          </div>
+        )}
+      </div>
       {error && (
         <p className="mt-1 flex items-center text-sm text-red-500">
           <ErrorIcon size={16} className="mr-1" />

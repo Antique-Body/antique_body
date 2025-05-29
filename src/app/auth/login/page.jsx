@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 
 import { EffectBackground } from "@/components/background";
 import { Button, Card } from "@/components/common";
+import { FormField } from "@/components/common/FormField";
 import { AuthForm } from "@/components/custom/auth/components/AuthForm";
 
 export default function LoginPage() {
@@ -199,11 +200,13 @@ export default function LoginPage() {
                   <label className="block text-sm font-medium text-gray-300 mb-1">
                     {t("auth.form.email")}
                   </label>
-                  <input
+                  <FormField
                     type="email"
+                    name="forgotPasswordEmail"
                     value={forgotPasswordEmail}
                     onChange={(e) => setForgotPasswordEmail(e.target.value)}
-                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff7800]"
+                    className="w-full mb-0"
+                    backgroundStyle="darker"
                     required
                   />
                 </div>

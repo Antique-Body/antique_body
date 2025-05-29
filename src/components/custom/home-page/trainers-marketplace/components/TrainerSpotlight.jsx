@@ -120,12 +120,14 @@ export const TrainerSpotlight = ({ trainers, onTrainerClick }) => {
                         size="medium"
                         onClick={() => onTrainerClick(activeTrainer)}
                         className="group"
+                        rightIcon={
+                          <Icon
+                            icon="mdi:arrow-right"
+                            className="w-5 h-5 ml-1 group-hover:translate-x-0.5 transition-transform"
+                          />
+                        }
                       >
                         View Profile
-                        <Icon
-                          icon="mdi:arrow-right"
-                          className="w-5 h-5 ml-1 group-hover:translate-x-0.5 transition-transform"
-                        />
                       </Button>
 
                       <Button variant="outline" size="medium">
@@ -146,13 +148,12 @@ export const TrainerSpotlight = ({ trainers, onTrainerClick }) => {
       {trainers.length > 1 && (
         <div className="absolute bottom-4 right-4 flex gap-2">
           {trainers.map((_, index) => (
-            <button
+            <Button
               key={index}
+              variant={index === activeIndex ? "orangeFilled" : "secondary"}
               onClick={() => setActiveIndex(index)}
-              className={`w-2.5 h-2.5 rounded-full transition-all ${
-                index === activeIndex
-                  ? "bg-[#FF6B00] w-6"
-                  : "bg-zinc-600 hover:bg-zinc-500"
+              className={`w-2.5 h-2.5 min-w-0 min-h-0 p-0 rounded-full transition-all ${
+                index === activeIndex ? "w-6" : "bg-zinc-600 hover:bg-zinc-500"
               }`}
               aria-label={`Go to trainer ${index + 1}`}
             />

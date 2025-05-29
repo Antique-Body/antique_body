@@ -132,27 +132,15 @@ export const FeaturePreviews = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             {features.map((feature, index) => (
-              <button
+              <Button
                 key={feature.id}
+                variant={activeFeature === index ? "orangeFilled" : "ghost"}
                 onClick={() => setActiveFeature(index)}
-                className={`relative px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
-                  activeFeature === index
-                    ? "text-white"
-                    : "text-gray-400 hover:text-gray-200"
-                }`}
+                className={`relative px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300`}
+                leftIcon={<Icon icon={feature.icon} />}
               >
-                {activeFeature === index && (
-                  <motion.div
-                    layoutId="activePill"
-                    className={`absolute inset-0 rounded-xl bg-gradient-to-r ${feature.color} -z-10`}
-                    initial={{ opacity: 0.8 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                )}
-                <Icon icon={feature.icon} className="mr-2" />
                 {feature.title}
-              </button>
+              </Button>
             ))}
           </motion.div>
         </div>
@@ -240,8 +228,8 @@ export const FeaturePreviews = () => {
                     activeFeature === 0
                       ? "border-[#FF6B00]/30"
                       : activeFeature === 1
-                        ? "border-[#3b82f6]/30"
-                        : "border-[#22c55e]/30"
+                      ? "border-[#3b82f6]/30"
+                      : "border-[#22c55e]/30"
                   } -z-10`}
                 ></div>
               </div>
@@ -294,14 +282,14 @@ export const FeaturePreviews = () => {
                     activeFeature === 0
                       ? "from-[#FF6B00]/10 to-black/20"
                       : activeFeature === 1
-                        ? "from-[#3b82f6]/10 to-black/20"
-                        : "from-[#22c55e]/10 to-black/20"
+                      ? "from-[#3b82f6]/10 to-black/20"
+                      : "from-[#22c55e]/10 to-black/20"
                   } border ${
                     activeFeature === 0
                       ? "border-[#FF6B00]/20"
                       : activeFeature === 1
-                        ? "border-[#3b82f6]/20"
-                        : "border-[#22c55e]/20"
+                      ? "border-[#3b82f6]/20"
+                      : "border-[#22c55e]/20"
                   }`}
                 >
                   <div className="flex items-center gap-3 mb-3">
@@ -319,12 +307,14 @@ export const FeaturePreviews = () => {
                   <Link href={`/features/${features[activeFeature].id}`}>
                     <Button
                       className={`w-full py-3 bg-gradient-to-r ${features[activeFeature].color} text-white rounded-lg hover:shadow-lg transition-all group`}
+                      rightIcon={
+                        <Icon
+                          icon="mdi:arrow-right"
+                          className="group-hover:translate-x-1 inline-block transition-transform"
+                        />
+                      }
                     >
                       Explore Feature
-                      <Icon
-                        icon="mdi:arrow-right"
-                        className="ml-2 group-hover:translate-x-1 inline-block transition-transform"
-                      ></Icon>
                     </Button>
                   </Link>
                 </motion.div>
@@ -428,12 +418,14 @@ export const FeaturePreviews = () => {
               variant="orangeFilled"
               size="large"
               className="group px-8 py-4"
+              rightIcon={
+                <Icon
+                  icon="mdi:arrow-right"
+                  className="relative z-10 group-hover:translate-x-1 transition-transform"
+                />
+              }
             >
               <span className="relative z-10">Explore All Features</span>
-              <Icon
-                icon="mdi:arrow-right"
-                className="ml-2 relative z-10 group-hover:translate-x-1 transition-transform"
-              ></Icon>
             </Button>
           </Link>
         </motion.div>

@@ -4,6 +4,7 @@ import Image from "next/image";
 
 import { FormSection } from "../shared/FormSection";
 
+import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common";
 
 export const ProfileSetupStep = ({ formData, onChange, errors }) => (
@@ -30,7 +31,8 @@ export const ProfileSetupStep = ({ formData, onChange, errors }) => (
                     priority
                   />
                 </div>
-                <button
+                <Button
+                  variant="primary"
                   type="button"
                   onClick={() =>
                     onChange({ target: { name: "profileImage", value: "" } })
@@ -38,7 +40,7 @@ export const ProfileSetupStep = ({ formData, onChange, errors }) => (
                   className="absolute -top-2 -right-2 w-10 h-10 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:scale-110"
                 >
                   <Icon icon="mdi:close" width={18} height={18} />
-                </button>
+                </Button>
               </div>
             ) : (
               <div className="w-40 h-40 rounded-full bg-gradient-to-br from-[rgba(40,40,40,0.8)] to-[rgba(20,20,20,0.8)] border-2 border-dashed border-[#444] hover:border-[#FF6B00]/50 flex items-center justify-center transition-all duration-300 group cursor-pointer">

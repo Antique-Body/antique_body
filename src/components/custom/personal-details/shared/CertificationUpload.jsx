@@ -3,6 +3,7 @@ import { Icon } from "@iconify/react";
 import { useState } from "react";
 
 import { FormField } from "@/components/common";
+import { Button } from "@/components/common/Button";
 
 export const CertificationUpload = ({
   certFields,
@@ -48,7 +49,8 @@ export const CertificationUpload = ({
             </div>
 
             {certFields.length > 1 && (
-              <button
+              <Button
+                variant="ghost"
                 type="button"
                 onClick={() => removeCertField(field.id)}
                 className="opacity-0 group-hover:opacity-100 w-8 h-8 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-full flex items-center justify-center transition-all duration-200"
@@ -59,7 +61,7 @@ export const CertificationUpload = ({
                   height={16}
                   className="text-red-400"
                 />
-              </button>
+              </Button>
             )}
           </div>
 
@@ -176,7 +178,8 @@ export const CertificationUpload = ({
       ))}
 
       {/* Add Certification Button */}
-      <button
+      <Button
+        variant="outline"
         type="button"
         onClick={addCertField}
         className="w-full border-2 border-dashed border-[#444] hover:border-[#FF6B00]/50 rounded-xl p-6 flex items-center justify-center gap-3 text-gray-400 hover:text-[#FF6B00] transition-all duration-300 group"
@@ -185,7 +188,7 @@ export const CertificationUpload = ({
           <Icon icon="mdi:plus" width={20} height={20} />
         </div>
         <span className="font-medium">Add Another Certification</span>
-      </button>
+      </Button>
     </div>
   );
 };

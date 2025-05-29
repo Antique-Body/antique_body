@@ -4,6 +4,8 @@ import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Button } from "@/components/common/Button";
+
 const languages = [
   { code: "en", name: "English" },
   { code: "bs", name: "Bosanski" },
@@ -82,7 +84,8 @@ export default function LanguageSelector() {
       style={{ position: "relative", zIndex: 9999 }}
       onClick={(e) => e.stopPropagation()}
     >
-      <button
+      <Button
+        variant="ghost"
         onClick={toggleDropdown}
         className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-300 hover:text-white transition-colors"
         type="button"
@@ -90,7 +93,9 @@ export default function LanguageSelector() {
       >
         <span suppressHydrationWarning>{currentLanguage}</span>
         <svg
-          className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
+          className={`w-4 h-4 transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -102,7 +107,7 @@ export default function LanguageSelector() {
             d="M19 9l-7 7-7-7"
           />
         </svg>
-      </button>
+      </Button>
 
       {isOpen && (
         <div
@@ -115,8 +120,9 @@ export default function LanguageSelector() {
           onClick={(e) => e.stopPropagation()}
         >
           {languages.map((lang) => (
-            <button
+            <Button
               key={lang.code}
+              variant={i18n.language === lang.code ? "ghostOrange" : "ghost"}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -130,7 +136,7 @@ export default function LanguageSelector() {
               type="button"
             >
               {lang.name}
-            </button>
+            </Button>
           ))}
         </div>
       )}

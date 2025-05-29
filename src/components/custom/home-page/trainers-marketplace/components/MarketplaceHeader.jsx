@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 
 import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/common/FormField";
 
 export const MarketplaceHeader = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -65,15 +67,16 @@ export const MarketplaceHeader = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            <div className="hidden sm:flex relative">
-              <input
+            <div className="hidden sm:block relative">
+              <FormField
                 type="text"
+                name="quickSearch"
                 placeholder="Quick search..."
-                className="bg-zinc-900/70 border border-zinc-800 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#FF6B00]/40 focus:border-[#FF6B00] w-48 lg:w-64 transition-all"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="mb-0 text-sm w-48 lg:w-64 bg-zinc-900/70 border-zinc-800 rounded-full"
+                prefixIcon="mdi:magnify"
               />
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Icon icon="mdi:magnify" className="h-5 w-5 text-zinc-400" />
-              </div>
             </div>
 
             <Link href="/auth/login">
@@ -88,9 +91,13 @@ export const MarketplaceHeader = () => {
               </Button>
             </Link>
 
-            <button className="md:hidden text-white hover:text-[#FF6B00] transition-colors">
+            <Button
+              variant="ghost"
+              className="md:hidden text-white hover:text-[#FF6B00] transition-colors"
+              aria-label="Menu"
+            >
               <Icon icon="mdi:menu" className="h-6 w-6" />
-            </button>
+            </Button>
           </div>
         </div>
       </div>
