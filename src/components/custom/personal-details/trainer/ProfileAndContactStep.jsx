@@ -88,21 +88,38 @@ export const ProfileAndContactStep = ({ formData, onChange, errors }) => {
           {/* Show price field only for specific pricing types */}
           {(formData.pricingType === "fixed" ||
             formData.pricingType === "package_deals") && (
-            <FormField
-              label={
-                formData.pricingType === "package_deals"
-                  ? "Starting Price per Session"
-                  : "Price per Session"
-              }
-              name="pricePerSession"
-              type="number"
-              value={formData.pricePerSession}
-              onChange={onChange}
-              placeholder="50"
-              min="0"
-              step="5"
-              error={errors.pricePerSession}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                label={
+                  formData.pricingType === "package_deals"
+                    ? "Starting Price per Session"
+                    : "Price per Session"
+                }
+                name="pricePerSession"
+                type="number"
+                value={formData.pricePerSession}
+                onChange={onChange}
+                placeholder="50"
+                min="0"
+                step="5"
+                error={errors.pricePerSession}
+              />
+
+              <FormField
+                label="Currency"
+                name="currency"
+                type="select"
+                value={formData.currency || "EUR"}
+                onChange={onChange}
+                options={[
+                  { value: "BAM", label: "BAM - Bosnian Mark" },
+                  { value: "DIN", label: "DIN - Serbian Dinar" },
+                  { value: "EUR", label: "EUR - Euro" },
+                  { value: "USD", label: "USD - US Dollar" },
+                  { value: "GBP", label: "GBP - British Pound" },
+                ]}
+              />
+            </div>
           )}
         </div>
       </FormSection>

@@ -25,42 +25,6 @@ export const CertificationUpload = ({
     }
   };
 
-  const getUploadStatus = (certId) => {
-    const state = uploadStates[certId];
-    if (!state) return null;
-
-    switch (state.status) {
-      case "pending":
-        return (
-          <div className="flex items-center gap-2 px-3 py-1 bg-yellow-500/10 border border-yellow-500/30 rounded-full">
-            <Icon
-              icon="mdi:clock-outline"
-              width={14}
-              height={14}
-              className="text-yellow-400"
-            />
-            <span className="text-xs text-yellow-400 font-medium">
-              Pending Verification
-            </span>
-          </div>
-        );
-      case "verified":
-        return (
-          <div className="flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/30 rounded-full">
-            <Icon
-              icon="mdi:check-circle"
-              width={14}
-              height={14}
-              className="text-green-400"
-            />
-            <span className="text-xs text-green-400 font-medium">Verified</span>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <div className="space-y-4">
       {certFields.map((field, index) => (
@@ -76,9 +40,11 @@ export const CertificationUpload = ({
                   {index + 1}
                 </span>
               </div>
-              <h4 className="text-white font-medium">
-                {field.value || `Certification ${index + 1}`}
-              </h4>
+              <div className="flex flex-col gap-1">
+                <h4 className="text-white font-medium">
+                  {field.value || `Certification ${index + 1}`}
+                </h4>
+              </div>
             </div>
 
             {certFields.length > 1 && (
@@ -109,6 +75,42 @@ export const CertificationUpload = ({
             />
           </div>
 
+          {/* Issuer/Trainer Name and Expiry Date */}
+          {field.value && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <FormField
+                label="Issued By (Organization/Trainer)"
+                type="text"
+                value={field.issuer || ""}
+                onChange={(e) =>
+                  handleCertChange(
+                    field.id,
+                    field.value,
+                    "issuer",
+                    e.target.value
+                  )
+                }
+                placeholder="e.g. National Academy of Sports Medicine, Personal Trainer Institute"
+                className="mb-0"
+              />
+
+              <FormField
+                label="Expiry Date"
+                type="date"
+                value={field.expiryDate || ""}
+                onChange={(e) =>
+                  handleCertChange(
+                    field.id,
+                    field.value,
+                    "expiryDate",
+                    e.target.value
+                  )
+                }
+                className="mb-0"
+              />
+            </div>
+          )}
+
           {/* File Upload Section */}
           {field.value && (
             <div className="space-y-3">
@@ -116,7 +118,6 @@ export const CertificationUpload = ({
                 <label className="block text-gray-300 text-sm font-medium">
                   Certificate Document
                 </label>
-                {getUploadStatus(field.id)}
               </div>
 
               <div className="border-2 border-dashed border-[#444] rounded-lg p-4 hover:border-[#FF6B00]/50 transition-colors">
