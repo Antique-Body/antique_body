@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-const PUBLIC_PATHS = [
-  "/",
-  "/contact",
-  "/trainers-marketplace",
-  "/auth/reset-password",
-];
-const AUTH_PATHS = ["/auth/login", "/auth/register"];
+// const PUBLIC_PATHS = [
+//   "/",
+//   "/contact",
+//   "/trainers-marketplace",
+//   "/auth/reset-password",
+// ];
+// const AUTH_PATHS = ["/auth/login", "/auth/register"];
 
 function isPageNavigation(request) {
   return request.headers.get("accept")?.includes("text/html");
@@ -17,7 +17,7 @@ export async function middleware(request) {
   const { pathname } = request.nextUrl;
   const token = await getToken({
     req: request,
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.AUTH_SECRET,
   });
 
   // Log samo za page navigacije

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { userService } from "@/app/api/users/services";
-import { auth, isAuthenticated } from "@/lib/auth";
+import { auth } from "../../../../auth";
 
+import { userService } from "@/app/api/users/services";
+import { isAuthenticated } from "@/lib/auth-helpers";
 export async function GET() {
   try {
     const session = await auth();

@@ -13,12 +13,35 @@ const prisma = new PrismaClient();
 export const authConfig = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      profile(profile) {
+        return {
+          id: profile.sub,
+          email: profile.email,
+          name: profile.name,
+          firstName: profile.given_name,
+          lastName: profile.family_name,
+          image: profile.picture,
+        };
+      },
     }),
     FacebookProvider({
-      clientId: process.env.FACEBOOK_CLIENT_ID,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+      clientId: process.env.AUTH_FACEBOOK_ID,
+      clientSecret: process.env.AUTH_FACEBOOK_SECRET,
+      userinfo: {
+        url: "https://graph.facebook.com/me?fields=id,email,first_name,last_name,name,picture",
+      },
+      profile(profile) {
+        return {
+          id: profile.id,
+          email: profile.email,
+          name: profile.name,
+          firstName: profile.first_name,
+          lastName: profile.last_name,
+          image: profile.picture?.data?.url,
+        };
+      },
     }),
     CredentialsProvider({
       id: "email",
@@ -39,12 +62,10 @@ export const authConfig = {
             throw new Error("Invalid email or password");
           }
 
-          // Check if user has email verification
           if (!user.emailVerified) {
             throw new Error("Please verify your email first");
           }
 
-          // Check if user has password set
           if (!user.password) {
             throw new Error("No password set for this account");
           }
@@ -62,8 +83,6 @@ export const authConfig = {
             name: user.name,
             email: user.email,
             role: user.role,
-            firstName: user.firstName,
-            lastName: user.lastName,
           };
         } catch (error) {
           console.error("Auth error:", error);
@@ -106,8 +125,6 @@ export const authConfig = {
             name: user.name,
             phone: user.phone,
             role: user.role,
-            firstName: user.firstName,
-            lastName: user.lastName,
           };
         } catch (error) {
           console.error("Auth error:", error);
@@ -117,25 +134,14 @@ export const authConfig = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (account?.provider === "google" || account?.provider === "facebook") {
         try {
           // Check if user already exists
           const existingUser = await userService.findUserByEmail(user.email);
 
-          let firstName = "";
-          let lastName = "";
-          if (profile?.given_name && profile?.family_name) {
-            firstName = profile.given_name;
-            lastName = profile.family_name;
-          } else if (user.name) {
-            const nameParts = user.name.split(" ");
-            firstName = nameParts[0] || "";
-            lastName = nameParts.slice(1).join(" ") || "";
-          }
-
           if (!existingUser) {
-            // Create new user if doesn't exist (bez imena u bazi)
+            // Create new user if doesn't exist
             await prisma.user.create({
               data: {
                 email: user.email,
@@ -145,9 +151,6 @@ export const authConfig = {
               },
             });
           }
-          // Vraćam imena kroz user objekt
-          user.firstName = firstName;
-          user.lastName = lastName;
           return true;
         } catch (error) {
           console.error("Error in signIn callback:", error);
@@ -157,7 +160,6 @@ export const authConfig = {
       return true;
     },
     async jwt({ token, user }) {
-      // Ako je user iz signIn callbacka, proslijedi imena u token
       if (user) {
         token.id = user.id;
         token.role = user.role;
@@ -166,22 +168,53 @@ export const authConfig = {
         token.firstName = user.firstName;
         token.lastName = user.lastName;
       }
-      // Nemoj tražiti firstName/lastName iz baze
+      if (!token.role && token.email) {
+        const userFromDb = await prisma.user.findUnique({
+          where: { email: token.email },
+          select: {
+            id: true,
+            role: true,
+            phone: true,
+          },
+        });
+        if (userFromDb) {
+          token.id = userFromDb.id;
+          token.role = userFromDb.role;
+          token.phone = userFromDb.phone;
+        }
+      }
       return token;
     },
     async session({ session, token }) {
       if (token) {
-        let userIdFromDb = null;
+        let userFromDb = null;
         if (token.email) {
-          const userFromDb = await userService.findUserByEmail(token.email);
-          if (userFromDb && userFromDb.id) {
-            userIdFromDb = userFromDb.id;
-          }
+          userFromDb = await prisma.user.findUnique({
+            where: { email: token.email },
+            select: {
+              id: true,
+              role: true,
+              email: true,
+              phone: true,
+            },
+          });
+        } else if (token.phone) {
+          userFromDb = await prisma.user.findUnique({
+            where: { phone: token.phone },
+            select: {
+              id: true,
+              role: true,
+              email: true,
+              phone: true,
+            },
+          });
         }
-        session.user.id = userIdFromDb || token.id;
-        session.user.role = token.role;
-        session.user.email = token.email;
-        session.user.phone = token.phone;
+        if (userFromDb) {
+          session.user.id = userFromDb.id;
+          session.user.role = userFromDb.role;
+          session.user.email = userFromDb.email;
+          session.user.phone = userFromDb.phone;
+        }
         session.user.firstName = token.firstName;
         session.user.lastName = token.lastName;
       }

@@ -76,7 +76,9 @@ export default function SelectRole() {
 
   // Handle role confirmation
   const handleConfirmRole = useCallback(async () => {
-    if (!session?.user?.email || !selectedRole) return;
+    console.log(session, "session");
+    if ((!session?.user?.email && !session?.user?.phone) || !selectedRole)
+      return;
 
     setLoading(true);
     setError(null);

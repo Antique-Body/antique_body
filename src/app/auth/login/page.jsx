@@ -143,6 +143,7 @@ export default function LoginPage() {
           redirect: false,
         });
 
+        console.log(result, "result");
         if (result?.error) {
           throw new Error(result.error);
         }
@@ -167,7 +168,12 @@ export default function LoginPage() {
       router.push("/select-role");
     } catch (err) {
       console.error("Login - Error:", err);
-      setError(err.message);
+      // Custom error message for 'Configuration' error
+      if (err.message === "Configuration") {
+        setError("Invalid email or password");
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
