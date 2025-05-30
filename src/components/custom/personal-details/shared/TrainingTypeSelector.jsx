@@ -2,6 +2,7 @@
 import { Icon } from "@iconify/react";
 
 import { Button } from "@/components/common/Button";
+import { ErrorIcon } from "@/components/common/Icons";
 
 const trainingEnvironments = [
   {
@@ -50,6 +51,8 @@ export const TrainingTypeSelector = ({
   selectedTypes = [],
   onEnvironmentChange,
   onTypeToggle,
+  errorEnvironment,
+  errorTypes,
 }) => (
   <div className="space-y-6">
     {/* Training Environment */}
@@ -84,6 +87,12 @@ export const TrainingTypeSelector = ({
           </Button>
         ))}
       </div>
+      {errorEnvironment && (
+        <p className="mt-3 flex items-center text-sm text-red-500">
+          <ErrorIcon size={16} className="mr-2" />
+          {errorEnvironment}
+        </p>
+      )}
     </div>
 
     {/* Training Types */}
@@ -123,10 +132,10 @@ export const TrainingTypeSelector = ({
           </Button>
         ))}
       </div>
-
-      {selectedTypes.length === 0 && (
-        <p className="mt-3 text-sm text-red-400">
-          Please select at least one training type
+      {errorTypes && (
+        <p className="mt-3 flex items-center text-sm text-red-500">
+          <ErrorIcon size={16} className="mr-2" />
+          {errorTypes}
         </p>
       )}
     </div>

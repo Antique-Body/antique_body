@@ -76,9 +76,14 @@ export default function SelectRole() {
 
   // Handle role confirmation
   const handleConfirmRole = useCallback(async () => {
-    console.log(session, "session");
-    if ((!session?.user?.email && !session?.user?.phone) || !selectedRole)
+    if (!session || (!session?.user?.email && !session?.user?.phone)) {
+      setError(t("common.unauthenticated"));
       return;
+    }
+    if (!selectedRole) {
+      setError(t("role.selection.select_role"));
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -93,6 +98,7 @@ export default function SelectRole() {
           userId: session.user.id,
           role: selectedRole,
         }),
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -103,8 +109,6 @@ export default function SelectRole() {
             t("role.update.failed", { status: response.status })
         );
       }
-
-      // const data = await response.json();
 
       await update({
         role: selectedRole,

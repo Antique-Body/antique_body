@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+// import { getToken } from "next-auth/jwt";
 
 // const PUBLIC_PATHS = [
 //   "/",
@@ -14,16 +14,15 @@ function isPageNavigation(request) {
 }
 
 export async function middleware(request) {
-  const { pathname } = request.nextUrl;
-  const token = await getToken({
-    req: request,
-    secret: process.env.AUTH_SECRET,
-  });
+  // const { pathname } = request.nextUrl;
+  // const token = await getToken({
+  //   req: request,
+  //   secret: process.env.AUTH_SECRET,
+  // });
 
   // Log samo za page navigacije
   if (isPageNavigation(request)) {
-    // eslint-disable-next-line no-console
-    console.log("token u middleware:", token, "pathname:", pathname);
+    // console.log("token u middleware:", token, "pathname:", pathname);
   }
 
   // // 1. Public paths: svi mogu pristupiti

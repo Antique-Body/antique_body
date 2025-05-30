@@ -1,16 +1,17 @@
 import { NextResponse } from "next/server";
 
-import {  hasRole } from "@/middleware/auth";
+import { auth } from "#/auth";
 import { userService } from "@/services/users";
 import { parseQueryParams } from "@/utils/api";
 
 export async function GET(request) {
   try {
-    // Check if user is authenticated and has admin role (or appropriate role)
-    const roleCheck = await hasRole(request, ["ADMIN"]);
-
-    if (!roleCheck.authorized) {
-      return NextResponse.json({ error: roleCheck.message }, { status: 401 });
+    const session = await auth();
+    if (!session?.user?.role || session.user.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "You don't have permission to access this resource" },
+        { status: 401 }
+      );
     }
 
     // Parse query parameters for pagination
@@ -27,7 +28,7 @@ export async function GET(request) {
     console.error("Error fetching users:", error);
     return NextResponse.json(
       { error: "An error occurred while fetching users" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

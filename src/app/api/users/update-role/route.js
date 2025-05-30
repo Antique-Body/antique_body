@@ -1,18 +1,23 @@
 import { NextResponse } from "next/server";
 
+import { auth } from "#/auth";
 import { userService } from "@/app/api/users/services";
-import { isAuthenticated } from "@/lib/auth-helpers";
 import { validateRoleUpdate } from "@/middleware/validation";
 
 export async function PATCH(request) {
   try {
-    const { authenticated } = await isAuthenticated(request);
+    const session = await auth();
 
-    if (!authenticated) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    let data;
+    try {
+      data = await request.json();
+    } catch {
+      data = {};
     }
 
-    const data = await request.json();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
 
     // Validacija
     const validation = validateRoleUpdate(data);
