@@ -4,8 +4,8 @@ import Image from "next/image";
 
 import { FormSection } from "../shared/FormSection";
 
-import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common";
+import { Button } from "@/components/common/Button";
 
 export const ProfileSetupStep = ({ formData, onChange, errors }) => (
   <div className="space-y-6">

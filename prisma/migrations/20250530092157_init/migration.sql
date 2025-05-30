@@ -1,12 +1,10 @@
 -- CreateTable
 CREATE TABLE `User` (
     `id` VARCHAR(191) NOT NULL,
-    `firstName` VARCHAR(191) NOT NULL,
-    `lastName` VARCHAR(191) NULL,
-    `email` VARCHAR(191) NOT NULL,
+    `email` VARCHAR(191) NULL,
     `phone` VARCHAR(191) NULL,
     `password` VARCHAR(191) NULL,
-    `role` ENUM('trainer', 'client', 'user', 'admin') NULL DEFAULT 'user',
+    `role` ENUM('trainer', 'client', 'user', 'admin') NULL,
     `language` VARCHAR(191) NOT NULL DEFAULT 'en',
     `emailVerified` BOOLEAN NOT NULL DEFAULT false,
     `phoneVerified` BOOLEAN NOT NULL DEFAULT false,
@@ -64,7 +62,7 @@ CREATE TABLE `EmailVerification` (
     `used` BOOLEAN NOT NULL DEFAULT false,
     `expiresAt` DATETIME(3) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `userId` VARCHAR(191) NOT NULL,
+    `userId` VARCHAR(191) NULL,
 
     INDEX `EmailVerification_email_idx`(`email`),
     INDEX `EmailVerification_code_idx`(`code`),
@@ -80,7 +78,7 @@ CREATE TABLE `PhoneVerification` (
     `used` BOOLEAN NOT NULL DEFAULT false,
     `expires` DATETIME(3) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `userId` VARCHAR(191) NOT NULL,
+    `userId` VARCHAR(191) NULL,
 
     INDEX `PhoneVerification_phone_idx`(`phone`),
     INDEX `PhoneVerification_code_idx`(`code`),
@@ -92,6 +90,8 @@ CREATE TABLE `PhoneVerification` (
 CREATE TABLE `TrainerPersonalInfo` (
     `id` VARCHAR(191) NOT NULL,
     `userId` VARCHAR(191) NOT NULL,
+    `firstName` VARCHAR(191) NOT NULL,
+    `lastName` VARCHAR(191) NULL,
     `dateOfBirth` DATETIME(3) NULL,
     `gender` VARCHAR(191) NULL,
     `trainingSince` INTEGER NULL,
@@ -160,6 +160,7 @@ CREATE TABLE `Certification` (
     `issuer` VARCHAR(191) NULL,
     `yearObtained` INTEGER NULL,
     `expiryDate` DATETIME(3) NULL,
+    `status` ENUM('pending', 'accepted', 'rejected', 'expired') NOT NULL DEFAULT 'pending',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
