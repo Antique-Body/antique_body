@@ -15,6 +15,7 @@ export const ProfessionalDetailsStep = ({
   handleCertChange,
   addCertField,
   removeCertField,
+  errors = {},
 }) => {
   const handleLanguageChange = (languages) => {
     onChange({
@@ -196,6 +197,7 @@ export const ProfessionalDetailsStep = ({
         <LanguageSelector
           selectedLanguages={formData.languages || []}
           onChange={handleLanguageChange}
+          error={errors.languages}
         />
       </FormSection>
 
@@ -209,6 +211,8 @@ export const ProfessionalDetailsStep = ({
           selectedTypes={formData.trainingTypes || []}
           onEnvironmentChange={handleEnvironmentChange}
           onTypeToggle={handleTrainingTypeToggle}
+          errorEnvironment={errors.trainingEnvironment}
+          errorTypes={errors.trainingTypes}
         />
       </FormSection>
 

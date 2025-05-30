@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 import NextAuth from "next-auth";
-import { getToken } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 import FacebookProvider from "next-auth/providers/facebook";
 import GoogleProvider from "next-auth/providers/google";
@@ -229,40 +228,8 @@ export const authConfig = {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.AUTH_SECRET,
 };
 
 // Export for App Router
 export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
-
-// Export for Pages Router
-export const authOptions = authConfig;
-
-// Check if the user is authenticated
-export const isAuthenticated = async (req) => {
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  if (!token) return { authenticated: false };
-  return { authenticated: true, user: token };
-};
-
-// Check if the user has a specific role
-export const hasRole = async (req, allowedRoles) => {
-  const { authenticated, user } = await isAuthenticated(req);
-
-  if (!authenticated) {
-    return { authorized: false, message: "Not authenticated" };
-  }
-
-  if (!user.role) {
-    return { authorized: false, message: "User has no role assigned" };
-  }
-
-  if (allowedRoles.includes(user.role)) {
-    return { authorized: true, user };
-  }
-
-  return {
-    authorized: false,
-    message: "You don't have permission to access this resource",
-  };
-};

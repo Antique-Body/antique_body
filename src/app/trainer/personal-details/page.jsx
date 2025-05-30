@@ -157,13 +157,59 @@ const TrainerRegistration = () => {
   };
 
   // Validate current step
-  const validateStep = (_currentStep) => {
+  const validateStep = (currentStep) => {
     const newErrors = {};
 
-    // Remove all validation since no fields are required anymore
+    if (currentStep === 1) {
+      if (!formData.firstName) newErrors.firstName = "First name is required";
+      if (!formData.lastName) newErrors.lastName = "Last name is required";
+      if (!formData.dateOfBirth)
+        newErrors.dateOfBirth = "Date of birth is required";
+      if (!formData.gender) newErrors.gender = "Gender is required";
+      if (!formData.trainingSince)
+        newErrors.trainingSince = "Training since is required";
+      if (!formData.specialties || formData.specialties.length === 0)
+        newErrors.specialties = "At least one specialty is required";
+    }
+    if (currentStep === 2) {
+      if (!formData.languages || formData.languages.length === 0)
+        newErrors.languages = "At least one language is required";
+      if (!formData.trainingEnvironment)
+        newErrors.trainingEnvironment = "Training environment is required";
+      if (!formData.trainingTypes || formData.trainingTypes.length === 0)
+        newErrors.trainingTypes = "At least one training type is required";
+    }
+    if (currentStep === 3) {
+      if (!formData.email) newErrors.email = "Email is required";
+      if (!formData.location || !formData.location.city)
+        newErrors["location.city"] = "City is required";
+      if (!formData.location || !formData.location.state)
+        newErrors["location.state"] = "State/Province is required";
+      if (!formData.location || !formData.location.country)
+        newErrors["location.country"] = "Country is required";
+      if (!formData.location || !formData.location.postalCode)
+        newErrors["location.postalCode"] = "Postal code is required";
+      if (!formData.pricingType || formData.pricingType === "")
+        newErrors.pricingType = "Pricing approach is required";
+      if (
+        (formData.pricingType === "fixed" ||
+          formData.pricingType === "package_deals") &&
+        (!formData.pricePerSession || Number(formData.pricePerSession) <= 0)
+      ) {
+        newErrors.pricePerSession = "Price per session is required";
+      }
+    }
+    // Step 4: nothing required
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  // Scroll to top helper
+  const scrollToTop = () => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   // Handle form submission
@@ -171,6 +217,8 @@ const TrainerRegistration = () => {
     e.preventDefault();
     if (validateStep(step)) {
       router.push("/select-plan");
+    } else {
+      scrollToTop();
     }
   };
 
@@ -180,6 +228,8 @@ const TrainerRegistration = () => {
     if (validateStep(step)) {
       setStep(step + 1);
       window.scrollTo(0, 0);
+    } else {
+      scrollToTop();
     }
   };
 
@@ -191,20 +241,6 @@ const TrainerRegistration = () => {
   };
 
   // Helper to check if Professional Details step is filled enough to continue
-  const canContinueProfessionalDetails = () => {
-    // Only allow continue if at least one language is selected
-    const hasLanguages = formData.languages && formData.languages.length > 0;
-    // Debug log
-    console.log("[canContinueProfessionalDetails]", {
-      languages: formData.languages,
-      hasLanguages,
-      certFields,
-      trainingEnvironment: formData.trainingEnvironment,
-      trainingTypes: formData.trainingTypes,
-      result: hasLanguages,
-    });
-    return hasLanguages;
-  };
 
   return (
     <div className="relative min-h-screen  text-white">
@@ -251,6 +287,7 @@ const TrainerRegistration = () => {
                 handleCertChange={handleCertChange}
                 addCertField={addCertField}
                 removeCertField={removeCertField}
+                errors={errors}
               />
             )}
 
@@ -287,11 +324,7 @@ const TrainerRegistration = () => {
               )}
 
               {step < 4 ? (
-                <Button
-                  onClick={goToNextStep}
-                  type="button"
-                  disabled={step === 2 && !canContinueProfessionalDetails()}
-                >
+                <Button onClick={goToNextStep} type="button">
                   Continue
                 </Button>
               ) : (

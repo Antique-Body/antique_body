@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 
+import { auth } from "#/auth";
 import { userService } from "@/app/api/users/services";
-import { isAuthenticated } from "@/lib/auth/helpers";
 
 export async function PATCH(request) {
   try {
-    const { authenticated, user } = await isAuthenticated(request);
-
-    if (!authenticated) {
+    const session = await auth();
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -31,7 +30,7 @@ export async function PATCH(request) {
 
     try {
       const updatedUser = await userService.updateUserLanguage(
-        user.id,
+        session.user.id,
         language
       );
 

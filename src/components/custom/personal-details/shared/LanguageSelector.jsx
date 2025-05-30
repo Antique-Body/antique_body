@@ -17,7 +17,11 @@ const getUniqueLanguages = () => {
   );
 };
 
-export const LanguageSelector = ({ selectedLanguages = [], onChange }) => {
+export const LanguageSelector = ({
+  selectedLanguages = [],
+  onChange,
+  error,
+}) => {
   const [currentSelection, setCurrentSelection] = useState("");
 
   const handleLanguageSelect = (selectedCountry) => {
@@ -57,6 +61,7 @@ export const LanguageSelector = ({ selectedLanguages = [], onChange }) => {
         showLanguageName={true}
         displayLanguageOnly={true}
         showShortCode={false}
+        error={error}
       />
 
       {/* Selected languages display */}
@@ -84,12 +89,6 @@ export const LanguageSelector = ({ selectedLanguages = [], onChange }) => {
             ))}
           </div>
         </div>
-      )}
-
-      {selectedLanguages.length === 0 && (
-        <p className="text-sm text-red-400">
-          Please select at least one language
-        </p>
       )}
     </div>
   );

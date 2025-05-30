@@ -16,6 +16,8 @@ export const ProfileAndContactStep = ({ formData, onChange, errors }) => {
     ],
   });
 
+  console.log(formData, "formData");
+
   return (
     <div className="space-y-6">
       {/* Contact Information */}
@@ -56,6 +58,7 @@ export const ProfileAndContactStep = ({ formData, onChange, errors }) => {
         <LocationSelector
           formData={formData}
           onChange={onChange}
+          errors={errors}
           title=""
           description=""
         />
@@ -83,6 +86,7 @@ export const ProfileAndContactStep = ({ formData, onChange, errors }) => {
               { value: "free_consultation", label: "Free Consultation First" },
               { value: "prefer_not_to_say", label: "Prefer Not to Display" },
             ]}
+            error={errors.pricingType}
           />
 
           {/* Show price field only for specific pricing types */}

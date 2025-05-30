@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { FormSection, SpecialtySelector } from "../shared";
 
 import { FormField } from "@/components/common";
+import { ErrorIcon } from "@/components/common/Icons";
 import { usePrefillFromSession } from "@/hooks/usePrefillFromSession";
 
 export const BasicInfoStep = ({ formData, onChange, errors }) => {
@@ -144,7 +145,15 @@ export const BasicInfoStep = ({ formData, onChange, errors }) => {
           selectedSpecialties={formData.specialties || []}
           onChange={handleSpecialtyChange}
         />
+        {errors.specialties && (
+          <p className="mt-3 flex items-center text-sm text-red-500">
+            <ErrorIcon size={16} className="mr-2" />
+            {errors.specialties}
+          </p>
+        )}
       </FormSection>
+
+      {/* General error prikaz na dnu */}
     </div>
   );
 };

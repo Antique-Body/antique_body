@@ -9,6 +9,7 @@ import { FormField } from "@/components/common";
 export const LocationSelector = ({
   formData,
   onChange,
+  errors = {},
   title = "Location Information",
   description = "This helps clients find you in their area",
 }) => {
@@ -39,6 +40,8 @@ export const LocationSelector = ({
     }
     return unique;
   };
+
+  console.log(errors, "errors");
 
   // Preporučeni gradovi (puni naziv iz Geoapify)
 
@@ -79,6 +82,7 @@ export const LocationSelector = ({
           }}
           onChange={onChange}
           placeholder="Start typing your city..."
+          error={errors["location.city"]}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -96,6 +100,7 @@ export const LocationSelector = ({
             }}
             onChange={onChange}
             placeholder="Type to search state/province..."
+            error={errors["location.state"]}
           />
           {/* Country as async searchableSelect */}
           <FormField
@@ -111,6 +116,7 @@ export const LocationSelector = ({
             }}
             onChange={onChange}
             placeholder="Type to search country..."
+            error={errors["location.country"]}
           />
         </div>
 
@@ -121,6 +127,7 @@ export const LocationSelector = ({
           value={formData.location.postalCode || ""}
           onChange={onChange}
           placeholder="Your postal code"
+          error={errors["location.postalCode"]}
         />
       </div>
 
