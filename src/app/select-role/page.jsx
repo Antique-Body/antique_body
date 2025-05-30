@@ -198,7 +198,7 @@ export default function SelectRole() {
 
       {/* Loading overlay */}
       {loading && selectedRole && (
-        <FullScreenLoader text={t("role.preparing.journey")} />
+        <FullScreenLoader text="Preparing your Ancient Journey" />
       )}
 
       {/* MDI Icons */}
