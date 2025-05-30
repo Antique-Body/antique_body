@@ -118,7 +118,7 @@ export default function SelectRole() {
       setError(error.message || t("common.unknown_error"));
       setLoading(false);
     }
-  }, [session?.user?.email, selectedRole, router, update, t]);
+  }, [session, selectedRole, update, router, t]);
 
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden bg-black text-white flex flex-col">

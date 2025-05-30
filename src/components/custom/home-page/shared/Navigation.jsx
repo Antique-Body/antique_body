@@ -5,8 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 
-import { Button } from "@/components/common/Button";
 import { BrandLogo } from "@/components/common/BrandLogo";
+import { Button } from "@/components/common/Button";
 
 export const Navigation = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

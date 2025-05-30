@@ -8,7 +8,9 @@ export const ToggleButton = ({ label, active, onClick }) => (
     type="button"
     onClick={onClick}
     className={`rounded-lg px-3 py-2 text-sm transition-all ${
-      active ? "bg-[#FF6B00] text-white" : "bg-[rgba(40,40,40,0.7)] text-gray-300 hover:bg-[rgba(60,60,60,0.7)]"
+      active
+        ? "bg-[#FF6B00] text-white"
+        : "bg-[rgba(40,40,40,0.7)] text-gray-300 hover:bg-[rgba(60,60,60,0.7)]"
     }`}
   >
     {label}
@@ -18,7 +20,14 @@ export const ToggleButton = ({ label, active, onClick }) => (
 /**
  * Group of toggle buttons with a label
  */
-export const ToggleButtonGroup = ({ label, description, options, selectedValues, onToggle, required }) => (
+export const ToggleButtonGroup = ({
+  label,
+  description,
+  options,
+  selectedValues,
+  onToggle,
+  required,
+}) => (
   <div className="mb-4">
     {label && <label className="mb-3 block text-gray-300">{label}</label>}
     {description && <p className="mb-3 text-sm text-gray-400">{description}</p>}
@@ -35,7 +44,9 @@ export const ToggleButtonGroup = ({ label, description, options, selectedValues,
     </div>
 
     {required && selectedValues.length === 0 && (
-      <p className="mt-2 text-sm text-red-400">Please select at least one option</p>
+      <p className="mt-2 text-sm text-red-400">
+        Please select at least one option
+      </p>
     )}
   </div>
 );
