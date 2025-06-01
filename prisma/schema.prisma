@@ -133,6 +133,9 @@ model TrainerPersonalInfo {
   state            String?
   country          String?
   postalCode       String?
+  pricingType      String?
+  pricePerSession  Int?
+  currency         String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -185,16 +188,16 @@ model TrainerType {
 }
 
 model Certification {
-  id                String   @id @default(cuid())
-  trainerInfoId     String
-  name              String
-  issuer            String?
-  yearObtained      Int?
-  expiryDate        DateTime?
-  status            CertificationStatus @default(pending)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id            String   @id @default(cuid())
+  trainerInfoId String
+  name          String
+  issuer        String?
+  expiryDate    DateTime?
+  status        CertificationStatus @default(pending)
+  description   String? @db.Text
+  documentUrl   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  // Relations
-  trainerInfo       TrainerPersonalInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  trainerInfo   TrainerPersonalInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
 }

@@ -197,6 +197,117 @@ async function getAllUsers(page = 1, limit = 10, role = null) {
   };
 }
 
+/**
+ * Kreira trenera sa svim detaljima i relacijama.
+ * Sva polja su required osim certifikata i description.
+ * formData: {
+ *   firstName, lastName, dateOfBirth, gender, trainingSince, specialties, languages, trainingEnvironment, trainingTypes,
+ *   email, phone,  profileImage, location: { city, state, country, postalCode },
+ *   pricingType, pricePerSession, currency, certifications: [{ name, issuer, expiryDate, description, documentUrl }]
+ * }
+ */
+async function createTrainerWithDetails(formData, userId) {
+  // Validacija required polja
+  const requiredFields = [
+    "firstName",
+    "lastName",
+    "dateOfBirth",
+    "gender",
+    "trainingSince",
+    "specialties",
+    "languages",
+    "trainingEnvironment",
+    "trainingTypes",
+    "profileImage",
+    "location",
+    "pricingType",
+    "pricePerSession",
+    "currency",
+  ];
+  for (const field of requiredFields) {
+    if (
+      !formData[field] ||
+      (Array.isArray(formData[field]) && formData[field].length === 0)
+    ) {
+      throw new Error(`Field '${field}' is required.`);
+    }
+  }
+  // Bar jedno od email ili phone mora biti popunjeno
+  if (!formData.email && !formData.phone) {
+    throw new Error("At least one of 'email' or 'phone' is required.");
+  }
+  const { location } = formData;
+  if (
+    !location.city ||
+    !location.state ||
+    !location.country ||
+    !location.postalCode
+  ) {
+    throw new Error("All location fields are required.");
+  }
+  // Kreiraj glavnu TrainerPersonalInfo
+  const trainer = await prisma.trainerPersonalInfo.create({
+    data: {
+      userId,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      dateOfBirth: new Date(formData.dateOfBirth),
+      gender: formData.gender,
+      trainingSince: Number(formData.trainingSince),
+      profileImage: formData.profileImage, // url ili path
+      professionalBio: formData.bio || null,
+      city: location.city,
+      state: location.state,
+      country: location.country,
+      postalCode: location.postalCode,
+      pricingType: formData.pricingType,
+      pricePerSession: Number(formData.pricePerSession),
+      currency: formData.currency,
+      specialties: {
+        create: formData.specialties.map((name) => ({ name })),
+      },
+      languages: {
+        create: formData.languages.map((name) => ({ name })),
+      },
+      trainingEnvironments: {
+        create: [{ name: formData.trainingEnvironment }],
+      },
+      trainingTypes: {
+        create: formData.trainingTypes.map((name) => ({ name })),
+      },
+      certifications:
+        formData.certifications && formData.certifications.length > 0
+          ? {
+              create: formData.certifications.map((cert) => ({
+                name: cert.name,
+                issuer: cert.issuer || null,
+                expiryDate: cert.expiryDate ? new Date(cert.expiryDate) : null,
+                description: cert.description || null,
+                documentUrl: cert.documentUrl || null,
+              })),
+            }
+          : undefined,
+    },
+  });
+  return trainer;
+}
+
+/**
+ * Fetch the full trainer profile for a user, including all relations.
+ */
+async function getTrainerProfileByUserId(userId) {
+  return await prisma.trainerPersonalInfo.findUnique({
+    where: { userId },
+    include: {
+      certifications: true,
+      specialties: true,
+      languages: true,
+      trainingEnvironments: true,
+      trainingTypes: true,
+    },
+  });
+}
+
 // Exportujem userService objekat sa svim funkcijama
 export const userService = {
   findUser,
@@ -213,4 +324,6 @@ export const userService = {
   updateUserProfile,
   updateUserLanguage,
   getAllUsers,
+  createTrainerWithDetails,
+  getTrainerProfileByUserId,
 };

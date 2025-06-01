@@ -38,12 +38,7 @@ const TrainerRegistration = () => {
     // Contact and Location
     email: "",
     phone: "",
-    username: "",
-    website: "",
-    instagram: "",
-    motto: "",
-    profilePicture: null,
-    profileImage: "",
+    profileImage: null,
     location: {
       city: "",
       state: "",
@@ -52,23 +47,24 @@ const TrainerRegistration = () => {
     },
 
     // Availability
-    preferredHours: "",
-    availableDays: "",
 
     // Legacy fields for compatibility
     name: "",
     specialty: "",
-    certifications: [""],
+    certifications: [{ name: "", issuer: "", expiryDate: "", file: null }],
     yearsExperience: "",
     trainingVenues: [""],
     sports: [],
     contactEmail: "",
     contactPhone: "",
+    currency: "EUR",
   });
 
   const [errors, setErrors] = useState({});
   const [step, setStep] = useState(1);
-  const [certFields, setCertFields] = useState([{ id: 1, value: "" }]);
+  const [loading, setLoading] = useState(false);
+
+  console.log(formData, "formData");
 
   // Handle form input changes
   const handleChange = (e) => {
@@ -103,57 +99,31 @@ const TrainerRegistration = () => {
   };
 
   // Handle certification fields
-  const handleCertChange = (
-    id,
-    value,
-    fieldName = "value",
-    fieldValue = null
-  ) => {
-    let updatedFields;
-
-    if (fieldName === "value") {
-      // Handle the main certification name (backward compatibility)
-      updatedFields = certFields.map((field) =>
-        field.id === id ? { ...field, value } : field
-      );
-    } else {
-      // Handle additional fields like issuer, expiryDate
-      updatedFields = certFields.map((field) =>
-        field.id === id ? { ...field, [fieldName]: fieldValue } : field
-      );
-    }
-
-    setCertFields(updatedFields);
-
-    // Update form data with certification values
-    setFormData({
-      ...formData,
-      certifications: updatedFields
-        .map((field) => field.value)
-        .filter((value) => value !== ""),
+  const handleCertChange = (index, field, value) => {
+    setFormData((prev) => {
+      const updated = [...prev.certifications];
+      updated[index] = { ...updated[index], [field]: value };
+      return { ...prev, certifications: updated };
     });
   };
 
   // Add new certification field
   const addCertField = () => {
-    const newField = { id: certFields.length + 1, value: "" };
-    setCertFields([...certFields, newField]);
+    setFormData((prev) => ({
+      ...prev,
+      certifications: [
+        ...prev.certifications,
+        { name: "", issuer: "", expiryDate: "", file: null },
+      ],
+    }));
   };
 
   // Remove certification field
-  const removeCertField = (id) => {
-    if (certFields.length > 1) {
-      const updatedFields = certFields.filter((field) => field.id !== id);
-      setCertFields(updatedFields);
-
-      // Update form data
-      setFormData({
-        ...formData,
-        certifications: updatedFields
-          .map((field) => field.value)
-          .filter((value) => value !== ""),
-      });
-    }
+  const removeCertField = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      certifications: prev.certifications.filter((_, i) => i !== index),
+    }));
   };
 
   // Validate current step
@@ -213,24 +183,84 @@ const TrainerRegistration = () => {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateStep(step)) {
-      router.push("/select-plan");
-    } else {
+    if (!validateStep(step)) {
       scrollToTop();
+      return;
     }
+    setLoading(true);
+    // 1. Pripremi FormData za upload fileova
+    const uploadData = new FormData();
+    if (formData.profileImage && formData.profileImage instanceof File) {
+      uploadData.append("profileImage", formData.profileImage);
+    }
+    formData.certifications.forEach((cert) => {
+      if (cert.file) {
+        uploadData.append("certifications", cert.file); // backend očekuje array
+      }
+    });
+    // Log sve što je u uploadData
+    for (const pair of uploadData.entries()) {
+      console.log("[DEBUG] FormData entry:", pair[0], pair[1]);
+    }
+    // 2. Prvo uploadaj slike/certifikate
+    let uploadedUrls = {};
+    if (
+      (formData.profileImage && formData.profileImage instanceof File) ||
+      formData.certifications.some((c) => c.file)
+    ) {
+      const uploadRes = await fetch("/api/upload", {
+        method: "POST",
+        body: uploadData,
+      });
+      if (!uploadRes.ok) {
+        setErrors({ general: "Greška pri uploadu slika/certifikata." });
+        setLoading(false);
+        return;
+      }
+      uploadedUrls = await uploadRes.json();
+    }
+    // 3. Pripremi podatke za kreiranje profila
+    const trainerData = {
+      ...formData,
+      profileImage: uploadedUrls.profileImage || formData.profileImage,
+      certifications: formData.certifications.map((cert, i) => ({
+        ...cert,
+        documentUrl:
+          uploadedUrls.certifications?.[i]?.documentUrl ||
+          cert.documentUrl ||
+          "",
+        file: undefined, // ne šalji file objekte
+      })),
+      currency: formData.currency || "EUR", // default to EUR if not set
+    };
+    // 4. Pošalji podatke na backend za kreiranje profila
+    const res = await fetch("/api/users/trainer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(trainerData),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      setErrors({ general: err.error || "Greška pri spremanju profila." });
+      setLoading(false);
+      return;
+    }
+    setLoading(false);
+    // 5. Redirect ako je sve prošlo
+    router.push("/trainer/dashboard");
   };
 
   // Move to next step
   const goToNextStep = (e) => {
     e.preventDefault();
-    if (validateStep(step)) {
-      setStep(step + 1);
-      window.scrollTo(0, 0);
-    } else {
-      scrollToTop();
-    }
+    // if (validateStep(step)) {
+    setStep(step + 1);
+    // window.scrollTo(0, 0);
+    // } else {
+    //   scrollToTop();
+    // }
   };
 
   // Move to previous step
@@ -241,6 +271,17 @@ const TrainerRegistration = () => {
   };
 
   // Helper to check if Professional Details step is filled enough to continue
+
+  // Za profilnu sliku
+  const handleProfileImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData((prev) => ({
+        ...prev,
+        profileImage: file,
+      }));
+    }
+  };
 
   return (
     <div className="relative min-h-screen  text-white">
@@ -283,7 +324,7 @@ const TrainerRegistration = () => {
               <ProfessionalDetailsStep
                 formData={formData}
                 onChange={handleChange}
-                certFields={certFields}
+                certFields={formData.certifications}
                 handleCertChange={handleCertChange}
                 addCertField={addCertField}
                 removeCertField={removeCertField}
@@ -305,6 +346,7 @@ const TrainerRegistration = () => {
               <ProfileSetupStep
                 formData={formData}
                 onChange={handleChange}
+                onProfileImageChange={handleProfileImageChange}
                 errors={errors}
               />
             )}
@@ -328,8 +370,37 @@ const TrainerRegistration = () => {
                   Continue
                 </Button>
               ) : (
-                <Button type="submit" rightIcon={<ArrowRight size={20} />}>
-                  Complete Profile
+                <Button
+                  type="submit"
+                  rightIcon={
+                    loading ? (
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v8z"
+                        ></path>
+                      </svg>
+                    ) : (
+                      <ArrowRight size={20} />
+                    )
+                  }
+                  disabled={loading}
+                >
+                  {loading ? "Saving..." : "Complete Profile"}
                 </Button>
               )}
             </div>

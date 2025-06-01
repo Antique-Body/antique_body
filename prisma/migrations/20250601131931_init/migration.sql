@@ -101,6 +101,9 @@ CREATE TABLE `TrainerPersonalInfo` (
     `state` VARCHAR(191) NULL,
     `country` VARCHAR(191) NULL,
     `postalCode` VARCHAR(191) NULL,
+    `pricingType` VARCHAR(191) NULL,
+    `pricePerSession` INTEGER NULL,
+    `currency` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -158,9 +161,10 @@ CREATE TABLE `Certification` (
     `trainerInfoId` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
     `issuer` VARCHAR(191) NULL,
-    `yearObtained` INTEGER NULL,
     `expiryDate` DATETIME(3) NULL,
     `status` ENUM('pending', 'accepted', 'rejected', 'expired') NOT NULL DEFAULT 'pending',
+    `description` TEXT NULL,
+    `documentUrl` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
