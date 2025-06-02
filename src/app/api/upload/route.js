@@ -6,25 +6,61 @@ import { uploadFile, initGCS } from "@/lib/storage";
 
 export const config = { api: { bodyParser: false } };
 
-const ALLOWED_IMAGE_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/jpg",
-  "image/gif",
-  "image/x-png",
-];
-const ALLOWED_CERT_TYPES = [
-  ...ALLOWED_IMAGE_TYPES,
-  "application/pdf",
-  "application/x-pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-];
+// Konfiguracija po key-u
+const UPLOAD_CONFIG = {
+  profileImage: {
+    allowedTypes: [
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+      "image/gif",
+      "image/x-png",
+    ],
+    folder: "profile-images",
+    maxSize: 1,
+  },
+  certifications: {
+    allowedTypes: [
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+      "image/gif",
+      "image/x-png",
+      "application/pdf",
+      "application/x-pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ],
+    folder: "certificates",
+    maxSize: 10,
+  },
+  gallery: {
+    allowedTypes: [
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+      "image/gif",
+      "image/x-png",
+    ],
+    folder: "gallery",
+    maxSize: 10,
+  },
+  videos: {
+    allowedTypes: [
+      "video/mp4",
+      "video/quicktime",
+      "video/x-msvideo",
+      "video/x-matroska",
+      "video/webm",
+    ],
+    folder: "videos",
+    maxSize: 100,
+  },
+  // Dodaj nove key-eve po potrebi
+};
 
 function validateFile(file, allowedTypes, maxSizeMB = 10) {
-  if (!file || !file.mimetype) return; // ignoriraj prazne slotove
-  // Log za debug
-  console.log("Validating file:", file?.originalFilename, file?.mimetype);
+  if (!file || !file.mimetype) return;
   if (!allowedTypes.includes(file.mimetype?.toLowerCase())) {
     throw new Error("Invalid file type");
   }
@@ -61,49 +97,80 @@ export async function POST(req) {
         console.log("FILES RECEIVED:", files); // Debug log
         if (err) throw err;
         const uploadedUrls = {};
-        // Handle profileImage as array or single file
-        let profileImageFile = files.profileImage;
-        if (Array.isArray(profileImageFile)) {
-          profileImageFile = profileImageFile[0];
-        }
-        if (profileImageFile && profileImageFile.mimetype) {
-          validateFile(profileImageFile, ALLOWED_IMAGE_TYPES, 5);
-          uploadedUrls.profileImage = await uploadFile(
-            profileImageFile,
-            "profile-images"
-          );
-        }
-        // Grupiraj certifikate po indexu (certifications[0], certifications[1], ...)
-        const grouped = {};
-        Object.keys(files).forEach((key) => {
-          const match = key.match(/^certifications\[(\d+)\]$/);
-          if (match) {
-            const certIdx = Number(match[1]);
-            if (!grouped[certIdx]) grouped[certIdx] = [];
+        // 1. Prvo obradi certifications posebno (kao array arraya)
+        const certGrouped = {};
+        for (const key of Object.keys(files)) {
+          const certMatch = key.match(/^certifications\[(\d+)\]$/);
+          if (certMatch) {
+            const idx = Number(certMatch[1]);
+            const config = UPLOAD_CONFIG.certifications;
+            if (!certGrouped[idx]) certGrouped[idx] = [];
             const fileOrArray = files[key];
-            if (Array.isArray(fileOrArray)) {
-              grouped[certIdx].push(...fileOrArray);
-            } else {
-              grouped[certIdx].push(fileOrArray);
+            const fileArr = Array.isArray(fileOrArray)
+              ? fileOrArray
+              : [fileOrArray];
+            for (const file of fileArr) {
+              if (!file || !file.mimetype) continue;
+              validateFile(file, config.allowedTypes, config.maxSize);
+              const url = await uploadFile(file, config.folder);
+              certGrouped[idx].push({
+                url,
+                originalName: file.originalFilename,
+                mimetype: file.mimetype,
+              });
             }
           }
-        });
-        const maxIdx = Math.max(-1, ...Object.keys(grouped).map(Number));
-        uploadedUrls.certifications = [];
-        for (let i = 0; i <= maxIdx; i++) {
-          const certFiles = grouped[i] || [];
-          const certDocs = [];
-          for (const cert of certFiles) {
-            if (!cert || !cert.mimetype) continue;
-            validateFile(cert, ALLOWED_CERT_TYPES);
-            const url = await uploadFile(cert, "certificates");
-            certDocs.push({
-              url,
-              originalName: cert.originalFilename,
-              mimetype: cert.mimetype,
-            });
+        }
+        // Pretvori certGrouped u array arraya po indeksima
+        if (Object.keys(certGrouped).length > 0) {
+          const maxIdx = Math.max(...Object.keys(certGrouped).map(Number));
+          uploadedUrls.certifications = [];
+          for (let i = 0; i <= maxIdx; i++) {
+            uploadedUrls.certifications[i] = certGrouped[i] || [];
           }
-          uploadedUrls.certifications.push(certDocs);
+        }
+        // 2. Ostale key-eve obradi generički
+        for (const key of Object.keys(files)) {
+          // preskoči certifications[...]
+          if (/^certifications\[\d+\]$/.test(key)) continue;
+          const baseKeyMatch = key.match(/^(\w+)(\[(\d+)\])?$/);
+          if (!baseKeyMatch) continue;
+          const baseKey = baseKeyMatch[1];
+          if (baseKey === "certifications") continue;
+          const config = UPLOAD_CONFIG[baseKey];
+          if (!config) continue;
+          const fileOrArray = files[key];
+          const fileArr = Array.isArray(fileOrArray)
+            ? fileOrArray
+            : [fileOrArray];
+          // profileImage: vrati samo url (string)
+          if (baseKey === "profileImage") {
+            let url = null;
+            for (const file of fileArr) {
+              if (!file || !file.mimetype) continue;
+              validateFile(file, config.allowedTypes, config.maxSize);
+              url = await uploadFile(file, config.folder);
+              break; // uzmi samo prvi
+            }
+            if (url) uploadedUrls.profileImage = url;
+            continue;
+          }
+          // gallery i videos: array objekata
+          if (baseKey === "gallery" || baseKey === "videos") {
+            if (!uploadedUrls[baseKey]) uploadedUrls[baseKey] = [];
+            for (const file of fileArr) {
+              if (!file || !file.mimetype) continue;
+              validateFile(file, config.allowedTypes, config.maxSize);
+              const url = await uploadFile(file, config.folder);
+              uploadedUrls[baseKey].push({
+                url,
+                originalName: file.originalFilename,
+                mimetype: file.mimetype,
+              });
+            }
+            continue;
+          }
+          // Ostali key-evi po potrebi
         }
         // Debug: logaj uploadedUrls prije resolve
         console.log("uploadedUrls", uploadedUrls);
