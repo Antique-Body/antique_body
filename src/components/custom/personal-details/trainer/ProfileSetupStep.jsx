@@ -80,6 +80,8 @@ export const ProfileSetupStep = ({ formData, onChange, errors }) => {
       },
     });
     setImageError("");
+    // Reset the file input value
+    document.getElementById("profile-image-upload").value = "";
   };
 
   return (
