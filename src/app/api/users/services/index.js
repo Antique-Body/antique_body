@@ -297,7 +297,6 @@ async function createTrainerWithDetails(formData, userId) {
                 name: cert.name,
                 issuer: cert.issuer || null,
                 expiryDate: cert.expiryDate ? new Date(cert.expiryDate) : null,
-                description: cert.description || null,
                 documents:
                   cert.documents && cert.documents.length > 0
                     ? {
