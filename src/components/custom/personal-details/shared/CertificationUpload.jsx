@@ -1,5 +1,6 @@
 "use client";
 import { Icon } from "@iconify/react";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 
 import { FormField } from "@/components/common";
@@ -32,7 +33,7 @@ export const CertificationUpload = ({
   addCertField,
   removeCertField,
 }) => {
-  // Za svaki certifikat držimo error i preview url
+  // Za svaki certifikat držimo errors i preview urls
   const [certErrors, setCertErrors] = useState([]);
   const [certPreviews, setCertPreviews] = useState([]);
 
@@ -40,40 +41,54 @@ export const CertificationUpload = ({
     () =>
       // Cleanup URL.createObjectURL kad se komponenta unmounta ili file promijeni
       () => {
-        certPreviews.forEach((url) => {
-          if (url && url.startsWith("blob:")) {
-            URL.revokeObjectURL(url);
+        certPreviews.forEach((previewArray) => {
+          if (previewArray) {
+            previewArray.forEach((url) => {
+              if (url && url.startsWith("blob:")) {
+                URL.revokeObjectURL(url);
+              }
+            });
           }
         });
       },
     [certPreviews]
   );
 
-  const handleCertFileChange = (index, file) => {
-    const error = validateCertFile(file);
-    if (error) {
+  const handleCertFileChange = (index, files) => {
+    // Convert FileList to Array if necessary
+    const fileArray = Array.isArray(files) ? files : Array.from(files);
+
+    // Validate each file
+    const errors = fileArray.map(validateCertFile).filter(Boolean);
+
+    if (errors.length > 0) {
       setCertErrors((prev) => {
         const updated = [...prev];
-        updated[index] = error;
+        updated[index] = errors.join(", ");
         return updated;
       });
       return;
     }
+
     setCertErrors((prev) => {
       const updated = [...prev];
       updated[index] = "";
       return updated;
     });
-    let url = "";
-    if (file.type.startsWith("image/")) {
-      url = URL.createObjectURL(file);
-    }
+
+    // Create preview URLs for image files
+    const urls = fileArray.map((file) =>
+      file.type.startsWith("image/") ? URL.createObjectURL(file) : ""
+    );
+
     setCertPreviews((prev) => {
       const updated = [...prev];
-      updated[index] = url;
+      updated[index] = urls;
       return updated;
     });
-    handleCertChange(index, "file", file);
+
+    // Update the file field in the form data
+    handleCertChange(index, "files", fileArray);
   };
 
   // Enhanced version to clear errors when certificate is removed
@@ -88,9 +103,13 @@ export const CertificationUpload = ({
     // Clear any preview URLs for this certificate
     setCertPreviews((prev) => {
       const updated = [...prev];
-      // Revoke the URL to prevent memory leaks
-      if (updated[index] && updated[index].startsWith("blob:")) {
-        URL.revokeObjectURL(updated[index]);
+      // Revoke the URLs to prevent memory leaks
+      if (updated[index]) {
+        updated[index].forEach((url) => {
+          if (url && url.startsWith("blob:")) {
+            URL.revokeObjectURL(url);
+          }
+        });
       }
       updated.splice(index, 1);
       return updated;
@@ -98,6 +117,41 @@ export const CertificationUpload = ({
 
     // Call the original removeCertField function
     removeCertField(index);
+  };
+
+  // Handle removal of a single file from multiple files
+  const handleRemoveFile = (certIndex, fileIndex) => {
+    // Get current files
+    const currentFiles = certFields[certIndex].files || [];
+
+    if (currentFiles.length <= fileIndex) return;
+
+    // Create a new array without the removed file
+    const updatedFiles = [...currentFiles];
+    updatedFiles.splice(fileIndex, 1);
+
+    // Update previews
+    setCertPreviews((prev) => {
+      const updated = [...prev];
+      if (updated[certIndex]) {
+        // Revoke the URL to prevent memory leaks
+        if (
+          updated[certIndex][fileIndex] &&
+          updated[certIndex][fileIndex].startsWith("blob:")
+        ) {
+          URL.revokeObjectURL(updated[certIndex][fileIndex]);
+        }
+
+        // Remove the preview
+        updated[certIndex] = updated[certIndex].filter(
+          (_, i) => i !== fileIndex
+        );
+      }
+      return updated;
+    });
+
+    // Update the form data
+    handleCertChange(certIndex, "files", updatedFiles);
   };
 
   return (
@@ -177,111 +231,157 @@ export const CertificationUpload = ({
             </div>
           )}
 
-          {/* File Upload Section with Preview */}
+          {/* File Upload Section */}
           {field.name && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <label className="block text-gray-300 text-sm font-medium">
-                  Certificate Document
+                  Certificate Documents
                 </label>
+                <span className="text-xs text-gray-500">
+                  {field.files && field.files.length > 0
+                    ? `${field.files.length} file${
+                        field.files.length > 1 ? "s" : ""
+                      } uploaded`
+                    : "No files"}
+                </span>
               </div>
 
-              {/* Two-column layout for upload and preview */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Image preview column (if available) */}
-                {field.file &&
-                  (field.file.type.startsWith("image/") ||
-                    certPreviews[index]) && (
-                    <div className="flex flex-col items-center md:items-start">
-                      <div
-                        className="relative group cursor-pointer w-32 h-32 bg-[#1a1a1a] rounded-lg overflow-hidden border border-[#444] hover:border-[#FF6B00]/50 transition-all"
-                        onClick={() =>
-                          document
-                            .getElementById(`cert-upload-${index}`)
-                            .click()
-                        }
-                      >
-                        <img
-                          src={certPreviews[index]}
-                          alt="Certificate preview"
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                          <Icon
-                            icon="mdi:camera"
-                            className="text-white w-8 h-8"
-                          />
-                        </div>
-                      </div>
-                      <p className="text-xs text-gray-400 mt-2 text-center md:text-left">
-                        Click to change
-                      </p>
+              {/* File upload area */}
+              <div className="grid grid-cols-1 gap-4">
+                <div className="flex flex-col space-y-4">
+                  {/* Upload area (always visible for multiple uploads) */}
+                  <div
+                    className="w-full p-6 border-2 border-dashed border-[#444] hover:border-[#FF6B00]/50 rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all duration-300"
+                    onClick={() =>
+                      document.getElementById(`cert-upload-${index}`).click()
+                    }
+                  >
+                    <div className="w-12 h-12 bg-[#FF6B00]/10 rounded-full flex items-center justify-center mb-3">
+                      <Icon
+                        icon="mdi:cloud-upload"
+                        width={24}
+                        height={24}
+                        className="text-[#FF6B00]"
+                      />
                     </div>
-                  )}
+                    <p className="text-gray-300 text-sm font-medium">
+                      {field.files && field.files.length > 0
+                        ? "Add more files"
+                        : "Upload certificate documents"}
+                    </p>
+                    <p className="text-gray-500 text-xs mt-1">
+                      Maximum size: 1MB per file
+                    </p>
+                  </div>
 
-                {/* File upload column */}
-                <div
-                  className={
-                    field.file &&
-                    (field.file.type.startsWith("image/") ||
-                      certPreviews[index])
-                      ? "col-span-1 md:col-span-2"
-                      : "col-span-1 md:col-span-3"
-                  }
-                >
-                  <FormField
+                  {/* Hidden file input */}
+                  <input
                     type="file"
                     accept=".pdf,.jpg,.jpeg,.png,.docx,.doc"
                     onChange={(e) => {
-                      const file = e.target.files
-                        ? e.target.files[0]
-                        : e.target.value;
-                      if (!file) return;
-                      handleCertFileChange(index, file);
+                      const files = e.target.files;
+                      if (!files || files.length === 0) return;
+                      handleCertFileChange(index, files);
                     }}
                     id={`cert-upload-${index}`}
-                    error={certErrors[index]}
-                    showFilePreview={false}
-                    subLabel={
-                      field.file
-                        ? undefined
-                        : "Upload your certification document (max 1MB)"
-                    }
+                    className="hidden"
+                    multiple
                   />
+
+                  {/* Error message */}
+                  {certErrors[index] && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {certErrors[index]}
+                    </p>
+                  )}
+
+                  {/* File previews grid */}
+                  {field.files && field.files.length > 0 && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-3">
+                      {field.files.map((file, fileIndex) => (
+                        <div key={fileIndex} className="relative group">
+                          {/* Image files */}
+                          {file.type.startsWith("image/") &&
+                            certPreviews[index] &&
+                            certPreviews[index][fileIndex] && (
+                              <div className="relative h-32 bg-[#1a1a1a] rounded-lg overflow-hidden border border-[#444] hover:border-[#FF6B00]/50 transition-all">
+                                <div className="relative w-full h-full">
+                                  <Image
+                                    src={certPreviews[index][fileIndex]}
+                                    alt={`Certificate ${fileIndex + 1}`}
+                                    fill
+                                    style={{ objectFit: "contain" }}
+                                  />
+                                </div>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveFile(index, fileIndex);
+                                  }}
+                                  className="absolute top-1 right-1 w-6 h-6 bg-red-500/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <Icon
+                                    icon="mdi:close"
+                                    width={14}
+                                    height={14}
+                                    className="text-white"
+                                  />
+                                </button>
+                              </div>
+                            )}
+
+                          {/* Document files */}
+                          {!file.type.startsWith("image/") && (
+                            <div className="relative flex items-center gap-2 p-3 bg-[#1a1a1a] rounded-lg border border-[#333] hover:border-[#FF6B00]/30 transition-all h-32">
+                              <div className="w-10 h-10 bg-[#FF6B00]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <Icon
+                                  icon={
+                                    file.type === "application/pdf"
+                                      ? "mdi:file-pdf"
+                                      : file.type.includes("word")
+                                      ? "mdi:file-word"
+                                      : "mdi:file-document"
+                                  }
+                                  width={20}
+                                  height={20}
+                                  className="text-[#FF6B00]"
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-white text-sm font-medium truncate">
+                                  {file.name}
+                                </p>
+                                <p className="text-gray-400 text-xs">
+                                  {file.size < 1024
+                                    ? `${file.size} B`
+                                    : file.size < 1048576
+                                    ? `${(file.size / 1024).toFixed(1)} KB`
+                                    : `${(file.size / 1048576).toFixed(1)} MB`}
+                                </p>
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveFile(index, fileIndex);
+                                }}
+                                className="absolute top-1 right-1 w-6 h-6 bg-red-500/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <Icon
+                                  icon="mdi:close"
+                                  width={14}
+                                  height={14}
+                                  className="text-white"
+                                />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
-
-              {/* Document type indicators (for non-image files) */}
-              {field.file && !field.file.type.startsWith("image/") && (
-                <div className="flex items-center gap-3 p-3 bg-[#1a1a1a] rounded-lg border border-[#333]">
-                  <div className="w-10 h-10 bg-[#FF6B00]/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Icon
-                      icon={
-                        field.file.type === "application/pdf"
-                          ? "mdi:file-pdf"
-                          : field.file.type.includes("word")
-                          ? "mdi:file-word"
-                          : "mdi:file-document"
-                      }
-                      width={20}
-                      height={20}
-                      className="text-[#FF6B00]"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-white text-sm font-medium">
-                      {field.file.name}
-                    </p>
-                    <p className="text-gray-400 text-xs">
-                      {field.file.size < 1024
-                        ? `${field.file.size} B`
-                        : field.file.size < 1048576
-                        ? `${(field.file.size / 1024).toFixed(1)} KB`
-                        : `${(field.file.size / 1048576).toFixed(1)} MB`}
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>
