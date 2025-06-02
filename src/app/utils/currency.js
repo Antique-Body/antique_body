@@ -1,7 +1,7 @@
 // Utility za konverziju valuta u EUR koristeći exchangerate.host
-// Dodaj u .env.local: EXCHANGERATE_API_KEY=OVDJE_STAVI_SVOJ_KLJUC
+// Dodaj u .env.local: CURRENCY_CHANGER=OVDJE_STAVI_SVOJ_KLJUC
 
-const ACCESS_KEY = "ccb481da2626e4ea9a262f7ffbfe1d25";
+const ACCESS_KEY = process.env.CURRENCY_CHANGER;
 
 /**
  * Konvertuje iznos iz bilo koje valute u EUR koristeći exchangerate.host API.
