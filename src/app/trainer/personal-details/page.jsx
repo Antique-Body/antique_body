@@ -163,7 +163,6 @@ const TrainerRegistration = () => {
         newErrors.trainingTypes = "At least one training type is required";
     }
     if (currentStep === 3) {
-      if (!formData.email) newErrors.email = "Email is required";
       if (!formData.location || !formData.location.city)
         newErrors["location.city"] = "City is required";
       if (!formData.location || !formData.location.state)
