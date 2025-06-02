@@ -3,6 +3,7 @@ import { Icon } from "@iconify/react";
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 
+import { DatePicker } from "./DatePicker";
 import { ErrorIcon } from "./Icons";
 
 /**
@@ -691,6 +692,30 @@ export const FormField = ({
         <LabelComponent htmlFor={id || name} />
         {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
         <textarea {...inputProps} className={inputClass} rows={rows}></textarea>
+        {error && (
+          <p className="mt-1 flex items-center text-sm text-red-500">
+            <ErrorIcon size={16} className="mr-1" />
+            {error}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  // If type is date, use our custom DatePicker
+  if (type === "date") {
+    return (
+      <div className={`mb-4 ${className}`}>
+        <LabelComponent htmlFor={id || name} />
+        {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
+        <DatePicker
+          value={value}
+          onChange={onChange}
+          name={name}
+          min={min}
+          max={max}
+          disabled={disabled}
+        />
         {error && (
           <p className="mt-1 flex items-center text-sm text-red-500">
             <ErrorIcon size={16} className="mr-1" />
