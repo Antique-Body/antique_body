@@ -1,3 +1,4 @@
+import { convertToEUR } from "../../../utils/currency";
 import { userService } from "../services";
 
 import { auth } from "#/auth";
@@ -11,6 +12,28 @@ export async function POST(req) {
       });
     }
     const body = await req.json();
+
+    // Konvertuj pricePerSession u EUR ako postoji i valuta nije EUR
+    if (body.pricePerSession && body.currency && body.currency !== "EUR") {
+      try {
+        const priceInEUR = await convertToEUR(
+          body.pricePerSession,
+          body.currency
+        );
+        body.pricePerSession = priceInEUR;
+        body.currency = "EUR";
+      } catch (err) {
+        return new Response(
+          JSON.stringify({
+            error: "Currency conversion failed: " + err.message,
+          }),
+          {
+            status: 400,
+          }
+        );
+      }
+    }
+
     const trainer = await userService.createTrainerWithDetails(
       body,
       session.user.id
