@@ -39,6 +39,9 @@ export const FormField = ({
   onSelectOption,
   prefixIcon, // New prop for icon prefix
   suffixIcon, // New prop for icon suffix
+  multiple = false, // Add support for multiple file uploads
+  maxFiles = 5, // Maximum number of files that can be uploaded
+  showFilePreview = true, // Option to show file previews
   ...props
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -47,6 +50,8 @@ export const FormField = ({
   const [asyncOptions, setAsyncOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [dragActive, setDragActive] = useState(false);
 
   // Fix: useEffect must not be called conditionally
   useEffect(() => {
@@ -76,7 +81,7 @@ export const FormField = ({
         max,
         step,
         disabled,
-        ...(type === "file" && { accept }),
+        ...(type === "file" && { accept, multiple }),
         ...(type === "checkbox" && { checked }),
         ...(type === "radio" && { checked }),
       };
@@ -202,19 +207,302 @@ export const FormField = ({
   }
 
   if (type === "file") {
+    // Handle file selection
+    const handleFileChange = (e) => {
+      const files = e.target.files;
+      if (!files || files.length === 0) return;
+
+      // For single file upload when multiple is false
+      if (!multiple) {
+        const file = files[0];
+        const error = validateFile(file);
+        if (error) {
+          // Handle error
+          return;
+        }
+        setSelectedFiles([file]);
+        if (onChange) onChange({ target: { name, value: file } });
+        return;
+      }
+
+      // For multiple file upload
+      const fileArray = Array.from(files).slice(0, maxFiles);
+      setSelectedFiles(fileArray);
+      if (onChange) onChange({ target: { name, value: fileArray } });
+    };
+
+    // Validate individual file
+    const validateFile = (file) => {
+      if (accept) {
+        const acceptedTypes = accept.split(",").map((type) => type.trim());
+        const fileType = file.type;
+        const fileExtension = "." + file.name.split(".").pop().toLowerCase();
+
+        const isAccepted = acceptedTypes.some((type) => {
+          if (type.startsWith(".")) {
+            return fileExtension === type;
+          }
+          if (type.includes("/*")) {
+            const mainType = type.split("/")[0];
+            return fileType.startsWith(mainType + "/");
+          }
+          return type === fileType;
+        });
+
+        if (!isAccepted) {
+          return `File type not allowed. Accepted: ${accept}`;
+        }
+      }
+      return null;
+    };
+
+    // Handle drag events
+    const handleDrag = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (e.type === "dragenter" || e.type === "dragover") {
+        setDragActive(true);
+      } else if (e.type === "dragleave") {
+        setDragActive(false);
+      }
+    };
+
+    // Handle drop event
+    const handleDrop = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragActive(false);
+
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        if (!multiple) {
+          const file = e.dataTransfer.files[0];
+          const error = validateFile(file);
+          if (error) {
+            // Handle error
+            return;
+          }
+          setSelectedFiles([file]);
+          if (onChange) onChange({ target: { name, value: file } });
+        } else {
+          const fileArray = Array.from(e.dataTransfer.files).slice(0, maxFiles);
+          setSelectedFiles(fileArray);
+          if (onChange) onChange({ target: { name, value: fileArray } });
+        }
+      }
+    };
+
+    // Remove a file from selection (for multiple uploads)
+    const removeFile = (indexToRemove) => {
+      const updatedFiles = selectedFiles.filter(
+        (_, index) => index !== indexToRemove
+      );
+      setSelectedFiles(updatedFiles);
+      if (onChange)
+        onChange({
+          target: {
+            name,
+            value: multiple ? updatedFiles : updatedFiles[0] || null,
+          },
+        });
+    };
+
+    // Get file icon based on mime type
+    const getFileIcon = (file) => {
+      if (file.type.startsWith("image/")) return "mdi:file-image";
+      if (file.type.includes("pdf")) return "mdi:file-pdf";
+      if (file.type.includes("word")) return "mdi:file-word";
+      if (file.type.includes("excel") || file.type.includes("sheet"))
+        return "mdi:file-excel";
+      return "mdi:file-document";
+    };
+
+    // Format file size
+    const formatFileSize = (size) => {
+      if (size < 1024) return size + " B";
+      else if (size < 1048576) return (size / 1024).toFixed(1) + " KB";
+      else return (size / 1048576).toFixed(1) + " MB";
+    };
+
     return (
       <div className={`mb-4 ${className}`}>
         <LabelComponent htmlFor={id || name} />
         {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
-        <input {...inputProps} className="hidden" id={id || name} />
+
+        {/* Hidden file input */}
+        <input
+          {...inputProps}
+          className="hidden"
+          id={id || name}
+          onChange={handleFileChange}
+        />
+
+        {/* Modern drag and drop file upload area */}
         <label
           htmlFor={id || name}
-          className="inline-block cursor-pointer rounded-lg bg-[#333] px-4 py-2 transition-colors hover:bg-[#444]"
+          className={`block w-full cursor-pointer rounded-lg border-2 border-dashed transition-all duration-200 ${
+            dragActive
+              ? "border-[#FF6B00] bg-[#FF6B00]/5"
+              : "border-[#444] hover:border-[#FF6B00]/50 hover:bg-[#333]/30"
+          } ${selectedFiles.length > 0 ? "p-3" : "p-6"}`}
+          onDragEnter={handleDrag}
+          onDragLeave={handleDrag}
+          onDragOver={handleDrag}
+          onDrop={handleDrop}
         >
-          Choose File
+          {selectedFiles.length === 0 ? (
+            <div className="flex flex-col items-center justify-center text-center gap-2">
+              <div className="w-12 h-12 bg-[#333] rounded-full flex items-center justify-center mb-2">
+                <Icon
+                  icon="mdi:cloud-upload"
+                  width={24}
+                  height={24}
+                  className="text-[#FF6B00]"
+                />
+              </div>
+              <p className="text-white font-medium">
+                Drag and drop {multiple ? "files" : "a file"} here
+              </p>
+              <p className="text-gray-400 text-sm">or click to browse</p>
+              {accept && (
+                <p className="text-gray-500 text-xs mt-1">
+                  Allowed formats: {accept}
+                </p>
+              )}
+              {multiple && (
+                <p className="text-gray-500 text-xs">Up to {maxFiles} files</p>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-300 text-sm font-medium">
+                  {multiple
+                    ? `${selectedFiles.length} file(s) selected`
+                    : "File selected"}
+                </span>
+                {selectedFiles.length > 0 && multiple && (
+                  <button
+                    type="button"
+                    className="text-gray-400 hover:text-[#FF6B00] text-sm flex items-center gap-1"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setSelectedFiles([]);
+                      if (onChange)
+                        onChange({
+                          target: { name, value: multiple ? [] : null },
+                        });
+                    }}
+                  >
+                    <Icon icon="mdi:refresh" width={16} height={16} />
+                    Change all
+                  </button>
+                )}
+              </div>
+
+              <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1">
+                {selectedFiles.map((file, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-3 bg-[#1a1a1a] rounded-lg p-2 border border-[#333] group"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="w-10 h-10 bg-[#FF6B00]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Icon
+                        icon={getFileIcon(file)}
+                        width={20}
+                        height={20}
+                        className="text-[#FF6B00]"
+                      />
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-medium truncate">
+                        {file.name}
+                      </p>
+                      <p className="text-gray-400 text-xs">
+                        {formatFileSize(file.size)}
+                      </p>
+                    </div>
+
+                    {multiple && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          removeFile(idx);
+                        }}
+                        className="w-6 h-6 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Icon
+                          icon="mdi:close"
+                          width={14}
+                          height={14}
+                          className="text-red-400"
+                        />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {multiple && selectedFiles.length < maxFiles && (
+                <button
+                  type="button"
+                  className="mt-2 text-[#FF6B00] hover:text-[#FF6B00]/80 text-sm flex items-center gap-1 self-start"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    document.getElementById(id || name).click();
+                  }}
+                >
+                  <Icon icon="mdi:plus" width={16} height={16} />
+                  Add more files
+                </button>
+              )}
+            </div>
+          )}
         </label>
+
+        {/* Preview area for images if enabled */}
+        {showFilePreview &&
+          selectedFiles.some((file) => file.type.startsWith("image/")) && (
+            <div className="mt-3 flex flex-wrap gap-3">
+              {selectedFiles
+                .filter((file) => file.type.startsWith("image/"))
+                .map((file, idx) => (
+                  <div key={`preview-${idx}`} className="relative group">
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={`Preview ${idx}`}
+                      className="w-20 h-20 object-cover rounded-lg border border-[#333]"
+                    />
+                    {multiple && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          removeFile(selectedFiles.indexOf(file));
+                        }}
+                        className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Icon
+                          icon="mdi:close"
+                          width={12}
+                          height={12}
+                          className="text-white"
+                        />
+                      </button>
+                    )}
+                  </div>
+                ))}
+            </div>
+          )}
+
         {error && (
-          <p className="mt-1 flex items-center text-sm text-red-500">
+          <p className="mt-2 flex items-center text-sm text-red-500">
             <ErrorIcon size={16} className="mr-1" />
             {error}
           </p>
