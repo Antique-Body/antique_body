@@ -1,31 +1,10 @@
 "use client";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
-import { useState, useEffect } from "react";
 
 import { FormField } from "@/components/common";
 import { Button } from "@/components/common/Button";
-
-const ALLOWED_CERT_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/jpg",
-  "image/gif",
-  "application/pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-];
-const MAX_CERT_SIZE_MB = 1;
-
-function validateCertFile(file) {
-  if (!ALLOWED_CERT_TYPES.includes(file.type)) {
-    return "Nedozvoljen format certifikata!";
-  }
-  if (file.size > MAX_CERT_SIZE_MB * 1024 * 1024) {
-    return `Certifikat je prevelik! Maksimalna veličina je ${MAX_CERT_SIZE_MB}MB.`;
-  }
-  return null;
-}
+import { useCertificateFiles } from "@/hooks";
 
 export const CertificationUpload = ({
   certFields,
@@ -33,126 +12,13 @@ export const CertificationUpload = ({
   addCertField,
   removeCertField,
 }) => {
-  // Za svaki certifikat držimo errors i preview urls
-  const [certErrors, setCertErrors] = useState([]);
-  const [certPreviews, setCertPreviews] = useState([]);
-
-  useEffect(
-    () =>
-      // Cleanup URL.createObjectURL kad se komponenta unmounta ili file promijeni
-      () => {
-        certPreviews.forEach((previewArray) => {
-          if (previewArray) {
-            previewArray.forEach((url) => {
-              if (url && url.startsWith("blob:")) {
-                URL.revokeObjectURL(url);
-              }
-            });
-          }
-        });
-      },
-    [certPreviews]
-  );
-
-  const handleCertFileChange = (index, files) => {
-    // Convert FileList to Array if necessary
-    const fileArray = Array.isArray(files) ? files : Array.from(files);
-
-    // Validate each file
-    const errors = fileArray.map(validateCertFile).filter(Boolean);
-
-    if (errors.length > 0) {
-      setCertErrors((prev) => {
-        const updated = [...prev];
-        updated[index] = errors.join(", ");
-        return updated;
-      });
-      return;
-    }
-
-    setCertErrors((prev) => {
-      const updated = [...prev];
-      updated[index] = "";
-      return updated;
-    });
-
-    // Create preview URLs for image files
-    const urls = fileArray.map((file) =>
-      file.type.startsWith("image/") ? URL.createObjectURL(file) : ""
-    );
-
-    setCertPreviews((prev) => {
-      const updated = [...prev];
-      updated[index] = urls;
-      return updated;
-    });
-
-    // Update the file field in the form data
-    handleCertChange(index, "files", fileArray);
-  };
-
-  // Enhanced version to clear errors when certificate is removed
-  const handleRemoveCertField = (index) => {
-    // Clear any errors for this certificate
-    setCertErrors((prev) => {
-      const updated = [...prev];
-      updated.splice(index, 1);
-      return updated;
-    });
-
-    // Clear any preview URLs for this certificate
-    setCertPreviews((prev) => {
-      const updated = [...prev];
-      // Revoke the URLs to prevent memory leaks
-      if (updated[index]) {
-        updated[index].forEach((url) => {
-          if (url && url.startsWith("blob:")) {
-            URL.revokeObjectURL(url);
-          }
-        });
-      }
-      updated.splice(index, 1);
-      return updated;
-    });
-
-    // Call the original removeCertField function
-    removeCertField(index);
-  };
-
-  // Handle removal of a single file from multiple files
-  const handleRemoveFile = (certIndex, fileIndex) => {
-    // Get current files
-    const currentFiles = certFields[certIndex].files || [];
-
-    if (currentFiles.length <= fileIndex) return;
-
-    // Create a new array without the removed file
-    const updatedFiles = [...currentFiles];
-    updatedFiles.splice(fileIndex, 1);
-
-    // Update previews
-    setCertPreviews((prev) => {
-      const updated = [...prev];
-      if (updated[certIndex]) {
-        // Revoke the URL to prevent memory leaks
-        if (
-          updated[certIndex][fileIndex] &&
-          updated[certIndex][fileIndex].startsWith("blob:")
-        ) {
-          URL.revokeObjectURL(updated[certIndex][fileIndex]);
-        }
-
-        // Remove the preview
-        updated[certIndex] = updated[certIndex].filter(
-          (_, i) => i !== fileIndex
-        );
-      }
-      return updated;
-    });
-
-    // Update the form data
-    handleCertChange(certIndex, "files", updatedFiles);
-  };
+  const {
+    previews,
+    errors,
+    handleAddFiles,
+    handleRemoveFile,
+    handleRemoveCertField: removeCertFieldWithCleanup,
+  } = useCertificateFiles(certFields, handleCertChange, removeCertField);
 
   return (
     <div className="space-y-4">
@@ -180,7 +46,7 @@ export const CertificationUpload = ({
               <Button
                 variant="ghost"
                 type="button"
-                onClick={() => handleRemoveCertField(index)}
+                onClick={() => removeCertFieldWithCleanup(index)}
                 className="opacity-0 group-hover:opacity-100 w-8 h-8 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-full flex items-center justify-center transition-all duration-200"
               >
                 <Icon
@@ -282,7 +148,7 @@ export const CertificationUpload = ({
                     onChange={(e) => {
                       const files = e.target.files;
                       if (!files || files.length === 0) return;
-                      handleCertFileChange(index, files);
+                      handleAddFiles(index, files);
                     }}
                     id={`cert-upload-${index}`}
                     className="hidden"
@@ -290,10 +156,8 @@ export const CertificationUpload = ({
                   />
 
                   {/* Error message */}
-                  {certErrors[index] && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {certErrors[index]}
-                    </p>
+                  {errors[index] && (
+                    <p className="text-red-500 text-xs mt-1">{errors[index]}</p>
                   )}
 
                   {/* File previews grid */}
@@ -303,18 +167,19 @@ export const CertificationUpload = ({
                         <div key={fileIndex} className="relative group">
                           {/* Image files */}
                           {file.type.startsWith("image/") &&
-                            certPreviews[index] &&
-                            certPreviews[index][fileIndex] && (
+                            previews[index] &&
+                            previews[index][fileIndex] && (
                               <div className="relative h-32 bg-[#1a1a1a] rounded-lg overflow-hidden border border-[#444] hover:border-[#FF6B00]/50 transition-all">
                                 <div className="relative w-full h-full">
                                   <Image
-                                    src={certPreviews[index][fileIndex]}
+                                    src={previews[index][fileIndex]}
                                     alt={`Certificate ${fileIndex + 1}`}
                                     fill
                                     style={{ objectFit: "contain" }}
                                   />
                                 </div>
                                 <button
+                                  type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleRemoveFile(index, fileIndex);
@@ -361,6 +226,7 @@ export const CertificationUpload = ({
                                 </p>
                               </div>
                               <button
+                                type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleRemoveFile(index, fileIndex);

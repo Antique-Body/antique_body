@@ -1,5 +1,6 @@
 "use client";
 import { Icon } from "@iconify/react";
+import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 
@@ -475,10 +476,12 @@ export const FormField = ({
                 .filter((file) => file.type.startsWith("image/"))
                 .map((file, idx) => (
                   <div key={`preview-${idx}`} className="relative group">
-                    <img
+                    <Image
                       src={URL.createObjectURL(file)}
                       alt={`Preview ${idx}`}
                       className="w-20 h-20 object-cover rounded-lg border border-[#333]"
+                      width={80}
+                      height={80}
                     />
                     {multiple && (
                       <button

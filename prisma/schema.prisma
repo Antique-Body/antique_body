@@ -194,10 +194,20 @@ model Certification {
   issuer        String?
   expiryDate    DateTime?
   status        CertificationStatus @default(pending)
-  description   String? @db.Text
-  documentUrl   String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   trainerInfo   TrainerPersonalInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  documents     CertificationDocument[]
+}
+
+model CertificationDocument {
+  id              String   @id @default(cuid())
+  certificationId String
+  url             String
+  originalName    String?
+  mimetype        String?
+  createdAt       DateTime @default(now())
+
+  certification   Certification @relation(fields: [certificationId], references: [id], onDelete: Cascade)
 }

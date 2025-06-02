@@ -221,7 +221,7 @@ async function createTrainerWithDetails(formData, userId) {
     "profileImage",
     "location",
     "pricingType",
-    "pricePerSession",
+    // pricePerSession will be conditionally required below
     "currency",
   ];
   for (const field of requiredFields) {
@@ -235,6 +235,17 @@ async function createTrainerWithDetails(formData, userId) {
   // Bar jedno od email ili phone mora biti popunjeno
   if (!formData.email && !formData.phone) {
     throw new Error("At least one of 'email' or 'phone' is required.");
+  }
+  // Conditionally require pricePerSession
+  if (
+    formData.pricingType === "fixed" ||
+    formData.pricingType === "package_deals"
+  ) {
+    if (!formData.pricePerSession || Number(formData.pricePerSession) <= 0) {
+      throw new Error(
+        "Field 'pricePerSession' is required for selected pricing type."
+      );
+    }
   }
   const { location } = formData;
   if (
@@ -261,7 +272,11 @@ async function createTrainerWithDetails(formData, userId) {
       country: location.country,
       postalCode: location.postalCode,
       pricingType: formData.pricingType,
-      pricePerSession: Number(formData.pricePerSession),
+      pricePerSession:
+        formData.pricingType === "fixed" ||
+        formData.pricingType === "package_deals"
+          ? Number(formData.pricePerSession)
+          : null,
       currency: formData.currency,
       specialties: {
         create: formData.specialties.map((name) => ({ name })),
@@ -283,7 +298,16 @@ async function createTrainerWithDetails(formData, userId) {
                 issuer: cert.issuer || null,
                 expiryDate: cert.expiryDate ? new Date(cert.expiryDate) : null,
                 description: cert.description || null,
-                documentUrl: cert.documentUrl || null,
+                documents:
+                  cert.documents && cert.documents.length > 0
+                    ? {
+                        create: cert.documents.map((doc) => ({
+                          url: doc.url,
+                          originalName: doc.originalName,
+                          mimetype: doc.mimetype,
+                        })),
+                      }
+                    : undefined,
               })),
             }
           : undefined,
@@ -299,7 +323,11 @@ async function getTrainerProfileByUserId(userId) {
   return await prisma.trainerPersonalInfo.findUnique({
     where: { userId },
     include: {
-      certifications: true,
+      certifications: {
+        include: {
+          documents: true,
+        },
+      },
       specialties: true,
       languages: true,
       trainingEnvironments: true,
