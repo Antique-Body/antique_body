@@ -135,6 +135,19 @@ const TrainerRegistration = () => {
       if (!formData.lastName) newErrors.lastName = "Last name is required";
       if (!formData.dateOfBirth)
         newErrors.dateOfBirth = "Date of birth is required";
+      else {
+        // Age validation
+        const dob = new Date(formData.dateOfBirth);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const m = today.getMonth() - dob.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+          age--;
+        }
+        if (age < 16) {
+          newErrors.dateOfBirth = "You must be at least 16 years old.";
+        }
+      }
       if (!formData.gender) newErrors.gender = "Gender is required";
       if (!formData.trainingSince)
         newErrors.trainingSince = "Training since is required";
