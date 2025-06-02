@@ -4,7 +4,7 @@ import { Icon } from "@iconify/react";
 import { FormSection, LocationSelector } from "../shared";
 
 import { FormField } from "@/components/common";
-import { usePrefillFromSession } from "@/hooks/usePrefillFromSession";
+import { usePrefillFromSession } from "@/hooks";
 
 export const ProfileAndContactStep = ({ formData, onChange, errors }) => {
   usePrefillFromSession({

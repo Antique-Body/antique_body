@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 export default function TrainerDashboard() {
   const [trainer, setTrainer] = useState(null);
@@ -33,9 +34,11 @@ export default function TrainerDashboard() {
         {/* Profile Image */}
         <div>
           {trainer.profileImage ? (
-            <img
+            <Image
               src={trainer.profileImage}
               alt="Profile"
+              width={160}
+              height={160}
               className="w-40 h-40 object-cover rounded-full border-4 border-orange-400 shadow-lg"
             />
           ) : (
@@ -120,15 +123,39 @@ export default function TrainerDashboard() {
                       : "-"}
                   </div>
                 </div>
-                {cert.documentUrl && (
-                  <a
-                    href={cert.documentUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-orange-600 underline text-xs font-medium"
-                  >
-                    View Document
-                  </a>
+                {/* Prikaz svih dokumenata za certifikat */}
+                {cert.documents && cert.documents.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {cert.documents.map((doc, idx) =>
+                      doc.mimetype && doc.mimetype.startsWith("image/") ? (
+                        <a
+                          key={doc.url}
+                          href={doc.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block"
+                        >
+                          <Image
+                            src={doc.url}
+                            alt={doc.originalName || `Certificate ${idx + 1}`}
+                            width={48}
+                            height={48}
+                            className="rounded border border-orange-200 object-cover"
+                          />
+                        </a>
+                      ) : (
+                        <a
+                          key={doc.url}
+                          href={doc.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-orange-600 underline text-xs font-medium block"
+                        >
+                          {doc.originalName || `Document ${idx + 1}`}
+                        </a>
+                      )
+                    )}
+                  </div>
                 )}
               </li>
             ))}

@@ -1,5 +1,5 @@
 "use client";
-import { useTrainerRegistration } from "./useTrainerRegistration";
+import { useTrainerRegistration } from "../../../hooks/useTrainerRegistration";
 
 import { EffectBackground } from "@/components/background";
 import { Button, Footer } from "@/components/common";

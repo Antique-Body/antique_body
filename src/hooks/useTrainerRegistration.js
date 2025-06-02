@@ -30,7 +30,7 @@ export function useTrainerRegistration() {
     // Legacy fields for compatibility
     name: "",
     specialty: "",
-    certifications: [{ name: "", issuer: "", expiryDate: "", file: null }],
+    certifications: [{ name: "", issuer: "", expiryDate: "", files: [] }],
     yearsExperience: "",
     trainingVenues: [""],
     sports: [],
@@ -86,7 +86,7 @@ export function useTrainerRegistration() {
       ...prev,
       certifications: [
         ...prev.certifications,
-        { name: "", issuer: "", expiryDate: "", file: null },
+        { name: "", issuer: "", expiryDate: "", files: [] },
       ],
     }));
   };
@@ -177,17 +177,24 @@ export function useTrainerRegistration() {
     if (formData.profileImage && formData.profileImage instanceof File) {
       uploadData.append("profileImage", formData.profileImage);
     }
-    formData.certifications.forEach((cert) => {
-      if (cert.file) {
-        uploadData.append("certifications", cert.file); // backend očekuje array
+    // Dodaj sve fajlove za svaki certifikat
+    formData.certifications.forEach((cert, i) => {
+      if (cert.files && Array.isArray(cert.files)) {
+        cert.files.forEach((file) => {
+          if (file instanceof File && file.size > 0) {
+            uploadData.append(`certifications[${i}]`, file);
+          }
+        });
       }
     });
+    // Debug: logaj certifikate i fajlove
+    console.log("Certifikati za upload:", formData.certifications);
     // 2. Prvo uploadaj slike/certifikate
     let uploadedUrls = {};
-    if (
+    const hasFilesToUpload =
       (formData.profileImage && formData.profileImage instanceof File) ||
-      formData.certifications.some((c) => c.file)
-    ) {
+      formData.certifications.some((c) => c.files && c.files.length > 0);
+    if (hasFilesToUpload) {
       const uploadRes = await fetch("/api/upload", {
         method: "POST",
         body: uploadData,
@@ -204,15 +211,23 @@ export function useTrainerRegistration() {
       ...formData,
       profileImage: uploadedUrls.profileImage || formData.profileImage,
       certifications: formData.certifications.map((cert, i) => ({
-        ...cert,
-        documentUrl:
-          uploadedUrls.certifications?.[i]?.documentUrl ||
-          cert.documentUrl ||
-          "",
-        file: undefined, // ne šalji file objekte
+        name: cert.name,
+        issuer: cert.issuer,
+        expiryDate: cert.expiryDate,
+        description: cert.description,
+        documents:
+          uploadedUrls.certifications && uploadedUrls.certifications[i]
+            ? uploadedUrls.certifications[i].map((doc) => ({
+                url: doc.url,
+                originalName: doc.originalName,
+                mimetype: doc.mimetype,
+              }))
+            : [],
       })),
       currency: formData.currency || "EUR", // default to EUR if not set
     };
+    // Debug: logaj podatke za backend
+    console.log("Podaci za backend:", trainerData);
     // 4. Pošalji podatke na backend za kreiranje profila
     const res = await fetch("/api/users/trainer", {
       method: "POST",

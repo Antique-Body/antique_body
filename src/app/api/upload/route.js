@@ -73,22 +73,40 @@ export async function POST(req) {
             "profile-images"
           );
         }
-        if (files.certifications) {
-          const certFiles = Array.isArray(files.certifications)
-            ? files.certifications
-            : [files.certifications];
-          uploadedUrls.certifications = [];
+        // Grupiraj certifikate po indexu (certifications[0], certifications[1], ...)
+        const grouped = {};
+        Object.keys(files).forEach((key) => {
+          const match = key.match(/^certifications\[(\d+)\]$/);
+          if (match) {
+            const certIdx = Number(match[1]);
+            if (!grouped[certIdx]) grouped[certIdx] = [];
+            const fileOrArray = files[key];
+            if (Array.isArray(fileOrArray)) {
+              grouped[certIdx].push(...fileOrArray);
+            } else {
+              grouped[certIdx].push(fileOrArray);
+            }
+          }
+        });
+        const maxIdx = Math.max(-1, ...Object.keys(grouped).map(Number));
+        uploadedUrls.certifications = [];
+        for (let i = 0; i <= maxIdx; i++) {
+          const certFiles = grouped[i] || [];
+          const certDocs = [];
           for (const cert of certFiles) {
-            if (!cert || !cert.mimetype) continue; // ignoriraj prazne slotove
+            if (!cert || !cert.mimetype) continue;
             validateFile(cert, ALLOWED_CERT_TYPES);
             const url = await uploadFile(cert, "certificates");
-            uploadedUrls.certifications.push({
-              documentUrl: url,
+            certDocs.push({
+              url,
               originalName: cert.originalFilename,
               mimetype: cert.mimetype,
             });
           }
+          uploadedUrls.certifications.push(certDocs);
         }
+        // Debug: logaj uploadedUrls prije resolve
+        console.log("uploadedUrls", uploadedUrls);
         resolve(new Response(JSON.stringify(uploadedUrls), { status: 200 }));
       } catch (error) {
         resolve(

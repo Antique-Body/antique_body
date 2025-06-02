@@ -468,7 +468,7 @@ export const DatePicker = ({
   return (
     <div ref={containerRef} className={`relative ${className}`}>
       <div
-        className={`flex items-center justify-between p-3 rounded-lg bg-[#1a1a1a] border border-[#333] hover:border-[#FF6B00] transition-all ${
+        className={`flex items-center justify-between p-2 rounded-lg bg-[#1a1a1a] border border-[#333] hover:border-[#FF6B00] transition-all ${
           disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
         }`}
         onClick={() => !disabled && setIsOpen(!isOpen)}
