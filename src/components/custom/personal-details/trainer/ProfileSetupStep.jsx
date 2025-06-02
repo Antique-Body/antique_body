@@ -28,6 +28,7 @@ function validateImageFile(file) {
 export const ProfileSetupStep = ({ formData, onChange, errors }) => {
   const [imageError, setImageError] = useState("");
   const [previewUrl, setPreviewUrl] = useState("");
+  const [isHovering, setIsHovering] = useState(false);
 
   useEffect(() => {
     // Cleanup stari blob URL kad se promijeni slika ili unmounta komponenta
@@ -67,6 +68,20 @@ export const ProfileSetupStep = ({ formData, onChange, errors }) => {
     });
   };
 
+  const triggerFileInput = () => {
+    document.getElementById("profile-image-upload").click();
+  };
+
+  const removeImage = () => {
+    onChange({
+      target: {
+        name: "profileImage",
+        value: null,
+      },
+    });
+    setImageError("");
+  };
+
   return (
     <div className="space-y-6">
       {/* Profile Image Upload */}
@@ -75,75 +90,164 @@ export const ProfileSetupStep = ({ formData, onChange, errors }) => {
         description="Upload your professional photo that clients will see"
         icon={<Icon icon="mdi:camera-account" width={20} height={20} />}
       >
-        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8">
-          {/* Image Preview Section */}
-          <div className="flex flex-col items-center space-y-4">
-            <div className="relative">
-              {previewUrl ? (
-                <Image
-                  src={previewUrl}
-                  alt="Profile"
-                  width={160}
-                  height={160}
-                  className="w-40 h-40 object-cover rounded-full border-2 border-gray-700 shadow-lg"
-                  priority
-                />
-              ) : (
-                <div className="w-40 h-40 rounded-full bg-gradient-to-br from-[rgba(40,40,40,0.8)] to-[rgba(20,20,20,0.8)] border-2 border-dashed border-[#444] hover:border-[#FF6B00]/50 flex items-center justify-center transition-all duration-300 group cursor-pointer">
-                  <div className="text-center">
-                    <Icon
-                      icon="mdi:camera-plus"
-                      width={40}
-                      height={40}
-                      className="text-gray-400 group-hover:text-[#FF6B00] transition-colors mx-auto mb-2"
+        <div className="bg-[rgba(30,30,30,0.6)] rounded-lg border border-[#333] p-6">
+          <div className="flex flex-col md:flex-row gap-8">
+            {/* Left side - Image and upload controls */}
+            <div className="flex flex-col items-center">
+              {/* Profile image */}
+              <div
+                className="relative cursor-pointer"
+                onClick={triggerFileInput}
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
+              >
+                <div className="w-40 h-40 rounded-full overflow-hidden border-2 border-[#444] hover:border-[#FF6B00]/50 transition-all duration-300">
+                  {previewUrl ? (
+                    <Image
+                      src={previewUrl}
+                      alt="Profile"
+                      width={160}
+                      height={160}
+                      className="w-full h-full object-cover"
+                      priority
                     />
-                    <p className="text-xs text-gray-400 group-hover:text-[#FF6B00] transition-colors">
-                      Add Photo
-                    </p>
-                  </div>
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-[#282828] to-[#1a1a1a] flex items-center justify-center">
+                      <div className="text-center flex flex-col items-center">
+                        <Icon
+                          icon="mdi:account"
+                          width={50}
+                          height={50}
+                          className="text-gray-500"
+                        />
+                        <p className="text-xs text-gray-400 mt-2">Add Photo</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Hover overlay */}
+                  {previewUrl && isHovering && (
+                    <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                      <Icon
+                        icon="mdi:camera"
+                        width={32}
+                        height={32}
+                        className="text-white"
+                      />
+                    </div>
+                  )}
                 </div>
+              </div>
+
+              {/* Buttons */}
+              <div className="mt-4 flex gap-2">
+                <button
+                  type="button"
+                  onClick={triggerFileInput}
+                  className="px-3 py-2 bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white text-sm font-medium rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Icon icon="mdi:camera" width={16} height={16} />
+                  {formData.profileImage ? "Change" : "Upload"}
+                </button>
+
+                {formData.profileImage && (
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className="px-3 py-2 bg-[#333] hover:bg-[#444] text-white text-sm font-medium rounded-lg flex items-center gap-2 transition-colors"
+                  >
+                    <Icon icon="mdi:delete" width={16} height={16} />
+                    Remove
+                  </button>
+                )}
+              </div>
+
+              {/* Status text */}
+              {formData.profileImage && !imageError && (
+                <p className="mt-2 text-sm text-green-400 flex items-center gap-1">
+                  <Icon icon="mdi:check-circle" width={14} height={14} />
+                  Photo uploaded
+                </p>
               )}
             </div>
 
-            <div className="text-center">
-              <p className="text-sm text-gray-300 font-medium">
-                {formData.profileImage ? "Profile Photo" : "No Photo Added"}
-              </p>
-              <p className="text-xs text-gray-400 mt-1">
-                Square image recommended
-              </p>
+            {/* Right side - Guidelines and error */}
+            <div className="flex-1">
+              {/* Error message */}
+              {imageError && (
+                <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Icon
+                      icon="mdi:alert-circle"
+                      width={16}
+                      height={16}
+                      className="text-red-400 flex-shrink-0"
+                    />
+                    <span className="text-sm text-red-400">{imageError}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Guidelines */}
+              <div className="p-4 bg-[#222] rounded-lg">
+                <h3 className="text-white font-medium mb-3 flex items-center gap-2">
+                  <Icon
+                    icon="mdi:information-outline"
+                    width={18}
+                    height={18}
+                    className="text-[#FF6B00]"
+                  />
+                  Photo Guidelines
+                </h3>
+
+                <ul className="space-y-2 ml-1">
+                  <li className="flex items-start gap-2 text-gray-300 text-sm">
+                    <Icon
+                      icon="mdi:check"
+                      width={16}
+                      height={16}
+                      className="text-[#FF6B00] mt-0.5"
+                    />
+                    Professional headshot with neutral background
+                  </li>
+                  <li className="flex items-start gap-2 text-gray-300 text-sm">
+                    <Icon
+                      icon="mdi:check"
+                      width={16}
+                      height={16}
+                      className="text-[#FF6B00] mt-0.5"
+                    />
+                    Clear, well-lit, and focused on your face
+                  </li>
+                  <li className="flex items-start gap-2 text-gray-300 text-sm">
+                    <Icon
+                      icon="mdi:check"
+                      width={16}
+                      height={16}
+                      className="text-[#FF6B00] mt-0.5"
+                    />
+                    JPG, PNG, or GIF format (max 1MB)
+                  </li>
+                </ul>
+
+                <p className="mt-3 text-xs text-gray-400 border-t border-[#333] pt-3">
+                  A professional profile photo helps build trust with potential
+                  clients.
+                </p>
+              </div>
             </div>
           </div>
-
-          {/* Upload Controls Section */}
-          <div className="flex-1 w-full">
-            <FormField
-              label={formData.profileImage ? "Change Photo" : "Upload Photo"}
-              name="profileImage"
-              type="file"
-              accept="image/*"
-              onChange={handleProfileImageChange}
-              error={imageError || errors.profileImage}
-              subLabel="JPG, PNG ili GIF • Max 1MB • 400x400px minimum"
-            />
-
-            {formData.profileImage && (
-              <div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Icon
-                    icon="mdi:check-circle"
-                    width={16}
-                    height={16}
-                    className="text-green-400"
-                  />
-                  <span className="text-sm text-green-400 font-medium">
-                    Photo uploaded successfully
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
+
+        {/* Hidden file input */}
+        <input
+          id="profile-image-upload"
+          name="profileImage"
+          type="file"
+          accept="image/*"
+          onChange={handleProfileImageChange}
+          className="hidden"
+        />
       </FormSection>
 
       {/* Professional Bio */}

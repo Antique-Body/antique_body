@@ -76,6 +76,30 @@ export const CertificationUpload = ({
     handleCertChange(index, "file", file);
   };
 
+  // Enhanced version to clear errors when certificate is removed
+  const handleRemoveCertField = (index) => {
+    // Clear any errors for this certificate
+    setCertErrors((prev) => {
+      const updated = [...prev];
+      updated.splice(index, 1);
+      return updated;
+    });
+
+    // Clear any preview URLs for this certificate
+    setCertPreviews((prev) => {
+      const updated = [...prev];
+      // Revoke the URL to prevent memory leaks
+      if (updated[index] && updated[index].startsWith("blob:")) {
+        URL.revokeObjectURL(updated[index]);
+      }
+      updated.splice(index, 1);
+      return updated;
+    });
+
+    // Call the original removeCertField function
+    removeCertField(index);
+  };
+
   return (
     <div className="space-y-4">
       {certFields.map((field, index) => (
@@ -102,7 +126,7 @@ export const CertificationUpload = ({
               <Button
                 variant="ghost"
                 type="button"
-                onClick={() => removeCertField(index)}
+                onClick={() => handleRemoveCertField(index)}
                 className="opacity-0 group-hover:opacity-100 w-8 h-8 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-full flex items-center justify-center transition-all duration-200"
               >
                 <Icon
@@ -153,7 +177,7 @@ export const CertificationUpload = ({
             </div>
           )}
 
-          {/* File Upload Section */}
+          {/* File Upload Section with Preview */}
           {field.name && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -162,82 +186,102 @@ export const CertificationUpload = ({
                 </label>
               </div>
 
-              <div className="border-2 border-dashed border-[#444] rounded-lg p-4 hover:border-[#FF6B00]/50 transition-colors">
-                <div className="flex flex-col items-center gap-3">
-                  {field.file && (
-                    <div className="flex items-center gap-3 text-center">
-                      <div className="w-10 h-10 bg-[#FF6B00]/20 rounded-lg flex items-center justify-center">
-                        <Icon
-                          icon="mdi:file-document"
-                          width={20}
-                          height={20}
-                          className="text-[#FF6B00]"
+              {/* Two-column layout for upload and preview */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Image preview column (if available) */}
+                {field.file &&
+                  (field.file.type.startsWith("image/") ||
+                    certPreviews[index]) && (
+                    <div className="flex flex-col items-center md:items-start">
+                      <div
+                        className="relative group cursor-pointer w-32 h-32 bg-[#1a1a1a] rounded-lg overflow-hidden border border-[#444] hover:border-[#FF6B00]/50 transition-all"
+                        onClick={() =>
+                          document
+                            .getElementById(`cert-upload-${index}`)
+                            .click()
+                        }
+                      >
+                        <img
+                          src={certPreviews[index]}
+                          alt="Certificate preview"
+                          className="w-full h-full object-cover"
                         />
+                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                          <Icon
+                            icon="mdi:camera"
+                            className="text-white w-8 h-8"
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-white text-sm font-medium">
-                          {field.file.name}
-                        </p>
-                        <p className="text-gray-400 text-xs">
-                          Click to replace
-                        </p>
-                      </div>
+                      <p className="text-xs text-gray-400 mt-2 text-center md:text-left">
+                        Click to change
+                      </p>
                     </div>
                   )}
 
+                {/* File upload column */}
+                <div
+                  className={
+                    field.file &&
+                    (field.file.type.startsWith("image/") ||
+                      certPreviews[index])
+                      ? "col-span-1 md:col-span-2"
+                      : "col-span-1 md:col-span-3"
+                  }
+                >
                   <FormField
                     type="file"
                     accept=".pdf,.jpg,.jpeg,.png,.docx,.doc"
                     onChange={(e) => {
-                      const file = e.target.files[0];
+                      const file = e.target.files
+                        ? e.target.files[0]
+                        : e.target.value;
                       if (!file) return;
                       handleCertFileChange(index, file);
                     }}
                     id={`cert-upload-${index}`}
                     error={certErrors[index]}
+                    showFilePreview={false}
+                    subLabel={
+                      field.file
+                        ? undefined
+                        : "Upload your certification document (max 1MB)"
+                    }
                   />
                 </div>
               </div>
 
-              {/* Prikaz previewa slike/pdf-a ispod polja */}
-              {certPreviews[index] &&
-                field.file &&
-                field.file.type.startsWith("image/") && (
-                  <img
-                    src={certPreviews[index]}
-                    alt="Certifikat preview"
-                    style={{
-                      width: 120,
-                      height: 120,
-                      objectFit: "cover",
-                      borderRadius: 8,
-                      marginTop: 8,
-                    }}
-                  />
-                )}
-              {field.file && field.file.type === "application/pdf" && (
-                <div
-                  style={{ marginTop: 8, color: "#FF6B00", fontWeight: 500 }}
-                >
-                  PDF: {field.file.name}
-                </div>
-              )}
-              {field.file && field.file.type === "application/msword" && (
-                <div
-                  style={{ marginTop: 8, color: "#FF6B00", fontWeight: 500 }}
-                >
-                  DOC: {field.file.name}
-                </div>
-              )}
-              {field.file &&
-                field.file.type ===
-                  "application/vnd.openxmlformats-officedocument.wordprocessingml.document" && (
-                  <div
-                    style={{ marginTop: 8, color: "#FF6B00", fontWeight: 500 }}
-                  >
-                    DOCX: {field.file.name}
+              {/* Document type indicators (for non-image files) */}
+              {field.file && !field.file.type.startsWith("image/") && (
+                <div className="flex items-center gap-3 p-3 bg-[#1a1a1a] rounded-lg border border-[#333]">
+                  <div className="w-10 h-10 bg-[#FF6B00]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Icon
+                      icon={
+                        field.file.type === "application/pdf"
+                          ? "mdi:file-pdf"
+                          : field.file.type.includes("word")
+                          ? "mdi:file-word"
+                          : "mdi:file-document"
+                      }
+                      width={20}
+                      height={20}
+                      className="text-[#FF6B00]"
+                    />
                   </div>
-                )}
+                  <div>
+                    <p className="text-white text-sm font-medium">
+                      {field.file.name}
+                    </p>
+                    <p className="text-gray-400 text-xs">
+                      {field.file.size < 1024
+                        ? `${field.file.size} B`
+                        : field.file.size < 1048576
+                        ? `${(field.file.size / 1024).toFixed(1)} KB`
+                        : `${(field.file.size / 1048576).toFixed(1)} MB`}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
