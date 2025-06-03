@@ -4,7 +4,7 @@ import { Icon } from "@iconify/react";
 import { FormSection, LocationSelector } from "../shared";
 
 import { FormField } from "@/components/common";
-import { usePrefillFromSession } from "@/hooks/usePrefillFromSession";
+import { usePrefillFromSession } from "@/hooks";
 
 export const ProfileAndContactStep = ({ formData, onChange, errors }) => {
   usePrefillFromSession({
@@ -15,6 +15,21 @@ export const ProfileAndContactStep = ({ formData, onChange, errors }) => {
       { formKey: "phone", sessionKey: "phone" },
     ],
   });
+
+  // Wrap original onChange to ensure pricePerSession is always a number
+  const handleChange = (e) => {
+    if (e.target && e.target.name === "pricePerSession") {
+      const value = e.target.value;
+      onChange({
+        target: {
+          name: "pricePerSession",
+          value: value === "" ? "" : Number(value),
+        },
+      });
+    } else {
+      onChange(e);
+    }
+  };
 
   console.log(formData, "formData");
 
@@ -76,7 +91,7 @@ export const ProfileAndContactStep = ({ formData, onChange, errors }) => {
             name="pricingType"
             type="select"
             value={formData.pricingType}
-            onChange={onChange}
+            onChange={handleChange}
             options={[
               { value: "", label: "Select pricing approach" },
               { value: "fixed", label: "Fixed Rate - Set My Price" },
@@ -102,7 +117,7 @@ export const ProfileAndContactStep = ({ formData, onChange, errors }) => {
                 name="pricePerSession"
                 type="number"
                 value={formData.pricePerSession}
-                onChange={onChange}
+                onChange={handleChange}
                 placeholder="50"
                 min="0"
                 step="5"
@@ -114,7 +129,7 @@ export const ProfileAndContactStep = ({ formData, onChange, errors }) => {
                 name="currency"
                 type="select"
                 value={formData.currency || "EUR"}
-                onChange={onChange}
+                onChange={handleChange}
                 options={[
                   { value: "BAM", label: "BAM - Bosnian Mark" },
                   { value: "DIN", label: "DIN - Serbian Dinar" },

@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "antique-body-app",
+  "private_key_id": "629ecc29aa56aef08692b7751c1ae564838c5f4a",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDClEmcCcGZWZOQ\n5VtkQH1AX6QuRauyvQX2HyphBhaXMbXClkd4OqNvrayrKwYV7sGS2fnwkW2xVfEv\njY7buddjVGpW74DJFyZaFyyXvGQeuxuP46lzPhbuwnvE2xCDuBKvqJurtx0S1j74\nAIB57vhfDV760WaONUf97J27QjpnVLfBwqbQNTJf9ZTjLQBfLJJqIcJ4Lkt5cwGh\nys88JADwEIiMSfH85Kc8P/GS2fQ4wL8BKOW9uYftV3n4Jngf93fyyMj/P+HuUaIt\nvTFUhv5Z2NHQ/26afeiNH9KnzCiRebooqyQoD+J5uEeIM4Z4x+M/PpzqJYqto7ep\nt5CrIlBpAgMBAAECggEADVxJQaGZ3YG9FDHreJLFBuqKR3MZOwinpCK3sjnMy0zq\nghX3ilXcawqt1IL7w/3E5OR6uP4DXi3chbtel8/G7lcZhiaj3SrtwzncIf8ZkNKg\nLd0gAX297V8FSJsSIzk8bztQlRXZtTVo1XaTW8wA2eX9I5PFSvZ1nwXkPrtpbzbP\nT4AaYhLkbCFJfFviL8x5qNufXnCsdnRAiZDreYHq0MhrOyP9qylmhwq24FRHxi++\nEhmd4wEFDhi5x61oWB4DCu3EYW/J4usKc5XNX7pdpQb4SeVoWwqQDmtix8Jpcp+v\nsIA7wmwSx7FK9S0EYjClP8DFQalADRt1gBbMlvgHQQKBgQDja2tP/3PHKrvJuzMX\nfJGibpfwkRt7Us7Zfnwf5mOtDCTka2YAzOTUJeeG//geAmySfl9gixjePWqQKktS\nfAO1eBTStzDThS18YQ5cYreoOZFTDOE2TJCaugqfYgOjTwKX4msXQD84ghLIuMgc\nKG59Z7sN8JjVyVI13eFfFMwBLQKBgQDbCFKuTO2mbY/x+XobMWpimEBOfFj2bg2S\nh83USdbWWoU9hqbpRXFHV8+L2e1vrACldzMbWV/OX7l+Jb0bxNBPDhzniSFMm2DT\nuutOmYh9EpdK1YsXSIb0kR+ZfmB1f9dCHx1yeMcJyBVNSk0PyrcuwDA3OkKnVPx6\n/srG/Zy5rQKBgANjBiYa186PhFxsvUYMRN72ZqzefFpJ0WrLx21yMOnS1HnSX6KD\naqT+K4SHK1rHDnbgCuuVJrmokH21I4oG7sc1EppQwBlmUlcX2u7lSXbn5JIoDvKQ\nEVc8jgvxmbxE4PUCGjYubsKYrU7v8Yr5zytu8Ao1GxGT/fVvaHvSA3fBAoGAHZub\naZpWiafHzILXwbNFWTyRfMqMUAuCZCtdZHPyyZkE59M63s+XR3iUQqhb0zuh/rwF\nOY40SDZiYa4CSS2qpvUWbSn5SVy7kwNyaXaRn66SqvgAzE3uiELRzbLqoRd95p9E\nIMQ4y5azYnZHwnm5l2U9X0nN1sbDNnEYwhtoQyUCgYAW1U5rvu3gAJZ6Boq3Cga/\nMu5/7iCt9GW3pURzVKQLA4qvmyC7xrvI4L98a1BigfYFNVsUvqc6a/35szk7j6hd\nAWQNN/lNONQKzIB/+mpXsKgY0JmauvqCM4WZ3UsbnZneXPMIU1XpGTr+iroVv1L+\n3/wUH/M/b0/A/5B7Cj/1fw==\n-----END PRIVATE KEY-----\n",
+  "client_email": "antique-body-storege-upload@antique-body-app.iam.gserviceaccount.com",
+  "client_id": "103490150260021916075",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/antique-body-storege-upload%40antique-body-app.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
