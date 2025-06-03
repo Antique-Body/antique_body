@@ -6,7 +6,7 @@ import { FormSection, SpecialtySelector } from "../shared";
 
 import { FormField } from "@/components/common";
 import { ErrorIcon } from "@/components/common/Icons";
-import { usePrefillFromSession } from "@/hooks/usePrefillFromSession";
+import { usePrefillFromSession } from "@/hooks";
 
 export const BasicInfoStep = ({ formData, onChange, errors }) => {
   const { data: session } = useSession();
