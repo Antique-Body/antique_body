@@ -8,3 +8,4 @@ export { LanguageSelector } from "./LanguageSelector";
 export { LocationSelector } from "./LocationSelector";
 export { TrainingTypeSelector } from "./TrainingTypeSelector";
 export { SpecialtySelector } from "./SpecialtySelector";
+export { InfoBanner } from "./InfoBanner";

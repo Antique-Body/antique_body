@@ -43,6 +43,7 @@ model User {
   accounts              Account[]
   sessions              Session[]
   trainerInfo           TrainerPersonalInfo?
+  clientProfile         ClientProfile?
   emailVerifications    EmailVerification[]
   phoneVerifications    PhoneVerification[]
 
@@ -210,4 +211,78 @@ model CertificationDocument {
   createdAt       DateTime @default(now())
 
   certification   Certification @relation(fields: [certificationId], references: [id], onDelete: Cascade)
+}
+
+// Client Profile Models
+model ClientProfile {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  
+  // Personal Information
+  firstName            String
+  lastName             String
+  dateOfBirth          DateTime
+  gender               String
+  
+  // Physical Information
+  height               Int      // in cm
+  weight               Int      // in kg
+  fitnessLevel         String
+  
+  // Fitness Experience
+  experienceLevel      String
+  previousActivities   String?  @db.Text
+  
+  // Goals and Preferences
+  primaryGoal          String
+  secondaryGoal        String?
+  goalDescription      String?  @db.Text
+  goalTimeFrame        String?
+  workoutFrequency     String?
+  
+  // Contact and Location
+  email                String?
+  phone                String?
+  preferredContactMethod String?
+  city                 String
+  state                String
+  country              String
+  postalCode           String
+  
+  // Profile and Health Info
+  profileImage         String?
+  bio                  String?  @db.Text
+  medicalConditions    String?  @db.Text
+  allergies            String?  @db.Text
+  
+  // Timestamps
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  
+  // Relations
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  languages            ClientLanguage[]
+  preferredActivities  ClientActivity[]
+}
+
+model ClientLanguage {
+  id              String   @id @default(cuid())
+  clientProfileId String
+  name            String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  clientProfile   ClientProfile @relation(fields: [clientProfileId], references: [id], onDelete: Cascade)
+}
+
+model ClientActivity {
+  id              String   @id @default(cuid())
+  clientProfileId String
+  name            String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  clientProfile   ClientProfile @relation(fields: [clientProfileId], references: [id], onDelete: Cascade)
 }

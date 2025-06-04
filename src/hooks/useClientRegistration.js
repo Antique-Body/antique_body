@@ -13,12 +13,15 @@ export function useClientRegistration() {
     height: "",
     weight: "",
     fitnessLevel: "",
-    trainingExperience: "",
-    // Fitness Goals
-    fitnessGoals: [],
-    activityPreferences: [],
-    preferredFrequency: "",
+    // Fitness Experience
+    experienceLevel: "",
+    previousActivities: "",
+    // Languages and Goals
+    languages: [],
+    primaryGoal: "",
+    secondaryGoal: "",
     goalDescription: "",
+    preferredActivities: [],
     // Contact and Location
     email: "",
     phone: "",
@@ -28,16 +31,11 @@ export function useClientRegistration() {
       country: "",
       postalCode: "",
     },
-    // Availability
-    preferredTimeOfDay: "",
-    preferredDays: "",
-    availabilityNotes: "",
-    // Budget
-    budgetRange: "",
-    currency: "EUR",
-    // Profile Setup
+    // Profile and Health Info
     profileImage: null,
     bio: "",
+    medicalConditions: "",
+    allergies: "",
   });
   const [errors, setErrors] = useState({});
   const [step, setStep] = useState(1);
@@ -75,7 +73,9 @@ export function useClientRegistration() {
   // Validate current step
   const validateStep = (currentStep) => {
     const newErrors = {};
+
     if (currentStep === 1) {
+      // Basic Info Step validation
       if (!formData.firstName) newErrors.firstName = "First name is required";
       if (!formData.lastName) newErrors.lastName = "Last name is required";
       if (!formData.dateOfBirth)
@@ -89,34 +89,54 @@ export function useClientRegistration() {
         if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
           age--;
         }
-        if (age < 16) {
-          newErrors.dateOfBirth = "You must be at least 16 years old.";
+        if (age < 12) {
+          newErrors.dateOfBirth = "You must be at least 12 years old.";
         }
       }
       if (!formData.gender) newErrors.gender = "Gender is required";
-      // Physical information is optional
+      if (!formData.height) newErrors.height = "Height is required";
+      if (!formData.weight) newErrors.weight = "Weight is required";
+      if (!formData.fitnessLevel)
+        newErrors.fitnessLevel = "Fitness level is required";
+      if (!formData.experienceLevel)
+        newErrors.experienceLevel = "Experience level is required";
     }
+
     if (currentStep === 2) {
-      if (!formData.fitnessGoals || formData.fitnessGoals.length === 0)
-        newErrors.fitnessGoals = "At least one fitness goal is required";
-      if (!formData.preferredFrequency)
-        newErrors.preferredFrequency = "Training frequency is required";
+      // Goals and Preferences Step validation
+      if (!formData.languages || formData.languages.length === 0)
+        newErrors.languages = "At least one language is required";
+      if (!formData.primaryGoal)
+        newErrors.primaryGoal = "Primary goal is required";
+      if (
+        !formData.preferredActivities ||
+        formData.preferredActivities.length === 0
+      )
+        newErrors.preferredActivities =
+          "Select at least one activity you're interested in";
     }
+
     if (currentStep === 3) {
+      // Contact and Location Step validation
       if (!formData.email) newErrors.email = "Email is required";
+      else if (!/\S+@\S+\.\S+/.test(formData.email))
+        newErrors.email = "Please enter a valid email address";
+
       if (!formData.phone) newErrors.phone = "Phone number is required";
-      if (!formData.location || !formData.location.city)
+
+      if (!formData.location.city)
         newErrors["location.city"] = "City is required";
-      if (!formData.location || !formData.location.country)
+      if (!formData.location.country)
         newErrors["location.country"] = "Country is required";
-      if (!formData.preferredTimeOfDay)
-        newErrors.preferredTimeOfDay = "Preferred time of day is required";
-      if (!formData.preferredDays)
-        newErrors.preferredDays = "Preferred days are required";
     }
+
     if (currentStep === 4) {
-      // Bio and profile image are optional
+      // Profile Setup Step validation
+      if (!formData.bio) newErrors.bio = "Bio is required";
+      if (formData.bio && formData.bio.length > 500)
+        newErrors.bio = "Bio cannot exceed 500 characters";
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -137,59 +157,65 @@ export function useClientRegistration() {
     }
     setLoading(true);
 
-    // Prepare FormData for file upload
+    // 1. Prepare FormData for file uploads
     const uploadData = new FormData();
     if (formData.profileImage && formData.profileImage instanceof File) {
       uploadData.append("profileImage", formData.profileImage);
     }
 
-    // Handle profile image upload if present
+    // 2. Upload images first if there are any
     let uploadedUrls = {};
-    const hasImageToUpload =
+    const hasFilesToUpload =
       formData.profileImage && formData.profileImage instanceof File;
 
-    if (hasImageToUpload) {
-      const uploadRes = await fetch("/api/upload", {
+    if (hasFilesToUpload) {
+      try {
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadData,
+        });
+
+        if (!uploadRes.ok) {
+          setErrors({ general: "Error uploading images." });
+          setLoading(false);
+          return;
+        }
+
+        uploadedUrls = await uploadRes.json();
+      } catch (error) {
+        setErrors({ general: "Error uploading images: " + error.message });
+        setLoading(false);
+        return;
+      }
+    }
+
+    // 3. Prepare client data for the API
+    const clientData = {
+      ...formData,
+      profileImage: uploadedUrls.profileImage || formData.profileImage,
+    };
+
+    // 4. Send data to backend API
+    try {
+      const res = await fetch("/api/users/client", {
         method: "POST",
-        body: uploadData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(clientData),
       });
 
-      if (!uploadRes.ok) {
-        setErrors({ general: "Error uploading profile image." });
+      if (!res.ok) {
+        const err = await res.json();
+        setErrors({ general: err.error || "Error saving profile." });
         setLoading(false);
         return;
       }
 
-      uploadedUrls = await uploadRes.json();
-    }
-
-    // Prepare data for creating profile
-    const clientData = {
-      ...formData,
-      profileImage: uploadedUrls.profileImage || formData.profileImage,
-      currency: formData.currency || "EUR", // default to EUR if not set
-    };
-
-    // Debug: log data for backend
-    console.log("Data for backend:", clientData);
-
-    // Send data to backend for profile creation
-    const res = await fetch("/api/users/client", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(clientData),
-    });
-
-    if (!res.ok) {
-      const err = await res.json();
-      setErrors({ general: err.error || "Error saving profile." });
+      // 5. Redirect to dashboard on success
+      router.push("/client/dashboard");
+    } catch (error) {
+      setErrors({ general: "Error: " + error.message });
       setLoading(false);
-      return;
     }
-
-    setLoading(false);
-    // Redirect if successful
-    router.push("/client/dashboard");
   };
 
   // Move to next step
@@ -210,6 +236,17 @@ export function useClientRegistration() {
     window.scrollTo(0, 0);
   };
 
+  // Profile image change handler
+  const handleProfileImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData((prev) => ({
+        ...prev,
+        profileImage: file,
+      }));
+    }
+  };
+
   return {
     formData,
     setFormData,
@@ -224,6 +261,7 @@ export function useClientRegistration() {
     handleSubmit,
     goToNextStep,
     goToPrevStep,
+    handleProfileImageChange,
     scrollToTop,
   };
 }

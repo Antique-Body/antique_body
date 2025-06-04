@@ -3,7 +3,7 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 
-import { FormSection } from "../shared";
+import { FormSection } from "../shared/FormSection";
 
 import { FormField } from "@/components/common";
 
@@ -17,7 +17,7 @@ const MAX_IMAGE_SIZE_MB = 1;
 
 function validateImageFile(file) {
   if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-    return "Invalid image format!";
+    return "Unsupported image format!";
   }
   if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) {
     return `Image is too large! Maximum size is ${MAX_IMAGE_SIZE_MB}MB.`;
@@ -31,7 +31,7 @@ export const ProfileSetupStep = ({ formData, onChange, errors }) => {
   const [isHovering, setIsHovering] = useState(false);
 
   useEffect(() => {
-    // Clean up old blob URL when the image changes or component unmounts
+    // Clean up old blob URL when image changes or component unmounts
     let url = "";
     if (formData.profileImage && formData.profileImage instanceof File) {
       url = URL.createObjectURL(formData.profileImage);
@@ -89,7 +89,7 @@ export const ProfileSetupStep = ({ formData, onChange, errors }) => {
       {/* Profile Image Upload */}
       <FormSection
         title="Profile Image"
-        description="Upload a profile photo (optional)"
+        description="Upload a photo for your profile"
         icon={<Icon icon="mdi:camera-account" width={20} height={20} />}
       >
         <div className="bg-[rgba(30,30,30,0.6)] rounded-lg border border-[#333] p-6">
@@ -210,7 +210,7 @@ export const ProfileSetupStep = ({ formData, onChange, errors }) => {
                       height={16}
                       className="text-[#FF6B00] mt-0.5"
                     />
-                    Clear photo with good lighting
+                    Choose a clear photo that shows your face
                   </li>
                   <li className="flex items-start gap-2 text-gray-300 text-sm">
                     <Icon
@@ -219,7 +219,7 @@ export const ProfileSetupStep = ({ formData, onChange, errors }) => {
                       height={16}
                       className="text-[#FF6B00] mt-0.5"
                     />
-                    Face clearly visible (for better trainer-client connection)
+                    Well-lit with a simple background
                   </li>
                   <li className="flex items-start gap-2 text-gray-300 text-sm">
                     <Icon
@@ -233,8 +233,8 @@ export const ProfileSetupStep = ({ formData, onChange, errors }) => {
                 </ul>
 
                 <p className="mt-3 text-xs text-gray-400 border-t border-[#333] pt-3">
-                  A profile photo helps trainers connect with you and understand
-                  your goals better.
+                  A profile photo helps trainers recognize you and personalizes
+                  your experience.
                 </p>
               </div>
             </div>
@@ -252,31 +252,65 @@ export const ProfileSetupStep = ({ formData, onChange, errors }) => {
         />
       </FormSection>
 
-      {/* Bio Section */}
+      {/* About Me */}
       <FormSection
-        title="About You"
+        title="About Me"
         description="Tell trainers about yourself and your fitness journey"
         icon={<Icon icon="mdi:text-account" width={20} height={20} />}
       >
         <FormField
-          label="Your Fitness Journey"
+          label="About You"
           name="bio"
           type="textarea"
           value={formData.bio}
           onChange={onChange}
-          placeholder="Share your fitness journey, what motivates you, any challenges you've faced, and what you hope to achieve with a personal trainer..."
+          placeholder="Write a brief description about yourself, your fitness journey, and what you're looking for in a trainer..."
           rows={6}
           error={errors.bio}
         />
 
         <div className="flex justify-between items-center mt-2">
           <p className="text-xs text-gray-400">
-            Help trainers understand your background and aspirations
+            Help trainers understand your background and needs
           </p>
           <span className="text-xs text-gray-400">
             {formData.bio?.length || 0}/500 characters
           </span>
         </div>
+      </FormSection>
+
+      {/* Health Information (Optional) */}
+      <FormSection
+        title="Health Information (Optional)"
+        description="Share any health information that trainers should be aware of"
+        icon={<Icon icon="mdi:medical-bag" width={20} height={20} />}
+      >
+        <FormField
+          label="Medical Conditions"
+          name="medicalConditions"
+          type="textarea"
+          value={formData.medicalConditions}
+          onChange={onChange}
+          placeholder="List any medical conditions, injuries, or health concerns that may affect your training..."
+          rows={3}
+          error={errors.medicalConditions}
+        />
+
+        <FormField
+          label="Allergies"
+          name="allergies"
+          type="textarea"
+          value={formData.allergies}
+          onChange={onChange}
+          placeholder="List any allergies or sensitivities..."
+          rows={2}
+          error={errors.allergies}
+        />
+
+        <p className="text-xs text-gray-400 mt-3">
+          This information will only be shared with trainers you choose to work
+          with to ensure your safety.
+        </p>
       </FormSection>
     </div>
   );
