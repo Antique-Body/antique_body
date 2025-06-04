@@ -338,61 +338,95 @@ async function getTrainerProfileByUserId(userId) {
  * Creates a client with all details and relations.
  * Required fields validation happens at the API layer.
  * formData: {
- *   firstName, lastName, dateOfBirth, gender, height, weight, fitnessLevel,
+ *   firstName, lastName, dateOfBirth, gender, height, weight,
  *   experienceLevel, previousActivities, languages, primaryGoal, secondaryGoal,
  *   goalDescription, preferredActivities, email, phone, location,
  *   profileImage, bio, medicalConditions, allergies
  * }
  */
 async function createClientWithDetails(formData, userId) {
-  // Create the main ClientProfile
-  const client = await prisma.clientProfile.create({
-    data: {
-      userId,
-      // Personal Information
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      dateOfBirth: new Date(formData.dateOfBirth),
-      gender: formData.gender,
+  // Definiši required polja
+  const requiredFields = [
+    "firstName",
+    "lastName",
+    "dateOfBirth",
+    "gender",
+    "height",
+    "weight",
+    "experienceLevel",
+    "languages",
+    "primaryGoal",
+    "preferredActivities",
+    "location",
+  ];
+  // Validacija required polja
+  for (const field of requiredFields) {
+    if (
+      !formData[field] ||
+      (Array.isArray(formData[field]) && formData[field].length === 0)
+    ) {
+      throw new Error(`Field '${field}' is required.`);
+    }
+  }
+  // Validacija da su languages i preferredActivities nizovi
+  if (!Array.isArray(formData.languages)) {
+    throw new Error("Field 'languages' must be an array.");
+  }
+  if (!Array.isArray(formData.preferredActivities)) {
+    throw new Error("Field 'preferredActivities' must be an array.");
+  }
+  // Validacija polja location
+  const { location } = formData;
+  if (
+    !location.city ||
+    !location.state ||
+    !location.country ||
+    !location.postalCode
+  ) {
+    throw new Error("All location fields are required.");
+  }
 
-      // Physical Information
-      height: Number(formData.height),
-      weight: Number(formData.weight),
-      fitnessLevel: formData.fitnessLevel,
-
-      // Fitness Experience
-      experienceLevel: formData.experienceLevel,
-      previousActivities: formData.previousActivities,
-
-      // Location and Contact
-      email: formData.email,
-      phone: formData.phone,
-      city: formData.location.city,
-      state: formData.location.state,
-      country: formData.location.country,
-      postalCode: formData.location.postalCode,
-
-      // Profile and Bio
-      profileImage: formData.profileImage, // url or path
-      bio: formData.bio,
-      medicalConditions: formData.medicalConditions,
-      allergies: formData.allergies,
-
-      // Goals
-      primaryGoal: formData.primaryGoal,
-      secondaryGoal: formData.secondaryGoal || null,
-      goalDescription: formData.goalDescription,
-
-      // Create related records
-      languages: {
-        create: formData.languages.map((name) => ({ name })),
-      },
-      preferredActivities: {
-        create: formData.preferredActivities.map((name) => ({ name })),
-      },
+  // Pripremi podatke za kreiranje
+  const data = {
+    userId,
+    firstName: formData.firstName,
+    lastName: formData.lastName,
+    dateOfBirth: new Date(formData.dateOfBirth),
+    gender: formData.gender,
+    height: Number(formData.height),
+    weight: Number(formData.weight),
+    experienceLevel: formData.experienceLevel,
+    previousActivities: formData.previousActivities?.trim() || null,
+    primaryGoal: formData.primaryGoal,
+    secondaryGoal: formData.secondaryGoal?.trim() || null,
+    goalDescription: formData.goalDescription?.trim() || null,
+    city: location.city,
+    state: location.state,
+    country: location.country,
+    postalCode: location.postalCode,
+    profileImage: formData.profileImage?.trim() || null,
+    bio: formData.bio?.trim() || null,
+    medicalConditions: formData.medicalConditions?.trim() || null,
+    allergies: formData.allergies?.trim() || null,
+    // Relacije
+    languages: {
+      create: formData.languages.map((name) => ({ name })),
     },
+    preferredActivities: {
+      create: formData.preferredActivities.map((name) => ({ name })),
+    },
+  };
+  // Dodaj email i phone samo ako postoje i nisu prazni stringovi
+  if (formData.email && formData.email.trim() !== "") {
+    data.email = formData.email;
+  }
+  if (formData.phone && formData.phone.trim() !== "") {
+    data.phone = formData.phone;
+  }
+  // Kreiraj ClientProfile
+  const client = await prisma.clientProfile.create({
+    data,
   });
-
   return client;
 }
 

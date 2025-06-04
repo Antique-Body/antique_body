@@ -12,7 +12,6 @@ export function useClientRegistration() {
     // Physical Information
     height: "",
     weight: "",
-    fitnessLevel: "",
     // Fitness Experience
     experienceLevel: "",
     previousActivities: "",
@@ -96,8 +95,6 @@ export function useClientRegistration() {
       if (!formData.gender) newErrors.gender = "Gender is required";
       if (!formData.height) newErrors.height = "Height is required";
       if (!formData.weight) newErrors.weight = "Weight is required";
-      if (!formData.fitnessLevel)
-        newErrors.fitnessLevel = "Fitness level is required";
       if (!formData.experienceLevel)
         newErrors.experienceLevel = "Experience level is required";
     }
@@ -118,23 +115,11 @@ export function useClientRegistration() {
 
     if (currentStep === 3) {
       // Contact and Location Step validation
-      if (!formData.email) newErrors.email = "Email is required";
-      else if (!/\S+@\S+\.\S+/.test(formData.email))
-        newErrors.email = "Please enter a valid email address";
-
-      if (!formData.phone) newErrors.phone = "Phone number is required";
 
       if (!formData.location.city)
         newErrors["location.city"] = "City is required";
       if (!formData.location.country)
         newErrors["location.country"] = "Country is required";
-    }
-
-    if (currentStep === 4) {
-      // Profile Setup Step validation
-      if (!formData.bio) newErrors.bio = "Bio is required";
-      if (formData.bio && formData.bio.length > 500)
-        newErrors.bio = "Bio cannot exceed 500 characters";
     }
 
     setErrors(newErrors);

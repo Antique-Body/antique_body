@@ -5,6 +5,7 @@ import { auth } from "#/auth";
 export async function POST(req) {
   try {
     const session = await auth();
+    console.log("session", session);
     if (!session?.user?.id) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
