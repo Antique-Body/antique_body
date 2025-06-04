@@ -73,12 +73,6 @@ export const LocationSelector = ({
             onChange({
               target: { name: "location.country", value: option.country || "" },
             });
-            onChange({
-              target: {
-                name: "location.postalCode",
-                value: option.postalCode || "",
-              },
-            });
           }}
           onChange={onChange}
           placeholder="Start typing your city..."
@@ -119,16 +113,6 @@ export const LocationSelector = ({
             error={errors["location.country"]}
           />
         </div>
-
-        {/* Postal Code as normal input, auto-filled if available */}
-        <FormField
-          label="Postal Code (Optional)"
-          name="location.postalCode"
-          value={formData.location.postalCode || ""}
-          onChange={onChange}
-          placeholder="Your postal code"
-          error={errors["location.postalCode"]}
-        />
       </div>
 
       {/* Location preview */}
@@ -140,7 +124,6 @@ export const LocationSelector = ({
           </div>
           <p className="text-sm text-gray-300 mt-1">
             {formData.location.city}
-            {formData.location.postalCode && ` ${formData.location.postalCode}`}
             {formData.location.state && `, ${formData.location.state}`}
             {formData.location.country && `, ${formData.location.country}`}
           </p>

@@ -25,7 +25,6 @@ export function useTrainerRegistration() {
       city: "",
       state: "",
       country: "",
-      postalCode: "",
     },
     // Legacy fields for compatibility
     name: "",
@@ -140,11 +139,8 @@ export function useTrainerRegistration() {
       if (!formData.location || !formData.location.state)
         newErrors["location.state"] = "State/Province is required";
       if (!formData.location || !formData.location.country)
-        newErrors["location.country"] = "Country is required";
-      if (!formData.location || !formData.location.postalCode)
-        newErrors["location.postalCode"] = "Postal code is required";
-      if (!formData.pricingType || formData.pricingType === "")
-        newErrors.pricingType = "Pricing approach is required";
+        if (!formData.pricingType || formData.pricingType === "")
+          newErrors.pricingType = "Pricing approach is required";
       if (
         (formData.pricingType === "fixed" ||
           formData.pricingType === "package_deals") &&

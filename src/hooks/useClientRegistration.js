@@ -28,7 +28,6 @@ export function useClientRegistration() {
       city: "",
       state: "",
       country: "",
-      postalCode: "",
     },
     // Profile and Health Info
     profileImage: null,

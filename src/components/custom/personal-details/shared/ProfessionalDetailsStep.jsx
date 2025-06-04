@@ -6,7 +6,7 @@ import {
   LanguageSelector,
   CertificationUpload,
   TrainingTypeSelector,
-} from "../shared";
+} from "./";
 
 export const ProfessionalDetailsStep = ({
   formData,

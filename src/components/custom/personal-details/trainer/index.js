@@ -1,4 +1,15 @@
-export { ProfessionalDetailsStep } from "./ProfessionalDetailsStep";
-export { ProfileAndContactStep } from "./ProfileAndContactStep";
-export { BasicInfoStep } from "./BasicInfoStep";
-export { ProfileSetupStep } from "./ProfileSetupStep";
+// Re-export shared components with trainer-specific configurations
+export {
+  BasicInfoStep,
+  ContactAndLocationStep,
+  ProfessionalDetailsStep,
+  ProfileSetupStep,
+  TipsSection,
+  LanguageSelector,
+  LocationSelector,
+  TrainingTypeSelector,
+  SpecialtySelector,
+  CertificationUpload,
+  InfoBanner,
+  FormSection,
+} from "../shared";

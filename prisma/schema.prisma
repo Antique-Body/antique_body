@@ -42,7 +42,7 @@ model User {
   updatedAt             DateTime  @updatedAt
   accounts              Account[]
   sessions              Session[]
-  trainerInfo           TrainerPersonalInfo?
+  trainerInfo           TrainerProfile?
   clientProfile         ClientProfile?
   emailVerifications    EmailVerification[]
   phoneVerifications    PhoneVerification[]
@@ -114,8 +114,7 @@ model PhoneVerification {
   @@index([userId])
 }
 
-// Trainer Personal Info
-model TrainerPersonalInfo {
+model TrainerProfile {
   id                String   @id @default(cuid())
   userId            String   @unique
   firstName         String
@@ -133,7 +132,6 @@ model TrainerPersonalInfo {
   city             String?
   state            String?
   country          String?
-  postalCode       String?
   pricingType      String?
   pricePerSession  Int?
   currency         String?
@@ -152,7 +150,7 @@ model TrainerSpecialty {
   updatedAt         DateTime @updatedAt
 
   // Relations
-  trainerInfo       TrainerPersonalInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  trainerInfo       TrainerProfile @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
 }
 
 model TrainerLanguage {
@@ -163,7 +161,7 @@ model TrainerLanguage {
   updatedAt         DateTime @updatedAt
 
   // Relations
-  trainerInfo       TrainerPersonalInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  trainerInfo       TrainerProfile @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
 }
 
 model TrainerEnvironment {
@@ -174,7 +172,7 @@ model TrainerEnvironment {
   updatedAt         DateTime @updatedAt
 
   // Relations
-  trainerInfo       TrainerPersonalInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  trainerInfo       TrainerProfile @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
 }
 
 model TrainerType {
@@ -185,7 +183,7 @@ model TrainerType {
   updatedAt         DateTime @updatedAt
 
   // Relations
-  trainerInfo       TrainerPersonalInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  trainerInfo       TrainerProfile @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
 }
 
 model Certification {
@@ -198,7 +196,7 @@ model Certification {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  trainerInfo   TrainerPersonalInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  trainerInfo   TrainerProfile @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
   documents     CertificationDocument[]
 }
 
@@ -213,52 +211,31 @@ model CertificationDocument {
   certification   Certification @relation(fields: [certificationId], references: [id], onDelete: Cascade)
 }
 
-// Client Profile Models
 model ClientProfile {
   id                   String   @id @default(cuid())
   userId               String   @unique
-  
-  // Personal Information
   firstName            String
   lastName             String
   dateOfBirth          DateTime
   gender               String
-  
-  // Physical Information
   height               Int      // in cm
   weight               Int      // in kg
-  
-  // Fitness Experience
   experienceLevel      String
   previousActivities   String?  @db.Text
-  
-  // Goals and Preferences
   primaryGoal          String
   secondaryGoal        String?
   goalDescription      String?  @db.Text
-  goalTimeFrame        String?
-  workoutFrequency     String?
-  
-  // Contact and Location
   email                String?
   phone                String?
-  preferredContactMethod String?
   city                 String
   state                String
   country              String
-  postalCode           String
-  
-  // Profile and Health Info
   profileImage         String?
   bio                  String?  @db.Text
   medicalConditions    String?  @db.Text
   allergies            String?  @db.Text
-  
-  // Timestamps
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
-  
-  // Relations
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   languages            ClientLanguage[]
   preferredActivities  ClientActivity[]
