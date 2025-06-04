@@ -117,7 +117,7 @@ export const DatePicker = ({
 
     if (onChange) {
       // Format date as YYYY-MM-DD for form value
-      const formattedDate = newDate.toISOString().split("T")[0];
+      const formattedDate = formatDate(newDate);
       onChange({ target: { name, value: formattedDate } });
     }
   };
@@ -326,6 +326,13 @@ export const DatePicker = ({
     }).format(date);
   };
 
+  // Helper for YYYY-MM-DD format
+  const formatDate = (date) =>
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}-${String(date.getDate()).padStart(2, "0")}`;
+
   // Render calendar portal
   const renderCalendar = () => {
     if (!isOpen || typeof window === "undefined") return null;
@@ -448,7 +455,7 @@ export const DatePicker = ({
                 setYear(today.getFullYear());
 
                 if (onChange) {
-                  const formattedDate = today.toISOString().split("T")[0];
+                  const formattedDate = formatDate(today);
                   onChange({ target: { name, value: formattedDate } });
                 }
                 setIsOpen(false);
