@@ -382,8 +382,8 @@ async function createClientWithDetails(formData, userId) {
     lastName: formData.lastName,
     dateOfBirth: new Date(formData.dateOfBirth),
     gender: formData.gender,
-    height: Number(formData.height),
-    weight: Number(formData.weight),
+    height: Number(formData.height || 0),
+    weight: Number(formData.weight || 0),
     experienceLevel: formData.experienceLevel,
     previousActivities: formData.previousActivities?.trim() || null,
     primaryGoal: formData.primaryGoal,
@@ -411,11 +411,17 @@ async function createClientWithDetails(formData, userId) {
   if (formData.phone && formData.phone.trim() !== "") {
     data.phone = formData.phone;
   }
-  // Kreiraj ClientProfile
-  const client = await prisma.clientProfile.create({
-    data,
-  });
-  return client;
+
+  try {
+    // Kreiraj ClientProfile
+    const client = await prisma.clientProfile.create({
+      data,
+    });
+    return client;
+  } catch (error) {
+    console.error("Error creating client profile:", error);
+    throw new Error(`Failed to create client profile: ${error.message}`);
+  }
 }
 
 /**
