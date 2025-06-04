@@ -54,14 +54,19 @@ export const ModernFeaturesSection = ({ features }) => {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className={`relative px-6 py-5 rounded-xl transition-all duration-300 cursor-pointer group ${
                   activeFeature === index
-                    ? "bg-gradient-to-r from-[#FF6B00]/10 to-transparent border-l-2 border-l-[#FF6B00]"
-                    : "hover:bg-white/5 border-l-2 border-l-transparent"
+                    ? "bg-gradient-to-r from-[#FF6B00]/10 to-transparent"
+                    : "hover:bg-white/5"
                 }`}
                 onClick={() => setActiveFeature(index)}
               >
                 {/* Glow effect for active item */}
                 {activeFeature === index && (
                   <div className="absolute inset-0 bg-[#FF6B00]/5 blur-xl rounded-xl -z-10"></div>
+                )}
+
+                {/* Left border indicator */}
+                {activeFeature === index && (
+                  <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#FF6B00] rounded-full"></div>
                 )}
 
                 <div className="flex items-start gap-5">

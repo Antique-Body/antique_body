@@ -7,13 +7,13 @@ import { BrandLogo } from "@/components/common/BrandLogo";
 import { Card } from "@/components/common/Card";
 import { ArrowRight } from "@/components/common/Icons";
 import { StepProgressBar } from "@/components/common/StepProgressBar";
+import { TipsSection } from "@/components/custom/personal-details/shared";
 import {
   BasicInfoStep,
-  FitnessGoalsStep,
-  ProfileAndContactStep,
+  GoalsAndPreferencesStep,
+  ContactAndLocationStep,
   ProfileSetupStep,
 } from "@/components/custom/personal-details/client";
-import { TipsSection } from "@/components/custom/personal-details/shared";
 
 const ClientRegistration = () => {
   const {
@@ -25,6 +25,7 @@ const ClientRegistration = () => {
     handleSubmit,
     goToNextStep,
     goToPrevStep,
+    handleProfileImageChange,
   } = useClientRegistration();
 
   return (
@@ -48,7 +49,7 @@ const ClientRegistration = () => {
         >
           <h1 className="mb-6 text-2xl font-bold md:text-3xl">
             {step === 1 && "Basic Information"}
-            {step === 2 && "Fitness Goals"}
+            {step === 2 && "Goals & Preferences"}
             {step === 3 && "Contact & Location"}
             {step === 4 && "Profile Setup"}
           </h1>
@@ -63,18 +64,18 @@ const ClientRegistration = () => {
               />
             )}
 
-            {/* Step 2: Fitness Goals */}
+            {/* Step 2: Goals and Preferences */}
             {step === 2 && (
-              <FitnessGoalsStep
+              <GoalsAndPreferencesStep
                 formData={formData}
                 onChange={handleChange}
                 errors={errors}
               />
             )}
 
-            {/* Step 3: Contact & Location */}
+            {/* Step 3: Contact and Location */}
             {step === 3 && (
-              <ProfileAndContactStep
+              <ContactAndLocationStep
                 formData={formData}
                 onChange={handleChange}
                 errors={errors}
@@ -86,6 +87,7 @@ const ClientRegistration = () => {
               <ProfileSetupStep
                 formData={formData}
                 onChange={handleChange}
+                onProfileImageChange={handleProfileImageChange}
                 errors={errors}
               />
             )}
@@ -139,7 +141,7 @@ const ClientRegistration = () => {
                   }
                   disabled={loading}
                 >
-                  {loading ? "Saving..." : "Find Your Trainer"}
+                  {loading ? "Saving..." : "Complete Profile"}
                 </Button>
               )}
             </div>

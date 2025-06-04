@@ -1,15 +1,32 @@
 "use client";
 import { Icon } from "@iconify/react";
 import { useSession } from "next-auth/react";
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 
 import { FormSection, InfoBanner } from "../shared";
 
 import { FormField } from "@/components/common";
 import { usePrefillFromSession } from "@/hooks";
 
+const fitnessLevels = [
+  { value: "beginner", label: "Beginner - New to fitness" },
+  { value: "intermediate", label: "Intermediate - Some experience" },
+  { value: "advanced", label: "Advanced - Regular exerciser" },
+  { value: "expert", label: "Expert - Dedicated fitness enthusiast" },
+];
+
+const experienceLevels = [
+  { value: "none", label: "No Experience - First time" },
+  { value: "less_than_year", label: "Less than 1 year" },
+  { value: "1_3_years", label: "1-3 years" },
+  { value: "3_5_years", label: "3-5 years" },
+  { value: "5_plus_years", label: "5+ years" },
+];
+
 export const BasicInfoStep = ({ formData, onChange, errors }) => {
   const { data: session } = useSession();
+  const [bmi, setBmi] = useState(null);
+  const [bmiCategory, setBmiCategory] = useState("");
 
   usePrefillFromSession({
     formData,
@@ -20,40 +37,30 @@ export const BasicInfoStep = ({ formData, onChange, errors }) => {
     ],
   });
 
-  // Calculate BMI whenever height or weight changes
-  const bmiData = useMemo(() => {
-    if (!formData.height || !formData.weight) return null;
+  useEffect(() => {
+    // Calculate BMI when height or weight changes
+    if (formData.height && formData.weight) {
+      const heightInMeters = formData.height / 100; // Convert cm to meters
+      const bmiValue = (
+        formData.weight /
+        (heightInMeters * heightInMeters)
+      ).toFixed(1);
+      setBmi(bmiValue);
 
-    const heightInMeters = Number(formData.height) / 100;
-    const weightInKg = Number(formData.weight);
-
-    if (heightInMeters <= 0 || weightInKg <= 0) return null;
-
-    const bmi = weightInKg / (heightInMeters * heightInMeters);
-
-    // Determine BMI category
-    let category = "";
-    let variant = "primary";
-
-    if (bmi < 18.5) {
-      category = "Underweight";
-      variant = "info";
-    } else if (bmi >= 18.5 && bmi < 25) {
-      category = "Normal weight";
-      variant = "success";
-    } else if (bmi >= 25 && bmi < 30) {
-      category = "Overweight";
-      variant = "primary";
+      // Determine BMI category
+      if (bmiValue < 18.5) {
+        setBmiCategory("Underweight");
+      } else if (bmiValue >= 18.5 && bmiValue < 25) {
+        setBmiCategory("Normal weight");
+      } else if (bmiValue >= 25 && bmiValue < 30) {
+        setBmiCategory("Overweight");
+      } else {
+        setBmiCategory("Obesity");
+      }
     } else {
-      category = "Obesity";
-      variant = "primary";
+      setBmi(null);
+      setBmiCategory("");
     }
-
-    return {
-      bmi: bmi.toFixed(1),
-      category,
-      variant,
-    };
   }, [formData.height, formData.weight]);
 
   return (
@@ -113,17 +120,17 @@ export const BasicInfoStep = ({ formData, onChange, errors }) => {
       {/* Physical Information */}
       <FormSection
         title="Physical Information"
-        description="Help trainers understand your physical profile"
-        icon={<Icon icon="mdi:human" width={20} height={20} />}
+        description="Details about your physical characteristics"
+        icon={<Icon icon="mdi:human-male-height" width={20} height={20} />}
       >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             label="Height (cm)"
             name="height"
             type="number"
             value={formData.height}
             onChange={onChange}
-            placeholder="Height in cm"
+            placeholder="Enter your height in cm"
             min="100"
             max="250"
             error={errors.height}
@@ -135,76 +142,73 @@ export const BasicInfoStep = ({ formData, onChange, errors }) => {
             type="number"
             value={formData.weight}
             onChange={onChange}
-            placeholder="Weight in kg"
+            placeholder="Enter your weight in kg"
             min="30"
             max="250"
             error={errors.weight}
           />
-
-          <FormField
-            label="Fitness Level"
-            name="fitnessLevel"
-            type="select"
-            value={formData.fitnessLevel}
-            onChange={onChange}
-            error={errors.fitnessLevel}
-            options={[
-              { value: "", label: "Select level" },
-              { value: "beginner", label: "Beginner" },
-              { value: "intermediate", label: "Intermediate" },
-              { value: "advanced", label: "Advanced" },
-              { value: "athlete", label: "Athlete" },
-            ]}
-          />
         </div>
 
+        <FormField
+          label="Current Fitness Level"
+          name="fitnessLevel"
+          type="select"
+          value={formData.fitnessLevel}
+          onChange={onChange}
+          error={errors.fitnessLevel}
+          options={[
+            { value: "", label: "Select your fitness level" },
+            ...fitnessLevels,
+          ]}
+        />
+
         {/* BMI Display */}
-        {bmiData && (
-          <div className="mt-4">
-            <InfoBanner
-              icon="mdi:scale-bathroom"
-              title={`BMI: ${bmiData.bmi} - ${bmiData.category}`}
-              subtitle="Based on your height and weight"
-              variant={bmiData.variant}
-            />
-          </div>
+        {bmi && (
+          <InfoBanner
+            icon="mdi:scale-bathroom"
+            title={`Your BMI: ${bmi} - ${bmiCategory}`}
+            subtitle={`Height: ${formData.height}cm, Weight: ${formData.weight}kg`}
+            variant={
+              bmiCategory === "Normal weight"
+                ? "success"
+                : bmiCategory === "Underweight" || bmiCategory === "Overweight"
+                ? "info"
+                : "primary"
+            }
+            className="mt-4"
+          />
         )}
       </FormSection>
 
-      {/* Experience */}
+      {/* Fitness Experience */}
       <FormSection
         title="Fitness Experience"
-        description="Tell us about your fitness background"
+        description="Your background in fitness and exercise"
         icon={<Icon icon="mdi:dumbbell" width={20} height={20} />}
       >
-        <div className="space-y-4">
-          <FormField
-            label="Training Experience"
-            name="trainingExperience"
-            type="select"
-            value={formData.trainingExperience}
-            onChange={onChange}
-            error={errors.trainingExperience}
-            options={[
-              { value: "", label: "Select experience" },
-              { value: "none", label: "None - Complete Beginner" },
-              { value: "less_than_6months", label: "Less than 6 months" },
-              { value: "6months_to_1year", label: "6 months to 1 year" },
-              { value: "1_to_3years", label: "1 to 3 years" },
-              { value: "3_to_5years", label: "3 to 5 years" },
-              { value: "more_than_5years", label: "More than 5 years" },
-            ]}
-          />
+        <FormField
+          label="Experience Level"
+          name="experienceLevel"
+          type="select"
+          value={formData.experienceLevel}
+          onChange={onChange}
+          error={errors.experienceLevel}
+          options={[
+            { value: "", label: "Select your experience level" },
+            ...experienceLevels,
+          ]}
+        />
 
-          {formData.trainingExperience &&
-            formData.trainingExperience !== "none" && (
-              <InfoBanner
-                icon="mdi:calendar-check"
-                title="Great! You already have some fitness experience"
-                subtitle="This will help trainers customize your program"
-              />
-            )}
-        </div>
+        <FormField
+          label="Previous Activities"
+          name="previousActivities"
+          type="textarea"
+          value={formData.previousActivities}
+          onChange={onChange}
+          placeholder="Describe any previous fitness activities or sports you've participated in..."
+          rows={3}
+          error={errors.previousActivities}
+        />
       </FormSection>
     </div>
   );

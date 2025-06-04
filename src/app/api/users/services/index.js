@@ -218,7 +218,6 @@ async function createTrainerWithDetails(formData, userId) {
     "languages",
     "trainingEnvironment",
     "trainingTypes",
-    "profileImage",
     "location",
     "pricingType",
     // pricePerSession will be conditionally required below
@@ -335,6 +334,81 @@ async function getTrainerProfileByUserId(userId) {
   });
 }
 
+/**
+ * Creates a client with all details and relations.
+ * Required fields validation happens at the API layer.
+ * formData: {
+ *   firstName, lastName, dateOfBirth, gender, height, weight, fitnessLevel,
+ *   experienceLevel, previousActivities, languages, primaryGoal, secondaryGoal,
+ *   goalDescription, preferredActivities, email, phone, location,
+ *   profileImage, bio, medicalConditions, allergies
+ * }
+ */
+async function createClientWithDetails(formData, userId) {
+  // Create the main ClientProfile
+  const client = await prisma.clientProfile.create({
+    data: {
+      userId,
+      // Personal Information
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      dateOfBirth: new Date(formData.dateOfBirth),
+      gender: formData.gender,
+
+      // Physical Information
+      height: Number(formData.height),
+      weight: Number(formData.weight),
+      fitnessLevel: formData.fitnessLevel,
+
+      // Fitness Experience
+      experienceLevel: formData.experienceLevel,
+      previousActivities: formData.previousActivities,
+
+      // Location and Contact
+      email: formData.email,
+      phone: formData.phone,
+      city: formData.location.city,
+      state: formData.location.state,
+      country: formData.location.country,
+      postalCode: formData.location.postalCode,
+
+      // Profile and Bio
+      profileImage: formData.profileImage, // url or path
+      bio: formData.bio,
+      medicalConditions: formData.medicalConditions,
+      allergies: formData.allergies,
+
+      // Goals
+      primaryGoal: formData.primaryGoal,
+      secondaryGoal: formData.secondaryGoal || null,
+      goalDescription: formData.goalDescription,
+
+      // Create related records
+      languages: {
+        create: formData.languages.map((name) => ({ name })),
+      },
+      preferredActivities: {
+        create: formData.preferredActivities.map((name) => ({ name })),
+      },
+    },
+  });
+
+  return client;
+}
+
+/**
+ * Fetch the full client profile for a user, including all relations.
+ */
+async function getClientProfileByUserId(userId) {
+  return await prisma.clientProfile.findUnique({
+    where: { userId },
+    include: {
+      languages: true,
+      preferredActivities: true,
+    },
+  });
+}
+
 // Exportujem userService objekat sa svim funkcijama
 export const userService = {
   findUser,
@@ -353,4 +427,6 @@ export const userService = {
   getAllUsers,
   createTrainerWithDetails,
   getTrainerProfileByUserId,
+  createClientWithDetails,
+  getClientProfileByUserId,
 };
