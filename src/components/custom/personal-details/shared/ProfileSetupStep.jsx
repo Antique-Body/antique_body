@@ -3,7 +3,7 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 
-import { FormSection } from "../shared/FormSection";
+import { FormSection } from "./FormSection";
 
 import { FormField } from "@/components/common";
 
@@ -25,13 +25,29 @@ function validateImageFile(file) {
   return null;
 }
 
-export const ProfileSetupStep = ({ formData, onChange, errors }) => {
+export const ProfileSetupStep = ({
+  formData,
+  onChange,
+  onProfileImageChange,
+  errors,
+  userType = "trainer", // "trainer" or "client"
+  titleText = "Profile Image",
+  descriptionText = "Upload your professional photo",
+  bioLabel = "About You",
+  bioPlaceholder = "Write a brief description about yourself...",
+  guidelines = [
+    "Professional headshot with neutral background",
+    "Clear, well-lit, and focused on your face",
+    "JPG, PNG, or GIF format (max 1MB)",
+  ],
+  guidelineHelpText = "A professional profile photo helps build trust.",
+}) => {
   const [imageError, setImageError] = useState("");
   const [previewUrl, setPreviewUrl] = useState("");
   const [isHovering, setIsHovering] = useState(false);
 
   useEffect(() => {
-    // Clean up old blob URL when image changes or component unmounts
+    // Cleanup old blob URL when image changes or component unmounts
     let url = "";
     if (formData.profileImage && formData.profileImage instanceof File) {
       url = URL.createObjectURL(formData.profileImage);
@@ -60,12 +76,18 @@ export const ProfileSetupStep = ({ formData, onChange, errors }) => {
       return;
     }
     setImageError("");
-    onChange({
-      target: {
-        name: "profileImage",
-        value: file,
-      },
-    });
+
+    // Use the onProfileImageChange prop if provided, otherwise use the regular onChange
+    if (onProfileImageChange) {
+      onProfileImageChange(e);
+    } else {
+      onChange({
+        target: {
+          name: "profileImage",
+          value: file,
+        },
+      });
+    }
   };
 
   const triggerFileInput = () => {
@@ -84,12 +106,52 @@ export const ProfileSetupStep = ({ formData, onChange, errors }) => {
     document.getElementById("profile-image-upload").value = "";
   };
 
+  // Client-specific additional fields
+  const renderClientHealthInfo = () => {
+    if (userType !== "client") return null;
+
+    return (
+      <FormSection
+        title="Health Information (Optional)"
+        description="Share any health information that trainers should be aware of"
+        icon={<Icon icon="mdi:medical-bag" width={20} height={20} />}
+      >
+        <FormField
+          label="Medical Conditions"
+          name="medicalConditions"
+          type="textarea"
+          value={formData.medicalConditions}
+          onChange={onChange}
+          placeholder="List any medical conditions, injuries, or health concerns that may affect your training..."
+          rows={3}
+          error={errors.medicalConditions}
+        />
+
+        <FormField
+          label="Allergies"
+          name="allergies"
+          type="textarea"
+          value={formData.allergies}
+          onChange={onChange}
+          placeholder="List any allergies or sensitivities..."
+          rows={2}
+          error={errors.allergies}
+        />
+
+        <p className="text-xs text-gray-400 mt-3">
+          This information will only be shared with trainers you choose to work
+          with to ensure your safety.
+        </p>
+      </FormSection>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Profile Image Upload */}
       <FormSection
-        title="Profile Image"
-        description="Upload a photo for your profile"
+        title={titleText}
+        description={descriptionText}
         icon={<Icon icon="mdi:camera-account" width={20} height={20} />}
       >
         <div className="bg-[rgba(30,30,30,0.6)] rounded-lg border border-[#333] p-6">
@@ -203,38 +265,24 @@ export const ProfileSetupStep = ({ formData, onChange, errors }) => {
                 </h3>
 
                 <ul className="space-y-2 ml-1">
-                  <li className="flex items-start gap-2 text-gray-300 text-sm">
-                    <Icon
-                      icon="mdi:check"
-                      width={16}
-                      height={16}
-                      className="text-[#FF6B00] mt-0.5"
-                    />
-                    Choose a clear photo that shows your face
-                  </li>
-                  <li className="flex items-start gap-2 text-gray-300 text-sm">
-                    <Icon
-                      icon="mdi:check"
-                      width={16}
-                      height={16}
-                      className="text-[#FF6B00] mt-0.5"
-                    />
-                    Well-lit with a simple background
-                  </li>
-                  <li className="flex items-start gap-2 text-gray-300 text-sm">
-                    <Icon
-                      icon="mdi:check"
-                      width={16}
-                      height={16}
-                      className="text-[#FF6B00] mt-0.5"
-                    />
-                    JPG, PNG, or GIF format (max 1MB)
-                  </li>
+                  {guidelines.map((guideline, index) => (
+                    <li
+                      key={index}
+                      className="flex items-start gap-2 text-gray-300 text-sm"
+                    >
+                      <Icon
+                        icon="mdi:check"
+                        width={16}
+                        height={16}
+                        className="text-[#FF6B00] mt-0.5"
+                      />
+                      {guideline}
+                    </li>
+                  ))}
                 </ul>
 
                 <p className="mt-3 text-xs text-gray-400 border-t border-[#333] pt-3">
-                  A profile photo helps trainers recognize you and personalizes
-                  your experience.
+                  {guidelineHelpText}
                 </p>
               </div>
             </div>
@@ -252,26 +300,32 @@ export const ProfileSetupStep = ({ formData, onChange, errors }) => {
         />
       </FormSection>
 
-      {/* About Me */}
+      {/* Bio Section */}
       <FormSection
-        title="About Me"
-        description="Tell trainers about yourself and your fitness journey"
+        title={userType === "trainer" ? "Professional Bio" : "About Me"}
+        description={
+          userType === "trainer"
+            ? "Tell potential clients about yourself and your training philosophy"
+            : "Tell trainers about yourself and your fitness journey"
+        }
         icon={<Icon icon="mdi:text-account" width={20} height={20} />}
       >
         <FormField
-          label="About You"
+          label={bioLabel}
           name="bio"
           type="textarea"
           value={formData.bio}
           onChange={onChange}
-          placeholder="Write a brief description about yourself, your fitness journey, and what you're looking for in a trainer..."
+          placeholder={bioPlaceholder}
           rows={6}
           error={errors.bio}
         />
 
         <div className="flex justify-between items-center mt-2">
           <p className="text-xs text-gray-400">
-            Help trainers understand your background and needs
+            {userType === "trainer"
+              ? "Help clients understand your approach and experience"
+              : "Help trainers understand your background and needs"}
           </p>
           <span className="text-xs text-gray-400">
             {formData.bio?.length || 0}/500 characters
@@ -279,39 +333,8 @@ export const ProfileSetupStep = ({ formData, onChange, errors }) => {
         </div>
       </FormSection>
 
-      {/* Health Information (Optional) */}
-      <FormSection
-        title="Health Information (Optional)"
-        description="Share any health information that trainers should be aware of"
-        icon={<Icon icon="mdi:medical-bag" width={20} height={20} />}
-      >
-        <FormField
-          label="Medical Conditions"
-          name="medicalConditions"
-          type="textarea"
-          value={formData.medicalConditions}
-          onChange={onChange}
-          placeholder="List any medical conditions, injuries, or health concerns that may affect your training..."
-          rows={3}
-          error={errors.medicalConditions}
-        />
-
-        <FormField
-          label="Allergies"
-          name="allergies"
-          type="textarea"
-          value={formData.allergies}
-          onChange={onChange}
-          placeholder="List any allergies or sensitivities..."
-          rows={2}
-          error={errors.allergies}
-        />
-
-        <p className="text-xs text-gray-400 mt-3">
-          This information will only be shared with trainers you choose to work
-          with to ensure your safety.
-        </p>
-      </FormSection>
+      {/* Conditionally render client health info */}
+      {renderClientHealthInfo()}
     </div>
   );
 };

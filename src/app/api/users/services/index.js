@@ -202,7 +202,7 @@ async function getAllUsers(page = 1, limit = 10, role = null) {
  * Sva polja su required osim certifikata i description.
  * formData: {
  *   firstName, lastName, dateOfBirth, gender, trainingSince, specialties, languages, trainingEnvironment, trainingTypes,
- *   email, phone,  profileImage, location: { city, state, country, postalCode },
+ *   email, phone,  profileImage, location: { city, state, country },
  *   pricingType, pricePerSession, currency, certifications: [{ name, issuer, expiryDate, description, documentUrl }]
  * }
  */
@@ -247,16 +247,11 @@ async function createTrainerWithDetails(formData, userId) {
     }
   }
   const { location } = formData;
-  if (
-    !location.city ||
-    !location.state ||
-    !location.country ||
-    !location.postalCode
-  ) {
+  if (!location.city || !location.state || !location.country) {
     throw new Error("All location fields are required.");
   }
-  // Kreiraj glavnu TrainerPersonalInfo
-  const trainer = await prisma.trainerPersonalInfo.create({
+  // Kreiraj glavnu trainerProfile
+  const trainer = await prisma.trainerProfile.create({
     data: {
       userId,
       firstName: formData.firstName,
@@ -269,7 +264,6 @@ async function createTrainerWithDetails(formData, userId) {
       city: location.city,
       state: location.state,
       country: location.country,
-      postalCode: location.postalCode,
       pricingType: formData.pricingType,
       pricePerSession:
         formData.pricingType === "fixed" ||
@@ -318,7 +312,7 @@ async function createTrainerWithDetails(formData, userId) {
  * Fetch the full trainer profile for a user, including all relations.
  */
 async function getTrainerProfileByUserId(userId) {
-  return await prisma.trainerPersonalInfo.findUnique({
+  return await prisma.trainerProfile.findUnique({
     where: { userId },
     include: {
       certifications: {
@@ -377,12 +371,7 @@ async function createClientWithDetails(formData, userId) {
   }
   // Validacija polja location
   const { location } = formData;
-  if (
-    !location.city ||
-    !location.state ||
-    !location.country ||
-    !location.postalCode
-  ) {
+  if (!location.city || !location.state || !location.country) {
     throw new Error("All location fields are required.");
   }
 
@@ -403,7 +392,6 @@ async function createClientWithDetails(formData, userId) {
     city: location.city,
     state: location.state,
     country: location.country,
-    postalCode: location.postalCode,
     profileImage: formData.profileImage?.trim() || null,
     bio: formData.bio?.trim() || null,
     medicalConditions: formData.medicalConditions?.trim() || null,

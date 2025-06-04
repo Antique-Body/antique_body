@@ -1,7 +1,7 @@
 "use client";
 import { Icon } from "@iconify/react";
 
-import { FormSection, LanguageSelector } from "../shared";
+import { FormSection, LanguageSelector } from "./";
 
 import { FormField } from "@/components/common";
 import { ErrorIcon } from "@/components/common/Icons";

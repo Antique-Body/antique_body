@@ -8,12 +8,12 @@ import { Card } from "@/components/common/Card";
 import { ArrowRight } from "@/components/common/Icons";
 import { StepProgressBar } from "@/components/common/StepProgressBar";
 import {
+  TipsSection,
   BasicInfoStep,
   GoalsAndPreferencesStep,
   ContactAndLocationStep,
   ProfileSetupStep,
-} from "@/components/custom/personal-details/client";
-import { TipsSection } from "@/components/custom/personal-details/shared";
+} from "@/components/custom/personal-details/shared";
 
 const ClientRegistration = () => {
   const {
@@ -61,6 +61,7 @@ const ClientRegistration = () => {
                 formData={formData}
                 onChange={handleChange}
                 errors={errors}
+                userType="client"
               />
             )}
 
@@ -79,6 +80,7 @@ const ClientRegistration = () => {
                 formData={formData}
                 onChange={handleChange}
                 errors={errors}
+                userType="client"
               />
             )}
 
@@ -89,6 +91,16 @@ const ClientRegistration = () => {
                 onChange={handleChange}
                 onProfileImageChange={handleProfileImageChange}
                 errors={errors}
+                userType="client"
+                titleText="Profile Image"
+                descriptionText="Upload a photo for your profile"
+                bioPlaceholder="Write a brief description about yourself, your fitness journey, and what you're looking for in a trainer..."
+                guidelines={[
+                  "Choose a clear photo that shows your face",
+                  "Well-lit with a simple background",
+                  "JPG, PNG, or GIF format (max 1MB)",
+                ]}
+                guidelineHelpText="A profile photo helps trainers recognize you and personalizes your experience."
               />
             )}
 

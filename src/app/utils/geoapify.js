@@ -17,7 +17,6 @@ export async function fetchGeoapifySuggestions(query) {
       state: feature.properties.state,
       country: feature.properties.country,
       country_code: feature.properties.country_code,
-      postalCode: feature.properties.postcode,
       raw: feature.properties,
     };
   });

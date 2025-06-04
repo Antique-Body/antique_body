@@ -7,13 +7,13 @@ import { BrandLogo } from "@/components/common/BrandLogo";
 import { Card } from "@/components/common/Card";
 import { ArrowRight } from "@/components/common/Icons";
 import { StepProgressBar } from "@/components/common/StepProgressBar";
-import { TipsSection } from "@/components/custom/personal-details/shared";
 import {
+  TipsSection,
   BasicInfoStep,
   ProfessionalDetailsStep,
-  ProfileAndContactStep,
+  ContactAndLocationStep,
   ProfileSetupStep,
-} from "@/components/custom/personal-details/trainer";
+} from "@/components/custom/personal-details/shared";
 
 const TrainerRegistration = () => {
   const {
@@ -64,6 +64,7 @@ const TrainerRegistration = () => {
                 formData={formData}
                 onChange={handleChange}
                 errors={errors}
+                userType="trainer"
               />
             )}
 
@@ -82,10 +83,11 @@ const TrainerRegistration = () => {
 
             {/* Step 3: Contact & Location */}
             {step === 3 && (
-              <ProfileAndContactStep
+              <ContactAndLocationStep
                 formData={formData}
                 onChange={handleChange}
                 errors={errors}
+                userType="trainer"
               />
             )}
 
@@ -96,6 +98,16 @@ const TrainerRegistration = () => {
                 onChange={handleChange}
                 onProfileImageChange={handleProfileImageChange}
                 errors={errors}
+                userType="trainer"
+                titleText="Profile Image"
+                descriptionText="Upload your professional photo that clients will see"
+                bioPlaceholder="Write a brief description about yourself, your training philosophy, and what makes you unique as a trainer..."
+                guidelines={[
+                  "Professional headshot with neutral background",
+                  "Clear, well-lit, and focused on your face",
+                  "JPG, PNG, or GIF format (max 1MB)",
+                ]}
+                guidelineHelpText="A professional profile photo helps build trust with potential clients."
               />
             )}
 
