@@ -7,13 +7,13 @@ import { BrandLogo } from "@/components/common/BrandLogo";
 import { Card } from "@/components/common/Card";
 import { ArrowRight } from "@/components/common/Icons";
 import { StepProgressBar } from "@/components/common/StepProgressBar";
-import { TipsSection } from "@/components/custom/personal-details/shared";
 import {
   BasicInfoStep,
   GoalsAndPreferencesStep,
   ContactAndLocationStep,
   ProfileSetupStep,
 } from "@/components/custom/personal-details/client";
+import { TipsSection } from "@/components/custom/personal-details/shared";
 
 const ClientRegistration = () => {
   const {

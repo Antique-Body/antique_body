@@ -227,7 +227,6 @@ model ClientProfile {
   // Physical Information
   height               Int      // in cm
   weight               Int      // in kg
-  fitnessLevel         String
   
   // Fitness Experience
   experienceLevel      String

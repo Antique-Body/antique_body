@@ -8,13 +8,6 @@ import { FormSection, InfoBanner } from "../shared";
 import { FormField } from "@/components/common";
 import { usePrefillFromSession } from "@/hooks";
 
-const fitnessLevels = [
-  { value: "beginner", label: "Beginner - New to fitness" },
-  { value: "intermediate", label: "Intermediate - Some experience" },
-  { value: "advanced", label: "Advanced - Regular exerciser" },
-  { value: "expert", label: "Expert - Dedicated fitness enthusiast" },
-];
-
 const experienceLevels = [
   { value: "none", label: "No Experience - First time" },
   { value: "less_than_year", label: "Less than 1 year" },
@@ -148,19 +141,6 @@ export const BasicInfoStep = ({ formData, onChange, errors }) => {
             error={errors.weight}
           />
         </div>
-
-        <FormField
-          label="Current Fitness Level"
-          name="fitnessLevel"
-          type="select"
-          value={formData.fitnessLevel}
-          onChange={onChange}
-          error={errors.fitnessLevel}
-          options={[
-            { value: "", label: "Select your fitness level" },
-            ...fitnessLevels,
-          ]}
-        />
 
         {/* BMI Display */}
         {bmi && (

@@ -213,6 +213,12 @@ export const authConfig = {
           session.user.role = userFromDb.role;
           session.user.email = userFromDb.email;
           session.user.phone = userFromDb.phone;
+        } else {
+          // fallback na token
+          session.user.id = token.id;
+          session.user.role = token.role;
+          session.user.email = token.email;
+          session.user.phone = token.phone;
         }
         session.user.firstName = token.firstName;
         session.user.lastName = token.lastName;
