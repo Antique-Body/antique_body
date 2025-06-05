@@ -1,4 +1,4 @@
-import { userService } from "../services";
+import { clientService } from "../services";
 
 import { auth } from "#/auth";
 
@@ -13,7 +13,7 @@ export async function POST(req) {
     }
     const body = await req.json();
 
-    const client = await userService.createClientWithDetails(
+    const client = await clientService.createClientWithDetails(
       body,
       session.user.id
     );
@@ -33,7 +33,9 @@ export async function GET() {
         status: 401,
       });
     }
-    const client = await userService.getClientProfileByUserId(session.user.id);
+    const client = await clientService.getClientProfileByUserId(
+      session.user.id
+    );
     if (!client) {
       return new Response(
         JSON.stringify({ error: "Client profile not found" }),

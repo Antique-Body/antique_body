@@ -9,216 +9,175 @@ import { userService } from "@/app/api/users/services";
 
 const prisma = new PrismaClient();
 
+const mapGoogleProfile = (profile) => ({
+  id: profile.sub,
+  email: profile.email,
+  name: profile.name,
+  firstName: profile.given_name,
+  lastName: profile.family_name,
+  image: profile.picture,
+});
+
+const mapFacebookProfile = (profile) => ({
+  id: profile.id,
+  email: profile.email,
+  name: profile.name,
+  firstName: profile.first_name,
+  lastName: profile.last_name,
+  image: profile.picture?.data?.url,
+});
+
+const providers = [
+  GoogleProvider({
+    clientId: process.env.AUTH_GOOGLE_ID,
+    clientSecret: process.env.AUTH_GOOGLE_SECRET,
+    profile: mapGoogleProfile,
+  }),
+  FacebookProvider({
+    clientId: process.env.AUTH_FACEBOOK_ID,
+    clientSecret: process.env.AUTH_FACEBOOK_SECRET,
+    userinfo: {
+      url: "https://graph.facebook.com/me?fields=id,email,first_name,last_name,name,picture",
+    },
+    profile: mapFacebookProfile,
+  }),
+  CredentialsProvider({
+    id: "email",
+    name: "Email",
+    credentials: {
+      email: { label: "Email", type: "email" },
+      password: { label: "Password", type: "password" },
+    },
+    async authorize(credentials) {
+      if (!credentials?.email || !credentials?.password) {
+        throw new Error("Email and password are required");
+      }
+      const user = await userService.findUserByEmail(credentials.email);
+      if (!user) throw new Error("Invalid email or password");
+      if (!user.emailVerified)
+        throw new Error("Please verify your email first");
+      if (!user.password) throw new Error("No password set for this account");
+      const isPasswordValid = await userService.verifyUserPassword(
+        user.id,
+        credentials.password
+      );
+      if (!isPasswordValid) throw new Error("Invalid email or password");
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      };
+    },
+  }),
+  CredentialsProvider({
+    id: "phone",
+    name: "Phone",
+    credentials: {
+      phone: { label: "Phone", type: "text" },
+      code: { label: "Verification Code", type: "text" },
+    },
+    async authorize(credentials) {
+      if (!credentials?.phone || !credentials?.code) {
+        throw new Error("Phone number and verification code are required");
+      }
+      const user = await userService.findUserByPhone(credentials.phone);
+      if (!user) throw new Error("User not found");
+      if (!user.phoneVerified) throw new Error("Phone number is not verified");
+      const isCodeValid = await verifyPhoneCode(
+        credentials.phone,
+        credentials.code
+      );
+      if (!isCodeValid) throw new Error("Invalid or expired verification code");
+      return {
+        id: user.id,
+        name: user.name,
+        phone: user.phone,
+        role: user.role,
+      };
+    },
+  }),
+];
+
+async function getUserByEmailOrPhone({ email, phone }) {
+  if (email) return prisma.user.findUnique({ where: { email } });
+  if (phone) return prisma.user.findUnique({ where: { phone } });
+  return null;
+}
+
 export const authConfig = {
-  providers: [
-    GoogleProvider({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
-      profile(profile) {
-        return {
-          id: profile.sub,
-          email: profile.email,
-          name: profile.name,
-          firstName: profile.given_name,
-          lastName: profile.family_name,
-          image: profile.picture,
-        };
-      },
-    }),
-    FacebookProvider({
-      clientId: process.env.AUTH_FACEBOOK_ID,
-      clientSecret: process.env.AUTH_FACEBOOK_SECRET,
-      userinfo: {
-        url: "https://graph.facebook.com/me?fields=id,email,first_name,last_name,name,picture",
-      },
-      profile(profile) {
-        return {
-          id: profile.id,
-          email: profile.email,
-          name: profile.name,
-          firstName: profile.first_name,
-          lastName: profile.last_name,
-          image: profile.picture?.data?.url,
-        };
-      },
-    }),
-    CredentialsProvider({
-      id: "email",
-      name: "Email",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        try {
-          if (!credentials?.email || !credentials?.password) {
-            throw new Error("Email and password are required");
-          }
-
-          const user = await userService.findUserByEmail(credentials.email);
-
-          if (!user) {
-            throw new Error("Invalid email or password");
-          }
-
-          if (!user.emailVerified) {
-            throw new Error("Please verify your email first");
-          }
-
-          if (!user.password) {
-            throw new Error("No password set for this account");
-          }
-
-          const isPasswordValid = await userService.verifyUserPassword(
-            user.id,
-            credentials.password
-          );
-          if (!isPasswordValid) {
-            throw new Error("Invalid email or password");
-          }
-
-          return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-          };
-        } catch (error) {
-          console.error("Auth error:", error);
-          throw error;
-        }
-      },
-    }),
-    CredentialsProvider({
-      id: "phone",
-      name: "Phone",
-      credentials: {
-        phone: { label: "Phone", type: "text" },
-        code: { label: "Verification Code", type: "text" },
-      },
-      async authorize(credentials) {
-        try {
-          if (!credentials?.phone || !credentials?.code) {
-            throw new Error("Phone number and verification code are required");
-          }
-
-          const user = await userService.findUserByPhone(credentials.phone);
-          if (!user) {
-            throw new Error("User not found");
-          }
-
-          if (!user.phoneVerified) {
-            throw new Error("Phone number is not verified");
-          }
-
-          const isCodeValid = await verifyPhoneCode(
-            credentials.phone,
-            credentials.code
-          );
-          if (!isCodeValid) {
-            throw new Error("Invalid or expired verification code");
-          }
-
-          return {
-            id: user.id,
-            name: user.name,
-            phone: user.phone,
-            role: user.role,
-          };
-        } catch (error) {
-          console.error("Auth error:", error);
-          throw error;
-        }
-      },
-    }),
-  ],
+  providers,
   callbacks: {
     async signIn({ user, account }) {
-      if (account?.provider === "google" || account?.provider === "facebook") {
-        try {
-          // Check if user already exists
-          const existingUser = await userService.findUserByEmail(user.email);
-
-          if (!existingUser) {
-            // Create new user if doesn't exist
-            await prisma.user.create({
-              data: {
-                email: user.email,
-                emailVerified: true,
-                phoneVerified: false,
-                language: "en",
-              },
-            });
-          }
-          return true;
-        } catch (error) {
-          console.error("Error in signIn callback:", error);
-          return false;
+      if (["google", "facebook"].includes(account?.provider)) {
+        const existingUser = await userService.findUserByEmail(user.email);
+        if (!existingUser) {
+          await prisma.user.create({
+            data: {
+              email: user.email,
+              emailVerified: true,
+              phoneVerified: false,
+              language: "en",
+            },
+          });
         }
       }
       return true;
     },
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        token.role = user.role;
-        token.phone = user.phone;
+        const userFromDb = await getUserByEmailOrPhone({
+          email: user.email,
+          phone: user.phone,
+        });
+        if (userFromDb) {
+          Object.assign(token, {
+            id: userFromDb.id,
+            role: userFromDb.role,
+            trainerProfile: userFromDb.trainerProfile,
+            clientProfile: userFromDb.clientProfile,
+          });
+        } else {
+          Object.assign(token, { id: user.id, role: user.role });
+        }
         token.email = user.email;
+        token.phone = user.phone;
         token.firstName = user.firstName;
         token.lastName = user.lastName;
       }
-      if (!token.role && token.email) {
+      if (token.id) {
         const userFromDb = await prisma.user.findUnique({
-          where: { email: token.email },
-          select: {
-            id: true,
-            role: true,
-            phone: true,
-          },
+          where: { id: token.id },
+          select: { role: true, trainerProfile: true, clientProfile: true },
         });
         if (userFromDb) {
-          token.id = userFromDb.id;
-          token.role = userFromDb.role;
-          token.phone = userFromDb.phone;
+          Object.assign(token, userFromDb);
         }
       }
       return token;
     },
     async session({ session, token }) {
       if (token) {
-        let userFromDb = null;
-        if (token.email) {
-          userFromDb = await prisma.user.findUnique({
-            where: { email: token.email },
-            select: {
-              id: true,
-              role: true,
-              email: true,
-              phone: true,
-            },
-          });
-        } else if (token.phone) {
-          userFromDb = await prisma.user.findUnique({
-            where: { phone: token.phone },
-            select: {
-              id: true,
-              role: true,
-              email: true,
-              phone: true,
-            },
-          });
-        }
+        const userFromDb = await getUserByEmailOrPhone({
+          email: token.email,
+          phone: token.phone,
+        });
         if (userFromDb) {
-          session.user.id = userFromDb.id;
-          session.user.role = userFromDb.role;
-          session.user.email = userFromDb.email;
-          session.user.phone = userFromDb.phone;
+          Object.assign(session.user, {
+            id: userFromDb.id,
+            role: userFromDb.role,
+            email: userFromDb.email,
+            phone: userFromDb.phone,
+            trainerProfile: userFromDb.trainerProfile,
+            clientProfile: userFromDb.clientProfile,
+          });
         } else {
-          // fallback na token
-          session.user.id = token.id;
-          session.user.role = token.role;
-          session.user.email = token.email;
-          session.user.phone = token.phone;
+          Object.assign(session.user, {
+            id: token.id,
+            role: token.role,
+            email: token.email,
+            phone: token.phone,
+          });
         }
         session.user.firstName = token.firstName;
         session.user.lastName = token.lastName;
@@ -237,5 +196,4 @@ export const authConfig = {
   secret: process.env.AUTH_SECRET,
 };
 
-// Export for App Router
 export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);

@@ -1,8 +1,10 @@
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 
 export function useTrainerRegistration() {
   const router = useRouter();
+  const { update } = useSession();
   const [formData, setFormData] = useState({
     // Personal Information
     firstName: "",
@@ -184,7 +186,6 @@ export function useTrainerRegistration() {
       }
     });
     // Debug: logaj certifikate i fajlove
-    console.log("Certifikati za upload:", formData.certifications);
     // 2. Prvo uploadaj slike/certifikate
     let uploadedUrls = {};
     const hasFilesToUpload =
@@ -202,29 +203,16 @@ export function useTrainerRegistration() {
       }
       uploadedUrls = await uploadRes.json();
     }
-    // 3. Pripremi podatke za kreiranje profila
+    // 3. Pripremi podatke za API
     const trainerData = {
       ...formData,
       profileImage: uploadedUrls.profileImage || formData.profileImage,
       certifications: formData.certifications.map((cert, i) => ({
-        name: cert.name,
-        issuer: cert.issuer,
-        expiryDate: cert.expiryDate,
-        description: cert.description,
-        documents:
-          uploadedUrls.certifications && uploadedUrls.certifications[i]
-            ? uploadedUrls.certifications[i].map((doc) => ({
-                url: doc.url,
-                originalName: doc.originalName,
-                mimetype: doc.mimetype,
-              }))
-            : [],
+        ...cert,
+        documents: uploadedUrls[`certifications[${i}]`] || [],
       })),
-      currency: formData.currency || "EUR", // default to EUR if not set
     };
-    // Debug: logaj podatke za backend
-    console.log("Podaci za backend:", trainerData);
-    // 4. Pošalji podatke na backend za kreiranje profila
+    // 4. Pošalji podatke na backend
     const res = await fetch("/api/users/trainer", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -236,8 +224,8 @@ export function useTrainerRegistration() {
       setLoading(false);
       return;
     }
-    setLoading(false);
-    // 5. Redirect ako je sve prošlo
+    // 5. Refresh session and redirect to dashboard on success
+    await update();
     router.push("/trainer/dashboard");
   };
 

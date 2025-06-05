@@ -1,8 +1,10 @@
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 
 export function useClientRegistration() {
   const router = useRouter();
+  const { update } = useSession();
   const [formData, setFormData] = useState({
     // Personal Information
     firstName: "",
@@ -194,7 +196,8 @@ export function useClientRegistration() {
         return;
       }
 
-      // 5. Redirect to dashboard on success
+      // 5. Refresh session and redirect to dashboard on success
+      await update();
       router.push("/client/dashboard");
     } catch (error) {
       setErrors({ general: "Error: " + error.message });
