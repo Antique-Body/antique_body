@@ -1,5 +1,5 @@
 import { convertToEUR } from "../../../utils/currency";
-import { userService } from "../services";
+import { trainerService } from "../services";
 
 import { auth } from "#/auth";
 
@@ -34,7 +34,7 @@ export async function POST(req) {
       }
     }
 
-    const trainer = await userService.createTrainerWithDetails(
+    const trainer = await trainerService.createTrainerWithDetails(
       body,
       session.user.id
     );
@@ -54,7 +54,7 @@ export async function GET() {
         status: 401,
       });
     }
-    const trainer = await userService.getTrainerProfileByUserId(
+    const trainer = await trainerService.getTrainerProfileByUserId(
       session.user.id
     );
     if (!trainer) {

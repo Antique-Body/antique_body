@@ -113,7 +113,7 @@ CREATE TABLE `TrainerProfile` (
 -- CreateTable
 CREATE TABLE `TrainerSpecialty` (
     `id` VARCHAR(191) NOT NULL,
-    `trainerInfoId` VARCHAR(191) NOT NULL,
+    `trainerProfileId` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -124,7 +124,7 @@ CREATE TABLE `TrainerSpecialty` (
 -- CreateTable
 CREATE TABLE `TrainerLanguage` (
     `id` VARCHAR(191) NOT NULL,
-    `trainerInfoId` VARCHAR(191) NOT NULL,
+    `trainerProfileId` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -135,7 +135,7 @@ CREATE TABLE `TrainerLanguage` (
 -- CreateTable
 CREATE TABLE `TrainerEnvironment` (
     `id` VARCHAR(191) NOT NULL,
-    `trainerInfoId` VARCHAR(191) NOT NULL,
+    `trainerProfileId` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -146,7 +146,7 @@ CREATE TABLE `TrainerEnvironment` (
 -- CreateTable
 CREATE TABLE `TrainerType` (
     `id` VARCHAR(191) NOT NULL,
-    `trainerInfoId` VARCHAR(191) NOT NULL,
+    `trainerProfileId` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -157,7 +157,7 @@ CREATE TABLE `TrainerType` (
 -- CreateTable
 CREATE TABLE `Certification` (
     `id` VARCHAR(191) NOT NULL,
-    `trainerInfoId` VARCHAR(191) NOT NULL,
+    `trainerProfileId` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
     `issuer` VARCHAR(191) NULL,
     `expiryDate` DATETIME(3) NULL,
@@ -249,19 +249,19 @@ ALTER TABLE `PhoneVerification` ADD CONSTRAINT `PhoneVerification_userId_fkey` F
 ALTER TABLE `TrainerProfile` ADD CONSTRAINT `TrainerProfile_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `TrainerSpecialty` ADD CONSTRAINT `TrainerSpecialty_trainerInfoId_fkey` FOREIGN KEY (`trainerInfoId`) REFERENCES `TrainerProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `TrainerSpecialty` ADD CONSTRAINT `TrainerSpecialty_trainerProfileId_fkey` FOREIGN KEY (`trainerProfileId`) REFERENCES `TrainerProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `TrainerLanguage` ADD CONSTRAINT `TrainerLanguage_trainerInfoId_fkey` FOREIGN KEY (`trainerInfoId`) REFERENCES `TrainerProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `TrainerLanguage` ADD CONSTRAINT `TrainerLanguage_trainerProfileId_fkey` FOREIGN KEY (`trainerProfileId`) REFERENCES `TrainerProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `TrainerEnvironment` ADD CONSTRAINT `TrainerEnvironment_trainerInfoId_fkey` FOREIGN KEY (`trainerInfoId`) REFERENCES `TrainerProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `TrainerEnvironment` ADD CONSTRAINT `TrainerEnvironment_trainerProfileId_fkey` FOREIGN KEY (`trainerProfileId`) REFERENCES `TrainerProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `TrainerType` ADD CONSTRAINT `TrainerType_trainerInfoId_fkey` FOREIGN KEY (`trainerInfoId`) REFERENCES `TrainerProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `TrainerType` ADD CONSTRAINT `TrainerType_trainerProfileId_fkey` FOREIGN KEY (`trainerProfileId`) REFERENCES `TrainerProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Certification` ADD CONSTRAINT `Certification_trainerInfoId_fkey` FOREIGN KEY (`trainerInfoId`) REFERENCES `TrainerProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `Certification` ADD CONSTRAINT `Certification_trainerProfileId_fkey` FOREIGN KEY (`trainerProfileId`) REFERENCES `TrainerProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `CertificationDocument` ADD CONSTRAINT `CertificationDocument_certificationId_fkey` FOREIGN KEY (`certificationId`) REFERENCES `Certification`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

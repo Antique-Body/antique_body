@@ -42,7 +42,7 @@ model User {
   updatedAt             DateTime  @updatedAt
   accounts              Account[]
   sessions              Session[]
-  trainerInfo           TrainerProfile?
+  trainerProfile        TrainerProfile?
   clientProfile         ClientProfile?
   emailVerifications    EmailVerification[]
   phoneVerifications    PhoneVerification[]
@@ -144,51 +144,51 @@ model TrainerProfile {
 
 model TrainerSpecialty {
   id                String   @id @default(cuid())
-  trainerInfoId     String
+  trainerProfileId     String
   name              String
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
   // Relations
-  trainerInfo       TrainerProfile @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  trainerProfile       TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
 }
 
 model TrainerLanguage {
   id                String   @id @default(cuid())
-  trainerInfoId     String
+  trainerProfileId     String
   name              String
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
   // Relations
-  trainerInfo       TrainerProfile @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  trainerProfile       TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
 }
 
 model TrainerEnvironment {
   id                String   @id @default(cuid())
-  trainerInfoId     String
+  trainerProfileId     String
   name              String
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
   // Relations
-  trainerInfo       TrainerProfile @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  trainerProfile       TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
 }
 
 model TrainerType {
   id                String   @id @default(cuid())
-  trainerInfoId     String
+  trainerProfileId     String
   name              String
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
   // Relations
-  trainerInfo       TrainerProfile @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  trainerProfile       TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
 }
 
 model Certification {
   id            String   @id @default(cuid())
-  trainerInfoId String
+  trainerProfileId String
   name          String
   issuer        String?
   expiryDate    DateTime?
@@ -196,7 +196,7 @@ model Certification {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  trainerInfo   TrainerProfile @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  trainerProfile   TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
   documents     CertificationDocument[]
 }
 

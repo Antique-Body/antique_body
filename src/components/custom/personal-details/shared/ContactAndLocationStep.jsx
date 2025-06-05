@@ -151,7 +151,7 @@ export const ContactAndLocationStep = ({
                   onChange={handleChange}
                   options={[
                     { value: "BAM", label: "BAM - Bosnian Mark" },
-                    { value: "DIN", label: "DIN - Serbian Dinar" },
+                    { value: "RSD", label: "RSD - Serbian Dinar" },
                     { value: "EUR", label: "EUR - Euro" },
                     { value: "USD", label: "USD - US Dollar" },
                     { value: "GBP", label: "GBP - British Pound" },
