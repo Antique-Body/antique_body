@@ -1,0 +1,1 @@
+export { TrainerProfile } from "./TrainerProfile";
