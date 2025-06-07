@@ -13,24 +13,26 @@ function isPageNavigation(request) {
   return request.headers.get("accept")?.includes("text/html");
 }
 
-function getRedirectUrl(role, token, pathname, url) {
-  if (!role) return pathname === "/select-role" ? null : "/select-role";
-  if (role === "client") {
-    if (!token.clientProfile)
-      return pathname === "/client/personal-details"
-        ? null
-        : "/client/personal-details";
-    return pathname === "/client/dashboard" ? null : "/client/dashboard";
-  }
-  if (role === "trainer") {
-    if (!token.trainerProfile)
-      return pathname === "/trainer/personal-details"
-        ? null
-        : "/trainer/personal-details";
-    return pathname === "/trainer/dashboard" ? null : "/trainer/dashboard";
-  }
-  return null;
-}
+// function getRedirectUrl(role, token, pathname, url) {
+//   if (!role) return pathname === "/select-role" ? null : "/select-role";
+//   if (role === "client") {
+//     if (!token.clientProfile)
+//       return pathname === "/client/personal-details"
+//         ? null
+//         : "/client/personal-details";
+//     return pathname === "/client/dashboard" ? null : "/client/dashboard";
+//   }
+//   if (role === "trainer") {
+//     if (!token.trainerProfile)
+//       return pathname === "/trainer/personal-details"
+//         ? null
+//         : "/trainer/personal-details";
+//     return pathname === "/trainer/dashboard"
+//       ? null
+//       : "/trainer/dashboard/newclients";
+//   }
+//   return null;
+// }
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
@@ -48,18 +50,18 @@ export async function middleware(request) {
 
   if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
 
-  if (AUTH_PATHS.includes(pathname) && token?.role) {
-    const redirect = getRedirectUrl(token.role, token, pathname, request.url);
-    if (redirect) return NextResponse.redirect(new URL(redirect, request.url));
-    return NextResponse.next();
-  }
+  // if (AUTH_PATHS.includes(pathname) && token?.role) {
+  //   const redirect = getRedirectUrl(token.role, token, pathname, request.url);
+  //   if (redirect) return NextResponse.redirect(new URL(redirect, request.url));
+  //   return NextResponse.next();
+  // }
 
   if (AUTH_PATHS.includes(pathname)) return NextResponse.next();
 
   if (!token) return NextResponse.redirect(new URL("/auth/login", request.url));
 
-  const redirect = getRedirectUrl(token.role, token, pathname, request.url);
-  if (redirect) return NextResponse.redirect(new URL(redirect, request.url));
+  // const redirect = getRedirectUrl(token.role, token, pathname, request.url);
+  // if (redirect) return NextResponse.redirect(new URL(redirect, request.url));
 
   return NextResponse.next();
 }
