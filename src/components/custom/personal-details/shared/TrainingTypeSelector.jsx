@@ -3,48 +3,8 @@ import { Icon } from "@iconify/react";
 
 import { Button } from "@/components/common/Button";
 import { ErrorIcon } from "@/components/common/Icons";
-
-const trainingEnvironments = [
-  {
-    id: "indoor",
-    label: "Indoor Training",
-    icon: "mdi:home-variant",
-    description: "Gym, studio, home workouts",
-  },
-  {
-    id: "outdoor",
-    label: "Outdoor Training",
-    icon: "mdi:tree",
-    description: "Parks, beaches, outdoor spaces",
-  },
-  {
-    id: "both",
-    label: "Both Indoor & Outdoor",
-    icon: "mdi:sync",
-    description: "Flexible training locations",
-  },
-];
-
-const trainingTypes = [
-  { id: "personal", label: "1-on-1 Personal Training", icon: "mdi:account" },
-  {
-    id: "small_group",
-    label: "Small Group Training (2-5)",
-    icon: "mdi:account-group",
-  },
-  {
-    id: "group_classes",
-    label: "Group Classes (6+)",
-    icon: "mdi:account-multiple",
-  },
-  { id: "online", label: "Online/Virtual Training", icon: "mdi:laptop" },
-  { id: "corporate", label: "Corporate Wellness", icon: "mdi:office-building" },
-  {
-    id: "sports_specific",
-    label: "Sports-Specific Training",
-    icon: "mdi:soccer",
-  },
-];
+import { TRAINING_ENVIRONMENTS } from "@/enums/specialties";
+import { TRAINING_TYPES } from "@/enums/trainingTypes";
 
 export const TrainingTypeSelector = ({
   selectedEnvironment,
@@ -65,7 +25,7 @@ export const TrainingTypeSelector = ({
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {trainingEnvironments.map((env) => (
+        {TRAINING_ENVIRONMENTS.map((env) => (
           <Button
             key={env.id}
             variant={
@@ -103,7 +63,7 @@ export const TrainingTypeSelector = ({
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {trainingTypes.map((type) => (
+        {TRAINING_TYPES.map((type) => (
           <Button
             key={type.id}
             variant={
@@ -118,7 +78,7 @@ export const TrainingTypeSelector = ({
             }`}
           >
             <div className="flex items-center gap-3">
-              <Icon icon={type.icon} className="text-xl" />
+              <Icon icon={type.icon || "mdi:star"} className="text-xl" />
               <span className="font-medium text-sm">{type.label}</span>
               {selectedTypes.includes(type.id) && (
                 <Icon
@@ -151,7 +111,7 @@ export const TrainingTypeSelector = ({
             <p>
               <span className="text-gray-400">Environment:</span>{" "}
               {
-                trainingEnvironments.find(
+                TRAINING_ENVIRONMENTS.find(
                   (env) => env.id === selectedEnvironment
                 )?.label
               }
@@ -163,7 +123,7 @@ export const TrainingTypeSelector = ({
               {selectedTypes
                 .map(
                   (typeId) =>
-                    trainingTypes.find((type) => type.id === typeId)?.label
+                    TRAINING_TYPES.find((type) => type.id === typeId)?.label
                 )
                 .join(", ")}
             </p>

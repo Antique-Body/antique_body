@@ -92,7 +92,7 @@ export const PersonalDetailsStep = ({
         <FormField
           label="City"
           name="location.city"
-          value={formData.location.city}
+          value={formData.location?.city || ""}
           onChange={onChange}
           placeholder="Your city"
           required
@@ -101,7 +101,7 @@ export const PersonalDetailsStep = ({
         <FormField
           label="State/Province"
           name="location.state"
-          value={formData.location.state}
+          value={formData.location?.state || ""}
           onChange={onChange}
           placeholder="Your state or province"
           required
@@ -111,7 +111,7 @@ export const PersonalDetailsStep = ({
       <FormField
         label="Country"
         name="location.country"
-        value={formData.location.country}
+        value={formData.location?.country || ""}
         onChange={onChange}
         placeholder="Your country"
         required

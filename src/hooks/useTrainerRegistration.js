@@ -20,8 +20,8 @@ export function useTrainerRegistration() {
     trainingEnvironment: "",
     trainingTypes: [],
     // Contact and Location
-    email: "",
-    phone: "",
+    contactEmail: "",
+    contactPhone: "",
     profileImage: null,
     location: {
       city: "",
@@ -35,14 +35,13 @@ export function useTrainerRegistration() {
     yearsExperience: "",
     trainingVenues: [""],
     sports: [],
-    contactEmail: "",
-    contactPhone: "",
     currency: "EUR",
   });
   const [errors, setErrors] = useState({});
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
+  console.log(formData, "fpr,dDate");
   // Handle form input changes
   const handleChange = (e) => {
     if (!e.target || typeof e.target.name !== "string") return;
@@ -230,6 +229,7 @@ export function useTrainerRegistration() {
   };
 
   // Move to next step
+  console.log(errors, "errors");
   const goToNextStep = (e) => {
     e.preventDefault();
     if (validateStep(step)) {

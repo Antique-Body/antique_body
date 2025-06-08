@@ -4,37 +4,12 @@ import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
-
-const specialtyOptions = [
-  { id: "weight-loss", label: "Weight Loss", icon: "mdi:scale-bathroom" },
-  { id: "muscle-building", label: "Muscle Building", icon: "mdi:arm-flex" },
-  { id: "strength-training", label: "Strength Training", icon: "mdi:dumbbell" },
-  { id: "cardio-fitness", label: "Cardio Fitness", icon: "mdi:heart-pulse" },
-  {
-    id: "functional-training",
-    label: "Functional Training",
-    icon: "mdi:human-handsup",
-  },
-  { id: "sports-performance", label: "Sports Performance", icon: "mdi:trophy" },
-  { id: "rehabilitation", label: "Rehabilitation", icon: "mdi:medical-bag" },
-  { id: "yoga-pilates", label: "Yoga/Pilates", icon: "mdi:yoga" },
-  { id: "crossfit", label: "CrossFit", icon: "mdi:weight-lifter" },
-  { id: "bodybuilding", label: "Bodybuilding", icon: "mdi:account-muscle" },
-  { id: "powerlifting", label: "Powerlifting", icon: "mdi:weight" },
-  { id: "martial-arts", label: "Martial Arts", icon: "mdi:karate" },
-  { id: "dance-fitness", label: "Dance Fitness", icon: "mdi:dance-ballroom" },
-  {
-    id: "senior-fitness",
-    label: "Senior Fitness",
-    icon: "mdi:account-supervisor",
-  },
-  { id: "youth-training", label: "Youth Training", icon: "mdi:account-child" },
-];
+import { SPECIALTIES } from "@/enums/specialties";
 
 export const SpecialtySelector = ({ selectedSpecialties = [], onChange }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredSpecialties = specialtyOptions.filter((specialty) =>
+  const filteredSpecialties = SPECIALTIES.filter((specialty) =>
     specialty.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -48,7 +23,7 @@ export const SpecialtySelector = ({ selectedSpecialties = [], onChange }) => {
 
   const getSelectedSpecialtyLabels = () =>
     selectedSpecialties
-      .map((id) => specialtyOptions.find((spec) => spec.id === id)?.label)
+      .map((id) => SPECIALTIES.find((spec) => spec.id === id)?.label)
       .filter(Boolean);
 
   return (
@@ -84,7 +59,7 @@ export const SpecialtySelector = ({ selectedSpecialties = [], onChange }) => {
               }`}
             >
               <Icon
-                icon={specialty.icon}
+                icon={specialty.icon || "mdi:star"}
                 width={16}
                 height={16}
                 className={isSelected ? "text-white" : "text-gray-400"}

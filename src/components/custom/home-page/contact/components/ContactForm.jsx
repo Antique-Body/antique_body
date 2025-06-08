@@ -59,7 +59,7 @@ export function ContactForm() {
             type="email"
             name="email"
             label="Email"
-            value={formData.email}
+            value={formData.contactEmail}
             onChange={handleChange}
             placeholder="john@example.com"
             backgroundStyle="transparent"

@@ -43,6 +43,25 @@ async function createClientWithDetails(formData, userId) {
   if (!location.city || !location.state || !location.country) {
     throw new Error("All location fields are required.");
   }
+
+  // Find or create location
+  let dbLocation = await prisma.location.findFirst({
+    where: {
+      city: location.city,
+      state: location.state,
+      country: location.country,
+    },
+  });
+  if (!dbLocation) {
+    dbLocation = await prisma.location.create({
+      data: {
+        city: location.city,
+        state: location.state,
+        country: location.country,
+      },
+    });
+  }
+
   const data = {
     userId,
     firstName: formData.firstName,
@@ -56,9 +75,7 @@ async function createClientWithDetails(formData, userId) {
     primaryGoal: formData.primaryGoal,
     secondaryGoal: formData.secondaryGoal?.trim() || null,
     goalDescription: formData.goalDescription?.trim() || null,
-    city: location.city,
-    state: location.state,
-    country: location.country,
+    locationId: dbLocation.id,
     profileImage: formData.profileImage?.trim() || null,
     bio: formData.bio?.trim() || null,
     medicalConditions: formData.medicalConditions?.trim() || null,
@@ -79,6 +96,11 @@ async function createClientWithDetails(formData, userId) {
   try {
     const client = await prisma.clientProfile.create({
       data,
+      include: {
+        location: true,
+        languages: true,
+        preferredActivities: true,
+      },
     });
     return client;
   } catch (error) {
@@ -93,6 +115,7 @@ async function getClientProfileByUserId(userId) {
     include: {
       languages: true,
       preferredActivities: true,
+      location: true,
     },
   });
 }
