@@ -41,8 +41,6 @@ export const LocationSelector = ({
     return unique;
   };
 
-  console.log(errors, "errors");
-
   // Preporučeni gradovi (puni naziv iz Geoapify)
 
   return (
@@ -58,7 +56,7 @@ export const LocationSelector = ({
           label="City"
           name="location.city"
           type="searchableSelect"
-          value={formData.location.city}
+          value={formData.location?.city || ""}
           asyncSearch={fetchGeoapifySuggestions}
           onSelectOption={(option) => {
             onChange({
@@ -85,7 +83,7 @@ export const LocationSelector = ({
             label="State/Province"
             name="location.state"
             type="searchableSelect"
-            value={formData.location.state}
+            value={formData.location?.state || ""}
             asyncSearch={fetchStateSuggestions}
             onSelectOption={(option) => {
               onChange({
@@ -101,7 +99,7 @@ export const LocationSelector = ({
             label="Country"
             name="location.country"
             type="searchableSelect"
-            value={formData.location.country}
+            value={formData.location?.country || ""}
             asyncSearch={fetchCountrySuggestions}
             onSelectOption={(option) => {
               onChange({
@@ -116,7 +114,7 @@ export const LocationSelector = ({
       </div>
 
       {/* Location preview */}
-      {formData.location.city && formData.location.country && (
+      {formData.location?.city && formData.location?.country && (
         <div className="mt-4 p-3 bg-[rgba(255,107,0,0.1)] border border-[#FF6B00]/30 rounded-lg">
           <div className="flex items-center gap-2 text-[#FF6B00]">
             <Icon icon="mdi:map-marker" width={16} height={16} />

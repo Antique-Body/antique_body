@@ -33,9 +33,6 @@ async function createTrainerWithDetails(formData, userId) {
       throw new Error(`Field '${field}' is required.`);
     }
   }
-  if (!formData.email && !formData.phone) {
-    throw new Error("At least one of 'email' or 'phone' is required.");
-  }
   if (
     formData.pricingType === "fixed" ||
     formData.pricingType === "package_deals"
@@ -50,6 +47,25 @@ async function createTrainerWithDetails(formData, userId) {
   if (!location.city || !location.state || !location.country) {
     throw new Error("All location fields are required.");
   }
+
+  // Find or create location
+  let dbLocation = await prisma.location.findFirst({
+    where: {
+      city: location.city,
+      state: location.state,
+      country: location.country,
+    },
+  });
+  if (!dbLocation) {
+    dbLocation = await prisma.location.create({
+      data: {
+        city: location.city,
+        state: location.state,
+        country: location.country,
+      },
+    });
+  }
+
   const trainer = await prisma.trainerProfile.create({
     data: {
       userId,
@@ -60,9 +76,7 @@ async function createTrainerWithDetails(formData, userId) {
       trainingSince: Number(formData.trainingSince),
       profileImage: formData.profileImage,
       professionalBio: formData.bio || null,
-      city: location.city,
-      state: location.state,
-      country: location.country,
+      locationId: dbLocation.id,
       pricingType: formData.pricingType,
       pricePerSession:
         formData.pricingType === "fixed" ||
@@ -70,6 +84,8 @@ async function createTrainerWithDetails(formData, userId) {
           ? Number(formData.pricePerSession)
           : null,
       currency: formData.currency,
+      contactEmail: formData.contactEmail || null,
+      contactPhone: formData.contactPhone || null,
       specialties: {
         create: formData.specialties.map((name) => ({ name })),
       },
@@ -103,12 +119,40 @@ async function createTrainerWithDetails(formData, userId) {
             }
           : undefined,
     },
+    include: {
+      location: true,
+      specialties: true,
+      languages: true,
+      trainingEnvironments: true,
+      trainingTypes: true,
+      certifications: true,
+    },
   });
   return trainer;
 }
 
+async function createTrainerInfo(trainerProfileId, infoData) {
+  return await prisma.trainerInfo.create({
+    data: {
+      trainerProfileId,
+      specialty: infoData.specialty || null,
+      experience: infoData.experience || null,
+      rating: infoData.rating || null,
+      totalSessions: infoData.totalSessions || null,
+      totalEarnings: infoData.totalEarnings || null,
+      upcomingSessions: infoData.upcomingSessions || null,
+    },
+  });
+}
+
+async function getTrainerInfoByProfileId(trainerProfileId) {
+  return await prisma.trainerInfo.findUnique({
+    where: { trainerProfileId },
+  });
+}
+
 async function getTrainerProfileByUserId(userId) {
-  return await prisma.trainerProfile.findUnique({
+  const profile = await prisma.trainerProfile.findUnique({
     where: { userId },
     include: {
       certifications: {
@@ -120,11 +164,42 @@ async function getTrainerProfileByUserId(userId) {
       languages: true,
       trainingEnvironments: true,
       trainingTypes: true,
+      trainerInfo: true,
+      location: true,
     },
   });
+  return profile;
+}
+
+async function getTrainerInfoByUserId(userId) {
+  // Prvo pronađi profil trenera
+  const profile = await prisma.trainerProfile.findUnique({
+    where: { userId },
+  });
+  if (!profile) return null;
+  // Zatim pronađi TrainerInfo i ugniježdi kompletan TrainerProfile sa svim relacijama
+  const trainerInfo = await prisma.trainerInfo.findUnique({
+    where: { trainerProfileId: profile.id },
+    include: {
+      trainerProfile: {
+        include: {
+          certifications: { include: { documents: true } },
+          specialties: true,
+          languages: true,
+          trainingEnvironments: true,
+          trainingTypes: true,
+          location: true,
+        },
+      },
+    },
+  });
+  return trainerInfo;
 }
 
 export const trainerService = {
   createTrainerWithDetails,
   getTrainerProfileByUserId,
+  createTrainerInfo,
+  getTrainerInfoByProfileId,
+  getTrainerInfoByUserId,
 };

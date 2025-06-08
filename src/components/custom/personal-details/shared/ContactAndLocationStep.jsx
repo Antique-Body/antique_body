@@ -16,8 +16,8 @@ export const ContactAndLocationStep = ({
     formData,
     onChange,
     fields: [
-      { formKey: "email", sessionKey: "email" },
-      { formKey: "phone", sessionKey: "phone" },
+      { formKey: "contactEmail", sessionKey: "email" },
+      { formKey: "contactPhone", sessionKey: "phone" },
     ],
   });
 
@@ -55,22 +55,22 @@ export const ContactAndLocationStep = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             label="Email"
-            name="email"
+            name="contactEmail"
             type="email"
-            value={formData.email}
+            value={formData.contactEmail}
             onChange={onChange}
             placeholder="your.email@example.com"
-            error={errors.email}
+            error={errors.contactEmail}
           />
 
           <FormField
             label="Phone Number"
-            name="phone"
+            name="contactPhone"
             type="tel"
-            value={formData.phone}
+            value={formData.contactPhone}
             onChange={onChange}
             placeholder="+387 XX XXX XXX"
-            error={errors.phone}
+            error={errors.contactPhone}
           />
         </div>
       </FormSection>

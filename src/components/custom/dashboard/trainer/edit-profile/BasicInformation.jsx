@@ -5,6 +5,8 @@ import Image from "next/image";
 import { FormField } from "@/components/common";
 import { Button } from "@/components/common/Button";
 import { SectionTitle } from "@/components/custom/dashboard/shared";
+import { LocationSelector } from "@/components/custom/personal-details/shared/LocationSelector";
+import { SpecialtySelector } from "@/components/custom/personal-details/shared/SpecialtySelector";
 
 // Animation variants
 const fadeInUp = {
@@ -82,135 +84,149 @@ export const BasicInformation = ({
       </div>
     </motion.div>
 
-    <motion.div
-      variants={fadeInUp}
-      className="grid grid-cols-1 gap-4 md:grid-cols-2"
-    >
-      <FormField
-        label="Full Name"
-        name="name"
-        value={trainerData.name}
-        onChange={handleChange}
-        placeholder="Your full name"
-        required
-        backgroundStyle="semi-transparent"
-      />
+    {/* Personal Info */}
+    <motion.div variants={fadeInUp}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormField
+          label="First Name"
+          name="firstName"
+          value={trainerData.firstName || ""}
+          onChange={handleChange}
+          placeholder="Your first name"
+          required
+          backgroundStyle="semi-transparent"
+        />
+        <FormField
+          label="Last Name"
+          name="lastName"
+          value={trainerData.lastName || ""}
+          onChange={handleChange}
+          placeholder="Your last name"
+          required
+          backgroundStyle="semi-transparent"
+        />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <FormField
+          label="Date of Birth"
+          name="dateOfBirth"
+          type="date"
+          value={trainerData.dateOfBirth || ""}
+          onChange={handleChange}
+          required
+          backgroundStyle="semi-transparent"
+        />
+        <FormField
+          label="Gender"
+          name="gender"
+          type="select"
+          value={trainerData.gender || ""}
+          onChange={handleChange}
+          options={[
+            { value: "", label: "Select gender" },
+            { value: "male", label: "Male" },
+            { value: "female", label: "Female" },
+          ]}
+          required
+          backgroundStyle="semi-transparent"
+        />
+      </div>
+    </motion.div>
 
-      <FormField
-        label="Specialty"
-        name="specialty"
-        value={trainerData.specialty}
-        onChange={handleChange}
-        placeholder="Your main area of specialization"
-        required
-        backgroundStyle="semi-transparent"
+    {/* Specialty Selector */}
+    <motion.div variants={fadeInUp}>
+      <SpecialtySelector
+        selectedSpecialties={trainerData.specialties || []}
+        onChange={(specialties) =>
+          handleChange({
+            target: { name: "specialties", value: specialties },
+          })
+        }
       />
     </motion.div>
 
-    <motion.div
-      variants={fadeInUp}
-      className="grid grid-cols-1 gap-4 md:grid-cols-2"
-    >
-      <FormField
-        label="Experience"
-        name="experience"
-        value={trainerData.experience}
-        onChange={handleChange}
-        placeholder="e.g. 5 years"
-        required
-        backgroundStyle="semi-transparent"
-      />
-
-      <FormField
-        label="Hourly Rate ($)"
-        name="hourlyRate"
-        type="number"
-        value={trainerData.hourlyRate}
-        onChange={handleChange}
-        placeholder="Your hourly rate"
-        required
-        backgroundStyle="semi-transparent"
-      />
-    </motion.div>
-
-    <motion.h3
-      variants={fadeInUp}
-      className="mb-4 mt-8 bg-gradient-to-r from-[#FF7800] to-white bg-clip-text text-lg font-medium text-transparent"
-    >
-      Contact Information
-    </motion.h3>
-
-    <motion.div
-      variants={fadeInUp}
-      className="grid grid-cols-1 gap-4 md:grid-cols-2"
-    >
-      <div className="group relative overflow-hidden rounded-lg border border-[#333]">
+    {/* Contact Info */}
+    <motion.div variants={fadeInUp}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           label="Email"
-          name="contact.email"
+          name="contactEmail"
           type="email"
-          value={trainerData.contact.email}
+          value={trainerData.contactEmail || ""}
           onChange={handleChange}
           placeholder="Your contact email"
           required
           backgroundStyle="semi-transparent"
         />
-        <div className="absolute bottom-0 left-0 h-1 w-0 bg-gradient-to-r from-[#FF7800] to-[#FF9A00] transition-all duration-500 group-hover:w-full"></div>
-      </div>
-
-      <div className="group relative overflow-hidden rounded-lg border border-[#333]">
         <FormField
           label="Phone"
-          name="contact.phone"
-          value={trainerData.contact.phone}
+          name="contactPhone"
+          value={trainerData.contactPhone || ""}
           onChange={handleChange}
           placeholder="Your contact phone"
           backgroundStyle="semi-transparent"
         />
-        <div className="absolute bottom-0 left-0 h-1 w-0 bg-gradient-to-r from-[#FF7800] to-[#FF9A00] transition-all duration-500 group-hover:w-full"></div>
       </div>
     </motion.div>
 
-    <motion.h3
-      variants={fadeInUp}
-      className="mb-4 mt-8 bg-gradient-to-r from-[#FF7800] to-white bg-clip-text text-lg font-medium text-transparent"
-    >
-      Location
-    </motion.h3>
-
-    <motion.div
-      variants={fadeInUp}
-      className="grid grid-cols-1 gap-4 md:grid-cols-3"
-    >
-      <FormField
-        label="City"
-        name="location.city"
-        value={trainerData.location.city}
+    {/* Location Selector */}
+    <motion.div variants={fadeInUp}>
+      <LocationSelector
+        formData={trainerData}
         onChange={handleChange}
-        placeholder="Your city"
-        required
-        backgroundStyle="semi-transparent"
+        errors={{}}
+        title="Location"
+        description="Where are you based? This helps clients find you."
       />
+    </motion.div>
 
-      <FormField
-        label="State/Province"
-        name="location.state"
-        value={trainerData.location.state}
-        onChange={handleChange}
-        placeholder="Your state/province"
-        required
-        backgroundStyle="semi-transparent"
-      />
-
-      <FormField
-        label="Country"
-        name="location.country"
-        value={trainerData.location.country}
-        onChange={handleChange}
-        placeholder="Your country"
-        required
-        backgroundStyle="semi-transparent"
-      />
+    {/* Pricing Section */}
+    <motion.div variants={fadeInUp}>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <FormField
+          label="Pricing Approach"
+          name="pricingType"
+          type="select"
+          value={trainerData.pricingType || ""}
+          onChange={handleChange}
+          options={[
+            { value: "", label: "Select pricing approach" },
+            { value: "fixed", label: "Fixed Rate - Set My Price" },
+            { value: "negotiable", label: "Negotiable - Will Discuss" },
+            { value: "package_deals", label: "Package Deals Available" },
+            { value: "contact_for_pricing", label: "Contact for Pricing" },
+            { value: "free_consultation", label: "Free Consultation First" },
+            { value: "prefer_not_to_say", label: "Prefer Not to Display" },
+          ]}
+          backgroundStyle="semi-transparent"
+        />
+        <FormField
+          label="Price per Session"
+          name="pricePerSession"
+          type="number"
+          value={trainerData.pricePerSession || ""}
+          onChange={handleChange}
+          placeholder="50"
+          min="0"
+          step="5"
+          backgroundStyle="semi-transparent"
+        />
+        <FormField
+          label="Currency"
+          name="currency"
+          type="select"
+          value={trainerData.currency || "EUR"}
+          onChange={handleChange}
+          options={[
+            { value: "BAM", label: "BAM - Bosnian Mark" },
+            { value: "RSD", label: "RSD - Serbian Dinar" },
+            { value: "EUR", label: "EUR - Euro" },
+            { value: "USD", label: "USD - US Dollar" },
+            { value: "GBP", label: "GBP - British Pound" },
+          ]}
+          backgroundStyle="semi-transparent"
+        />
+      </div>
     </motion.div>
 
     {/* Certifications Section */}

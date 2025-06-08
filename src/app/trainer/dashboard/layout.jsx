@@ -7,11 +7,12 @@ import { EffectBackground } from "@/components/background";
 import { BrandLogo } from "@/components/common/BrandLogo";
 import { DashboardTabs } from "@/components/custom/dashboard/shared/DashboardTabs";
 import { TrainerProfile } from "@/components/custom/dashboard/trainer/components";
+import { InfoBanner } from "@/components/custom/personal-details/shared/InfoBanner";
 
 export default function TrainerDashboardLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { data: _session } = useSession();
 
   // Map pathname to tab ID
   const getActiveTabFromPath = (path) => {
@@ -26,11 +27,29 @@ export default function TrainerDashboardLayout({ children }) {
   };
 
   const [activeTab, setActiveTab] = useState(getActiveTabFromPath(pathname));
+  const [trainerData, setTrainerData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // Update active tab when pathname changes
   useEffect(() => {
     setActiveTab(getActiveTabFromPath(pathname));
   }, [pathname]);
+
+  useEffect(() => {
+    async function fetchTrainer() {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/users/trainer");
+        const data = await res.json();
+        setTrainerData(data);
+      } catch {
+        setTrainerData(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchTrainer();
+  }, []);
 
   // Navigate to appropriate route when tab changes
   const handleTabChange = (tabId) => {
@@ -62,24 +81,8 @@ export default function TrainerDashboardLayout({ children }) {
     }
   };
 
-  // Sample data for the trainer dashboard
-  const trainerData = {
-    name: session?.user?.name || "Loading...",
-    specialty: "Football Conditioning Specialist",
-    avatarContent:
-      session?.user?.image ||
-      "https://ai-previews.123rf.com/ai-txt2img/600nwm/74143221-4fc9-47bd-a919-0c6d55da9cc5.jpg",
-    certifications: ["UEFA A License", "NSCA CSCS"],
-    experience: "8 years",
-    rating: 4.8,
-    clients: [
-      { id: 1, name: "John Doe", status: "active" },
-      { id: 2, name: "Jane Smith", status: "inactive" },
-      { id: 3, name: "Mike Johnson", status: "active" },
-    ],
-    totalSessions: 563,
-    totalEarnings: 12450,
-    upcomingSessions: 8,
+  const handleVerifyClick = () => {
+    router.push("/trainer/edit-profile");
   };
 
   // Get the count of unread messages
@@ -104,7 +107,32 @@ export default function TrainerDashboardLayout({ children }) {
 
         <div className="flex flex-col gap-6">
           {/* Trainer profile section (top) */}
-          <TrainerProfile trainerData={trainerData} />
+          {loading ? (
+            <div className="animate-pulse space-y-4">
+              <div className="h-8 bg-gray-700 rounded w-1/3" />
+              <div className="h-6 bg-gray-700 rounded w-1/2" />
+              <div className="h-32 bg-gray-800 rounded" />
+            </div>
+          ) : (
+            <TrainerProfile trainerData={trainerData.trainerProfile} />
+          )}
+
+          {/* Verification banner */}
+          <div className="mb-2 relative">
+            <InfoBanner
+              icon="mdi:shield-check"
+              title="Boost Your Visibility"
+              subtitle="Complete your profile to stand out and attract more clients. Verified trainers are more likely to be chosen."
+              variant="primary"
+              className="pr-36"
+            />
+            <button
+              onClick={handleVerifyClick}
+              className="absolute right-4 top-1/2 -translate-y-1/2 rounded-md bg-[#FF6B00] px-4 py-2 text-sm font-medium text-white hover:bg-[#FF6B00]/90 transition-colors"
+            >
+              Complete Profile
+            </button>
+          </div>
 
           {/* Tabs and main content section */}
           <div>

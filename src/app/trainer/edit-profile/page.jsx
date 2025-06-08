@@ -8,6 +8,7 @@ import { BackButton } from "@/components/common/BackButton";
 import { BrandLogo } from "@/components/common/BrandLogo";
 import { Button } from "@/components/common/Button";
 import { Card } from "@/components/common/Card";
+import { FullScreenLoader } from "@/components/common/FullScreenLoader";
 import {
   AnimatedTabContent,
   DashboardTabs,
@@ -42,66 +43,101 @@ const TrainerEditProfilePage = () => {
   const [saveIndicator, setSaveIndicator] = useState(false);
   const [formProgress, setFormProgress] = useState(20);
 
-  // Sample trainer data - in a real app this would come from an API
+  // Novo: loading state
+  const [loading, setLoading] = useState(true);
+
+  // Novo: inicijalni state je prazan dok ne dođe fetch
   const [trainerData, setTrainerData] = useState({
-    name: "Alex Miller",
-    specialty: "Football Conditioning Specialist",
-    certifications: ["UEFA A License", "NSCA CSCS"],
-    experience: "8 years",
-    hourlyRate: 75,
-    rating: 4.8,
-    proximity: "5 miles away",
-    description:
-      "Professional strength and conditioning coach with over 8 years of experience working with athletes from amateur to professional levels. Specializing in sport-specific training programs that enhance performance and prevent injuries.",
-    philosophy:
-      "My approach to training is focused on building sustainable habits and tailoring workouts to individual needs. I believe in a balanced approach that combines strength, conditioning, mobility, and proper recovery techniques.",
-    education: [
-      "Bachelor's Degree in Exercise Science",
-      "Master's in Sports Performance",
-    ],
-    services: [
-      {
-        name: "Personal Training",
-        description:
-          "One-on-one customized training sessions to meet your specific goals.",
-      },
-      {
-        name: "Nutrition Planning",
-        description:
-          "Customized meal plans and nutritional guidance to complement your training.",
-      },
-      {
-        name: "Performance Assessment",
-        description:
-          "Comprehensive analysis of your current fitness level and performance metrics.",
-      },
-      {
-        name: "Remote Coaching",
-        description:
-          "Virtual training sessions and programming for clients who prefer training remotely.",
-      },
-    ],
-    expertise: [
-      { area: "Strength Training", level: 90 },
-      { area: "Sport-specific Conditioning", level: 95 },
-      { area: "Nutrition Planning", level: 85 },
-      { area: "Injury Prevention", level: 80 },
-      { area: "Recovery Protocols", level: 90 },
-    ],
-    location: {
-      city: "Los Angeles",
-      state: "California",
-      country: "USA",
+    specialty: "",
+    experience: "",
+    rating: "",
+    trainerProfile: {
+      firstName: "",
+      lastName: "",
+      dateOfBirth: "",
+      gender: "",
+      specialties: [],
+      languages: [],
+      trainingEnvironments: [],
+      trainingTypes: [],
+      certifications: [],
+      professionalBio: "",
+      city: "",
+      state: "",
+      country: "",
+      pricingType: "",
+      pricePerSession: "",
+      currency: "EUR",
+      contactEmail: "",
+      contactPhone: "",
+      profileImage: "",
+      description: "",
     },
-    contact: {
-      email: "alex.miller@example.com",
-      phone: "+1 (555) 123-4567",
-    },
-    availability: {
-      weekdays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-      timeSlots: ["Morning", "Afternoon"],
-    },
+    // Ostala polja edit forme
+    proximity: "",
+    philosophy: "",
+    education: [],
+    services: [],
+    expertise: [],
+    availability: { weekdays: [], timeSlots: [] },
   });
+
+  console.log(trainerData, "trainerData");
+
+  // Novo: fetch podataka iz baze
+  useEffect(() => {
+    const fetchTrainer = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/users/trainer");
+        if (!res.ok) throw new Error("No trainer profile");
+        const data = await res.json();
+        console.log(data, "data");
+        setTrainerData((prev) => ({
+          ...prev,
+          specialty: data.specialty || "",
+          experience: data.experience || "",
+          rating: data.rating || "",
+          trainerProfile: {
+            ...prev.trainerProfile,
+            ...data.trainerProfile,
+            dateOfBirth: data.trainerProfile?.dateOfBirth
+              ? data.trainerProfile.dateOfBirth.slice(0, 10)
+              : "",
+            specialties:
+              data.trainerProfile?.specialties?.map((s) => s.name) || [],
+            languages: data.trainerProfile?.languages?.map((l) => l.name) || [],
+            trainingEnvironments:
+              data.trainerProfile?.trainingEnvironments?.map((e) => e.name) ||
+              [],
+            trainingTypes:
+              data.trainerProfile?.trainingTypes?.map((t) => t.name) || [],
+            certifications:
+              data.trainerProfile?.certifications?.map((c) => c.name) || [],
+            city: data.trainerProfile?.city || "",
+            state: data.trainerProfile?.state || "",
+            country: data.trainerProfile?.country || "",
+            pricingType: data.trainerProfile?.pricingType || "",
+            pricePerSession: data.trainerProfile?.pricePerSession || "",
+            currency: data.trainerProfile?.currency || "EUR",
+            contactEmail: data.trainerProfile?.contactEmail || "",
+            contactPhone: data.trainerProfile?.contactPhone || "",
+            profileImage: data.trainerProfile?.profileImage || "",
+            firstName: data.trainerProfile?.firstName || "",
+            lastName: data.trainerProfile?.lastName || "",
+            professionalBio: data.trainerProfile?.professionalBio || "",
+            description: data.trainerProfile?.professionalBio || "",
+            profileImage: data.trainerProfile?.profileImage || "",
+          },
+        }));
+      } catch (err) {
+        // Ako nema profila, ostavi prazno (user treba popuniti)
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTrainer();
+  }, []);
 
   // Calculate form completion percentage
   const calculateFormProgress = useCallback(() => {
@@ -109,21 +145,36 @@ const TrainerEditProfilePage = () => {
     const totalFields = 15; // approximate total number of important fields
     let filledFields = 0;
 
-    if (trainerData.name) filledFields++;
     if (trainerData.specialty) filledFields++;
-    if (trainerData.certifications.length > 0) filledFields++;
     if (trainerData.experience) filledFields++;
-    if (trainerData.hourlyRate) filledFields++;
-    if (trainerData.contact.email) filledFields++;
-    if (trainerData.location.city) filledFields++;
-    if (trainerData.education.length > 0) filledFields++;
-    if (trainerData.description) filledFields++;
+    if (trainerData.rating) filledFields++;
+    if (trainerData.trainerProfile.firstName) filledFields++;
+    if (trainerData.trainerProfile.lastName) filledFields++;
+    if (trainerData.trainerProfile.dateOfBirth) filledFields++;
+    if (trainerData.trainerProfile.gender) filledFields++;
+    if (trainerData.trainerProfile.specialties.length > 0) filledFields++;
+    if (trainerData.trainerProfile.languages.length > 0) filledFields++;
+    if (trainerData.trainerProfile.trainingEnvironments.length > 0)
+      filledFields++;
+    if (trainerData.trainerProfile.trainingTypes.length > 0) filledFields++;
+    if (trainerData.trainerProfile.certifications.length > 0) filledFields++;
+    if (trainerData.trainerProfile.professionalBio) filledFields++;
+    if (trainerData.trainerProfile.city) filledFields++;
+    if (trainerData.trainerProfile.state) filledFields++;
+    if (trainerData.trainerProfile.country) filledFields++;
+    if (trainerData.trainerProfile.pricingType) filledFields++;
+    if (trainerData.trainerProfile.pricePerSession) filledFields++;
+    if (trainerData.trainerProfile.currency) filledFields++;
+    if (trainerData.trainerProfile.contactEmail) filledFields++;
+    if (trainerData.trainerProfile.contactPhone) filledFields++;
+    if (trainerData.trainerProfile.profileImage) filledFields++;
+    if (trainerData.proximity) filledFields++;
     if (trainerData.philosophy) filledFields++;
-    if (trainerData.expertise.length > 0) filledFields++;
+    if (trainerData.education.length > 0) filledFields++;
     if (trainerData.services.length > 0) filledFields++;
+    if (trainerData.expertise.length > 0) filledFields++;
     if (trainerData.availability.weekdays.length > 0) filledFields++;
     if (trainerData.availability.timeSlots.length > 0) filledFields++;
-    if (trainerData.contact.phone) filledFields++;
 
     setFormProgress(
       Math.max(20, Math.round((filledFields / totalFields) * 100))
@@ -139,38 +190,35 @@ const TrainerEditProfilePage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Show temporary save indicator effect
     setSaveIndicator(true);
     setTimeout(() => setSaveIndicator(false), 1000);
 
-    // Handle nested properties (using dot notation in the name)
-    if (name.includes(".")) {
-      const [parent, child] = name.split(".");
-      setTrainerData({
-        ...trainerData,
-        [parent]: {
-          ...trainerData[parent],
-          [child]: value,
-        },
-      });
-    } else {
-      setTrainerData({
-        ...trainerData,
+    // Svi inputi idu u trainerProfile
+    setTrainerData({
+      ...trainerData,
+      trainerProfile: {
+        ...trainerData.trainerProfile,
         [name]: value,
-      });
-    }
+      },
+    });
   };
 
   // Handle image upload
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // In a real app, you'd upload this to storage
       const reader = new FileReader();
       reader.onload = () => {
         setPreviewImage(reader.result);
         setSaveIndicator(true);
         setTimeout(() => setSaveIndicator(false), 1000);
+        setTrainerData({
+          ...trainerData,
+          trainerProfile: {
+            ...trainerData.trainerProfile,
+            profileImage: reader.result,
+          },
+        });
       };
       reader.readAsDataURL(file);
     }
@@ -183,10 +231,13 @@ const TrainerEditProfilePage = () => {
     if (newCertification.trim()) {
       setTrainerData({
         ...trainerData,
-        certifications: [
-          ...trainerData.certifications,
-          newCertification.trim(),
-        ],
+        trainerProfile: {
+          ...trainerData.trainerProfile,
+          certifications: [
+            ...trainerData.trainerProfile.certifications,
+            newCertification.trim(),
+          ],
+        },
       });
       setNewCertification("");
       setSaveIndicator(true);
@@ -198,7 +249,12 @@ const TrainerEditProfilePage = () => {
   const removeCertification = (index) => {
     setTrainerData({
       ...trainerData,
-      certifications: trainerData.certifications.filter((_, i) => i !== index),
+      trainerProfile: {
+        ...trainerData.trainerProfile,
+        certifications: trainerData.trainerProfile.certifications.filter(
+          (_, i) => i !== index
+        ),
+      },
     });
     setSaveIndicator(true);
     setTimeout(() => setSaveIndicator(false), 1000);
@@ -266,18 +322,35 @@ const TrainerEditProfilePage = () => {
     setTimeout(() => setSaveIndicator(false), 1000);
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  // Prilagođavam handleSubmit da šalje podatke na backend
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Show saving animation
     setSaveIndicator(true);
+    try {
+      // Šaljemo sve podatke u trainerProfile + ostala polja
+      const body = {
+        trainerProfile: trainerData.trainerProfile,
+        education: trainerData.education,
+        services: trainerData.services,
+        expertise: trainerData.expertise,
+        availability: trainerData.availability,
+      };
+      const res = await fetch("/api/users/trainer", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error("Failed to update profile");
+      setTimeout(() => {
+        setSaveIndicator(false);
+        router.push("/trainer/dashboard");
+      }, 1000);
 
-    // In a real app, you'd save this to your backend
-    setTimeout(() => {
+      console.log(res, "res");
+    } catch (err) {
       setSaveIndicator(false);
-      router.push("/trainer/dashboard");
-    }, 1500);
+      alert("Error updating profile: " + err.message);
+    }
   };
 
   // Go back to dashboard
@@ -285,6 +358,7 @@ const TrainerEditProfilePage = () => {
     router.push("/trainer/dashboard");
   };
 
+  console.log(trainerData, "trainerData");
   // Navigation sections
   const sections = [
     { id: "basicInfo", label: "Basic Information", badgeCount: 0 },
@@ -293,6 +367,16 @@ const TrainerEditProfilePage = () => {
     { id: "services", label: "Services", badgeCount: 0 },
     { id: "availability", label: "Availability", badgeCount: 0 },
   ];
+
+  console.log(trainerData, ";ajmo");
+  // Loading indikator
+  if (loading) {
+    return (
+      <>
+        <FullScreenLoader text="Preparing your Profile Settings" />
+      </>
+    );
+  }
 
   return (
     <div className="relative min-h-screen  bg-[radial-gradient(circle_at_center,rgba(40,40,40,0.3),transparent_70%)] px-4 py-6">
@@ -369,7 +453,7 @@ const TrainerEditProfilePage = () => {
                 tabId="basicInfo"
               >
                 <BasicInformation
-                  trainerData={trainerData}
+                  trainerData={trainerData.trainerProfile}
                   handleChange={handleChange}
                   previewImage={previewImage}
                   handleImageUpload={handleImageUpload}
