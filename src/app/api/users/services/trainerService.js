@@ -136,7 +136,6 @@ async function createTrainerInfo(trainerProfileId, infoData) {
     data: {
       trainerProfileId,
       specialty: infoData.specialty || null,
-      experience: infoData.experience || null,
       rating: infoData.rating || null,
       totalSessions: infoData.totalSessions || null,
       totalEarnings: infoData.totalEarnings || null,
