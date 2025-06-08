@@ -1,0 +1,239 @@
+import { motion } from "framer-motion";
+import React, { useState, useEffect } from "react";
+
+import { SectionTitle } from "@/components/custom/dashboard/shared";
+import { CertificationUpload } from "@/components/custom/personal-details/shared/CertificationUpload";
+import { EducationUpload } from "@/components/custom/personal-details/shared/EducationUpload";
+
+// Animation variants
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
+
+const staggerItems = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+export const CertificationEducation = ({
+  trainerData,
+  handleChange,
+  setTrainerData,
+}) => {
+  // Convert simple certification strings to objects with more properties
+  const [certFields, setCertFields] = useState([]);
+  const [educationFields, setEducationFields] = useState([]);
+
+  // Initialize certFields from trainerData.certifications
+  useEffect(() => {
+    if (
+      trainerData.trainerProfile.certifications &&
+      trainerData.trainerProfile.certifications.length > 0
+    ) {
+      // Map each certification to ensure it has the proper structure
+      const mappedCerts = trainerData.trainerProfile.certifications.map(
+        (cert) => {
+          // If cert is a string, convert to object
+          if (typeof cert === "string") {
+            return { name: cert, issuer: "", expiryDate: "", files: [] };
+          }
+
+          // If cert is an object but might be missing some fields
+          if (typeof cert === "object") {
+            return {
+              name: cert.name || "",
+              issuer: cert.issuer || "",
+              expiryDate: cert.expiryDate
+                ? cert.expiryDate.substring(0, 10)
+                : "",
+              files: cert.files || [],
+            };
+          }
+
+          // Fallback
+          return { name: "", issuer: "", expiryDate: "", files: [] };
+        }
+      );
+
+      setCertFields(mappedCerts);
+    } else {
+      // If no certifications, initialize with an empty array
+      setCertFields([{ name: "", issuer: "", expiryDate: "", files: [] }]);
+    }
+  }, [trainerData.trainerProfile.certifications]);
+
+  // Initialize educationFields from trainerData.education
+  useEffect(() => {
+    if (trainerData.education && trainerData.education.length > 0) {
+      setEducationFields(trainerData.education);
+    } else {
+      // If no education, initialize with one empty field
+      setEducationFields([
+        {
+          institution: "",
+          degree: "",
+          fieldOfStudy: "",
+          startYear: "",
+          endYear: "",
+          description: "",
+        },
+      ]);
+    }
+  }, [trainerData.education]);
+
+  // Handler for certification changes
+  const handleCertChange = (index, field, value) => {
+    const updatedFields = [...certFields];
+    updatedFields[index] = { ...updatedFields[index], [field]: value };
+    setCertFields(updatedFields);
+
+    // Process files for API compatibility
+    const processedFields = updatedFields.map((cert) => {
+      // If the cert has files, process them for API compatibility
+      if (cert.files && cert.files.length > 0) {
+        const processedFiles = cert.files.map((file) => {
+          // If file is a File object, convert to data URL for storage
+          if (file instanceof File) {
+            return {
+              name: file.name,
+              type: file.type,
+              size: file.size,
+              // We'll process the actual file data when it's needed for upload
+              // The File object itself is not JSON serializable
+              data: file.data || null,
+              url: file.url || null,
+            };
+          }
+          return file;
+        });
+
+        return { ...cert, files: processedFiles };
+      }
+      return cert;
+    });
+
+    // Update the parent component's state with detailed certification objects
+    handleChange({
+      target: { name: "certifications", value: processedFields },
+    });
+  };
+
+  // Handler for education changes
+  const handleEducationChange = (index, field, value) => {
+    const updatedFields = [...educationFields];
+    updatedFields[index] = { ...updatedFields[index], [field]: value };
+    setEducationFields(updatedFields);
+
+    // Update the parent component's state
+    setTrainerData({
+      ...trainerData,
+      education: updatedFields,
+    });
+  };
+
+  // Add new certification field
+  const addCertField = () => {
+    const newFields = [
+      ...certFields,
+      { name: "", issuer: "", expiryDate: "", files: [] },
+    ];
+    setCertFields(newFields);
+  };
+
+  // Add new education field
+  const addEducationField = () => {
+    const newFields = [
+      ...educationFields,
+      {
+        institution: "",
+        degree: "",
+        fieldOfStudy: "",
+        startYear: "",
+        endYear: "",
+        description: "",
+      },
+    ];
+    setEducationFields(newFields);
+  };
+
+  // Remove certification field
+  const removeCertField = (index) => {
+    const newFields = certFields.filter((_, i) => i !== index);
+    setCertFields(newFields);
+
+    // Update the parent component's state with full certification objects
+    handleChange({
+      target: { name: "certifications", value: newFields },
+    });
+  };
+
+  // Remove education field
+  const removeEducationField = (index) => {
+    const newFields = educationFields.filter((_, i) => i !== index);
+    setEducationFields(newFields);
+
+    // Update the parent component's state
+    setTrainerData({
+      ...trainerData,
+      education: newFields,
+    });
+  };
+
+  return (
+    <motion.div
+      variants={staggerItems}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6"
+    >
+      <SectionTitle title="Certifications & Education" />
+
+      {/* Certifications Section */}
+      <motion.h3
+        variants={fadeInUp}
+        className="mb-4 mt-8 bg-gradient-to-r from-[#FF7800] to-white bg-clip-text text-lg font-medium text-transparent"
+      >
+        Certifications
+      </motion.h3>
+
+      <motion.div variants={fadeInUp}>
+        <CertificationUpload
+          certFields={certFields}
+          handleCertChange={handleCertChange}
+          addCertField={addCertField}
+          removeCertField={removeCertField}
+        />
+        <p className="mt-2 text-xs text-gray-400">
+          Add certifications to build credibility with potential clients
+        </p>
+      </motion.div>
+
+      {/* Education Section */}
+      <motion.h3
+        variants={fadeInUp}
+        className="mb-4 mt-8 bg-gradient-to-r from-[#FF7800] to-white bg-clip-text text-lg font-medium text-transparent"
+      >
+        Education
+      </motion.h3>
+
+      <motion.div variants={fadeInUp}>
+        <EducationUpload
+          educationFields={educationFields}
+          handleEducationChange={handleEducationChange}
+          addEducationField={addEducationField}
+          removeEducationField={removeEducationField}
+        />
+        <p className="mt-2 text-xs text-gray-400">
+          Add your educational background to showcase your knowledge and
+          qualifications
+        </p>
+      </motion.div>
+    </motion.div>
+  );
+};

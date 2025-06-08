@@ -346,10 +346,6 @@ export const trainers = [
 ];
 
 // Functions to get unique values for filtering
-export const getAllSpecialties = () => {
-  const specialties = trainers.map((trainer) => trainer.specialty);
-  return [...new Set(specialties)];
-};
 
 export const getAllLocations = () => {
   const locations = trainers.map((trainer) => trainer.location);
@@ -358,7 +354,7 @@ export const getAllLocations = () => {
 
 export const getAllAvailabilityDays = () => {
   const availabilityDays = trainers.flatMap(
-    (trainer) => trainer.availability || [],
+    (trainer) => trainer.availability || []
   );
   return [...new Set(availabilityDays)];
 };

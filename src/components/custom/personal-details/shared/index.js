@@ -3,6 +3,7 @@ export { RegistrationStep } from "./RegistrationStep";
 export { TipsSection } from "./TipsSection";
 export { FormSection } from "./FormSection";
 export { CertificationUpload } from "./CertificationUpload";
+export { EducationUpload } from "./EducationUpload";
 export { LanguageSelector } from "./LanguageSelector";
 export { LocationSelector } from "./LocationSelector";
 export { TrainingTypeSelector } from "./TrainingTypeSelector";
