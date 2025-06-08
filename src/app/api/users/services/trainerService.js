@@ -135,7 +135,6 @@ async function createTrainerInfo(trainerProfileId, infoData) {
   return await prisma.trainerInfo.create({
     data: {
       trainerProfileId,
-      specialty: infoData.specialty || null,
       experience: infoData.experience || null,
       rating: infoData.rating || null,
       totalSessions: infoData.totalSessions || null,

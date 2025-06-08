@@ -41,7 +41,9 @@ export const TrainerCard = ({ trainer, onClick }) => {
             alt={trainer.name || "Trainer profile"}
             width={500}
             height={300}
-            className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? "scale-105" : "scale-100"}`}
+            className={`w-full h-full object-cover transition-transform duration-700 ${
+              isHovered ? "scale-105" : "scale-100"
+            }`}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
@@ -95,13 +97,6 @@ export const TrainerCard = ({ trainer, onClick }) => {
       <div className="p-5 flex-1 flex flex-col">
         {/* Top section with specialty and ratings */}
         <div>
-          {/* Specialty - Made wider for translations */}
-          <div className="inline-block px-3 py-1.5 bg-[#FF6B00]/10 border border-[#FF6B00]/20 rounded-full mb-4 max-w-full">
-            <span className="text-xs font-medium text-[#FF6B00] truncate block">
-              {trainer.specialty || "General Training"}
-            </span>
-          </div>
-
           {/* Rating and reviews - More spaced layout */}
           <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
             <div className="flex items-center">

@@ -48,7 +48,6 @@ const TrainerEditProfilePage = () => {
 
   // Novo: inicijalni state je prazan dok ne dođe fetch
   const [trainerData, setTrainerData] = useState({
-    specialty: "",
     experience: "",
     rating: "",
     trainerProfile: {
@@ -95,7 +94,6 @@ const TrainerEditProfilePage = () => {
         console.log(data, "data");
         setTrainerData((prev) => ({
           ...prev,
-          specialty: data.specialty || "",
           experience: data.experience || "",
           rating: data.rating || "",
           trainerProfile: {
@@ -145,7 +143,6 @@ const TrainerEditProfilePage = () => {
     const totalFields = 15; // approximate total number of important fields
     let filledFields = 0;
 
-    if (trainerData.specialty) filledFields++;
     if (trainerData.experience) filledFields++;
     if (trainerData.rating) filledFields++;
     if (trainerData.trainerProfile.firstName) filledFields++;

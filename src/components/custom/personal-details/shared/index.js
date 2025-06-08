@@ -1,4 +1,3 @@
-export { PersonalDetailsStep } from "./PersonalDetailsStep";
 export { ProfileContactStep } from "./ProfileContactStep";
 export { RegistrationStep } from "./RegistrationStep";
 export { TipsSection } from "./TipsSection";

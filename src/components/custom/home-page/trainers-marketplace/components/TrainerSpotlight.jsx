@@ -86,10 +86,6 @@ export const TrainerSpotlight = ({ trainers, onTrainerClick }) => {
                       {activeTrainer.name}
                     </h1>
 
-                    <p className="text-lg text-zinc-300 font-medium mb-1">
-                      {activeTrainer.specialty}
-                    </p>
-
                     <div className="flex items-center text-zinc-300 mb-4">
                       <Icon
                         icon="mdi:map-marker"
