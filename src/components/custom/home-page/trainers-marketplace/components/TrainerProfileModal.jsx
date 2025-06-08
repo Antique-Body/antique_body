@@ -101,9 +101,6 @@ export const TrainerProfileModal = ({ trainer, isOpen, onClose }) => {
                   <h2 className="text-2xl md:text-3xl font-bold text-white">
                     {trainer.name}
                   </h2>
-                  <p className="text-[#FF6B00] font-medium">
-                    {trainer.specialty}
-                  </p>
 
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2">
                     <div className="flex items-center text-zinc-300">

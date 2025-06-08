@@ -29,12 +29,7 @@ export function useTrainerRegistration() {
       country: "",
     },
     // Legacy fields for compatibility
-    name: "",
-    specialty: "",
     certifications: [{ name: "", issuer: "", expiryDate: "", files: [] }],
-    yearsExperience: "",
-    trainingVenues: [""],
-    sports: [],
     currency: "EUR",
   });
   const [errors, setErrors] = useState({});

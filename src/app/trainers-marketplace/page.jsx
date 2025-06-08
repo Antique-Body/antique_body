@@ -16,7 +16,6 @@ export default function TrainersMarketplace() {
   const [filteredTrainers, setFilteredTrainers] = useState(extendedTrainers);
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
-    specialty: [],
     location: [],
     availability: [],
     price: { min: 0, max: 200 },
@@ -56,17 +55,9 @@ export default function TrainersMarketplace() {
       results = results.filter(
         (trainer) =>
           trainer.name.toLowerCase().includes(query) ||
-          trainer.specialty.toLowerCase().includes(query) ||
           trainer.bio.toLowerCase().includes(query) ||
           (trainer.tags &&
             trainer.tags.some((tag) => tag.toLowerCase().includes(query)))
-      );
-    }
-
-    // Specialty filter
-    if (filters.specialty.length > 0) {
-      results = results.filter((trainer) =>
-        filters.specialty.includes(trainer.specialty)
       );
     }
 
@@ -116,7 +107,6 @@ export default function TrainersMarketplace() {
 
   const handleClearFilters = () => {
     setFilters({
-      specialty: [],
       location: [],
       availability: [],
       price: { min: 0, max: 200 },
