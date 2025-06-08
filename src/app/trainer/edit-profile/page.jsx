@@ -14,11 +14,10 @@ import {
   DashboardTabs,
 } from "@/components/custom/dashboard/shared/DashboardTabs";
 import {
-  AboutYou,
-  AreasOfExpertise,
   Availability,
   BasicInformation,
-  ServicesOffered,
+  CertificationEducation,
+  Specialties,
 } from "@/components/custom/dashboard/trainer/edit-profile";
 
 const fadeIn = {
@@ -126,7 +125,7 @@ const TrainerEditProfilePage = () => {
             profileImage: data.trainerProfile?.profileImage || "",
           },
         }));
-      } catch (err) {
+      } catch {
         // Ako nema profila, ostavi prazno (user treba popuniti)
       } finally {
         setLoading(false);
@@ -187,14 +186,26 @@ const TrainerEditProfilePage = () => {
     setSaveIndicator(true);
     setTimeout(() => setSaveIndicator(false), 1000);
 
-    // Svi inputi idu u trainerProfile
-    setTrainerData({
-      ...trainerData,
-      trainerProfile: {
-        ...trainerData.trainerProfile,
-        [name]: value,
-      },
-    });
+    // Update trainerProfile data
+    if (name === "certifications") {
+      // For certification array updates
+      setTrainerData({
+        ...trainerData,
+        trainerProfile: {
+          ...trainerData.trainerProfile,
+          [name]: Array.isArray(value) ? value : [value],
+        },
+      });
+    } else {
+      // For regular inputs
+      setTrainerData({
+        ...trainerData,
+        trainerProfile: {
+          ...trainerData.trainerProfile,
+          [name]: value,
+        },
+      });
+    }
   };
 
   // Handle image upload
@@ -216,104 +227,6 @@ const TrainerEditProfilePage = () => {
       };
       reader.readAsDataURL(file);
     }
-  };
-
-  // Add a new certification
-  const [newCertification, setNewCertification] = useState("");
-
-  const addCertification = () => {
-    if (newCertification.trim()) {
-      setTrainerData({
-        ...trainerData,
-        trainerProfile: {
-          ...trainerData.trainerProfile,
-          certifications: [
-            ...trainerData.trainerProfile.certifications,
-            newCertification.trim(),
-          ],
-        },
-      });
-      setNewCertification("");
-      setSaveIndicator(true);
-      setTimeout(() => setSaveIndicator(false), 1000);
-    }
-  };
-
-  // Remove a certification
-  const removeCertification = (index) => {
-    setTrainerData({
-      ...trainerData,
-      trainerProfile: {
-        ...trainerData.trainerProfile,
-        certifications: trainerData.trainerProfile.certifications.filter(
-          (_, i) => i !== index
-        ),
-      },
-    });
-    setSaveIndicator(true);
-    setTimeout(() => setSaveIndicator(false), 1000);
-  };
-
-  // Add a new education item
-  const [newEducation, setNewEducation] = useState("");
-
-  const addEducation = () => {
-    if (newEducation.trim()) {
-      setTrainerData({
-        ...trainerData,
-        education: [...trainerData.education, newEducation.trim()],
-      });
-      setNewEducation("");
-      setSaveIndicator(true);
-      setTimeout(() => setSaveIndicator(false), 1000);
-    }
-  };
-
-  // Remove an education item
-  const removeEducation = (index) => {
-    setTrainerData({
-      ...trainerData,
-      education: trainerData.education.filter((_, i) => i !== index),
-    });
-    setSaveIndicator(true);
-    setTimeout(() => setSaveIndicator(false), 1000);
-  };
-
-  // Add a new service
-  const [newService, setNewService] = useState({ name: "", description: "" });
-
-  const addService = () => {
-    if (newService.name.trim() && newService.description.trim()) {
-      setTrainerData({
-        ...trainerData,
-        services: [...trainerData.services, { ...newService }],
-      });
-      setNewService({ name: "", description: "" });
-      setSaveIndicator(true);
-      setTimeout(() => setSaveIndicator(false), 1000);
-    }
-  };
-
-  // Remove a service
-  const removeService = (index) => {
-    setTrainerData({
-      ...trainerData,
-      services: trainerData.services.filter((_, i) => i !== index),
-    });
-    setSaveIndicator(true);
-    setTimeout(() => setSaveIndicator(false), 1000);
-  };
-
-  // Update expertise level
-  const updateExpertiseLevel = (index, level) => {
-    const updatedExpertise = [...trainerData.expertise];
-    updatedExpertise[index].level = Number(level);
-    setTrainerData({
-      ...trainerData,
-      expertise: updatedExpertise,
-    });
-    setSaveIndicator(true);
-    setTimeout(() => setSaveIndicator(false), 1000);
   };
 
   // Prilagođavam handleSubmit da šalje podatke na backend
@@ -356,9 +269,12 @@ const TrainerEditProfilePage = () => {
   // Navigation sections
   const sections = [
     { id: "basicInfo", label: "Basic Information", badgeCount: 0 },
-    { id: "aboutYou", label: "About You", badgeCount: 0 },
-    { id: "expertise", label: "Expertise", badgeCount: 0 },
-    { id: "services", label: "Services", badgeCount: 0 },
+    { id: "specialties", label: "Specialties", badgeCount: 0 },
+    {
+      id: "certificationEducation",
+      label: "Certification & Education",
+      badgeCount: 0,
+    },
     { id: "availability", label: "Availability", badgeCount: 0 },
   ];
 
@@ -451,47 +367,28 @@ const TrainerEditProfilePage = () => {
                   handleChange={handleChange}
                   previewImage={previewImage}
                   handleImageUpload={handleImageUpload}
-                  newCertification={newCertification}
-                  setNewCertification={setNewCertification}
-                  addCertification={addCertification}
-                  removeCertification={removeCertification}
                 />
               </AnimatedTabContent>
 
               <AnimatedTabContent
-                isActive={activeSection === "aboutYou"}
-                tabId="aboutYou"
+                isActive={activeSection === "specialties"}
+                tabId="specialties"
               >
-                <AboutYou
+                <Specialties
                   trainerData={trainerData}
                   handleChange={handleChange}
-                  newEducation={newEducation}
-                  setNewEducation={setNewEducation}
-                  addEducation={addEducation}
-                  removeEducation={removeEducation}
+                  setTrainerData={setTrainerData}
                 />
               </AnimatedTabContent>
 
               <AnimatedTabContent
-                isActive={activeSection === "expertise"}
-                tabId="expertise"
+                isActive={activeSection === "certificationEducation"}
+                tabId="certificationEducation"
               >
-                <AreasOfExpertise
+                <CertificationEducation
                   trainerData={trainerData}
-                  updateExpertiseLevel={updateExpertiseLevel}
-                />
-              </AnimatedTabContent>
-
-              <AnimatedTabContent
-                isActive={activeSection === "services"}
-                tabId="services"
-              >
-                <ServicesOffered
-                  trainerData={trainerData}
-                  newService={newService}
-                  setNewService={setNewService}
-                  addService={addService}
-                  removeService={removeService}
+                  handleChange={handleChange}
+                  setTrainerData={setTrainerData}
                 />
               </AnimatedTabContent>
 

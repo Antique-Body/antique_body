@@ -11,7 +11,6 @@ import { FormField } from "@/components/common/FormField";
 import {
   getAllAvailabilityDays,
   getAllLocations,
-  getAllSpecialties,
   getAllTags,
 } from "@/components/custom/home-page/trainers-marketplace/data/trainersData";
 
@@ -30,7 +29,6 @@ export const SearchFilters = ({
     tags: false,
   });
 
-  const specialties = getAllSpecialties();
   const locations = getAllLocations();
   const availabilityDays = getAllAvailabilityDays();
   const tags = getAllTags();

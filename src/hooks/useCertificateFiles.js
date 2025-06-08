@@ -14,10 +14,10 @@ const MAX_FILES = 5;
 
 function validateCertFile(file) {
   if (!ALLOWED_CERT_TYPES.includes(file.type)) {
-    return "Nedozvoljen format certifikata!";
+    return "Unsupported file format!";
   }
   if (file.size > MAX_CERT_SIZE_MB * 1024 * 1024) {
-    return `Certifikat je prevelik! Maksimalna veličina je ${MAX_CERT_SIZE_MB}MB.`;
+    return `File is too large! Maximum size is ${MAX_CERT_SIZE_MB}MB.`;
   }
   return null;
 }
@@ -37,7 +37,7 @@ export function useCertificateFiles(
       certFields.map((field, idx) => {
         const files = field.files || [];
         return files.map((file, i) => {
-          // Ako već postoji preview za ovaj file na istom indexu i file je isti, koristi ga
+          // If preview exists for this file at the same index and file is the same, use it
           if (
             prev[idx] &&
             prev[idx][i] &&
@@ -53,11 +53,11 @@ export function useCertificateFiles(
         });
       })
     );
-    // Zapamti trenutne file objekte za usporedbu
+    // Remember current file objects for comparison
     prevUrlsRef.current = certFields.map((field) => field.files || []);
   }, [certFields]);
 
-  // Cleanup blob URL-ova na unmount ili promjenu
+  // Cleanup blob URLs on unmount or change
   useEffect(
     () => () => {
       previews.forEach((previewArray) => {
@@ -82,7 +82,7 @@ export function useCertificateFiles(
         const updated = [...prev];
         updated[
           index
-        ] = `Možete uploadati maksimalno ${MAX_FILES} fajlova po certifikatu.`;
+        ] = `You can upload a maximum of ${MAX_FILES} files per certification.`;
         return updated;
       });
       return;

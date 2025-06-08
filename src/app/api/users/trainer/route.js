@@ -133,7 +133,8 @@ export async function PUT(req) {
       });
     }
     const body = await req.json();
-    // Pronađi trainerProfileId
+
+    // Find the trainer profile
     const profile = await trainerService.getTrainerProfileByUserId(
       session.user.id
     );
@@ -143,22 +144,126 @@ export async function PUT(req) {
         { status: 404 }
       );
     }
-    // Kreiraj ili update TrainerInfo
+
+    // Handle trainer profile update
+    if (body.trainerProfile) {
+      // Prepare certification data if provided
+      const certifications = body.trainerProfile.certifications || [];
+
+      // First, delete existing certifications
+      await prisma.certification.deleteMany({
+        where: { trainerProfileId: profile.id },
+      });
+
+      // Then create new certifications
+      if (certifications.length > 0) {
+        // Create new certifications
+        for (const cert of certifications) {
+          // If cert is just a string, create a simple certification
+          if (typeof cert === "string") {
+            await prisma.certification.create({
+              data: {
+                trainerProfileId: profile.id,
+                name: cert,
+              },
+            });
+          }
+          // If cert is an object with more details
+          else if (typeof cert === "object") {
+            const certData = {
+              name: cert.name,
+              issuer: cert.issuer || null,
+              expiryDate: cert.expiryDate ? new Date(cert.expiryDate) : null,
+            };
+
+            // Create the certification
+            const newCert = await prisma.certification.create({
+              data: {
+                trainerProfileId: profile.id,
+                ...certData,
+              },
+            });
+
+            // Handle file uploads if any
+            if (
+              cert.files &&
+              Array.isArray(cert.files) &&
+              cert.files.length > 0
+            ) {
+              // For each file, create a document entry
+              for (const file of cert.files) {
+                if (file && (file.url || file.data)) {
+                  await prisma.certificationDocument.create({
+                    data: {
+                      certificationId: newCert.id,
+                      url: file.url || file.data || "",
+                      originalName: file.name || "document",
+                      mimetype: file.type || "application/octet-stream",
+                    },
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Update the trainer profile excluding certifications (handled separately)
+      const { certifications: _, ...profileData } = body.trainerProfile;
+
+      // Update profile
+      await prisma.trainerProfile.update({
+        where: { id: profile.id },
+        data: {
+          ...profileData,
+          dateOfBirth: profileData.dateOfBirth
+            ? new Date(profileData.dateOfBirth)
+            : profile.dateOfBirth,
+        },
+      });
+    }
+
+    // Handle trainer info update
     let trainerInfo = await trainerService.getTrainerInfoByProfileId(
       profile.id
     );
+
+    // Prepare trainer info data
+    const infoData = {
+      rating: body.rating,
+      totalSessions: body.totalSessions,
+      totalEarnings: body.totalEarnings,
+      upcomingSessions: body.upcomingSessions,
+    };
+
     if (trainerInfo) {
       // Update
       trainerInfo = await prisma.trainerInfo.update({
         where: { trainerProfileId: profile.id },
-        data: body,
+        data: infoData,
       });
     } else {
       // Create
-      trainerInfo = await trainerService.createTrainerInfo(profile.id, body);
+      trainerInfo = await trainerService.createTrainerInfo(
+        profile.id,
+        infoData
+      );
     }
-    return new Response(JSON.stringify(trainerInfo), { status: 200 });
+
+    // Get updated profile with all relations
+    const updatedProfile = await trainerService.getTrainerProfileByUserId(
+      session.user.id
+    );
+
+    return new Response(
+      JSON.stringify({
+        ...trainerInfo,
+        trainerProfile: updatedProfile,
+      }),
+      { status: 200 }
+    );
   } catch (error) {
+    console.error("Error updating trainer profile:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 400,
     });
