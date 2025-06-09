@@ -48,7 +48,7 @@ async function createTrainerWithDetails(formData, userId) {
     throw new Error("All location fields are required.");
   }
 
-  // Find or create location
+  // Find or create location (with lat/lon)
   let dbLocation = await prisma.location.findFirst({
     where: {
       city: location.city,
@@ -62,8 +62,25 @@ async function createTrainerWithDetails(formData, userId) {
         city: location.city,
         state: location.state,
         country: location.country,
+        lat: location.lat ?? null,
+        lon: location.lon ?? null,
       },
     });
+  } else {
+    // Ako već postoji, ali nema lat/lon, ažuriraj
+    if (
+      (dbLocation.lat == null || dbLocation.lon == null) &&
+      location.lat &&
+      location.lon
+    ) {
+      dbLocation = await prisma.location.update({
+        where: { id: dbLocation.id },
+        data: {
+          lat: location.lat,
+          lon: location.lon,
+        },
+      });
+    }
   }
 
   const trainer = await prisma.trainerProfile.create({
@@ -131,16 +148,25 @@ async function createTrainerWithDetails(formData, userId) {
   return trainer;
 }
 
-async function createTrainerInfo(trainerProfileId, infoData) {
-  return await prisma.trainerInfo.create({
-    data: {
-      trainerProfileId,
-      rating: infoData.rating || null,
-      totalSessions: infoData.totalSessions || null,
-      totalEarnings: infoData.totalEarnings || null,
-      upcomingSessions: infoData.upcomingSessions || null,
-    },
+async function createOrUpdateTrainerInfo(trainerProfileId, infoData) {
+  const existing = await prisma.trainerInfo.findUnique({
+    where: { trainerProfileId },
   });
+  if (existing) {
+    // Update
+    return await prisma.trainerInfo.update({
+      where: { trainerProfileId },
+      data: infoData,
+    });
+  } else {
+    // Create
+    return await prisma.trainerInfo.create({
+      data: {
+        trainerProfileId,
+        ...infoData,
+      },
+    });
+  }
 }
 
 async function getTrainerInfoByProfileId(trainerProfileId) {
@@ -164,6 +190,12 @@ async function getTrainerProfileByUserId(userId) {
       trainingTypes: true,
       trainerInfo: true,
       location: true,
+      trainerGyms: {
+        take: 3,
+        include: {
+          gym: { include: { location: true } },
+        },
+      },
     },
   });
   return profile;
@@ -197,7 +229,7 @@ async function getTrainerInfoByUserId(userId) {
 export const trainerService = {
   createTrainerWithDetails,
   getTrainerProfileByUserId,
-  createTrainerInfo,
+  createOrUpdateTrainerInfo,
   getTrainerInfoByProfileId,
   getTrainerInfoByUserId,
 };

@@ -22,6 +22,7 @@ export const SPECIALTIES = [
     icon: "mdi:account-supervisor",
   },
   { id: "youth-training", label: "Youth Training", icon: "mdi:account-child" },
+  { id: "nutrition", label: "Nutrition", icon: "mdi:food-apple" },
 ];
 
 export const TRAINING_ENVIRONMENTS = [

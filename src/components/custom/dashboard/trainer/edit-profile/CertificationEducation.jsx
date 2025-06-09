@@ -2,8 +2,8 @@ import { motion } from "framer-motion";
 import React, { useState, useEffect } from "react";
 
 import { SectionTitle } from "@/components/custom/dashboard/shared";
-import { CertificationUpload } from "@/components/custom/personal-details/shared/CertificationUpload";
 import { EducationUpload } from "@/components/custom/personal-details/shared/EducationUpload";
+import { CertificationUpload } from "@/components/custom/shared";
 
 // Animation variants
 const fadeInUp = {
@@ -39,32 +39,46 @@ export const CertificationEducation = ({
       // Map each certification to ensure it has the proper structure
       const mappedCerts = trainerData.trainerProfile.certifications.map(
         (cert) => {
-          // If cert is a string, convert to object
           if (typeof cert === "string") {
-            return { name: cert, issuer: "", expiryDate: "", files: [] };
-          }
-
-          // If cert is an object but might be missing some fields
-          if (typeof cert === "object") {
             return {
-              name: cert.name || "",
-              issuer: cert.issuer || "",
-              expiryDate: cert.expiryDate
-                ? cert.expiryDate.substring(0, 10)
-                : "",
-              files: cert.files || [],
+              name: cert,
+              issuer: "",
+              expiryDate: "",
+              status: "pending",
+              documents: [],
+              files: [],
+              id: undefined,
+              trainerProfileId: undefined,
+              createdAt: undefined,
+              updatedAt: undefined,
             };
           }
-
-          // Fallback
-          return { name: "", issuer: "", expiryDate: "", files: [] };
+          return {
+            id: cert.id,
+            trainerProfileId: cert.trainerProfileId,
+            name: cert.name || "",
+            issuer: cert.issuer || "",
+            expiryDate: cert.expiryDate ? cert.expiryDate.substring(0, 10) : "",
+            status: cert.status || "pending",
+            documents: cert.documents || [],
+            files: [],
+            createdAt: cert.createdAt,
+            updatedAt: cert.updatedAt,
+          };
         }
       );
-
       setCertFields(mappedCerts);
     } else {
-      // If no certifications, initialize with an empty array
-      setCertFields([{ name: "", issuer: "", expiryDate: "", files: [] }]);
+      setCertFields([
+        {
+          name: "",
+          issuer: "",
+          expiryDate: "",
+          status: "pending",
+          documents: [],
+          files: [],
+        },
+      ]);
     }
   }, [trainerData.trainerProfile.certifications]);
 
@@ -141,7 +155,14 @@ export const CertificationEducation = ({
   const addCertField = () => {
     const newFields = [
       ...certFields,
-      { name: "", issuer: "", expiryDate: "", files: [] },
+      {
+        name: "",
+        issuer: "",
+        expiryDate: "",
+        status: "pending",
+        documents: [],
+        files: [],
+      },
     ];
     setCertFields(newFields);
   };

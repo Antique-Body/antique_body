@@ -2,11 +2,14 @@
 import { useClientRegistration } from "../../../hooks/useClientRegistration";
 
 import { EffectBackground } from "@/components/background";
-import { Button, Footer } from "@/components/common";
-import { BrandLogo } from "@/components/common/BrandLogo";
-import { Card } from "@/components/common/Card";
+import {
+  Button,
+  Footer,
+  Card,
+  BrandLogo,
+  StepProgressBar,
+} from "@/components/common";
 import { ArrowRight } from "@/components/common/Icons";
-import { StepProgressBar } from "@/components/common/StepProgressBar";
 import {
   TipsSection,
   BasicInfoStep,

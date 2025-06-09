@@ -92,23 +92,23 @@ export const EducationUpload = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <FormField
             label="Start Year"
-            type="number"
+            type="date"
             value={field.startYear || ""}
             onChange={(e) =>
               handleEducationChange(index, "startYear", e.target.value)
             }
-            placeholder="e.g. 2015"
+            placeholder="Select start year"
             className="mb-0"
           />
 
           <FormField
             label="End Year (or expected)"
-            type="number"
+            type="date"
             value={field.endYear || ""}
             onChange={(e) =>
               handleEducationChange(index, "endYear", e.target.value)
             }
-            placeholder="e.g. 2019 (or leave blank if current)"
+            placeholder="Select end year (or leave blank if current)"
             className="mb-0"
           />
         </div>

@@ -4,20 +4,21 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 
-import { BackButton } from "@/components/common/BackButton";
-import { BrandLogo } from "@/components/common/BrandLogo";
-import { Button } from "@/components/common/Button";
-import { Card } from "@/components/common/Card";
-import { FullScreenLoader } from "@/components/common/FullScreenLoader";
 import {
-  AnimatedTabContent,
-  DashboardTabs,
-} from "@/components/custom/dashboard/shared/DashboardTabs";
+  Button,
+  Card,
+  BrandLogo,
+  BackButton,
+  FullScreenLoader,
+} from "@/components/common";
+import { DashboardTabs } from "@/components/custom/dashboard/shared";
+import { AnimatedTabContent } from "@/components/custom/dashboard/shared/DashboardTabs";
 import {
   Availability,
   BasicInformation,
   CertificationEducation,
   Specialties,
+  WorkoutSpaceLocation,
 } from "@/components/custom/dashboard/trainer/edit-profile";
 
 const fadeIn = {
@@ -69,10 +70,16 @@ const TrainerEditProfilePage = () => {
       contactPhone: "",
       profileImage: "",
       description: "",
+      location: {
+        city: "",
+        state: "",
+        country: "",
+        lat: null,
+        lon: null,
+        gyms: [],
+      },
     },
-    // Ostala polja edit forme
     proximity: "",
-    philosophy: "",
     education: [],
     services: [],
     expertise: [],
@@ -107,8 +114,7 @@ const TrainerEditProfilePage = () => {
               [],
             trainingTypes:
               data.trainerProfile?.trainingTypes?.map((t) => t.name) || [],
-            certifications:
-              data.trainerProfile?.certifications?.map((c) => c.name) || [],
+            certifications: data.trainerProfile?.certifications || [],
             city: data.trainerProfile?.city || "",
             state: data.trainerProfile?.state || "",
             country: data.trainerProfile?.country || "",
@@ -123,6 +129,15 @@ const TrainerEditProfilePage = () => {
             professionalBio: data.trainerProfile?.professionalBio || "",
             description: data.trainerProfile?.professionalBio || "",
             profileImage: data.trainerProfile?.profileImage || "",
+            location: {
+              ...(data.trainerProfile?.location || {}),
+              city: data.trainerProfile?.location?.city || "",
+              state: data.trainerProfile?.location?.state || "",
+              country: data.trainerProfile?.location?.country || "",
+              lat: data.trainerProfile?.location?.lat || null,
+              lon: data.trainerProfile?.location?.lon || null,
+              gyms: data.trainerProfile?.location?.gyms || [],
+            },
           },
         }));
       } catch {
@@ -162,7 +177,6 @@ const TrainerEditProfilePage = () => {
     if (trainerData.trainerProfile.contactPhone) filledFields++;
     if (trainerData.trainerProfile.profileImage) filledFields++;
     if (trainerData.proximity) filledFields++;
-    if (trainerData.philosophy) filledFields++;
     if (trainerData.education.length > 0) filledFields++;
     if (trainerData.services.length > 0) filledFields++;
     if (trainerData.expertise.length > 0) filledFields++;
@@ -182,13 +196,20 @@ const TrainerEditProfilePage = () => {
   // Handler for text input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     setSaveIndicator(true);
     setTimeout(() => setSaveIndicator(false), 1000);
-
-    // Update trainerProfile data
-    if (name === "certifications") {
-      // For certification array updates
+    if (name.startsWith("location.")) {
+      setTrainerData({
+        ...trainerData,
+        trainerProfile: {
+          ...trainerData.trainerProfile,
+          location: {
+            ...trainerData.trainerProfile.location,
+            [name.replace("location.", "")]: value,
+          },
+        },
+      });
+    } else if (name === "certifications") {
       setTrainerData({
         ...trainerData,
         trainerProfile: {
@@ -197,7 +218,6 @@ const TrainerEditProfilePage = () => {
         },
       });
     } else {
-      // For regular inputs
       setTrainerData({
         ...trainerData,
         trainerProfile: {
@@ -234,7 +254,6 @@ const TrainerEditProfilePage = () => {
     e.preventDefault();
     setSaveIndicator(true);
     try {
-      // Šaljemo sve podatke u trainerProfile + ostala polja
       const body = {
         trainerProfile: trainerData.trainerProfile,
         education: trainerData.education,
@@ -252,7 +271,6 @@ const TrainerEditProfilePage = () => {
         setSaveIndicator(false);
         router.push("/trainer/dashboard");
       }, 1000);
-
       console.log(res, "res");
     } catch (err) {
       setSaveIndicator(false);
@@ -276,6 +294,11 @@ const TrainerEditProfilePage = () => {
       badgeCount: 0,
     },
     { id: "availability", label: "Availability", badgeCount: 0 },
+    {
+      id: "workoutSpaceLocation",
+      label: "Workout Space & Location",
+      badgeCount: 0,
+    },
   ];
 
   console.log(trainerData, ";ajmo");
@@ -399,6 +422,16 @@ const TrainerEditProfilePage = () => {
                 <Availability
                   trainerData={trainerData}
                   handleChange={handleChange}
+                  setTrainerData={setTrainerData}
+                />
+              </AnimatedTabContent>
+
+              <AnimatedTabContent
+                isActive={activeSection === "workoutSpaceLocation"}
+                tabId="workoutSpaceLocation"
+              >
+                <WorkoutSpaceLocation
+                  trainerData={trainerData}
                   setTrainerData={setTrainerData}
                 />
               </AnimatedTabContent>
