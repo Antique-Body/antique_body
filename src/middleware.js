@@ -22,27 +22,27 @@ function getRedirectUrl(role, token, pathname, _url) {
         : "/client/personal-details";
     return pathname === "/client/dashboard" ? null : "/client/dashboard";
   }
-  if (role === "trainer") {
-    const allowedTrainerPaths = [
-      "/trainer/dashboard",
-      "/trainer/dashboard/newclients",
-      "/trainer/edit-profile",
-    ];
-    if (!token.trainerProfile) {
-      if (
-        pathname === "/trainer/personal-details" ||
-        pathname === "/trainer/edit-profile"
-      ) {
-        return null;
-      }
-      return "/trainer/personal-details";
-    }
-    // Ako ima profil, pusti samo dozvoljene rute
-    if (!allowedTrainerPaths.includes(pathname)) {
-      return "/trainer/dashboard";
-    }
-    return null;
-  }
+  // if (role === "trainer") {
+  //   const allowedTrainerPaths = [
+  //     "/trainer/dashboard",
+  //     "/trainer/dashboard/newclients",
+  //     "/trainer/edit-profile",
+  //   ];
+  //   if (!token.trainerProfile) {
+  //     if (
+  //       pathname === "/trainer/personal-details" ||
+  //       pathname === "/trainer/edit-profile"
+  //     ) {
+  //       return null;
+  //     }
+  //     return "/trainer/personal-details";
+  //   }
+  //   // Ako ima profil, pusti samo dozvoljene rute
+  //   if (!allowedTrainerPaths.includes(pathname)) {
+  //     return "/trainer/dashboard";
+  //   }
+  //   return null;
+  // }
   return null;
 }
 

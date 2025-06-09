@@ -196,16 +196,33 @@ export function useTrainerRegistration() {
         return;
       }
       uploadedUrls = await uploadRes.json();
+      console.log("uploadedUrls from /api/upload:", uploadedUrls);
     }
     // 3. Pripremi podatke za API
+    console.log(
+      "formData.certifications before mapping:",
+      formData.certifications
+    );
+    let certifications = formData.certifications.map((cert, i) => ({
+      ...cert,
+      documents:
+        Array.isArray(uploadedUrls.certifications) &&
+        uploadedUrls.certifications[i]
+          ? uploadedUrls.certifications[i]
+          : [],
+    }));
+    // Ako je certifications slučajno array arraya, flattenaj
+    if (Array.isArray(certifications[0])) {
+      certifications = certifications.flat();
+    }
+    // Debug: logaj certifications prije slanja
+    console.log("Certifications payload:", certifications);
     const trainerData = {
       ...formData,
       profileImage: uploadedUrls.profileImage || formData.profileImage,
-      certifications: formData.certifications.map((cert, i) => ({
-        ...cert,
-        documents: uploadedUrls[`certifications[${i}]`] || [],
-      })),
+      certifications,
     };
+    console.log("Final trainerData payload:", trainerData);
     // 4. Pošalji podatke na backend
     const res = await fetch("/api/users/trainer", {
       method: "POST",
@@ -224,15 +241,14 @@ export function useTrainerRegistration() {
   };
 
   // Move to next step
-  console.log(errors, "errors");
   const goToNextStep = (e) => {
     e.preventDefault();
-    if (validateStep(step)) {
-      setStep(step + 1);
-      window.scrollTo(0, 0);
-    } else {
-      scrollToTop();
-    }
+    // if (validateStep(step)) {
+    setStep(step + 1);
+    //   window.scrollTo(0, 0);
+    // } else {
+    //   scrollToTop();
+    // }
   };
 
   // Move to previous step

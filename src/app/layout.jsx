@@ -3,7 +3,7 @@
 import { Inter } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
 
-import I18nProvider from "../components/I18nProvider";
+import I18nProvider from "../components/custom/shared/I18nProvider";
 
 // import RootErrorBoundary from "@/components/RootErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";

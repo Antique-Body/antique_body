@@ -5,7 +5,6 @@ import React from "react";
 
 import { FormField } from "@/components/common";
 import { SectionTitle } from "@/components/custom/dashboard/shared";
-import { LocationSelector } from "@/components/custom/personal-details/shared/LocationSelector";
 
 // Animation variants
 const fadeInUp = {
@@ -61,9 +60,9 @@ export const BasicInformation = ({
                 onMouseLeave={() => setIsHovering(false)}
               >
                 <div className="w-40 h-40 rounded-full overflow-hidden border-2 border-[#444] hover:border-[#FF6B00]/50 transition-all duration-300">
-                  {previewImage ? (
+                  {previewImage || trainerData.profileImage ? (
                     <Image
-                      src={previewImage}
+                      src={previewImage || trainerData.profileImage}
                       alt="Profile"
                       width={160}
                       height={160}
@@ -281,17 +280,6 @@ export const BasicInformation = ({
             backgroundStyle="semi-transparent"
           />
         </div>
-      </motion.div>
-
-      {/* Location Selector */}
-      <motion.div variants={fadeInUp}>
-        <LocationSelector
-          formData={trainerData}
-          onChange={handleChange}
-          errors={{}}
-          title="Location"
-          description="Where are you based? This helps clients find you."
-        />
       </motion.div>
 
       {/* Pricing Section */}

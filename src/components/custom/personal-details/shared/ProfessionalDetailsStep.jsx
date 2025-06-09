@@ -1,12 +1,29 @@
 "use client";
 import { Icon } from "@iconify/react";
+import { motion } from "framer-motion";
 
-import {
-  FormSection,
-  LanguageSelector,
-  CertificationUpload,
-  TrainingTypeSelector,
-} from "./";
+import { CertificationUpload } from "../../shared";
+
+import { FormSection, LanguageSelector, TrainingTypeSelector } from "./";
+
+import { SpecialtySelector } from "@/components/custom/shared";
+
+// Animation variants
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
+    },
+  },
+};
 
 export const ProfessionalDetailsStep = ({
   formData,
@@ -49,23 +66,41 @@ export const ProfessionalDetailsStep = ({
     });
   };
 
+  const handleSpecialtyChange = (specialties) => {
+    onChange({
+      target: {
+        name: "specialties",
+        value: specialties,
+      },
+    });
+  };
+
   // Get completion status for visual indicators
   const getCompletionStatus = () => {
     const hasLanguages = formData.languages?.length > 0;
     const hasEnvironment = formData.trainingEnvironment;
     const hasTypes = formData.trainingTypes?.length > 0;
+    const hasSpecialties = formData.specialties?.length > 0;
     const hasCerts =
       certFields?.length > 0 && certFields.some((cert) => cert.value);
 
-    return { hasLanguages, hasEnvironment, hasTypes, hasCerts };
+    return { hasLanguages, hasEnvironment, hasTypes, hasCerts, hasSpecialties };
   };
 
   const status = getCompletionStatus();
 
   return (
-    <div className="space-y-8">
+    <motion.div
+      variants={staggerContainer}
+      initial="hidden"
+      animate="visible"
+      className="space-y-8"
+    >
       {/* Progress Overview */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <motion.div
+        variants={fadeInUp}
+        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3"
+      >
         <div
           className={`p-3 rounded-lg border transition-all duration-200 ${
             status.hasLanguages
@@ -92,6 +127,37 @@ export const ProfessionalDetailsStep = ({
               </p>
               <p className="text-xs text-gray-500">
                 {status.hasLanguages ? `${formData.languages.length}` : "0"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          className={`p-3 rounded-lg border transition-all duration-200 ${
+            status.hasSpecialties
+              ? "bg-green-500/10 border-green-500/30"
+              : "bg-gray-800/50 border-gray-600/30"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <Icon
+              icon="mdi:star-circle"
+              width={18}
+              height={18}
+              className={
+                status.hasSpecialties ? "text-green-400" : "text-gray-400"
+              }
+            />
+            <div>
+              <p
+                className={`text-sm font-medium ${
+                  status.hasSpecialties ? "text-green-400" : "text-gray-400"
+                }`}
+              >
+                Specialties
+              </p>
+              <p className="text-xs text-gray-500">
+                {status.hasSpecialties ? `${formData.specialties.length}` : "0"}
               </p>
             </div>
           </div>
@@ -137,7 +203,7 @@ export const ProfessionalDetailsStep = ({
         >
           <div className="flex items-center gap-2">
             <Icon
-              icon="mdi:clipboard-list"
+              icon="mdi:dumbbell"
               width={18}
               height={18}
               className={status.hasTypes ? "text-green-400" : "text-gray-400"}
@@ -187,47 +253,69 @@ export const ProfessionalDetailsStep = ({
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Languages */}
-      <FormSection
-        title="Languages"
-        icon={<Icon icon="mdi:translate" width={20} height={20} />}
-      >
-        <LanguageSelector
-          selectedLanguages={formData.languages || []}
-          onChange={handleLanguageChange}
-          error={errors.languages}
-        />
-      </FormSection>
+      <motion.div variants={fadeInUp}>
+        <FormSection
+          title="Languages"
+          icon={<Icon icon="mdi:translate" width={20} height={20} />}
+        >
+          <LanguageSelector
+            selectedLanguages={formData.languages || []}
+            onChange={handleLanguageChange}
+            error={errors.languages}
+          />
+        </FormSection>
+      </motion.div>
+
+      {/* Specialties */}
+      <motion.div variants={fadeInUp}>
+        <FormSection
+          title="Specialties"
+          icon={<Icon icon="mdi:star-circle" width={20} height={20} />}
+          description="Select the areas you specialize in as a trainer"
+        >
+          <SpecialtySelector
+            selectedSpecialties={formData.specialties || []}
+            onChange={handleSpecialtyChange}
+          />
+        </FormSection>
+      </motion.div>
 
       {/* Training Setup */}
-      <FormSection
-        title="Training Setup"
-        icon={<Icon icon="mdi:dumbbell" width={20} height={20} />}
-      >
-        <TrainingTypeSelector
-          selectedEnvironment={formData.trainingEnvironment}
-          selectedTypes={formData.trainingTypes || []}
-          onEnvironmentChange={handleEnvironmentChange}
-          onTypeToggle={handleTrainingTypeToggle}
-          errorEnvironment={errors.trainingEnvironment}
-          errorTypes={errors.trainingTypes}
-        />
-      </FormSection>
+      <motion.div variants={fadeInUp}>
+        <FormSection
+          title="Training Setup"
+          icon={<Icon icon="mdi:dumbbell" width={20} height={20} />}
+          description="Define your training environment and the types of training you offer"
+        >
+          <TrainingTypeSelector
+            selectedEnvironment={formData.trainingEnvironment}
+            selectedTypes={formData.trainingTypes || []}
+            onEnvironmentChange={handleEnvironmentChange}
+            onTypeToggle={handleTrainingTypeToggle}
+            errorEnvironment={errors.trainingEnvironment}
+            errorTypes={errors.trainingTypes}
+          />
+        </FormSection>
+      </motion.div>
 
       {/* Certifications */}
-      <FormSection
-        title="Certifications"
-        icon={<Icon icon="mdi:certificate" width={20} height={20} />}
-      >
-        <CertificationUpload
-          certFields={certFields}
-          handleCertChange={handleCertChange}
-          addCertField={addCertField}
-          removeCertField={removeCertField}
-        />
-      </FormSection>
-    </div>
+      <motion.div variants={fadeInUp}>
+        <FormSection
+          title="Certifications"
+          icon={<Icon icon="mdi:certificate" width={20} height={20} />}
+          description="Upload your professional certifications and credentials"
+        >
+          <CertificationUpload
+            certFields={certFields}
+            handleCertChange={handleCertChange}
+            addCertField={addCertField}
+            removeCertField={removeCertField}
+          />
+        </FormSection>
+      </motion.div>
+    </motion.div>
   );
 };

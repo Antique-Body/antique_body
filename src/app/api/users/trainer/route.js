@@ -81,7 +81,7 @@ export async function GET() {
         );
       }
       // Kreiraj prazan TrainerInfo
-      await trainerService.createTrainerInfo(profile.id, {});
+      await trainerService.createOrUpdateTrainerInfo(profile.id, {});
       // Fetchaj opet
       trainerInfo = await trainerService.getTrainerInfoByUserId(
         session.user.id
@@ -244,7 +244,7 @@ export async function PUT(req) {
       });
     } else {
       // Create
-      trainerInfo = await trainerService.createTrainerInfo(
+      trainerInfo = await trainerService.createOrUpdateTrainerInfo(
         profile.id,
         infoData
       );

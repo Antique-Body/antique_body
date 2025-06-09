@@ -2,12 +2,10 @@ export { ProfileContactStep } from "./ProfileContactStep";
 export { RegistrationStep } from "./RegistrationStep";
 export { TipsSection } from "./TipsSection";
 export { FormSection } from "./FormSection";
-export { CertificationUpload } from "./CertificationUpload";
-export { EducationUpload } from "./EducationUpload";
 export { LanguageSelector } from "./LanguageSelector";
 export { LocationSelector } from "./LocationSelector";
-export { TrainingTypeSelector } from "./TrainingTypeSelector";
-export { SpecialtySelector } from "./SpecialtySelector";
+export { TrainingTypeSelector } from "../../shared/TrainingTypeSelector";
+export { SpecialtySelector } from "../../shared/SpecialtySelector";
 export { InfoBanner } from "./InfoBanner";
 
 // New reusable components
