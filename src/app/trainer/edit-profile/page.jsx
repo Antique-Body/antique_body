@@ -40,7 +40,6 @@ const TrainerEditProfilePage = () => {
   const router = useRouter();
   const [previewImage, setPreviewImage] = useState(null);
   const [activeSection, setActiveSection] = useState("basicInfo");
-  const [saveIndicator, setSaveIndicator] = useState(false);
   const [formProgress, setFormProgress] = useState(20);
 
   // Novo: loading state
@@ -85,8 +84,11 @@ const TrainerEditProfilePage = () => {
     expertise: [],
     availability: { weekdays: [], timeSlots: [] },
   });
-
-  console.log(trainerData, "trainerData");
+  // Dodajem state za inicijalni snapshot
+  // Dodajem state za inicijalni snapshot certifikata
+  const [initialCertifications, setInitialCertifications] = useState([]);
+  const [resetCertFieldsTrigger, setResetCertFieldsTrigger] = useState(0);
+  const [certFields, setCertFields] = useState([]);
 
   // Novo: fetch podataka iz baze
   useEffect(() => {
@@ -97,11 +99,11 @@ const TrainerEditProfilePage = () => {
         if (!res.ok) throw new Error("No trainer profile");
         const data = await res.json();
         console.log(data, "data");
-        setTrainerData((prev) => ({
-          ...prev,
+        const newTrainerData = {
+          ...trainerData,
           rating: data.rating || "",
           trainerProfile: {
-            ...prev.trainerProfile,
+            ...trainerData.trainerProfile,
             ...data.trainerProfile,
             dateOfBirth: data.trainerProfile?.dateOfBirth
               ? data.trainerProfile.dateOfBirth.slice(0, 10)
@@ -139,7 +141,9 @@ const TrainerEditProfilePage = () => {
               gyms: data.trainerProfile?.location?.gyms || [],
             },
           },
-        }));
+        };
+        setTrainerData(newTrainerData);
+        setInitialCertifications(data.trainerProfile?.certifications || []); // Spremi snapshot certifikata
       } catch {
         // Ako nema profila, ostavi prazno (user treba popuniti)
       } finally {
@@ -147,7 +151,10 @@ const TrainerEditProfilePage = () => {
       }
     };
     fetchTrainer();
+    // eslint-disable-next-line
   }, []);
+
+  console.log(trainerData, "trainerData");
 
   // Calculate form completion percentage
   const calculateFormProgress = useCallback(() => {
@@ -196,8 +203,6 @@ const TrainerEditProfilePage = () => {
   // Handler for text input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setSaveIndicator(true);
-    setTimeout(() => setSaveIndicator(false), 1000);
     if (name.startsWith("location.")) {
       setTrainerData({
         ...trainerData,
@@ -230,37 +235,109 @@ const TrainerEditProfilePage = () => {
 
   // Handle image upload
   const handleImageUpload = (e) => {
-    const file = e.target.files[0];
+    const file = e?.target?.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        setPreviewImage(reader.result);
-        setSaveIndicator(true);
-        setTimeout(() => setSaveIndicator(false), 1000);
-        setTrainerData({
-          ...trainerData,
+        setPreviewImage(reader.result); // Za prikaz slike
+        setTrainerData((prev) => ({
+          ...prev,
           trainerProfile: {
-            ...trainerData.trainerProfile,
-            profileImage: reader.result,
+            ...prev.trainerProfile,
+            profileImage: file, // Spremi file objekt
           },
-        });
+        }));
       };
       reader.readAsDataURL(file);
     }
   };
 
+  // Funkcija za reset samo certifikata
+  const handleResetCertifications = () => {
+    setCertFields(initialCertifications);
+    setTrainerData((prev) => ({
+      ...prev,
+      trainerProfile: {
+        ...prev.trainerProfile,
+        certifications: initialCertifications,
+      },
+    }));
+    setResetCertFieldsTrigger((prev) => prev + 1);
+  };
+
+  const handleCertificationsChange = (newCertFields) => {
+    setCertFields(newCertFields);
+  };
+
   // Prilagođavam handleSubmit da šalje podatke na backend
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSaveIndicator(true);
     try {
+      // 1. Pripremi FormData za upload slike i certifikata
+      const formData = new FormData();
+
+      // Dodaj profilnu sliku ako je novi file (nije string tj. nije već URL)
+      if (
+        trainerData.trainerProfile.profileImage &&
+        typeof trainerData.trainerProfile.profileImage !== "string"
+      ) {
+        formData.append(
+          "profileImage",
+          trainerData.trainerProfile.profileImage
+        );
+      }
+
+      // Dodaj certifikate koji su novi fileovi
+      certFields.forEach((cert, idx) => {
+        if (cert.files && cert.files.length > 0) {
+          for (const file of cert.files) {
+            if (file && typeof file !== "string") {
+              formData.append(`certifications[${idx}]`, file);
+            }
+          }
+        }
+      });
+
+      // 2. Ako ima fileova, uploadaj ih
+      let uploadedUrls = {};
+      if ([...formData.keys()].length > 0) {
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        uploadedUrls = await uploadRes.json();
+        if (uploadedUrls.error) throw new Error(uploadedUrls.error);
+      }
+
+      // 3. Zamijeni profileImage i certifikate s novim URL-ovima
+      let profileImageUrl = trainerData.trainerProfile.profileImage;
+      if (uploadedUrls.profileImage) {
+        profileImageUrl = uploadedUrls.profileImage;
+      }
+
+      // Pripremi certifikate za spremanje (samo URL-ovi, bez file objekata)
+      const certificationsForSave = certFields.map((cert, idx) => ({
+        ...cert,
+        hidden: cert.hidden || false,
+        documents:
+          uploadedUrls.certifications && uploadedUrls.certifications[idx]
+            ? uploadedUrls.certifications[idx]
+            : cert.documents || [],
+        files: undefined, // ne šalji fileove
+      }));
+
+      // 4. Pripremi payload: availability, education, certifications unutar trainerProfile
       const body = {
-        trainerProfile: trainerData.trainerProfile,
-        education: trainerData.education,
-        services: trainerData.services,
-        expertise: trainerData.expertise,
-        availability: trainerData.availability,
+        trainerProfile: {
+          ...trainerData.trainerProfile,
+          profileImage: profileImageUrl,
+          certifications: certificationsForSave,
+          availability: trainerData.availability,
+          education: trainerData.education,
+        },
       };
+
+      // 5. Pošalji na backend
       const res = await fetch("/api/users/trainer", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -268,12 +345,10 @@ const TrainerEditProfilePage = () => {
       });
       if (!res.ok) throw new Error("Failed to update profile");
       setTimeout(() => {
-        setSaveIndicator(false);
         router.push("/trainer/dashboard");
       }, 1000);
       console.log(res, "res");
     } catch (err) {
-      setSaveIndicator(false);
       alert("Error updating profile: " + err.message);
     }
   };
@@ -283,7 +358,6 @@ const TrainerEditProfilePage = () => {
     router.push("/trainer/dashboard");
   };
 
-  console.log(trainerData, "trainerData");
   // Navigation sections
   const sections = [
     { id: "basicInfo", label: "Basic Information", badgeCount: 0 },
@@ -301,7 +375,6 @@ const TrainerEditProfilePage = () => {
     },
   ];
 
-  console.log(trainerData, ";ajmo");
   // Loading indikator
   if (loading) {
     return (
@@ -371,15 +444,6 @@ const TrainerEditProfilePage = () => {
             className="backdrop-blur-xl"
           >
             <form onSubmit={handleSubmit} className="relative space-y-10">
-              {/* Auto-save indicator */}
-              <div
-                className={`pointer-events-none fixed right-10 top-10 z-50 rounded-lg bg-black/80 px-4 py-2 text-sm font-medium text-green-400 transition-all duration-300 ${
-                  saveIndicator ? "opacity-100" : "opacity-0"
-                }`}
-              >
-                <span className="mr-2">●</span> Auto-saving...
-              </div>
-
               {/* Active section */}
               <AnimatedTabContent
                 isActive={activeSection === "basicInfo"}
@@ -412,6 +476,12 @@ const TrainerEditProfilePage = () => {
                   trainerData={trainerData}
                   handleChange={handleChange}
                   setTrainerData={setTrainerData}
+                  onResetCertifications={handleResetCertifications}
+                  resetCertFieldsTrigger={resetCertFieldsTrigger}
+                  initialCertifications={initialCertifications}
+                  onCertificationsChange={handleCertificationsChange}
+                  certFields={certFields}
+                  setCertFields={setCertFields}
                 />
               </AnimatedTabContent>
 
@@ -475,21 +545,7 @@ const TrainerEditProfilePage = () => {
                     }
                     className="relative overflow-hidden"
                   >
-                    <span
-                      className={`transition-opacity ${
-                        saveIndicator ? "opacity-0" : "opacity-100"
-                      }`}
-                    >
-                      Save Profile
-                    </span>
-                    <span
-                      className={`absolute inset-0 flex items-center justify-center transition-opacity ${
-                        saveIndicator ? "opacity-100" : "opacity-0"
-                      }`}
-                    >
-                      <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
-                      Saving...
-                    </span>
+                    Save Profile
                   </Button>
                 </div>
               </div>

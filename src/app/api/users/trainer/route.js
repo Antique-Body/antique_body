@@ -133,6 +133,7 @@ export async function PUT(req) {
       });
     }
     const body = await req.json();
+    const data = body.trainerProfile;
 
     // Find the trainer profile
     const profile = await trainerService.getTrainerProfileByUserId(
@@ -145,123 +146,110 @@ export async function PUT(req) {
       );
     }
 
-    // Handle trainer profile update
-    if (body.trainerProfile) {
-      // Prepare certification data if provided
-      const certifications = body.trainerProfile.certifications || [];
+    // Briši stare relacije
+    await prisma.trainerSpecialty.deleteMany({
+      where: { trainerProfileId: profile.id },
+    });
+    await prisma.trainerLanguage.deleteMany({
+      where: { trainerProfileId: profile.id },
+    });
+    await prisma.trainerEnvironment.deleteMany({
+      where: { trainerProfileId: profile.id },
+    });
+    await prisma.trainerType.deleteMany({
+      where: { trainerProfileId: profile.id },
+    });
+    await prisma.certification.deleteMany({
+      where: { trainerProfileId: profile.id },
+    });
 
-      // First, delete existing certifications
-      await prisma.certification.deleteMany({
-        where: { trainerProfileId: profile.id },
-      });
+    // Kreiraj nove relacije i certifikate
+    const {
+      certifications,
+      specialties,
+      languages,
+      trainingEnvironments,
+      trainingTypes,
+      availability,
+      education,
+      ...profileData
+    } = data;
 
-      // Then create new certifications
-      if (certifications.length > 0) {
-        // Create new certifications
-        for (const cert of certifications) {
-          // If cert is just a string, create a simple certification
-          if (typeof cert === "string") {
-            await prisma.certification.create({
-              data: {
-                trainerProfileId: profile.id,
-                name: cert,
-              },
-            });
-          }
-          // If cert is an object with more details
-          else if (typeof cert === "object") {
-            const certData = {
-              name: cert.name,
-              issuer: cert.issuer || null,
-              expiryDate: cert.expiryDate ? new Date(cert.expiryDate) : null,
-            };
-
-            // Create the certification
-            const newCert = await prisma.certification.create({
-              data: {
-                trainerProfileId: profile.id,
-                ...certData,
-              },
-            });
-
-            // Handle file uploads if any
-            if (
-              cert.files &&
-              Array.isArray(cert.files) &&
-              cert.files.length > 0
-            ) {
-              // For each file, create a document entry
-              for (const file of cert.files) {
-                if (file && (file.url || file.data)) {
-                  await prisma.certificationDocument.create({
-                    data: {
-                      certificationId: newCert.id,
-                      url: file.url || file.data || "",
-                      originalName: file.name || "document",
-                      mimetype: file.type || "application/octet-stream",
-                    },
-                  });
-                }
-              }
+    // Kreiraj certifikate
+    if (certifications && certifications.length > 0) {
+      for (const cert of certifications) {
+        const certData = {
+          name: cert.name,
+          issuer: cert.issuer || null,
+          expiryDate: cert.expiryDate ? new Date(cert.expiryDate) : null,
+          hidden: cert.hidden !== undefined ? cert.hidden : false,
+        };
+        const newCert = await prisma.certification.create({
+          data: {
+            trainerProfileId: profile.id,
+            ...certData,
+          },
+        });
+        if (
+          cert.documents &&
+          Array.isArray(cert.documents) &&
+          cert.documents.length > 0
+        ) {
+          for (const file of cert.documents) {
+            if (file && file.url) {
+              await prisma.certificationDocument.create({
+                data: {
+                  certificationId: newCert.id,
+                  url: file.url,
+                  originalName: file.originalName || "document",
+                  mimetype: file.mimetype || "application/octet-stream",
+                },
+              });
             }
           }
         }
       }
+    }
 
-      // Update the trainer profile excluding certifications (handled separately)
-      const { certifications: _, ...profileData } = body.trainerProfile;
+    // Izbaci polja koja nisu u modelu
+    const {
+      city,
+      state,
+      country,
+      id,
+      userId,
+      createdAt,
+      updatedAt,
+      location,
+      description, // description je duplikat professionalBio
+      ...allowedProfileData
+    } = profileData;
 
-      // Update profile
-      await prisma.trainerProfile.update({
-        where: { id: profile.id },
-        data: {
-          ...profileData,
-          dateOfBirth: profileData.dateOfBirth
-            ? new Date(profileData.dateOfBirth)
-            : profile.dateOfBirth,
+    await prisma.trainerProfile.update({
+      where: { id: profile.id },
+      data: {
+        ...allowedProfileData,
+        dateOfBirth: allowedProfileData.dateOfBirth
+          ? new Date(allowedProfileData.dateOfBirth)
+          : profile.dateOfBirth,
+        specialties: { create: (specialties || []).map((name) => ({ name })) },
+        languages: { create: (languages || []).map((name) => ({ name })) },
+        trainingEnvironments: {
+          create: (trainingEnvironments || []).map((name) => ({ name })),
         },
-      });
-    }
-
-    // Handle trainer info update
-    let trainerInfo = await trainerService.getTrainerInfoByProfileId(
-      profile.id
-    );
-
-    // Prepare trainer info data
-    const infoData = {
-      rating: body.rating,
-      totalSessions: body.totalSessions,
-      totalEarnings: body.totalEarnings,
-      upcomingSessions: body.upcomingSessions,
-    };
-
-    if (trainerInfo) {
-      // Update
-      trainerInfo = await prisma.trainerInfo.update({
-        where: { trainerProfileId: profile.id },
-        data: infoData,
-      });
-    } else {
-      // Create
-      trainerInfo = await trainerService.createOrUpdateTrainerInfo(
-        profile.id,
-        infoData
-      );
-    }
+        trainingTypes: {
+          create: (trainingTypes || []).map((name) => ({ name })),
+        },
+        availability: availability || undefined,
+        education: education || undefined,
+      },
+    });
 
     // Get updated profile with all relations
     const updatedProfile = await trainerService.getTrainerProfileByUserId(
       session.user.id
     );
-
-    return new Response(
-      JSON.stringify({
-        ...trainerInfo,
-        trainerProfile: updatedProfile,
-      }),
-      { status: 200 }
-    );
+    return new Response(JSON.stringify(updatedProfile), { status: 200 });
   } catch (error) {
     console.error("Error updating trainer profile:", error);
     return new Response(JSON.stringify({ error: error.message }), {

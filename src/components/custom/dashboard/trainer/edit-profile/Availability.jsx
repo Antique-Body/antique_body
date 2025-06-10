@@ -20,7 +20,7 @@ const staggerItems = {
   },
 };
 
-export const Availability = ({ trainerData, handleChange, setTrainerData }) => (
+export const Availability = ({ trainerData, setTrainerData }) => (
   <motion.div
     variants={staggerItems}
     initial="hidden"
@@ -169,8 +169,16 @@ export const Availability = ({ trainerData, handleChange, setTrainerData }) => (
               label="Session Duration (minutes)"
               name="sessionDuration"
               type="number"
-              value={trainerData.sessionDuration || 60}
-              onChange={handleChange}
+              value={trainerData.availability.sessionDuration || 60}
+              onChange={(e) => {
+                setTrainerData({
+                  ...trainerData,
+                  availability: {
+                    ...trainerData.availability,
+                    sessionDuration: e.target.value,
+                  },
+                });
+              }}
               placeholder="e.g. 60"
               backgroundStyle="darker"
             />
@@ -184,8 +192,16 @@ export const Availability = ({ trainerData, handleChange, setTrainerData }) => (
               label="Cancellation Policy (hours notice)"
               name="cancellationPolicy"
               type="number"
-              value={trainerData.cancellationPolicy || 24}
-              onChange={handleChange}
+              value={trainerData.availability.cancellationPolicy || 24}
+              onChange={(e) => {
+                setTrainerData({
+                  ...trainerData,
+                  availability: {
+                    ...trainerData.availability,
+                    cancellationPolicy: e.target.value,
+                  },
+                });
+              }}
               placeholder="e.g. 24"
               backgroundStyle="darker"
             />
