@@ -80,8 +80,23 @@ export async function GET() {
           { status: 404 }
         );
       }
-      // Kreiraj prazan TrainerInfo
-      await trainerService.createOrUpdateTrainerInfo(profile.id, {});
+      // Kreiraj prazan TrainerInfo, ali ignoriraj grešku ako već postoji
+      try {
+        await trainerService.createOrUpdateTrainerInfo(profile.id, {});
+      } catch (err) {
+        if (
+          err.code !== "P2002" &&
+          !(
+            err.message &&
+            err.message.includes(
+              "Unique constraint failed on the fields: (`trainerProfileId`)"
+            )
+          )
+        ) {
+          throw err;
+        }
+        // Ako je unique constraint, samo nastavi
+      }
       // Fetchaj opet
       trainerInfo = await trainerService.getTrainerInfoByUserId(
         session.user.id
@@ -106,13 +121,31 @@ export async function GET() {
       }
     }
 
-    // Response: sve podatke, ali pricePerSession u originalnoj valuti
+    // Response: sve podatke, ali pricePerSession u originalnoj valuti i location objekt direktno u trainerProfile
+    const location = trainerInfo.trainerProfile?.location || {};
+    // Fetch all gyms for this trainer and include in location.gyms
+    const trainerGyms = await prisma.trainerGym.findMany({
+      where: { trainerId: trainerInfo.trainerProfile.id },
+      include: { gym: true },
+    });
+    const gymsArray = trainerGyms.map((tg) => ({
+      value: tg.gym.placeId,
+      label: tg.gym.name,
+      address: tg.gym.address,
+      lat: tg.gym.lat,
+      lon: tg.gym.lon,
+    }));
     return new Response(
       JSON.stringify({
         ...trainerInfo,
         trainerProfile: {
           ...trainerInfo.trainerProfile,
           pricePerSession: convertedPrice,
+          location: {
+            ...location,
+            gyms: gymsArray,
+          },
+          availability: trainerInfo.trainerProfile.availability || {},
         },
       }),
       { status: 200 }
@@ -213,22 +246,41 @@ export async function PUT(req) {
 
     // Izbaci polja koja nisu u modelu
     const {
-      city,
-      state,
-      country,
-      id,
-      userId,
-      createdAt,
-      updatedAt,
       location,
-      description, // description je duplikat professionalBio
+      userId: _userId,
+      locationId: _locationId,
       ...allowedProfileData
     } = profileData;
+
+    // Pripremi pricePerSession kao int ili null
+    let pricePerSession = null;
+    if (
+      allowedProfileData.pricePerSession !== undefined &&
+      allowedProfileData.pricePerSession !== null &&
+      allowedProfileData.pricePerSession !== ""
+    ) {
+      pricePerSession = Number(allowedProfileData.pricePerSession);
+      if (isNaN(pricePerSession)) pricePerSession = null;
+    }
+
+    // Validacija pricePerSession
+    if (
+      (data.pricingType === "fixed" || data.pricingType === "package_deals") &&
+      (!data.pricePerSession || Number(data.pricePerSession) <= 0)
+    ) {
+      return new Response(
+        JSON.stringify({
+          error: "Price per session is required for selected pricing type.",
+        }),
+        { status: 400 }
+      );
+    }
 
     await prisma.trainerProfile.update({
       where: { id: profile.id },
       data: {
         ...allowedProfileData,
+        pricePerSession,
         dateOfBirth: allowedProfileData.dateOfBirth
           ? new Date(allowedProfileData.dateOfBirth)
           : profile.dateOfBirth,
@@ -245,11 +297,63 @@ export async function PUT(req) {
       },
     });
 
+    // Save gyms as relations if present in payload
+    if (location && Array.isArray(location.gyms)) {
+      // Remove old TrainerGym relations
+      await prisma.trainerGym.deleteMany({ where: { trainerId: profile.id } });
+      for (const gym of location.gyms) {
+        let dbGym = await prisma.gym.findUnique({
+          where: { placeId: gym.value },
+        });
+        if (!dbGym) {
+          dbGym = await prisma.gym.create({
+            data: {
+              name: gym.label,
+              address: gym.address,
+              lat: gym.lat,
+              lon: gym.lon,
+              placeId: gym.value,
+            },
+          });
+        }
+        await prisma.trainerGym.create({
+          data: {
+            trainerId: profile.id,
+            gymId: dbGym.id,
+          },
+        });
+      }
+    }
+
     // Get updated profile with all relations
     const updatedProfile = await trainerService.getTrainerProfileByUserId(
       session.user.id
     );
-    return new Response(JSON.stringify(updatedProfile), { status: 200 });
+
+    // Fetch all gyms for this trainer and include in location.gyms
+    const trainerGyms = await prisma.trainerGym.findMany({
+      where: { trainerId: profile.id },
+      include: { gym: true },
+    });
+    const gymsArray = trainerGyms.map((tg) => ({
+      value: tg.gym.placeId,
+      label: tg.gym.name,
+      address: tg.gym.address,
+      lat: tg.gym.lat,
+      lon: tg.gym.lon,
+    }));
+    const updatedLocation = updatedProfile.location || {};
+    return new Response(
+      JSON.stringify({
+        ...updatedProfile,
+        location: {
+          ...updatedLocation,
+          gyms: gymsArray,
+        },
+        availability: updatedProfile.availability || {},
+      }),
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error updating trainer profile:", error);
     return new Response(JSON.stringify({ error: error.message }), {

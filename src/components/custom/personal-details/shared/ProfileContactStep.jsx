@@ -48,9 +48,9 @@ export const ProfileContactStep = ({
 
       <FormField
         label="Tell us a bit about yourself"
-        name="bio"
+        name="description"
         type="textarea"
-        value={formData.bio}
+        value={formData.description}
         onChange={onChange}
         placeholder={
           userType === "trainer"

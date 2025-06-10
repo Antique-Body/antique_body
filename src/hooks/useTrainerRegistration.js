@@ -14,7 +14,7 @@ export function useTrainerRegistration() {
     // Professional Information
     trainingSince: "",
     specialties: [],
-    bio: "",
+    description: "",
     // Languages and Training Types
     languages: [],
     trainingEnvironment: "",

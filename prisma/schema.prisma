@@ -125,6 +125,9 @@ model Location {
   trainers TrainerProfile[]
   clients  ClientProfile[]
   gyms     Gym[]
+
+  @@index([city])
+  @@index([country])
 }
 
 model Gym {
@@ -133,7 +136,7 @@ model Gym {
   address   String?
   lat       Float
   lon       Float
-  placeId   String?  // Google place_id
+  placeId   String?  @unique // Google place_id
   locationId String?
   location   Location? @relation(fields: [locationId], references: [id])
   trainers   TrainerGym[]
@@ -148,7 +151,7 @@ model TrainerProfile {
   gender            String?
   trainingSince     Int?     
   profileImage      String?  
-  professionalBio   String?  @db.Text 
+  description   String?  @db.Text 
   specialties       TrainerSpecialty[]
   languages         TrainerLanguage[]
   trainingEnvironments TrainerEnvironment[]
@@ -311,7 +314,8 @@ model TrainerGym {
   trainer         TrainerProfile @relation(fields: [trainerId], references: [id], onDelete: Cascade)
   gym             Gym            @relation(fields: [gymId], references: [id], onDelete: Cascade)
   createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  updatedAt       DateTime @default(now())
 
   @@unique([trainerId, gymId])
+  @@index([gymId])
 }
