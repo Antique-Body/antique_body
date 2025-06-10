@@ -68,7 +68,7 @@ export const ContactAndLocationStep = ({
       onChange({ target: { name: "location.state", value: state } });
       onChange({ target: { name: "location.country", value: country } });
       onChange({ target: { name: "location.lat", value: details.lat } });
-      onChange({ target: { name: "location.lot", value: details.lon } });
+      onChange({ target: { name: "location.lon", value: details.lon } });
     }
   };
 

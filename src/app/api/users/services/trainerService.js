@@ -92,7 +92,7 @@ async function createTrainerWithDetails(formData, userId) {
       gender: formData.gender,
       trainingSince: Number(formData.trainingSince),
       profileImage: formData.profileImage,
-      professionalBio: formData.bio || null,
+      description: formData.description || null,
       locationId: dbLocation.id,
       pricingType: formData.pricingType,
       pricePerSession:

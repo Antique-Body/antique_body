@@ -58,17 +58,19 @@ const TrainerEditProfilePage = () => {
       trainingEnvironments: [],
       trainingTypes: [],
       certifications: [],
-      professionalBio: "",
-      city: "",
-      state: "",
-      country: "",
+      description: "",
       pricingType: "",
       pricePerSession: "",
       currency: "EUR",
       contactEmail: "",
       contactPhone: "",
       profileImage: "",
-      description: "",
+      availability: {
+        weekdays: [],
+        timeSlots: [],
+        sessionDuration: 60,
+        cancellationPolicy: 24,
+      },
       location: {
         city: "",
         state: "",
@@ -82,7 +84,6 @@ const TrainerEditProfilePage = () => {
     education: [],
     services: [],
     expertise: [],
-    availability: { weekdays: [], timeSlots: [] },
   });
   // Dodajem state za inicijalni snapshot
   // Dodajem state za inicijalni snapshot certifikata
@@ -117,9 +118,6 @@ const TrainerEditProfilePage = () => {
             trainingTypes:
               data.trainerProfile?.trainingTypes?.map((t) => t.name) || [],
             certifications: data.trainerProfile?.certifications || [],
-            city: data.trainerProfile?.city || "",
-            state: data.trainerProfile?.state || "",
-            country: data.trainerProfile?.country || "",
             pricingType: data.trainerProfile?.pricingType || "",
             pricePerSession: data.trainerProfile?.pricePerSession || "",
             currency: data.trainerProfile?.currency || "EUR",
@@ -128,8 +126,7 @@ const TrainerEditProfilePage = () => {
             profileImage: data.trainerProfile?.profileImage || "",
             firstName: data.trainerProfile?.firstName || "",
             lastName: data.trainerProfile?.lastName || "",
-            professionalBio: data.trainerProfile?.professionalBio || "",
-            description: data.trainerProfile?.professionalBio || "",
+            description: data.trainerProfile?.description || "",
             profileImage: data.trainerProfile?.profileImage || "",
             location: {
               ...(data.trainerProfile?.location || {}),
@@ -173,7 +170,7 @@ const TrainerEditProfilePage = () => {
       filledFields++;
     if (trainerData.trainerProfile.trainingTypes.length > 0) filledFields++;
     if (trainerData.trainerProfile.certifications.length > 0) filledFields++;
-    if (trainerData.trainerProfile.professionalBio) filledFields++;
+    if (trainerData.trainerProfile.description) filledFields++;
     if (trainerData.trainerProfile.city) filledFields++;
     if (trainerData.trainerProfile.state) filledFields++;
     if (trainerData.trainerProfile.country) filledFields++;
@@ -187,8 +184,11 @@ const TrainerEditProfilePage = () => {
     if (trainerData.education.length > 0) filledFields++;
     if (trainerData.services.length > 0) filledFields++;
     if (trainerData.expertise.length > 0) filledFields++;
-    if (trainerData.availability.weekdays.length > 0) filledFields++;
-    if (trainerData.availability.timeSlots.length > 0) filledFields++;
+    console.log(trainerData.trainerProfile, "trainerData222");
+    if (trainerData.trainerProfile.availability.weekdays.length > 0)
+      filledFields++;
+    if (trainerData.trainerProfile.availability.timeSlots.length > 0)
+      filledFields++;
 
     setFormProgress(
       Math.max(20, Math.round((filledFields / totalFields) * 100))
@@ -234,8 +234,7 @@ const TrainerEditProfilePage = () => {
   };
 
   // Handle image upload
-  const handleImageUpload = (e) => {
-    const file = e?.target?.files?.[0];
+  const handleImageUpload = (file) => {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
@@ -249,8 +248,27 @@ const TrainerEditProfilePage = () => {
         }));
       };
       reader.readAsDataURL(file);
+    } else {
+      setPreviewImage(null);
+      setTrainerData((prev) => ({
+        ...prev,
+        trainerProfile: {
+          ...prev.trainerProfile,
+          profileImage: "",
+        },
+      }));
     }
   };
+
+  // Reset previewImage kad backend vrati novi URL (npr. nakon save-a ili fetch-a)
+  useEffect(() => {
+    if (
+      trainerData.trainerProfile.profileImage &&
+      typeof trainerData.trainerProfile.profileImage === "string"
+    ) {
+      setPreviewImage(null); // Prikazuj samo URL iz baze
+    }
+  }, [trainerData.trainerProfile.profileImage]);
 
   // Funkcija za reset samo certifikata
   const handleResetCertifications = () => {
@@ -332,7 +350,7 @@ const TrainerEditProfilePage = () => {
           ...trainerData.trainerProfile,
           profileImage: profileImageUrl,
           certifications: certificationsForSave,
-          availability: trainerData.availability,
+          availability: trainerData.trainerProfile.availability,
           education: trainerData.education,
         },
       };

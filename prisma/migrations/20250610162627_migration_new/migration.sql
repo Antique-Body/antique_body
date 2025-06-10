@@ -95,6 +95,8 @@ CREATE TABLE `Location` (
     `lat` DOUBLE NULL,
     `lon` DOUBLE NULL,
 
+    INDEX `Location_city_idx`(`city`),
+    INDEX `Location_country_idx`(`country`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -108,6 +110,7 @@ CREATE TABLE `Gym` (
     `placeId` VARCHAR(191) NULL,
     `locationId` VARCHAR(191) NULL,
 
+    UNIQUE INDEX `Gym_placeId_key`(`placeId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -121,7 +124,7 @@ CREATE TABLE `TrainerProfile` (
     `gender` VARCHAR(191) NULL,
     `trainingSince` INTEGER NULL,
     `profileImage` VARCHAR(191) NULL,
-    `professionalBio` TEXT NULL,
+    `description` TEXT NULL,
     `locationId` VARCHAR(191) NULL,
     `pricingType` VARCHAR(191) NULL,
     `pricePerSession` INTEGER NULL,
@@ -280,8 +283,9 @@ CREATE TABLE `TrainerGym` (
     `trainerId` VARCHAR(191) NOT NULL,
     `gymId` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
+    INDEX `TrainerGym_gymId_idx`(`gymId`),
     UNIQUE INDEX `TrainerGym_trainerId_gymId_key`(`trainerId`, `gymId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
