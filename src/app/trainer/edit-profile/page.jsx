@@ -164,12 +164,15 @@ const TrainerEditProfilePage = () => {
     if (trainerData.trainerProfile.lastName) filledFields++;
     if (trainerData.trainerProfile.dateOfBirth) filledFields++;
     if (trainerData.trainerProfile.gender) filledFields++;
-    if (trainerData.trainerProfile.specialties.length > 0) filledFields++;
-    if (trainerData.trainerProfile.languages.length > 0) filledFields++;
-    if (trainerData.trainerProfile.trainingEnvironments.length > 0)
+    if ((trainerData.trainerProfile.specialties || []).length > 0)
       filledFields++;
-    if (trainerData.trainerProfile.trainingTypes.length > 0) filledFields++;
-    if (trainerData.trainerProfile.certifications.length > 0) filledFields++;
+    if ((trainerData.trainerProfile.languages || []).length > 0) filledFields++;
+    if ((trainerData.trainerProfile.trainingEnvironments || []).length > 0)
+      filledFields++;
+    if ((trainerData.trainerProfile.trainingTypes || []).length > 0)
+      filledFields++;
+    if ((trainerData.trainerProfile.certifications || []).length > 0)
+      filledFields++;
     if (trainerData.trainerProfile.description) filledFields++;
     if (trainerData.trainerProfile.city) filledFields++;
     if (trainerData.trainerProfile.state) filledFields++;
@@ -181,13 +184,25 @@ const TrainerEditProfilePage = () => {
     if (trainerData.trainerProfile.contactPhone) filledFields++;
     if (trainerData.trainerProfile.profileImage) filledFields++;
     if (trainerData.proximity) filledFields++;
-    if (trainerData.education.length > 0) filledFields++;
-    if (trainerData.services.length > 0) filledFields++;
-    if (trainerData.expertise.length > 0) filledFields++;
+    if ((trainerData.education || []).length > 0) filledFields++;
+    if ((trainerData.services || []).length > 0) filledFields++;
+    if ((trainerData.expertise || []).length > 0) filledFields++;
     console.log(trainerData.trainerProfile, "trainerData222");
-    if (trainerData.trainerProfile.availability.weekdays.length > 0)
+    if (
+      (
+        (trainerData.trainerProfile.availability &&
+          trainerData.trainerProfile.availability.weekdays) ||
+        []
+      ).length > 0
+    )
       filledFields++;
-    if (trainerData.trainerProfile.availability.timeSlots.length > 0)
+    if (
+      (
+        (trainerData.trainerProfile.availability &&
+          trainerData.trainerProfile.availability.timeSlots) ||
+        []
+      ).length > 0
+    )
       filledFields++;
 
     setFormProgress(

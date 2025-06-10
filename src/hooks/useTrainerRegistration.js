@@ -243,12 +243,12 @@ export function useTrainerRegistration() {
   // Move to next step
   const goToNextStep = (e) => {
     e.preventDefault();
-    // if (validateStep(step)) {
-    setStep(step + 1);
-    //   window.scrollTo(0, 0);
-    // } else {
-    //   scrollToTop();
-    // }
+    if (validateStep(step)) {
+      setStep(step + 1);
+      window.scrollTo(0, 0);
+    } else {
+      scrollToTop();
+    }
   };
 
   // Move to previous step

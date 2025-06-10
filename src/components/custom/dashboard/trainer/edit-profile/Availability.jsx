@@ -22,6 +22,11 @@ const staggerItems = {
 
 export const Availability = ({ trainerData, setTrainerData }) => {
   console.log("trainerData:", trainerData);
+  // Safe fallback values
+  const availability = trainerData.trainerProfile.availability || {};
+  const weekdays = availability.weekdays || [];
+  const timeSlots = availability.timeSlots || [];
+
   return (
     <motion.div
       variants={staggerItems}
@@ -65,26 +70,19 @@ export const Availability = ({ trainerData, setTrainerData }) => {
                   type="checkbox"
                   id={day}
                   className="peer hidden"
-                  checked={trainerData.trainerProfile.availability.weekdays.includes(
-                    day
-                  )}
+                  checked={weekdays.includes(day)}
                   onChange={(e) => {
-                    const weekdays = e.target.checked
-                      ? [
-                          ...trainerData.trainerProfile.availability.weekdays,
-                          day,
-                        ]
-                      : trainerData.trainerProfile.availability.weekdays.filter(
-                          (d) => d !== day
-                        );
+                    const newWeekdays = e.target.checked
+                      ? [...weekdays, day]
+                      : weekdays.filter((d) => d !== day);
 
                     setTrainerData({
                       ...trainerData,
                       trainerProfile: {
                         ...trainerData.trainerProfile,
                         availability: {
-                          ...trainerData.trainerProfile.availability,
-                          weekdays,
+                          ...availability,
+                          weekdays: newWeekdays,
                         },
                       },
                     });
@@ -121,26 +119,19 @@ export const Availability = ({ trainerData, setTrainerData }) => {
                   type="checkbox"
                   id={slot}
                   className="peer hidden"
-                  checked={trainerData.trainerProfile.availability.timeSlots.includes(
-                    slot
-                  )}
+                  checked={timeSlots.includes(slot)}
                   onChange={(e) => {
-                    const timeSlots = e.target.checked
-                      ? [
-                          ...trainerData.trainerProfile.availability.timeSlots,
-                          slot,
-                        ]
-                      : trainerData.trainerProfile.availability.timeSlots.filter(
-                          (s) => s !== slot
-                        );
+                    const newTimeSlots = e.target.checked
+                      ? [...timeSlots, slot]
+                      : timeSlots.filter((s) => s !== slot);
 
                     setTrainerData({
                       ...trainerData,
                       trainerProfile: {
                         ...trainerData.trainerProfile,
                         availability: {
-                          ...trainerData.trainerProfile.availability,
-                          timeSlots,
+                          ...availability,
+                          timeSlots: newTimeSlots,
                         },
                       },
                     });
@@ -155,12 +146,7 @@ export const Availability = ({ trainerData, setTrainerData }) => {
                     <motion.div
                       initial={false}
                       animate={{
-                        opacity:
-                          trainerData.trainerProfile.availability.timeSlots.includes(
-                            slot
-                          )
-                            ? 1
-                            : 0,
+                        opacity: timeSlots.includes(slot) ? 1 : 0,
                       }}
                       className="ml-2 h-2 w-2 rounded-full bg-[#FF7800]"
                     ></motion.div>
@@ -190,16 +176,14 @@ export const Availability = ({ trainerData, setTrainerData }) => {
                 label="Session Duration (minutes)"
                 name="sessionDuration"
                 type="number"
-                value={
-                  trainerData.trainerProfile.availability.sessionDuration || 60
-                }
+                value={availability.sessionDuration || 60}
                 onChange={(e) => {
                   setTrainerData({
                     ...trainerData,
                     trainerProfile: {
                       ...trainerData.trainerProfile,
                       availability: {
-                        ...trainerData.trainerProfile.availability,
+                        ...availability,
                         sessionDuration: e.target.value,
                       },
                     },
@@ -218,17 +202,14 @@ export const Availability = ({ trainerData, setTrainerData }) => {
                 label="Cancellation Policy (hours notice)"
                 name="cancellationPolicy"
                 type="number"
-                value={
-                  trainerData.trainerProfile.availability.cancellationPolicy ||
-                  24
-                }
+                value={availability.cancellationPolicy || 24}
                 onChange={(e) => {
                   setTrainerData({
                     ...trainerData,
                     trainerProfile: {
                       ...trainerData.trainerProfile,
                       availability: {
-                        ...trainerData.trainerProfile.availability,
+                        ...availability,
                         cancellationPolicy: e.target.value,
                       },
                     },
