@@ -6,8 +6,6 @@ import { CertificationUpload } from "../../shared";
 
 import { FormSection, LanguageSelector, TrainingTypeSelector } from "./";
 
-import { SpecialtySelector } from "@/components/custom/shared";
-
 // Animation variants
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -66,25 +64,15 @@ export const ProfessionalDetailsStep = ({
     });
   };
 
-  const handleSpecialtyChange = (specialties) => {
-    onChange({
-      target: {
-        name: "specialties",
-        value: specialties,
-      },
-    });
-  };
-
   // Get completion status for visual indicators
   const getCompletionStatus = () => {
     const hasLanguages = formData.languages?.length > 0;
     const hasEnvironment = formData.trainingEnvironment;
     const hasTypes = formData.trainingTypes?.length > 0;
-    const hasSpecialties = formData.specialties?.length > 0;
     const hasCerts =
       certFields?.length > 0 && certFields.some((cert) => cert.value);
 
-    return { hasLanguages, hasEnvironment, hasTypes, hasCerts, hasSpecialties };
+    return { hasLanguages, hasEnvironment, hasTypes, hasCerts };
   };
 
   const status = getCompletionStatus();
@@ -269,20 +257,6 @@ export const ProfessionalDetailsStep = ({
         </FormSection>
       </motion.div>
 
-      {/* Specialties */}
-      <motion.div variants={fadeInUp}>
-        <FormSection
-          title="Specialties"
-          icon={<Icon icon="mdi:star-circle" width={20} height={20} />}
-          description="Select the areas you specialize in as a trainer"
-        >
-          <SpecialtySelector
-            selectedSpecialties={formData.specialties || []}
-            onChange={handleSpecialtyChange}
-          />
-        </FormSection>
-      </motion.div>
-
       {/* Training Setup */}
       <motion.div variants={fadeInUp}>
         <FormSection
@@ -313,6 +287,7 @@ export const ProfessionalDetailsStep = ({
             handleCertChange={handleCertChange}
             addCertField={addCertField}
             removeCertField={removeCertField}
+            isRegistration={true}
           />
         </FormSection>
       </motion.div>

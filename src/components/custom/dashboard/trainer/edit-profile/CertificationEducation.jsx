@@ -23,20 +23,30 @@ const staggerItems = {
 
 export const CertificationEducation = ({
   trainerData,
-  handleChange,
   setTrainerData,
+  onResetCertifications,
+  resetCertFieldsTrigger,
+  initialCertifications,
+  onCertificationsChange,
+  certFields: propCertFields,
+  setCertFields: propSetCertFields,
 }) => {
-  // Convert simple certification strings to objects with more properties
-  const [certFields, setCertFields] = useState([]);
+  // Ako su proslijeđeni certFields i setCertFields iz parenta, koristi njih, inače koristi lokalni state
+  const [localCertFields, localSetCertFields] = useState([]);
+  const certFields = propCertFields || localCertFields;
+  const setCertFields = propSetCertFields || localSetCertFields;
+
   const [educationFields, setEducationFields] = useState([]);
 
+  console.log(certFields, "certFields");
+
+  console.log(trainerData, "trainerData certifikati");
   // Initialize certFields from trainerData.certifications
   useEffect(() => {
     if (
       trainerData.trainerProfile.certifications &&
       trainerData.trainerProfile.certifications.length > 0
     ) {
-      // Map each certification to ensure it has the proper structure
       const mappedCerts = trainerData.trainerProfile.certifications.map(
         (cert) => {
           if (typeof cert === "string") {
@@ -47,6 +57,7 @@ export const CertificationEducation = ({
               status: "pending",
               documents: [],
               files: [],
+              hidden: false,
               id: undefined,
               trainerProfileId: undefined,
               createdAt: undefined,
@@ -62,6 +73,7 @@ export const CertificationEducation = ({
             status: cert.status || "pending",
             documents: cert.documents || [],
             files: [],
+            hidden: cert.hidden !== undefined ? cert.hidden : false,
             createdAt: cert.createdAt,
             updatedAt: cert.updatedAt,
           };
@@ -77,10 +89,11 @@ export const CertificationEducation = ({
           status: "pending",
           documents: [],
           files: [],
+          hidden: false,
         },
       ]);
     }
-  }, [trainerData.trainerProfile.certifications]);
+  }, [trainerData.trainerProfile.certifications, resetCertFieldsTrigger]);
 
   // Initialize educationFields from trainerData.education
   useEffect(() => {
@@ -106,36 +119,6 @@ export const CertificationEducation = ({
     const updatedFields = [...certFields];
     updatedFields[index] = { ...updatedFields[index], [field]: value };
     setCertFields(updatedFields);
-
-    // Process files for API compatibility
-    const processedFields = updatedFields.map((cert) => {
-      // If the cert has files, process them for API compatibility
-      if (cert.files && cert.files.length > 0) {
-        const processedFiles = cert.files.map((file) => {
-          // If file is a File object, convert to data URL for storage
-          if (file instanceof File) {
-            return {
-              name: file.name,
-              type: file.type,
-              size: file.size,
-              // We'll process the actual file data when it's needed for upload
-              // The File object itself is not JSON serializable
-              data: file.data || null,
-              url: file.url || null,
-            };
-          }
-          return file;
-        });
-
-        return { ...cert, files: processedFiles };
-      }
-      return cert;
-    });
-
-    // Update the parent component's state with detailed certification objects
-    handleChange({
-      target: { name: "certifications", value: processedFields },
-    });
   };
 
   // Handler for education changes
@@ -162,6 +145,7 @@ export const CertificationEducation = ({
         status: "pending",
         documents: [],
         files: [],
+        hidden: false,
       },
     ];
     setCertFields(newFields);
@@ -187,11 +171,6 @@ export const CertificationEducation = ({
   const removeCertField = (index) => {
     const newFields = certFields.filter((_, i) => i !== index);
     setCertFields(newFields);
-
-    // Update the parent component's state with full certification objects
-    handleChange({
-      target: { name: "certifications", value: newFields },
-    });
   };
 
   // Remove education field
@@ -205,6 +184,17 @@ export const CertificationEducation = ({
       education: newFields,
     });
   };
+
+  // Dodaj poziv onCertificationsChange svaki put kad se certFields promijeni
+  useEffect(() => {
+    if (typeof onCertificationsChange === "function") {
+      onCertificationsChange(certFields);
+    }
+    // eslint-disable-next-line
+  }, [certFields]);
+
+  // Prilikom spremanja (Save Profile), šalji hidden: isHidden
+  // Ovo radiš u parentu, ali ovdje možeš pripremiti podatke:
 
   return (
     <motion.div
@@ -229,6 +219,8 @@ export const CertificationEducation = ({
           handleCertChange={handleCertChange}
           addCertField={addCertField}
           removeCertField={removeCertField}
+          onResetCertifications={onResetCertifications}
+          initialCertifications={initialCertifications}
         />
         <p className="mt-2 text-xs text-gray-400">
           Add certifications to build credibility with potential clients
