@@ -334,15 +334,29 @@ const TrainerEditProfilePage = () => {
       }
 
       // Pripremi certifikate za spremanje (samo URL-ovi, bez file objekata)
-      const certificationsForSave = certFields.map((cert, idx) => ({
-        ...cert,
-        hidden: cert.hidden || false,
-        documents:
-          uploadedUrls.certifications && uploadedUrls.certifications[idx]
-            ? uploadedUrls.certifications[idx]
-            : cert.documents || [],
-        files: undefined, // ne šalji fileove
-      }));
+      const certificationsForSave = certFields.map((cert, idx) => {
+        let documents = cert.documents || [];
+        // Ako su uploadani novi dokumenti za ovaj certifikat, koristi njih (ali samo ako ih ima barem jedan)
+        if (
+          uploadedUrls.certifications &&
+          Array.isArray(uploadedUrls.certifications[idx]) &&
+          uploadedUrls.certifications[idx].length > 0
+        ) {
+          documents = uploadedUrls.certifications[idx];
+        }
+        // Ako je postojeći certifikat i NEMA dokumenata (niti starih niti novih), makni documents polje
+        const base = {
+          ...cert,
+          hidden: cert.hidden || false,
+          files: undefined, // ne šalji fileove
+        };
+        if (cert.id && (!documents || documents.length === 0)) {
+          // Ne šalji documents polje
+          const { documents: _omit, ...rest } = base;
+          return rest;
+        }
+        return { ...base, documents };
+      });
 
       // 4. Pripremi payload: availability, education, certifications unutar trainerProfile
       const body = {

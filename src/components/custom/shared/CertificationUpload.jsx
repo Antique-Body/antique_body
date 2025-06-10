@@ -73,22 +73,21 @@ export const CertificationUpload = ({
   const [documentPreviews, setDocumentPreviews] = useState({});
   const [uploadError, setUploadError] = useState(null);
 
-  // Helper funkcija za deep compare certifikata
+  // Helper funkcija za deep compare SAMO postojećih certifikata (iz baze)
   const isCertsModified = () => {
-    if (
-      !initialCertifications ||
-      certFields.length !== initialCertifications.length
-    ) {
-      console.log(
-        "isCertsModified: length mismatch",
-        certFields,
-        initialCertifications
-      );
-      return true;
-    }
-    for (let i = 0; i < certFields.length; i++) {
-      const a = certFields[i];
-      const b = initialCertifications[i];
+    if (!initialCertifications) return false;
+    // Uspoređujemo samo certifikate koji imaju id (postojeći iz baze)
+    const existingCurrent = certFields.filter((c) => c.id);
+    const existingInitial = initialCertifications.filter((c) => c.id);
+
+    // Ako je broj različit, nešto je obrisano/dodano
+    if (existingCurrent.length !== existingInitial.length) return true;
+
+    // Provjeri je li neki od postojećih certifikata promijenjen (npr. hidden ili obrisan)
+    for (let i = 0; i < existingInitial.length; i++) {
+      const a = existingCurrent[i];
+      const b = existingInitial[i];
+      if (!a || !b) return true;
       const aExpiry = a.expiryDate ? a.expiryDate.slice(0, 10) : "";
       const bExpiry = b.expiryDate ? b.expiryDate.slice(0, 10) : "";
       if (
@@ -97,9 +96,7 @@ export const CertificationUpload = ({
         a.issuer !== b.issuer ||
         aExpiry !== bExpiry ||
         a.status !== b.status ||
-        (a.hidden || false) !== (b.hidden || b.hidden || false) ||
-        (Array.isArray(a.documents) ? a.documents.length : 0) !==
-          (Array.isArray(b.documents) ? b.documents.length : 0)
+        (a.hidden || false) !== (b.hidden || b.hidden || false)
       ) {
         return true;
       }
