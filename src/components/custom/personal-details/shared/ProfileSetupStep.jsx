@@ -98,6 +98,8 @@ export const ProfileSetupStep = ({
           guidelineHelpText={guidelineHelpText}
           error={errors?.profileImage}
           inputId="profile-image-upload"
+          label={null}
+          description={null}
         />
       </FormSection>
 
