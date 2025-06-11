@@ -5,6 +5,7 @@ import { convertToEUR, convertFromEUR } from "../../../utils/currency";
 import { trainerService } from "../services";
 
 import { auth } from "#/auth";
+import { validateTrainerProfile } from "@/middleware/validation";
 
 export async function POST(req) {
   try {
@@ -161,203 +162,36 @@ export async function PUT(req) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-      });
+      return new Response(
+        JSON.stringify({ success: false, error: "Unauthorized" }),
+        {
+          status: 401,
+        }
+      );
     }
     const body = await req.json();
-    const data = body.trainerProfile;
-
-    // Find the trainer profile
-    const profile = await trainerService.getTrainerProfileByUserId(
-      session.user.id
+    const { valid, errors } = validateTrainerProfile(body.trainerProfile);
+    if (!valid) {
+      return new Response(JSON.stringify({ success: false, error: errors }), {
+        status: 400,
+      });
+    }
+    // Pozovi servis (koji očekuje validiran input)
+    const updatedProfile = await trainerService.updateTrainerProfile(
+      session.user.id,
+      body.trainerProfile
     );
-    if (!profile) {
-      return new Response(
-        JSON.stringify({ error: "Trainer profile not found" }),
-        { status: 404 }
-      );
-    }
-
-    // Briši stare relacije
-    await prisma.trainerSpecialty.deleteMany({
-      where: { trainerProfileId: profile.id },
-    });
-    await prisma.trainerLanguage.deleteMany({
-      where: { trainerProfileId: profile.id },
-    });
-    await prisma.trainerEnvironment.deleteMany({
-      where: { trainerProfileId: profile.id },
-    });
-    await prisma.trainerType.deleteMany({
-      where: { trainerProfileId: profile.id },
-    });
-    await prisma.certification.deleteMany({
-      where: { trainerProfileId: profile.id },
-    });
-
-    // Kreiraj nove relacije i certifikate
-    const {
-      certifications,
-      specialties,
-      languages,
-      trainingEnvironments,
-      trainingTypes,
-      availability,
-      education,
-      ...profileData
-    } = data;
-
-    // Kreiraj certifikate
-    if (certifications && certifications.length > 0) {
-      for (const cert of certifications) {
-        const certData = {
-          name: cert.name,
-          issuer: cert.issuer || null,
-          expiryDate: cert.expiryDate ? new Date(cert.expiryDate) : null,
-          hidden: cert.hidden !== undefined ? cert.hidden : false,
-        };
-        const newCert = await prisma.certification.create({
-          data: {
-            trainerProfileId: profile.id,
-            ...certData,
-          },
-        });
-        if (
-          cert.documents &&
-          Array.isArray(cert.documents) &&
-          cert.documents.length > 0
-        ) {
-          for (const file of cert.documents) {
-            if (file && file.url) {
-              await prisma.certificationDocument.create({
-                data: {
-                  certificationId: newCert.id,
-                  url: file.url,
-                  originalName: file.originalName || "document",
-                  mimetype: file.mimetype || "application/octet-stream",
-                },
-              });
-            }
-          }
-        }
-      }
-    }
-
-    // Izbaci polja koja nisu u modelu
-    const {
-      location,
-      userId: _userId,
-      locationId: _locationId,
-      ...allowedProfileData
-    } = profileData;
-
-    // Pripremi pricePerSession kao int ili null
-    let pricePerSession = null;
-    if (
-      allowedProfileData.pricePerSession !== undefined &&
-      allowedProfileData.pricePerSession !== null &&
-      allowedProfileData.pricePerSession !== ""
-    ) {
-      pricePerSession = Number(allowedProfileData.pricePerSession);
-      if (isNaN(pricePerSession)) pricePerSession = null;
-    }
-
-    // Validacija pricePerSession
-    if (
-      (data.pricingType === "fixed" || data.pricingType === "package_deals") &&
-      (!data.pricePerSession || Number(data.pricePerSession) <= 0)
-    ) {
-      return new Response(
-        JSON.stringify({
-          error: "Price per session is required for selected pricing type.",
-        }),
-        { status: 400 }
-      );
-    }
-
-    await prisma.trainerProfile.update({
-      where: { id: profile.id },
-      data: {
-        ...allowedProfileData,
-        pricePerSession,
-        dateOfBirth: allowedProfileData.dateOfBirth
-          ? new Date(allowedProfileData.dateOfBirth)
-          : profile.dateOfBirth,
-        specialties: { create: (specialties || []).map((name) => ({ name })) },
-        languages: { create: (languages || []).map((name) => ({ name })) },
-        trainingEnvironments: {
-          create: (trainingEnvironments || []).map((name) => ({ name })),
-        },
-        trainingTypes: {
-          create: (trainingTypes || []).map((name) => ({ name })),
-        },
-        availability: availability || undefined,
-        education: education || undefined,
-      },
-    });
-
-    // Save gyms as relations if present in payload
-    if (location && Array.isArray(location.gyms)) {
-      // Remove old TrainerGym relations
-      await prisma.trainerGym.deleteMany({ where: { trainerId: profile.id } });
-      for (const gym of location.gyms) {
-        let dbGym = await prisma.gym.findUnique({
-          where: { placeId: gym.value },
-        });
-        if (!dbGym) {
-          dbGym = await prisma.gym.create({
-            data: {
-              name: gym.label,
-              address: gym.address,
-              lat: gym.lat,
-              lon: gym.lon,
-              placeId: gym.value,
-            },
-          });
-        }
-        await prisma.trainerGym.create({
-          data: {
-            trainerId: profile.id,
-            gymId: dbGym.id,
-          },
-        });
-      }
-    }
-
-    // Get updated profile with all relations
-    const updatedProfile = await trainerService.getTrainerProfileByUserId(
-      session.user.id
-    );
-
-    // Fetch all gyms for this trainer and include in location.gyms
-    const trainerGyms = await prisma.trainerGym.findMany({
-      where: { trainerId: profile.id },
-      include: { gym: true },
-    });
-    const gymsArray = trainerGyms.map((tg) => ({
-      value: tg.gym.placeId,
-      label: tg.gym.name,
-      address: tg.gym.address,
-      lat: tg.gym.lat,
-      lon: tg.gym.lon,
-    }));
-    const updatedLocation = updatedProfile.location || {};
     return new Response(
-      JSON.stringify({
-        ...updatedProfile,
-        location: {
-          ...updatedLocation,
-          gyms: gymsArray,
-        },
-        availability: updatedProfile.availability || {},
-      }),
+      JSON.stringify({ success: true, data: updatedProfile }),
       { status: 200 }
     );
   } catch (error) {
     console.error("Error updating trainer profile:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 400,
-    });
+    return new Response(
+      JSON.stringify({ success: false, error: error.message }),
+      {
+        status: 400,
+      }
+    );
   }
 }
