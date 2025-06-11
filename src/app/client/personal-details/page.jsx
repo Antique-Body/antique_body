@@ -31,23 +31,6 @@ const ClientRegistration = () => {
     handleProfileImageChange,
   } = useClientRegistration();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // ...upload slike/certifikata ako treba...
-    // Pripremi payload
-    const body = {
-      clientProfile: {
-        ...formData,
-      },
-    };
-    // Pošalji na backend
-    await fetch("/api/users/client", {
-      method: "POST", // ili PUT, ovisno o ruti
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-  };
-
   return (
     <div className="relative min-h-screen text-white">
       <EffectBackground />

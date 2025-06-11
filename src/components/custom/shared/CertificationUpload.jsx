@@ -5,19 +5,8 @@ import { useState, useEffect, useCallback } from "react";
 
 import { FormField } from "@/components/common";
 import { Button } from "@/components/common/Button";
-import { Tooltip } from "@/components/common/Tooltip";
+import { InfoBanner } from "@/components/custom/personal-details/shared/InfoBanner";
 import { useCertificateFiles } from "@/hooks";
-
-// Status messages for tooltips
-const STATUS_MESSAGES = {
-  pending:
-    "Our Antique Body team is reviewing your certification. This typically takes 1-2 business days.",
-  accepted: "Your certification has been verified and approved by our team.",
-  rejected:
-    "Your certification was not approved. Please check the requirements and upload a valid certificate.",
-  expired:
-    "This certification has expired. Please update with a current version.",
-};
 
 // Status icons mapping
 const STATUS_ICONS = {
@@ -72,37 +61,6 @@ export const CertificationUpload = ({
 
   const [documentPreviews, setDocumentPreviews] = useState({});
   const [uploadError, setUploadError] = useState(null);
-
-  // Helper funkcija za deep compare SAMO postojećih certifikata (iz baze)
-  const isCertsModified = () => {
-    if (!initialCertifications) return false;
-    // Uspoređujemo samo certifikate koji imaju id (postojeći iz baze)
-    const existingCurrent = certFields.filter((c) => c.id);
-    const existingInitial = initialCertifications.filter((c) => c.id);
-
-    // Ako je broj različit, nešto je obrisano/dodano
-    if (existingCurrent.length !== existingInitial.length) return true;
-
-    // Provjeri je li neki od postojećih certifikata promijenjen (npr. hidden ili obrisan)
-    for (let i = 0; i < existingInitial.length; i++) {
-      const a = existingCurrent[i];
-      const b = existingInitial[i];
-      if (!a || !b) return true;
-      const aExpiry = a.expiryDate ? a.expiryDate.slice(0, 10) : "";
-      const bExpiry = b.expiryDate ? b.expiryDate.slice(0, 10) : "";
-      if (
-        a.id !== b.id ||
-        a.name !== b.name ||
-        a.issuer !== b.issuer ||
-        aExpiry !== bExpiry ||
-        a.status !== b.status ||
-        (a.hidden || false) !== (b.hidden || b.hidden || false)
-      ) {
-        return true;
-      }
-    }
-    return false;
-  };
 
   // Reset upload error when certFields changes
   useEffect(() => {
@@ -159,6 +117,9 @@ export const CertificationUpload = ({
     [handleAddFiles]
   );
 
+  console.log("initialCertifications", initialCertifications);
+  console.log("realcertifications", certFields);
+
   // Hide cert (set hidden to true locally)
   const handleHideCert = (index) => {
     handleCertChange(index, "hidden", true);
@@ -197,83 +158,98 @@ export const CertificationUpload = ({
     return "mdi:file-document";
   }, []);
 
-  // Function to get file name from URL
-  const _getFileNameFromUrl = useCallback((url = "") => {
-    if (!url) return "Document";
-    const parts = url.split("/");
-    const fileName = parts[parts.length - 1];
-    // Remove any query parameters
-    return fileName.split("?")[0];
-  }, []);
+  const showResetCertification =
+    initialCertifications &&
+    JSON.stringify(initialCertifications) !== JSON.stringify(certFields);
 
+  console.log("initialCertifications", initialCertifications);
+  console.log("certfields", certFields);
+  // Function to get file name from UR
   return (
     <div className="space-y-6">
-      {/* Reset Certifications Bar - appears only if not registration and ima modificiranih certifikata */}
-      {!isRegistration && isCertsModified() && (
-        <div className="bg-blue-900/30 border border-blue-500/30 rounded-lg p-3 mb-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <Icon
-              icon="mdi:information-outline"
-              className="text-blue-400 mr-2"
-              width={20}
-              height={20}
-            />
-            <span className="text-blue-300 text-sm">
-              You have pending changes to your certifications.
-            </span>
-          </div>
-          <Button
-            variant="outline"
-            type="button"
-            onClick={onResetCertifications}
-            className="text-xs bg-blue-800/30 border border-blue-500/50 hover:bg-blue-700/50 text-blue-300"
-          >
-            <Icon icon="mdi:refresh" className="mr-1" width={14} height={14} />
-            Reset Certifications
-          </Button>
-        </div>
+      {/* Reset Certification Banner */}
+      {showResetCertification && !isRegistration && (
+        <InfoBanner
+          icon="mdi:alert-circle"
+          title="You have unsaved certification changes"
+          subtitle="You can reset to the original certifications if needed"
+          variant="info"
+          buttonText="Reset Changes"
+          onButtonClick={onResetCertifications}
+          className="relative mb-4"
+        />
       )}
 
-      {/* Existing certifications (readonly) - more compact design */}
+      {/* Existing certifications (table/list view) */}
       {existingCerts.length > 0 && (
         <div>
           <h3 className="text-lg font-semibold text-white mb-3">
             Your Certifications
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {existingCerts.map((field) => (
-              <div
-                key={`readonly-cert-${field._idx}`}
-                className={`relative bg-gradient-to-r from-[rgba(30,30,30,0.8)] to-[rgba(25,25,25,0.8)] border rounded-xl p-4 transition-all duration-300 ${
-                  field.hidden
-                    ? "opacity-60 border-gray-700/50"
-                    : "border-[#333] hover:border-[#FF6B00]/30"
-                }`}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex flex-col">
-                    <div className="text-gray-400 text-xs mb-1">
-                      Certification Name:
-                    </div>
-                    <h4 className="text-white text-sm font-medium">
-                      {field.name}
-                    </h4>
 
-                    {field.status && (
-                      <Tooltip
-                        content={
-                          STATUS_MESSAGES[field.status] || "Status information"
-                        }
-                        position="bottom"
-                        width="max-w-xs"
-                      >
+          <div className="overflow-hidden rounded-xl border border-[#333] bg-[#1a1a1a]/60 backdrop-blur-sm">
+            {/* Header */}
+            <div className="hidden md:grid md:grid-cols-12 gap-4 p-4 border-b border-[#333] bg-[#222]/80">
+              <div className="md:col-span-3">
+                <span className="text-xs font-medium text-gray-400">
+                  CERTIFICATION
+                </span>
+              </div>
+              <div className="md:col-span-2">
+                <span className="text-xs font-medium text-gray-400">
+                  ISSUER
+                </span>
+              </div>
+              <div className="md:col-span-2">
+                <span className="text-xs font-medium text-gray-400">
+                  EXPIRY
+                </span>
+              </div>
+              <div className="md:col-span-2">
+                <span className="text-xs font-medium text-gray-400">
+                  STATUS
+                </span>
+              </div>
+              <div className="md:col-span-3 text-right">
+                <span className="text-xs font-medium text-gray-400">
+                  ACTIONS
+                </span>
+              </div>
+            </div>
+
+            {/* Certification Items */}
+            <div className="divide-y divide-[#333]">
+              {existingCerts.map((field) => (
+                <div
+                  key={`readonly-cert-${field._idx}`}
+                  className={`p-4 hover:bg-[#222]/50 transition-colors duration-200 ${
+                    field.hidden ? "opacity-60" : ""
+                  }`}
+                >
+                  {/* Mobile View */}
+                  <div className="md:hidden space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Icon
+                          icon="mdi:certificate"
+                          className="text-[#FF6B00]"
+                          width={20}
+                          height={20}
+                        />
+                        <h4 className="text-white text-base font-medium">
+                          {field.name}
+                        </h4>
+                      </div>
+
+                      {/* Status badge */}
+                      {field.status && (
                         <div
-                          className={`flex items-center gap-1 mt-1.5 px-1.5 py-0.5 rounded-full ${
-                            STATUS_COLORS[field.status]?.bg || "bg-gray-800"
-                          } ${
+                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md ${
+                            STATUS_COLORS[field.status]?.bg || "bg-gray-800/50"
+                          } border ${
                             STATUS_COLORS[field.status]?.border ||
                             "border-gray-700"
-                          } border w-fit transition-all duration-200 hover:brightness-110`}
+                          }`}
                         >
                           <Icon
                             icon={
@@ -284,8 +260,8 @@ export const CertificationUpload = ({
                               STATUS_COLORS[field.status]?.text ||
                               "text-gray-400"
                             }
-                            width={12}
-                            height={12}
+                            width={16}
+                            height={16}
                           />
                           <span
                             className={`text-xs font-medium capitalize ${
@@ -296,131 +272,330 @@ export const CertificationUpload = ({
                             {field.status}
                           </span>
                         </div>
-                      </Tooltip>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <div className="text-gray-400 text-xs mb-1">
+                          Issued By
+                        </div>
+                        <div className="text-white text-sm">
+                          {field.issuer || "—"}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-gray-400 text-xs mb-1">
+                          Expiry Date
+                        </div>
+                        <div className="text-white text-sm">
+                          {field.expiryDate
+                            ? new Date(field.expiryDate).toLocaleDateString()
+                            : "—"}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Documents (simplified for mobile) */}
+                    {field.documents && field.documents.length > 0 && (
+                      <div>
+                        <div className="text-gray-400 text-xs mb-1">
+                          Documents ({field.documents.length})
+                        </div>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {field.documents.slice(0, 3).map((doc, docIndex) => (
+                            <div
+                              key={`mobile-doc-${field._idx}-${docIndex}`}
+                              className="relative group flex-shrink-0"
+                            >
+                              {/* Image files */}
+                              {doc?.url &&
+                                (doc.url.endsWith(".jpg") ||
+                                  doc.url.endsWith(".jpeg") ||
+                                  doc.url.endsWith(".png") ||
+                                  doc.url.endsWith(".gif")) &&
+                                documentPreviews[field._idx] &&
+                                documentPreviews[field._idx][docIndex] && (
+                                  <div className="relative h-12 w-12 bg-[#1a1a1a] rounded-lg overflow-hidden border border-[#444] transition-all">
+                                    <div className="relative w-full h-full">
+                                      <Image
+                                        src={
+                                          documentPreviews[field._idx][docIndex]
+                                        }
+                                        alt={`Certificate ${docIndex + 1}`}
+                                        fill
+                                        style={{ objectFit: "cover" }}
+                                        unoptimized={true}
+                                      />
+                                    </div>
+                                  </div>
+                                )}
+                              {/* Document files (non-image) */}
+                              {doc?.url &&
+                                !(
+                                  doc.url.endsWith(".jpg") ||
+                                  doc.url.endsWith(".jpeg") ||
+                                  doc.url.endsWith(".png") ||
+                                  doc.url.endsWith(".gif")
+                                ) && (
+                                  <a
+                                    href={doc.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="relative flex items-center justify-center h-12 w-12 bg-[#1a1a1a] rounded-lg border border-[#333] transition-all"
+                                  >
+                                    <Icon
+                                      icon={getDocumentIcon(doc.url)}
+                                      width={20}
+                                      height={20}
+                                      className="text-[#FF6B00]"
+                                    />
+                                  </a>
+                                )}
+                            </div>
+                          ))}
+                          {field.documents.length > 3 && (
+                            <div className="h-12 w-12 bg-[#1a1a1a] rounded-lg border border-[#333] flex items-center justify-center">
+                              <span className="text-xs text-gray-400">
+                                +{field.documents.length - 3}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     )}
-                  </div>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      type="button"
-                      onClick={() => handleDeleteCert(field._idx)}
-                      className="w-6 h-6 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-full flex items-center justify-center"
-                    >
-                      <Icon
-                        icon="mdi:delete"
-                        width={14}
-                        height={14}
-                        className="text-red-400"
-                      />
-                    </Button>
-                    {!field.hidden && (
+
+                    {/* Action buttons for mobile */}
+                    <div className="flex gap-1.5 mt-2">
                       <Button
                         variant="ghost"
                         type="button"
-                        onClick={() => handleHideCert(field._idx)}
-                        className="w-6 h-6 bg-gray-500/20 hover:bg-gray-500/30 border border-gray-500/30 rounded-full flex items-center justify-center"
+                        onClick={() => handleDeleteCert(field._idx)}
+                        className="flex-1 h-9 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-lg flex items-center justify-center gap-1"
                       >
                         <Icon
-                          icon="mdi:eye-off"
-                          width={14}
-                          height={14}
-                          className="text-gray-400"
+                          icon="mdi:delete"
+                          width={16}
+                          height={16}
+                          className="text-red-400"
                         />
+                        <span className="text-xs text-red-400">Delete</span>
                       </Button>
-                    )}
-                    {field.hidden && (
-                      <Button
-                        variant="ghost"
-                        type="button"
-                        onClick={() => handleUnhideCert(field._idx)}
-                        className="w-6 h-6 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-full flex items-center justify-center"
-                      >
-                        <Icon
-                          icon="mdi:eye"
-                          width={14}
-                          height={14}
-                          className="text-green-400"
-                        />
-                      </Button>
-                    )}
-                  </div>
-                </div>
 
-                {/* Compact info layout */}
-                <div className="grid grid-cols-2 gap-2 mb-2 text-xs">
-                  <div>
-                    <div className="text-gray-400 font-medium">Issued By:</div>
-                    <div className="text-white">{field.issuer || "-"}</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-400 font-medium">
-                      Expiry Date:
-                    </div>
-                    <div className="text-white">{field.expiryDate || "-"}</div>
-                  </div>
-                </div>
-
-                {/* Documents compact gallery */}
-                {field.documents && field.documents.length > 0 && (
-                  <div>
-                    <div className="text-gray-400 text-xs font-medium mb-1">
-                      Documents ({field.documents.length}):
-                    </div>
-                    <div className="flex gap-2 overflow-x-auto pb-1 max-h-16">
-                      {field.documents.map((doc, docIndex) => (
-                        <div
-                          key={`readonly-doc-${field._idx}-${docIndex}`}
-                          className="relative group flex-shrink-0"
+                      {!field.hidden && (
+                        <Button
+                          variant="ghost"
+                          type="button"
+                          onClick={() => handleHideCert(field._idx)}
+                          className="flex-1 h-9 bg-gray-500/20 hover:bg-gray-500/30 border border-gray-500/30 rounded-lg flex items-center justify-center gap-1"
                         >
-                          {/* Image files */}
-                          {doc?.url &&
-                            (doc.url.endsWith(".jpg") ||
-                              doc.url.endsWith(".jpeg") ||
-                              doc.url.endsWith(".png") ||
-                              doc.url.endsWith(".gif")) &&
-                            documentPreviews[field._idx] &&
-                            documentPreviews[field._idx][docIndex] && (
-                              <div className="relative h-14 w-14 bg-[#1a1a1a] rounded-lg overflow-hidden border border-[#444]">
-                                <div className="relative w-full h-full">
-                                  <Image
-                                    src={documentPreviews[field._idx][docIndex]}
-                                    alt={`Certificate ${docIndex + 1}`}
-                                    fill
-                                    style={{ objectFit: "cover" }}
-                                    unoptimized={true}
+                          <Icon
+                            icon="mdi:eye-off"
+                            width={16}
+                            height={16}
+                            className="text-gray-400"
+                          />
+                          <span className="text-xs text-gray-400">Hide</span>
+                        </Button>
+                      )}
+
+                      {field.hidden && (
+                        <Button
+                          variant="ghost"
+                          type="button"
+                          onClick={() => handleUnhideCert(field._idx)}
+                          className="flex-1 h-9 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-lg flex items-center justify-center gap-1"
+                        >
+                          <Icon
+                            icon="mdi:eye"
+                            width={16}
+                            height={16}
+                            className="text-green-400"
+                          />
+                          <span className="text-xs text-green-400">Show</span>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Desktop View */}
+                  <div className="hidden md:grid md:grid-cols-12 gap-4 items-center">
+                    <div className="md:col-span-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-[#FF6B00]/20 border border-[#FF6B00]/30 rounded-full flex items-center justify-center flex-shrink-0">
+                          <Icon
+                            icon="mdi:certificate"
+                            className="text-[#FF6B00]"
+                            width={16}
+                            height={16}
+                          />
+                        </div>
+                        <span className="text-white font-medium truncate">
+                          {field.name}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="md:col-span-2">
+                      <span className="text-white text-sm">
+                        {field.issuer || "—"}
+                      </span>
+                    </div>
+                    <div className="md:col-span-2">
+                      <span className="text-white text-sm">
+                        {field.expiryDate
+                          ? new Date(field.expiryDate).toLocaleDateString()
+                          : "—"}
+                      </span>
+                    </div>
+                    <div className="md:col-span-2">
+                      {field.status && (
+                        <div
+                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md ${
+                            STATUS_COLORS[field.status]?.bg || "bg-gray-800/50"
+                          } border ${
+                            STATUS_COLORS[field.status]?.border ||
+                            "border-gray-700"
+                          }`}
+                        >
+                          <Icon
+                            icon={
+                              STATUS_ICONS[field.status] ||
+                              "mdi:information-outline"
+                            }
+                            className={
+                              STATUS_COLORS[field.status]?.text ||
+                              "text-gray-400"
+                            }
+                            width={16}
+                            height={16}
+                          />
+                          <span
+                            className={`text-xs font-medium capitalize ${
+                              STATUS_COLORS[field.status]?.text ||
+                              "text-gray-400"
+                            }`}
+                          >
+                            {field.status}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="md:col-span-3 flex items-center justify-end gap-2">
+                      {/* Document thumbnails (if any) */}
+                      {field.documents && field.documents.length > 0 && (
+                        <div className="flex -space-x-1 mr-2">
+                          {field.documents.slice(0, 2).map((doc, docIndex) => (
+                            <div
+                              key={`desktop-thumb-${field._idx}-${docIndex}`}
+                              className="relative w-8 h-8 border-2 border-[#333] rounded-full overflow-hidden"
+                            >
+                              {doc?.url &&
+                              (doc.url.endsWith(".jpg") ||
+                                doc.url.endsWith(".jpeg") ||
+                                doc.url.endsWith(".png") ||
+                                doc.url.endsWith(".gif")) &&
+                              documentPreviews[field._idx] &&
+                              documentPreviews[field._idx][docIndex] ? (
+                                <Image
+                                  src={documentPreviews[field._idx][docIndex]}
+                                  alt="Doc"
+                                  fill
+                                  style={{ objectFit: "cover" }}
+                                  unoptimized={true}
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-[#222] flex items-center justify-center">
+                                  <Icon
+                                    icon={getDocumentIcon(doc?.url)}
+                                    className="text-[#FF6B00]"
+                                    width={14}
+                                    height={14}
                                   />
                                 </div>
-                              </div>
-                            )}
-                          {/* Document files (non-image) */}
-                          {doc?.url &&
-                            !(
-                              doc.url.endsWith(".jpg") ||
-                              doc.url.endsWith(".jpeg") ||
-                              doc.url.endsWith(".png") ||
-                              doc.url.endsWith(".gif")
-                            ) && (
-                              <a
-                                href={doc.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="relative flex items-center justify-center h-14 w-14 bg-[#1a1a1a] rounded-lg border border-[#333] hover:border-[#FF6B00]/30 transition-all"
-                              >
-                                <Icon
-                                  icon={getDocumentIcon(doc.url)}
-                                  width={20}
-                                  height={20}
-                                  className="text-[#FF6B00]"
-                                />
-                              </a>
-                            )}
+                              )}
+                            </div>
+                          ))}
+                          {field.documents.length > 2 && (
+                            <div className="relative w-8 h-8 border-2 border-[#333] bg-[#222] rounded-full flex items-center justify-center">
+                              <span className="text-xs text-gray-400">
+                                +{field.documents.length - 2}
+                              </span>
+                            </div>
+                          )}
                         </div>
-                      ))}
+                      )}
+
+                      {/* Action buttons */}
+                      <Button
+                        variant="ghost"
+                        type="button"
+                        onClick={() => handleDeleteCert(field._idx)}
+                        className="w-8 h-8 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-lg flex items-center justify-center"
+                        title="Delete certification"
+                      >
+                        <Icon
+                          icon="mdi:delete"
+                          width={16}
+                          height={16}
+                          className="text-red-400"
+                        />
+                      </Button>
+
+                      {!field.hidden && (
+                        <Button
+                          variant="ghost"
+                          type="button"
+                          onClick={() => handleHideCert(field._idx)}
+                          className="w-8 h-8 bg-gray-500/20 hover:bg-gray-500/30 border border-gray-500/30 rounded-lg flex items-center justify-center"
+                          title="Hide certification"
+                        >
+                          <Icon
+                            icon="mdi:eye-off"
+                            width={16}
+                            height={16}
+                            className="text-gray-400"
+                          />
+                        </Button>
+                      )}
+
+                      {field.hidden && (
+                        <Button
+                          variant="ghost"
+                          type="button"
+                          onClick={() => handleUnhideCert(field._idx)}
+                          className="w-8 h-8 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-lg flex items-center justify-center"
+                          title="Show certification"
+                        >
+                          <Icon
+                            icon="mdi:eye"
+                            width={16}
+                            height={16}
+                            className="text-green-400"
+                          />
+                        </Button>
+                      )}
                     </div>
                   </div>
-                )}
+                </div>
+              ))}
+            </div>
+
+            {/* Empty State */}
+            {existingCerts.length === 0 && (
+              <div className="p-6 text-center">
+                <div className="w-12 h-12 bg-[#222] rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Icon
+                    icon="mdi:certificate-outline"
+                    className="text-gray-400"
+                    width={24}
+                    height={24}
+                  />
+                </div>
+                <p className="text-gray-400 text-sm">
+                  No certifications added yet.
+                </p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       )}
@@ -433,12 +608,13 @@ export const CertificationUpload = ({
         {uploadError && (
           <div className="p-3 mb-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-500 text-sm">
             {uploadError}
-            <button
+            <Button
               onClick={() => setUploadError(null)}
               className="ml-2 text-red-400 hover:text-red-300"
+              variant="ghost"
             >
               Dismiss
-            </button>
+            </Button>
           </div>
         )}
         {newCerts.length === 0 && (
@@ -599,8 +775,9 @@ export const CertificationUpload = ({
                                 />
                               </div>
 
-                              <button
+                              <Button
                                 type="button"
+                                variant="ghost"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleRemoveFile(field._idx, fileIndex);
@@ -613,7 +790,7 @@ export const CertificationUpload = ({
                                   height={14}
                                   className="text-white"
                                 />
-                              </button>
+                              </Button>
                             </div>
                           )}
                         {/* Document files */}
@@ -647,8 +824,9 @@ export const CertificationUpload = ({
                                   : "Unknown size"}
                               </p>
                             </div>
-                            <button
+                            <Button
                               type="button"
+                              variant="ghost"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleRemoveFile(field._idx, fileIndex);
@@ -661,7 +839,7 @@ export const CertificationUpload = ({
                                 height={14}
                                 className="text-white"
                               />
-                            </button>
+                            </Button>
                           </div>
                         )}
                       </div>

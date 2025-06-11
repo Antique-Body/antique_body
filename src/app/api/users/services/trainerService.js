@@ -317,11 +317,6 @@ export async function updateTrainerProfile(userId, data) {
 
     // 5. Update profile (samo polja koja su direktno na modelu)
     const {
-      specialties,
-      languages,
-      trainingEnvironments,
-      trainingTypes,
-      certifications,
       location,
       userId: _userId,
       locationId: _locationId,
@@ -347,7 +342,6 @@ export async function updateTrainerProfile(userId, data) {
           ? new Date(allowedProfileData.dateOfBirth)
           : profile.dateOfBirth,
         availability: allowedProfileData.availability || undefined,
-        education: allowedProfileData.education || undefined,
       },
       include: {
         certifications: { include: { documents: true } },

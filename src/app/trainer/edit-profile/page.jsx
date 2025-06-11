@@ -16,7 +16,7 @@ import { AnimatedTabContent } from "@/components/custom/dashboard/shared/Dashboa
 import {
   Availability,
   BasicInformation,
-  CertificationEducation,
+  Certification,
   Specialties,
   WorkoutSpaceLocation,
 } from "@/components/custom/dashboard/trainer/edit-profile";
@@ -81,7 +81,6 @@ const TrainerEditProfilePage = () => {
       },
     },
     proximity: "",
-    education: [],
     services: [],
     expertise: [],
   });
@@ -184,7 +183,6 @@ const TrainerEditProfilePage = () => {
     if (trainerData.trainerProfile.contactPhone) filledFields++;
     if (trainerData.trainerProfile.profileImage) filledFields++;
     if (trainerData.proximity) filledFields++;
-    if ((trainerData.education || []).length > 0) filledFields++;
     if ((trainerData.services || []).length > 0) filledFields++;
     if ((trainerData.expertise || []).length > 0) filledFields++;
     console.log(trainerData.trainerProfile, "trainerData222");
@@ -373,14 +371,13 @@ const TrainerEditProfilePage = () => {
         return { ...base, documents };
       });
 
-      // 4. Pripremi payload: availability, education, certifications unutar trainerProfile
+      // 4. Pripremi payload: availability, certifications unutar trainerProfile
       const body = {
         trainerProfile: {
           ...trainerData.trainerProfile,
           profileImage: profileImageUrl,
           certifications: certificationsForSave,
           availability: trainerData.trainerProfile.availability,
-          education: trainerData.education,
         },
       };
 
@@ -410,8 +407,8 @@ const TrainerEditProfilePage = () => {
     { id: "basicInfo", label: "Basic Information", badgeCount: 0 },
     { id: "specialties", label: "Specialties", badgeCount: 0 },
     {
-      id: "certificationEducation",
-      label: "Certification & Education",
+      id: "certification",
+      label: "Certification",
       badgeCount: 0,
     },
     { id: "availability", label: "Availability", badgeCount: 0 },
@@ -422,7 +419,6 @@ const TrainerEditProfilePage = () => {
     },
   ];
 
-  // Loading indikator
   if (loading) {
     return (
       <>
@@ -516,10 +512,10 @@ const TrainerEditProfilePage = () => {
               </AnimatedTabContent>
 
               <AnimatedTabContent
-                isActive={activeSection === "certificationEducation"}
-                tabId="certificationEducation"
+                isActive={activeSection === "certification"}
+                tabId="certification"
               >
-                <CertificationEducation
+                <Certification
                   trainerData={trainerData}
                   handleChange={handleChange}
                   setTrainerData={setTrainerData}
@@ -560,11 +556,12 @@ const TrainerEditProfilePage = () => {
                     const isActive = activeSection === section.id;
 
                     return (
-                      <button
+                      <Button
                         key={section.id}
                         type="button"
+                        variant="ghost"
                         onClick={() => setActiveSection(section.id)}
-                        className={`h-3 w-3 rounded-full transition-all duration-300 ${
+                        className={`h-3 w-3 rounded-full transition-all duration-300 p-0 ${
                           isActive
                             ? "bg-gradient-to-r from-[#FF7800] to-[#FF5F00] shadow-lg shadow-orange-500/20"
                             : "bg-[#333] hover:bg-[#666]"

@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import React, { useState, useEffect } from "react";
 
 import { SectionTitle } from "@/components/custom/dashboard/shared";
-import { EducationUpload } from "@/components/custom/personal-details/shared/EducationUpload";
 import { CertificationUpload } from "@/components/custom/shared";
 
 // Animation variants
@@ -21,9 +20,8 @@ const staggerItems = {
   },
 };
 
-export const CertificationEducation = ({
+export const Certification = ({
   trainerData,
-  setTrainerData,
   onResetCertifications,
   resetCertFieldsTrigger,
   initialCertifications,
@@ -36,11 +34,6 @@ export const CertificationEducation = ({
   const certFields = propCertFields || localCertFields;
   const setCertFields = propSetCertFields || localSetCertFields;
 
-  const [educationFields, setEducationFields] = useState([]);
-
-  console.log(certFields, "certFields");
-
-  console.log(trainerData, "trainerData certifikati");
   // Initialize certFields from trainerData.certifications
   useEffect(() => {
     if (
@@ -95,43 +88,11 @@ export const CertificationEducation = ({
     }
   }, [trainerData.trainerProfile.certifications, resetCertFieldsTrigger]);
 
-  // Initialize educationFields from trainerData.education
-  useEffect(() => {
-    if (trainerData.education && trainerData.education.length > 0) {
-      setEducationFields(trainerData.education);
-    } else {
-      // If no education, initialize with one empty field
-      setEducationFields([
-        {
-          institution: "",
-          degree: "",
-          fieldOfStudy: "",
-          startYear: "",
-          endYear: "",
-          description: "",
-        },
-      ]);
-    }
-  }, [trainerData.education]);
-
   // Handler for certification changes
   const handleCertChange = (index, field, value) => {
     const updatedFields = [...certFields];
     updatedFields[index] = { ...updatedFields[index], [field]: value };
     setCertFields(updatedFields);
-  };
-
-  // Handler for education changes
-  const handleEducationChange = (index, field, value) => {
-    const updatedFields = [...educationFields];
-    updatedFields[index] = { ...updatedFields[index], [field]: value };
-    setEducationFields(updatedFields);
-
-    // Update the parent component's state
-    setTrainerData({
-      ...trainerData,
-      education: updatedFields,
-    });
   };
 
   // Add new certification field
@@ -151,38 +112,10 @@ export const CertificationEducation = ({
     setCertFields(newFields);
   };
 
-  // Add new education field
-  const addEducationField = () => {
-    const newFields = [
-      ...educationFields,
-      {
-        institution: "",
-        degree: "",
-        fieldOfStudy: "",
-        startYear: "",
-        endYear: "",
-        description: "",
-      },
-    ];
-    setEducationFields(newFields);
-  };
-
   // Remove certification field
   const removeCertField = (index) => {
     const newFields = certFields.filter((_, i) => i !== index);
     setCertFields(newFields);
-  };
-
-  // Remove education field
-  const removeEducationField = (index) => {
-    const newFields = educationFields.filter((_, i) => i !== index);
-    setEducationFields(newFields);
-
-    // Update the parent component's state
-    setTrainerData({
-      ...trainerData,
-      education: newFields,
-    });
   };
 
   // Dodaj poziv onCertificationsChange svaki put kad se certFields promijeni
@@ -203,7 +136,7 @@ export const CertificationEducation = ({
       animate="visible"
       className="space-y-6"
     >
-      <SectionTitle title="Certifications & Education" />
+      <SectionTitle title="Certifications" />
 
       {/* Certifications Section */}
       <motion.h3
@@ -224,27 +157,6 @@ export const CertificationEducation = ({
         />
         <p className="mt-2 text-xs text-gray-400">
           Add certifications to build credibility with potential clients
-        </p>
-      </motion.div>
-
-      {/* Education Section */}
-      <motion.h3
-        variants={fadeInUp}
-        className="mb-4 mt-8 bg-gradient-to-r from-[#FF7800] to-white bg-clip-text text-lg font-medium text-transparent"
-      >
-        Education
-      </motion.h3>
-
-      <motion.div variants={fadeInUp}>
-        <EducationUpload
-          educationFields={educationFields}
-          handleEducationChange={handleEducationChange}
-          addEducationField={addEducationField}
-          removeEducationField={removeEducationField}
-        />
-        <p className="mt-2 text-xs text-gray-400">
-          Add your educational background to showcase your knowledge and
-          qualifications
         </p>
       </motion.div>
     </motion.div>
