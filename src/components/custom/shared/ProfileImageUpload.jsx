@@ -2,6 +2,8 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
 
+import { Button } from "@/components/common/Button";
+
 const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
   "image/png",
@@ -157,23 +159,25 @@ export const ProfileImageUpload = ({
             </div>
             {/* Buttons */}
             <div className="mt-4 flex gap-2">
-              <button
+              <Button
                 type="button"
                 onClick={triggerFileInput}
-                className="px-3 py-2 bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white text-sm font-medium rounded-lg flex items-center gap-2 transition-colors"
+                variant="orangeFilled"
+                leftIcon={<Icon icon="mdi:camera" width={16} height={16} />}
+                className="px-3 py-2 text-sm font-medium"
               >
-                <Icon icon="mdi:camera" width={16} height={16} />
                 {image ? "Change" : "Upload"}
-              </button>
+              </Button>
               {image && (
-                <button
+                <Button
                   type="button"
                   onClick={removeImage}
-                  className="px-3 py-2 bg-[#333] hover:bg-[#444] text-white text-sm font-medium rounded-lg flex items-center gap-2 transition-colors"
+                  variant="secondary"
+                  leftIcon={<Icon icon="mdi:delete" width={16} height={16} />}
+                  className="px-3 py-2 text-sm font-medium"
                 >
-                  <Icon icon="mdi:delete" width={16} height={16} />
                   Remove
-                </button>
+                </Button>
               )}
             </div>
             {/* Status text */}

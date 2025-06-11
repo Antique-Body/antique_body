@@ -3,6 +3,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
+import { Button } from "@/components/common/Button";
+
 export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
   const tabsRef = useRef([]);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
@@ -35,7 +37,7 @@ export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
   };
 
   return (
-    <div className="relative top-3 mb-6 flex overflow-x-auto  pb-1 pt-3">
+    <div className="relative top-3 mb-6 flex overflow-x-auto pb-1 pt-3">
       {/* Active tab indicator */}
       <div
         className="absolute bottom-0 h-0.5 bg-[#FF6B00] transition-all duration-300 ease-in-out"
@@ -57,7 +59,7 @@ export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
       )}
 
       {tabs.map((tab, index) => (
-        <button
+        <Button
           key={tab.id}
           ref={(el) => (tabsRef.current[index] = el)}
           className={`whitespace-nowrap px-4 py-2 text-sm font-medium transition-all duration-300 ${
@@ -68,6 +70,7 @@ export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
           onClick={() => setActiveTab(tab.id)}
           onMouseEnter={() => handleMouseEnter(index)}
           onMouseLeave={handleMouseLeave}
+          variant="ghost"
         >
           <span
             className={`transition-all duration-300 ${
@@ -85,7 +88,7 @@ export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
               </span>
             )}
           </span>
-        </button>
+        </Button>
       ))}
     </div>
   );

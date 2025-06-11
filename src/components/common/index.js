@@ -16,4 +16,3 @@ export { ToggleButton } from "./ToggleButton";
 export { ToggleButtonGroup } from "./ToggleButton";
 export { DynamicFields } from "./DynamicFields";
 export { DatePicker } from "./DatePicker";
-export { Tooltip } from "./Tooltip";

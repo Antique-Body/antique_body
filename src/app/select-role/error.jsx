@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/common/Button";
+
 export default function Error({ error, reset }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b  text-white">
@@ -8,12 +10,13 @@ export default function Error({ error, reset }) {
           Something went wrong!
         </h2>
         <p className="text-gray-300 mb-6">{error.message}</p>
-        <button
+        <Button
           onClick={() => reset()}
-          className="px-4 py-2 bg-[#ff7800] hover:bg-[#e66e00] text-white rounded-lg transition-colors"
+          variant="orangeFilled"
+          className="px-4 py-2 rounded-lg transition-colors"
         >
           Try again
-        </button>
+        </Button>
       </div>
     </div>
   );

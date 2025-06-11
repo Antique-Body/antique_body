@@ -165,7 +165,6 @@ model TrainerProfile {
   contactEmail      String?
   contactPhone      String?
   availability      Json?    // NOVO
-  education         Json?    // NOVO
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   trainerInfo       TrainerInfo?

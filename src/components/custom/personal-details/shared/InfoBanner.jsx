@@ -1,6 +1,8 @@
 "use client";
 import { Icon } from "@iconify/react";
 
+import { Button } from "@/components/common/Button";
+
 /**
  * A reusable banner component for displaying information in a stylized gradient box
  */
@@ -10,6 +12,8 @@ export const InfoBanner = ({
   subtitle,
   variant = "primary", // primary (orange), success (green), info (blue)
   className = "",
+  buttonText,
+  onButtonClick,
 }) => {
   // Define styles based on variant
   const getVariantStyles = () => {
@@ -21,6 +25,8 @@ export const InfoBanner = ({
           iconBg: "bg-green-500/20",
           iconColor: "text-green-400",
           titleColor: "text-green-400",
+          buttonVariant:
+            "bg-[rgba(74,222,128,0.2)] border border-[rgba(74,222,128,0.3)] text-green-400 hover:bg-[rgba(74,222,128,0.3)]",
         };
       case "info":
         return {
@@ -29,6 +35,8 @@ export const InfoBanner = ({
           iconBg: "bg-blue-500/20",
           iconColor: "text-blue-400",
           titleColor: "text-blue-400",
+          buttonVariant:
+            "bg-[rgba(59,130,246,0.2)] border border-[rgba(59,130,246,0.3)] text-blue-400 hover:bg-[rgba(59,130,246,0.3)]",
         };
       case "primary":
       default:
@@ -38,6 +46,7 @@ export const InfoBanner = ({
           iconBg: "bg-[#FF6B00]/20",
           iconColor: "text-[#FF6B00]",
           titleColor: "text-[#FF6B00]",
+          buttonVariant: "outlineOrange",
         };
     }
   };
@@ -46,7 +55,9 @@ export const InfoBanner = ({
 
   return (
     <div
-      className={`p-4 bg-gradient-to-r ${styles.gradient} border ${styles.border} rounded-lg ${className}`}
+      className={`p-4 bg-gradient-to-r ${styles.gradient} border ${
+        styles.border
+      } rounded-lg ${className} ${buttonText ? "pr-36" : ""}`}
     >
       <div className="flex items-center gap-3">
         <div
@@ -68,6 +79,19 @@ export const InfoBanner = ({
           {subtitle && <p className="text-xs text-gray-400">{subtitle}</p>}
         </div>
       </div>
+
+      {buttonText && onButtonClick && (
+        <div className="absolute right-4 top-1/2 -translate-y-1/2">
+          <Button
+            variant={variant === "primary" ? "outlineOrange" : "custom"}
+            className={variant !== "primary" ? styles.buttonVariant : ""}
+            size="small"
+            onClick={onButtonClick}
+          >
+            {buttonText}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
