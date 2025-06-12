@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/common/Button";
+
 import { FullScreenLoader } from "@/components/common";
+import { Button } from "@/components/common/Button";
 
 export default function LoadingTestPage() {
   const [showLoader, setShowLoader] = useState(true);

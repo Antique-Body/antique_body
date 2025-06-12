@@ -88,11 +88,12 @@ export function useCertificateFiles(
   }, [certFields]);
 
   // Cleanup on unmount
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       cleanupBlobUrls();
-    };
-  }, []);
+    },
+    []
+  );
 
   const handleAddFiles = (index, files) => {
     try {
