@@ -157,3 +157,47 @@ export const validateEmail = (email) => {
     errors,
   };
 };
+
+export const validateTrainerProfile = (data) => {
+  const errors = {};
+  if (!data) {
+    return { valid: false, errors: { general: "No data provided" } };
+  }
+  const requiredFields = [
+    "firstName",
+    "lastName",
+    "dateOfBirth",
+    "gender",
+    "trainingSince",
+    "specialties",
+    "languages",
+    "trainingEnvironments",
+    "trainingTypes",
+    "location",
+    "pricingType",
+    "currency",
+  ];
+  for (const field of requiredFields) {
+    if (
+      !data[field] ||
+      (Array.isArray(data[field]) && data[field].length === 0)
+    ) {
+      errors[field] = `Field '${field}' is required.`;
+    }
+  }
+  if (data.pricingType === "fixed" || data.pricingType === "package_deals") {
+    if (!data.pricePerSession || Number(data.pricePerSession) <= 0) {
+      errors.pricePerSession =
+        "Field 'pricePerSession' is required for selected pricing type.";
+    }
+  }
+  if (data.location) {
+    if (!data.location.city || !data.location.state || !data.location.country) {
+      errors.location = "All location fields are required.";
+    }
+  }
+  return {
+    valid: Object.keys(errors).length === 0,
+    errors,
+  };
+};

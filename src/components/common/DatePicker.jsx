@@ -3,6 +3,8 @@ import { Icon } from "@iconify/react";
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
+import { Button } from "@/components/common/Button";
+
 const DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 const MONTHS = [
   "January",
@@ -304,13 +306,14 @@ export const DatePicker = ({
     return (
       <div className="flex flex-wrap gap-2 p-2 border-t border-[#333]">
         {decades.map((decade) => (
-          <button
+          <Button
             key={decade.label}
             onClick={() => jumpToDecade(decade.year)}
+            variant="ghost"
             className="px-3 py-1 text-xs text-white bg-[#333] hover:bg-[#444] rounded transition-colors"
           >
             {decade.label}
-          </button>
+          </Button>
         ))}
       </div>
     );
@@ -340,21 +343,23 @@ export const DatePicker = ({
     let headerContent;
     if (viewMode === "days") {
       headerContent = (
-        <button
+        <Button
           onClick={() => setViewMode("months")}
+          variant="ghost"
           className="text-white font-medium hover:text-[#FF6B00] transition-colors"
         >
           {MONTHS[month]} {year}
-        </button>
+        </Button>
       );
     } else if (viewMode === "months") {
       headerContent = (
-        <button
+        <Button
           onClick={() => setViewMode("years")}
+          variant="ghost"
           className="text-white font-medium hover:text-[#FF6B00] transition-colors"
         >
           {year}
-        </button>
+        </Button>
       );
     } else {
       headerContent = (
@@ -375,33 +380,37 @@ export const DatePicker = ({
       >
         {/* Header with month and year */}
         <div className="p-3 border-b border-[#333] flex items-center justify-between">
-          <button
+          <Button
             type="button"
+            variant="ghost"
             onClick={handlePrevPage}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#333] transition-colors"
-          >
-            <Icon
-              icon="mdi:chevron-left"
-              width={20}
-              height={20}
-              className="text-white"
-            />
-          </button>
+            leftIcon={
+              <Icon
+                icon="mdi:chevron-left"
+                width={20}
+                height={20}
+                className="text-white"
+              />
+            }
+          />
 
           {headerContent}
 
-          <button
+          <Button
             type="button"
+            variant="ghost"
             onClick={handleNextPage}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#333] transition-colors"
-          >
-            <Icon
-              icon="mdi:chevron-right"
-              width={20}
-              height={20}
-              className="text-white"
-            />
-          </button>
+            leftIcon={
+              <Icon
+                icon="mdi:chevron-right"
+                width={20}
+                height={20}
+                className="text-white"
+              />
+            }
+          />
         </div>
 
         {/* Calendar grid - conditional based on viewMode */}
@@ -442,8 +451,9 @@ export const DatePicker = ({
         {/* Footer with today button - only in days view */}
         {viewMode === "days" && (
           <div className="p-3 border-t border-[#333] flex justify-end">
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => {
                 const today = new Date();
                 // Check if today is within min/max range
@@ -464,7 +474,7 @@ export const DatePicker = ({
               className="px-3 py-1 text-sm text-[#FF6B00] hover:bg-[#FF6B00]/10 rounded transition-colors"
             >
               Today
-            </button>
+            </Button>
           </div>
         )}
       </div>,

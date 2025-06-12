@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react";
 import { FormSection, LanguageSelector } from "./";
 
 import { FormField } from "@/components/common";
+import { Button } from "@/components/common/Button";
 import { ErrorIcon } from "@/components/common/Icons";
 
 // Activity types that the client might be interested in
@@ -119,17 +120,18 @@ export const GoalsAndPreferencesStep = ({ formData, onChange, errors }) => {
               {fitnessGoalTypes.map((goal) => {
                 const isSelected = formData.primaryGoal === goal.id;
                 return (
-                  <button
+                  <Button
                     key={goal.id}
                     type="button"
+                    variant="ghost"
                     onClick={() => handlePrimaryGoalToggle(goal.id)}
                     className={`flex items-center gap-2 p-3 rounded-lg border transition-all ${
                       isSelected
                         ? "bg-[#FF6B00]/10 border-[#FF6B00]/50 text-[#FF6B00]"
                         : "bg-[rgba(30,30,30,0.5)] border-[#333] text-gray-300 hover:border-[#444] hover:bg-[rgba(40,40,40,0.7)]"
                     }`}
+                    leftIcon={<Icon icon={goal.icon} width={18} height={18} />}
                   >
-                    <Icon icon={goal.icon} width={18} height={18} />
                     <span className="text-sm">{goal.label}</span>
                     {isSelected && (
                       <Icon
@@ -139,7 +141,7 @@ export const GoalsAndPreferencesStep = ({ formData, onChange, errors }) => {
                         height={16}
                       />
                     )}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -160,9 +162,10 @@ export const GoalsAndPreferencesStep = ({ formData, onChange, errors }) => {
                 const isSelected = formData.secondaryGoal === goal.id;
                 const isPrimary = formData.primaryGoal === goal.id;
                 return (
-                  <button
+                  <Button
                     key={goal.id}
                     type="button"
+                    variant="ghost"
                     onClick={() => handleSecondaryGoalToggle(goal.id)}
                     disabled={isPrimary}
                     className={`flex items-center gap-2 p-3 rounded-lg border transition-all ${
@@ -172,8 +175,8 @@ export const GoalsAndPreferencesStep = ({ formData, onChange, errors }) => {
                         ? "opacity-50 cursor-not-allowed bg-[rgba(30,30,30,0.5)] border-[#333] text-gray-500"
                         : "bg-[rgba(30,30,30,0.5)] border-[#333] text-gray-300 hover:border-[#444] hover:bg-[rgba(40,40,40,0.7)]"
                     }`}
+                    leftIcon={<Icon icon={goal.icon} width={18} height={18} />}
                   >
-                    <Icon icon={goal.icon} width={18} height={18} />
                     <span className="text-sm">{goal.label}</span>
                     {isSelected && (
                       <Icon
@@ -188,7 +191,7 @@ export const GoalsAndPreferencesStep = ({ formData, onChange, errors }) => {
                         Primary
                       </span>
                     )}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -223,19 +226,22 @@ export const GoalsAndPreferencesStep = ({ formData, onChange, errors }) => {
                 activity.id
               );
               return (
-                <button
+                <Button
                   key={activity.id}
                   type="button"
+                  variant="ghost"
                   onClick={() => handleActivityToggle(activity.id)}
                   className={`flex items-center gap-2 p-3 rounded-lg border transition-all ${
                     isSelected
                       ? "bg-[#FF6B00]/10 border-[#FF6B00]/50 text-[#FF6B00]"
                       : "bg-[rgba(30,30,30,0.5)] border-[#333] text-gray-300 hover:border-[#444] hover:bg-[rgba(40,40,40,0.7)]"
                   }`}
+                  leftIcon={
+                    <Icon icon={activity.icon} width={18} height={18} />
+                  }
                 >
-                  <Icon icon={activity.icon} width={18} height={18} />
                   <span className="text-sm">{activity.label}</span>
-                </button>
+                </Button>
               );
             })}
           </div>

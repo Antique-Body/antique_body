@@ -11,7 +11,6 @@ import { FormField } from "@/components/common/FormField";
 import {
   getAllAvailabilityDays,
   getAllLocations,
-  getAllSpecialties,
   getAllTags,
 } from "@/components/custom/home-page/trainers-marketplace/data/trainersData";
 
@@ -23,7 +22,6 @@ export const SearchFilters = ({
   onClearFilters,
 }) => {
   const [isExpanded, setIsExpanded] = useState({
-    specialty: true,
     location: false,
     availability: false,
     price: true,
@@ -31,7 +29,6 @@ export const SearchFilters = ({
     tags: false,
   });
 
-  const specialties = getAllSpecialties();
   const locations = getAllLocations();
   const availabilityDays = getAllAvailabilityDays();
   const tags = getAllTags();
@@ -40,16 +37,6 @@ export const SearchFilters = ({
     setIsExpanded({
       ...isExpanded,
       [section]: !isExpanded[section],
-    });
-  };
-
-  const handleSpecialtyChange = (specialty) => {
-    setFilters((prev) => {
-      const newSpecialties = prev.specialty.includes(specialty)
-        ? prev.specialty.filter((s) => s !== specialty)
-        : [...prev.specialty, specialty];
-
-      return { ...prev, specialty: newSpecialties };
     });
   };
 
@@ -94,7 +81,6 @@ export const SearchFilters = ({
   // Count active filters
   const countActiveFilters = () => {
     let count = 0;
-    count += filters.specialty.length;
     count += filters.location.length;
     count += filters.availability.length;
     count += filters.price.min > 0 || filters.price.max < 200 ? 1 : 0;
@@ -158,48 +144,6 @@ export const SearchFilters = ({
           />
         </div>
       )}
-
-      {/* Specialty filter */}
-      <div className="mb-4 border-t border-zinc-800 pt-4">
-        <Button
-          variant="ghost"
-          className="flex items-center justify-between w-full text-left mb-2"
-          onClick={() => toggleSection("specialty")}
-        >
-          <span className="font-medium">Specialty</span>
-          <Icon
-            icon={isExpanded.specialty ? "mdi:chevron-up" : "mdi:chevron-down"}
-            className="h-5 w-5"
-          />
-        </Button>
-
-        <AnimatePresence>
-          {isExpanded.specialty && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="overflow-hidden"
-            >
-              <div className="space-y-2 mt-2">
-                {specialties.map((specialty) => (
-                  <FormField
-                    key={specialty}
-                    type="checkbox"
-                    id={`specialty-${specialty}`}
-                    name={`specialty-${specialty}`}
-                    label={specialty}
-                    checked={filters.specialty.includes(specialty)}
-                    onChange={() => handleSpecialtyChange(specialty)}
-                    className="text-sm text-zinc-300"
-                  />
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
 
       {/* Location filter */}
       <div className="mb-4 border-t border-zinc-800 pt-4">

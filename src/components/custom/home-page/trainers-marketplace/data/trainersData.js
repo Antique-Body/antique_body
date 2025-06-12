@@ -30,7 +30,6 @@ export const trainers = [
       "National Weightlifting Champion",
       "Coached 3 Olympic Athletes",
     ],
-    education: ["Masters in Exercise Science", "Sports Medicine Certification"],
     languages: ["Greek", "English", "French"],
     image:
       "https://images.pexels.com/photos/30672394/pexels-photo-30672394/free-photo-of-man-exercising-with-dumbbells-in-gym.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
@@ -75,7 +74,6 @@ export const trainers = [
       "Cardiovascular Health",
     ],
     achievements: ["2x Marathon Winner", "Ultra-Marathon Competitor"],
-    education: ["Bachelor's in Physical Education"],
     languages: ["Greek", "English", "Italian"],
     image:
       "https://images.pexels.com/photos/5669179/pexels-photo-5669179.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
@@ -346,10 +344,6 @@ export const trainers = [
 ];
 
 // Functions to get unique values for filtering
-export const getAllSpecialties = () => {
-  const specialties = trainers.map((trainer) => trainer.specialty);
-  return [...new Set(specialties)];
-};
 
 export const getAllLocations = () => {
   const locations = trainers.map((trainer) => trainer.location);
@@ -358,7 +352,7 @@ export const getAllLocations = () => {
 
 export const getAllAvailabilityDays = () => {
   const availabilityDays = trainers.flatMap(
-    (trainer) => trainer.availability || [],
+    (trainer) => trainer.availability || []
   );
   return [...new Set(availabilityDays)];
 };

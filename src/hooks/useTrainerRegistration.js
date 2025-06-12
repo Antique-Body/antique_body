@@ -14,14 +14,14 @@ export function useTrainerRegistration() {
     // Professional Information
     trainingSince: "",
     specialties: [],
-    bio: "",
+    description: "",
     // Languages and Training Types
     languages: [],
     trainingEnvironment: "",
     trainingTypes: [],
     // Contact and Location
-    email: "",
-    phone: "",
+    contactEmail: "",
+    contactPhone: "",
     profileImage: null,
     location: {
       city: "",
@@ -29,20 +29,14 @@ export function useTrainerRegistration() {
       country: "",
     },
     // Legacy fields for compatibility
-    name: "",
-    specialty: "",
     certifications: [{ name: "", issuer: "", expiryDate: "", files: [] }],
-    yearsExperience: "",
-    trainingVenues: [""],
-    sports: [],
-    contactEmail: "",
-    contactPhone: "",
     currency: "EUR",
   });
   const [errors, setErrors] = useState({});
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
+  console.log(formData, "fpr,dDate");
   // Handle form input changes
   const handleChange = (e) => {
     if (!e.target || typeof e.target.name !== "string") return;
@@ -202,16 +196,33 @@ export function useTrainerRegistration() {
         return;
       }
       uploadedUrls = await uploadRes.json();
+      console.log("uploadedUrls from /api/upload:", uploadedUrls);
     }
     // 3. Pripremi podatke za API
+    console.log(
+      "formData.certifications before mapping:",
+      formData.certifications
+    );
+    let certifications = formData.certifications.map((cert, i) => ({
+      ...cert,
+      documents:
+        Array.isArray(uploadedUrls.certifications) &&
+        uploadedUrls.certifications[i]
+          ? uploadedUrls.certifications[i]
+          : [],
+    }));
+    // Ako je certifications slučajno array arraya, flattenaj
+    if (Array.isArray(certifications[0])) {
+      certifications = certifications.flat();
+    }
+    // Debug: logaj certifications prije slanja
+    console.log("Certifications payload:", certifications);
     const trainerData = {
       ...formData,
       profileImage: uploadedUrls.profileImage || formData.profileImage,
-      certifications: formData.certifications.map((cert, i) => ({
-        ...cert,
-        documents: uploadedUrls[`certifications[${i}]`] || [],
-      })),
+      certifications,
     };
+    console.log("Final trainerData payload:", trainerData);
     // 4. Pošalji podatke na backend
     const res = await fetch("/api/users/trainer", {
       method: "POST",

@@ -7,7 +7,6 @@ import { PhoneInput } from "./PhoneInput";
 import { VerificationCodeInput } from "./VerificationCodeInput";
 
 import { Button, ErrorMessage, FormField } from "@/components/common";
-import { FacebookIcon, GoogleIcon } from "@/components/common/Icons";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthForm } from "@/hooks";
 
@@ -103,7 +102,7 @@ export const AuthForm = ({
           onClick={handleGoogleSignIn}
           variant="outline"
           className="w-full bg-white text-[#1a1a1a] hover:bg-gray-100 hover:scale-[1.02] transition-all duration-200"
-          leftIcon={<GoogleIcon />}
+          leftIcon={<Icon icon="flat-color-icons:google" className="w-5 h-5" />}
         >
           {isLogin
             ? t("auth.login.continue_with_google")
@@ -113,7 +112,7 @@ export const AuthForm = ({
           onClick={handleFacebookSignIn}
           variant="outline"
           className="w-full bg-white text-[#1a1a1a] hover:bg-gray-100 hover:scale-[1.02] transition-all duration-200"
-          leftIcon={<FacebookIcon />}
+          leftIcon={<Icon icon="logos:facebook" className="w-5 h-5" />}
         >
           {isLogin
             ? t("auth.login.continue_with_facebook")

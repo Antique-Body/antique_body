@@ -87,6 +87,34 @@ CREATE TABLE `PhoneVerification` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `Location` (
+    `id` VARCHAR(191) NOT NULL,
+    `city` VARCHAR(191) NOT NULL,
+    `state` VARCHAR(191) NOT NULL,
+    `country` VARCHAR(191) NOT NULL,
+    `lat` DOUBLE NULL,
+    `lon` DOUBLE NULL,
+
+    INDEX `Location_city_idx`(`city`),
+    INDEX `Location_country_idx`(`country`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Gym` (
+    `id` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `address` VARCHAR(191) NULL,
+    `lat` DOUBLE NOT NULL,
+    `lon` DOUBLE NOT NULL,
+    `placeId` VARCHAR(191) NULL,
+    `locationId` VARCHAR(191) NULL,
+
+    UNIQUE INDEX `Gym_placeId_key`(`placeId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `TrainerProfile` (
     `id` VARCHAR(191) NOT NULL,
     `userId` VARCHAR(191) NOT NULL,
@@ -96,13 +124,15 @@ CREATE TABLE `TrainerProfile` (
     `gender` VARCHAR(191) NULL,
     `trainingSince` INTEGER NULL,
     `profileImage` VARCHAR(191) NULL,
-    `professionalBio` TEXT NULL,
-    `city` VARCHAR(191) NULL,
-    `state` VARCHAR(191) NULL,
-    `country` VARCHAR(191) NULL,
+    `description` TEXT NULL,
+    `locationId` VARCHAR(191) NULL,
     `pricingType` VARCHAR(191) NULL,
     `pricePerSession` INTEGER NULL,
     `currency` VARCHAR(191) NULL,
+    `contactEmail` VARCHAR(191) NULL,
+    `contactPhone` VARCHAR(191) NULL,
+    `availability` JSON NULL,
+    `education` JSON NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -164,6 +194,7 @@ CREATE TABLE `Certification` (
     `status` ENUM('pending', 'accepted', 'rejected', 'expired') NOT NULL DEFAULT 'pending',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
+    `hidden` BOOLEAN NOT NULL DEFAULT false,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -197,9 +228,7 @@ CREATE TABLE `ClientProfile` (
     `goalDescription` TEXT NULL,
     `email` VARCHAR(191) NULL,
     `phone` VARCHAR(191) NULL,
-    `city` VARCHAR(191) NOT NULL,
-    `state` VARCHAR(191) NOT NULL,
-    `country` VARCHAR(191) NOT NULL,
+    `locationId` VARCHAR(191) NULL,
     `profileImage` VARCHAR(191) NULL,
     `bio` TEXT NULL,
     `medicalConditions` TEXT NULL,
@@ -233,6 +262,34 @@ CREATE TABLE `ClientActivity` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `TrainerInfo` (
+    `id` VARCHAR(191) NOT NULL,
+    `trainerProfileId` VARCHAR(191) NOT NULL,
+    `rating` DOUBLE NULL,
+    `totalSessions` INTEGER NULL,
+    `totalEarnings` INTEGER NULL,
+    `upcomingSessions` INTEGER NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `TrainerInfo_trainerProfileId_key`(`trainerProfileId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `TrainerGym` (
+    `id` VARCHAR(191) NOT NULL,
+    `trainerId` VARCHAR(191) NOT NULL,
+    `gymId` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `TrainerGym_gymId_idx`(`gymId`),
+    UNIQUE INDEX `TrainerGym_trainerId_gymId_key`(`trainerId`, `gymId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `Account` ADD CONSTRAINT `Account_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -244,6 +301,12 @@ ALTER TABLE `EmailVerification` ADD CONSTRAINT `EmailVerification_userId_fkey` F
 
 -- AddForeignKey
 ALTER TABLE `PhoneVerification` ADD CONSTRAINT `PhoneVerification_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Gym` ADD CONSTRAINT `Gym_locationId_fkey` FOREIGN KEY (`locationId`) REFERENCES `Location`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `TrainerProfile` ADD CONSTRAINT `TrainerProfile_locationId_fkey` FOREIGN KEY (`locationId`) REFERENCES `Location`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `TrainerProfile` ADD CONSTRAINT `TrainerProfile_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -267,6 +330,9 @@ ALTER TABLE `Certification` ADD CONSTRAINT `Certification_trainerProfileId_fkey`
 ALTER TABLE `CertificationDocument` ADD CONSTRAINT `CertificationDocument_certificationId_fkey` FOREIGN KEY (`certificationId`) REFERENCES `Certification`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `ClientProfile` ADD CONSTRAINT `ClientProfile_locationId_fkey` FOREIGN KEY (`locationId`) REFERENCES `Location`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `ClientProfile` ADD CONSTRAINT `ClientProfile_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -274,3 +340,12 @@ ALTER TABLE `ClientLanguage` ADD CONSTRAINT `ClientLanguage_clientProfileId_fkey
 
 -- AddForeignKey
 ALTER TABLE `ClientActivity` ADD CONSTRAINT `ClientActivity_clientProfileId_fkey` FOREIGN KEY (`clientProfileId`) REFERENCES `ClientProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `TrainerInfo` ADD CONSTRAINT `TrainerInfo_trainerProfileId_fkey` FOREIGN KEY (`trainerProfileId`) REFERENCES `TrainerProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `TrainerGym` ADD CONSTRAINT `TrainerGym_trainerId_fkey` FOREIGN KEY (`trainerId`) REFERENCES `TrainerProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `TrainerGym` ADD CONSTRAINT `TrainerGym_gymId_fkey` FOREIGN KEY (`gymId`) REFERENCES `Gym`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
