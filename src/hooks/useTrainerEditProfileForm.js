@@ -56,8 +56,6 @@ export function useTrainerEditProfileForm() {
         if (!res.ok) throw new Error("No trainer profile");
         const data = await res.json();
         const availabilities = data.trainerProfile?.availabilities || [];
-        const weekdays = [...new Set(availabilities.map((a) => a.weekday))];
-        const timeSlots = [...new Set(availabilities.map((a) => a.timeSlot))];
         const newTrainerData = {
           ...trainerData,
           rating: data.rating || "",
@@ -250,6 +248,7 @@ export function useTrainerEditProfileForm() {
     async (e) => {
       e.preventDefault();
       setError("");
+      setLoading(true);
       try {
         const formData = new FormData();
         if (
@@ -303,7 +302,6 @@ export function useTrainerEditProfileForm() {
           }
           return { ...base, documents };
         });
-
         // Transform relacijska polja u nizove stringova
         const specialties = Array.isArray(
           trainerData.trainerProfile.specialties
@@ -323,7 +321,6 @@ export function useTrainerEditProfileForm() {
         )
           ? trainerData.trainerProfile.trainingTypes
           : [];
-
         // Pripremi payload
         const body = {
           trainerProfile: {
@@ -337,18 +334,17 @@ export function useTrainerEditProfileForm() {
             trainingTypes,
           },
         };
-
         const res = await fetch("/api/users/trainer", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
         });
         if (!res.ok) throw new Error("Failed to update profile");
-        setTimeout(() => {
-          router.push("/trainer/dashboard");
-        }, 1000);
+        setLoading(false);
+        router.push("/trainer/dashboard");
       } catch (err) {
         setError(err.message || "Error updating profile");
+        setLoading(false);
       }
     },
     [trainerData, certFields, router]

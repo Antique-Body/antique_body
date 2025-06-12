@@ -78,7 +78,7 @@ export default function ClientDashboardLayout({ children }) {
   // Get the count of unread messages
   const unreadMessagesCount = 2; // Placeholder value
   const tabsConfig = [
-    { id: "profile", label: "Profile" },
+    { id: "yourCoach", label: "Your Coach" },
     { id: "upcomingTrainings", label: "Upcoming Trainings" },
     { id: "messages", label: "Messages", badgeCount: unreadMessagesCount },
     { id: "plans", label: "Plans" },

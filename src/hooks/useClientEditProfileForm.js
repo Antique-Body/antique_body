@@ -158,12 +158,10 @@ export function useClientEditProfileForm() {
           body: JSON.stringify(body),
         });
         if (!res.ok) throw new Error("Failed to update profile");
-        setTimeout(() => {
-          router.push("/client/dashboard");
-        }, 1000);
+        setLoading(false);
+        router.push("/client/dashboard");
       } catch (err) {
         setError(err.message || "Error updating profile");
-      } finally {
         setLoading(false);
       }
     },
