@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
 
 export function useTrainerEditProfileForm() {
   const router = useRouter();

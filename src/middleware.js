@@ -22,27 +22,27 @@ function getRedirectUrl(role, token, pathname, _url) {
         : "/client/personal-details";
     return pathname === "/client/dashboard" ? null : "/client/dashboard";
   }
-  // if (role === "trainer") {
-  //   const allowedTrainerPaths = [
-  //     "/trainer/dashboard",
-  //     "/trainer/dashboard/newclients",
-  //     "/trainer/edit-profile",
-  //   ];
-  //   if (!token.trainerProfile) {
-  //     if (
-  //       pathname === "/trainer/personal-details" ||
-  //       pathname === "/trainer/edit-profile"
-  //     ) {
-  //       return null;
-  //     }
-  //     return "/trainer/personal-details";
-  //   }
-  //   // Ako ima profil, pusti samo dozvoljene rute
-  //   if (!allowedTrainerPaths.includes(pathname)) {
-  //     return "/trainer/dashboard";
-  //   }
-  //   return null;
-  // }
+  if (role === "trainer") {
+    const allowedTrainerPaths = [
+      "/trainer/dashboard",
+      "/trainer/dashboard/newclients",
+      "/trainer/edit-profile",
+    ];
+    if (!token.trainerProfile) {
+      if (
+        pathname === "/trainer/personal-details" ||
+        pathname === "/trainer/edit-profile"
+      ) {
+        return null;
+      }
+      return "/trainer/personal-details";
+    }
+    // Ako ima profil, pusti samo dozvoljene rute
+    if (!allowedTrainerPaths.includes(pathname)) {
+      return "/trainer/dashboard";
+    }
+    return null;
+  }
   return null;
 }
 
@@ -62,7 +62,19 @@ export async function middleware(request) {
 
   // 2. Auth paths uvijek pusti (login, register, reset-password)
   if (AUTH_PATHS.includes(pathname)) {
-    // console.log("[middleware] Na AUTH_PATH, dopuštam prolaz.");
+    if (token) {
+      let redirectUrl = "/select-role";
+      if (token.role === "client") {
+        redirectUrl = token.clientProfile
+          ? "/client/dashboard"
+          : "/client/personal-details";
+      } else if (token.role === "trainer") {
+        redirectUrl = token.trainerProfile
+          ? "/trainer/dashboard"
+          : "/trainer/personal-details";
+      }
+      return NextResponse.redirect(new URL(redirectUrl, request.url));
+    }
     return NextResponse.next();
   }
 

@@ -1,8 +1,6 @@
 "use client";
-import { Icon } from "@iconify/react";
 
-import { FormField } from "@/components/common";
-import { InfoBanner } from "@/components/common/InfoBanner";
+import { FormField, InfoBanner } from "@/components/common";
 import {
   searchCities,
   searchStates,
