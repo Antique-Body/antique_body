@@ -138,14 +138,6 @@ export const Certification = ({
     >
       <SectionTitle title="Certifications" />
 
-      {/* Certifications Section */}
-      <motion.h3
-        variants={fadeInUp}
-        className="mb-4 mt-8 bg-gradient-to-r from-[#FF7800] to-white bg-clip-text text-lg font-medium text-transparent"
-      >
-        Certifications
-      </motion.h3>
-
       <motion.div variants={fadeInUp}>
         <CertificationUpload
           certFields={certFields}
