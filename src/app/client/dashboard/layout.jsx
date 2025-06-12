@@ -78,12 +78,17 @@ export default function ClientDashboardLayout({ children }) {
   // Get the count of unread messages
   const unreadMessagesCount = 2; // Placeholder value
   const tabsConfig = [
-    { id: "yourCoach", label: "Your Coach" },
-    { id: "upcomingTrainings", label: "Upcoming Trainings" },
+    { id: "trainwithcoach", label: "Train with Coach" },
+    { id: "overview", label: "Overview" },
+    {
+      id: "upcoming-trainings",
+      label: "Upcoming Trainings",
+    },
+    { id: "trainings", label: "Trainings" },
+    { id: "progress", label: "Progress" },
     { id: "messages", label: "Messages", badgeCount: unreadMessagesCount },
-    { id: "plans", label: "Plans" },
-    { id: "exercises", label: "Exercises" },
-    { id: "meals", label: "Meals" },
+    { id: "nutrition", label: "Nutrition" },
+    { id: "health", label: "Health" },
   ];
 
   // Helper for displaying client info
@@ -100,20 +105,7 @@ export default function ClientDashboardLayout({ children }) {
     if (!clientData || clientData.error) {
       return <div className="text-red-400">Failed to load profile.</div>;
     }
-    // Mapaj podatke iz clientData u userData format koji ClientProfile očekuje
-    const userData = {
-      name: `${clientData.firstName} ${clientData.lastName}`,
-      avatarContent: clientData.profileImage || "/avatar-placeholder.png",
-      planName: clientData.planName || "N/A", // prilagodi ako imaš plan podatke
-      coach: clientData.coachName || "N/A", // prilagodi ako imaš coach podatke
-      progress: clientData.progress || null, // prilagodi ako imaš progress podatke
-      stats: {
-        weight: clientData.weight || 0,
-        bodyFat: clientData.bodyFat || 0,
-        calorieGoal: clientData.calorieGoal || 0,
-      },
-    };
-    return <ClientProfile userData={userData} />;
+    return <ClientProfile userData={clientData} />;
   };
 
   return (

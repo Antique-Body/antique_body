@@ -1,0 +1,17 @@
+export const ACTIVITY_TYPES = [
+  { id: "weight_training", label: "Weight Training", icon: "mdi:dumbbell" },
+  { id: "cardio", label: "Cardio", icon: "mdi:run" },
+  { id: "yoga", label: "Yoga", icon: "mdi:yoga" },
+  { id: "pilates", label: "Pilates", icon: "mdi:yoga-pose" },
+  { id: "crossfit", label: "CrossFit", icon: "mdi:weight-lifter" },
+  { id: "hiit", label: "HIIT", icon: "mdi:timer" },
+  { id: "swimming", label: "Swimming", icon: "mdi:swim" },
+  { id: "cycling", label: "Cycling", icon: "mdi:bike" },
+  { id: "running", label: "Running", icon: "mdi:run-fast" },
+  { id: "boxing", label: "Boxing", icon: "mdi:boxing-glove" },
+  { id: "martial_arts", label: "Martial Arts", icon: "mdi:karate" },
+  { id: "team_sports", label: "Team Sports", icon: "mdi:soccer" },
+  { id: "dance", label: "Dance", icon: "mdi:dance-ballroom" },
+  { id: "stretching", label: "Stretching", icon: "mdi:stretching" },
+  { id: "walking", label: "Walking", icon: "mdi:walk" },
+];

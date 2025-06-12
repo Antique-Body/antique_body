@@ -2,7 +2,8 @@ import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/common/Button";
-import { StatCard, UserProfile } from "@/components/custom/dashboard/shared";
+import { UserProfile } from "@/components/custom/dashboard/shared";
+import { StatCard } from "@/components/custom/dashboard/shared/StatCard";
 import { SPECIALTIES } from "@/enums/specialties";
 import { TRAINING_TYPES } from "@/enums/trainingTypes";
 
@@ -41,12 +42,12 @@ export const TrainerProfile = ({ trainerData }) => {
         className="py-2"
       >
         <div className="w-full space-y-4">
-          {/* Specialties section - prvi red */}
-          <div className="w-full bg-[rgba(0,180,255,0.05)] p-3 rounded-lg border border-[rgba(0,180,255,0.1)]">
-            <h3 className="text-xs font-medium text-white mb-2 flex items-center">
+          {/* Specialties section - first row */}
+          <div className="w-full bg-[rgba(0,180,255,0.05)] p-4 rounded-lg border border-[rgba(0,180,255,0.1)] transition-all duration-300 hover:shadow-lg hover:shadow-[rgba(0,180,255,0.05)]">
+            <h3 className="text-xs font-medium text-white mb-3 flex items-center">
               <Icon
                 icon="mdi:star-circle"
-                className="mr-1 text-[#00B4FF]"
+                className="mr-1.5 text-[#00B4FF]"
                 width={16}
                 height={16}
               />
@@ -54,7 +55,7 @@ export const TrainerProfile = ({ trainerData }) => {
                 Specialties
               </span>
             </h3>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-2">
               {specialties.length > 0 ? (
                 specialties.map((spec, idx) => {
                   const obj = SPECIALTIES.find((s) => s.id === spec);
@@ -63,9 +64,9 @@ export const TrainerProfile = ({ trainerData }) => {
                   return (
                     <span
                       key={idx}
-                      className="inline-flex items-center gap-1 rounded-md border border-[rgba(0,180,255,0.3)] bg-[rgba(0,180,255,0.15)] px-2 py-0.5 text-xs font-medium text-[#00B4FF] shadow-sm"
+                      className="inline-flex items-center gap-1.5 rounded-md border border-[rgba(0,180,255,0.3)] bg-[rgba(0,180,255,0.15)] px-2.5 py-1 text-xs font-medium text-[#00B4FF] shadow-sm transition-all duration-300 hover:bg-[rgba(0,180,255,0.2)]"
                     >
-                      {icon && <Icon icon={icon} width={12} height={12} />}
+                      {icon && <Icon icon={icon} width={14} height={14} />}
                       {label}
                     </span>
                   );
@@ -76,12 +77,12 @@ export const TrainerProfile = ({ trainerData }) => {
             </div>
           </div>
 
-          {/* Training Types section - drugi red */}
-          <div className="w-full bg-[rgba(255,107,0,0.05)] p-3 rounded-lg border border-[rgba(255,107,0,0.1)]">
-            <h3 className="text-xs font-medium text-white mb-2 flex items-center">
+          {/* Training Types section - second row */}
+          <div className="w-full bg-[rgba(255,107,0,0.05)] p-4 rounded-lg border border-[rgba(255,107,0,0.1)] transition-all duration-300 hover:shadow-lg hover:shadow-[rgba(255,107,0,0.05)]">
+            <h3 className="text-xs font-medium text-white mb-3 flex items-center">
               <Icon
                 icon="mdi:dumbbell"
-                className="mr-1 text-[#FF6B00]"
+                className="mr-1.5 text-[#FF6B00]"
                 width={16}
                 height={16}
               />
@@ -89,7 +90,7 @@ export const TrainerProfile = ({ trainerData }) => {
                 Training Types
               </span>
             </h3>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-2">
               {trainingTypes.length > 0 ? (
                 trainingTypes.map((type, idx) => {
                   const obj = TRAINING_TYPES.find((t) => t.id === type);
@@ -98,9 +99,9 @@ export const TrainerProfile = ({ trainerData }) => {
                   return (
                     <span
                       key={idx}
-                      className="inline-flex items-center gap-1 rounded-md border border-[rgba(255,107,0,0.3)] bg-[rgba(255,107,0,0.15)] px-2 py-0.5 text-xs font-medium text-[#FF6B00] shadow-sm"
+                      className="inline-flex items-center gap-1.5 rounded-md border border-[rgba(255,107,0,0.3)] bg-[rgba(255,107,0,0.15)] px-2.5 py-1 text-xs font-medium text-[#FF6B00] shadow-sm transition-all duration-300 hover:bg-[rgba(255,107,0,0.2)]"
                     >
-                      {icon && <Icon icon={icon} width={12} height={12} />}
+                      {icon && <Icon icon={icon} width={14} height={14} />}
                       {label}
                     </span>
                   );
@@ -111,12 +112,12 @@ export const TrainerProfile = ({ trainerData }) => {
             </div>
           </div>
 
-          {/* Stats Section - treći red */}
-          <div className="w-full bg-[rgba(151,71,255,0.05)] p-3 rounded-lg border border-[rgba(151,71,255,0.1)]">
-            <h3 className="text-xs font-medium text-white mb-2 flex items-center">
+          {/* Stats Section - third row */}
+          <div className="w-full bg-[rgba(151,71,255,0.05)] p-4 rounded-lg border border-[rgba(151,71,255,0.1)] transition-all duration-300 hover:shadow-lg hover:shadow-[rgba(151,71,255,0.05)]">
+            <h3 className="text-xs font-medium text-white mb-3 flex items-center">
               <Icon
                 icon="mdi:chart-bar"
-                className="mr-1 text-[#9747FF]"
+                className="mr-1.5 text-[#9747FF]"
                 width={16}
                 height={16}
               />
@@ -128,7 +129,15 @@ export const TrainerProfile = ({ trainerData }) => {
               <StatCard
                 label="Total Sessions"
                 value={getOrNoData(info.totalSessions)}
-                subtext={<span className="text-[#4CAF50]">+100 sessions</span>}
+                subtext={
+                  info.sessionChange > 0 ? (
+                    <span className="text-[#4CAF50]">
+                      +{info.sessionChange} sessions
+                    </span>
+                  ) : null
+                }
+                icon="mdi:calendar-check"
+                variant="primary"
               />
               <StatCard
                 label="Active Clients"
@@ -138,29 +147,56 @@ export const TrainerProfile = ({ trainerData }) => {
                         .length
                     : "No data"
                 }
-                subtext={<span className="text-[#4CAF50]">+1 clients</span>}
+                subtext={
+                  info.clientChange > 0 ? (
+                    <span className="text-[#4CAF50]">
+                      +{info.clientChange} clients
+                    </span>
+                  ) : null
+                }
+                icon="mdi:account-group"
+                variant="orange"
               />
               <StatCard
                 label="Upcoming Sessions"
                 value={getOrNoData(info.upcomingSessions)}
-                subtext={<span className="text-[#4CAF50]">+10 sessions</span>}
+                subtext={
+                  info.upcomingSessionsChange > 0 ? (
+                    <span className="text-[#4CAF50]">
+                      +{info.upcomingSessionsChange} sessions
+                    </span>
+                  ) : null
+                }
+                icon="mdi:calendar-clock"
+                variant="purple"
               />
               <StatCard
                 label="Total Earnings"
                 value={
                   info.totalEarnings ? `$${info.totalEarnings}` : "No data"
                 }
-                subtext={<span className="text-[#4CAF50]">+$1,200</span>}
+                subtext={
+                  info.earningsChange > 0 ? (
+                    <span className="text-[#4CAF50]">
+                      +${info.earningsChange}
+                    </span>
+                  ) : null
+                }
+                icon="mdi:cash"
+                variant="success"
               />
               <StatCard
                 label="Rating"
                 value={getOrNoData(info.rating)}
                 subtext={<span className="text-[#FF6B00]">★★★★★</span>}
+                icon="mdi:star"
+                variant="orange"
               />
             </div>
           </div>
         </div>
       </UserProfile>
+
       {/* Edit Profile Button */}
       <Button
         variant="secondary"

@@ -65,7 +65,7 @@ export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
           className={`whitespace-nowrap px-6 py-3 mx-2 text-sm font-medium transition-all duration-300 ${
             activeTab === tab.id
               ? "scale-105 transform text-white"
-              : "text-gray-400 hover:text-white hover:bg-gray-800/40"
+              : "text-gray-400 hover:text-white"
           } rounded-md first:ml-0 last:mr-0`}
           onClick={() => setActiveTab(tab.id)}
           onMouseEnter={() => handleMouseEnter(index)}

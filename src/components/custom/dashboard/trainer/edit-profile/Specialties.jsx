@@ -2,11 +2,11 @@ import { motion } from "framer-motion";
 import React from "react";
 
 import { SectionTitle } from "@/components/custom/dashboard/shared";
+import { LanguageSelector } from "@/components/custom/personal-details/shared/LanguageSelector";
 import {
   SpecialtySelector,
   TrainingTypeSelector,
 } from "@/components/custom/shared";
-import { LanguageSelector } from "@/components/custom/personal-details/shared/LanguageSelector";
 
 // Animation variants
 const fadeInUp = {
