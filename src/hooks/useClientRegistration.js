@@ -33,7 +33,7 @@ export function useClientRegistration() {
     },
     // Profile and Health Info
     profileImage: null,
-    bio: "",
+    description: "",
     medicalConditions: "",
     allergies: "",
   });

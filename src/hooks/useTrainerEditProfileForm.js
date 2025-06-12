@@ -27,12 +27,9 @@ export function useTrainerEditProfileForm() {
       contactEmail: "",
       contactPhone: "",
       profileImage: "",
-      availability: {
-        weekdays: [],
-        timeSlots: [],
-        sessionDuration: 60,
-        cancellationPolicy: 24,
-      },
+      sessionDuration: 60,
+      cancellationPolicy: 24,
+      availabilities: [],
       location: {
         city: "",
         state: "",
@@ -58,6 +55,9 @@ export function useTrainerEditProfileForm() {
         const res = await fetch("/api/users/trainer");
         if (!res.ok) throw new Error("No trainer profile");
         const data = await res.json();
+        const availabilities = data.trainerProfile?.availabilities || [];
+        const weekdays = [...new Set(availabilities.map((a) => a.weekday))];
+        const timeSlots = [...new Set(availabilities.map((a) => a.timeSlot))];
         const newTrainerData = {
           ...trainerData,
           rating: data.rating || "",
@@ -86,6 +86,9 @@ export function useTrainerEditProfileForm() {
             lastName: data.trainerProfile?.lastName || "",
             description: data.trainerProfile?.description || "",
             profileImage: data.trainerProfile?.profileImage || "",
+            sessionDuration: data.trainerProfile?.sessionDuration || 60,
+            cancellationPolicy: data.trainerProfile?.cancellationPolicy || 24,
+            availabilities: availabilities,
             location: {
               ...(data.trainerProfile?.location || {}),
               city: data.trainerProfile?.location?.city || "",
@@ -140,21 +143,7 @@ export function useTrainerEditProfileForm() {
     if (trainerData.proximity) filledFields++;
     if ((trainerData.services || []).length > 0) filledFields++;
     if ((trainerData.expertise || []).length > 0) filledFields++;
-    if (
-      (
-        (trainerData.trainerProfile.availability &&
-          trainerData.trainerProfile.availability.weekdays) ||
-        []
-      ).length > 0
-    )
-      filledFields++;
-    if (
-      (
-        (trainerData.trainerProfile.availability &&
-          trainerData.trainerProfile.availability.timeSlots) ||
-        []
-      ).length > 0
-    )
+    if ((trainerData.trainerProfile.availabilities || []).length > 0)
       filledFields++;
     setFormProgress(
       Math.max(20, Math.round((filledFields / totalFields) * 100))
@@ -185,6 +174,14 @@ export function useTrainerEditProfileForm() {
         trainerProfile: {
           ...prev.trainerProfile,
           [name]: Array.isArray(value) ? value : [value],
+        },
+      }));
+    } else if (name === "sessionDuration" || name === "cancellationPolicy") {
+      setTrainerData((prev) => ({
+        ...prev,
+        trainerProfile: {
+          ...prev.trainerProfile,
+          [name]: value,
         },
       }));
     } else {
@@ -333,12 +330,11 @@ export function useTrainerEditProfileForm() {
             ...trainerData.trainerProfile,
             profileImage: profileImageUrl,
             certifications: certificationsForSave,
-            availability: trainerData.trainerProfile.availability,
+            availabilities: trainerData.trainerProfile.availabilities,
             specialties,
             languages,
             trainingEnvironments,
             trainingTypes,
-            // location.gyms ostaje kao što je
           },
         };
 

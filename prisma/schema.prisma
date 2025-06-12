@@ -118,7 +118,7 @@ model PhoneVerification {
 model Location {
   id      String   @id @default(cuid())
   city    String
-  state   String
+  state   String?
   country String
   lat     Float?
   lon     Float?
@@ -164,12 +164,14 @@ model TrainerProfile {
   currency          String?
   contactEmail      String?
   contactPhone      String?
-  availability      Json?    // NOVO
+  sessionDuration   Int? // in minutes
+  cancellationPolicy Int? // in hours
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   trainerInfo       TrainerInfo?
   trainerGyms       TrainerGym[]
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  availabilities    TrainerAvailability[]
 }
 
 model TrainerSpecialty {
@@ -261,7 +263,7 @@ model ClientProfile {
   locationId           String?
   location             Location? @relation(fields: [locationId], references: [id])
   profileImage         String?
-  bio                  String?  @db.Text
+  description         String?  @db.Text
   medicalConditions    String?  @db.Text
   allergies            String?  @db.Text
   createdAt            DateTime @default(now())
@@ -269,6 +271,7 @@ model ClientProfile {
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   languages            ClientLanguage[]
   preferredActivities  ClientActivity[]
+  clientInfo           ClientInfo?
 }
 
 model ClientLanguage {
@@ -317,4 +320,25 @@ model TrainerGym {
 
   @@unique([trainerId, gymId])
   @@index([gymId])
+}
+
+model ClientInfo {
+  id                String   @id @default(cuid())
+  clientProfileId   String   @unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  clientProfile     ClientProfile @relation(fields: [clientProfileId], references: [id], onDelete: Cascade)
+}
+
+model TrainerAvailability {
+  id                String   @id @default(cuid())
+  trainerProfileId  String
+  weekday           String // e.g. Monday, Tuesday, ...
+  timeSlot          String // e.g. Morning, Afternoon, Evening, Night
+  trainerProfile    TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
+  
+  @@index([trainerProfileId])
+  @@index([weekday])
+  @@index([timeSlot])
 }

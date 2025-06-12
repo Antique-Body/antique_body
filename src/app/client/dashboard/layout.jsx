@@ -5,29 +5,27 @@ import { useEffect, useState } from "react";
 
 import { EffectBackground } from "@/components/background";
 import { BrandLogo } from "@/components/common/BrandLogo";
-import { InfoBanner } from "@/components/common/InfoBanner";
+import { ClientProfile } from "@/components/custom/dashboard/client/components";
 import { DashboardTabs } from "@/components/custom/dashboard/shared/DashboardTabs";
-import { TrainerProfile } from "@/components/custom/dashboard/trainer/components";
 
-export default function TrainerDashboardLayout({ children }) {
+export default function ClientDashboardLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const { data: _session } = useSession();
 
   // Map pathname to tab ID
   const getActiveTabFromPath = (path) => {
-    if (path.includes("/newclients")) return "newClients";
-    if (path.includes("/clients")) return "clients";
+    if (path.includes("/profile")) return "profile";
     if (path.includes("/upcoming-trainings")) return "upcomingTrainings";
     if (path.includes("/messages")) return "messages";
     if (path.includes("/plans")) return "plans";
     if (path.includes("/exercises")) return "exercises";
     if (path.includes("/meals")) return "meals";
-    return "newClients"; // Default tab
+    return "profile"; // Default tab
   };
 
   const [activeTab, setActiveTab] = useState(getActiveTabFromPath(pathname));
-  const [trainerData, setTrainerData] = useState(null);
+  const [clientData, setClientData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Update active tab when pathname changes
@@ -36,66 +34,87 @@ export default function TrainerDashboardLayout({ children }) {
   }, [pathname]);
 
   useEffect(() => {
-    async function fetchTrainer() {
+    async function fetchClient() {
       setLoading(true);
       try {
-        const res = await fetch("/api/users/trainer");
+        const res = await fetch("/api/users/client");
         const data = await res.json();
-        setTrainerData(data);
+        setClientData(data);
       } catch {
-        setTrainerData(null);
+        setClientData(null);
       } finally {
         setLoading(false);
       }
     }
-    fetchTrainer();
+    fetchClient();
   }, []);
 
   // Navigate to appropriate route when tab changes
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
-
     // Navigate to corresponding route
     switch (tabId) {
-      case "newClients":
-        router.push("/trainer/dashboard/newclients");
-        break;
-      case "clients":
-        router.push("/trainer/dashboard/clients");
+      case "profile":
+        router.push("/client/dashboard/profile");
         break;
       case "upcomingTrainings":
-        router.push("/trainer/dashboard/upcoming-trainings");
+        router.push("/client/dashboard/upcoming-trainings");
         break;
       case "messages":
-        router.push("/trainer/dashboard/messages");
+        router.push("/client/dashboard/messages");
         break;
       case "plans":
-        router.push("/trainer/dashboard/plans");
+        router.push("/client/dashboard/plans");
         break;
       case "exercises":
-        router.push("/trainer/dashboard/exercises");
+        router.push("/client/dashboard/exercises");
         break;
       case "meals":
-        router.push("/trainer/dashboard/meals");
+        router.push("/client/dashboard/meals");
         break;
     }
-  };
-
-  const handleVerifyClick = () => {
-    router.push("/trainer/edit-profile");
   };
 
   // Get the count of unread messages
   const unreadMessagesCount = 2; // Placeholder value
   const tabsConfig = [
-    { id: "newClients", label: "New Clients" },
-    { id: "clients", label: "Clients" },
+    { id: "profile", label: "Profile" },
     { id: "upcomingTrainings", label: "Upcoming Trainings" },
     { id: "messages", label: "Messages", badgeCount: unreadMessagesCount },
     { id: "plans", label: "Plans" },
     { id: "exercises", label: "Exercises" },
     { id: "meals", label: "Meals" },
   ];
+
+  // Helper for displaying client info
+  const renderClientProfile = () => {
+    if (loading) {
+      return (
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-700 rounded w-1/3" />
+          <div className="h-6 bg-gray-700 rounded w-1/2" />
+          <div className="h-32 bg-gray-800 rounded" />
+        </div>
+      );
+    }
+    if (!clientData || clientData.error) {
+      return <div className="text-red-400">Failed to load profile.</div>;
+    }
+    // Mapaj podatke iz clientData u userData format koji ClientProfile očekuje
+    const userData = {
+      name: `${clientData.firstName} ${clientData.lastName}`,
+      avatarContent: clientData.profileImage || "/avatar-placeholder.png",
+      planName: clientData.planName || "N/A", // prilagodi ako imaš plan podatke
+      coach: clientData.coachName || "N/A", // prilagodi ako imaš coach podatke
+      progress: clientData.progress || null, // prilagodi ako imaš progress podatke
+      stats: {
+        weight: clientData.weight || 0,
+        bodyFat: clientData.bodyFat || 0,
+        calorieGoal: clientData.calorieGoal || 0,
+      },
+    };
+    return <ClientProfile userData={userData} />;
+  };
 
   return (
     <div className="min-h-screen  text-white">
@@ -104,31 +123,9 @@ export default function TrainerDashboardLayout({ children }) {
         <div className="mb-8 flex items-center justify-center">
           <BrandLogo />
         </div>
-
         <div className="flex flex-col gap-6">
-          {/* Trainer profile section (top) */}
-          {loading ? (
-            <div className="animate-pulse space-y-4">
-              <div className="h-8 bg-gray-700 rounded w-1/3" />
-              <div className="h-6 bg-gray-700 rounded w-1/2" />
-              <div className="h-32 bg-gray-800 rounded" />
-            </div>
-          ) : (
-            <TrainerProfile trainerData={trainerData.trainerProfile} />
-          )}
-
-          {/* Verification banner */}
-          <div className="mb-2 relative">
-            <InfoBanner
-              icon="mdi:shield-check"
-              title="Boost Your Visibility"
-              subtitle="Complete your profile to stand out and attract more clients. Verified trainers are more likely to be chosen."
-              variant="primary"
-              buttonText="Complete Profile"
-              onButtonClick={handleVerifyClick}
-            />
-          </div>
-
+          {/* Client profile section (top) */}
+          {renderClientProfile()}
           {/* Tabs and main content section */}
           <div>
             <DashboardTabs
@@ -136,7 +133,6 @@ export default function TrainerDashboardLayout({ children }) {
               setActiveTab={handleTabChange}
               tabs={tabsConfig}
             />
-
             {/* Render the nested page content */}
             <div className="mt-6">{children}</div>
           </div>

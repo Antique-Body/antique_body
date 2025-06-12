@@ -40,27 +40,12 @@ async function createClientWithDetails(formData, userId) {
     throw new Error("Field 'preferredActivities' must be an array.");
   }
   const { location } = formData;
-  if (!location.city || !location.state || !location.country) {
-    throw new Error("All location fields are required.");
+  if (!location.city || !location.country) {
+    throw new Error("City and country are required.");
   }
 
   // Find or create location
-  let dbLocation = await prisma.location.findFirst({
-    where: {
-      city: location.city,
-      state: location.state,
-      country: location.country,
-    },
-  });
-  if (!dbLocation) {
-    dbLocation = await prisma.location.create({
-      data: {
-        city: location.city,
-        state: location.state,
-        country: location.country,
-      },
-    });
-  }
+  const dbLocation = await getOrCreateLocation(prisma, location);
 
   const data = {
     userId,
@@ -77,7 +62,6 @@ async function createClientWithDetails(formData, userId) {
     goalDescription: formData.goalDescription?.trim() || null,
     locationId: dbLocation.id,
     profileImage: formData.profileImage?.trim() || null,
-    bio: formData.bio?.trim() || null,
     medicalConditions: formData.medicalConditions?.trim() || null,
     allergies: formData.allergies?.trim() || null,
     languages: {
@@ -120,7 +104,136 @@ async function getClientProfileByUserId(userId) {
   });
 }
 
+// Helper za dinamički where za lokaciju
+function buildLocationWhere(location) {
+  const where = {
+    city: location.city,
+    country: location.country,
+    state: location.state && location.state.trim() !== "" ? location.state : "",
+  };
+  return where;
+}
+
+// Helper za dobijanje ili kreiranje lokacije
+async function getOrCreateLocation(tx, location) {
+  let dbLocation = null;
+  // Ako je poslan id, provjeri da li se podaci poklapaju
+  if (location.id) {
+    dbLocation = await tx.location.findUnique({ where: { id: location.id } });
+    if (
+      dbLocation &&
+      (dbLocation.city !== location.city ||
+        dbLocation.country !== location.country ||
+        (dbLocation.state || "") !== (location.state || ""))
+    ) {
+      dbLocation = null;
+    }
+  }
+  if (!dbLocation) {
+    dbLocation = await tx.location.findFirst({
+      where: buildLocationWhere(location),
+    });
+    if (!dbLocation) {
+      const locData = {
+        city: location.city,
+        country: location.country,
+        state: location.state ?? "",
+        lat: location.lat ?? null,
+        lon: location.lon ?? null,
+      };
+      dbLocation = await tx.location.create({ data: locData });
+    } else {
+      // Update lat/lon if missing
+      if (
+        (dbLocation.lat == null || dbLocation.lon == null) &&
+        location.lat &&
+        location.lon
+      ) {
+        dbLocation = await tx.location.update({
+          where: { id: dbLocation.id },
+          data: {
+            lat: location.lat,
+            lon: location.lon,
+          },
+        });
+      }
+    }
+  }
+  return dbLocation;
+}
+
+/**
+ * Update client profile with all relations (languages, preferredActivities, location, etc).
+ * Očekuje validiran input.
+ */
+export async function updateClientProfile(userId, data) {
+  return await prisma.$transaction(async (tx) => {
+    // 1. Nađi profil
+    const profile = await tx.clientProfile.findUnique({ where: { userId } });
+    if (!profile) throw new Error("Client profile not found");
+
+    // 2. Briši stare relacije
+    await Promise.all([
+      tx.clientLanguage.deleteMany({ where: { clientProfileId: profile.id } }),
+      tx.clientActivity.deleteMany({ where: { clientProfileId: profile.id } }),
+    ]);
+
+    // 3. Kreiraj nove relacije (batch insert)
+    if (data.languages?.length) {
+      await tx.clientLanguage.createMany({
+        data: data.languages.map((name) => ({
+          clientProfileId: profile.id,
+          name,
+        })),
+      });
+    }
+    if (data.preferredActivities?.length) {
+      await tx.clientActivity.createMany({
+        data: data.preferredActivities.map((name) => ({
+          clientProfileId: profile.id,
+          name,
+        })),
+      });
+    }
+
+    // 4. Update location if needed
+    let locationId = profile.locationId;
+    if (data.location && data.location.city && data.location.country) {
+      const dbLocation = await getOrCreateLocation(tx, data.location);
+      locationId = dbLocation.id;
+    }
+
+    // 5. Update profile (samo polja koja su direktno na modelu)
+    const {
+      languages: _languages,
+      preferredActivities: _preferredActivities,
+      location: _location,
+      userId: _userId,
+      locationId: _locationId,
+      ...allowedProfileData
+    } = data;
+
+    const updated = await tx.clientProfile.update({
+      where: { id: profile.id },
+      data: {
+        ...allowedProfileData,
+        locationId,
+        dateOfBirth: allowedProfileData.dateOfBirth
+          ? new Date(allowedProfileData.dateOfBirth)
+          : profile.dateOfBirth,
+      },
+      include: {
+        location: true,
+        languages: true,
+        preferredActivities: true,
+      },
+    });
+    return updated;
+  });
+}
+
 export const clientService = {
   createClientWithDetails,
   getClientProfileByUserId,
+  updateClientProfile,
 };

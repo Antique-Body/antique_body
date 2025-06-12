@@ -21,11 +21,45 @@ const staggerItems = {
 };
 
 export const Availability = ({ trainerData, setTrainerData }) => {
-  console.log("trainerData:", trainerData);
-  // Safe fallback values
-  const availability = trainerData.trainerProfile.availability || {};
-  const weekdays = availability.weekdays || [];
-  const timeSlots = availability.timeSlots || [];
+  const availabilities = trainerData.trainerProfile.availabilities || [];
+  const sessionDuration = trainerData.trainerProfile.sessionDuration || 60;
+  const cancellationPolicy =
+    trainerData.trainerProfile.cancellationPolicy || 24;
+
+  const weekdays = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
+  const timeSlots = ["Morning", "Afternoon", "Evening", "Night"];
+
+  // Helper to check if a (day, slot) is selected
+  const isSelected = (day, slot) =>
+    availabilities.some((a) => a.weekday === day && a.timeSlot === slot);
+
+  // Toggle (day, slot)
+  const toggleAvailability = (day, slot) => {
+    const exists = isSelected(day, slot);
+    let newAvailabilities;
+    if (exists) {
+      newAvailabilities = availabilities.filter(
+        (a) => !(a.weekday === day && a.timeSlot === slot)
+      );
+    } else {
+      newAvailabilities = [...availabilities, { weekday: day, timeSlot: slot }];
+    }
+    setTrainerData({
+      ...trainerData,
+      trainerProfile: {
+        ...trainerData.trainerProfile,
+        availabilities: newAvailabilities,
+      },
+    });
+  };
 
   return (
     <motion.div
@@ -46,113 +80,41 @@ export const Availability = ({ trainerData, setTrainerData }) => {
               <Icon icon="lucide:calendar" width={18} />
             </div>
             <h3 className="ml-3 text-lg font-medium text-[#FF9A00]">
-              Available Days
+              Available Days & Time Slots
             </h3>
           </div>
 
-          <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-7">
-            {[
-              "Monday",
-              "Tuesday",
-              "Wednesday",
-              "Thursday",
-              "Friday",
-              "Saturday",
-              "Sunday",
-            ].map((day) => (
-              <motion.div
-                key={day}
-                className="text-center"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <input
-                  type="checkbox"
-                  id={day}
-                  className="peer hidden"
-                  checked={weekdays.includes(day)}
-                  onChange={(e) => {
-                    const newWeekdays = e.target.checked
-                      ? [...weekdays, day]
-                      : weekdays.filter((d) => d !== day);
-
-                    setTrainerData({
-                      ...trainerData,
-                      trainerProfile: {
-                        ...trainerData.trainerProfile,
-                        availability: {
-                          ...availability,
-                          weekdays: newWeekdays,
-                        },
-                      },
-                    });
-                  }}
-                />
-                <label
-                  htmlFor={day}
-                  className="block cursor-pointer rounded-lg border border-[#444] bg-[rgba(30,30,30,0.8)] px-3 py-2 text-sm font-medium text-white shadow-md transition-all duration-300 hover:shadow-orange-900/5 peer-checked:border-[#FF7800] peer-checked:bg-[rgba(255,120,0,0.15)] peer-checked:text-[#FF7800] peer-checked:shadow-orange-900/20"
-                >
+          <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-7">
+            {weekdays.map((day) => (
+              <div key={day} className="flex flex-col items-center">
+                <span className="mb-2 text-sm font-medium text-white">
                   {day.substring(0, 3)}
-                </label>
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="mb-4 flex items-center">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(255,120,0,0.15)] text-[#FF7800]">
-              <Icon icon="lucide:clock" width={18} />
-            </div>
-            <h3 className="ml-3 text-lg font-medium text-[#FF9A00]">
-              Available Time Slots
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {["Morning", "Afternoon", "Evening", "Night"].map((slot) => (
-              <motion.div
-                key={slot}
-                className="text-center"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <input
-                  type="checkbox"
-                  id={slot}
-                  className="peer hidden"
-                  checked={timeSlots.includes(slot)}
-                  onChange={(e) => {
-                    const newTimeSlots = e.target.checked
-                      ? [...timeSlots, slot]
-                      : timeSlots.filter((s) => s !== slot);
-
-                    setTrainerData({
-                      ...trainerData,
-                      trainerProfile: {
-                        ...trainerData.trainerProfile,
-                        availability: {
-                          ...availability,
-                          timeSlots: newTimeSlots,
-                        },
-                      },
-                    });
-                  }}
-                />
-                <label
-                  htmlFor={slot}
-                  className="group block cursor-pointer rounded-lg border border-[#444] bg-[rgba(30,30,30,0.8)] px-4 py-3 text-sm font-medium text-white shadow-md transition-all duration-300 hover:shadow-orange-900/5 peer-checked:border-[#FF7800] peer-checked:bg-[rgba(255,120,0,0.15)] peer-checked:text-[#FF7800] peer-checked:shadow-orange-900/20"
-                >
-                  <div className="flex items-center justify-center">
-                    <span>{slot}</span>
-                    <motion.div
-                      initial={false}
-                      animate={{
-                        opacity: timeSlots.includes(slot) ? 1 : 0,
-                      }}
-                      className="ml-2 h-2 w-2 rounded-full bg-[#FF7800]"
-                    ></motion.div>
-                  </div>
-                </label>
-              </motion.div>
+                </span>
+                <div className="flex flex-col gap-2">
+                  {timeSlots.map((slot) => (
+                    <label
+                      key={slot}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected(day, slot)}
+                        onChange={() => toggleAvailability(day, slot)}
+                        className="accent-[#FF7800]"
+                      />
+                      <span
+                        className={`text-xs ${
+                          isSelected(day, slot)
+                            ? "text-[#FF7800] font-semibold"
+                            : "text-white"
+                        }`}
+                      >
+                        {slot}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -176,19 +138,16 @@ export const Availability = ({ trainerData, setTrainerData }) => {
                 label="Session Duration (minutes)"
                 name="sessionDuration"
                 type="number"
-                value={availability.sessionDuration || 60}
-                onChange={(e) => {
+                value={sessionDuration}
+                onChange={(e) =>
                   setTrainerData({
                     ...trainerData,
                     trainerProfile: {
                       ...trainerData.trainerProfile,
-                      availability: {
-                        ...availability,
-                        sessionDuration: e.target.value,
-                      },
+                      sessionDuration: e.target.value,
                     },
-                  });
-                }}
+                  })
+                }
                 placeholder="e.g. 60"
                 backgroundStyle="darker"
               />
@@ -202,19 +161,16 @@ export const Availability = ({ trainerData, setTrainerData }) => {
                 label="Cancellation Policy (hours notice)"
                 name="cancellationPolicy"
                 type="number"
-                value={availability.cancellationPolicy || 24}
-                onChange={(e) => {
+                value={cancellationPolicy}
+                onChange={(e) =>
                   setTrainerData({
                     ...trainerData,
                     trainerProfile: {
                       ...trainerData.trainerProfile,
-                      availability: {
-                        ...availability,
-                        cancellationPolicy: e.target.value,
-                      },
+                      cancellationPolicy: e.target.value,
                     },
-                  });
-                }}
+                  })
+                }
                 placeholder="e.g. 24"
                 backgroundStyle="darker"
               />

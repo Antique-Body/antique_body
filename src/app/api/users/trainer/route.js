@@ -146,7 +146,7 @@ export async function GET() {
             ...location,
             gyms: gymsArray,
           },
-          availability: trainerInfo.trainerProfile.availability || {},
+          availabilities: trainerInfo.trainerProfile.availabilities || [],
         },
       }),
       { status: 200 }
