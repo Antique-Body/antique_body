@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import React from "react";
-import { SectionTitle } from "@/components/custom/dashboard/shared";
+
 import { FormField } from "@/components/common";
+import { SectionTitle } from "@/components/custom/dashboard/shared";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },

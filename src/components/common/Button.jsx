@@ -61,7 +61,7 @@ export const Button = ({
       "bg-[rgba(0,149,255,0.07)] border border-[rgba(0,149,255,0.3)] text-blue-400 hover:bg-[rgba(0,149,255,0.15)] transform hover:-translate-y-[1px]",
 
     // Dashboard variants - improved visibility and interaction states
-    ghost: "text-gray-400 hover:text-white hover:bg-[#2a2a2a] bg-transparent",
+    ghost: "text-gray-400 hover:text-white bg-transparent",
     ghostOrange:
       "text-[#FF6B00] hover:text-[#FF9A00] hover:bg-[rgba(255,107,0,0.07)] bg-transparent",
     subtle:
@@ -84,7 +84,7 @@ export const Button = ({
             ? "border-[#FF6B00] text-[#FF6B00]"
             : "border-transparent text-gray-400 hover:text-white"),
         fullWidth && "w-full",
-        className,
+        className
       )}
       disabled={disabled || loading}
       type={type}
