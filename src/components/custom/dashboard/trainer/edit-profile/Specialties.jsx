@@ -6,6 +6,7 @@ import {
   SpecialtySelector,
   TrainingTypeSelector,
 } from "@/components/custom/shared";
+import { LanguageSelector } from "@/components/custom/personal-details/shared/LanguageSelector";
 
 // Animation variants
 const fadeInUp = {
@@ -104,7 +105,7 @@ export const Specialties = ({ trainerData, handleChange, setTrainerData }) => (
       />
     </motion.div>
 
-    {/* Training Types Selector */}
+    {/* Language Selector */}
     <motion.div
       variants={fadeInUp}
       className="p-6 bg-[rgba(25,25,25,0.5)] border border-[#333] rounded-lg"
@@ -112,6 +113,31 @@ export const Specialties = ({ trainerData, handleChange, setTrainerData }) => (
       <h3 className="text-base font-medium text-gray-300 mb-4 flex items-center">
         <span className="w-8 h-8 rounded-full bg-[#FF6B00]/20 inline-flex items-center justify-center mr-2">
           <span className="text-[#FF6B00]">2</span>
+        </span>
+        Languages
+      </h3>
+      <LanguageSelector
+        selectedLanguages={trainerData.trainerProfile.languages || []}
+        onChange={(langs) =>
+          setTrainerData((prev) => ({
+            ...prev,
+            trainerProfile: {
+              ...prev.trainerProfile,
+              languages: langs,
+            },
+          }))
+        }
+      />
+    </motion.div>
+
+    {/* Training Types Selector */}
+    <motion.div
+      variants={fadeInUp}
+      className="p-6 bg-[rgba(25,25,25,0.5)] border border-[#333] rounded-lg"
+    >
+      <h3 className="text-base font-medium text-gray-300 mb-4 flex items-center">
+        <span className="w-8 h-8 rounded-full bg-[#FF6B00]/20 inline-flex items-center justify-center mr-2">
+          <span className="text-[#FF6B00]">3</span>
         </span>
         Training Setup
       </h3>
