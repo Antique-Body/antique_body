@@ -320,6 +320,11 @@ export async function updateTrainerProfile(userId, data) {
       location,
       userId: _userId,
       locationId: _locationId,
+      specialties: _specialties,
+      languages: _languages,
+      trainingEnvironments: _trainingEnvironments,
+      trainingTypes: _trainingTypes,
+      certifications: _certifications,
       ...allowedProfileData
     } = data;
 

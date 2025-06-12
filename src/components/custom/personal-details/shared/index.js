@@ -6,7 +6,6 @@ export { LanguageSelector } from "./LanguageSelector";
 export { LocationSelector } from "./LocationSelector";
 export { TrainingTypeSelector } from "../../shared/TrainingTypeSelector";
 export { SpecialtySelector } from "../../shared/SpecialtySelector";
-export { InfoBanner } from "./InfoBanner";
 
 // New reusable components
 export { BasicInfoStep } from "./BasicInfoStep";

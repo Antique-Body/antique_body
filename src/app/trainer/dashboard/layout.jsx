@@ -7,7 +7,7 @@ import { EffectBackground } from "@/components/background";
 import { BrandLogo } from "@/components/common/BrandLogo";
 import { DashboardTabs } from "@/components/custom/dashboard/shared/DashboardTabs";
 import { TrainerProfile } from "@/components/custom/dashboard/trainer/components";
-import { InfoBanner } from "@/components/custom/personal-details/shared/InfoBanner";
+import { InfoBanner } from "@/components/common/InfoBanner";
 
 export default function TrainerDashboardLayout({ children }) {
   const router = useRouter();
