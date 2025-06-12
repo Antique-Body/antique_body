@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useState } from "react";
 
+import { Button } from "@/components/common/Button";
+
 export function RoleCard({ role, config, isSelected, onClick, loading, t }) {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -60,7 +62,11 @@ export function RoleCard({ role, config, isSelected, onClick, loading, t }) {
                     absolute -top-24 -right-24 w-48 h-48 
                     bg-gradient-to-br ${config.gradient}
                     rotate-45 opacity-20 transition-all duration-500
-                    ${isHovered || isSelected ? "translate-y-8 translate-x-8" : "translate-y-4 translate-x-4"}
+                    ${
+                      isHovered || isSelected
+                        ? "translate-y-8 translate-x-8"
+                        : "translate-y-4 translate-x-4"
+                    }
                     z-10
                 `}
       ></div>
@@ -171,7 +177,7 @@ export function RoleCard({ role, config, isSelected, onClick, loading, t }) {
 
         {/* Select button */}
         <div className="mt-auto pt-3">
-          <button
+          <Button
             className={`
                             w-full relative group overflow-hidden
                             py-3 px-4 rounded-lg 
@@ -188,6 +194,7 @@ export function RoleCard({ role, config, isSelected, onClick, loading, t }) {
               e.stopPropagation();
               if (!loading) onClick(role);
             }}
+            variant={isSelected ? "custom" : "ghost"}
           >
             {/* Button highlight effect */}
             <div
@@ -209,7 +216,7 @@ export function RoleCard({ role, config, isSelected, onClick, loading, t }) {
             ) : (
               <span className="mdi mdi-arrow-right text-lg"></span>
             )}
-          </button>
+          </Button>
         </div>
       </div>
 

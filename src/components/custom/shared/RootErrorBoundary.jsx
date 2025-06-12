@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import ErrorBoundary from "./common/ErrorBoundary";
+import { ErrorBoundary } from "@/components/common";
 
 export default function RootErrorBoundary({ children }) {
   const [error, setError] = useState(null);

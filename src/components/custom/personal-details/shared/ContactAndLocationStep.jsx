@@ -1,10 +1,16 @@
 "use client";
 import { Icon } from "@iconify/react";
 
-import { FormSection, LocationSelector } from "./";
+import { FormSection } from "./";
 
-import { FormField } from "@/components/common";
+import { FormField, InfoBanner } from "@/components/common";
 import { usePrefillFromSession } from "@/hooks";
+import {
+  searchCities,
+  searchStates,
+  searchCountries,
+  geocodePlaceId,
+} from "@/lib/googlePlaces";
 
 export const ContactAndLocationStep = ({
   formData,
@@ -16,8 +22,8 @@ export const ContactAndLocationStep = ({
     formData,
     onChange,
     fields: [
-      { formKey: "email", sessionKey: "email" },
-      { formKey: "phone", sessionKey: "phone" },
+      { formKey: "contactEmail", sessionKey: "email" },
+      { formKey: "contactPhone", sessionKey: "phone" },
     ],
   });
 
@@ -40,6 +46,32 @@ export const ContactAndLocationStep = ({
     }
   };
 
+  // Custom handler for city select (Google Places)
+  const handleCitySelect = async (option) => {
+    onChange({
+      target: {
+        name: "location.city",
+        value: option.label || "",
+      },
+    });
+    if (option.place_id) {
+      const details = await geocodePlaceId(option.place_id);
+      let state = "";
+      let country = "";
+      if (details && details.raw && details.raw.address_components) {
+        for (const comp of details.raw.address_components) {
+          if (comp.types.includes("administrative_area_level_1"))
+            state = comp.long_name;
+          if (comp.types.includes("country")) country = comp.long_name;
+        }
+      }
+      onChange({ target: { name: "location.state", value: state } });
+      onChange({ target: { name: "location.country", value: country } });
+      onChange({ target: { name: "location.lat", value: details.lat } });
+      onChange({ target: { name: "location.lon", value: details.lon } });
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Contact Information */}
@@ -55,22 +87,22 @@ export const ContactAndLocationStep = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             label="Email"
-            name="email"
+            name="contactEmail"
             type="email"
-            value={formData.email}
+            value={formData.contactEmail}
             onChange={onChange}
             placeholder="your.email@example.com"
-            error={errors.email}
+            error={errors.contactEmail}
           />
 
           <FormField
             label="Phone Number"
-            name="phone"
+            name="contactPhone"
             type="tel"
-            value={formData.phone}
+            value={formData.contactPhone}
             onChange={onChange}
             placeholder="+387 XX XXX XXX"
-            error={errors.phone}
+            error={errors.contactPhone}
           />
         </div>
       </FormSection>
@@ -85,13 +117,65 @@ export const ContactAndLocationStep = ({
         }
         icon={<Icon icon="mdi:map-marker" width={20} height={20} />}
       >
-        <LocationSelector
-          formData={formData}
+        <FormField
+          label="City"
+          name="location.city"
+          type="searchableSelect"
+          value={formData.location?.city || ""}
+          asyncSearch={searchCities}
+          onSelectOption={handleCitySelect}
           onChange={onChange}
-          errors={errors}
-          title=""
-          description=""
+          placeholder="Start typing your city..."
+          error={errors["location.city"]}
         />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <FormField
+            label="State/Province"
+            name="location.state"
+            type="searchableSelect"
+            value={formData.location?.state || ""}
+            asyncSearch={searchStates}
+            onSelectOption={(option) => {
+              onChange({
+                target: { name: "location.state", value: option.value },
+              });
+            }}
+            onChange={onChange}
+            placeholder="Type to search state/province..."
+            error={errors["location.state"]}
+          />
+          <FormField
+            label="Country"
+            name="location.country"
+            type="searchableSelect"
+            value={formData.location?.country || ""}
+            asyncSearch={searchCountries}
+            onSelectOption={(option) => {
+              onChange({
+                target: { name: "location.country", value: option.value },
+              });
+            }}
+            onChange={onChange}
+            placeholder="Type to search country..."
+            error={errors["location.country"]}
+          />
+        </div>
+        {/* Location preview */}
+        {formData.location?.city && formData.location?.country && (
+          <InfoBanner
+            icon={"mdi:map-marker"}
+            title="Your Location:"
+            subtitle={
+              formData.location.city +
+              (formData.location.state ? `, ${formData.location.state}` : "") +
+              (formData.location.country
+                ? `, ${formData.location.country}`
+                : "")
+            }
+            variant="primary"
+            className="mt-4"
+          />
+        )}
       </FormSection>
 
       {/* Pricing - Only for trainers */}

@@ -9,13 +9,6 @@ export const FilterChips = ({
   searchQuery,
   setSearchQuery,
 }) => {
-  const removeSpecialty = (specialty) => {
-    setFilters((prev) => ({
-      ...prev,
-      specialty: prev.specialty.filter((s) => s !== specialty),
-    }));
-  };
-
   const removeLocation = (location) => {
     setFilters((prev) => ({
       ...prev,
@@ -105,29 +98,6 @@ export const FilterChips = ({
             </Button>
           </motion.div>
         )}
-
-        {filters.specialty.map((specialty) => (
-          <motion.div
-            key={`specialty-${specialty}`}
-            variants={chipVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="inline-flex items-center px-2.5 py-1 bg-zinc-800 border border-zinc-700 rounded-full"
-          >
-            <span className="text-xs text-zinc-300 truncate max-w-[120px]">
-              {specialty}
-            </span>
-            <Button
-              variant="ghost"
-              size="small"
-              onClick={() => removeSpecialty(specialty)}
-              className="ml-1.5 p-0"
-            >
-              <Icon icon="mdi:close" className="w-3.5 h-3.5" />
-            </Button>
-          </motion.div>
-        ))}
 
         {filters.location.map((location) => (
           <motion.div

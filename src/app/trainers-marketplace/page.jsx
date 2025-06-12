@@ -16,7 +16,6 @@ export default function TrainersMarketplace() {
   const [filteredTrainers, setFilteredTrainers] = useState(extendedTrainers);
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
-    specialty: [],
     location: [],
     availability: [],
     price: { min: 0, max: 200 },
@@ -56,17 +55,9 @@ export default function TrainersMarketplace() {
       results = results.filter(
         (trainer) =>
           trainer.name.toLowerCase().includes(query) ||
-          trainer.specialty.toLowerCase().includes(query) ||
           trainer.bio.toLowerCase().includes(query) ||
           (trainer.tags &&
             trainer.tags.some((tag) => tag.toLowerCase().includes(query)))
-      );
-    }
-
-    // Specialty filter
-    if (filters.specialty.length > 0) {
-      results = results.filter((trainer) =>
-        filters.specialty.includes(trainer.specialty)
       );
     }
 
@@ -116,7 +107,6 @@ export default function TrainersMarketplace() {
 
   const handleClearFilters = () => {
     setFilters({
-      specialty: [],
       location: [],
       availability: [],
       price: { min: 0, max: 200 },
@@ -247,24 +237,29 @@ export default function TrainersMarketplace() {
                         <div className="mt-12 mb-8 flex justify-center">
                           <nav className="flex flex-wrap items-center justify-center gap-2">
                             {/* Previous page button with text label for better accessibility */}
-                            <button
+                            <Button
                               onClick={() =>
                                 handlePageChange(Math.max(1, currentPage - 1))
                               }
                               disabled={currentPage === 1}
+                              variant={
+                                currentPage === 1 ? "ghost" : "secondary"
+                              }
                               className={`flex items-center px-4 py-2 rounded-lg ${
                                 currentPage === 1
                                   ? "bg-zinc-800/50 text-zinc-600 cursor-not-allowed"
                                   : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors"
                               }`}
                               aria-label="Go to previous page"
+                              leftIcon={
+                                <Icon
+                                  icon="mdi:chevron-left"
+                                  className="w-5 h-5 mr-1"
+                                />
+                              }
                             >
-                              <Icon
-                                icon="mdi:chevron-left"
-                                className="w-5 h-5 mr-1"
-                              />
                               <span className="text-sm">Previous</span>
-                            </button>
+                            </Button>
 
                             {/* Page numbers - in a scrollable container on small screens */}
                             <div className="flex items-center overflow-x-auto max-w-[250px] sm:max-w-none hide-scrollbar py-1">
@@ -276,9 +271,14 @@ export default function TrainersMarketplace() {
                                         ...
                                       </span>
                                     ) : (
-                                      <button
+                                      <Button
                                         onClick={() =>
                                           handlePageChange(pageNum)
+                                        }
+                                        variant={
+                                          currentPage === pageNum
+                                            ? "orangeFilled"
+                                            : "secondary"
                                         }
                                         className={`min-w-[40px] h-10 flex items-center justify-center rounded-lg transition-colors ${
                                           currentPage === pageNum
@@ -287,7 +287,7 @@ export default function TrainersMarketplace() {
                                         }`}
                                       >
                                         {pageNum}
-                                      </button>
+                                      </Button>
                                     )}
                                   </div>
                                 )
@@ -295,26 +295,33 @@ export default function TrainersMarketplace() {
                             </div>
 
                             {/* Next page button with text label for better accessibility */}
-                            <button
+                            <Button
                               onClick={() =>
                                 handlePageChange(
                                   Math.min(totalPages, currentPage + 1)
                                 )
                               }
                               disabled={currentPage === totalPages}
+                              variant={
+                                currentPage === totalPages
+                                  ? "ghost"
+                                  : "secondary"
+                              }
                               className={`flex items-center px-4 py-2 rounded-lg ${
                                 currentPage === totalPages
                                   ? "bg-zinc-800/50 text-zinc-600 cursor-not-allowed"
                                   : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors"
                               }`}
                               aria-label="Go to next page"
+                              rightIcon={
+                                <Icon
+                                  icon="mdi:chevron-right"
+                                  className="w-5 h-5 ml-1"
+                                />
+                              }
                             >
                               <span className="text-sm">Next</span>
-                              <Icon
-                                icon="mdi:chevron-right"
-                                className="w-5 h-5 ml-1"
-                              />
-                            </button>
+                            </Button>
                           </nav>
                         </div>
                       )}

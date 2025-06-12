@@ -13,7 +13,7 @@ function isPageNavigation(request) {
   return request.headers.get("accept")?.includes("text/html");
 }
 
-function getRedirectUrl(role, token, pathname, url) {
+function getRedirectUrl(role, token, pathname, _url) {
   if (!role) return pathname === "/select-role" ? null : "/select-role";
   if (role === "client") {
     if (!token.clientProfile)
@@ -23,11 +23,25 @@ function getRedirectUrl(role, token, pathname, url) {
     return pathname === "/client/dashboard" ? null : "/client/dashboard";
   }
   if (role === "trainer") {
-    if (!token.trainerProfile)
-      return pathname === "/trainer/personal-details"
-        ? null
-        : "/trainer/personal-details";
-    return pathname === "/trainer/dashboard" ? null : "/trainer/dashboard";
+    const allowedTrainerPaths = [
+      "/trainer/dashboard",
+      "/trainer/dashboard/newclients",
+      "/trainer/edit-profile",
+    ];
+    if (!token.trainerProfile) {
+      if (
+        pathname === "/trainer/personal-details" ||
+        pathname === "/trainer/edit-profile"
+      ) {
+        return null;
+      }
+      return "/trainer/personal-details";
+    }
+    // Ako ima profil, pusti samo dozvoljene rute
+    if (!allowedTrainerPaths.includes(pathname)) {
+      return "/trainer/dashboard";
+    }
+    return null;
   }
   return null;
 }
@@ -39,28 +53,49 @@ export async function middleware(request) {
     secret: process.env.AUTH_SECRET,
   });
 
-  console.log(token, "token");
-
-  // Log samo za page navigacije
   if (isPageNavigation(request)) {
     // console.log("token u middleware:", token, "pathname:", pathname);
   }
 
+  // 1. Public paths uvijek pusti
   if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
 
-  if (AUTH_PATHS.includes(pathname) && token?.role) {
-    const redirect = getRedirectUrl(token.role, token, pathname, request.url);
-    if (redirect) return NextResponse.redirect(new URL(redirect, request.url));
+  // 2. Auth paths uvijek pusti (login, register, reset-password)
+  if (AUTH_PATHS.includes(pathname)) {
+    if (token) {
+      let redirectUrl = "/select-role";
+      if (token.role === "client") {
+        redirectUrl = token.clientProfile
+          ? "/client/dashboard"
+          : "/client/personal-details";
+      } else if (token.role === "trainer") {
+        redirectUrl = token.trainerProfile
+          ? "/trainer/dashboard"
+          : "/trainer/personal-details";
+      }
+      return NextResponse.redirect(new URL(redirectUrl, request.url));
+    }
     return NextResponse.next();
   }
 
-  if (AUTH_PATHS.includes(pathname)) return NextResponse.next();
+  // 3. Ako nema tokena ili nema role, redirect na login
+  if (!token) {
+    return NextResponse.redirect(new URL("/auth/login", request.url));
+  }
 
-  if (!token) return NextResponse.redirect(new URL("/auth/login", request.url));
-
+  // 4. Provjeri treba li usera redirectati na neku onboarding/dashboard stranicu
   const redirect = getRedirectUrl(token.role, token, pathname, request.url);
-  if (redirect) return NextResponse.redirect(new URL(redirect, request.url));
+  if (redirect) {
+    return NextResponse.redirect(new URL(redirect, request.url));
+  }
 
+  // 5. Sve ok, pusti dalje
+  console.log(
+    "[middleware] Sve OK, dopuštam prolaz na:",
+    pathname,
+    "token:",
+    token
+  );
   return NextResponse.next();
 }
 

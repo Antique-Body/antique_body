@@ -1,14 +1,11 @@
-export { PersonalDetailsStep } from "./PersonalDetailsStep";
 export { ProfileContactStep } from "./ProfileContactStep";
 export { RegistrationStep } from "./RegistrationStep";
 export { TipsSection } from "./TipsSection";
 export { FormSection } from "./FormSection";
-export { CertificationUpload } from "./CertificationUpload";
 export { LanguageSelector } from "./LanguageSelector";
 export { LocationSelector } from "./LocationSelector";
-export { TrainingTypeSelector } from "./TrainingTypeSelector";
-export { SpecialtySelector } from "./SpecialtySelector";
-export { InfoBanner } from "./InfoBanner";
+export { TrainingTypeSelector } from "../../shared/TrainingTypeSelector";
+export { SpecialtySelector } from "../../shared/SpecialtySelector";
 
 // New reusable components
 export { BasicInfoStep } from "./BasicInfoStep";
