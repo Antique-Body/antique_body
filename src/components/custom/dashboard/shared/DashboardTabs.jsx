@@ -37,10 +37,10 @@ export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
   };
 
   return (
-    <div className="relative top-3 mb-6 flex overflow-x-auto pb-1 pt-3">
+    <div className="relative top-3 mb-8 flex overflow-x-auto pb-2 pt-3">
       {/* Active tab indicator */}
       <div
-        className="absolute bottom-0 h-0.5 bg-[#FF6B00] transition-all duration-300 ease-in-out"
+        className="absolute bottom-0 h-1 rounded-t-md bg-[#FF6B00] transition-all duration-300 ease-in-out"
         style={{
           left: `${indicatorStyle.left}px`,
           width: `${indicatorStyle.width}px`,
@@ -50,7 +50,7 @@ export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
       {/* Hover indicator */}
       {hoverIndicatorStyle && (
         <div
-          className="absolute bottom-0 h-0.5 bg-[#FF6B00]/30 transition-all duration-300 ease-in-out"
+          className="absolute bottom-0 h-1 rounded-t-md bg-[#FF6B00]/30 transition-all duration-300 ease-in-out"
           style={{
             left: `${hoverIndicatorStyle.left}px`,
             width: `${hoverIndicatorStyle.width}px`,
@@ -62,11 +62,11 @@ export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
         <Button
           key={tab.id}
           ref={(el) => (tabsRef.current[index] = el)}
-          className={`whitespace-nowrap px-4 py-2 text-sm font-medium transition-all duration-300 ${
+          className={`whitespace-nowrap px-6 py-3 mx-2 text-sm font-medium transition-all duration-300 ${
             activeTab === tab.id
               ? "scale-105 transform text-white"
-              : "text-gray-400 hover:text-white"
-          }`}
+              : "text-gray-400 hover:text-white hover:bg-gray-800/40"
+          } rounded-md first:ml-0 last:mr-0`}
           onClick={() => setActiveTab(tab.id)}
           onMouseEnter={() => handleMouseEnter(index)}
           onMouseLeave={handleMouseLeave}
