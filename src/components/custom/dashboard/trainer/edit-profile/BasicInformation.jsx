@@ -3,8 +3,8 @@ import React from "react";
 
 import { FormField } from "@/components/common";
 import { SectionTitle } from "@/components/custom/dashboard/shared";
-import { ProfileImageUpload } from "@/components/custom/shared";
 import { LanguageSelector } from "@/components/custom/personal-details/shared/LanguageSelector";
+import { ProfileImageUpload } from "@/components/custom/shared";
 
 // Animation variants
 const fadeInUp = {
@@ -207,8 +207,7 @@ export const BasicInformation = ({
                 value={trainerData.pricePerSession || ""}
                 onChange={handleChange}
                 placeholder="50"
-                min="0"
-                step="5"
+                min={0}
                 backgroundStyle="semi-transparent"
               />
 
