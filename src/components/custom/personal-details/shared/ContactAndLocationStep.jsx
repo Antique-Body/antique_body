@@ -1,9 +1,9 @@
 "use client";
 import { Icon } from "@iconify/react";
 
-import { FormSection, InfoBanner } from "./";
+import { FormSection } from "./";
 
-import { FormField } from "@/components/common";
+import { FormField, InfoBanner } from "@/components/common";
 import { usePrefillFromSession } from "@/hooks";
 import {
   searchCities,

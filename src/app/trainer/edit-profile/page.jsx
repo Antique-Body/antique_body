@@ -1,8 +1,6 @@
 "use client";
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
 
 import {
   Button,
@@ -10,6 +8,7 @@ import {
   BrandLogo,
   BackButton,
   FullScreenLoader,
+  InfoBanner,
 } from "@/components/common";
 import { DashboardTabs } from "@/components/custom/dashboard/shared";
 import { AnimatedTabContent } from "@/components/custom/dashboard/shared/DashboardTabs";
@@ -20,6 +19,7 @@ import {
   Specialties,
   WorkoutSpaceLocation,
 } from "@/components/custom/dashboard/trainer/edit-profile";
+import { useTrainerEditProfileForm } from "@/hooks/useTrainerEditProfileForm";
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -37,380 +37,32 @@ const staggerContainer = {
 };
 
 const TrainerEditProfilePage = () => {
-  const router = useRouter();
-  const [previewImage, setPreviewImage] = useState(null);
-  const [activeSection, setActiveSection] = useState("basicInfo");
-  const [formProgress, setFormProgress] = useState(20);
+  const {
+    previewImage,
+    activeSection,
+    setActiveSection,
+    formProgress,
+    loading,
+    error,
+    setError,
+    trainerData,
+    setTrainerData,
+    initialCertifications,
+    resetCertFieldsTrigger,
+    certFields,
+    setCertFields,
+    handleChange,
+    handleImageUpload,
+    handleCertificationsChange,
+    handleResetCertifications,
+    handleSubmit,
+    goBack,
+  } = useTrainerEditProfileForm();
 
-  // Novo: loading state
-  const [loading, setLoading] = useState(true);
-
-  // Novo: inicijalni state je prazan dok ne dođe fetch
-  const [trainerData, setTrainerData] = useState({
-    rating: "",
-    trainerProfile: {
-      firstName: "",
-      lastName: "",
-      dateOfBirth: "",
-      gender: "",
-      specialties: [],
-      languages: [],
-      trainingEnvironments: [],
-      trainingTypes: [],
-      certifications: [],
-      description: "",
-      pricingType: "",
-      pricePerSession: "",
-      currency: "EUR",
-      contactEmail: "",
-      contactPhone: "",
-      profileImage: "",
-      availability: {
-        weekdays: [],
-        timeSlots: [],
-        sessionDuration: 60,
-        cancellationPolicy: 24,
-      },
-      location: {
-        city: "",
-        state: "",
-        country: "",
-        lat: null,
-        lon: null,
-        gyms: [],
-      },
-    },
-    proximity: "",
-    services: [],
-    expertise: [],
-  });
-  // Dodajem state za inicijalni snapshot
-  // Dodajem state za inicijalni snapshot certifikata
-  const [initialCertifications, setInitialCertifications] = useState([]);
-  const [resetCertFieldsTrigger, setResetCertFieldsTrigger] = useState(0);
-  const [certFields, setCertFields] = useState([]);
-
-  // Novo: fetch podataka iz baze
-  useEffect(() => {
-    const fetchTrainer = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/users/trainer");
-        if (!res.ok) throw new Error("No trainer profile");
-        const data = await res.json();
-        console.log(data, "data");
-        const newTrainerData = {
-          ...trainerData,
-          rating: data.rating || "",
-          trainerProfile: {
-            ...trainerData.trainerProfile,
-            ...data.trainerProfile,
-            dateOfBirth: data.trainerProfile?.dateOfBirth
-              ? data.trainerProfile.dateOfBirth.slice(0, 10)
-              : "",
-            specialties:
-              data.trainerProfile?.specialties?.map((s) => s.name) || [],
-            languages: data.trainerProfile?.languages?.map((l) => l.name) || [],
-            trainingEnvironments:
-              data.trainerProfile?.trainingEnvironments?.map((e) => e.name) ||
-              [],
-            trainingTypes:
-              data.trainerProfile?.trainingTypes?.map((t) => t.name) || [],
-            certifications: data.trainerProfile?.certifications || [],
-            pricingType: data.trainerProfile?.pricingType || "",
-            pricePerSession: data.trainerProfile?.pricePerSession || "",
-            currency: data.trainerProfile?.currency || "EUR",
-            contactEmail: data.trainerProfile?.contactEmail || "",
-            contactPhone: data.trainerProfile?.contactPhone || "",
-            profileImage: data.trainerProfile?.profileImage || "",
-            firstName: data.trainerProfile?.firstName || "",
-            lastName: data.trainerProfile?.lastName || "",
-            description: data.trainerProfile?.description || "",
-            profileImage: data.trainerProfile?.profileImage || "",
-            location: {
-              ...(data.trainerProfile?.location || {}),
-              city: data.trainerProfile?.location?.city || "",
-              state: data.trainerProfile?.location?.state || "",
-              country: data.trainerProfile?.location?.country || "",
-              lat: data.trainerProfile?.location?.lat || null,
-              lon: data.trainerProfile?.location?.lon || null,
-              gyms: data.trainerProfile?.location?.gyms || [],
-            },
-          },
-        };
-        setTrainerData(newTrainerData);
-        setInitialCertifications(data.trainerProfile?.certifications || []); // Spremi snapshot certifikata
-      } catch {
-        // Ako nema profila, ostavi prazno (user treba popuniti)
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTrainer();
-    // eslint-disable-next-line
-  }, []);
-
-  console.log(trainerData, "trainerData");
-
-  // Calculate form completion percentage
-  const calculateFormProgress = useCallback(() => {
-    // This is a simplified calculation - in a real app you'd check all required fields
-    const totalFields = 15; // approximate total number of important fields
-    let filledFields = 0;
-
-    if (trainerData.rating) filledFields++;
-    if (trainerData.trainerProfile.firstName) filledFields++;
-    if (trainerData.trainerProfile.lastName) filledFields++;
-    if (trainerData.trainerProfile.dateOfBirth) filledFields++;
-    if (trainerData.trainerProfile.gender) filledFields++;
-    if ((trainerData.trainerProfile.specialties || []).length > 0)
-      filledFields++;
-    if ((trainerData.trainerProfile.languages || []).length > 0) filledFields++;
-    if ((trainerData.trainerProfile.trainingEnvironments || []).length > 0)
-      filledFields++;
-    if ((trainerData.trainerProfile.trainingTypes || []).length > 0)
-      filledFields++;
-    if ((trainerData.trainerProfile.certifications || []).length > 0)
-      filledFields++;
-    if (trainerData.trainerProfile.description) filledFields++;
-    if (trainerData.trainerProfile.city) filledFields++;
-    if (trainerData.trainerProfile.state) filledFields++;
-    if (trainerData.trainerProfile.country) filledFields++;
-    if (trainerData.trainerProfile.pricingType) filledFields++;
-    if (trainerData.trainerProfile.pricePerSession) filledFields++;
-    if (trainerData.trainerProfile.currency) filledFields++;
-    if (trainerData.trainerProfile.contactEmail) filledFields++;
-    if (trainerData.trainerProfile.contactPhone) filledFields++;
-    if (trainerData.trainerProfile.profileImage) filledFields++;
-    if (trainerData.proximity) filledFields++;
-    if ((trainerData.services || []).length > 0) filledFields++;
-    if ((trainerData.expertise || []).length > 0) filledFields++;
-    console.log(trainerData.trainerProfile, "trainerData222");
-    if (
-      (
-        (trainerData.trainerProfile.availability &&
-          trainerData.trainerProfile.availability.weekdays) ||
-        []
-      ).length > 0
-    )
-      filledFields++;
-    if (
-      (
-        (trainerData.trainerProfile.availability &&
-          trainerData.trainerProfile.availability.timeSlots) ||
-        []
-      ).length > 0
-    )
-      filledFields++;
-
-    setFormProgress(
-      Math.max(20, Math.round((filledFields / totalFields) * 100))
-    );
-  }, [trainerData]);
-
-  // Update form progress whenever any data changes
-  useEffect(() => {
-    calculateFormProgress();
-  }, [calculateFormProgress]);
-
-  // Handler for text input changes
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name.startsWith("location.")) {
-      setTrainerData({
-        ...trainerData,
-        trainerProfile: {
-          ...trainerData.trainerProfile,
-          location: {
-            ...trainerData.trainerProfile.location,
-            [name.replace("location.", "")]: value,
-          },
-        },
-      });
-    } else if (name === "certifications") {
-      setTrainerData({
-        ...trainerData,
-        trainerProfile: {
-          ...trainerData.trainerProfile,
-          [name]: Array.isArray(value) ? value : [value],
-        },
-      });
-    } else {
-      setTrainerData({
-        ...trainerData,
-        trainerProfile: {
-          ...trainerData.trainerProfile,
-          [name]: value,
-        },
-      });
-    }
-  };
-
-  // Handle image upload
-  const handleImageUpload = (file) => {
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setPreviewImage(reader.result); // Za prikaz slike
-        setTrainerData((prev) => ({
-          ...prev,
-          trainerProfile: {
-            ...prev.trainerProfile,
-            profileImage: file, // Spremi file objekt
-          },
-        }));
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setPreviewImage(null);
-      setTrainerData((prev) => ({
-        ...prev,
-        trainerProfile: {
-          ...prev.trainerProfile,
-          profileImage: "",
-        },
-      }));
-    }
-  };
-
-  // Reset previewImage kad backend vrati novi URL (npr. nakon save-a ili fetch-a)
-  useEffect(() => {
-    if (
-      trainerData.trainerProfile.profileImage &&
-      typeof trainerData.trainerProfile.profileImage === "string"
-    ) {
-      setPreviewImage(null); // Prikazuj samo URL iz baze
-    }
-  }, [trainerData.trainerProfile.profileImage]);
-
-  // Funkcija za reset samo certifikata
-  const handleResetCertifications = () => {
-    setCertFields(initialCertifications);
-    setTrainerData((prev) => ({
-      ...prev,
-      trainerProfile: {
-        ...prev.trainerProfile,
-        certifications: initialCertifications,
-      },
-    }));
-    setResetCertFieldsTrigger((prev) => prev + 1);
-  };
-
-  const handleCertificationsChange = (newCertFields) => {
-    setCertFields(newCertFields);
-  };
-
-  // Prilagođavam handleSubmit da šalje podatke na backend
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      // 1. Pripremi FormData za upload slike i certifikata
-      const formData = new FormData();
-
-      // Dodaj profilnu sliku ako je novi file (nije string tj. nije već URL)
-      if (
-        trainerData.trainerProfile.profileImage &&
-        typeof trainerData.trainerProfile.profileImage !== "string"
-      ) {
-        formData.append(
-          "profileImage",
-          trainerData.trainerProfile.profileImage
-        );
-      }
-
-      // Dodaj certifikate koji su novi fileovi
-      certFields.forEach((cert, idx) => {
-        if (cert.files && cert.files.length > 0) {
-          for (const file of cert.files) {
-            if (file && typeof file !== "string") {
-              formData.append(`certifications[${idx}]`, file);
-            }
-          }
-        }
-      });
-
-      // 2. Ako ima fileova, uploadaj ih
-      let uploadedUrls = {};
-      if ([...formData.keys()].length > 0) {
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-        uploadedUrls = await uploadRes.json();
-        if (uploadedUrls.error) throw new Error(uploadedUrls.error);
-      }
-
-      // 3. Zamijeni profileImage i certifikate s novim URL-ovima
-      let profileImageUrl = trainerData.trainerProfile.profileImage;
-      if (uploadedUrls.profileImage) {
-        profileImageUrl = uploadedUrls.profileImage;
-      }
-
-      // Pripremi certifikate za spremanje (samo URL-ovi, bez file objekata)
-      const certificationsForSave = certFields.map((cert, idx) => {
-        let documents = cert.documents || [];
-        // Ako su uploadani novi dokumenti za ovaj certifikat, koristi njih (ali samo ako ih ima barem jedan)
-        if (
-          uploadedUrls.certifications &&
-          Array.isArray(uploadedUrls.certifications[idx]) &&
-          uploadedUrls.certifications[idx].length > 0
-        ) {
-          documents = uploadedUrls.certifications[idx];
-        }
-        // Ako je postojeći certifikat i NEMA dokumenata (niti starih niti novih), makni documents polje
-        const base = {
-          ...cert,
-          hidden: cert.hidden || false,
-          files: undefined, // ne šalji fileove
-        };
-        if (cert.id && (!documents || documents.length === 0)) {
-          // Ne šalji documents polje
-          const { documents: _omit, ...rest } = base;
-          return rest;
-        }
-        return { ...base, documents };
-      });
-
-      // 4. Pripremi payload: availability, certifications unutar trainerProfile
-      const body = {
-        trainerProfile: {
-          ...trainerData.trainerProfile,
-          profileImage: profileImageUrl,
-          certifications: certificationsForSave,
-          availability: trainerData.trainerProfile.availability,
-        },
-      };
-
-      // 5. Pošalji na backend
-      const res = await fetch("/api/users/trainer", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) throw new Error("Failed to update profile");
-      setTimeout(() => {
-        router.push("/trainer/dashboard");
-      }, 1000);
-      console.log(res, "res");
-    } catch (err) {
-      alert("Error updating profile: " + err.message);
-    }
-  };
-
-  // Go back to dashboard
-  const goBack = () => {
-    router.push("/trainer/dashboard");
-  };
-
-  // Navigation sections
   const sections = [
     { id: "basicInfo", label: "Basic Information", badgeCount: 0 },
     { id: "specialties", label: "Specialties", badgeCount: 0 },
-    {
-      id: "certification",
-      label: "Certification",
-      badgeCount: 0,
-    },
+    { id: "certification", label: "Certification", badgeCount: 0 },
     { id: "availability", label: "Availability", badgeCount: 0 },
     {
       id: "workoutSpaceLocation",
@@ -420,11 +72,7 @@ const TrainerEditProfilePage = () => {
   ];
 
   if (loading) {
-    return (
-      <>
-        <FullScreenLoader text="Preparing your Profile Settings" />
-      </>
-    );
+    return <FullScreenLoader text="Preparing your Profile Settings" />;
   }
 
   return (
@@ -434,7 +82,6 @@ const TrainerEditProfilePage = () => {
         <div className="animate-pulse-slow absolute left-[10%] top-[20%] h-40 w-40 rounded-full bg-gradient-to-r from-[#FF7800]/5 to-[#FF5F00]/5 blur-3xl"></div>
         <div className="animate-pulse-slow absolute right-[10%] top-[50%] h-60 w-60 rounded-full bg-gradient-to-r from-[#FF7800]/5 to-[#FF5F00]/5 blur-3xl"></div>
       </div>
-
       <motion.div
         initial="hidden"
         animate="visible"
@@ -447,7 +94,6 @@ const TrainerEditProfilePage = () => {
         >
           <BrandLogo />
         </motion.div>
-
         <motion.div
           variants={fadeIn}
           className="mb-6 flex items-center justify-between"
@@ -456,7 +102,6 @@ const TrainerEditProfilePage = () => {
             <BackButton onClick={goBack} />
             <h1 className="text-2xl font-bold">Edit Profile</h1>
           </div>
-
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-400">Profile completion</span>
             <div className="h-2 w-24 overflow-hidden rounded-full bg-gray-800">
@@ -470,7 +115,19 @@ const TrainerEditProfilePage = () => {
             </span>
           </div>
         </motion.div>
-
+        {error && (
+          <div className="mb-4">
+            <InfoBanner
+              icon="mdi:alert-circle"
+              title="Error updating profile"
+              subtitle={error}
+              variant="danger"
+              buttonText="Dismiss"
+              onButtonClick={() => setError("")}
+              className="relative mb-4"
+            />
+          </div>
+        )}
         <motion.div variants={fadeIn}>
           <DashboardTabs
             activeTab={activeSection}
@@ -478,7 +135,6 @@ const TrainerEditProfilePage = () => {
             tabs={sections}
           />
         </motion.div>
-
         <motion.div variants={fadeIn}>
           <Card
             variant="darkStrong"
@@ -499,7 +155,6 @@ const TrainerEditProfilePage = () => {
                   handleImageUpload={handleImageUpload}
                 />
               </AnimatedTabContent>
-
               <AnimatedTabContent
                 isActive={activeSection === "specialties"}
                 tabId="specialties"
@@ -510,7 +165,6 @@ const TrainerEditProfilePage = () => {
                   setTrainerData={setTrainerData}
                 />
               </AnimatedTabContent>
-
               <AnimatedTabContent
                 isActive={activeSection === "certification"}
                 tabId="certification"
@@ -527,7 +181,6 @@ const TrainerEditProfilePage = () => {
                   setCertFields={setCertFields}
                 />
               </AnimatedTabContent>
-
               <AnimatedTabContent
                 isActive={activeSection === "availability"}
                 tabId="availability"
@@ -538,7 +191,6 @@ const TrainerEditProfilePage = () => {
                   setTrainerData={setTrainerData}
                 />
               </AnimatedTabContent>
-
               <AnimatedTabContent
                 isActive={activeSection === "workoutSpaceLocation"}
                 tabId="workoutSpaceLocation"
@@ -548,13 +200,11 @@ const TrainerEditProfilePage = () => {
                   setTrainerData={setTrainerData}
                 />
               </AnimatedTabContent>
-
               {/* Navigation and Submit */}
               <div className="flex justify-between border-t border-[#333] pt-8">
                 <div className="flex items-center gap-3">
                   {sections.map((section, _index) => {
                     const isActive = activeSection === section.id;
-
                     return (
                       <Button
                         key={section.id}
@@ -571,7 +221,6 @@ const TrainerEditProfilePage = () => {
                     );
                   })}
                 </div>
-
                 <div className="flex gap-4">
                   <Button variant="secondary" onClick={goBack}>
                     Cancel

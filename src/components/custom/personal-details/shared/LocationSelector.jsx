@@ -2,7 +2,7 @@
 import { Icon } from "@iconify/react";
 
 import { FormField } from "@/components/common";
-import { InfoBanner } from "@/components/custom/personal-details/shared/InfoBanner";
+import { InfoBanner } from "@/components/common/InfoBanner";
 import {
   searchCities,
   searchStates,
