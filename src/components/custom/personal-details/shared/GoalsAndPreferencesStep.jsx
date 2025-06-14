@@ -6,42 +6,7 @@ import { FormSection, LanguageSelector } from "./";
 import { FormField } from "@/components/common";
 import { Button } from "@/components/common/Button";
 import { ErrorIcon } from "@/components/common/Icons";
-
-// Activity types that the client might be interested in
-const activityTypes = [
-  { id: "weight_training", label: "Weight Training", icon: "mdi:dumbbell" },
-  { id: "cardio", label: "Cardio", icon: "mdi:run" },
-  { id: "yoga", label: "Yoga", icon: "mdi:yoga" },
-  { id: "pilates", label: "Pilates", icon: "mdi:yoga-pose" },
-  { id: "crossfit", label: "CrossFit", icon: "mdi:weight-lifter" },
-  { id: "hiit", label: "HIIT", icon: "mdi:timer" },
-  { id: "swimming", label: "Swimming", icon: "mdi:swim" },
-  { id: "cycling", label: "Cycling", icon: "mdi:bike" },
-  { id: "running", label: "Running", icon: "mdi:run-fast" },
-  { id: "boxing", label: "Boxing", icon: "mdi:boxing-glove" },
-  { id: "martial_arts", label: "Martial Arts", icon: "mdi:karate" },
-  { id: "team_sports", label: "Team Sports", icon: "mdi:soccer" },
-  { id: "dance", label: "Dance", icon: "mdi:dance-ballroom" },
-  { id: "stretching", label: "Stretching", icon: "mdi:stretching" },
-  { id: "walking", label: "Walking", icon: "mdi:walk" },
-];
-
-// Fitness goals options
-const fitnessGoalTypes = [
-  { id: "weight_loss", label: "Weight Loss", icon: "mdi:scale-bathroom" },
-  { id: "muscle_gain", label: "Muscle Gain", icon: "mdi:arm-flex" },
-  { id: "strength", label: "Improve Strength", icon: "mdi:weight" },
-  { id: "endurance", label: "Improve Endurance", icon: "mdi:heart-pulse" },
-  { id: "flexibility", label: "Increase Flexibility", icon: "mdi:yoga" },
-  { id: "health", label: "General Health", icon: "mdi:heart-plus" },
-  { id: "performance", label: "Athletic Performance", icon: "mdi:trophy" },
-  {
-    id: "rehabilitation",
-    label: "Injury Rehabilitation",
-    icon: "mdi:medical-bag",
-  },
-  { id: "stress_reduction", label: "Stress Reduction", icon: "mdi:meditation" },
-];
+import { ACTIVITY_TYPES, FITNESS_GOALS } from "@/enums";
 
 export const GoalsAndPreferencesStep = ({ formData, onChange, errors }) => {
   // Handler for language selection
@@ -117,7 +82,7 @@ export const GoalsAndPreferencesStep = ({ formData, onChange, errors }) => {
           <div>
             <label className="block text-gray-300 mb-3">Primary Goal</label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {fitnessGoalTypes.map((goal) => {
+              {FITNESS_GOALS.map((goal) => {
                 const isSelected = formData.primaryGoal === goal.id;
                 return (
                   <Button
@@ -158,7 +123,7 @@ export const GoalsAndPreferencesStep = ({ formData, onChange, errors }) => {
               Secondary Goal (Optional)
             </label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {fitnessGoalTypes.map((goal) => {
+              {FITNESS_GOALS.map((goal) => {
                 const isSelected = formData.secondaryGoal === goal.id;
                 const isPrimary = formData.primaryGoal === goal.id;
                 return (
@@ -221,7 +186,7 @@ export const GoalsAndPreferencesStep = ({ formData, onChange, errors }) => {
             Select all activities you're interested in:
           </p>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {activityTypes.map((activity) => {
+            {ACTIVITY_TYPES.map((activity) => {
               const isSelected = (formData.preferredActivities || []).includes(
                 activity.id
               );

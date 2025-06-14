@@ -132,8 +132,6 @@ export function useTrainerRegistration() {
     if (currentStep === 3) {
       if (!formData.location || !formData.location.city)
         newErrors["location.city"] = "City is required";
-      if (!formData.location || !formData.location.state)
-        newErrors["location.state"] = "State/Province is required";
       if (!formData.location || !formData.location.country)
         if (!formData.pricingType || formData.pricingType === "")
           newErrors.pricingType = "Pricing approach is required";

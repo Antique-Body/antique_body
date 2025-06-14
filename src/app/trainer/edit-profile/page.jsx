@@ -230,15 +230,25 @@ const TrainerEditProfilePage = () => {
                     variant="orangeFilled"
                     size="large"
                     leftIcon={
-                      <Icon
-                        icon="material-symbols:save"
-                        width={20}
-                        height={20}
-                      />
+                      loading ? (
+                        <Icon
+                          icon="eos-icons:loading"
+                          width={20}
+                          height={20}
+                          className="animate-spin"
+                        />
+                      ) : (
+                        <Icon
+                          icon="material-symbols:save"
+                          width={20}
+                          height={20}
+                        />
+                      )
                     }
+                    disabled={loading}
                     className="relative overflow-hidden"
                   >
-                    Save Profile
+                    {loading ? "Saving..." : "Save Profile"}
                   </Button>
                 </div>
               </div>
