@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 
 import { EffectBackground } from "@/components/background";
 import { BrandLogo } from "@/components/common/BrandLogo";
+import { InfoBanner } from "@/components/common/InfoBanner";
 import { DashboardTabs } from "@/components/custom/dashboard/shared/DashboardTabs";
 import { TrainerProfile } from "@/components/custom/dashboard/trainer/components";
-import { InfoBanner } from "@/components/common/InfoBanner";
 
 export default function TrainerDashboardLayout({ children }) {
   const router = useRouter();

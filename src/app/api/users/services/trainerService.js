@@ -2,6 +2,16 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// Helper za dinamički where za lokaciju
+function buildLocationWhere(location) {
+  const where = {
+    city: location.city,
+    country: location.country,
+  };
+  if (location.state) where.state = location.state;
+  return where;
+}
+
 /**
  * Kreira trenera sa svim detaljima i relacijama.
  * Sva polja su required osim certifikata i description.
@@ -45,28 +55,38 @@ async function createTrainerWithDetails(formData, userId) {
     }
   }
   const { location } = formData;
-  if (!location.city || !location.state || !location.country) {
-    throw new Error("All location fields are required.");
+  if (!location.city || !location.country) {
+    throw new Error("City and country are required.");
   }
 
   // Find or create location (with lat/lon)
-  let dbLocation = await prisma.location.findFirst({
-    where: {
-      city: location.city,
-      state: location.state,
-      country: location.country,
-    },
-  });
+  let dbLocation = null;
+  if (location.id) {
+    dbLocation = await prisma.location.findUnique({
+      where: { id: location.id },
+    });
+  }
   if (!dbLocation) {
-    dbLocation = await prisma.location.create({
-      data: {
+    dbLocation = await prisma.location.findFirst({
+      where: buildLocationWhere(location),
+    });
+    if (!dbLocation) {
+      const locData = {
         city: location.city,
-        state: location.state,
         country: location.country,
         lat: location.lat ?? null,
         lon: location.lon ?? null,
-      },
-    });
+      };
+      if (
+        location.state &&
+        location.state.trim() !== "" &&
+        location.state !== "String" &&
+        typeof location.state === "string"
+      ) {
+        locData.state = location.state;
+      }
+      dbLocation = await prisma.location.create({ data: locData });
+    }
   } else {
     // Ako već postoji, ali nema lat/lon, ažuriraj
     if (
@@ -180,11 +200,7 @@ async function getTrainerProfileByUserId(userId) {
   const profile = await prisma.trainerProfile.findUnique({
     where: { userId },
     include: {
-      certifications: {
-        include: {
-          documents: true,
-        },
-      },
+      certifications: { include: { documents: true } },
       specialties: true,
       languages: true,
       trainingEnvironments: true,
@@ -193,22 +209,19 @@ async function getTrainerProfileByUserId(userId) {
       location: true,
       trainerGyms: {
         take: 3,
-        include: {
-          gym: { include: { location: true } },
-        },
+        include: { gym: { include: { location: true } } },
       },
+      availabilities: true,
     },
   });
   return profile;
 }
 
 async function getTrainerInfoByUserId(userId) {
-  // Prvo pronađi profil trenera
   const profile = await prisma.trainerProfile.findUnique({
     where: { userId },
   });
   if (!profile) return null;
-  // Zatim pronađi TrainerInfo i ugniježdi kompletan TrainerProfile sa svim relacijama
   const trainerInfo = await prisma.trainerInfo.findUnique({
     where: { trainerProfileId: profile.id },
     include: {
@@ -220,6 +233,7 @@ async function getTrainerInfoByUserId(userId) {
           trainingEnvironments: true,
           trainingTypes: true,
           location: true,
+          availabilities: true,
         },
       },
     },
@@ -233,11 +247,9 @@ async function getTrainerInfoByUserId(userId) {
  */
 export async function updateTrainerProfile(userId, data) {
   return await prisma.$transaction(async (tx) => {
-    // 1. Nađi profil
     const profile = await tx.trainerProfile.findUnique({ where: { userId } });
     if (!profile) throw new Error("Trainer profile not found");
-
-    // 2. Briši stare relacije
+    let locationId = profile.locationId;
     await Promise.all([
       tx.trainerSpecialty.deleteMany({
         where: { trainerProfileId: profile.id },
@@ -250,8 +262,10 @@ export async function updateTrainerProfile(userId, data) {
       }),
       tx.trainerType.deleteMany({ where: { trainerProfileId: profile.id } }),
       tx.certification.deleteMany({ where: { trainerProfileId: profile.id } }),
+      tx.trainerAvailability.deleteMany({
+        where: { trainerProfileId: profile.id },
+      }),
     ]);
-
     // 3. Kreiraj nove relacije (batch insert, NIKAD ne šalji u .update())
     if (data.specialties?.length) {
       await tx.trainerSpecialty.createMany({
@@ -325,6 +339,7 @@ export async function updateTrainerProfile(userId, data) {
       trainingEnvironments: _trainingEnvironments,
       trainingTypes: _trainingTypes,
       certifications: _certifications,
+      availabilities: _availabilities,
       ...allowedProfileData
     } = data;
 
@@ -338,6 +353,75 @@ export async function updateTrainerProfile(userId, data) {
       if (isNaN(pricePerSession)) pricePerSession = null;
     }
 
+    if (location && location.city && location.country) {
+      let dbLocation = null;
+      // Ako je poslan id, provjeri da li se podaci poklapaju
+      if (location.id) {
+        dbLocation = await tx.location.findUnique({
+          where: { id: location.id },
+        });
+        if (
+          dbLocation &&
+          (dbLocation.city !== location.city ||
+            dbLocation.country !== location.country ||
+            (dbLocation.state || "") !== (location.state || ""))
+        ) {
+          dbLocation = null;
+        }
+      }
+      if (!dbLocation) {
+        dbLocation = await tx.location.findFirst({
+          where: buildLocationWhere(location),
+        });
+        if (!dbLocation) {
+          const locData = {
+            city: location.city,
+            country: location.country,
+            lat: location.lat ?? null,
+            lon: location.lon ?? null,
+          };
+          if (
+            location.state &&
+            location.state.trim() !== "" &&
+            location.state !== "String" &&
+            typeof location.state === "string"
+          ) {
+            locData.state = location.state;
+          }
+          dbLocation = await tx.location.create({
+            data: locData,
+          });
+        } else {
+          // Update lat/lon if missing
+          if (
+            (dbLocation.lat == null || dbLocation.lon == null) &&
+            location.lat &&
+            location.lon
+          ) {
+            dbLocation = await tx.location.update({
+              where: { id: dbLocation.id },
+              data: {
+                lat: location.lat,
+                lon: location.lon,
+              },
+            });
+          }
+        }
+      }
+      locationId = dbLocation.id;
+    }
+
+    // Availabilities
+    if (Array.isArray(data.availabilities)) {
+      await tx.trainerAvailability.createMany({
+        data: data.availabilities.map((a) => ({
+          trainerProfileId: profile.id,
+          weekday: a.weekday,
+          timeSlot: a.timeSlot,
+        })),
+      });
+    }
+
     const updated = await tx.trainerProfile.update({
       where: { id: profile.id },
       data: {
@@ -346,7 +430,7 @@ export async function updateTrainerProfile(userId, data) {
         dateOfBirth: allowedProfileData.dateOfBirth
           ? new Date(allowedProfileData.dateOfBirth)
           : profile.dateOfBirth,
-        availability: allowedProfileData.availability || undefined,
+        locationId,
       },
       include: {
         certifications: { include: { documents: true } },
@@ -356,6 +440,7 @@ export async function updateTrainerProfile(userId, data) {
         trainingTypes: true,
         location: true,
         trainerGyms: { include: { gym: true } },
+        availabilities: true,
       },
     });
 

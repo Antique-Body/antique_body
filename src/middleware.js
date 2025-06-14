@@ -13,37 +13,36 @@ function isPageNavigation(request) {
   return request.headers.get("accept")?.includes("text/html");
 }
 
-function getRedirectUrl(role, token, pathname, _url) {
+function getRedirectUrl(role, token, pathname) {
   if (!role) return pathname === "/select-role" ? null : "/select-role";
-  if (role === "client") {
-    if (!token.clientProfile)
-      return pathname === "/client/personal-details"
-        ? null
-        : "/client/personal-details";
-    return pathname === "/client/dashboard" ? null : "/client/dashboard";
-  }
-  if (role === "trainer") {
-    const allowedTrainerPaths = [
-      "/trainer/dashboard",
-      "/trainer/dashboard/newclients",
-      "/trainer/edit-profile",
-    ];
-    if (!token.trainerProfile) {
-      if (
-        pathname === "/trainer/personal-details" ||
-        pathname === "/trainer/edit-profile"
-      ) {
-        return null;
-      }
-      return "/trainer/personal-details";
-    }
-    // Ako ima profil, pusti samo dozvoljene rute
-    if (!allowedTrainerPaths.includes(pathname)) {
-      return "/trainer/dashboard";
-    }
-    return null;
-  }
-  return null;
+
+  const config = {
+    client: {
+      profile: token.clientProfile,
+      personal: "/client/personal-details",
+      allowed: [
+        "/client/dashboard",
+        "/client/dashboard/trainwithcoach",
+        "/client/edit-profile",
+      ],
+      fallback: "/client/dashboard",
+    },
+    trainer: {
+      profile: token.trainerProfile,
+      personal: "/trainer/personal-details",
+      allowed: [
+        "/trainer/dashboard",
+        "/trainer/dashboard/newclients",
+        "/trainer/edit-profile",
+      ],
+      fallback: "/trainer/dashboard",
+    },
+  }[role];
+
+  if (!config) return "/select-role";
+  if (!config.profile)
+    return pathname === config.personal ? null : config.personal;
+  return config.allowed.includes(pathname) ? null : config.fallback;
 }
 
 export async function middleware(request) {
