@@ -62,7 +62,7 @@ export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
         <Button
           key={tab.id}
           ref={(el) => (tabsRef.current[index] = el)}
-          className={`whitespace-nowrap px-6 py-3 mx-2 text-sm font-medium transition-all duration-300 ${
+          className={`whitespace-nowrap px-6 py-3 mx-2 text-sm font-medium transition-all duration-300 focus:ring-0 ${
             activeTab === tab.id
               ? "scale-105 transform text-white"
               : "text-gray-400 hover:text-white"
