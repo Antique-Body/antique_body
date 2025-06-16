@@ -1,13 +1,8 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-const PUBLIC_PATHS = [
-  "/",
-  "/contact",
-  "/trainers-marketplace",
-  "/auth/reset-password",
-];
-const AUTH_PATHS = ["/auth/login", "/auth/register"];
+const PUBLIC_PATHS = ["/", "/auth/login", "/auth/register"];
+const AUTH_PATHS = ["/auth/reset-password"];
 
 function isPageNavigation(request) {
   return request.headers.get("accept")?.includes("text/html");
@@ -72,27 +67,24 @@ export async function middleware(request) {
   // 1. Public paths uvijek pusti
   if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
 
-  // 2. Auth paths uvijek pusti (login, register, reset-password)
-  if (AUTH_PATHS.includes(pathname)) {
-    if (token) {
-      let redirectUrl = "/select-role";
-      if (token.role === "client") {
-        redirectUrl = token.clientProfile
-          ? "/client/dashboard"
-          : "/client/personal-details";
-      } else if (token.role === "trainer") {
-        redirectUrl = token.trainerProfile
-          ? "/trainer/dashboard"
-          : "/trainer/personal-details";
-      }
-      return NextResponse.redirect(new URL(redirectUrl, request.url));
-    }
-    return NextResponse.next();
-  }
-
-  // 3. Ako nema tokena ili nema role, redirect na login
+  // 2. Ako nema tokena, redirect na login
   if (!token) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
+  }
+
+  // 3. Auth paths uvijek pusti (ali ako je logiran, redirect na dashboard/personal-details)
+  if (AUTH_PATHS.includes(pathname)) {
+    let redirectUrl = "/select-role";
+    if (token.role === "client") {
+      redirectUrl = token.clientProfile
+        ? "/client/dashboard"
+        : "/client/personal-details";
+    } else if (token.role === "trainer") {
+      redirectUrl = token.trainerProfile
+        ? "/trainer/dashboard"
+        : "/trainer/personal-details";
+    }
+    return NextResponse.redirect(new URL(redirectUrl, request.url));
   }
 
   // 4. Provjeri treba li usera redirectati na neku onboarding/dashboard stranicu
