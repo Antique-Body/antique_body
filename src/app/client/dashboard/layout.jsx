@@ -15,13 +15,15 @@ export default function ClientDashboardLayout({ children }) {
 
   // Map pathname to tab ID
   const getActiveTabFromPath = (path) => {
-    if (path.includes("/profile")) return "profile";
-    if (path.includes("/upcoming-trainings")) return "upcomingTrainings";
+    if (path.includes("/trainwithcoach")) return "trainwithcoach";
+    if (path.includes("/overview")) return "overview";
+    if (path.includes("/upcoming-trainings")) return "upcoming-trainings";
+    if (path.includes("/trainings")) return "trainings";
+    if (path.includes("/progress")) return "progress";
     if (path.includes("/messages")) return "messages";
-    if (path.includes("/plans")) return "plans";
-    if (path.includes("/exercises")) return "exercises";
-    if (path.includes("/meals")) return "meals";
-    return "profile"; // Default tab
+    if (path.includes("/nutrition")) return "nutrition";
+    if (path.includes("/health")) return "health";
+    return "trainwithcoach"; // Default tab
   };
 
   const [activeTab, setActiveTab] = useState(getActiveTabFromPath(pathname));
@@ -52,26 +54,33 @@ export default function ClientDashboardLayout({ children }) {
   // Navigate to appropriate route when tab changes
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
-    // Navigate to corresponding route
     switch (tabId) {
-      case "profile":
-        router.push("/client/dashboard/profile");
+      case "trainwithcoach":
+        router.push("/client/dashboard/trainwithcoach");
         break;
-      case "upcomingTrainings":
+      case "overview":
+        router.push("/client/dashboard/overview");
+        break;
+      case "upcoming-trainings":
         router.push("/client/dashboard/upcoming-trainings");
+        break;
+      case "trainings":
+        router.push("/client/dashboard/trainings");
+        break;
+      case "progress":
+        router.push("/client/dashboard/progress");
         break;
       case "messages":
         router.push("/client/dashboard/messages");
         break;
-      case "plans":
-        router.push("/client/dashboard/plans");
+      case "nutrition":
+        router.push("/client/dashboard/nutrition");
         break;
-      case "exercises":
-        router.push("/client/dashboard/exercises");
+      case "health":
+        router.push("/client/dashboard/health");
         break;
-      case "meals":
-        router.push("/client/dashboard/meals");
-        break;
+      default:
+        router.push("/client/dashboard/trainwithcoach");
     }
   };
 
