@@ -31,6 +31,7 @@ function getRedirectUrl(role, token, pathname) {
         "/trainer/dashboard/newclients",
         "/trainer/edit-profile",
         "/trainer/dashboard/messages",
+        "/trainer/dashboard/themeProvider",
       ],
       fallback: "/trainer/dashboard",
     },

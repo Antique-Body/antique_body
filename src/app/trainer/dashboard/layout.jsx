@@ -23,6 +23,7 @@ export default function TrainerDashboardLayout({ children }) {
     if (path.includes("/plans")) return "plans";
     if (path.includes("/exercises")) return "exercises";
     if (path.includes("/meals")) return "meals";
+    if (path.includes("/themeProvider")) return "themeProvider";
     return "newClients"; // Default tab
   };
 
@@ -78,6 +79,9 @@ export default function TrainerDashboardLayout({ children }) {
       case "meals":
         router.push("/trainer/dashboard/meals");
         break;
+      case "themeProvider":
+        router.push("/trainer/dashboard/themeProvider");
+        break;
     }
   };
 
@@ -95,6 +99,7 @@ export default function TrainerDashboardLayout({ children }) {
     { id: "plans", label: "Plans" },
     { id: "exercises", label: "Exercises" },
     { id: "meals", label: "Meals" },
+    { id: "themeProvider", label: "Theme Provider" },
   ];
 
   return (

@@ -18,3 +18,4 @@ export { DynamicFields } from "./DynamicFields";
 export { DatePicker } from "./DatePicker";
 export { InfoBanner } from "./InfoBanner";
 export { Accordion } from "./Accordion";
+export { Text } from "./Text";
