@@ -2,6 +2,16 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 async function main() {
+  // Clean up existing data
+  console.log("Cleaning up existing data...");
+  await prisma.trainerGym.deleteMany();
+  await prisma.trainerProfile.deleteMany();
+  await prisma.clientProfile.deleteMany();
+  await prisma.user.deleteMany();
+  await prisma.gym.deleteMany();
+  await prisma.location.deleteMany();
+  console.log("Cleanup completed.");
+
   // Create locations first
   const locations = await Promise.all([
     prisma.location.create({
