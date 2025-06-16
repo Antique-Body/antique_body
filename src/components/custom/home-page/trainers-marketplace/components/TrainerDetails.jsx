@@ -112,10 +112,10 @@ const ExpertiseSection = ({ trainer }) => (
       <h3 className="text-lg font-semibold mb-3">Certifications</h3>
 
       <div className="grid grid-cols-1 gap-3">
-        {trainer.certifications ? (
+        {trainer.certifications && trainer.certifications.length > 0 ? (
           trainer.certifications.map((cert, index) => (
             <div
-              key={index}
+              key={cert.id || index}
               className="flex items-center p-3 bg-zinc-800/50 border border-zinc-700 rounded-lg"
             >
               <div className="p-2 bg-[#FF6B00]/20 rounded-full mr-3">
@@ -124,8 +124,27 @@ const ExpertiseSection = ({ trainer }) => (
                   className="h-5 w-5 text-[#FF6B00]"
                 />
               </div>
-              <div>
-                <h4 className="font-medium text-white">{cert}</h4>
+              <div className="flex-1">
+                <h4 className="font-medium text-white">{cert.name}</h4>
+                <div className="text-sm text-zinc-400">
+                  {cert.issuer} • {new Date(cert.issueDate).getFullYear()}
+                  {cert.expiryDate &&
+                    ` - ${new Date(cert.expiryDate).getFullYear()}`}
+                </div>
+                {cert.status && (
+                  <div className="mt-1">
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full ${
+                        cert.status === "active"
+                          ? "bg-green-500/20 text-green-400"
+                          : "bg-yellow-500/20 text-yellow-400"
+                      }`}
+                    >
+                      {cert.status.charAt(0).toUpperCase() +
+                        cert.status.slice(1)}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           ))
@@ -217,17 +236,21 @@ const ScheduleSection = ({ trainer }) => {
                   }`}
                 >
                   <div
-                    className={`p-2 rounded-full mr-3 ${isAvailable ? "bg-[#FF6B00]/20" : "bg-zinc-700"}`}
+                    className={`p-2 rounded-full mr-3 ${
+                      isAvailable ? "bg-[#FF6B00]/20" : "bg-zinc-700"
+                    }`}
                   >
                     <Icon
                       icon={
                         slot === "Morning"
                           ? "mdi:weather-sunny"
                           : slot === "Afternoon"
-                            ? "mdi:weather-partly-cloudy"
-                            : "mdi:weather-night"
+                          ? "mdi:weather-partly-cloudy"
+                          : "mdi:weather-night"
                       }
-                      className={`h-5 w-5 ${isAvailable ? "text-[#FF6B00]" : "text-zinc-500"}`}
+                      className={`h-5 w-5 ${
+                        isAvailable ? "text-[#FF6B00]" : "text-zinc-500"
+                      }`}
                     />
                   </div>
                   <div>
@@ -242,8 +265,8 @@ const ScheduleSection = ({ trainer }) => {
                       {slot === "Morning"
                         ? "6:00 AM - 12:00 PM"
                         : slot === "Afternoon"
-                          ? "12:00 PM - 5:00 PM"
-                          : "5:00 PM - 10:00 PM"}
+                        ? "12:00 PM - 5:00 PM"
+                        : "5:00 PM - 10:00 PM"}
                     </p>
                   </div>
                   <div className="ml-auto">

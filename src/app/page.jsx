@@ -106,70 +106,6 @@ const updatedFeatures = [
   },
 ];
 
-// Sample trainers data
-const sampleTrainers = [
-  {
-    id: 1,
-    name: "Alexander Petrakis",
-    specialization: "Strength Training",
-    location: "Athens, Greece",
-    rating: 4.9,
-    reviewCount: 127,
-    clientCount: 15,
-    bio: "Former Olympic athlete specializing in strength and conditioning with a focus on ancient Greek training methods.",
-    image:
-      "https://images.pexels.com/photos/30672394/pexels-photo-30672394/free-photo-of-man-exercising-with-dumbbells-in-gym.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-  },
-  {
-    id: 2,
-    name: "Elena Dimitriou",
-    specialization: "HIIT & Endurance",
-    location: "Sparta, Greece",
-    rating: 4.8,
-    reviewCount: 98,
-    clientCount: 12,
-    bio: "Endurance specialist with a background in competitive distance running. Combines modern HIIT with traditional techniques.",
-    image:
-      "https://images.pexels.com/photos/5669179/pexels-photo-5669179.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-  },
-  {
-    id: 3,
-    name: "Markos Constantinou",
-    specialization: "Wrestling & MMA",
-    location: "Thessaloniki, Greece",
-    rating: 5.0,
-    reviewCount: 87,
-    clientCount: 8,
-    bio: "MMA champion with extensive background in traditional Greek wrestling (Pale). Focuses on functional strength and combat technique.",
-    image:
-      "https://images.pexels.com/photos/13318591/pexels-photo-13318591.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-  },
-  {
-    id: 4,
-    name: "Sophia Karagianni",
-    specialization: "Flexibility & Recovery",
-    location: "Crete, Greece",
-    rating: 4.7,
-    reviewCount: 56,
-    clientCount: 10,
-    bio: "Yoga instructor who combines modern flexibility training with ancient Greek recovery techniques for optimal performance.",
-    image:
-      "https://images.pexels.com/photos/13197535/pexels-photo-13197535.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-  },
-  {
-    id: 5,
-    name: "Nikos Stamatis",
-    specialization: "Throwing Sports",
-    location: "Olympia, Greece",
-    rating: 4.9,
-    reviewCount: 72,
-    clientCount: 6,
-    bio: "Former javelin champion specializing in proper technique for all throwing sports with strong emphasis on injury prevention.",
-    image:
-      "https://images.pexels.com/photos/3912944/pexels-photo-3912944.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-  },
-];
-
 export default function Home() {
   const featuresRef = useRef(null);
   const benefitsRef = useRef(null);
@@ -445,7 +381,7 @@ export default function Home() {
           className="relative py-16 md:py-32 overflow-hidden"
         >
           <div className="container mx-auto px-4">
-            <TrainersSection trainers={sampleTrainers} />
+            <TrainersSection />
           </div>
         </section>
 
