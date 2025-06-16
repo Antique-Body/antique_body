@@ -67,9 +67,9 @@ export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
       <div className="mb-4 flex flex-col items-start gap-4 md:flex-row">
         {/* Trainer photo */}
         <div className="relative flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#FF6B00] to-[#FF9A00] text-3xl font-semibold text-white md:h-32 md:w-32">
-          {trainer?.image ? (
+          {trainer?.profileImage ? (
             <Image
-              src={trainer.image}
+              src={trainer.profileImage}
               alt={trainer.name}
               width={128}
               height={128}
