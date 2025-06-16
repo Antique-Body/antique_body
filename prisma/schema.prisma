@@ -151,7 +151,8 @@ model TrainerProfile {
   gender            String?
   trainingSince     Int?     
   profileImage      String?  
-  description   String?  @db.Text 
+  description       String?  @db.Text 
+  paidAds           DateTime? // Date until which the trainer has paid advertisement
   specialties       TrainerSpecialty[]
   languages         TrainerLanguage[]
   trainingEnvironments TrainerEnvironment[]

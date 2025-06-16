@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-const PUBLIC_PATHS = ["/", "/auth/login", "/auth/register"];
+const PUBLIC_PATHS = [
+  "/",
+  "/auth/login",
+  "/auth/register",
+  "/trainers-marketplace",
+  "/trainers-marketplace/:path*",
+  "/contact",
+];
 const AUTH_PATHS = ["/auth/reset-password"];
 
 function isPageNavigation(request) {

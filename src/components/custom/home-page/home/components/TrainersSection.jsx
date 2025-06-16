@@ -2,14 +2,52 @@ import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { Button } from "@/components/common/Button";
 
-export const TrainersSection = ({ trainers }) => {
-  // Limit to only 5 trainers
-  const limitedTrainers = trainers.slice(0, 5);
+export const TrainersSection = () => {
+  const [trainers, setTrainers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeTrainer, setActiveTrainer] = useState(null);
+
+  useEffect(() => {
+    const fetchTrainers = async () => {
+      try {
+        const response = await fetch("/api/users/trainers");
+        const data = await response.json();
+        setTrainers(data.trainers);
+      } catch (error) {
+        console.error("Error fetching trainers:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrainers();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="w-full py-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 md:gap-6">
+          {[...Array(5)].map((_, index) => (
+            <div
+              key={index}
+              className="h-full bg-gradient-to-b from-[#121212] to-black/90 rounded-xl border border-gray-800 animate-pulse"
+            >
+              <div className="h-[220px] bg-gray-800 rounded-t-xl"></div>
+              <div className="p-4 space-y-4">
+                <div className="h-4 bg-gray-800 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-800 rounded w-1/2"></div>
+                <div className="h-10 bg-gray-800 rounded"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full py-10">
@@ -53,7 +91,7 @@ export const TrainersSection = ({ trainers }) => {
 
       {/* Responsive Trainer Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 md:gap-6">
-        {limitedTrainers.map((trainer, index) => (
+        {trainers.map((trainer, index) => (
           <motion.div
             key={trainer.id}
             initial={{ opacity: 0, y: 20 }}
@@ -80,10 +118,10 @@ export const TrainersSection = ({ trainers }) => {
             >
               {/* Trainer image with overlay */}
               <div className="h-[220px] relative overflow-hidden">
-                {trainer.image ? (
+                {trainer.profileImage ? (
                   <Image
-                    src={trainer.image}
-                    alt={trainer.name}
+                    src={trainer.profileImage}
+                    alt={`${trainer.firstName} ${trainer.lastName}`}
                     width={320}
                     height={220}
                     className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
@@ -101,23 +139,25 @@ export const TrainersSection = ({ trainers }) => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
 
                 {/* Specialization tag */}
-                <div className="absolute top-3 right-3 bg-[#FF6B00]/10 backdrop-blur-sm px-2 py-1 rounded-full border border-[#FF6B00]/20">
-                  <span className="text-xs font-medium text-[#FF6B00]">
-                    {trainer.specialization}
-                  </span>
-                </div>
+                {trainer.specialties && trainer.specialties.length > 0 && (
+                  <div className="absolute top-3 right-3 bg-[#FF6B00]/10 backdrop-blur-sm px-2 py-1 rounded-full border border-[#FF6B00]/20">
+                    <span className="text-xs font-medium text-[#FF6B00]">
+                      {trainer.specialties[0].name}
+                    </span>
+                  </div>
+                )}
 
                 {/* Trainer info overlay */}
                 <div className="absolute bottom-0 left-0 right-0 p-4">
                   <h3 className="text-xl font-bold text-white mb-1 line-clamp-1">
-                    {trainer.name}
+                    {trainer.firstName} {trainer.lastName}
                   </h3>
                   <p className="text-sm text-gray-400 flex items-center">
                     <Icon
                       icon="mdi:map-marker"
                       className="text-[#FF6B00] mr-1"
                     />
-                    {trainer.location}
+                    {trainer.location?.city}, {trainer.location?.country}
                   </p>
                 </div>
               </div>
@@ -127,43 +167,48 @@ export const TrainersSection = ({ trainers }) => {
                 {/* Rating and review count */}
                 <div className="flex justify-between items-center mb-4">
                   <div className="flex items-center">
-                    <div className="flex mr-1">
-                      {[...Array(Math.floor(trainer.rating))].map((_, i) => (
-                        <Icon
-                          key={i}
-                          icon="mdi:star"
-                          className="text-[#FF6B00] text-sm"
-                        />
-                      ))}
-                      {trainer.rating % 1 !== 0 && (
-                        <Icon
-                          icon="mdi:star-half"
-                          className="text-[#FF6B00] text-sm"
-                        />
-                      )}
-                    </div>
-                    <span className="text-white text-sm font-semibold">
-                      {trainer.rating}
-                    </span>
-                    <span className="text-gray-400 ml-1 text-xs">
-                      ({trainer.reviewCount})
-                    </span>
+                    {trainer.trainerInfo?.rating && (
+                      <>
+                        <div className="flex mr-1">
+                          {[
+                            ...Array(Math.floor(trainer.trainerInfo.rating)),
+                          ].map((_, i) => (
+                            <Icon
+                              key={i}
+                              icon="mdi:star"
+                              className="text-[#FF6B00] text-sm"
+                            />
+                          ))}
+                          {trainer.trainerInfo.rating % 1 !== 0 && (
+                            <Icon
+                              icon="mdi:star-half"
+                              className="text-[#FF6B00] text-sm"
+                            />
+                          )}
+                        </div>
+                        <span className="text-white text-sm font-semibold">
+                          {trainer.trainerInfo.rating.toFixed(1)}
+                        </span>
+                      </>
+                    )}
                   </div>
 
-                  <div className="bg-[#FF6B00]/10 px-2 py-1 rounded-full text-xs border border-[#FF6B00]/10">
-                    <span className="text-[#FF6B00]">
-                      {trainer.clientCount} clients
-                    </span>
-                  </div>
+                  {trainer.trainerInfo?.totalSessions && (
+                    <div className="bg-[#FF6B00]/10 px-2 py-1 rounded-full text-xs border border-[#FF6B00]/10">
+                      <span className="text-[#FF6B00]">
+                        {trainer.trainerInfo.totalSessions} sessions
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Bio with line clamp */}
                 <p className="text-gray-400 text-sm mb-4 line-clamp-2">
-                  {trainer.bio}
+                  {trainer.description || "No description available"}
                 </p>
 
                 {/* CTA button */}
-                <Link href="/trainers-marketplace">
+                <Link href={`/trainers-marketplace/${trainer.id}`}>
                   <Button
                     variant="outline"
                     size="small"

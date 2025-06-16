@@ -11,9 +11,10 @@ import {
   SearchFilters,
   TrainerProfileModal,
 } from "@/components/custom/home-page/trainers-marketplace/components";
-import { extendedTrainers } from "@/components/custom/home-page/trainers-marketplace/data/trainersData";
+
 export default function TrainersMarketplace() {
-  const [filteredTrainers, setFilteredTrainers] = useState(extendedTrainers);
+  const [trainers, setTrainers] = useState([]);
+  const [filteredTrainers, setFilteredTrainers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     location: [],
@@ -25,6 +26,7 @@ export default function TrainersMarketplace() {
   const [selectedTrainer, setSelectedTrainer] = useState(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -37,17 +39,67 @@ export default function TrainersMarketplace() {
     indexOfLastTrainer
   );
 
-  // Simulate loading state
+  // Fetch trainers from API
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
+    const fetchTrainers = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch("/api/users/trainers");
+        if (!response.ok) {
+          throw new Error("Failed to fetch trainers");
+        }
+        const data = await response.json();
+        const formattedTrainers = data.trainers.map((trainer) => ({
+          id: trainer.id,
+          name: `${trainer.firstName} ${trainer.lastName}`,
+          firstName: trainer.firstName,
+          lastName: trainer.lastName,
+          bio: trainer.description || "",
+          location: trainer.location
+            ? `${trainer.location.city}, ${trainer.location.country}`
+            : "",
+          rating: trainer.trainerInfo?.rating || 0,
+          price: trainer.pricePerSession || 0,
+          currency: trainer.currency || "USD",
+          experience: trainer.trainingSince || 0,
+          image: trainer.profileImage || "/images/default-trainer.jpg",
+          specialties: trainer.specialties?.map((s) => s.name) || [],
+          availability:
+            trainer.availabilities?.map((a) => `${a.weekday} ${a.timeSlot}`) ||
+            [],
+          tags: trainer.specialties?.map((s) => s.name) || [],
+          contactEmail: trainer.contactEmail,
+          contactPhone: trainer.contactPhone,
+          sessionDuration: trainer.sessionDuration,
+          cancellationPolicy: trainer.cancellationPolicy,
+          certifications:
+            trainer.certifications?.map((cert) => ({
+              id: cert.id,
+              name: cert.name,
+              issuer: cert.issuer,
+              expiryDate: cert.expiryDate,
+              status: cert.status,
+              issueDate: cert.createdAt,
+            })) || [],
+          reviewCount: trainer.trainerInfo?.reviewCount || 0,
+          isVerified: trainer.trainerInfo?.isVerified || false,
+        }));
+        setTrainers(formattedTrainers);
+        setFilteredTrainers(formattedTrainers);
+      } catch (err) {
+        console.error("Error fetching trainers:", err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTrainers();
   }, []);
 
   // Handle search and filtering
   useEffect(() => {
-    let results = [...extendedTrainers];
+    let results = [...trainers];
 
     // Search filter
     if (searchQuery) {
@@ -56,8 +108,10 @@ export default function TrainersMarketplace() {
         (trainer) =>
           trainer.name.toLowerCase().includes(query) ||
           trainer.bio.toLowerCase().includes(query) ||
-          (trainer.tags &&
-            trainer.tags.some((tag) => tag.toLowerCase().includes(query)))
+          (trainer.specialties &&
+            trainer.specialties.some((specialty) =>
+              specialty.toLowerCase().includes(query)
+            ))
       );
     }
 
@@ -92,13 +146,14 @@ export default function TrainersMarketplace() {
     if (filters.tags.length > 0) {
       results = results.filter(
         (trainer) =>
-          trainer.tags && trainer.tags.some((tag) => filters.tags.includes(tag))
+          trainer.specialties &&
+          trainer.specialties.some((tag) => filters.tags.includes(tag))
       );
     }
 
     setFilteredTrainers(results);
     setCurrentPage(1); // Reset to first page when filters change
-  }, [searchQuery, filters]);
+  }, [searchQuery, filters, trainers]);
 
   const handleTrainerClick = (trainer) => {
     setSelectedTrainer(trainer);
@@ -118,7 +173,6 @@ export default function TrainersMarketplace() {
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
-    // Scroll to top smoothly when changing pages
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -154,6 +208,27 @@ export default function TrainersMarketplace() {
     ];
   };
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <Icon
+            icon="mdi:alert-circle"
+            className="w-16 h-16 text-red-500 mx-auto mb-4"
+          />
+          <h2 className="text-2xl font-bold mb-2">Error Loading Trainers</h2>
+          <p className="text-gray-400 mb-4">{error}</p>
+          <Button
+            variant="orangeFilled"
+            onClick={() => window.location.reload()}
+          >
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden bg-black text-white">
       {/* Background effects */}
@@ -172,7 +247,7 @@ export default function TrainersMarketplace() {
         <Navigation />
 
         <main className="container mx-auto px-4 py-16 mt-24">
-          {/* Page Title with search stats - Made more flexible for translations */}
+          {/* Page Title with search stats */}
           <div className="mb-12">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
               <div className="max-w-xl">
@@ -202,7 +277,7 @@ export default function TrainersMarketplace() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Filters sidebar - Increased width for translation flexibility */}
+            {/* Filters sidebar */}
             <div className="lg:col-span-3 xl:col-span-3">
               <div className="sticky top-24">
                 <SearchFilters
@@ -211,12 +286,12 @@ export default function TrainersMarketplace() {
                   filters={filters}
                   setFilters={setFilters}
                   onClearFilters={handleClearFilters}
-                  trainers={extendedTrainers}
+                  trainers={trainers}
                 />
               </div>
             </div>
 
-            {/* Trainers section - Adapted to fill remaining space */}
+            {/* Trainers section */}
             <div className="lg:col-span-9 xl:col-span-9">
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center min-h-[500px] bg-zinc-900/30 backdrop-blur-sm rounded-xl border border-zinc-800">
@@ -232,11 +307,10 @@ export default function TrainersMarketplace() {
                         onTrainerClick={handleTrainerClick}
                       />
 
-                      {/* Pagination - Made more flexible for translations */}
+                      {/* Pagination */}
                       {totalPages > 1 && (
                         <div className="mt-12 mb-8 flex justify-center">
                           <nav className="flex flex-wrap items-center justify-center gap-2">
-                            {/* Previous page button with text label for better accessibility */}
                             <Button
                               onClick={() =>
                                 handlePageChange(Math.max(1, currentPage - 1))
@@ -261,7 +335,6 @@ export default function TrainersMarketplace() {
                               <span className="text-sm">Previous</span>
                             </Button>
 
-                            {/* Page numbers - in a scrollable container on small screens */}
                             <div className="flex items-center overflow-x-auto max-w-[250px] sm:max-w-none hide-scrollbar py-1">
                               {generatePaginationNumbers().map(
                                 (pageNum, index) => (
@@ -294,7 +367,6 @@ export default function TrainersMarketplace() {
                               )}
                             </div>
 
-                            {/* Next page button with text label for better accessibility */}
                             <Button
                               onClick={() =>
                                 handlePageChange(
@@ -326,7 +398,7 @@ export default function TrainersMarketplace() {
                         </div>
                       )}
 
-                      {/* Page indication for better user orientation */}
+                      {/* Page indication */}
                       {totalPages > 1 && (
                         <div className="text-center text-zinc-500 text-sm mb-4">
                           Page {currentPage} of {totalPages}

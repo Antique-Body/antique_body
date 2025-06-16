@@ -34,6 +34,8 @@ export const TrainerProfileModal = ({ trainer, isOpen, onClose }) => {
     }
   };
 
+  const imageSrc = trainer.imag;
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -66,10 +68,11 @@ export const TrainerProfileModal = ({ trainer, isOpen, onClose }) => {
               {/* Banner image */}
               <div className="h-48 relative">
                 <Image
-                  src={trainer.image}
+                  src={imageSrc}
                   alt={trainer.name}
                   fill
                   className="object-cover"
+                  priority
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black"></div>
               </div>
@@ -80,11 +83,12 @@ export const TrainerProfileModal = ({ trainer, isOpen, onClose }) => {
                 <div className="relative">
                   <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl border-4 border-zinc-900 overflow-hidden bg-zinc-800">
                     <Image
-                      src={trainer.image}
+                      src={imageSrc}
                       alt={trainer.name}
                       width={128}
                       height={128}
                       className="object-cover w-full h-full"
+                      priority
                     />
                   </div>
 
