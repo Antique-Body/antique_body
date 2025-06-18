@@ -70,7 +70,7 @@ export const FilterChips = ({
   };
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1.5 sm:gap-2">
       <AnimatePresence>
         {searchQuery && (
           <motion.div
@@ -79,22 +79,22 @@ export const FilterChips = ({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="inline-flex items-center px-2.5 py-1 bg-[#FF6B00]/20 border border-[#FF6B00]/30 rounded-full"
+            className="inline-flex items-center px-2 sm:px-2.5 py-0.5 sm:py-1 bg-[#FF6B00]/20 border border-[#FF6B00]/30 rounded-full"
           >
             <Icon
               icon="mdi:magnify"
-              className="w-3.5 h-3.5 text-[#FF6B00] mr-1"
+              className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#FF6B00] mr-1"
             />
-            <span className="text-xs text-white truncate max-w-[150px]">
+            <span className="text-[10px] sm:text-xs text-white truncate max-w-[100px] sm:max-w-[150px]">
               {searchQuery}
             </span>
             <Button
               variant="ghostOrange"
               size="small"
               onClick={() => setSearchQuery("")}
-              className="ml-1.5 p-0"
+              className="ml-1 p-0"
             >
-              <Icon icon="mdi:close" className="w-3.5 h-3.5" />
+              <Icon icon="mdi:close" className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             </Button>
           </motion.div>
         )}
@@ -106,22 +106,22 @@ export const FilterChips = ({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="inline-flex items-center px-2.5 py-1 bg-zinc-800 border border-zinc-700 rounded-full"
+            className="inline-flex items-center px-2 sm:px-2.5 py-0.5 sm:py-1 bg-zinc-800 border border-zinc-700 rounded-full"
           >
             <Icon
               icon="mdi:map-marker"
-              className="w-3.5 h-3.5 text-[#FF6B00] mr-1"
+              className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#FF6B00] mr-0.5 sm:mr-1"
             />
-            <span className="text-xs text-zinc-300 truncate max-w-[120px]">
+            <span className="text-[10px] sm:text-xs text-zinc-300 truncate max-w-[80px] sm:max-w-[120px]">
               {location}
             </span>
             <Button
               variant="ghost"
               size="small"
               onClick={() => removeLocation(location)}
-              className="ml-1.5 p-0"
+              className="ml-1 p-0"
             >
-              <Icon icon="mdi:close" className="w-3.5 h-3.5" />
+              <Icon icon="mdi:close" className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             </Button>
           </motion.div>
         ))}
@@ -133,20 +133,20 @@ export const FilterChips = ({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="inline-flex items-center px-2.5 py-1 bg-zinc-800 border border-zinc-700 rounded-full"
+            className="inline-flex items-center px-2 sm:px-2.5 py-0.5 sm:py-1 bg-zinc-800 border border-zinc-700 rounded-full"
           >
             <Icon
               icon="mdi:calendar"
-              className="w-3.5 h-3.5 text-[#FF6B00] mr-1"
+              className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#FF6B00] mr-0.5 sm:mr-1"
             />
-            <span className="text-xs text-zinc-300">{day}</span>
+            <span className="text-[10px] sm:text-xs text-zinc-300">{day}</span>
             <Button
               variant="ghost"
               size="small"
               onClick={() => removeAvailability(day)}
-              className="ml-1.5 p-0"
+              className="ml-1 p-0"
             >
-              <Icon icon="mdi:close" className="w-3.5 h-3.5" />
+              <Icon icon="mdi:close" className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             </Button>
           </motion.div>
         ))}
@@ -158,22 +158,22 @@ export const FilterChips = ({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="inline-flex items-center px-2.5 py-1 bg-zinc-800 border border-zinc-700 rounded-full"
+            className="inline-flex items-center px-2 sm:px-2.5 py-0.5 sm:py-1 bg-zinc-800 border border-zinc-700 rounded-full"
           >
             <Icon
               icon="mdi:currency-usd"
-              className="w-3.5 h-3.5 text-[#FF6B00] mr-1"
+              className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#FF6B00] mr-0.5 sm:mr-1"
             />
-            <span className="text-xs text-zinc-300">
+            <span className="text-[10px] sm:text-xs text-zinc-300">
               ${filters.price.min} - ${filters.price.max}
             </span>
             <Button
               variant="ghost"
               size="small"
               onClick={resetPrice}
-              className="ml-1.5 p-0"
+              className="ml-1 p-0"
             >
-              <Icon icon="mdi:close" className="w-3.5 h-3.5" />
+              <Icon icon="mdi:close" className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             </Button>
           </motion.div>
         )}
@@ -185,19 +185,22 @@ export const FilterChips = ({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="inline-flex items-center px-2.5 py-1 bg-zinc-800 border border-zinc-700 rounded-full"
+            className="inline-flex items-center px-2 sm:px-2.5 py-0.5 sm:py-1 bg-zinc-800 border border-zinc-700 rounded-full"
           >
-            <Icon icon="mdi:star" className="w-3.5 h-3.5 text-[#FF6B00] mr-1" />
-            <span className="text-xs text-zinc-300">
+            <Icon
+              icon="mdi:star"
+              className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#FF6B00] mr-0.5 sm:mr-1"
+            />
+            <span className="text-[10px] sm:text-xs text-zinc-300">
               {filters.rating}+ Stars
             </span>
             <Button
               variant="ghost"
               size="small"
               onClick={resetRating}
-              className="ml-1.5 p-0"
+              className="ml-1 p-0"
             >
-              <Icon icon="mdi:close" className="w-3.5 h-3.5" />
+              <Icon icon="mdi:close" className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             </Button>
           </motion.div>
         )}
@@ -209,19 +212,22 @@ export const FilterChips = ({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="inline-flex items-center px-2.5 py-1 bg-zinc-800 border border-zinc-700 rounded-full"
+            className="inline-flex items-center px-2 sm:px-2.5 py-0.5 sm:py-1 bg-zinc-800 border border-zinc-700 rounded-full"
           >
-            <Icon icon="mdi:tag" className="w-3.5 h-3.5 text-[#FF6B00] mr-1" />
-            <span className="text-xs text-zinc-300 truncate max-w-[100px]">
+            <Icon
+              icon="mdi:tag"
+              className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#FF6B00] mr-0.5 sm:mr-1"
+            />
+            <span className="text-[10px] sm:text-xs text-zinc-300 truncate max-w-[70px] sm:max-w-[100px]">
               {tag}
             </span>
             <Button
               variant="ghost"
               size="small"
               onClick={() => removeTag(tag)}
-              className="ml-1.5 p-0"
+              className="ml-1 p-0"
             >
-              <Icon icon="mdi:close" className="w-3.5 h-3.5" />
+              <Icon icon="mdi:close" className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             </Button>
           </motion.div>
         ))}

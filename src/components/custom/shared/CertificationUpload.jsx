@@ -3,7 +3,7 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useState, useEffect, useCallback } from "react";
 
-import { FormField, Button, InfoBanner } from "@/components/common";
+import { FormField, Button } from "@/components/common";
 import { useCertificateFiles } from "@/hooks";
 
 // Status icons mapping
@@ -45,9 +45,6 @@ export const CertificationUpload = ({
   removeCertField,
   handleRemoveDocument: _externalRemoveDocument,
   onDeleteCert: _onDeleteCert,
-  onResetCertifications,
-  initialCertifications,
-  isRegistration = false,
 }) => {
   const {
     previews,
@@ -153,76 +150,8 @@ export const CertificationUpload = ({
     return "mdi:file-document";
   }, []);
 
-  // Helper za duboko poređenje objekata/arrayeva (ignoriše redoslijed ključeva)
-  const deepEqual = (a, b) => {
-    if (a === b) return true;
-    if (typeof a !== typeof b) return false;
-    if (typeof a !== "object" || a === null || b === null) return false;
-    if (Array.isArray(a) !== Array.isArray(b)) return false;
-    if (Array.isArray(a)) {
-      if (a.length !== b.length) return false;
-      for (let i = 0; i < a.length; i++) {
-        if (!deepEqual(a[i], b[i])) return false;
-      }
-      return true;
-    }
-    const aKeys = Object.keys(a);
-    const bKeys = Object.keys(b);
-    if (aKeys.length !== bKeys.length) return false;
-    for (const key of aKeys) {
-      if (!bKeys.includes(key)) return false;
-      if (!deepEqual(a[key], b[key])) return false;
-    }
-    return true;
-  };
-
-  // Helper to izbaciti expiryDate i files iz svakog cert objekta
-  const stripExpiryDateAndFiles = (arr) =>
-    Array.isArray(arr)
-      ? arr.map((obj) => {
-          const { expiryDate: _unused, files: _unused2, ...rest } = obj || {};
-          return rest;
-        })
-      : [];
-
-  const showResetCertification =
-    initialCertifications &&
-    (() => {
-      const initialNoExpiryFiles = stripExpiryDateAndFiles(
-        initialCertifications
-      );
-      const currentNoExpiryFiles = stripExpiryDateAndFiles(certFields);
-      return !deepEqual(initialNoExpiryFiles, currentNoExpiryFiles);
-    })();
-
-  console.log("initialCertifications", initialCertifications);
-  console.log("certFields", certFields);
-  console.log(
-    "initialCertifications (bez expiryDate, files)",
-    stripExpiryDateAndFiles(initialCertifications)
-  );
-  console.log(
-    "certFields (bez expiryDate, files)",
-    stripExpiryDateAndFiles(certFields)
-  );
-  console.log("showResetCertification", showResetCertification);
-
-  // Function to get file name from UR
   return (
     <div className="space-y-6">
-      {/* Reset Certification Banner */}
-      {showResetCertification && !isRegistration && (
-        <InfoBanner
-          icon="mdi:alert-circle"
-          title="You have unsaved certification changes"
-          subtitle="You can reset to the original certifications if needed"
-          variant="info"
-          buttonText="Reset Changes"
-          onButtonClick={onResetCertifications}
-          className="relative mb-4"
-        />
-      )}
-
       {/* Existing certifications (table/list view) */}
       {existingCerts.length > 0 && (
         <div>

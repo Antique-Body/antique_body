@@ -1,5 +1,5 @@
-import Image from "next/image";
 import { Icon } from "@iconify/react";
+import Image from "next/image";
 
 import { Button } from "@/components/common/Button";
 
