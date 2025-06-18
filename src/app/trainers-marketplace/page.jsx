@@ -11,6 +11,7 @@ import {
   SearchFilters,
   TrainerProfileModal,
 } from "@/components/custom/home-page/trainers-marketplace/components";
+import { mapSpecialtyToLabel } from "@/utils/specialtyMapper";
 
 export default function TrainersMarketplace() {
   const [trainers, setTrainers] = useState([]);
@@ -27,10 +28,11 @@ export default function TrainersMarketplace() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const trainersPerPage = 9;
+  const trainersPerPage = 8; // Changed from 9 to 8 for better grid alignment
   const totalPages = Math.ceil(filteredTrainers.length / trainersPerPage);
   const indexOfLastTrainer = currentPage * trainersPerPage;
   const indexOfFirstTrainer = indexOfLastTrainer - trainersPerPage;
@@ -49,41 +51,50 @@ export default function TrainersMarketplace() {
           throw new Error("Failed to fetch trainers");
         }
         const data = await response.json();
-        const formattedTrainers = data.trainers.map((trainer) => ({
-          id: trainer.id,
-          name: `${trainer.firstName} ${trainer.lastName}`,
-          firstName: trainer.firstName,
-          lastName: trainer.lastName,
-          bio: trainer.description || "",
-          location: trainer.location
-            ? `${trainer.location.city}, ${trainer.location.country}`
-            : "",
-          rating: trainer.trainerInfo?.rating || 0,
-          price: trainer.pricePerSession || 0,
-          currency: trainer.currency || "USD",
-          experience: trainer.trainingSince || 0,
-          image: trainer.profileImage || "/images/default-trainer.jpg",
-          specialties: trainer.specialties?.map((s) => s.name) || [],
-          availability:
-            trainer.availabilities?.map((a) => `${a.weekday} ${a.timeSlot}`) ||
-            [],
-          tags: trainer.specialties?.map((s) => s.name) || [],
-          contactEmail: trainer.contactEmail,
-          contactPhone: trainer.contactPhone,
-          sessionDuration: trainer.sessionDuration,
-          cancellationPolicy: trainer.cancellationPolicy,
-          certifications:
-            trainer.certifications?.map((cert) => ({
-              id: cert.id,
-              name: cert.name,
-              issuer: cert.issuer,
-              expiryDate: cert.expiryDate,
-              status: cert.status,
-              issueDate: cert.createdAt,
-            })) || [],
-          reviewCount: trainer.trainerInfo?.reviewCount || 0,
-          isVerified: trainer.trainerInfo?.isVerified || false,
-        }));
+        const formattedTrainers = data.trainers.map((trainer) => {
+          // Map specialties to their proper labels
+          const formattedSpecialties =
+            trainer.specialties?.map((s) => mapSpecialtyToLabel(s.name)) || [];
+
+          return {
+            id: trainer.id,
+            name: `${trainer.firstName} ${trainer.lastName}`,
+            firstName: trainer.firstName,
+            lastName: trainer.lastName,
+            bio: trainer.description || "",
+            location: trainer.location
+              ? `${trainer.location.city}, ${trainer.location.country}`
+              : "",
+            rating: trainer.trainerInfo?.rating || 0,
+            price: trainer.pricePerSession || 0,
+            currency: trainer.currency || "USD",
+            experience: trainer.trainingSince || 0,
+            image:
+              trainer.profileImage ||
+              "https://st3.depositphotos.com/9998432/19552/v/450/depositphotos_195522150-stock-illustration-default-placeholder-fitness-trainer-in.jpg",
+            specialties: formattedSpecialties,
+            availability:
+              trainer.availabilities?.map(
+                (a) => `${a.weekday} ${a.timeSlot}`
+              ) || [],
+            tags: formattedSpecialties, // Use the same formatted specialties for tags
+            contactEmail: trainer.contactEmail,
+            contactPhone: trainer.contactPhone,
+            sessionDuration: trainer.sessionDuration,
+            cancellationPolicy: trainer.cancellationPolicy,
+            certifications:
+              trainer.certifications?.map((cert) => ({
+                id: cert.id,
+                name: cert.name,
+                issuer: cert.issuer,
+                expiryDate: cert.expiryDate,
+                status: cert.status,
+                issueDate: cert.createdAt,
+              })) || [],
+            reviewCount: trainer.trainerInfo?.reviewCount || 0,
+            isVerified: trainer.trainerInfo?.isVerified || false,
+          };
+        });
         setTrainers(formattedTrainers);
         setFilteredTrainers(formattedTrainers);
       } catch (err) {
@@ -246,12 +257,12 @@ export default function TrainersMarketplace() {
       <div className="relative z-10">
         <Navigation />
 
-        <main className="container mx-auto px-4 py-16 mt-24">
+        <main className="container mx-auto px-4 py-8 sm:py-16 mt-16 sm:mt-24">
           {/* Page Title with search stats */}
-          <div className="mb-12">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="mb-8 sm:mb-12">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sm:gap-6">
               <div className="max-w-xl">
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] bg-clip-text text-transparent mb-4">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] bg-clip-text text-transparent mb-2 sm:mb-4">
                   Find Your Perfect Trainer
                 </h1>
                 <p className="text-zinc-400 text-sm sm:text-base leading-relaxed">
@@ -260,10 +271,10 @@ export default function TrainersMarketplace() {
                 </p>
               </div>
               {!isLoading && (
-                <div className="inline-flex items-center px-5 py-3 bg-zinc-900/80 backdrop-blur-sm rounded-xl border border-zinc-800 whitespace-nowrap">
+                <div className="inline-flex items-center px-4 py-2.5 bg-zinc-900/80 backdrop-blur-sm rounded-xl border border-zinc-800 whitespace-nowrap">
                   <Icon
                     icon="mdi:account-group"
-                    className="text-[#FF6B00] text-xl min-w-[20px] mr-3"
+                    className="text-[#FF6B00] text-xl min-w-[20px] mr-2 sm:mr-3"
                   />
                   <span className="text-zinc-300">
                     <span className="font-semibold text-white">
@@ -276,9 +287,27 @@ export default function TrainersMarketplace() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Filters sidebar */}
-            <div className="lg:col-span-3 xl:col-span-3">
+          {/* Mobile filter toggle button */}
+          <div className="lg:hidden mb-4">
+            <Button
+              variant="secondary"
+              size="medium"
+              onClick={() => setIsFilterSidebarOpen(true)}
+              className="w-full flex items-center justify-center gap-2 bg-zinc-900 border border-zinc-800 py-3 text-base"
+            >
+              <Icon icon="mdi:filter-variant" className="w-5 h-5" />
+              <span className="font-medium">Filters</span>
+              {Object.values(filters).flat().filter(Boolean).length > 0 && (
+                <span className="bg-[#FF6B00] text-white text-xs w-6 h-6 rounded-full flex items-center justify-center ml-1">
+                  {Object.values(filters).flat().filter(Boolean).length}
+                </span>
+              )}
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+            {/* Filters sidebar for desktop */}
+            <div className="hidden lg:block lg:col-span-3 xl:col-span-3">
               <div className="sticky top-24">
                 <SearchFilters
                   searchQuery={searchQuery}
@@ -291,11 +320,57 @@ export default function TrainersMarketplace() {
               </div>
             </div>
 
+            {/* Mobile filter sidebar */}
+            <div
+              className={`fixed inset-0 z-50 lg:hidden transition-transform duration-300 ${
+                isFilterSidebarOpen ? "translate-x-0" : "-translate-x-full"
+              }`}
+            >
+              <div
+                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                onClick={() => setIsFilterSidebarOpen(false)}
+              ></div>
+              <div className="absolute top-0 left-0 h-full w-[85%] max-w-sm bg-zinc-900 border-r border-zinc-800 overflow-y-auto">
+                <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Filters</h3>
+                  <Button
+                    variant="ghost"
+                    size="small"
+                    onClick={() => setIsFilterSidebarOpen(false)}
+                    className="p-1"
+                  >
+                    <Icon icon="mdi:close" className="w-6 h-6" />
+                  </Button>
+                </div>
+                <div className="p-4">
+                  <SearchFilters
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
+                    filters={filters}
+                    setFilters={setFilters}
+                    onClearFilters={handleClearFilters}
+                    trainers={trainers}
+                    isMobile={true}
+                  />
+                </div>
+                <div className="p-4 border-t border-zinc-800">
+                  <Button
+                    variant="orangeFilled"
+                    size="medium"
+                    onClick={() => setIsFilterSidebarOpen(false)}
+                    className="w-full"
+                  >
+                    Apply Filters ({filteredTrainers.length} results)
+                  </Button>
+                </div>
+              </div>
+            </div>
+
             {/* Trainers section */}
             <div className="lg:col-span-9 xl:col-span-9">
               {isLoading ? (
-                <div className="flex flex-col items-center justify-center min-h-[500px] bg-zinc-900/30 backdrop-blur-sm rounded-xl border border-zinc-800">
-                  <div className="w-16 h-16 border-t-4 border-[#FF6B00] border-solid rounded-full animate-spin mb-4"></div>
+                <div className="flex flex-col items-center justify-center min-h-[400px] sm:min-h-[500px] bg-zinc-900/30 backdrop-blur-sm rounded-xl border border-zinc-800">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 border-t-4 border-[#FF6B00] border-solid rounded-full animate-spin mb-4"></div>
                   <p className="text-zinc-400">Loading trainers...</p>
                 </div>
               ) : (
@@ -309,8 +384,8 @@ export default function TrainersMarketplace() {
 
                       {/* Pagination */}
                       {totalPages > 1 && (
-                        <div className="mt-12 mb-8 flex justify-center">
-                          <nav className="flex flex-wrap items-center justify-center gap-2">
+                        <div className="mt-8 sm:mt-12 mb-6 sm:mb-8 flex justify-center">
+                          <nav className="flex flex-wrap items-center justify-center gap-1 sm:gap-2">
                             <Button
                               onClick={() =>
                                 handlePageChange(Math.max(1, currentPage - 1))
@@ -319,7 +394,7 @@ export default function TrainersMarketplace() {
                               variant={
                                 currentPage === 1 ? "ghost" : "secondary"
                               }
-                              className={`flex items-center px-4 py-2 rounded-lg ${
+                              className={`flex items-center px-2 sm:px-4 py-2 rounded-lg ${
                                 currentPage === 1
                                   ? "bg-zinc-800/50 text-zinc-600 cursor-not-allowed"
                                   : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors"
@@ -328,19 +403,21 @@ export default function TrainersMarketplace() {
                               leftIcon={
                                 <Icon
                                   icon="mdi:chevron-left"
-                                  className="w-5 h-5 mr-1"
+                                  className="w-4 h-4 sm:w-5 sm:h-5 mr-0 sm:mr-1"
                                 />
                               }
                             >
-                              <span className="text-sm">Previous</span>
+                              <span className="text-xs sm:text-sm hidden sm:inline">
+                                Previous
+                              </span>
                             </Button>
 
-                            <div className="flex items-center overflow-x-auto max-w-[250px] sm:max-w-none hide-scrollbar py-1">
+                            <div className="flex items-center overflow-x-auto max-w-[180px] sm:max-w-none hide-scrollbar py-1">
                               {generatePaginationNumbers().map(
                                 (pageNum, index) => (
-                                  <div key={index} className="px-1">
+                                  <div key={index} className="px-0.5 sm:px-1">
                                     {pageNum === "..." ? (
-                                      <span className="px-3 py-2 text-zinc-500">
+                                      <span className="px-2 sm:px-3 py-2 text-zinc-500">
                                         ...
                                       </span>
                                     ) : (
@@ -353,7 +430,7 @@ export default function TrainersMarketplace() {
                                             ? "orangeFilled"
                                             : "secondary"
                                         }
-                                        className={`min-w-[40px] h-10 flex items-center justify-center rounded-lg transition-colors ${
+                                        className={`min-w-[32px] sm:min-w-[40px] h-8 sm:h-10 flex items-center justify-center rounded-lg transition-colors ${
                                           currentPage === pageNum
                                             ? "bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] text-white font-medium"
                                             : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
@@ -379,7 +456,7 @@ export default function TrainersMarketplace() {
                                   ? "ghost"
                                   : "secondary"
                               }
-                              className={`flex items-center px-4 py-2 rounded-lg ${
+                              className={`flex items-center px-2 sm:px-4 py-2 rounded-lg ${
                                 currentPage === totalPages
                                   ? "bg-zinc-800/50 text-zinc-600 cursor-not-allowed"
                                   : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors"
@@ -388,11 +465,13 @@ export default function TrainersMarketplace() {
                               rightIcon={
                                 <Icon
                                   icon="mdi:chevron-right"
-                                  className="w-5 h-5 ml-1"
+                                  className="w-4 h-4 sm:w-5 sm:h-5 ml-0 sm:ml-1"
                                 />
                               }
                             >
-                              <span className="text-sm">Next</span>
+                              <span className="text-xs sm:text-sm hidden sm:inline">
+                                Next
+                              </span>
                             </Button>
                           </nav>
                         </div>
@@ -400,21 +479,21 @@ export default function TrainersMarketplace() {
 
                       {/* Page indication */}
                       {totalPages > 1 && (
-                        <div className="text-center text-zinc-500 text-sm mb-4">
+                        <div className="text-center text-zinc-500 text-xs sm:text-sm mb-4">
                           Page {currentPage} of {totalPages}
                         </div>
                       )}
                     </>
                   ) : (
-                    <div className="text-center py-24 bg-zinc-900/50 backdrop-blur-sm rounded-xl border border-zinc-800">
+                    <div className="text-center py-12 sm:py-24 bg-zinc-900/50 backdrop-blur-sm rounded-xl border border-zinc-800">
                       <Icon
                         icon="mdi:account-search"
-                        className="w-16 h-16 text-zinc-600 mx-auto mb-6"
+                        className="w-12 h-12 sm:w-16 sm:h-16 text-zinc-600 mx-auto mb-4 sm:mb-6"
                       />
-                      <h3 className="text-xl font-medium mb-4">
+                      <h3 className="text-lg sm:text-xl font-medium mb-2 sm:mb-4">
                         No trainers found
                       </h3>
-                      <p className="text-zinc-400 mb-8 max-w-md mx-auto px-4">
+                      <p className="text-zinc-400 mb-6 sm:mb-8 max-w-md mx-auto px-4">
                         We couldn't find any trainers matching your current
                         filters. Try adjusting your search criteria or clearing
                         all filters.
