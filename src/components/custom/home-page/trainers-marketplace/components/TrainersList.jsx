@@ -6,30 +6,30 @@ import { TrainerCard } from "./TrainerCard";
 
 import { Button } from "@/components/common/Button";
 
-export const TrainersList = ({ trainers, onTrainerClick }) => {
-  const [sortOption, setSortOption] = useState("rating");
-  const [sortOrder, setSortOrder] = useState("desc");
+export const TrainersList = ({
+  trainers,
+  onTrainerClick,
+  sortOption,
+  setSortOption,
+  sortOrder,
+  setSortOrder,
+}) => {
   const [showSortOptions, setShowSortOptions] = useState(false);
 
-  // Sort trainers based on selected option and order
-  const sortedTrainers = [...trainers].sort((a, b) => {
-    let comparison = 0;
-
-    if (sortOption === "rating") {
-      comparison = a.rating - b.rating;
-    } else if (sortOption === "price") {
-      comparison = a.price - b.price;
-    } else if (sortOption === "experience") {
-      comparison = parseInt(a.experience) - parseInt(b.experience);
-    } else if (sortOption === "name") {
-      comparison = a.name.localeCompare(b.name);
-    }
-
-    return sortOrder === "desc" ? -comparison : comparison;
-  });
+  const sortOptions = [
+    ...(trainers.some((t) => typeof t.distance === "number")
+      ? [{ value: "location", label: "Location (Closest)" }]
+      : []),
+    { value: "rating", label: "Rating" },
+    { value: "price", label: "Price" },
+    { value: "experience", label: "Experience" },
+    { value: "name", label: "Name" },
+  ];
 
   const toggleSortOrder = () => {
-    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    if (sortOption !== "location") {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    }
   };
 
   const containerVariants = {
@@ -41,13 +41,6 @@ export const TrainersList = ({ trainers, onTrainerClick }) => {
       },
     },
   };
-
-  const sortOptions = [
-    { value: "rating", label: "Rating" },
-    { value: "price", label: "Price" },
-    { value: "experience", label: "Experience" },
-    { value: "name", label: "Name" },
-  ];
 
   return (
     <div>
@@ -168,7 +161,7 @@ export const TrainersList = ({ trainers, onTrainerClick }) => {
         initial="hidden"
         animate="show"
       >
-        {sortedTrainers.map((trainer) => (
+        {trainers.map((trainer) => (
           <TrainerCard
             key={trainer.id}
             trainer={trainer}

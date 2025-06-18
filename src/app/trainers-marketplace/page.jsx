@@ -29,24 +29,86 @@ export default function TrainersMarketplace() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
+  const [locationResolved, setLocationResolved] = useState(false);
+  const [sortOption, setSortOption] = useState("location");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const trainersPerPage = 8; // Changed from 9 to 8 for better grid alignment
-  const totalPages = Math.ceil(filteredTrainers.length / trainersPerPage);
+  const totalPages = Math.ceil(trainers.length / trainersPerPage);
   const indexOfLastTrainer = currentPage * trainersPerPage;
   const indexOfFirstTrainer = indexOfLastTrainer - trainersPerPage;
-  const currentTrainers = filteredTrainers.slice(
+  const currentTrainers = trainers.slice(
     indexOfFirstTrainer,
     indexOfLastTrainer
   );
 
-  // Fetch trainers from API
+  // Get user location on mount, then resolve
   useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          });
+          setLocationResolved(true);
+        },
+        (err) => {
+          setUserLocation(null); // fallback to no location
+          setLocationResolved(true);
+        }
+      );
+    } else {
+      setLocationResolved(true);
+    }
+  }, []);
+
+  // Fetch trainers from API whenever filters/search/userLocation/locationResolved change
+  useEffect(() => {
+    if (!locationResolved) return;
     const fetchTrainers = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch("/api/users/trainers");
+        let url = "/api/users/trainers?limit=100";
+        const params = [];
+        if (userLocation) {
+          params.push(`lat=${userLocation.lat}`);
+          params.push(`lon=${userLocation.lon}`);
+        }
+        if (searchQuery) {
+          params.push(`search=${encodeURIComponent(searchQuery)}`);
+        }
+        filters.location.forEach((loc) => {
+          params.push(`location=${encodeURIComponent(loc)}`);
+        });
+        filters.availability.forEach((a) => {
+          params.push(`availability=${encodeURIComponent(a)}`);
+        });
+        if (typeof filters.price.min === "number") {
+          params.push(`priceMin=${filters.price.min}`);
+        }
+        if (typeof filters.price.max === "number") {
+          params.push(`priceMax=${filters.price.max}`);
+        }
+        if (filters.rating > 0) {
+          params.push(`rating=${filters.rating}`);
+        }
+        filters.tags.forEach((tag) => {
+          params.push(`tag=${encodeURIComponent(tag)}`);
+        });
+        if (sortOption) {
+          params.push(`sortBy=${sortOption}`);
+        }
+        if (sortOrder) {
+          params.push(`sortOrder=${sortOrder}`);
+        }
+        if (params.length > 0) {
+          url += "&" + params.join("&");
+        }
+        const response = await fetch(url);
         if (!response.ok) {
           throw new Error("Failed to fetch trainers");
         }
@@ -55,6 +117,12 @@ export default function TrainersMarketplace() {
           // Map specialties to their proper labels
           const formattedSpecialties =
             trainer.specialties?.map((s) => mapSpecialtyToLabel(s.name)) || [];
+
+          // Format gyms if available
+          let gyms = [];
+          if (trainer.location && Array.isArray(trainer.location.gyms)) {
+            gyms = trainer.location.gyms;
+          }
 
           return {
             id: trainer.id,
@@ -93,10 +161,12 @@ export default function TrainersMarketplace() {
               })) || [],
             reviewCount: trainer.trainerInfo?.reviewCount || 0,
             isVerified: trainer.trainerInfo?.isVerified || false,
+            distance: trainer.distance ?? null,
+            distanceSource: trainer.distanceSource ?? null,
+            gyms,
           };
         });
         setTrainers(formattedTrainers);
-        setFilteredTrainers(formattedTrainers);
       } catch (err) {
         console.error("Error fetching trainers:", err);
         setError(err.message);
@@ -104,67 +174,20 @@ export default function TrainersMarketplace() {
         setIsLoading(false);
       }
     };
-
     fetchTrainers();
-  }, []);
+  }, [
+    userLocation,
+    locationResolved,
+    filters,
+    searchQuery,
+    sortOption,
+    sortOrder,
+  ]);
 
-  // Handle search and filtering
+  // Reset to first page when filters/search change
   useEffect(() => {
-    let results = [...trainers];
-
-    // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      results = results.filter(
-        (trainer) =>
-          trainer.name.toLowerCase().includes(query) ||
-          trainer.bio.toLowerCase().includes(query) ||
-          (trainer.specialties &&
-            trainer.specialties.some((specialty) =>
-              specialty.toLowerCase().includes(query)
-            ))
-      );
-    }
-
-    // Location filter
-    if (filters.location.length > 0) {
-      results = results.filter((trainer) =>
-        filters.location.includes(trainer.location)
-      );
-    }
-
-    // Availability filter
-    if (filters.availability.length > 0) {
-      results = results.filter(
-        (trainer) =>
-          trainer.availability &&
-          trainer.availability.some((day) => filters.availability.includes(day))
-      );
-    }
-
-    // Price filter
-    results = results.filter(
-      (trainer) =>
-        trainer.price >= filters.price.min && trainer.price <= filters.price.max
-    );
-
-    // Rating filter
-    if (filters.rating > 0) {
-      results = results.filter((trainer) => trainer.rating >= filters.rating);
-    }
-
-    // Tags filter
-    if (filters.tags.length > 0) {
-      results = results.filter(
-        (trainer) =>
-          trainer.specialties &&
-          trainer.specialties.some((tag) => filters.tags.includes(tag))
-      );
-    }
-
-    setFilteredTrainers(results);
-    setCurrentPage(1); // Reset to first page when filters change
-  }, [searchQuery, filters, trainers]);
+    setCurrentPage(1);
+  }, [filters, searchQuery]);
 
   const handleTrainerClick = (trainer) => {
     setSelectedTrainer(trainer);
@@ -218,6 +241,15 @@ export default function TrainersMarketplace() {
       totalPages,
     ];
   };
+
+  if (!locationResolved) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] sm:min-h-[500px] bg-zinc-900/30 backdrop-blur-sm rounded-xl border border-zinc-800">
+        <div className="w-12 h-12 sm:w-16 sm:h-16 border-t-4 border-[#FF6B00] border-solid rounded-full animate-spin mb-4"></div>
+        <p className="text-zinc-400">Loading trainers...</p>
+      </div>
+    );
+  }
 
   if (error) {
     return (
@@ -278,7 +310,7 @@ export default function TrainersMarketplace() {
                   />
                   <span className="text-zinc-300">
                     <span className="font-semibold text-white">
-                      {filteredTrainers.length}
+                      {trainers.length}
                     </span>
                     <span className="mx-1">trainers found</span>
                   </span>
@@ -360,7 +392,7 @@ export default function TrainersMarketplace() {
                     onClick={() => setIsFilterSidebarOpen(false)}
                     className="w-full"
                   >
-                    Apply Filters ({filteredTrainers.length} results)
+                    Apply Filters ({trainers.length} results)
                   </Button>
                 </div>
               </div>
@@ -373,142 +405,129 @@ export default function TrainersMarketplace() {
                   <div className="w-12 h-12 sm:w-16 sm:h-16 border-t-4 border-[#FF6B00] border-solid rounded-full animate-spin mb-4"></div>
                   <p className="text-zinc-400">Loading trainers...</p>
                 </div>
-              ) : (
+              ) : trainers.length > 0 ? (
                 <>
-                  {filteredTrainers.length > 0 ? (
-                    <>
-                      <TrainersList
-                        trainers={currentTrainers}
-                        onTrainerClick={handleTrainerClick}
-                      />
-
-                      {/* Pagination */}
-                      {totalPages > 1 && (
-                        <div className="mt-8 sm:mt-12 mb-6 sm:mb-8 flex justify-center">
-                          <nav className="flex flex-wrap items-center justify-center gap-1 sm:gap-2">
-                            <Button
-                              onClick={() =>
-                                handlePageChange(Math.max(1, currentPage - 1))
-                              }
-                              disabled={currentPage === 1}
-                              variant={
-                                currentPage === 1 ? "ghost" : "secondary"
-                              }
-                              className={`flex items-center px-2 sm:px-4 py-2 rounded-lg ${
-                                currentPage === 1
-                                  ? "bg-zinc-800/50 text-zinc-600 cursor-not-allowed"
-                                  : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors"
-                              }`}
-                              aria-label="Go to previous page"
-                              leftIcon={
-                                <Icon
-                                  icon="mdi:chevron-left"
-                                  className="w-4 h-4 sm:w-5 sm:h-5 mr-0 sm:mr-1"
-                                />
-                              }
-                            >
-                              <span className="text-xs sm:text-sm hidden sm:inline">
-                                Previous
-                              </span>
-                            </Button>
-
-                            <div className="flex items-center overflow-x-auto max-w-[180px] sm:max-w-none hide-scrollbar py-1">
-                              {generatePaginationNumbers().map(
-                                (pageNum, index) => (
-                                  <div key={index} className="px-0.5 sm:px-1">
-                                    {pageNum === "..." ? (
-                                      <span className="px-2 sm:px-3 py-2 text-zinc-500">
-                                        ...
-                                      </span>
-                                    ) : (
-                                      <Button
-                                        onClick={() =>
-                                          handlePageChange(pageNum)
-                                        }
-                                        variant={
-                                          currentPage === pageNum
-                                            ? "orangeFilled"
-                                            : "secondary"
-                                        }
-                                        className={`min-w-[32px] sm:min-w-[40px] h-8 sm:h-10 flex items-center justify-center rounded-lg transition-colors ${
-                                          currentPage === pageNum
-                                            ? "bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] text-white font-medium"
-                                            : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                                        }`}
-                                      >
-                                        {pageNum}
-                                      </Button>
-                                    )}
-                                  </div>
-                                )
+                  <TrainersList
+                    trainers={currentTrainers}
+                    onTrainerClick={handleTrainerClick}
+                    sortOption={sortOption}
+                    setSortOption={setSortOption}
+                    sortOrder={sortOrder}
+                    setSortOrder={setSortOrder}
+                  />
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="mt-8 sm:mt-12 mb-6 sm:mb-8 flex justify-center">
+                      <nav className="flex flex-wrap items-center justify-center gap-1 sm:gap-2">
+                        <Button
+                          onClick={() =>
+                            handlePageChange(Math.max(1, currentPage - 1))
+                          }
+                          disabled={currentPage === 1}
+                          variant={currentPage === 1 ? "ghost" : "secondary"}
+                          className={`flex items-center px-2 sm:px-4 py-2 rounded-lg ${
+                            currentPage === 1
+                              ? "bg-zinc-800/50 text-zinc-600 cursor-not-allowed"
+                              : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors"
+                          }`}
+                          aria-label="Go to previous page"
+                          leftIcon={
+                            <Icon
+                              icon="mdi:chevron-left"
+                              className="w-4 h-4 sm:w-5 sm:h-5 mr-0 sm:mr-1"
+                            />
+                          }
+                        >
+                          <span className="text-xs sm:text-sm hidden sm:inline">
+                            Previous
+                          </span>
+                        </Button>
+                        <div className="flex items-center overflow-x-auto max-w-[180px] sm:max-w-none hide-scrollbar py-1">
+                          {generatePaginationNumbers().map((pageNum, index) => (
+                            <div key={index} className="px-0.5 sm:px-1">
+                              {pageNum === "..." ? (
+                                <span className="px-2 sm:px-3 py-2 text-zinc-500">
+                                  ...
+                                </span>
+                              ) : (
+                                <Button
+                                  onClick={() => handlePageChange(pageNum)}
+                                  variant={
+                                    currentPage === pageNum
+                                      ? "orangeFilled"
+                                      : "secondary"
+                                  }
+                                  className={`min-w-[32px] sm:min-w-[40px] h-8 sm:h-10 flex items-center justify-center rounded-lg transition-colors ${
+                                    currentPage === pageNum
+                                      ? "bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] text-white font-medium"
+                                      : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                                  }`}
+                                >
+                                  {pageNum}
+                                </Button>
                               )}
                             </div>
-
-                            <Button
-                              onClick={() =>
-                                handlePageChange(
-                                  Math.min(totalPages, currentPage + 1)
-                                )
-                              }
-                              disabled={currentPage === totalPages}
-                              variant={
-                                currentPage === totalPages
-                                  ? "ghost"
-                                  : "secondary"
-                              }
-                              className={`flex items-center px-2 sm:px-4 py-2 rounded-lg ${
-                                currentPage === totalPages
-                                  ? "bg-zinc-800/50 text-zinc-600 cursor-not-allowed"
-                                  : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors"
-                              }`}
-                              aria-label="Go to next page"
-                              rightIcon={
-                                <Icon
-                                  icon="mdi:chevron-right"
-                                  className="w-4 h-4 sm:w-5 sm:h-5 ml-0 sm:ml-1"
-                                />
-                              }
-                            >
-                              <span className="text-xs sm:text-sm hidden sm:inline">
-                                Next
-                              </span>
-                            </Button>
-                          </nav>
+                          ))}
                         </div>
-                      )}
-
-                      {/* Page indication */}
-                      {totalPages > 1 && (
-                        <div className="text-center text-zinc-500 text-xs sm:text-sm mb-4">
-                          Page {currentPage} of {totalPages}
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="text-center py-12 sm:py-24 bg-zinc-900/50 backdrop-blur-sm rounded-xl border border-zinc-800">
-                      <Icon
-                        icon="mdi:account-search"
-                        className="w-12 h-12 sm:w-16 sm:h-16 text-zinc-600 mx-auto mb-4 sm:mb-6"
-                      />
-                      <h3 className="text-lg sm:text-xl font-medium mb-2 sm:mb-4">
-                        No trainers found
-                      </h3>
-                      <p className="text-zinc-400 mb-6 sm:mb-8 max-w-md mx-auto px-4">
-                        We couldn't find any trainers matching your current
-                        filters. Try adjusting your search criteria or clearing
-                        all filters.
-                      </p>
-                      <Button
-                        variant="orangeOutline"
-                        size="medium"
-                        onClick={handleClearFilters}
-                        className="min-w-[150px]"
-                      >
-                        Clear Filters
-                      </Button>
+                        <Button
+                          onClick={() =>
+                            handlePageChange(
+                              Math.min(totalPages, currentPage + 1)
+                            )
+                          }
+                          disabled={currentPage === totalPages}
+                          variant={
+                            currentPage === totalPages ? "ghost" : "secondary"
+                          }
+                          className={`flex items-center px-2 sm:px-4 py-2 rounded-lg ${
+                            currentPage === totalPages
+                              ? "bg-zinc-800/50 text-zinc-600 cursor-not-allowed"
+                              : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors"
+                          }`}
+                          aria-label="Go to next page"
+                          rightIcon={
+                            <Icon
+                              icon="mdi:chevron-right"
+                              className="w-4 h-4 sm:w-5 sm:h-5 ml-0 sm:ml-1"
+                            />
+                          }
+                        >
+                          <span className="text-xs sm:text-sm hidden sm:inline">
+                            Next
+                          </span>
+                        </Button>
+                      </nav>
+                    </div>
+                  )}
+                  {/* Page indication */}
+                  {totalPages > 1 && (
+                    <div className="text-center text-zinc-500 text-xs sm:text-sm mb-4">
+                      Page {currentPage} of {totalPages}
                     </div>
                   )}
                 </>
+              ) : (
+                <div className="text-center py-12 sm:py-24 bg-zinc-900/50 backdrop-blur-sm rounded-xl border border-zinc-800">
+                  <Icon
+                    icon="mdi:account-search"
+                    className="w-12 h-12 sm:w-16 sm:h-16 text-zinc-600 mx-auto mb-4 sm:mb-6"
+                  />
+                  <h3 className="text-lg sm:text-xl font-medium mb-2 sm:mb-4">
+                    No trainers found
+                  </h3>
+                  <p className="text-zinc-400 mb-6 sm:mb-8 max-w-md mx-auto px-4">
+                    We couldn't find any trainers matching your current filters.
+                    Try adjusting your search criteria or clearing all filters.
+                  </p>
+                  <Button
+                    variant="orangeOutline"
+                    size="medium"
+                    onClick={handleClearFilters}
+                    className="min-w-[150px]"
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
               )}
             </div>
           </div>
