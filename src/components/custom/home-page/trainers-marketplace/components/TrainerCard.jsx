@@ -8,6 +8,8 @@ import { RatingStars } from "./RatingStars";
 import { Button } from "@/components/common/Button";
 
 export const TrainerCard = ({ trainer, onClick }) => {
+  // Debug: log each trainer rendered
+  console.log("Rendering TrainerCard:", trainer);
   const [isHovered, setIsHovered] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
@@ -158,18 +160,58 @@ export const TrainerCard = ({ trainer, onClick }) => {
 
             <div className="h-8 w-px bg-zinc-800 mx-1"></div>
 
-            <div className="flex items-center">
-              <div className="p-1 bg-[#FF6B00]/20 rounded-full mr-1.5">
-                <Icon icon="mdi:map" className="w-3.5 h-3.5 text-[#FF6B00]" />
+            <div className="flex flex-col items-start justify-center min-w-[90px]">
+              <div className="flex items-center">
+                <div className="p-1 bg-[#FF6B00]/20 rounded-full mr-1.5">
+                  <Icon icon="mdi:map" className="w-3.5 h-3.5 text-[#FF6B00]" />
+                </div>
+                <div>
+                  <span className="text-[10px] text-zinc-400 block leading-none">
+                    Distance
+                  </span>
+                  <p className="text-xs font-medium text-white leading-tight">
+                    {typeof trainer.distance === "number"
+                      ? `${trainer.distance.toFixed(1)} km`
+                      : "Nepoznata udaljenost"}
+                  </p>
+                  {/* Distance source badge */}
+                  {trainer.distanceSource === "gym" && (
+                    <span className="inline-block mt-0.5 px-2 py-0.5 text-[10px] bg-[#FF6B00]/20 text-[#FF6B00] rounded-full font-medium">
+                      Najbliža teretana
+                    </span>
+                  )}
+                  {trainer.distanceSource === "city" && (
+                    <span className="inline-block mt-0.5 px-2 py-0.5 text-[10px] bg-zinc-700 text-zinc-200 rounded-full font-medium">
+                      Grad
+                    </span>
+                  )}
+                  {(!trainer.distanceSource ||
+                    trainer.distanceSource === null) && (
+                    <span className="inline-block mt-0.5 px-2 py-0.5 text-[10px] bg-zinc-800 text-zinc-400 rounded-full font-medium">
+                      Nepoznata udaljenost
+                    </span>
+                  )}
+                </div>
               </div>
-              <div>
-                <span className="text-[10px] text-zinc-400 block leading-none">
-                  Distance
-                </span>
-                <p className="text-xs font-medium text-white leading-tight">
-                  {trainer.proximity || "Unknown"}
-                </p>
-              </div>
+              {/* Gyms list */}
+              {Array.isArray(trainer.gyms) && trainer.gyms.length > 0 && (
+                <div className="mt-1">
+                  <span className="text-[10px] text-zinc-400 block leading-none mb-0.5">
+                    Gyms:
+                  </span>
+                  <ul className="text-[10px] text-zinc-300">
+                    {trainer.gyms.slice(0, 2).map((gym, idx) => (
+                      <li key={idx} className="truncate">
+                        {gym.label || gym.name}
+                        {gym.address ? `, ${gym.address}` : ""}
+                      </li>
+                    ))}
+                    {trainer.gyms.length > 2 && (
+                      <li>+{trainer.gyms.length - 2} more</li>
+                    )}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
 

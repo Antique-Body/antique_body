@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { useUserLocation } from "@/app/layout";
 import { Button } from "@/components/common/Button";
 import { Card } from "@/components/common/Card";
 import { FormField } from "@/components/common/FormField";
@@ -34,17 +35,33 @@ export default function TrainWithCoachPage() {
     indexOfLastTrainer
   );
 
+  const { userLocation, locationResolved } = useUserLocation();
+
+  // Fetch trainers from API only after location is resolved
   useEffect(() => {
+    if (!locationResolved) return;
     const fetchTrainers = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/api/users/trainers");
+        let url = "/api/users/trainers";
+        if (userLocation) {
+          url += `?lat=${userLocation.lat}&lon=${userLocation.lon}&sortBy=location&limit=100`;
+        } else {
+          url += `?limit=100`;
+        }
+        const response = await fetch(url);
         if (!response.ok) {
           throw new Error("Failed to fetch trainers");
         }
         const data = await response.json();
-        setTrainers(data.trainers);
-        setFilteredTrainers(data.trainers);
+        // Map distance and distanceSource for each trainer
+        const mapped = data.trainers.map((trainer) => ({
+          ...trainer,
+          distance: trainer.distance ?? null,
+          distanceSource: trainer.distanceSource ?? null,
+        }));
+        setTrainers(mapped);
+        setFilteredTrainers(mapped);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching trainers:", err);
@@ -52,9 +69,8 @@ export default function TrainWithCoachPage() {
         setLoading(false);
       }
     };
-
     fetchTrainers();
-  }, []);
+  }, [userLocation, locationResolved]);
 
   // Function to open the coaching request confirmation
   const handleRequestCoaching = (trainer) => {
@@ -227,7 +243,7 @@ export default function TrainWithCoachPage() {
     setSportFilter("");
   };
 
-  if (loading) {
+  if (loading || !locationResolved) {
     return (
       <div className="flex h-64 w-full items-center justify-center">
         <div className="flex flex-col items-center">
@@ -756,6 +772,27 @@ const TrainerCard = ({
                 {trainer.location.city},{" "}
                 {trainer.location.state || trainer.location.country}
               </span>
+              {/* Distance and source badge */}
+              <span className="ml-2 text-xs text-white font-semibold">
+                {typeof trainer.distance === "number"
+                  ? `${trainer.distance.toFixed(1)} km`
+                  : "Nepoznata udaljenost"}
+              </span>
+              {trainer.distanceSource === "gym" && (
+                <span className="ml-2 px-2 py-0.5 text-[10px] bg-[#FF6B00]/20 text-[#FF6B00] rounded-full font-medium">
+                  Najbliža teretana
+                </span>
+              )}
+              {trainer.distanceSource === "city" && (
+                <span className="ml-2 px-2 py-0.5 text-[10px] bg-zinc-700 text-zinc-200 rounded-full font-medium">
+                  Grad
+                </span>
+              )}
+              {(!trainer.distanceSource || trainer.distanceSource === null) && (
+                <span className="ml-2 px-2 py-0.5 text-[10px] bg-zinc-800 text-zinc-400 rounded-full font-medium">
+                  Nepoznata udaljenost
+                </span>
+              )}
             </div>
           )}
         </div>
