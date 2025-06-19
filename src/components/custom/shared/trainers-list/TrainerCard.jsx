@@ -11,12 +11,20 @@ export const TrainerCard = ({
   onRequestCoaching,
   onViewProfile,
   hasRequested,
+  colorVariant = "blue",
 }) => {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [showGymsTooltip, setShowGymsTooltip] = useState(false);
   const gymsTooltipRef = useRef(null);
+
+  // Set theme colors based on colorVariant
+  const themeColors = {
+    primary: colorVariant === "blue" ? "#3E92CC" : "#FF6B00",
+    secondary: colorVariant === "blue" ? "#2D7EB8" : "#E65A00",
+    featured: colorVariant === "blue" ? "#FFD700" : "#FFD700", // Gold for both variants
+  };
 
   // Calculate experience years based on trainingSince field
   const experienceYears = trainer.trainingSince
@@ -115,14 +123,18 @@ export const TrainerCard = ({
     for (let i = 1; i <= 5; i++) {
       if (i <= fullStars) {
         stars.push(
-          <Icon key={i} icon="mdi:star" className="text-[#3E92CC] w-4 h-4" />
+          <Icon
+            key={i}
+            icon="mdi:star"
+            className={`text-[${themeColors.primary}] w-4 h-4`}
+          />
         );
       } else if (i === fullStars + 1 && hasHalfStar) {
         stars.push(
           <Icon
             key={i}
             icon="mdi:star-half"
-            className="text-[#3E92CC] w-4 h-4"
+            className={`text-[${themeColors.primary}] w-4 h-4`}
           />
         );
       } else {
@@ -143,11 +155,13 @@ export const TrainerCard = ({
     <div
       className={`group flex flex-col h-full overflow-hidden rounded-xl border transition-all duration-300 bg-gradient-to-b from-zinc-900 to-black ${
         hasRequested
-          ? "border-[#3E92CC]"
+          ? `border-[${themeColors.primary}]`
           : isFeatured
           ? "border-[#FFD700]"
           : "border-zinc-800"
-      } hover:border-[#3E92CC] hover:shadow-lg hover:shadow-[#3E92CC]/10 hover:translate-y-[-4px]`}
+      } hover:border-[${themeColors.primary}] hover:shadow-lg hover:shadow-[${
+        themeColors.primary
+      }]/10 hover:translate-y-[-4px]`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -155,8 +169,11 @@ export const TrainerCard = ({
         {/* Top accent */}
         <div
           className={`absolute top-0 left-0 right-0 h-[3px] ${
-            isFeatured ? "bg-[#FFD700]" : "bg-[#3E92CC]"
+            isFeatured ? "bg-[#FFD700]" : `bg-[${themeColors.primary}]`
           } scale-x-[0.6] transform transition-transform duration-300 ease-in-out group-hover:scale-x-100`}
+          style={{
+            backgroundColor: isFeatured ? "#FFD700" : themeColors.primary,
+          }}
         ></div>
 
         {/* Featured badge */}
@@ -214,18 +231,18 @@ export const TrainerCard = ({
               <p className="text-xs text-zinc-300 flex items-center">
                 <Icon
                   icon="mdi:map-marker"
-                  className="w-3.5 h-3.5 text-[#3E92CC] mr-1 flex-shrink-0"
+                  className={`w-3.5 h-3.5 text-[${themeColors.primary}] mr-1 flex-shrink-0`}
+                  style={{ color: themeColors.primary }}
                 />
-                <span className="line-clamp-1">
-                  {trainer.location
-                    ? `${trainer.location.city}`
-                    : "Location unknown"}
-                </span>
+                <span className="line-clamp-1">{trainer.location.city}</span>
               </p>
 
               {/* Pending status badge - small dot style */}
               {hasRequested && (
-                <div className="flex items-center gap-1 bg-[#3E92CC] rounded-full px-2 py-0.5 text-xs font-medium text-white">
+                <div
+                  className={`flex items-center gap-1 bg-[${themeColors.primary}] rounded-full px-2 py-0.5 text-xs font-medium text-white`}
+                  style={{ backgroundColor: themeColors.primary }}
+                >
                   <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span>
                   Pending
                 </div>
@@ -259,27 +276,33 @@ export const TrainerCard = ({
           </div>
 
           {/* Distance to gym - New section */}
-          {typeof trainer.distance === "number" && (
+          {typeof trainer.distance == "number" && (
             <div className="mb-2.5 bg-zinc-800/30 rounded-lg p-2 border border-zinc-700/30">
               <div className="flex items-center gap-1.5">
                 <Icon
                   icon="mdi:directions"
-                  className="w-3.5 h-3.5 text-[#3E92CC] flex-shrink-0"
+                  className={`w-3.5 h-3.5 text-[${themeColors.primary}] flex-shrink-0`}
+                  style={{ color: themeColors.primary }}
                 />
                 <span className="text-xs font-medium text-white">
                   {trainer.distanceSource === "gym"
                     ? "Distance to gym:"
                     : "Distance:"}
                 </span>
-                <span className="text-xs font-bold text-[#3E92CC]">
+                <span
+                  className={`text-xs font-bold text-[${themeColors.primary}]`}
+                  style={{ color: themeColors.primary }}
+                >
                   {formatDistance(trainer.distance)}
                 </span>
               </div>
-              {trainer.distanceSource === "gym" && closestGym && (
-                <div className="ml-5 mt-1 text-xs text-zinc-400">
-                  {closestGym.name}, {closestGym.address?.split(",")[0]}
-                </div>
-              )}
+              <div className="ml-5 mt-1 text-xs text-zinc-400">
+                {trainer.distanceSource === "gym" && closestGym
+                  ? `${closestGym.name}, ${
+                      closestGym.address?.split(",")[0] || ""
+                    }`
+                  : trainer.location?.city || "Your location"}
+              </div>
             </div>
           )}
 
@@ -292,19 +315,34 @@ export const TrainerCard = ({
                 onMouseLeave={handleGymsMouseLeave}
                 ref={gymsTooltipRef}
               >
-                <div className="flex items-center gap-1.5 bg-zinc-800/40 rounded-lg px-3 py-1.5 cursor-pointer hover:bg-zinc-800">
-                  <Icon
-                    icon="mdi:dumbbell"
-                    className="w-3.5 h-3.5 text-[#3E92CC]"
-                  />
-                  <span className="text-xs text-white">
-                    {trainer.trainerGyms.length}{" "}
-                    {trainer.trainerGyms.length === 1 ? "gym" : "gyms"}
-                  </span>
-                  <Icon
-                    icon="mdi:chevron-down"
-                    className="w-3.5 h-3.5 text-zinc-400 ml-auto"
-                  />
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 bg-zinc-800/40 rounded-lg px-3 py-1.5 cursor-pointer hover:bg-zinc-800 flex-1">
+                    <Icon
+                      icon="mdi:dumbbell"
+                      className={`w-3.5 h-3.5 text-[${themeColors.primary}]`}
+                      style={{ color: themeColors.primary }}
+                    />
+                    <span className="text-xs text-white">
+                      {trainer.trainerGyms.length}{" "}
+                      {trainer.trainerGyms.length === 1 ? "gym" : "gyms"}
+                    </span>
+                    <Icon
+                      icon="mdi:chevron-down"
+                      className="w-3.5 h-3.5 text-zinc-400 ml-auto"
+                    />
+                  </div>
+
+                  {/* Client count */}
+                  <div className="flex items-center gap-1.5 bg-zinc-800/40 rounded-lg px-3 py-1.5 flex-1">
+                    <Icon
+                      icon="mdi:account-group"
+                      className={`w-3.5 h-3.5 text-[${themeColors.primary}]`}
+                      style={{ color: themeColors.primary }}
+                    />
+                    <span className="text-xs text-white">
+                      {trainer.clientCount || 0} clients
+                    </span>
+                  </div>
                 </div>
 
                 {/* Gyms tooltip */}
@@ -321,7 +359,8 @@ export const TrainerCard = ({
                         >
                           <Icon
                             icon="mdi:map-marker"
-                            className="w-3 h-3 text-[#3E92CC] mr-1 mt-0.5 flex-shrink-0"
+                            className={`w-3 h-3 text-[${themeColors.primary}] mr-1 mt-0.5 flex-shrink-0`}
+                            style={{ color: themeColors.primary }}
                           />
                           <div>
                             <div className="font-medium">
@@ -335,7 +374,13 @@ export const TrainerCard = ({
                             {idx === 0 &&
                               trainer.distanceSource === "gym" &&
                               typeof trainer.distance === "number" && (
-                                <div className="mt-0.5 text-[10px] bg-[#3E92CC]/20 text-[#3E92CC] px-1.5 py-0.5 rounded-full inline-block">
+                                <div
+                                  className={`mt-0.5 text-[10px] bg-[${themeColors.primary}]/20 text-[${themeColors.primary}] px-1.5 py-0.5 rounded-full inline-block`}
+                                  style={{
+                                    backgroundColor: `${themeColors.primary}20`,
+                                    color: themeColors.primary,
+                                  }}
+                                >
                                   {formatDistance(trainer.distance)} away
                                 </div>
                               )}
@@ -349,19 +394,48 @@ export const TrainerCard = ({
               </div>
             )}
 
+          {/* Display only client count when no gyms available */}
+          {(!Array.isArray(trainer.trainerGyms) ||
+            trainer.trainerGyms.length === 0) && (
+            <div className="mb-2.5">
+              <div className="flex items-center gap-1.5 bg-zinc-800/40 rounded-lg px-3 py-1.5">
+                <Icon
+                  icon="mdi:account-group"
+                  className={`w-3.5 h-3.5 text-[${themeColors.primary}]`}
+                  style={{ color: themeColors.primary }}
+                />
+                <span className="text-xs text-white">
+                  {trainer.clientCount || 0} clients
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Certification badges */}
           <div className="mb-3 flex flex-wrap gap-1.5">
             {trainer.certifications.slice(0, 2).map((cert, index) => (
               <span
                 key={index}
-                className="flex items-center gap-1 rounded-full border border-[rgba(62,146,204,0.3)] bg-[rgba(62,146,204,0.1)] px-2 py-0.5 text-xs font-medium text-[#3E92CC] transition-all duration-300 group-hover:-translate-y-0.5"
+                className={`flex items-center gap-1 rounded-full border border-[${themeColors.primary}30] bg-[${themeColors.primary}10] px-2 py-0.5 text-xs font-medium text-[${themeColors.primary}] transition-all duration-300 group-hover:-translate-y-0.5`}
+                style={{
+                  borderColor: `${themeColors.primary}30`,
+                  backgroundColor: `${themeColors.primary}10`,
+                  color: themeColors.primary,
+                }}
               >
                 <Icon icon="mdi:certificate" width={10} height={10} />
                 {cert.name}
               </span>
             ))}
             {trainer.certifications.length > 2 && (
-              <span className="flex items-center rounded-full border border-[rgba(62,146,204,0.3)] bg-[rgba(62,146,204,0.1)] px-2 py-0.5 text-xs font-medium text-[#3E92CC]">
+              <span
+                className={`flex items-center rounded-full border border-[${themeColors.primary}30] bg-[${themeColors.primary}10] px-2 py-0.5 text-xs font-medium text-[${themeColors.primary}]`}
+                style={{
+                  borderColor: `${themeColors.primary}30`,
+                  backgroundColor: `${themeColors.primary}10`,
+                  color: themeColors.primary,
+                }}
+              >
                 +{trainer.certifications.length - 2} more
               </span>
             )}
@@ -386,7 +460,10 @@ export const TrainerCard = ({
 
           {/* Price */}
           <div className="mt-auto mb-3 flex items-center justify-between">
-            <p className="text-lg font-bold text-[#3E92CC]">
+            <p
+              className={`text-lg font-bold text-[${themeColors.primary}]`}
+              style={{ color: themeColors.primary }}
+            >
               {getPricingDisplay()}
             </p>
 
@@ -417,8 +494,17 @@ export const TrainerCard = ({
               className={`w-full transition-transform duration-300 group-hover:-translate-y-1 group-hover:scale-105 ${
                 hasRequested
                   ? "bg-zinc-800 hover:bg-zinc-700 border-zinc-700"
-                  : "bg-[#3E92CC] hover:bg-[#2D7EB8] border-[#3E92CC]"
+                  : `bg-[${themeColors.primary}] hover:bg-[${themeColors.secondary}] border-[${themeColors.primary}]`
               }`}
+              style={
+                !hasRequested
+                  ? {
+                      backgroundColor: themeColors.primary,
+                      borderColor: themeColors.primary,
+                      "--hover-bg": themeColors.secondary,
+                    }
+                  : {}
+              }
               leftIcon={
                 hasRequested ? (
                   <Icon icon="mdi:check-circle" width={14} height={14} />
@@ -441,7 +527,11 @@ export const TrainerCard = ({
                 leftIcon={
                   <Icon icon="mdi:message-outline" width={14} height={14} />
                 }
-                className="w-full mt-2 transition-transform duration-300 group-hover:-translate-y-1 border-zinc-700 hover:border-[#3E92CC]"
+                className={`w-full text-[${themeColors.primary}] mt-2 transition-transform duration-300 group-hover:-translate-y-1 border-zinc-700 hover:border-[${themeColors.primary}]`}
+                style={{
+                  color: themeColors.primary,
+                  "--hover-border": themeColors.primary,
+                }}
               >
                 Message
               </Button>
@@ -454,7 +544,9 @@ export const TrainerCard = ({
           className="absolute inset-0 -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           style={{
             boxShadow: isHovered
-              ? "0 0 20px 1px rgba(62, 146, 204, 0.2)"
+              ? isFeatured
+                ? "0 0 20px 1px rgba(255, 215, 0, 0.2)"
+                : `0 0 20px 1px ${themeColors.primary}33`
               : "none",
           }}
         />

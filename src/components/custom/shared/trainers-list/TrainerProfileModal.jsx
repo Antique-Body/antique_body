@@ -1,36 +1,21 @@
 import { Icon } from "@iconify/react";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
 import { Modal } from "@/components/common/Modal";
+import { DashboardTabs } from "@/components/custom/dashboard/shared";
 import {
   About,
   Availability,
   Expertise,
   Reviews,
-} from "@/components/custom/dashboard/client/pages/trainwithcoach/components";
-import { DashboardTabs } from "@/components/custom/dashboard/shared";
+} from "@/components/custom/shared/trainers-list";
 import { mapSpecialtyToLabel } from "@/utils/specialtyMapper";
 
 // This component is the profile modal that appears when "View Profile" is clicked
-export const TrainerProfileModal = ({ trainer, isOpen, onClose }) => {
+export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
   const [activeTab, setActiveTab] = useState("about");
-
-  useEffect(() => {
-    // Disable body scroll when modal is open
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
-
-  if (!trainer || !isOpen) return null;
 
   // Define tabs for the DashboardTabs component
   const tabs = [
@@ -104,8 +89,6 @@ export const TrainerProfileModal = ({ trainer, isOpen, onClose }) => {
     formattedDistance: trainer.distance
       ? formatDistance(trainer.distance)
       : null,
-    profileImage: trainer.image,
-    name: trainer.name || "Unnamed Trainer",
   };
 
   return (
@@ -120,9 +103,9 @@ export const TrainerProfileModal = ({ trainer, isOpen, onClose }) => {
       <div className="mb-4 flex flex-col items-start gap-4 md:flex-row">
         {/* Trainer photo */}
         <div className="relative flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#FF6B00] to-[#FF9A00] text-3xl font-semibold text-white md:h-32 md:w-32">
-          {trainer?.image ? (
+          {trainer?.profileImage ? (
             <Image
-              src={trainer.image}
+              src={trainer.profileImage}
               alt={trainer.name}
               width={128}
               height={128}
@@ -149,9 +132,9 @@ export const TrainerProfileModal = ({ trainer, isOpen, onClose }) => {
         {/* Trainer info */}
         <div className="flex-1">
           <div className="mb-2 flex items-center gap-3">
-            {trainer?.isVerified && (
+            {trainer?.preferred && (
               <span className="rounded bg-[rgba(255,107,0,0.2)] px-3 py-1 text-xs font-medium text-[#FF6B00]">
-                Verified Trainer
+                Preferred for your goals
               </span>
             )}
           </div>
@@ -185,7 +168,7 @@ export const TrainerProfileModal = ({ trainer, isOpen, onClose }) => {
 
             <div className="flex items-center gap-1">
               <Icon icon="mdi:map-marker" width={16} height={16} />
-              <span>{trainer?.location}</span>
+              <span>{trainer?.proximity}</span>
               {enhancedTrainer.formattedDistance && (
                 <span className="ml-1 text-xs px-2 py-0.5 bg-[rgba(255,107,0,0.2)] rounded-full text-[#FF6B00]">
                   {enhancedTrainer.formattedDistance} away
