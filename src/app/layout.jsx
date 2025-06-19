@@ -29,19 +29,13 @@ function UserLocationProvider({ children }) {
 
   useEffect(() => {
     if (typeof window !== "undefined" && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lon: position.coords.longitude,
-          });
-          setLocationResolved(true);
-        },
-        (err) => {
-          setUserLocation(null);
-          setLocationResolved(true);
-        }
-      );
+      navigator.geolocation.getCurrentPosition((position) => {
+        setUserLocation({
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+        });
+        setLocationResolved(true);
+      });
     } else {
       setLocationResolved(true);
     }

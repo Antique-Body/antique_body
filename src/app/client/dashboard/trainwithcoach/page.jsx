@@ -1,5 +1,6 @@
 "use client";
 import { Icon } from "@iconify/react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import { useUserLocation } from "@/app/layout";
@@ -424,10 +425,12 @@ export default function TrainWithCoachPage() {
           <div className="mb-6 flex items-center gap-4">
             <div className="h-16 w-16 overflow-hidden rounded-full">
               {selectedTrainer.profileImage ? (
-                <img
+                <Image
                   src={selectedTrainer.profileImage}
                   alt={`${selectedTrainer.firstName} profile`}
-                  className="h-full w-full object-cover"
+                  className="object-cover"
+                  width={64}
+                  height={64}
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#3E92CC] to-[#2D7EB8]">
