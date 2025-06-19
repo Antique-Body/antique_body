@@ -45,6 +45,8 @@ function getRedirectUrl(role, token, pathname) {
         "/trainer/dashboard/clients",
         "/trainer/dashboard/upcoming-trainings",
         "/trainer/dashboard/messages",
+        "/client/dashboard/trainwithcoach",
+
         "/trainer/dashboard/plans",
         "/trainer/dashboard/exercises",
         "/trainer/dashboard/meals",

@@ -11,6 +11,7 @@ import {
   Reviews,
 } from "@/components/custom/dashboard/client/pages/trainwithcoach/components";
 import { DashboardTabs } from "@/components/custom/dashboard/shared";
+import { mapSpecialtyToLabel } from "@/utils/specialtyMapper";
 
 // This component is the profile modal that appears when "View Profile" is clicked
 export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
@@ -23,6 +24,32 @@ export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
     { id: "availability", label: "Availability", badgeCount: 0 },
     { id: "reviews", label: "Reviews", badgeCount: 0 },
   ];
+
+  // Format distance to be more concise
+  const formatDistance = (distance) => {
+    if (typeof distance !== "number") return null;
+
+    // For distances under 1km, show in meters
+    if (distance < 1) {
+      return `${Math.round(distance * 1000)}m`;
+    }
+    // For distances under 10km, show one decimal place
+    if (distance < 10) {
+      return `${distance.toFixed(1)}km`;
+    }
+    // For larger distances, round to nearest whole number
+    return `${Math.round(distance)}km`;
+  };
+
+  // Map specialties using the specialtyMapper utility
+  const getFormattedSpecialties = () => {
+    if (!trainer.specialties) return [];
+
+    return trainer.specialties.map((specialty) => {
+      const name = typeof specialty === "string" ? specialty : specialty.name;
+      return mapSpecialtyToLabel(name);
+    });
+  };
 
   // Function to render rating stars
   const renderStars = (rating) => {
@@ -53,6 +80,15 @@ export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
     }
 
     return stars;
+  };
+
+  // Prepare trainer data with mapped specialties for child components
+  const enhancedTrainer = {
+    ...trainer,
+    formattedSpecialties: getFormattedSpecialties(),
+    formattedDistance: trainer.distance
+      ? formatDistance(trainer.distance)
+      : null,
   };
 
   return (
@@ -104,7 +140,7 @@ export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
           </div>
 
           <p className="mb-2 text-lg font-medium text-[#FF6B00]">
-            {trainer?.specialty}
+            {enhancedTrainer.formattedSpecialties.slice(0, 2).join(", ")}
           </p>
 
           <div className="mb-3 flex flex-wrap gap-2">
@@ -133,6 +169,11 @@ export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
             <div className="flex items-center gap-1">
               <Icon icon="mdi:map-marker" width={16} height={16} />
               <span>{trainer?.proximity}</span>
+              {enhancedTrainer.formattedDistance && (
+                <span className="ml-1 text-xs px-2 py-0.5 bg-[rgba(255,107,0,0.2)] rounded-full text-[#FF6B00]">
+                  {enhancedTrainer.formattedDistance} away
+                </span>
+              )}
             </div>
           </div>
 
@@ -174,7 +215,7 @@ export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
             activeTab === "about" ? "block" : "hidden"
           }`}
         >
-          <About trainer={trainer} />
+          <About trainer={enhancedTrainer} />
         </div>
 
         <div
@@ -182,7 +223,7 @@ export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
             activeTab === "expertise" ? "block" : "hidden"
           }`}
         >
-          <Expertise trainer={trainer} />
+          <Expertise trainer={enhancedTrainer} />
         </div>
 
         <div
@@ -190,7 +231,7 @@ export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
             activeTab === "availability" ? "block" : "hidden"
           }`}
         >
-          <Availability trainer={trainer} />
+          <Availability trainer={enhancedTrainer} />
         </div>
 
         <div
@@ -198,7 +239,7 @@ export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
             activeTab === "reviews" ? "block" : "hidden"
           }`}
         >
-          <Reviews trainer={trainer} renderStars={renderStars} />
+          <Reviews trainer={enhancedTrainer} renderStars={renderStars} />
         </div>
       </div>
     </Modal>

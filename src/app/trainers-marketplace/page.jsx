@@ -8,14 +8,14 @@ import { Footer } from "@/components/common/Footer";
 import { Navigation } from "@/components/custom/home-page/shared";
 import {
   TrainersList,
-  SearchFilters,
   TrainerProfileModal,
+  SearchFilters,
 } from "@/components/custom/home-page/trainers-marketplace/components";
+import { NoResults, Pagination } from "@/components/custom/shared";
 import { mapSpecialtyToLabel } from "@/utils/specialtyMapper";
 
 export default function TrainersMarketplace() {
   const [trainers, setTrainers] = useState([]);
-  const [filteredTrainers, setFilteredTrainers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     location: [],
@@ -56,7 +56,7 @@ export default function TrainersMarketplace() {
           });
           setLocationResolved(true);
         },
-        (err) => {
+        () => {
           setUserLocation(null); // fallback to no location
           setLocationResolved(true);
         }
@@ -130,9 +130,7 @@ export default function TrainersMarketplace() {
             firstName: trainer.firstName,
             lastName: trainer.lastName,
             bio: trainer.description || "",
-            location: trainer.location
-              ? `${trainer.location.city}, ${trainer.location.country}`
-              : "",
+            location: trainer.location ? `${trainer.location.city}` : "",
             rating: trainer.trainerInfo?.rating || 0,
             price: trainer.pricePerSession || 0,
             currency: trainer.currency || "USD",
@@ -208,38 +206,6 @@ export default function TrainersMarketplace() {
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  // Generate pagination numbers
-  const generatePaginationNumbers = () => {
-    if (totalPages <= 5) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
-
-    if (currentPage <= 3) {
-      return [1, 2, 3, 4, "...", totalPages];
-    }
-
-    if (currentPage >= totalPages - 2) {
-      return [
-        1,
-        "...",
-        totalPages - 3,
-        totalPages - 2,
-        totalPages - 1,
-        totalPages,
-      ];
-    }
-
-    return [
-      1,
-      "...",
-      currentPage - 1,
-      currentPage,
-      currentPage + 1,
-      "...",
-      totalPages,
-    ];
   };
 
   if (!locationResolved) {
@@ -325,9 +291,12 @@ export default function TrainersMarketplace() {
               variant="secondary"
               size="medium"
               onClick={() => setIsFilterSidebarOpen(true)}
-              className="w-full flex items-center justify-center gap-2 bg-zinc-900 border border-zinc-800 py-3 text-base"
+              className="w-full flex items-center justify-center gap-2 bg-zinc-900 border border-zinc-800 py-3 text-base shadow-md hover:bg-zinc-800 transition-colors"
             >
-              <Icon icon="mdi:filter-variant" className="w-5 h-5" />
+              <Icon
+                icon="mdi:filter-variant"
+                className="w-5 h-5 text-[#FF6B00]"
+              />
               <span className="font-medium">Filters</span>
               {Object.values(filters).flat().filter(Boolean).length > 0 && (
                 <span className="bg-[#FF6B00] text-white text-xs w-6 h-6 rounded-full flex items-center justify-center ml-1">
@@ -347,7 +316,6 @@ export default function TrainersMarketplace() {
                   filters={filters}
                   setFilters={setFilters}
                   onClearFilters={handleClearFilters}
-                  trainers={trainers}
                 />
               </div>
             </div>
@@ -362,8 +330,8 @@ export default function TrainersMarketplace() {
                 className="absolute inset-0 bg-black/80 backdrop-blur-sm"
                 onClick={() => setIsFilterSidebarOpen(false)}
               ></div>
-              <div className="absolute top-0 left-0 h-full w-[85%] max-w-sm bg-zinc-900 border-r border-zinc-800 overflow-y-auto">
-                <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
+              <div className="absolute top-0 left-0 h-full w-[85%] max-w-sm bg-zinc-900 border-r border-zinc-800 overflow-y-auto shadow-xl">
+                <div className="p-4 border-b border-zinc-800 flex items-center justify-between sticky top-0 bg-zinc-900 z-10">
                   <h3 className="text-lg font-semibold">Filters</h3>
                   <Button
                     variant="ghost"
@@ -381,11 +349,9 @@ export default function TrainersMarketplace() {
                     filters={filters}
                     setFilters={setFilters}
                     onClearFilters={handleClearFilters}
-                    trainers={trainers}
-                    isMobile={true}
                   />
                 </div>
-                <div className="p-4 border-t border-zinc-800">
+                <div className="p-4 border-t border-zinc-800 sticky bottom-0 bg-zinc-900 z-10">
                   <Button
                     variant="orangeFilled"
                     size="medium"
@@ -417,117 +383,21 @@ export default function TrainersMarketplace() {
                   />
                   {/* Pagination */}
                   {totalPages > 1 && (
-                    <div className="mt-8 sm:mt-12 mb-6 sm:mb-8 flex justify-center">
-                      <nav className="flex flex-wrap items-center justify-center gap-1 sm:gap-2">
-                        <Button
-                          onClick={() =>
-                            handlePageChange(Math.max(1, currentPage - 1))
-                          }
-                          disabled={currentPage === 1}
-                          variant={currentPage === 1 ? "ghost" : "secondary"}
-                          className={`flex items-center px-2 sm:px-4 py-2 rounded-lg ${
-                            currentPage === 1
-                              ? "bg-zinc-800/50 text-zinc-600 cursor-not-allowed"
-                              : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors"
-                          }`}
-                          aria-label="Go to previous page"
-                          leftIcon={
-                            <Icon
-                              icon="mdi:chevron-left"
-                              className="w-4 h-4 sm:w-5 sm:h-5 mr-0 sm:mr-1"
-                            />
-                          }
-                        >
-                          <span className="text-xs sm:text-sm hidden sm:inline">
-                            Previous
-                          </span>
-                        </Button>
-                        <div className="flex items-center overflow-x-auto max-w-[180px] sm:max-w-none hide-scrollbar py-1">
-                          {generatePaginationNumbers().map((pageNum, index) => (
-                            <div key={index} className="px-0.5 sm:px-1">
-                              {pageNum === "..." ? (
-                                <span className="px-2 sm:px-3 py-2 text-zinc-500">
-                                  ...
-                                </span>
-                              ) : (
-                                <Button
-                                  onClick={() => handlePageChange(pageNum)}
-                                  variant={
-                                    currentPage === pageNum
-                                      ? "orangeFilled"
-                                      : "secondary"
-                                  }
-                                  className={`min-w-[32px] sm:min-w-[40px] h-8 sm:h-10 flex items-center justify-center rounded-lg transition-colors ${
-                                    currentPage === pageNum
-                                      ? "bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] text-white font-medium"
-                                      : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                                  }`}
-                                >
-                                  {pageNum}
-                                </Button>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                        <Button
-                          onClick={() =>
-                            handlePageChange(
-                              Math.min(totalPages, currentPage + 1)
-                            )
-                          }
-                          disabled={currentPage === totalPages}
-                          variant={
-                            currentPage === totalPages ? "ghost" : "secondary"
-                          }
-                          className={`flex items-center px-2 sm:px-4 py-2 rounded-lg ${
-                            currentPage === totalPages
-                              ? "bg-zinc-800/50 text-zinc-600 cursor-not-allowed"
-                              : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors"
-                          }`}
-                          aria-label="Go to next page"
-                          rightIcon={
-                            <Icon
-                              icon="mdi:chevron-right"
-                              className="w-4 h-4 sm:w-5 sm:h-5 ml-0 sm:ml-1"
-                            />
-                          }
-                        >
-                          <span className="text-xs sm:text-sm hidden sm:inline">
-                            Next
-                          </span>
-                        </Button>
-                      </nav>
-                    </div>
-                  )}
-                  {/* Page indication */}
-                  {totalPages > 1 && (
-                    <div className="text-center text-zinc-500 text-xs sm:text-sm mb-4">
-                      Page {currentPage} of {totalPages}
-                    </div>
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={handlePageChange}
+                      variant="orange"
+                    />
                   )}
                 </>
               ) : (
-                <div className="text-center py-12 sm:py-24 bg-zinc-900/50 backdrop-blur-sm rounded-xl border border-zinc-800">
-                  <Icon
-                    icon="mdi:account-search"
-                    className="w-12 h-12 sm:w-16 sm:h-16 text-zinc-600 mx-auto mb-4 sm:mb-6"
-                  />
-                  <h3 className="text-lg sm:text-xl font-medium mb-2 sm:mb-4">
-                    No trainers found
-                  </h3>
-                  <p className="text-zinc-400 mb-6 sm:mb-8 max-w-md mx-auto px-4">
-                    We couldn't find any trainers matching your current filters.
-                    Try adjusting your search criteria or clearing all filters.
-                  </p>
-                  <Button
-                    variant="orangeOutline"
-                    size="medium"
-                    onClick={handleClearFilters}
-                    className="min-w-[150px]"
-                  >
-                    Clear Filters
-                  </Button>
-                </div>
+                <NoResults
+                  onClearFilters={handleClearFilters}
+                  variant="orange"
+                  title="No trainers found"
+                  message="We couldn't find any trainers matching your current filters. Try adjusting your search criteria or clearing all filters."
+                />
               )}
             </div>
           </div>

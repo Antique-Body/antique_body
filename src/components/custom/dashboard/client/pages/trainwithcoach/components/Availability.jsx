@@ -59,6 +59,19 @@ export const Availability = ({ trainer }) => {
     return date.toLocaleDateString("en-US", options);
   };
 
+  // Format distance to display nicely
+  const formatDistance = (distance) => {
+    if (typeof distance !== "number") return null;
+
+    if (distance < 1) {
+      return `${Math.round(distance * 1000)}m`;
+    }
+    if (distance < 10) {
+      return `${distance.toFixed(1)}km`;
+    }
+    return `${Math.round(distance)}km`;
+  };
+
   // Check if date is today
   const isToday = (date) => {
     const today = new Date();
@@ -84,6 +97,24 @@ export const Availability = ({ trainer }) => {
   const availableTimes = selectedDate
     ? getAvailableTimesForDate(selectedDate)
     : [];
+
+  // Get closest gym if available
+  const getClosestGym = () => {
+    if (
+      !Array.isArray(trainer.trainerGyms) ||
+      trainer.trainerGyms.length === 0
+    ) {
+      return null;
+    }
+
+    if (trainer.distanceSource === "gym" && trainer.trainerGyms.length > 0) {
+      return trainer.trainerGyms[0].gym;
+    }
+
+    return null;
+  };
+
+  const closestGym = getClosestGym();
 
   return (
     <div className="space-y-6">
@@ -165,6 +196,52 @@ export const Availability = ({ trainer }) => {
         </div>
       )}
 
+      {/* Training locations */}
+      {Array.isArray(trainer.trainerGyms) && trainer.trainerGyms.length > 0 && (
+        <div className="mt-6">
+          <h4 className="mb-3 text-lg font-medium text-white">
+            Training Locations
+          </h4>
+          <div className="space-y-2">
+            {trainer.trainerGyms.slice(0, 3).map((gymData, index) => (
+              <div
+                key={index}
+                className="rounded-lg border border-[rgba(255,107,0,0.2)] bg-[rgba(255,107,0,0.1)] p-3"
+              >
+                <div className="flex items-center gap-2">
+                  <Icon
+                    icon="mdi:dumbbell"
+                    width={16}
+                    height={16}
+                    className="text-[#FF6B00]"
+                  />
+                  <span className="font-medium text-white">
+                    {gymData.gym?.name || "Unnamed Gym"}
+                  </span>
+                  {index === 0 &&
+                    trainer.distanceSource === "gym" &&
+                    typeof trainer.distance === "number" && (
+                      <span className="ml-auto text-xs bg-[rgba(255,107,0,0.2)] px-2 py-0.5 rounded-full text-[#FF6B00]">
+                        {formatDistance(trainer.distance)} away
+                      </span>
+                    )}
+                </div>
+                {gymData.gym?.address && (
+                  <p className="mt-1 ml-6 text-sm text-gray-400">
+                    {gymData.gym.address}
+                  </p>
+                )}
+              </div>
+            ))}
+            {trainer.trainerGyms.length > 3 && (
+              <p className="text-sm text-center text-gray-400">
+                +{trainer.trainerGyms.length - 3} more locations
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Session details */}
       <div className="mt-6 rounded-lg border border-[rgba(255,107,0,0.2)] bg-[rgba(255,107,0,0.1)] p-4">
         <h4 className="mb-3 font-medium text-white">Session Information</h4>
@@ -176,13 +253,36 @@ export const Availability = ({ trainer }) => {
           <li className="flex justify-between">
             <span>Price:</span>
             <span className="font-medium text-[#FF6B00]">
-              ${trainer?.hourlyRate || trainer?.pricePerSession || "--"}/
-              {trainer?.pricingType === "per_session" ? "session" : "package"}
+              {trainer?.pricePerSession ? (
+                <>
+                  ${trainer.pricePerSession}/
+                  {trainer?.pricingType === "per_session"
+                    ? "session"
+                    : "package"}
+                </>
+              ) : (
+                <>
+                  {trainer?.pricingType === "contact_for_pricing"
+                    ? "Contact for pricing"
+                    : trainer?.pricingType === "free_consultation"
+                    ? "Free consultation"
+                    : "Price not specified"}
+                </>
+              )}
             </span>
           </li>
           <li className="flex justify-between">
             <span>Location:</span>
-            <span>{trainer?.proximity || "In person or virtual"}</span>
+            <span>
+              {closestGym
+                ? `${closestGym.name} (${
+                    trainer.distanceSource === "gym" &&
+                    typeof trainer.distance === "number"
+                      ? formatDistance(trainer.distance) + " away"
+                      : "In person"
+                  })`
+                : trainer?.proximity || "In person or virtual"}
+            </span>
           </li>
           <li className="flex justify-between">
             <span>Cancellation Policy:</span>
