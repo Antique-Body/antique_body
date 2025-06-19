@@ -246,13 +246,13 @@ async function main() {
             name: "Certified Nutrition Coach",
             issuer: "Precision Nutrition",
             expiryDate: new Date("2025-12-31"),
-            status: "accepted",
+            status: "pending",
           },
           {
             name: "ACE Personal Trainer",
             issuer: "American Council on Exercise",
             expiryDate: new Date("2024-12-31"),
-            status: "accepted",
+            status: "pending",
           },
         ],
         trainerInfo: {
@@ -342,13 +342,13 @@ async function main() {
             name: "Zumba Instructor",
             issuer: "Zumba Fitness",
             expiryDate: new Date("2024-12-31"),
-            status: "accepted",
+            status: "pending",
           },
           {
             name: "Dance Fitness Instructor",
             issuer: "International Dance Fitness Association",
             expiryDate: new Date("2025-12-31"),
-            status: "accepted",
+            status: "pending",
           },
         ],
         trainerInfo: {
@@ -392,13 +392,13 @@ async function main() {
             name: "CSCS",
             issuer: "National Strength and Conditioning Association",
             expiryDate: new Date("2025-12-31"),
-            status: "accepted",
+            status: "pending",
           },
           {
             name: "Sports Performance Coach",
             issuer: "USA Weightlifting",
             expiryDate: new Date("2024-12-31"),
-            status: "accepted",
+            status: "pending",
           },
         ],
         trainerInfo: {
@@ -443,13 +443,13 @@ async function main() {
             name: "Comprehensive Pilates Instructor",
             issuer: "Pilates Method Alliance",
             expiryDate: new Date("2025-12-31"),
-            status: "accepted",
+            status: "rejected",
           },
           {
             name: "Posture Specialist",
             issuer: "International Posture Institute",
             expiryDate: new Date("2024-12-31"),
-            status: "accepted",
+            status: "expired",
           },
         ],
         trainerInfo: {
