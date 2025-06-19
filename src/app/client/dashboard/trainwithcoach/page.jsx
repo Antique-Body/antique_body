@@ -3,6 +3,7 @@ import { Icon } from "@iconify/react";
 import { useEffect, useState } from "react";
 
 import { useUserLocation } from "@/app/layout";
+import { FormField } from "@/components/common/FormField";
 import { Modal } from "@/components/common/Modal";
 import {
   TrainerProfileModal,
@@ -13,17 +14,22 @@ import {
   Pagination,
   SortControls,
 } from "@/components/custom/shared";
+import { searchCities } from "@/lib/googlePlaces";
 
 export default function TrainWithCoachPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [goalFilter, setGoalFilter] = useState("");
+  const [locationSearch, setLocationSearch] = useState("");
+  const [locationSuggestions, setLocationSuggestions] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [isLoadingLocations, setIsLoadingLocations] = useState(false);
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
   const [sportFilter, setSportFilter] = useState("");
+  const [allTrainers, setAllTrainers] = useState([]);
+  const [filteredTrainers, setFilteredTrainers] = useState([]);
   const [selectedTrainer, setSelectedTrainer] = useState(null);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [requestedTrainers, setRequestedTrainers] = useState([]);
-  const [trainers, setTrainers] = useState([]);
-  const [filteredTrainers, setFilteredTrainers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sortOption, setSortOption] = useState("rating");
@@ -42,23 +48,45 @@ export default function TrainWithCoachPage() {
 
   const { userLocation, locationResolved } = useUserLocation();
 
-  // Fetch trainers from API only after location is resolved
+  // Update sort option when user location becomes available
+  useEffect(() => {
+    if (userLocation) {
+      setSortOption("location");
+      setSortOrder("asc");
+    }
+  }, [userLocation]);
+
+  // Initial fetch of trainers sorted by location
   useEffect(() => {
     if (!locationResolved) return;
+
     const fetchTrainers = async () => {
       try {
         setLoading(true);
-        let url = "/api/users/trainers";
+        let url = "/api/users/trainers?limit=100";
+
+        // Always include location parameters if available for initial sorting
         if (userLocation) {
-          url += `?lat=${userLocation.lat}&lon=${userLocation.lon}&sortBy=location&limit=100`;
+          url += `&lat=${userLocation.lat}&lon=${userLocation.lon}&sortBy=location`;
+          console.log("Fetching with location:", {
+            lat: userLocation.lat,
+            lon: userLocation.lon,
+          });
         } else {
-          url += `?limit=100`;
+          url += "&sortBy=rating&sortOrder=desc";
+          console.log(
+            "Fetching without location - user location not available"
+          );
         }
+
+        console.log("Fetching trainers from URL:", url);
+
         const response = await fetch(url);
         if (!response.ok) {
           throw new Error("Failed to fetch trainers");
         }
         const data = await response.json();
+
         // Map distance and distanceSource for each trainer
         const mapped = data.trainers.map((trainer) => ({
           ...trainer,
@@ -66,9 +94,31 @@ export default function TrainWithCoachPage() {
           distanceSource: trainer.distanceSource ?? null,
         }));
 
-        console.log("Trainers with distance data:", mapped);
-        setTrainers(mapped);
-        setFilteredTrainers(mapped);
+        console.log("Received trainers:", {
+          total: mapped.length,
+          withDistance: mapped.filter((t) => t.distance !== null).length,
+          firstFive: mapped.slice(0, 5).map((t) => ({
+            name: `${t.firstName} ${t.lastName}`,
+            distance: t.distance,
+            distanceSource: t.distanceSource,
+            location: t.location,
+          })),
+        });
+
+        // Ensure initial sort by distance if available
+        const sorted = sortTrainers(mapped, "location", "asc");
+
+        console.log("After sorting:", {
+          firstFive: sorted.slice(0, 5).map((t) => ({
+            name: `${t.firstName} ${t.lastName}`,
+            distance: t.distance,
+            distanceSource: t.distanceSource,
+            location: t.location,
+          })),
+        });
+
+        setAllTrainers(sorted);
+        setFilteredTrainers(sorted);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching trainers:", err);
@@ -76,8 +126,107 @@ export default function TrainWithCoachPage() {
         setLoading(false);
       }
     };
+
     fetchTrainers();
   }, [userLocation, locationResolved]);
+
+  // Handle filtering based on search term and location
+  useEffect(() => {
+    if (!allTrainers.length) return;
+
+    let results = [...allTrainers];
+
+    // Apply name search filter
+    if (searchTerm) {
+      const searchTermLower = searchTerm.toLowerCase();
+      results = results.filter((trainer) => {
+        const fullName = `${trainer.firstName} ${
+          trainer.lastName || ""
+        }`.toLowerCase();
+        const hasNameMatch = fullName.includes(searchTermLower);
+        const hasSpecialtyMatch = trainer.specialties?.some((specialty) =>
+          specialty.name.toLowerCase().includes(searchTermLower)
+        );
+        const hasDescriptionMatch = trainer.description
+          ?.toLowerCase()
+          .includes(searchTermLower);
+
+        return hasNameMatch || hasSpecialtyMatch || hasDescriptionMatch;
+      });
+    }
+
+    // Apply location filter
+    if (selectedLocation) {
+      const cityParts = selectedLocation.label
+        .split(",")[0]
+        .split("-")
+        .map((part) => part.trim());
+      results = results.filter((trainer) => {
+        if (!trainer.location) return false;
+
+        const trainerCity = trainer.location.city.toLowerCase();
+        return cityParts.some(
+          (part) =>
+            trainerCity.includes(part.toLowerCase()) ||
+            trainerCity === selectedLocation.label.split(",")[0].toLowerCase()
+        );
+      });
+    }
+
+    // Apply sport filter
+    if (sportFilter) {
+      results = results.filter(
+        (trainer) =>
+          trainer.specialties &&
+          trainer.specialties.some(
+            (specialty) =>
+              specialty.name.toLowerCase() === sportFilter.toLowerCase()
+          )
+      );
+    }
+
+    // Sort results
+    results = sortTrainers(results, sortOption, sortOrder);
+
+    setFilteredTrainers(results);
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [
+    searchTerm,
+    selectedLocation,
+    sportFilter,
+    allTrainers,
+    sortOption,
+    sortOrder,
+  ]);
+
+  // Handle location search
+  useEffect(() => {
+    const fetchLocationSuggestions = async () => {
+      if (locationSearch.length < 2) {
+        setLocationSuggestions([]);
+        return;
+      }
+      setIsLoadingLocations(true);
+      try {
+        const suggestions = await searchCities(locationSearch);
+        setLocationSuggestions(suggestions);
+      } catch (error) {
+        console.error("Error fetching location suggestions:", error);
+        setLocationSuggestions([]);
+      }
+      setIsLoadingLocations(false);
+    };
+
+    const timeoutId = setTimeout(fetchLocationSuggestions, 300);
+    return () => clearTimeout(timeoutId);
+  }, [locationSearch]);
+
+  // Handle location selection
+  const handleLocationSelect = (location) => {
+    setSelectedLocation(location);
+    setLocationSearch(location.label);
+    setShowLocationSuggestions(false);
+  };
 
   // Function to open the coaching request confirmation
   const handleRequestCoaching = (trainer) => {
@@ -119,62 +268,11 @@ export default function TrainWithCoachPage() {
   const hasRequestedTrainer = (trainerId) =>
     requestedTrainers.includes(trainerId);
 
-  // Filter trainers based on search term and selected filters
-  useEffect(() => {
-    let results = [...trainers];
-
-    // Search filter
-    if (searchTerm) {
-      const query = searchTerm.toLowerCase();
-      results = results.filter(
-        (trainer) =>
-          (trainer.firstName &&
-            trainer.firstName.toLowerCase().includes(query)) ||
-          (trainer.lastName &&
-            trainer.lastName.toLowerCase().includes(query)) ||
-          (trainer.description &&
-            trainer.description.toLowerCase().includes(query)) ||
-          (trainer.specialties &&
-            trainer.specialties.some((specialty) =>
-              specialty.name.toLowerCase().includes(query)
-            ))
-      );
-    }
-
-    // Goal filter (matching specialties)
-    if (goalFilter) {
-      results = results.filter(
-        (trainer) =>
-          trainer.specialties &&
-          trainer.specialties.some(
-            (specialty) =>
-              specialty.name.toLowerCase() === goalFilter.toLowerCase()
-          )
-      );
-    }
-
-    // Sport filter (matching specialties or training types)
-    if (sportFilter) {
-      results = results.filter(
-        (trainer) =>
-          trainer.specialties &&
-          trainer.specialties.some(
-            (specialty) =>
-              specialty.name.toLowerCase() === sportFilter.toLowerCase()
-          )
-      );
-    }
-
-    // Sort the results
-    results = sortTrainers(results, sortOption, sortOrder);
-
-    setFilteredTrainers(results);
-    setCurrentPage(1); // Reset to first page when filters change
-  }, [searchTerm, goalFilter, sportFilter, trainers, sortOption, sortOrder]);
-
   // Function to sort trainers
-  const sortTrainers = (trainersToSort, option, order) =>
-    [...trainersToSort].sort((a, b) => {
+  const sortTrainers = (trainersToSort, option, order) => {
+    console.log("Sorting trainers:", { option, order });
+
+    return [...trainersToSort].sort((a, b) => {
       let comparison = 0;
 
       switch (option) {
@@ -200,7 +298,12 @@ export default function TrainWithCoachPage() {
             typeof b.distance === "number"
           ) {
             comparison = a.distance - b.distance;
+          } else if (typeof a.distance === "number") {
+            comparison = -1; // a comes first if only a has distance
+          } else if (typeof b.distance === "number") {
+            comparison = 1; // b comes first if only b has distance
           }
+          // If neither has distance, maintain current order
           break;
         default:
           comparison = 0;
@@ -209,10 +312,11 @@ export default function TrainWithCoachPage() {
       // Reverse for descending order
       return order === "asc" ? comparison : -comparison;
     });
+  };
 
   // Define sort options
   const sortOptions = [
-    ...(trainers.some((t) => typeof t.distance === "number")
+    ...(allTrainers.some((t) => typeof t.distance === "number")
       ? [{ value: "location", label: "Location (Closest)" }]
       : []),
     { value: "rating", label: "Rating" },
@@ -227,11 +331,13 @@ export default function TrainWithCoachPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Handle clear filters
+  // Clear all filters
   const handleClearFilters = () => {
     setSearchTerm("");
-    setGoalFilter("");
+    setLocationSearch("");
+    setSelectedLocation("");
     setSportFilter("");
+    setFilteredTrainers(allTrainers);
   };
 
   if (loading || !locationResolved) {
@@ -273,6 +379,130 @@ export default function TrainWithCoachPage() {
   return (
     <div className="relative min-h-screen overflow-x-hidden text-white">
       <div className="relative z-10">
+        {/* Search Controls */}
+        <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Name Search */}
+          <div className="relative">
+            <FormField
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search trainers by name..."
+              className="w-full bg-zinc-800 border-zinc-700 text-white rounded-lg focus:ring-2 focus:ring-[#3E92CC]/40 focus:border-[#3E92CC]"
+              prefixIcon="mdi:magnify"
+            />
+            {searchTerm && (
+              <button
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+                onClick={() => setSearchTerm("")}
+              >
+                <Icon
+                  icon="mdi:close"
+                  className="w-5 h-5 text-zinc-400 hover:text-white"
+                />
+              </button>
+            )}
+          </div>
+
+          {/* Location Search */}
+          <div className="relative">
+            <FormField
+              type="text"
+              value={locationSearch}
+              onChange={(e) => {
+                setLocationSearch(e.target.value);
+                setShowLocationSuggestions(true);
+              }}
+              onFocus={() => setShowLocationSuggestions(true)}
+              placeholder="Search by location..."
+              className="w-full bg-zinc-800 border-zinc-700 text-white rounded-lg focus:ring-2 focus:ring-[#3E92CC]/40 focus:border-[#3E92CC]"
+              prefixIcon="mdi:map-marker"
+            />
+            {locationSearch && (
+              <button
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+                onClick={() => {
+                  setLocationSearch("");
+                  setSelectedLocation("");
+                }}
+              >
+                <Icon
+                  icon="mdi:close"
+                  className="w-5 h-5 text-zinc-400 hover:text-white"
+                />
+              </button>
+            )}
+
+            {/* Location Suggestions Dropdown */}
+            {showLocationSuggestions &&
+              (locationSuggestions.length > 0 || isLoadingLocations) && (
+                <div className="absolute z-50 w-full mt-1 bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {isLoadingLocations ? (
+                    <div className="p-3 text-center text-zinc-400">
+                      Loading locations...
+                    </div>
+                  ) : (
+                    locationSuggestions.map((location) => (
+                      <button
+                        key={location.value}
+                        className="w-full px-4 py-2 text-left hover:bg-zinc-700 focus:bg-zinc-700 focus:outline-none"
+                        onClick={() => handleLocationSelect(location)}
+                      >
+                        <div className="flex items-center">
+                          <Icon
+                            icon="mdi:map-marker"
+                            className="w-5 h-5 mr-2 text-[#3E92CC]"
+                          />
+                          <span>{location.label}</span>
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+          </div>
+        </div>
+
+        {/* Active Filters */}
+        {(searchTerm || selectedLocation) && (
+          <div className="mb-4 flex flex-wrap gap-2">
+            {searchTerm && (
+              <div className="flex items-center bg-[#3E92CC] px-3 py-1 rounded-full text-sm">
+                <span>Name: {searchTerm}</span>
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="ml-2 hover:text-zinc-200"
+                >
+                  <Icon icon="mdi:close" className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+            {selectedLocation && (
+              <div className="flex items-center bg-[#3E92CC] px-3 py-1 rounded-full text-sm">
+                <Icon icon="mdi:map-marker" className="w-4 h-4 mr-1" />
+                <span>{selectedLocation.label}</span>
+                <button
+                  onClick={() => {
+                    setSelectedLocation("");
+                    setLocationSearch("");
+                  }}
+                  className="ml-2 hover:text-zinc-200"
+                >
+                  <Icon icon="mdi:close" className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+            {(searchTerm || selectedLocation) && (
+              <button
+                onClick={handleClearFilters}
+                className="text-sm text-[#3E92CC] hover:text-[#2D7EB8] flex items-center"
+              >
+                Clear all filters
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Sort Controls */}
         <SortControls
           sortOption={sortOption}

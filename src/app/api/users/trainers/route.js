@@ -61,36 +61,57 @@ export async function GET(request) {
 
     // Search filter (name, description, specialties)
     if (search) {
+      const searchTerms = search.toLowerCase().split(" ");
       queryOptions.where.OR = [
-        { firstName: { contains: search } },
-        { lastName: { contains: search } },
-        { description: { contains: search } },
-        {
-          specialties: {
-            some: {
-              name: { contains: search },
+        ...searchTerms.map((term) => ({
+          OR: [
+            { firstName: { contains: term } },
+            { lastName: { contains: term } },
+            { description: { contains: term } },
+            {
+              specialties: {
+                some: {
+                  name: { contains: term },
+                },
+              },
             },
-          },
-        },
+          ],
+        })),
       ];
     }
-    // Location filter (city+country string)
+
+    // Location filter (city+country string from Google Places)
     if (locations && locations.length > 0) {
-      queryOptions.where.OR = [
-        ...(queryOptions.where.OR || []),
-        {
-          location: {
-            OR: locations.map((loc) => {
-              const [city, country] = loc.split(",").map((s) => s.trim());
-              return {
-                city: city || undefined,
-                country: country || undefined,
-              };
-            }),
-          },
+      const locationQueries = locations.map((loc) => {
+        const addressComponents = loc.split(", ");
+        const city = addressComponents[0];
+        const country = addressComponents[addressComponents.length - 1];
+
+        // Split city into parts (for handling districts)
+        const cityParts = city.split("-").map((part) => part.trim());
+
+        return {
+          OR: [
+            // Exact city match
+            { city },
+            // Main city match (before district)
+            { city: cityParts[0] },
+            // Partial city match
+            { city: { contains: cityParts[0] } },
+          ],
+          country: { contains: country },
+        };
+      });
+
+      // Combine with existing OR conditions if any
+      queryOptions.where.OR = queryOptions.where.OR || [];
+      queryOptions.where.OR.push({
+        location: {
+          OR: locationQueries,
         },
-      ];
+      });
     }
+
     // Price filter
     if (priceMin !== null || priceMax !== null) {
       queryOptions.where.AND = [
@@ -175,12 +196,28 @@ export async function GET(request) {
       queryOptions.skip = skip;
     }
 
-    let trainers = await prisma.trainerProfile.findMany(queryOptions);
-    const totalTrainers = await prisma.trainerProfile.count({
-      where: queryOptions.where,
-    });
+    let trainers = [];
+    let totalTrainers = 0;
 
-    // Mapiraj gymove iz trainerGyms u location.gyms
+    try {
+      trainers = await prisma.trainerProfile.findMany(queryOptions);
+      totalTrainers = await prisma.trainerProfile.count({
+        where: queryOptions.where,
+      });
+    } catch (error) {
+      // If the table doesn't exist or there's any other error, we'll return empty results
+      if (error.code === "P2021") {
+        console.log(
+          "Trainer table does not exist yet, returning empty results"
+        );
+      } else {
+        console.error("Error fetching trainers:", error);
+      }
+      trainers = [];
+      totalTrainers = 0;
+    }
+
+    // Map gyms from trainerGyms to location.gyms
     trainers = trainers.map((trainer) => {
       let gyms = [];
       if (Array.isArray(trainer.trainerGyms)) {
@@ -274,10 +311,13 @@ export async function GET(request) {
       },
     });
   } catch (error) {
-    console.error("Error fetching trainers:", error);
+    console.error("Error in trainers API:", error);
     return NextResponse.json(
-      { error: "Failed to fetch trainers" },
-      { status: 500 }
+      {
+        trainers: [],
+        pagination: { total: 0, pages: 1, currentPage: 1, limit: 0 },
+      },
+      { status: 200 }
     );
   }
 }
