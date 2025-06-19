@@ -1,6 +1,6 @@
 import { Icon } from "@iconify/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { FilterChips } from "./FilterChips";
 import { PriceRangeSlider } from "./PriceRangeSlider";
@@ -10,9 +10,9 @@ import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import {
   getAllAvailabilityDays,
-  getAllLocations,
   getAllTags,
 } from "@/components/custom/home-page/trainers-marketplace/data/trainersData";
+import { searchCities } from "@/lib/googlePlaces";
 
 export const SearchFilters = ({
   searchQuery,
@@ -29,9 +29,33 @@ export const SearchFilters = ({
     tags: false,
   });
 
-  const locations = getAllLocations();
+  const [citySearchQuery, setCitySearchQuery] = useState("");
+  const [citySuggestions, setCitySuggestions] = useState([]);
+  const [isLoadingCities, setIsLoadingCities] = useState(false);
+
   const availabilityDays = getAllAvailabilityDays();
   const tags = getAllTags();
+
+  useEffect(() => {
+    const fetchCitySuggestions = async () => {
+      if (citySearchQuery.length < 2) {
+        setCitySuggestions([]);
+        return;
+      }
+      setIsLoadingCities(true);
+      try {
+        const suggestions = await searchCities(citySearchQuery);
+        setCitySuggestions(suggestions);
+      } catch (error) {
+        console.error("Error fetching city suggestions:", error);
+        setCitySuggestions([]);
+      }
+      setIsLoadingCities(false);
+    };
+
+    const timeoutId = setTimeout(fetchCitySuggestions, 300);
+    return () => clearTimeout(timeoutId);
+  }, [citySearchQuery]);
 
   const toggleSection = (section) => {
     setIsExpanded({
@@ -168,19 +192,49 @@ export const SearchFilters = ({
               transition={{ duration: 0.3 }}
               className="overflow-hidden"
             >
-              <div className="space-y-2 mt-2">
-                {locations.map((location) => (
-                  <FormField
-                    key={location}
-                    type="checkbox"
-                    id={`location-${location}`}
-                    name={`location-${location}`}
-                    label={location}
-                    checked={filters.location.includes(location)}
-                    onChange={() => handleLocationChange(location)}
-                    className="text-sm text-zinc-300"
-                  />
-                ))}
+              <div className="space-y-4">
+                <FormField
+                  type="text"
+                  value={citySearchQuery}
+                  onChange={(e) => setCitySearchQuery(e.target.value)}
+                  placeholder="Search for a city..."
+                  className="mb-2 w-full bg-zinc-800 border-zinc-700 text-white rounded-lg focus:ring-2 focus:ring-[#FF6B00]/40 focus:border-[#FF6B00]"
+                />
+
+                {isLoadingCities && (
+                  <div className="text-sm text-zinc-400">Loading cities...</div>
+                )}
+
+                <div className="space-y-2">
+                  {citySuggestions.map((city) => (
+                    <FormField
+                      key={city.value}
+                      type="checkbox"
+                      id={`location-${city.value}`}
+                      name={`location-${city.value}`}
+                      label={city.label}
+                      checked={filters.location.includes(city.value)}
+                      onChange={() => handleLocationChange(city.value)}
+                      className="text-sm text-zinc-300"
+                    />
+                  ))}
+                </div>
+
+                {filters.location.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {filters.location.map((location) => (
+                      <Button
+                        key={location}
+                        variant="orangeFilled"
+                        size="small"
+                        onClick={() => handleLocationChange(location)}
+                        className="px-2.5 py-1 text-xs font-medium rounded-full"
+                      >
+                        {location} ×
+                      </Button>
+                    ))}
+                  </div>
+                )}
               </div>
             </motion.div>
           )}

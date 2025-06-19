@@ -15,10 +15,14 @@ export const TrainersSection = () => {
     const fetchTrainers = async () => {
       try {
         const response = await fetch("/api/users/trainers");
+        if (!response.ok) {
+          throw new Error("Failed to fetch trainers");
+        }
         const data = await response.json();
-        setTrainers(data.trainers);
+        setTrainers(data.trainers || []);
       } catch (error) {
         console.error("Error fetching trainers:", error);
+        setTrainers([]);
       } finally {
         setLoading(false);
       }
@@ -44,6 +48,32 @@ export const TrainersSection = () => {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (trainers.length === 0) {
+    return (
+      <div className="w-full py-10">
+        <div className="text-center">
+          <div className="inline-flex items-center px-3 py-1 gap-2 mb-4 rounded-full bg-[#FF6B00]/10 border border-[#FF6B00]/20">
+            <span className="text-[#FF6B00]">
+              <Icon icon="mdi:account-group" className="text-sm" />
+            </span>
+            <span className="text-sm font-medium text-[#FF6B00]">
+              Featured Trainers
+            </span>
+          </div>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3">
+            <span className="bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] bg-clip-text text-transparent">
+              No Trainers Available
+            </span>
+          </h2>
+          <p className="text-gray-300 max-w-2xl mt-3 mx-auto">
+            We're currently working on bringing the best trainers to our
+            platform. Check back soon!
+          </p>
         </div>
       </div>
     );
