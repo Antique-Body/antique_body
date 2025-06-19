@@ -29,14 +29,6 @@ export const Expertise = ({ trainer }) => {
     );
   }
 
-  // Map specialties to expertise areas with default proficiency levels
-  const expertise = specialties
-    .map((specialty, index) => ({
-      area: specialty,
-      level: 80 + (index % 3) * 5, // Generate varying levels between 80-90%
-    }))
-    .slice(0, 5); // Limit to 5 specialties
-
   // Group specialties by category
   const specialtyCategories = {
     strengthConditioning: specialties.filter((s) => {
@@ -78,27 +70,6 @@ export const Expertise = ({ trainer }) => {
 
   return (
     <div>
-      <h3 className="mb-4 text-lg font-semibold text-white">
-        Areas of Expertise
-      </h3>
-
-      <div className="mb-6 space-y-4">
-        {expertise.map((item, index) => (
-          <div key={index}>
-            <div className="mb-1 flex justify-between">
-              <span className="text-gray-300">{item.area}</span>
-              <span className="text-[#FF6B00]">{item.level}%</span>
-            </div>
-            <div className="h-2 overflow-hidden rounded-full bg-[#333]">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-[#FF6B00] to-[#FF9A00]"
-                style={{ width: `${item.level}%` }}
-              ></div>
-            </div>
-          </div>
-        ))}
-      </div>
-
       <h3 className="mb-3 text-lg font-semibold text-white">
         Specialization Details
       </h3>
