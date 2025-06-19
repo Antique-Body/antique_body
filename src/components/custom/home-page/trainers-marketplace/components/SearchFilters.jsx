@@ -141,8 +141,7 @@ export const SearchFilters = ({
   const hasActiveFilters = countActiveFilters() > 0 || searchQuery !== "";
 
   // Render star rating
-  const renderStars = (rating) => {
-    return (
+  const renderStars = (rating) => (
       <div className="flex items-center">
         {[1, 2, 3, 4, 5].map((star) => (
           <Icon
@@ -157,7 +156,6 @@ export const SearchFilters = ({
         ))}
       </div>
     );
-  };
 
   return (
     <div className="bg-zinc-900/50 backdrop-blur-sm rounded-xl border border-zinc-800 p-4">
