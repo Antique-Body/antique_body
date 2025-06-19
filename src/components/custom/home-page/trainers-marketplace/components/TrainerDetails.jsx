@@ -93,37 +93,6 @@ const ExpertiseSection = ({ trainer }) => (
   <div className="space-y-4 sm:space-y-6">
     <div>
       <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">
-        Areas of Expertise
-      </h3>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
-        {trainer.specializations ? (
-          trainer.specializations.map((spec, index) => (
-            <div
-              key={index}
-              className="flex items-start p-2.5 sm:p-3 bg-zinc-800/50 border border-zinc-700 rounded-lg"
-            >
-              <div className="p-1.5 sm:p-2 bg-[#FF6B00]/20 rounded-full mr-2.5 sm:mr-3">
-                <Icon
-                  icon="mdi:check"
-                  className="h-3.5 w-3.5 sm:h-5 sm:w-5 text-[#FF6B00]"
-                />
-              </div>
-              <div>
-                <h4 className="font-medium text-sm sm:text-base text-white">
-                  {spec}
-                </h4>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="text-sm text-zinc-400">No specializations listed</div>
-        )}
-      </div>
-    </div>
-
-    <div>
-      <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">
         Certifications
       </h3>
 
@@ -154,37 +123,6 @@ const ExpertiseSection = ({ trainer }) => (
           ))
         ) : (
           <div className="text-sm text-zinc-400">No certifications listed</div>
-        )}
-      </div>
-    </div>
-
-    <div>
-      <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">
-        Achievements
-      </h3>
-
-      <div className="grid grid-cols-1 gap-3">
-        {trainer.achievements ? (
-          trainer.achievements.map((achievement, index) => (
-            <div
-              key={index}
-              className="flex items-center p-2.5 sm:p-3 bg-zinc-800/50 border border-zinc-700 rounded-lg"
-            >
-              <div className="p-1.5 sm:p-2 bg-[#FF6B00]/20 rounded-full mr-2.5 sm:mr-3">
-                <Icon
-                  icon="mdi:trophy"
-                  className="h-3.5 w-3.5 sm:h-5 sm:w-5 text-[#FF6B00]"
-                />
-              </div>
-              <div>
-                <h4 className="font-medium text-sm sm:text-base text-white">
-                  {achievement}
-                </h4>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="text-sm text-zinc-400">No achievements listed</div>
         )}
       </div>
     </div>

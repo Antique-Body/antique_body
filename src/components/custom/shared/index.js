@@ -1,7 +1,13 @@
 export { CertificationUpload } from "./CertificationUpload";
-// export { LanguageSelector } from "./LanguageSelector";
-// export { RootErrorBoundary } from "./RootErrorBoundary";
-export { TrainingTypeSelector } from "./TrainingTypeSelector";
-export { SpecialtySelector } from "./SpecialtySelector";
+export { RootErrorBoundary } from "./RootErrorBoundary";
+export { LanguageSelector } from "./LanguageSelector";
 export { ProfileImageUpload } from "./ProfileImageUpload";
-export { default as I18nProvider } from "./I18nProvider";
+export { SpecialtySelector } from "./SpecialtySelector";
+export { TrainingTypeSelector } from "./TrainingTypeSelector";
+export { I18nProvider } from "./I18nProvider";
+
+// New shared components
+export { SearchFilters } from "./SearchFilters";
+export { NoResults } from "./NoResults";
+export { Pagination } from "./Pagination";
+export { SortControls } from "./SortControls";

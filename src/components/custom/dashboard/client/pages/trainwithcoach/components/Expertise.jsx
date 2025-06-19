@@ -1,8 +1,14 @@
 import { Icon } from "@iconify/react";
 
 export const Expertise = ({ trainer }) => {
+  // Use formatted specialties if available, otherwise use regular specialties
+  const specialties =
+    trainer?.formattedSpecialties ||
+    trainer?.specialties?.map((s) => (typeof s === "string" ? s : s.name)) ||
+    [];
+
   // If no specialties are available, show a placeholder message
-  if (!trainer?.specialties || trainer.specialties.length === 0) {
+  if (!specialties || specialties.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <div className="mb-4 rounded-full bg-[rgba(255,107,0,0.1)] p-4">
@@ -24,48 +30,48 @@ export const Expertise = ({ trainer }) => {
   }
 
   // Map specialties to expertise areas with default proficiency levels
-  const expertise = trainer.specialties
+  const expertise = specialties
     .map((specialty, index) => ({
-      area: typeof specialty === "string" ? specialty : specialty.name,
+      area: specialty,
       level: 80 + (index % 3) * 5, // Generate varying levels between 80-90%
     }))
     .slice(0, 5); // Limit to 5 specialties
 
   // Group specialties by category
   const specialtyCategories = {
-    strengthConditioning: trainer.specialties.filter((s) => {
-      const specialtyName = typeof s === "string" ? s : s.name;
+    strengthConditioning: specialties.filter((s) => {
+      const specialtyName = s.toLowerCase();
       return (
-        specialtyName.toLowerCase().includes("strength") ||
-        specialtyName.toLowerCase().includes("conditioning") ||
-        specialtyName.toLowerCase().includes("weight") ||
-        specialtyName.toLowerCase().includes("power")
+        specialtyName.includes("strength") ||
+        specialtyName.includes("conditioning") ||
+        specialtyName.includes("weight") ||
+        specialtyName.includes("power")
       );
     }),
-    performance: trainer.specialties.filter((s) => {
-      const specialtyName = typeof s === "string" ? s : s.name;
+    performance: specialties.filter((s) => {
+      const specialtyName = s.toLowerCase();
       return (
-        specialtyName.toLowerCase().includes("performance") ||
-        specialtyName.toLowerCase().includes("sport") ||
-        specialtyName.toLowerCase().includes("athletic")
+        specialtyName.includes("performance") ||
+        specialtyName.includes("sport") ||
+        specialtyName.includes("athletic")
       );
     }),
-    recovery: trainer.specialties.filter((s) => {
-      const specialtyName = typeof s === "string" ? s : s.name;
+    recovery: specialties.filter((s) => {
+      const specialtyName = s.toLowerCase();
       return (
-        specialtyName.toLowerCase().includes("recovery") ||
-        specialtyName.toLowerCase().includes("mobility") ||
-        specialtyName.toLowerCase().includes("flexibility") ||
-        specialtyName.toLowerCase().includes("injury")
+        specialtyName.includes("recovery") ||
+        specialtyName.includes("mobility") ||
+        specialtyName.includes("flexibility") ||
+        specialtyName.includes("injury")
       );
     }),
-    nutrition: trainer.specialties.filter((s) => {
-      const specialtyName = typeof s === "string" ? s : s.name;
+    nutrition: specialties.filter((s) => {
+      const specialtyName = s.toLowerCase();
       return (
-        specialtyName.toLowerCase().includes("nutrition") ||
-        specialtyName.toLowerCase().includes("diet") ||
-        specialtyName.toLowerCase().includes("food") ||
-        specialtyName.toLowerCase().includes("meal")
+        specialtyName.includes("nutrition") ||
+        specialtyName.includes("diet") ||
+        specialtyName.includes("food") ||
+        specialtyName.includes("meal")
       );
     }),
   };
@@ -114,10 +120,7 @@ export const Expertise = ({ trainer }) => {
             <ul className="space-y-1 text-gray-300">
               {specialtyCategories.strengthConditioning.map(
                 (specialty, index) => (
-                  <li key={index}>
-                    •{" "}
-                    {typeof specialty === "string" ? specialty : specialty.name}
-                  </li>
+                  <li key={index}>• {specialty}</li>
                 )
               )}
             </ul>
@@ -138,9 +141,7 @@ export const Expertise = ({ trainer }) => {
             </div>
             <ul className="space-y-1 text-gray-300">
               {specialtyCategories.performance.map((specialty, index) => (
-                <li key={index}>
-                  • {typeof specialty === "string" ? specialty : specialty.name}
-                </li>
+                <li key={index}>• {specialty}</li>
               ))}
             </ul>
           </div>
@@ -160,9 +161,7 @@ export const Expertise = ({ trainer }) => {
             </div>
             <ul className="space-y-1 text-gray-300">
               {specialtyCategories.recovery.map((specialty, index) => (
-                <li key={index}>
-                  • {typeof specialty === "string" ? specialty : specialty.name}
-                </li>
+                <li key={index}>• {specialty}</li>
               ))}
             </ul>
           </div>
@@ -182,9 +181,7 @@ export const Expertise = ({ trainer }) => {
             </div>
             <ul className="space-y-1 text-gray-300">
               {specialtyCategories.nutrition.map((specialty, index) => (
-                <li key={index}>
-                  • {typeof specialty === "string" ? specialty : specialty.name}
-                </li>
+                <li key={index}>• {specialty}</li>
               ))}
             </ul>
           </div>
@@ -215,7 +212,12 @@ export const Expertise = ({ trainer }) => {
                   <Icon icon="mdi:certificate" width={16} height={16} />
                 </div>
                 <div>
-                  <h5 className="font-medium text-white">{cert}</h5>
+                  <h5 className="font-medium text-white">
+                    {typeof cert === "string" ? cert : cert.name}
+                  </h5>
+                  {cert.issuer && (
+                    <p className="text-sm text-gray-400">{cert.issuer}</p>
+                  )}
                   {trainer.certificationDates &&
                     trainer.certificationDates[index] && (
                       <p className="text-sm text-gray-400">
