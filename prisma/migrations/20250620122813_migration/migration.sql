@@ -90,7 +90,7 @@ CREATE TABLE `PhoneVerification` (
 CREATE TABLE `Location` (
     `id` VARCHAR(191) NOT NULL,
     `city` VARCHAR(191) NOT NULL,
-    `state` VARCHAR(191) NOT NULL,
+    `state` VARCHAR(191) NULL,
     `country` VARCHAR(191) NOT NULL,
     `lat` DOUBLE NULL,
     `lon` DOUBLE NULL,
@@ -125,14 +125,15 @@ CREATE TABLE `TrainerProfile` (
     `trainingSince` INTEGER NULL,
     `profileImage` VARCHAR(191) NULL,
     `description` TEXT NULL,
+    `paidAds` DATETIME(3) NULL,
     `locationId` VARCHAR(191) NULL,
     `pricingType` VARCHAR(191) NULL,
     `pricePerSession` INTEGER NULL,
     `currency` VARCHAR(191) NULL,
     `contactEmail` VARCHAR(191) NULL,
     `contactPhone` VARCHAR(191) NULL,
-    `availability` JSON NULL,
-    `education` JSON NULL,
+    `sessionDuration` INTEGER NULL,
+    `cancellationPolicy` INTEGER NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -230,7 +231,7 @@ CREATE TABLE `ClientProfile` (
     `phone` VARCHAR(191) NULL,
     `locationId` VARCHAR(191) NULL,
     `profileImage` VARCHAR(191) NULL,
-    `bio` TEXT NULL,
+    `description` TEXT NULL,
     `medicalConditions` TEXT NULL,
     `allergies` TEXT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -287,6 +288,30 @@ CREATE TABLE `TrainerGym` (
 
     INDEX `TrainerGym_gymId_idx`(`gymId`),
     UNIQUE INDEX `TrainerGym_trainerId_gymId_key`(`trainerId`, `gymId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `ClientInfo` (
+    `id` VARCHAR(191) NOT NULL,
+    `clientProfileId` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `ClientInfo_clientProfileId_key`(`clientProfileId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `TrainerAvailability` (
+    `id` VARCHAR(191) NOT NULL,
+    `trainerProfileId` VARCHAR(191) NOT NULL,
+    `weekday` VARCHAR(191) NOT NULL,
+    `timeSlot` VARCHAR(191) NOT NULL,
+
+    INDEX `TrainerAvailability_trainerProfileId_idx`(`trainerProfileId`),
+    INDEX `TrainerAvailability_weekday_idx`(`weekday`),
+    INDEX `TrainerAvailability_timeSlot_idx`(`timeSlot`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -349,3 +374,9 @@ ALTER TABLE `TrainerGym` ADD CONSTRAINT `TrainerGym_trainerId_fkey` FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE `TrainerGym` ADD CONSTRAINT `TrainerGym_gymId_fkey` FOREIGN KEY (`gymId`) REFERENCES `Gym`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ClientInfo` ADD CONSTRAINT `ClientInfo_clientProfileId_fkey` FOREIGN KEY (`clientProfileId`) REFERENCES `ClientProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `TrainerAvailability` ADD CONSTRAINT `TrainerAvailability_trainerProfileId_fkey` FOREIGN KEY (`trainerProfileId`) REFERENCES `TrainerProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
