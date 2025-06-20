@@ -1,28 +1,24 @@
 "use client";
 import { Icon } from "@iconify/react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import { useUserLocation } from "@/app/layout";
-import { FormField } from "@/components/common/FormField";
 import { Modal } from "@/components/common/Modal";
-import {
-  TrainerProfileModal,
-  TrainerCard,
-} from "@/components/custom/dashboard/client/pages/trainwithcoach/components";
 import {
   NoResults,
   Pagination,
   SortControls,
 } from "@/components/custom/shared";
-import { searchCities } from "@/lib/googlePlaces";
+import {
+  TrainerCard,
+  TrainerProfileModal,
+} from "@/components/custom/shared/trainers-list";
 
 export default function TrainWithCoachPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [locationSearch, setLocationSearch] = useState("");
-  const [locationSuggestions, setLocationSuggestions] = useState([]);
-  const [selectedLocation, setSelectedLocation] = useState("");
-  const [isLoadingLocations, setIsLoadingLocations] = useState(false);
-  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState(null);
   const [sportFilter, setSportFilter] = useState("");
   const [allTrainers, setAllTrainers] = useState([]);
   const [filteredTrainers, setFilteredTrainers] = useState([]);
@@ -199,35 +195,6 @@ export default function TrainWithCoachPage() {
     sortOrder,
   ]);
 
-  // Handle location search
-  useEffect(() => {
-    const fetchLocationSuggestions = async () => {
-      if (locationSearch.length < 2) {
-        setLocationSuggestions([]);
-        return;
-      }
-      setIsLoadingLocations(true);
-      try {
-        const suggestions = await searchCities(locationSearch);
-        setLocationSuggestions(suggestions);
-      } catch (error) {
-        console.error("Error fetching location suggestions:", error);
-        setLocationSuggestions([]);
-      }
-      setIsLoadingLocations(false);
-    };
-
-    const timeoutId = setTimeout(fetchLocationSuggestions, 300);
-    return () => clearTimeout(timeoutId);
-  }, [locationSearch]);
-
-  // Handle location selection
-  const handleLocationSelect = (location) => {
-    setSelectedLocation(location);
-    setLocationSearch(location.label);
-    setShowLocationSuggestions(false);
-  };
-
   // Function to open the coaching request confirmation
   const handleRequestCoaching = (trainer) => {
     setSelectedTrainer(trainer);
@@ -335,7 +302,7 @@ export default function TrainWithCoachPage() {
   const handleClearFilters = () => {
     setSearchTerm("");
     setLocationSearch("");
-    setSelectedLocation("");
+    setSelectedLocation(null);
     setSportFilter("");
     setFilteredTrainers(allTrainers);
   };
@@ -379,131 +346,7 @@ export default function TrainWithCoachPage() {
   return (
     <div className="relative min-h-screen overflow-x-hidden text-white">
       <div className="relative z-10">
-        {/* Search Controls */}
-        <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Name Search */}
-          <div className="relative">
-            <FormField
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search trainers by name..."
-              className="w-full bg-zinc-800 border-zinc-700 text-white rounded-lg focus:ring-2 focus:ring-[#3E92CC]/40 focus:border-[#3E92CC]"
-              prefixIcon="mdi:magnify"
-            />
-            {searchTerm && (
-              <button
-                className="absolute right-3 top-1/2 -translate-y-1/2"
-                onClick={() => setSearchTerm("")}
-              >
-                <Icon
-                  icon="mdi:close"
-                  className="w-5 h-5 text-zinc-400 hover:text-white"
-                />
-              </button>
-            )}
-          </div>
-
-          {/* Location Search */}
-          <div className="relative">
-            <FormField
-              type="text"
-              value={locationSearch}
-              onChange={(e) => {
-                setLocationSearch(e.target.value);
-                setShowLocationSuggestions(true);
-              }}
-              onFocus={() => setShowLocationSuggestions(true)}
-              placeholder="Search by location..."
-              className="w-full bg-zinc-800 border-zinc-700 text-white rounded-lg focus:ring-2 focus:ring-[#3E92CC]/40 focus:border-[#3E92CC]"
-              prefixIcon="mdi:map-marker"
-            />
-            {locationSearch && (
-              <button
-                className="absolute right-3 top-1/2 -translate-y-1/2"
-                onClick={() => {
-                  setLocationSearch("");
-                  setSelectedLocation("");
-                }}
-              >
-                <Icon
-                  icon="mdi:close"
-                  className="w-5 h-5 text-zinc-400 hover:text-white"
-                />
-              </button>
-            )}
-
-            {/* Location Suggestions Dropdown */}
-            {showLocationSuggestions &&
-              (locationSuggestions.length > 0 || isLoadingLocations) && (
-                <div className="absolute z-50 w-full mt-1 bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                  {isLoadingLocations ? (
-                    <div className="p-3 text-center text-zinc-400">
-                      Loading locations...
-                    </div>
-                  ) : (
-                    locationSuggestions.map((location) => (
-                      <button
-                        key={location.value}
-                        className="w-full px-4 py-2 text-left hover:bg-zinc-700 focus:bg-zinc-700 focus:outline-none"
-                        onClick={() => handleLocationSelect(location)}
-                      >
-                        <div className="flex items-center">
-                          <Icon
-                            icon="mdi:map-marker"
-                            className="w-5 h-5 mr-2 text-[#3E92CC]"
-                          />
-                          <span>{location.label}</span>
-                        </div>
-                      </button>
-                    ))
-                  )}
-                </div>
-              )}
-          </div>
-        </div>
-
-        {/* Active Filters */}
-        {(searchTerm || selectedLocation) && (
-          <div className="mb-4 flex flex-wrap gap-2">
-            {searchTerm && (
-              <div className="flex items-center bg-[#3E92CC] px-3 py-1 rounded-full text-sm">
-                <span>Name: {searchTerm}</span>
-                <button
-                  onClick={() => setSearchTerm("")}
-                  className="ml-2 hover:text-zinc-200"
-                >
-                  <Icon icon="mdi:close" className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-            {selectedLocation && (
-              <div className="flex items-center bg-[#3E92CC] px-3 py-1 rounded-full text-sm">
-                <Icon icon="mdi:map-marker" className="w-4 h-4 mr-1" />
-                <span>{selectedLocation.label}</span>
-                <button
-                  onClick={() => {
-                    setSelectedLocation("");
-                    setLocationSearch("");
-                  }}
-                  className="ml-2 hover:text-zinc-200"
-                >
-                  <Icon icon="mdi:close" className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-            {(searchTerm || selectedLocation) && (
-              <button
-                onClick={handleClearFilters}
-                className="text-sm text-[#3E92CC] hover:text-[#2D7EB8] flex items-center"
-              >
-                Clear all filters
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* Sort Controls */}
+        {/* Enhanced SortControls with integrated search and location filters */}
         <SortControls
           sortOption={sortOption}
           setSortOption={setSortOption}
@@ -512,6 +355,13 @@ export default function TrainWithCoachPage() {
           itemCount={filteredTrainers.length}
           sortOptions={sortOptions}
           variant="blue"
+          searchQuery={searchTerm}
+          setSearchQuery={setSearchTerm}
+          locationSearch={locationSearch}
+          setLocationSearch={setLocationSearch}
+          selectedLocation={selectedLocation}
+          setSelectedLocation={setSelectedLocation}
+          onClearFilters={handleClearFilters}
         />
 
         {/* Trainer List */}
@@ -524,6 +374,7 @@ export default function TrainWithCoachPage() {
                 onRequestCoaching={handleRequestCoaching}
                 onViewProfile={handleViewProfile}
                 hasRequested={hasRequestedTrainer(trainer.id)}
+                colorVariant="blue"
               />
             ))}
           </div>
@@ -574,10 +425,12 @@ export default function TrainWithCoachPage() {
           <div className="mb-6 flex items-center gap-4">
             <div className="h-16 w-16 overflow-hidden rounded-full">
               {selectedTrainer.profileImage ? (
-                <img
+                <Image
                   src={selectedTrainer.profileImage}
                   alt={`${selectedTrainer.firstName} profile`}
-                  className="h-full w-full object-cover"
+                  className="object-cover"
+                  width={64}
+                  height={64}
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#3E92CC] to-[#2D7EB8]">
