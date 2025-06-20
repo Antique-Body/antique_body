@@ -97,7 +97,7 @@ export const Modal = memo(
           {/* Modal content - with scrolling */}
           <div className="flex-1 overflow-y-auto">
             <div className="p-4 sm:p-5">
-              {message}
+              <div className="mb-4">{message}</div>
               {children}
             </div>
           </div>
