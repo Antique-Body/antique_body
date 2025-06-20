@@ -73,7 +73,7 @@ export const Specialties = ({ trainerData, handleChange, setTrainerData }) => (
           <div>
             <h3 className="text-gray-300 font-medium">Environment</h3>
             <p className="text-xs text-gray-400">
-              {trainerData.trainerProfile.trainingEnvironments?.[0]
+              {trainerData.trainerProfile.trainingEnvironment
                 ? "Set"
                 : "Not set yet"}
             </p>
@@ -118,7 +118,7 @@ export const Specialties = ({ trainerData, handleChange, setTrainerData }) => (
 
       <TrainingTypeSelector
         selectedEnvironment={
-          trainerData.trainerProfile.trainingEnvironments?.[0] || ""
+          trainerData.trainerProfile.trainingEnvironment || ""
         }
         selectedTypes={trainerData.trainerProfile.trainingTypes || []}
         onEnvironmentChange={(environment) => {
@@ -126,7 +126,7 @@ export const Specialties = ({ trainerData, handleChange, setTrainerData }) => (
             ...trainerData,
             trainerProfile: {
               ...trainerData.trainerProfile,
-              trainingEnvironments: [environment],
+              trainingEnvironment: environment,
             },
           });
         }}

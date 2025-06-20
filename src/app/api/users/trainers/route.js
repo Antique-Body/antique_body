@@ -55,6 +55,11 @@ export async function GET(request) {
             gym: true,
           },
         },
+        galleryImages: {
+          orderBy: {
+            order: "asc",
+          },
+        },
       },
       where: {},
     };

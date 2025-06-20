@@ -40,10 +40,9 @@ const UPLOAD_CONFIG = {
       "image/png",
       "image/jpg",
       "image/gif",
-      "image/x-png",
     ],
     folder: "gallery",
-    maxSize: 10,
+    maxSize: 1,
   },
   videos: {
     allowedTypes: [
