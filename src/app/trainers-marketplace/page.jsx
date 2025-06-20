@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react";
 import { useState, useEffect } from "react";
 
 import { useUserLocation } from "@/app/layout";
+import { FullScreenLoader } from "@/components";
 import { Footer } from "@/components/common/Footer";
 import { Navigation } from "@/components/custom/home-page/shared";
 import { SearchFilters } from "@/components/custom/home-page/trainers-marketplace/components/SearchFilters";
@@ -323,29 +324,9 @@ export default function TrainersMarketplace() {
 
   if (loading) {
     return (
-      <div className="relative min-h-screen w-full overflow-x-hidden bg-black text-white">
-        {/* Background effects */}
-        <div className="fixed inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-black via-[#0a0a0a] to-black"></div>
-          <div className="absolute top-1/4 -left-40 w-[800px] h-[800px] rounded-full bg-[#FF6B00]/20 blur-[100px] animate-pulse"></div>
-          <div
-            className="absolute bottom-1/4 -right-40 w-[800px] h-[800px] rounded-full bg-[#FF9A00]/20 blur-[100px] animate-pulse"
-            style={{ animationDelay: "2s" }}
-          ></div>
-          <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20"></div>
-        </div>
-
-        <div className="relative z-10">
-          <Navigation />
-
-          <div className="flex h-64 w-full items-center justify-center">
-            <div className="flex flex-col items-center">
-              <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#FF6B00] border-t-transparent"></div>
-              <p className="mt-4 text-zinc-400">Loading trainers...</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <>
+        <FullScreenLoader text={"Loading trainers..."} />
+      </>
     );
   }
 
