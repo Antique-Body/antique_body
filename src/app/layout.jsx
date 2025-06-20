@@ -38,6 +38,7 @@ function UserLocationProvider({ children }) {
           setLocationResolved(true);
         },
         (err) => {
+          console.error("Error getting user location:", err);
           setUserLocation(null);
           setLocationResolved(true);
         }

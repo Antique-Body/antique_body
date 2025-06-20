@@ -6,7 +6,6 @@ export const PriceRangeSlider = ({ min, max, value, onChange }) => {
   const [localValues, setLocalValues] = useState(value);
   const [isDragging, setIsDragging] = useState(null);
   const trackRef = useRef(null);
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
   useEffect(() => {
     setLocalValues(value);
