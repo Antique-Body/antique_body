@@ -173,6 +173,7 @@ model TrainerProfile {
   trainerGyms       TrainerGym[]
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   availabilities    TrainerAvailability[]
+  exercises         Exercise[]
 }
 
 model TrainerSpecialty {
@@ -342,4 +343,56 @@ model TrainerAvailability {
   @@index([trainerProfileId])
   @@index([weekday])
   @@index([timeSlot])
+}
+
+// Exercise models
+model Exercise {
+  id                String   @id @default(cuid())
+  trainerProfileId  String
+  name              String
+  location          String   // "gym", "home", "outdoor"
+  equipment         Boolean  @default(true)
+  type              String   // "strength", "bodyweight", "cardio", "flexibility", "balance"
+  level             String   // "beginner", "intermediate", "advanced"
+  description       String   @db.Text
+  instructions      String   @db.Text
+  video             String?  // URL to video
+  imageUrl          String?  // URL to image
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  trainerProfile    TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
+  muscleGroups      ExerciseMuscleGroup[]
+  exerciseInfo      ExerciseInfo?
+  
+  @@index([trainerProfileId])
+  @@index([type])
+  @@index([level])
+  @@index([location])
+  @@index([equipment])
+}
+
+model ExerciseMuscleGroup {
+  id          String   @id @default(cuid())
+  exerciseId  String
+  name        String   // "chest", "back", "shoulders", etc.
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  
+  @@index([exerciseId])
+  @@index([name])
+}
+
+model ExerciseInfo {
+  id                String   @id @default(cuid())
+  exerciseId        String   @unique
+  totalUses         Int      @default(0)
+  averageRating     Float?
+  totalRatings      Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  exercise          Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 }

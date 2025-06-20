@@ -201,3 +201,59 @@ export const validateTrainerProfile = (data) => {
     errors,
   };
 };
+
+export const validateExercise = (data) => {
+  const errors = {};
+  if (!data) {
+    return { valid: false, errors: { general: "No data provided" } };
+  }
+
+  const requiredFields = [
+    "name",
+    "location",
+    "equipment",
+    "type",
+    "level",
+    "description",
+    "instructions",
+    "muscleGroups",
+  ];
+
+  for (const field of requiredFields) {
+    if (
+      !data[field] ||
+      (Array.isArray(data[field]) && data[field].length === 0)
+    ) {
+      errors[field] = `Field '${field}' is required.`;
+    }
+  }
+
+  // Validate type
+  const validTypes = [
+    "strength",
+    "bodyweight",
+    "cardio",
+    "flexibility",
+    "balance",
+  ];
+  if (data.type && !validTypes.includes(data.type)) {
+    errors.type = "Invalid exercise type.";
+  }
+
+  // Validate level
+  const validLevels = ["beginner", "intermediate", "advanced"];
+  if (data.level && !validLevels.includes(data.level)) {
+    errors.level = "Invalid exercise level.";
+  }
+
+  // Validate location
+  const validLocations = ["gym", "home", "outdoor"];
+  if (data.location && !validLocations.includes(data.location)) {
+    errors.location = "Invalid location.";
+  }
+
+  return {
+    valid: Object.keys(errors).length === 0,
+    errors,
+  };
+};
