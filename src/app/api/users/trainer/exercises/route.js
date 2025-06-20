@@ -10,6 +10,7 @@ const prisma = new PrismaClient();
 
 export async function GET(_request) {
   try {
+    // Get trainer info ID from the authenticated user
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -20,6 +21,7 @@ export async function GET(_request) {
 
     const trainerProfile = await prisma.trainerProfile.findUnique({
       where: { userId: session.user.id },
+      include: { trainerInfo: true },
     });
 
     if (!trainerProfile) {
@@ -29,30 +31,37 @@ export async function GET(_request) {
       );
     }
 
-    const exercises = await exerciseService.getExercisesByTrainerId(
-      trainerProfile.id
+    if (!trainerProfile.trainerInfo) {
+      return NextResponse.json(
+        { success: false, error: "Trainer info not found" },
+        { status: 404 }
+      );
+    }
+
+    // Get exercises for this trainer
+    const exercises = await exerciseService.getExercisesByTrainerInfoId(
+      trainerProfile.trainerInfo.id
     );
 
-    return NextResponse.json({ success: true, data: exercises });
+    return NextResponse.json({
+      success: true,
+      exercises: exercises,
+    });
   } catch (error) {
-    console.error("Error fetching trainer exercises:", error);
+    console.error("Error in exercises API:", error);
     return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 400 }
+      {
+        success: false,
+        error: error.message,
+        exercises: [],
+      },
+      { status: 500 }
     );
   }
 }
 
 export async function POST(request) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
     const body = await request.json();
     const { valid, errors } = validateExercise(body);
 
@@ -63,8 +72,18 @@ export async function POST(request) {
       );
     }
 
+    // Get trainer info ID from the authenticated user
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const trainerProfile = await prisma.trainerProfile.findUnique({
       where: { userId: session.user.id },
+      include: { trainerInfo: true },
     });
 
     if (!trainerProfile) {
@@ -74,9 +93,16 @@ export async function POST(request) {
       );
     }
 
+    if (!trainerProfile.trainerInfo) {
+      return NextResponse.json(
+        { success: false, error: "Trainer info not found" },
+        { status: 404 }
+      );
+    }
+
     const exercise = await exerciseService.createExerciseWithDetails(
       body,
-      trainerProfile.id
+      trainerProfile.trainerInfo.id
     );
 
     return NextResponse.json(

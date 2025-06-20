@@ -141,13 +141,6 @@ export default function SelectRole() {
         <div className="container mx-auto px-4 sm:px-6 flex flex-col h-full">
           {/* Header */}
           <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
-            <div className="inline-flex items-center justify-center text-sm font-medium mb-5 bg-gradient-to-r from-[#FF6B00]/10 to-transparent backdrop-blur-sm px-4 py-2 rounded-full text-[#FF6B00] border border-[#FF6B00]/20">
-              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#FF6B00]/20 mr-2">
-                <span className="mdi mdi-account text-sm" />
-              </span>
-              {t("role.selection.step")}
-            </div>
-
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-5 leading-tight">
               <span className="text-white block mb-2">
                 {t("role.selection.title")}

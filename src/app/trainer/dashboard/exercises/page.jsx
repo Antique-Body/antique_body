@@ -10,97 +10,48 @@ import {
 } from "@/components/custom/dashboard/trainer/pages/exercises/components";
 import { CreateExerciseCard } from "@/components/custom/dashboard/trainer/pages/exercises/components/CreateExerciseCard";
 import { NoResults, SortControls } from "@/components/custom/shared";
+import {
+  EXERCISE_TYPES,
+  EXERCISE_LEVELS,
+  EXERCISE_LOCATIONS,
+  SORT_OPTIONS,
+} from "@/enums";
 import { useExercises } from "@/hooks";
 
-export default function ExercisesPage() {
-  const {
-    exercises,
-    loading,
-    error,
-    fetchTrainerExercises,
-    createExercise,
-    updateExercise,
-    deleteExercise,
-  } = useExercises();
+// Apstraktna konfiguracija za filtere
+const FILTER_CONFIG = {
+  type: {
+    name: "type",
+    label: "Type",
+    options: [{ value: "", label: "All Types" }, ...EXERCISE_TYPES],
+  },
+  level: {
+    name: "level",
+    label: "Level",
+    options: [{ value: "", label: "All Levels" }, ...EXERCISE_LEVELS],
+  },
+  location: {
+    name: "location",
+    label: "Location",
+    options: [{ value: "", label: "All Locations" }, ...EXERCISE_LOCATIONS],
+  },
+  equipment: {
+    name: "equipment",
+    label: "Equipment",
+    options: [
+      { value: "", label: "All Equipment" },
+      { value: "true", label: "Required" },
+      { value: "false", label: "No Equipment" },
+    ],
+  },
+};
 
-  // Modal state
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedExercise, setSelectedExercise] = useState(null);
-  const [modalMode, setModalMode] = useState("view"); // view, edit, create
+// Apstraktna konfiguracija za sortiranje
+const SORT_CONFIG = SORT_OPTIONS;
 
-  // Filters
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filters, setFilters] = useState({
-    type: "",
-    level: "",
-    location: "",
-    equipment: "",
-  });
-
-  // Sorting
-  const [sortOption, setSortOption] = useState("name");
-  const [sortOrder, setSortOrder] = useState("asc");
-
-  // Filter options for the SortControls component
-  const filterOptions = [
-    {
-      name: "type",
-      label: "Type",
-      options: [
-        { value: "", label: "All Types" },
-        { value: "strength", label: "Strength" },
-        { value: "bodyweight", label: "Bodyweight" },
-        { value: "cardio", label: "Cardio" },
-        { value: "flexibility", label: "Flexibility" },
-        { value: "balance", label: "Balance" },
-      ],
-    },
-    {
-      name: "level",
-      label: "Level",
-      options: [
-        { value: "", label: "All Levels" },
-        { value: "beginner", label: "Beginner" },
-        { value: "intermediate", label: "Intermediate" },
-        { value: "advanced", label: "Advanced" },
-      ],
-    },
-    {
-      name: "location",
-      label: "Location",
-      options: [
-        { value: "", label: "All Locations" },
-        { value: "gym", label: "Gym" },
-        { value: "home", label: "Home" },
-        { value: "outdoor", label: "Outdoor" },
-      ],
-    },
-    {
-      name: "equipment",
-      label: "Equipment",
-      options: [
-        { value: "", label: "All Equipment" },
-        { value: "true", label: "Required" },
-        { value: "false", label: "No Equipment" },
-      ],
-    },
-  ];
-
-  // Sort options
-  const sortOptions = [
-    { value: "name", label: "Name" },
-    { value: "type", label: "Type" },
-    { value: "level", label: "Level" },
-    { value: "dateCreated", label: "Date Created" },
-  ];
-
-  // Load exercises data
-  useEffect(() => {
-    fetchTrainerExercises();
-  }, [fetchTrainerExercises]);
-
-  // Filter exercises based on search and filters
-  const filteredExercises = exercises.filter((exercise) => {
+// Apstraktna obrada filtera
+function applyFilters(exercises, filters, searchTerm) {
+  return exercises.filter((exercise) => {
     // Apply search filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
@@ -142,9 +93,11 @@ export default function ExercisesPage() {
 
     return true;
   });
+}
 
-  // Sort exercises
-  const sortedExercises = [...filteredExercises].sort((a, b) => {
+// Apstraktna obrada sortiranja
+function applySorting(exercises, sortOption, sortOrder) {
+  return [...exercises].sort((a, b) => {
     let comparison = 0;
 
     switch (sortOption) {
@@ -168,6 +121,49 @@ export default function ExercisesPage() {
 
     return sortOrder === "asc" ? comparison : -comparison;
   });
+}
+
+export default function ExercisesPage() {
+  const {
+    exercises,
+    loading,
+    error,
+    fetchTrainerExercises,
+    createExercise,
+    updateExercise,
+    deleteExercise,
+  } = useExercises();
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedExercise, setSelectedExercise] = useState(null);
+  const [modalMode, setModalMode] = useState("view");
+
+  // Filters
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState({
+    type: "",
+    level: "",
+    location: "",
+    equipment: "",
+  });
+
+  // Sorting
+  const [sortOption, setSortOption] = useState("name");
+  const [sortOrder, setSortOrder] = useState("asc");
+
+  // Load exercises data
+  useEffect(() => {
+    fetchTrainerExercises();
+  }, [fetchTrainerExercises]);
+
+  // Apply filters and sorting
+  const filteredExercises = applyFilters(exercises, filters, searchTerm);
+  const sortedExercises = applySorting(
+    filteredExercises,
+    sortOption,
+    sortOrder
+  );
 
   // Clear all filters
   const handleClearFilters = () => {
@@ -180,28 +176,25 @@ export default function ExercisesPage() {
     });
   };
 
-  // Open modal to create a new exercise
+  // Modal handlers
   const handleCreateExercise = () => {
     setSelectedExercise(null);
     setModalMode("create");
     setIsModalOpen(true);
   };
 
-  // Open modal to view exercise details
   const handleViewExercise = (exercise) => {
     setSelectedExercise(exercise);
     setModalMode("view");
     setIsModalOpen(true);
   };
 
-  // Open modal to edit an exercise
   const handleEditExercise = (exercise) => {
     setSelectedExercise(exercise);
     setModalMode("edit");
     setIsModalOpen(true);
   };
 
-  // Handle saving exercise (create or update)
   const handleSaveExercise = async (exerciseData) => {
     if (modalMode === "create") {
       const result = await createExercise(exerciseData);
@@ -216,7 +209,6 @@ export default function ExercisesPage() {
     }
   };
 
-  // Handle deleting an exercise
   const handleDeleteExercise = async (exerciseId) => {
     const result = await deleteExercise(exerciseId);
     if (result.success) {
@@ -224,6 +216,7 @@ export default function ExercisesPage() {
     }
   };
 
+  // Loading state
   if (loading) {
     return (
       <div className="flex h-64 w-full items-center justify-center">
@@ -235,6 +228,7 @@ export default function ExercisesPage() {
     );
   }
 
+  // Error state
   if (error) {
     return (
       <div className="flex h-64 w-full items-center justify-center">
@@ -269,7 +263,7 @@ export default function ExercisesPage() {
         sortOrder={sortOrder}
         setSortOrder={setSortOrder}
         itemCount={sortedExercises.length}
-        sortOptions={sortOptions}
+        sortOptions={SORT_CONFIG}
         variant="orange"
         searchQuery={searchTerm}
         setSearchQuery={setSearchTerm}
@@ -277,7 +271,7 @@ export default function ExercisesPage() {
         enableLocation={false}
         filters={filters}
         setFilters={setFilters}
-        filterOptions={filterOptions}
+        filterOptions={Object.values(FILTER_CONFIG)}
         onClearFilters={handleClearFilters}
         actionButton={
           <Button

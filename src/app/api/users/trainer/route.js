@@ -148,6 +148,7 @@ export async function GET() {
           },
           availabilities: trainerInfo.trainerProfile.availabilities || [],
         },
+        exercises: trainerInfo.exercises || [],
       }),
       { status: 200 }
     );

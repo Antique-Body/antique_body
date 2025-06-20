@@ -1,5 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
+import { exerciseService } from "./exerciseService";
+
 const prisma = new PrismaClient();
 
 // Helper za dinamički where za lokaciju
@@ -181,18 +183,32 @@ async function createOrUpdateTrainerInfo(trainerProfileId, infoData) {
     });
   } else {
     // Create
-    return await prisma.trainerInfo.create({
+    const trainerInfo = await prisma.trainerInfo.create({
       data: {
         trainerProfileId,
         ...infoData,
       },
     });
+
+    // Create default exercises for new trainer
+    await exerciseService.createDefaultExercises(trainerInfo.id);
+
+    return trainerInfo;
   }
 }
 
 async function getTrainerInfoByProfileId(trainerProfileId) {
   return await prisma.trainerInfo.findUnique({
     where: { trainerProfileId },
+    include: {
+      exercises: {
+        include: {
+          muscleGroups: true,
+          exerciseInfo: true,
+        },
+        orderBy: { createdAt: "desc" },
+      },
+    },
   });
 }
 
@@ -225,6 +241,13 @@ async function getTrainerInfoByUserId(userId) {
   const trainerInfo = await prisma.trainerInfo.findUnique({
     where: { trainerProfileId: profile.id },
     include: {
+      exercises: {
+        include: {
+          muscleGroups: true,
+          exerciseInfo: true,
+        },
+        orderBy: { createdAt: "desc" },
+      },
       trainerProfile: {
         include: {
           certifications: { include: { documents: true } },

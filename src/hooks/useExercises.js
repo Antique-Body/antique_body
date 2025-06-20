@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 
 export function useExercises() {
   const [exercises, setExercises] = useState([]);
@@ -68,7 +68,7 @@ export function useExercises() {
       const data = await response.json();
 
       if (data.success) {
-        setExercises(data.data);
+        setExercises(data.exercises);
       } else {
         setError(data.error || "Failed to fetch trainer exercises");
       }
@@ -117,13 +117,16 @@ export function useExercises() {
     try {
       setError(null);
 
-      const response = await fetch(`/api/exercises/${exerciseId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(exerciseData),
-      });
+      const response = await fetch(
+        `/api/users/trainer/exercises/${exerciseId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(exerciseData),
+        }
+      );
 
       const data = await response.json();
 
@@ -149,9 +152,12 @@ export function useExercises() {
     try {
       setError(null);
 
-      const response = await fetch(`/api/exercises/${exerciseId}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `/api/users/trainer/exercises/${exerciseId}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       const data = await response.json();
 
@@ -175,7 +181,9 @@ export function useExercises() {
     try {
       setError(null);
 
-      const response = await fetch(`/api/exercises/${exerciseId}`);
+      const response = await fetch(
+        `/api/users/trainer/exercises/${exerciseId}`
+      );
       const data = await response.json();
 
       if (data.success) {
