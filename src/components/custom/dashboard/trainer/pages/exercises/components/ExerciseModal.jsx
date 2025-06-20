@@ -53,7 +53,10 @@ export const ExerciseModal = ({
       setFormData({
         ...exercise,
       });
-      setSelectedMuscles(exercise.muscleGroups || []);
+      // Handle muscle groups from API structure
+      const muscleGroupNames =
+        exercise.muscleGroups?.map((mg) => mg.name) || [];
+      setSelectedMuscles(muscleGroupNames);
       if (exercise.video) setVideoPreview(exercise.video);
       if (exercise.imageUrl) setImagePreview(exercise.imageUrl);
     } else {
@@ -96,11 +99,16 @@ export const ExerciseModal = ({
   // Handle muscle group selection
   const toggleMuscleGroup = (muscle) => {
     setSelectedMuscles((prev) => {
-      if (prev.includes(muscle)) {
-        return prev.filter((m) => m !== muscle);
-      } else {
-        return [...prev, muscle];
+      const newSelectedMuscles = prev.includes(muscle)
+        ? prev.filter((m) => m !== muscle)
+        : [...prev, muscle];
+
+      // Clear muscle groups error if muscle groups are selected
+      if (newSelectedMuscles.length > 0 && errors.muscleGroups) {
+        setErrors((prev) => ({ ...prev, muscleGroups: null }));
       }
+
+      return newSelectedMuscles;
     });
   };
 
@@ -110,7 +118,12 @@ export const ExerciseModal = ({
       ...prev,
       muscleGroups: selectedMuscles,
     }));
-  }, [selectedMuscles]);
+
+    // Clear muscle groups error if muscle groups are selected
+    if (selectedMuscles.length > 0 && errors.muscleGroups) {
+      setErrors((prev) => ({ ...prev, muscleGroups: null }));
+    }
+  }, [selectedMuscles, errors.muscleGroups]);
 
   // Handle file uploads
   const handleFileChange = (e, fileType) => {
@@ -307,7 +320,8 @@ export const ExerciseModal = ({
                       key={index}
                       className="rounded-md bg-[rgba(255,107,0,0.15)] px-2 py-1 text-sm text-[#FF6B00]"
                     >
-                      {muscle.charAt(0).toUpperCase() + muscle.slice(1)}
+                      {muscle.name.charAt(0).toUpperCase() +
+                        muscle.name.slice(1)}
                     </div>
                   ))}
                 </div>
@@ -664,9 +678,6 @@ export const ExerciseModal = ({
       secondaryButtonText={mode === "view" ? null : "Cancel"}
       primaryButtonAction={mode === "view" ? onClose : handleSubmit}
       secondaryButtonAction={onClose}
-      primaryButtonDisabled={
-        mode === "view" ? false : Object.keys(errors).length > 0
-      }
     >
       {mode === "view" ? renderViewContent() : renderFormContent()}
     </Modal>

@@ -105,7 +105,7 @@ export const ExerciseCard = ({ exercise, onView, onEdit, onDelete }) => {
             <div className="flex flex-wrap gap-2">
               {muscleGroups.slice(0, 3).map((muscle, index) => (
                 <div key={index} className="rounded-md bg-[rgba(255,107,0,0.15)] px-2 py-1 text-xs text-[#FF6B00]">
-                  {muscle.charAt(0).toUpperCase() + muscle.slice(1)}
+                  {muscle.name.charAt(0).toUpperCase() + muscle.name.slice(1)}
                 </div>
               ))}
               {muscleGroups.length > 3 && (

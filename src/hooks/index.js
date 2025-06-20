@@ -5,3 +5,6 @@ export { useTrainerRegistration } from "./useTrainerRegistration";
 export { useClientRegistration } from "./useClientRegistration";
 export { usePrefillFromSession } from "./usePrefillFromSession";
 export { useCertificateFiles } from "./useCertificateFiles";
+export { useClientEditProfileForm } from "./useClientEditProfileForm";
+export { useTrainerEditProfileForm } from "./useTrainerEditProfileForm";
+export { useExercises } from "./useExercises";
