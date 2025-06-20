@@ -4,12 +4,44 @@ const prisma = new PrismaClient();
 async function main() {
   // Clean up existing data
   console.log("Cleaning up existing data...");
-  await prisma.trainerGym.deleteMany();
-  await prisma.trainerProfile.deleteMany();
-  await prisma.clientProfile.deleteMany();
-  await prisma.user.deleteMany();
-  await prisma.gym.deleteMany();
-  await prisma.location.deleteMany();
+
+  // Wrap cleanup in try-catch to handle cases where tables don't exist yet
+  try {
+    await prisma.trainerGym.deleteMany();
+  } catch {
+    console.log("TrainerGym table doesn't exist yet, skipping cleanup");
+  }
+
+  try {
+    await prisma.trainerProfile.deleteMany();
+  } catch {
+    console.log("TrainerProfile table doesn't exist yet, skipping cleanup");
+  }
+
+  try {
+    await prisma.clientProfile.deleteMany();
+  } catch {
+    console.log("ClientProfile table doesn't exist yet, skipping cleanup");
+  }
+
+  try {
+    await prisma.user.deleteMany();
+  } catch {
+    console.log("User table doesn't exist yet, skipping cleanup");
+  }
+
+  try {
+    await prisma.gym.deleteMany();
+  } catch {
+    console.log("Gym table doesn't exist yet, skipping cleanup");
+  }
+
+  try {
+    await prisma.location.deleteMany();
+  } catch {
+    console.log("Location table doesn't exist yet, skipping cleanup");
+  }
+
   console.log("Cleanup completed.");
 
   // Create locations first

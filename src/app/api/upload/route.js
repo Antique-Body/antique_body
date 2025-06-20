@@ -6,18 +6,13 @@ import { uploadFile, initGCS } from "@/lib/storage";
 
 export const config = { api: { bodyParser: false } };
 
-// Konfiguracija po key-u
+// Apstraktna konfiguracija za sve tipove uploada
 const UPLOAD_CONFIG = {
   profileImage: {
-    allowedTypes: [
-      "image/jpeg",
-      "image/png",
-      "image/jpg",
-      "image/gif",
-      "image/x-png",
-    ],
+    allowedTypes: ["image/jpeg", "image/png", "image/jpg", "image/gif"],
     folder: "profile-images",
     maxSize: 1,
+    returnType: "single", // single URL
   },
   certifications: {
     allowedTypes: [
@@ -25,64 +20,104 @@ const UPLOAD_CONFIG = {
       "image/png",
       "image/jpg",
       "image/gif",
-      "image/x-png",
       "application/pdf",
-      "application/x-pdf",
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ],
     folder: "certificates",
     maxSize: 10,
+    returnType: "array", // array of objects
   },
   gallery: {
-    allowedTypes: [
-      "image/jpeg",
-      "image/png",
-      "image/jpg",
-      "image/gif",
-      "image/x-png",
-    ],
+    allowedTypes: ["image/jpeg", "image/png", "image/jpg", "image/gif"],
     folder: "gallery",
     maxSize: 10,
+    returnType: "array",
   },
   videos: {
     allowedTypes: [
       "video/mp4",
       "video/quicktime",
       "video/x-msvideo",
-      "video/x-matroska",
       "video/webm",
     ],
     folder: "videos",
     maxSize: 100,
+    returnType: "array",
   },
-  // Dodaj nove key-eve po potrebi
+  exerciseImage: {
+    allowedTypes: ["image/jpeg", "image/png", "image/jpg", "image/gif"],
+    folder: "exercise-images",
+    maxSize: 5,
+    returnType: "single",
+  },
+  exerciseVideo: {
+    allowedTypes: [
+      "video/mp4",
+      "video/quicktime",
+      "video/x-msvideo",
+      "video/webm",
+    ],
+    folder: "exercise-videos",
+    maxSize: 50,
+    returnType: "single",
+  },
 };
 
-function validateFile(file, allowedTypes, maxSizeMB = 10) {
+// Apstraktna validacija fajla
+function validateFile(file, config) {
   if (!file || !file.mimetype) return;
-  if (!allowedTypes.includes(file.mimetype?.toLowerCase())) {
-    throw new Error("Invalid file type");
+  if (!config.allowedTypes.includes(file.mimetype?.toLowerCase())) {
+    throw new Error(
+      `Invalid file type. Allowed: ${config.allowedTypes.join(", ")}`
+    );
   }
-  if (file.size > maxSizeMB * 1024 * 1024) {
-    throw new Error("File too large");
+  if (file.size > config.maxSize * 1024 * 1024) {
+    throw new Error(`File too large. Maximum: ${config.maxSize}MB`);
   }
+}
+
+// Apstraktna obrada fajlova
+async function processFiles(files, config) {
+  const fileArray = Array.isArray(files) ? files : [files];
+  const validFiles = fileArray.filter((file) => file && file.mimetype);
+
+  if (validFiles.length === 0) return null;
+
+  // Za single return type, uzmi samo prvi fajl
+  if (config.returnType === "single") {
+    const file = validFiles[0];
+    validateFile(file, config);
+    const url = await uploadFile(file, config.folder);
+    return url;
+  }
+
+  // Za array return type, obradi sve fajlove
+  const uploadPromises = validFiles.map(async (file) => {
+    validateFile(file, config);
+    const url = await uploadFile(file, config.folder);
+    return {
+      url,
+      originalName: file.originalFilename,
+      mimetype: file.mimetype,
+    };
+  });
+
+  return Promise.all(uploadPromises);
 }
 
 export async function POST(req) {
   initGCS();
 
-  // 1. Uzmi headers
+  // Parse request
   const headers = {};
   req.headers.forEach((value, key) => {
     headers[key] = value;
   });
 
-  // 2. Uzmi body kao buffer
   const arrayBuffer = await req.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
-  // 3. Napravi fake Node.js request
   const nodeReq = new Readable();
   nodeReq._read = () => {};
   nodeReq.push(buffer);
@@ -94,86 +129,35 @@ export async function POST(req) {
     const form = formidable({ multiples: true });
     form.parse(nodeReq, async (err, fields, files) => {
       try {
-        console.log("FILES RECEIVED:", files); // Debug log
         if (err) throw err;
+
         const uploadedUrls = {};
-        // 1. Prvo obradi certifications posebno (kao array arraya)
-        const certGrouped = {};
-        for (const key of Object.keys(files)) {
+
+        // Apstraktna obrada svih fajlova
+        for (const [key, fileData] of Object.entries(files)) {
+          // Posebna obrada za certifications array
           const certMatch = key.match(/^certifications\[(\d+)\]$/);
           if (certMatch) {
             const idx = Number(certMatch[1]);
             const config = UPLOAD_CONFIG.certifications;
-            if (!certGrouped[idx]) certGrouped[idx] = [];
-            const fileOrArray = files[key];
-            const fileArr = Array.isArray(fileOrArray)
-              ? fileOrArray
-              : [fileOrArray];
-            for (const file of fileArr) {
-              if (!file || !file.mimetype) continue;
-              validateFile(file, config.allowedTypes, config.maxSize);
-              const url = await uploadFile(file, config.folder);
-              certGrouped[idx].push({
-                url,
-                originalName: file.originalFilename,
-                mimetype: file.mimetype,
-              });
-            }
+            if (!uploadedUrls.certifications) uploadedUrls.certifications = [];
+            const result = await processFiles(fileData, config);
+            if (result) uploadedUrls.certifications[idx] = result;
+            continue;
           }
-        }
-        // Pretvori certGrouped u array arraya po indeksima
-        if (Object.keys(certGrouped).length > 0) {
-          const maxIdx = Math.max(...Object.keys(certGrouped).map(Number));
-          uploadedUrls.certifications = [];
-          for (let i = 0; i <= maxIdx; i++) {
-            uploadedUrls.certifications[i] = certGrouped[i] || [];
-          }
-        }
-        // 2. Ostale key-eve obradi generički
-        for (const key of Object.keys(files)) {
-          // preskoči certifications[...]
-          if (/^certifications\[\d+\]$/.test(key)) continue;
+
+          // Standardna obrada
           const baseKeyMatch = key.match(/^(\w+)(\[(\d+)\])?$/);
           if (!baseKeyMatch) continue;
+
           const baseKey = baseKeyMatch[1];
-          if (baseKey === "certifications") continue;
           const config = UPLOAD_CONFIG[baseKey];
           if (!config) continue;
-          const fileOrArray = files[key];
-          const fileArr = Array.isArray(fileOrArray)
-            ? fileOrArray
-            : [fileOrArray];
-          // profileImage: vrati samo url (string)
-          if (baseKey === "profileImage") {
-            let url = null;
-            for (const file of fileArr) {
-              if (!file || !file.mimetype) continue;
-              validateFile(file, config.allowedTypes, config.maxSize);
-              url = await uploadFile(file, config.folder);
-              break; // uzmi samo prvi
-            }
-            if (url) uploadedUrls.profileImage = url;
-            continue;
-          }
-          // gallery i videos: array objekata
-          if (baseKey === "gallery" || baseKey === "videos") {
-            if (!uploadedUrls[baseKey]) uploadedUrls[baseKey] = [];
-            for (const file of fileArr) {
-              if (!file || !file.mimetype) continue;
-              validateFile(file, config.allowedTypes, config.maxSize);
-              const url = await uploadFile(file, config.folder);
-              uploadedUrls[baseKey].push({
-                url,
-                originalName: file.originalFilename,
-                mimetype: file.mimetype,
-              });
-            }
-            continue;
-          }
-          // Ostali key-evi po potrebi
+
+          const result = await processFiles(fileData, config);
+          if (result) uploadedUrls[baseKey] = result;
         }
-        // Debug: logaj uploadedUrls prije resolve
-        console.log("uploadedUrls", uploadedUrls);
+
         resolve(new Response(JSON.stringify(uploadedUrls), { status: 200 }));
       } catch (error) {
         resolve(

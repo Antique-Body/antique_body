@@ -173,7 +173,6 @@ model TrainerProfile {
   trainerGyms       TrainerGym[]
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   availabilities    TrainerAvailability[]
-  exercises         Exercise[]
 }
 
 model TrainerSpecialty {
@@ -309,6 +308,7 @@ model TrainerInfo {
   updatedAt         DateTime @updatedAt
 
   trainerProfile    TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
+  exercises         Exercise[]
 }
 
 model TrainerGym {
@@ -348,7 +348,7 @@ model TrainerAvailability {
 // Exercise models
 model Exercise {
   id                String   @id @default(cuid())
-  trainerProfileId  String
+  trainerInfoId     String
   name              String
   location          String   // "gym", "home", "outdoor"
   equipment         Boolean  @default(true)
@@ -361,11 +361,11 @@ model Exercise {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   
-  trainerProfile    TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
+  trainerInfo       TrainerInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
   muscleGroups      ExerciseMuscleGroup[]
   exerciseInfo      ExerciseInfo?
   
-  @@index([trainerProfileId])
+  @@index([trainerInfoId])
   @@index([type])
   @@index([level])
   @@index([location])
