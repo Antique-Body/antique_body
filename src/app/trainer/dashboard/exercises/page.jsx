@@ -378,7 +378,7 @@ export default function ExercisesPage() {
         onClearFilters={handleClearFilters}
         actionButton={createExerciseButton}
         itemLabel="exercises"
-        className="sticky top-0 z-30"
+        className="mb-2"
       />
 
       {/* Exercise Cards */}
