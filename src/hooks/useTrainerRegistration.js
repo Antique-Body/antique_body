@@ -17,7 +17,7 @@ export function useTrainerRegistration() {
     description: "",
     // Languages and Training Types
     languages: [],
-    trainingEnvironment: "",
+    trainingEnvironments: [],
     trainingTypes: [],
     // Contact and Location
     contactEmail: "",
@@ -124,8 +124,12 @@ export function useTrainerRegistration() {
     if (currentStep === 2) {
       if (!formData.languages || formData.languages.length === 0)
         newErrors.languages = "At least one language is required";
-      if (!formData.trainingEnvironment)
-        newErrors.trainingEnvironment = "Training environment is required";
+      if (
+        !formData.trainingEnvironments ||
+        formData.trainingEnvironments.length === 0
+      )
+        newErrors.trainingEnvironments =
+          "At least one training environment is required";
       if (!formData.trainingTypes || formData.trainingTypes.length === 0)
         newErrors.trainingTypes = "At least one training type is required";
     }
