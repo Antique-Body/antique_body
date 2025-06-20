@@ -10,6 +10,7 @@ import {
   Availability,
   Expertise,
   Reviews,
+  Gallery,
 } from "@/components/custom/shared/trainers-list";
 import { mapSpecialtyToLabel } from "@/utils/specialtyMapper";
 
@@ -17,10 +18,16 @@ import { mapSpecialtyToLabel } from "@/utils/specialtyMapper";
 export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
   const [activeTab, setActiveTab] = useState("about");
 
+  const hasHighlightedImages =
+    trainer?.galleryImages?.some((img) => img.isHighlighted) || false;
+
   // Define tabs for the DashboardTabs component
   const tabs = [
     { id: "about", label: "About", badgeCount: 0 },
     { id: "expertise", label: "Expertise", badgeCount: 0 },
+    ...(hasHighlightedImages
+      ? [{ id: "gallery", label: "Gallery", badgeCount: 0 }]
+      : []),
     { id: "availability", label: "Availability", badgeCount: 0 },
     { id: "reviews", label: "Reviews", badgeCount: 0 },
   ];
@@ -81,6 +88,8 @@ export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
 
     return stars;
   };
+
+  console.log(trainer, 'tetteet');
 
   // Prepare trainer data with mapped specialties for child components
   const enhancedTrainer = {
@@ -225,6 +234,16 @@ export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
         >
           <Expertise trainer={enhancedTrainer} />
         </div>
+
+        {hasHighlightedImages && (
+          <div
+            className={`transition-opacity duration-200 ${
+              activeTab === "gallery" ? "block" : "hidden"
+            }`}
+          >
+            <Gallery trainer={enhancedTrainer} />
+          </div>
+        )}
 
         <div
           className={`transition-opacity duration-200 ${

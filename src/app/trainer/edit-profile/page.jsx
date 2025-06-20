@@ -1,6 +1,8 @@
 "use client";
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 import {
   Button,
@@ -16,6 +18,7 @@ import {
   Availability,
   BasicInformation,
   Certification,
+  Gallery,
   Specialties,
   WorkoutSpaceLocation,
 } from "@/components/custom/dashboard/trainer/edit-profile";
@@ -69,6 +72,7 @@ const TrainerEditProfilePage = () => {
       label: "Workout Space & Location",
       badgeCount: 0,
     },
+    { id: "gallery", label: "Gallery", badgeCount: 0 },
   ];
 
   if (loading) {
@@ -135,126 +139,137 @@ const TrainerEditProfilePage = () => {
             tabs={sections}
           />
         </motion.div>
-        <motion.div variants={fadeIn}>
-          <Card
-            variant="darkStrong"
-            width="100%"
-            maxWidth="100%"
-            className="backdrop-blur-xl"
-          >
-            <form onSubmit={handleSubmit} className="relative space-y-10">
-              {/* Active section */}
-              <AnimatedTabContent
-                isActive={activeSection === "basicInfo"}
-                tabId="basicInfo"
-              >
-                <BasicInformation
-                  trainerData={trainerData.trainerProfile}
-                  handleChange={handleChange}
-                  previewImage={previewImage}
-                  handleImageUpload={handleImageUpload}
-                />
-              </AnimatedTabContent>
-              <AnimatedTabContent
-                isActive={activeSection === "specialties"}
-                tabId="specialties"
-              >
-                <Specialties
-                  trainerData={trainerData}
-                  handleChange={handleChange}
-                  setTrainerData={setTrainerData}
-                />
-              </AnimatedTabContent>
-              <AnimatedTabContent
-                isActive={activeSection === "certification"}
-                tabId="certification"
-              >
-                <Certification
-                  trainerData={trainerData}
-                  handleChange={handleChange}
-                  setTrainerData={setTrainerData}
-                  onResetCertifications={handleResetCertifications}
-                  resetCertFieldsTrigger={resetCertFieldsTrigger}
-                  initialCertifications={initialCertifications}
-                  onCertificationsChange={handleCertificationsChange}
-                  certFields={certFields}
-                  setCertFields={setCertFields}
-                />
-              </AnimatedTabContent>
-              <AnimatedTabContent
-                isActive={activeSection === "availability"}
-                tabId="availability"
-              >
-                <Availability
-                  trainerData={trainerData}
-                  handleChange={handleChange}
-                  setTrainerData={setTrainerData}
-                />
-              </AnimatedTabContent>
-              <AnimatedTabContent
-                isActive={activeSection === "workoutSpaceLocation"}
-                tabId="workoutSpaceLocation"
-              >
-                <WorkoutSpaceLocation
-                  trainerData={trainerData}
-                  setTrainerData={setTrainerData}
-                />
-              </AnimatedTabContent>
-              {/* Navigation and Submit */}
-              <div className="flex justify-between border-t border-[#333] pt-8">
-                <div className="flex items-center gap-3">
-                  {sections.map((section, _index) => {
-                    const isActive = activeSection === section.id;
-                    return (
-                      <Button
-                        key={section.id}
-                        type="button"
-                        variant="ghost"
-                        onClick={() => setActiveSection(section.id)}
-                        className={`h-3 w-3 rounded-full transition-all duration-300 p-0 ${
-                          isActive
-                            ? "bg-gradient-to-r from-[#FF7800] to-[#FF5F00] shadow-lg shadow-orange-500/20"
-                            : "bg-[#333] hover:bg-[#666]"
-                        }`}
-                        aria-label={`Go to ${section.label}`}
-                      />
-                    );
-                  })}
-                </div>
-                <div className="flex gap-4">
-                  <Button variant="secondary" onClick={goBack}>
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="orangeFilled"
-                    size="large"
-                    leftIcon={
-                      loading ? (
-                        <Icon
-                          icon="eos-icons:loading"
-                          width={20}
-                          height={20}
-                          className="animate-spin"
+        <DndProvider backend={HTML5Backend}>
+          <motion.div variants={fadeIn}>
+            <Card
+              variant="darkStrong"
+              width="100%"
+              maxWidth="100%"
+              className="backdrop-blur-xl"
+            >
+              <form onSubmit={handleSubmit} className="relative space-y-10">
+                {/* Active section */}
+                <AnimatedTabContent
+                  isActive={activeSection === "basicInfo"}
+                  tabId="basicInfo"
+                >
+                  <BasicInformation
+                    trainerData={trainerData.trainerProfile}
+                    handleChange={handleChange}
+                    previewImage={previewImage}
+                    handleImageUpload={handleImageUpload}
+                  />
+                </AnimatedTabContent>
+                <AnimatedTabContent
+                  isActive={activeSection === "specialties"}
+                  tabId="specialties"
+                >
+                  <Specialties
+                    trainerData={trainerData}
+                    handleChange={handleChange}
+                    setTrainerData={setTrainerData}
+                  />
+                </AnimatedTabContent>
+                <AnimatedTabContent
+                  isActive={activeSection === "certification"}
+                  tabId="certification"
+                >
+                  <Certification
+                    trainerData={trainerData}
+                    handleChange={handleChange}
+                    setTrainerData={setTrainerData}
+                    onResetCertifications={handleResetCertifications}
+                    resetCertFieldsTrigger={resetCertFieldsTrigger}
+                    initialCertifications={initialCertifications}
+                    onCertificationsChange={handleCertificationsChange}
+                    certFields={certFields}
+                    setCertFields={setCertFields}
+                  />
+                </AnimatedTabContent>
+                <AnimatedTabContent
+                  isActive={activeSection === "availability"}
+                  tabId="availability"
+                >
+                  <Availability
+                    trainerData={trainerData}
+                    handleChange={handleChange}
+                    setTrainerData={setTrainerData}
+                  />
+                </AnimatedTabContent>
+                <AnimatedTabContent
+                  isActive={activeSection === "workoutSpaceLocation"}
+                  tabId="workoutSpaceLocation"
+                >
+                  <WorkoutSpaceLocation
+                    trainerData={trainerData}
+                    setTrainerData={setTrainerData}
+                  />
+                </AnimatedTabContent>
+                <AnimatedTabContent
+                  isActive={activeSection === "gallery"}
+                  tabId="gallery"
+                >
+                  <Gallery
+                    trainerData={trainerData}
+                    setTrainerData={setTrainerData}
+                  />
+                </AnimatedTabContent>
+                {/* Navigation and Submit */}
+                <div className="flex justify-between border-t border-[#333] pt-8">
+                  <div className="flex items-center gap-3">
+                    {sections.map((section, _index) => {
+                      const isActive = activeSection === section.id;
+                      return (
+                        <Button
+                          key={section.id}
+                          type="button"
+                          variant="ghost"
+                          onClick={() => setActiveSection(section.id)}
+                          className={`h-3 w-3 rounded-full transition-all duration-300 p-0 ${
+                            isActive
+                              ? "bg-gradient-to-r from-[#FF7800] to-[#FF5F00] shadow-lg shadow-orange-500/20"
+                              : "bg-[#333] hover:bg-[#666]"
+                          }`}
+                          aria-label={`Go to ${section.label}`}
                         />
-                      ) : (
-                        <Icon
-                          icon="material-symbols:save"
-                          width={20}
-                          height={20}
-                        />
-                      )
-                    }
-                    disabled={loading}
-                    className="relative overflow-hidden"
-                  >
-                    {loading ? "Saving..." : "Save Profile"}
-                  </Button>
+                      );
+                    })}
+                  </div>
+                  <div className="flex gap-4">
+                    <Button variant="secondary" onClick={goBack}>
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      variant="orangeFilled"
+                      size="large"
+                      leftIcon={
+                        loading ? (
+                          <Icon
+                            icon="eos-icons:loading"
+                            width={20}
+                            height={20}
+                            className="animate-spin"
+                          />
+                        ) : (
+                          <Icon
+                            icon="material-symbols:save"
+                            width={20}
+                            height={20}
+                          />
+                        )
+                      }
+                      disabled={loading}
+                      className="relative overflow-hidden"
+                    >
+                      {loading ? "Saving..." : "Save Profile"}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </form>
-          </Card>
-        </motion.div>
+              </form>
+            </Card>
+          </motion.div>
+        </DndProvider>
       </motion.div>
     </div>
   );
