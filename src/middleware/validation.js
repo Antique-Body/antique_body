@@ -171,7 +171,7 @@ export const validateTrainerProfile = (data) => {
     "trainingSince",
     "specialties",
     "languages",
-    "trainingEnvironments",
+    "trainingEnvironment",
     "trainingTypes",
     "location",
     "pricingType",
@@ -211,7 +211,6 @@ export const validateExercise = (data) => {
   const requiredFields = [
     "name",
     "location",
-    "equipment",
     "type",
     "level",
     "description",
@@ -226,6 +225,11 @@ export const validateExercise = (data) => {
     ) {
       errors[field] = `Field '${field}' is required.`;
     }
+  }
+
+  // Special handling for equipment field - it can be boolean
+  if (data.equipment === undefined || data.equipment === null) {
+    errors.equipment = "Field 'equipment' is required.";
   }
 
   // Validate type

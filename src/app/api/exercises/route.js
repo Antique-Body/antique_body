@@ -5,23 +5,19 @@ import { exerciseService } from "../users/services";
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get("limit"));
-    const page = parseInt(searchParams.get("page")) || 1;
 
-    // Filters
-    const search = searchParams.get("search") || null;
-    const type = searchParams.get("type") || null;
-    const level = searchParams.get("level") || null;
-    const location = searchParams.get("location") || null;
-    const equipment = searchParams.get("equipment") || null;
-
-    // Sorting
+    // Extract filter parameters
+    const search = searchParams.get("search") || "";
+    const type = searchParams.get("type") || "";
+    const level = searchParams.get("level") || "";
+    const location = searchParams.get("location") || "";
+    const equipment = searchParams.get("equipment") || "";
     const sortBy = searchParams.get("sortBy") || "name";
     const sortOrder = searchParams.get("sortOrder") || "asc";
+    const page = parseInt(searchParams.get("page")) || 1;
+    const limit = parseInt(searchParams.get("limit")) || 12;
 
     const result = await exerciseService.getAllExercises({
-      limit,
-      page,
       search,
       type,
       level,
@@ -29,6 +25,8 @@ export async function GET(request) {
       equipment,
       sortBy,
       sortOrder,
+      page,
+      limit,
     });
 
     return NextResponse.json({

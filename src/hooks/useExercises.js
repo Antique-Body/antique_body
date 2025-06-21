@@ -9,7 +9,20 @@ export function useExercises() {
     pages: 1,
     currentPage: 1,
     limit: 12,
+    hasNextPage: false,
+    hasPreviousPage: false,
   });
+
+  // Filter and sort state
+  const [filters, setFilters] = useState({
+    search: "",
+    type: "",
+    level: "",
+    location: "",
+    equipment: "",
+  });
+  const [sortBy, setSortBy] = useState("name");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   // Fetch all exercises with filters
   const fetchExercises = useCallback(async (options = {}) => {
@@ -58,26 +71,112 @@ export function useExercises() {
     }
   }, []);
 
-  // Fetch exercises for a specific trainer
-  const fetchTrainerExercises = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  // Fetch exercises for a specific trainer with filters
+  const fetchTrainerExercisesWithFilters = useCallback(
+    async (filterOptions = {}) => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      const response = await fetch("/api/users/trainer/exercises");
-      const data = await response.json();
+        const {
+          search = filters.search,
+          type = filters.type,
+          level = filters.level,
+          location = filters.location,
+          equipment = filters.equipment,
+          sortBy: newSortBy = sortBy,
+          sortOrder: newSortOrder = sortOrder,
+          page = 1,
+          limit = 12,
+        } = filterOptions;
 
-      if (data.success) {
-        setExercises(data.exercises);
-      } else {
-        setError(data.error || "Failed to fetch trainer exercises");
+        const params = new URLSearchParams({
+          page: page.toString(),
+          limit: limit.toString(),
+          sortBy: newSortBy,
+          sortOrder: newSortOrder,
+        });
+
+        if (search) params.append("search", search);
+        if (type) params.append("type", type);
+        if (level) params.append("level", level);
+        if (location) params.append("location", location);
+        if (equipment !== "") params.append("equipment", equipment);
+
+        const response = await fetch(`/api/users/trainer/exercises?${params}`);
+        const data = await response.json();
+
+        if (data.success) {
+          setExercises(data.exercises);
+          setPagination(data.pagination);
+
+          // Update filter state
+          setFilters({ search, type, level, location, equipment });
+          setSortBy(newSortBy);
+          setSortOrder(newSortOrder);
+        } else {
+          setError(data.error || "Failed to fetch trainer exercises");
+        }
+      } catch (err) {
+        setError(err.message || "Failed to fetch trainer exercises");
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      setError(err.message || "Failed to fetch trainer exercises");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    []
+  );
+
+  // Fetch exercises for a specific trainer (legacy method for backward compatibility)
+  const fetchTrainerExercises = useCallback(async () => {
+    await fetchTrainerExercisesWithFilters();
+  }, [fetchTrainerExercisesWithFilters]);
+
+  // Update filters and refetch
+  const updateFilters = useCallback(
+    async (newFilters) => {
+      await fetchTrainerExercisesWithFilters({
+        ...newFilters,
+        page: 1, // Reset to first page when filters change
+      });
+    },
+    [fetchTrainerExercisesWithFilters]
+  );
+
+  // Update sorting and refetch
+  const updateSorting = useCallback(
+    async (newSortBy, newSortOrder) => {
+      await fetchTrainerExercisesWithFilters({
+        sortBy: newSortBy,
+        sortOrder: newSortOrder,
+        page: 1, // Reset to first page when sorting changes
+      });
+    },
+    [fetchTrainerExercisesWithFilters]
+  );
+
+  // Change page
+  const changePage = useCallback(
+    async (newPage) => {
+      await fetchTrainerExercisesWithFilters({
+        page: newPage,
+      });
+    },
+    [fetchTrainerExercisesWithFilters]
+  );
+
+  // Clear all filters
+  const clearFilters = useCallback(async () => {
+    await fetchTrainerExercisesWithFilters({
+      search: "",
+      type: "",
+      level: "",
+      location: "",
+      equipment: "",
+      sortBy: "name",
+      sortOrder: "asc",
+      page: 1,
+    });
+  }, [fetchTrainerExercisesWithFilters]);
 
   // Create a new exercise
   const createExercise = useCallback(
@@ -96,8 +195,8 @@ export function useExercises() {
         const data = await response.json();
 
         if (data.success) {
-          // Refresh the exercises list
-          await fetchTrainerExercises();
+          // Refresh the exercises list with current filters
+          await fetchTrainerExercisesWithFilters();
           return { success: true, data: data.data };
         } else {
           setError(data.error || "Failed to create exercise");
@@ -109,7 +208,7 @@ export function useExercises() {
         return { success: false, error: errorMsg };
       }
     },
-    [fetchTrainerExercises]
+    [fetchTrainerExercisesWithFilters]
   );
 
   // Update an exercise
@@ -148,33 +247,36 @@ export function useExercises() {
   }, []);
 
   // Delete an exercise
-  const deleteExercise = useCallback(async (exerciseId) => {
-    try {
-      setError(null);
+  const deleteExercise = useCallback(
+    async (exerciseId) => {
+      try {
+        setError(null);
 
-      const response = await fetch(
-        `/api/users/trainer/exercises/${exerciseId}`,
-        {
-          method: "DELETE",
+        const response = await fetch(
+          `/api/users/trainer/exercises/${exerciseId}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Refresh the exercises list with current filters
+          await fetchTrainerExercisesWithFilters();
+          return { success: true };
+        } else {
+          setError(data.error || "Failed to delete exercise");
+          return { success: false, error: data.error };
         }
-      );
-
-      const data = await response.json();
-
-      if (data.success) {
-        // Remove the exercise from the local state
-        setExercises((prev) => prev.filter((ex) => ex.id !== exerciseId));
-        return { success: true };
-      } else {
-        setError(data.error || "Failed to delete exercise");
-        return { success: false, error: data.error };
+      } catch (err) {
+        const errorMsg = err.message || "Failed to delete exercise";
+        setError(errorMsg);
+        return { success: false, error: errorMsg };
       }
-    } catch (err) {
-      const errorMsg = err.message || "Failed to delete exercise";
-      setError(errorMsg);
-      return { success: false, error: errorMsg };
-    }
-  }, []);
+    },
+    [fetchTrainerExercisesWithFilters]
+  );
 
   // Get a single exercise
   const getExercise = useCallback(async (exerciseId) => {
@@ -204,8 +306,16 @@ export function useExercises() {
     loading,
     error,
     pagination,
+    filters,
+    sortBy,
+    sortOrder,
     fetchExercises,
     fetchTrainerExercises,
+    fetchTrainerExercisesWithFilters,
+    updateFilters,
+    updateSorting,
+    changePage,
+    clearFilters,
     createExercise,
     updateExercise,
     deleteExercise,

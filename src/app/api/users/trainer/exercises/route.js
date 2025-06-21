@@ -8,8 +8,10 @@ import { validateExercise } from "@/middleware/validation";
 
 const prisma = new PrismaClient();
 
-export async function GET(_request) {
+export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+
     // Get trainer info ID from the authenticated user
     const session = await auth();
     if (!session?.user?.id) {
@@ -38,14 +40,37 @@ export async function GET(_request) {
       );
     }
 
-    // Get exercises for this trainer
-    const exercises = await exerciseService.getExercisesByTrainerInfoId(
-      trainerProfile.trainerInfo.id
+    // Extract filter parameters
+    const search = searchParams.get("search") || "";
+    const type = searchParams.get("type") || "";
+    const level = searchParams.get("level") || "";
+    const location = searchParams.get("location") || "";
+    const equipment = searchParams.get("equipment") || "";
+    const sortBy = searchParams.get("sortBy") || "name";
+    const sortOrder = searchParams.get("sortOrder") || "asc";
+    const page = parseInt(searchParams.get("page")) || 1;
+    const limit = parseInt(searchParams.get("limit")) || 12;
+
+    // Get filtered exercises for this trainer
+    const result = await exerciseService.getTrainerExercisesWithFilters(
+      trainerProfile.trainerInfo.id,
+      {
+        search,
+        type,
+        level,
+        location,
+        equipment,
+        sortBy,
+        sortOrder,
+        page,
+        limit,
+      }
     );
 
     return NextResponse.json({
       success: true,
-      exercises: exercises,
+      exercises: result.exercises,
+      pagination: result.pagination,
     });
   } catch (error) {
     console.error("Error in exercises API:", error);
@@ -54,6 +79,7 @@ export async function GET(_request) {
         success: false,
         error: error.message,
         exercises: [],
+        pagination: { total: 0, pages: 1, currentPage: 1, limit: 0 },
       },
       { status: 500 }
     );

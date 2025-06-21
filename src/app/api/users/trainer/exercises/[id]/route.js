@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 
-import { exerciseService } from "../../users/services";
+import { exerciseService } from "../../../services/exerciseService";
 
 import { auth } from "#/auth";
 import { validateExercise } from "@/middleware/validation";

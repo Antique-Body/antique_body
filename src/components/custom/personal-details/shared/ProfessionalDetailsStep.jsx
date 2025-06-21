@@ -69,13 +69,22 @@ export const ProfessionalDetailsStep = ({
     const hasLanguages = formData.languages?.length > 0;
     const hasEnvironment = formData.trainingEnvironment;
     const hasTypes = formData.trainingTypes?.length > 0;
-    const hasCerts =
-      certFields?.length > 0 && certFields.some((cert) => cert.value);
 
-    return { hasLanguages, hasEnvironment, hasTypes, hasCerts };
+    const certNumber = formData.certifications.filter(
+      (cert) => cert.name && cert.name.trim() !== ""
+    ).length;
+
+    return {
+      hasLanguages,
+      hasEnvironment,
+      hasTypes,
+      certNumber,
+    };
   };
 
   const status = getCompletionStatus();
+
+  console.log(certFields, "status");
 
   return (
     <motion.div
@@ -87,7 +96,7 @@ export const ProfessionalDetailsStep = ({
       {/* Progress Overview */}
       <motion.div
         variants={fadeInUp}
-        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3"
+        className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3"
       >
         <div
           className={`p-3 rounded-lg border transition-all duration-200 ${
@@ -115,37 +124,6 @@ export const ProfessionalDetailsStep = ({
               </p>
               <p className="text-xs text-gray-500">
                 {status.hasLanguages ? `${formData.languages.length}` : "0"}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div
-          className={`p-3 rounded-lg border transition-all duration-200 ${
-            status.hasSpecialties
-              ? "bg-green-500/10 border-green-500/30"
-              : "bg-gray-800/50 border-gray-600/30"
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <Icon
-              icon="mdi:star-circle"
-              width={18}
-              height={18}
-              className={
-                status.hasSpecialties ? "text-green-400" : "text-gray-400"
-              }
-            />
-            <div>
-              <p
-                className={`text-sm font-medium ${
-                  status.hasSpecialties ? "text-green-400" : "text-gray-400"
-                }`}
-              >
-                Specialties
-              </p>
-              <p className="text-xs text-gray-500">
-                {status.hasSpecialties ? `${formData.specialties.length}` : "0"}
               </p>
             </div>
           </div>
@@ -213,7 +191,7 @@ export const ProfessionalDetailsStep = ({
 
         <div
           className={`p-3 rounded-lg border transition-all duration-200 ${
-            status.hasCerts
+            status.certNumber > 0
               ? "bg-green-500/10 border-green-500/30"
               : "bg-gray-800/50 border-gray-600/30"
           }`}
@@ -223,20 +201,20 @@ export const ProfessionalDetailsStep = ({
               icon="mdi:certificate"
               width={18}
               height={18}
-              className={status.hasCerts ? "text-green-400" : "text-gray-400"}
+              className={
+                status.certNumber > 0 ? "text-green-400" : "text-gray-400"
+              }
             />
             <div>
               <p
                 className={`text-sm font-medium ${
-                  status.hasCerts ? "text-green-400" : "text-gray-400"
+                  status.certNumber > 0 ? "text-green-400" : "text-gray-400"
                 }`}
               >
                 Certificates
               </p>
               <p className="text-xs text-gray-500">
-                {status.hasCerts
-                  ? `${certFields.filter((c) => c.value).length}`
-                  : "0"}
+                {status.certNumber > 0 ? `${status.certNumber}` : "0"}
               </p>
             </div>
           </div>

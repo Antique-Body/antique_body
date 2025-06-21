@@ -129,7 +129,7 @@ async function main() {
           "Sports Performance",
         ],
         languages: ["English", "Spanish"],
-        trainingEnvironments: ["Gym", "Outdoor", "Home"],
+        trainingEnvironment: "both",
         trainingTypes: ["One-on-One", "Group Classes", "Online Training"],
         certifications: [
           {
@@ -175,7 +175,7 @@ async function main() {
           "https://images.pexels.com/photos/5669179/pexels-photo-5669179.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
         specialties: ["Yoga", "Meditation", "Mindfulness", "Stress Management"],
         languages: ["English", "Sanskrit"],
-        trainingEnvironments: ["Studio", "Outdoor", "Online"],
+        trainingEnvironment: "both",
         trainingTypes: ["Group Classes", "Private Sessions", "Workshops"],
         certifications: [
           {
@@ -220,7 +220,7 @@ async function main() {
           "https://images.pexels.com/photos/13318591/pexels-photo-13318591.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
         specialties: ["Boxing", "MMA", "Combat Sports", "Strength Training"],
         languages: ["English", "French"],
-        trainingEnvironments: ["Gym", "Boxing Ring", "Outdoor"],
+        trainingEnvironment: "indoor",
         trainingTypes: ["One-on-One", "Group Classes", "Fight Camp"],
         certifications: [
           {
@@ -271,7 +271,7 @@ async function main() {
           "Lifestyle Coaching",
         ],
         languages: ["English", "German"],
-        trainingEnvironments: ["Gym", "Home", "Online"],
+        trainingEnvironment: "both",
         trainingTypes: ["One-on-One", "Online Coaching", "Group Programs"],
         certifications: [
           {
@@ -321,7 +321,7 @@ async function main() {
           "Rehabilitation",
         ],
         languages: ["English"],
-        trainingEnvironments: ["Pool", "Open Water", "Rehabilitation Center"],
+        trainingEnvironment: "both",
         trainingTypes: ["One-on-One", "Group Classes", "Competition Training"],
         certifications: [
           {
@@ -367,7 +367,7 @@ async function main() {
           "https://images.pexels.com/photos/136405/pexels-photo-136405.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
         specialties: ["Dance", "Aerobics", "Zumba", "Cardio Dance"],
         languages: ["English", "Mandarin"],
-        trainingEnvironments: ["Studio", "Gym", "Online"],
+        trainingEnvironment: "both",
         trainingTypes: ["Group Classes", "Private Sessions", "Workshops"],
         certifications: [
           {
@@ -417,7 +417,7 @@ async function main() {
           "Injury Prevention",
         ],
         languages: ["English"],
-        trainingEnvironments: ["Gym", "Sports Facility", "Outdoor"],
+        trainingEnvironment: "both",
         trainingTypes: ["One-on-One", "Team Training", "Online Coaching"],
         certifications: [
           {
@@ -468,7 +468,7 @@ async function main() {
           "Core Training",
         ],
         languages: ["English", "Polish"],
-        trainingEnvironments: ["Studio", "Home", "Online"],
+        trainingEnvironment: "both",
         trainingTypes: ["One-on-One", "Group Classes", "Equipment Classes"],
         certifications: [
           {
@@ -518,7 +518,7 @@ async function main() {
           "Physical Therapy",
         ],
         languages: ["English"],
-        trainingEnvironments: ["Clinic", "Gym", "Home"],
+        trainingEnvironment: "both",
         trainingTypes: [
           "One-on-One",
           "Rehabilitation Programs",
@@ -572,7 +572,7 @@ async function main() {
           "Circuit Training",
         ],
         languages: ["English", "Spanish"],
-        trainingEnvironments: ["Gym", "Outdoor", "Online"],
+        trainingEnvironment: "both",
         trainingTypes: ["Group Classes", "One-on-One", "Online Programs"],
         certifications: [
           {
@@ -621,11 +621,6 @@ async function main() {
         languages: {
           create: trainer.profile.languages.map((language) => ({
             name: language,
-          })),
-        },
-        trainingEnvironments: {
-          create: trainer.profile.trainingEnvironments.map((environment) => ({
-            name: environment,
           })),
         },
         trainingTypes: {
