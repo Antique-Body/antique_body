@@ -155,7 +155,7 @@ model TrainerProfile {
   paidAds           DateTime? // Date until which the trainer has paid advertisement
   specialties       TrainerSpecialty[]
   languages         TrainerLanguage[]
-  trainingEnvironments TrainerEnvironment[]
+  trainingEnvironment String? // indoor, outdoor, or both
   trainingTypes     TrainerType[]
   certifications    Certification[]
   locationId        String?
@@ -173,6 +173,9 @@ model TrainerProfile {
   trainerGyms       TrainerGym[]
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   availabilities    TrainerAvailability[]
+  galleryImages     TrainerGalleryImage[]
+
+  @@index([trainingEnvironment])
 }
 
 model TrainerSpecialty {
@@ -187,17 +190,6 @@ model TrainerSpecialty {
 }
 
 model TrainerLanguage {
-  id                String   @id @default(cuid())
-  trainerProfileId     String
-  name              String
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  // Relations
-  trainerProfile       TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
-}
-
-model TrainerEnvironment {
   id                String   @id @default(cuid())
   trainerProfileId     String
   name              String
@@ -370,6 +362,13 @@ model Exercise {
   @@index([level])
   @@index([location])
   @@index([equipment])
+  @@index([name])
+  @@index([createdAt])
+  @@index([trainerInfoId, type])
+  @@index([trainerInfoId, level])
+  @@index([trainerInfoId, location])
+  @@index([trainerInfoId, equipment])
+  @@index([trainerInfoId, createdAt])
 }
 
 model ExerciseMuscleGroup {
@@ -395,4 +394,20 @@ model ExerciseInfo {
   updatedAt         DateTime @updatedAt
   
   exercise          Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+}
+
+model TrainerGalleryImage {
+  id               String   @id @default(cuid())
+  trainerProfileId String
+  url              String
+  description      String?  @db.Text
+  order            Int
+  isHighlighted    Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  trainerProfile TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
+
+  @@index([trainerProfileId])
+  @@index([trainerProfileId, order])
 }

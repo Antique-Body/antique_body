@@ -86,7 +86,7 @@ export const Certification = ({
         },
       ]);
     }
-  }, [trainerData.trainerProfile.certifications, resetCertFieldsTrigger]);
+  }, [trainerData.trainerProfile.certifications, resetCertFieldsTrigger, setCertFields]);
 
   // Handler for certification changes
   const handleCertChange = (index, field, value) => {

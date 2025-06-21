@@ -33,8 +33,8 @@ const DEFAULT_EXERCISES = [
       "1. Stand with feet shoulder-width apart, barbell resting on upper back\n2. Keep chest up, core engaged\n3. Lower body by bending knees and hips\n4. Descend until thighs are parallel to ground\n5. Drive through heels to return to starting position\n6. Repeat for desired number of reps",
     muscleGroups: ["quadriceps", "hamstrings", "glutes", "core"],
     imageUrl:
-      "https://images.pexels.com/photos/4056530/pexels-photo-4056530.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    video: "https://www.youtube.com/watch?v=aclHkVaku9U",
+      "https://images.pexels.com/photos/2261482/pexels-photo-2261482.jpeg",
+    video: "https://www.youtube.com/watch?v=ultWZbUMPL8",
   },
   {
     name: "Push-ups",
@@ -48,7 +48,7 @@ const DEFAULT_EXERCISES = [
       "1. Start in plank position with hands slightly wider than shoulders\n2. Lower body by bending elbows\n3. Keep body in straight line from head to heels\n4. Lower until chest nearly touches ground\n5. Push back up to starting position\n6. Repeat for desired number of reps",
     muscleGroups: ["chest", "shoulders", "triceps", "core"],
     imageUrl:
-      "https://images.pexels.com/photos/4056530/pexels-photo-4056530.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+      "https://images.pexels.com/photos/416778/pexels-photo-416778.jpeg",
     video: "https://www.youtube.com/watch?v=IODxDxX7oi4",
   },
   {
@@ -63,7 +63,7 @@ const DEFAULT_EXERCISES = [
       "1. Start in forearm plank position\n2. Keep body in straight line from head to heels\n3. Engage core muscles\n4. Hold position for 30-60 seconds\n5. Maintain steady breathing throughout\n6. Gradually increase hold time as strength improves",
     muscleGroups: ["core", "shoulders", "back"],
     imageUrl:
-      "https://images.pexels.com/photos/4056530/pexels-photo-4056530.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+      "https://images.pexels.com/photos/4056723/pexels-photo-4056723.jpeg",
     video: "https://www.youtube.com/watch?v=ASdvN_XEl_c",
   },
 ];
@@ -72,7 +72,18 @@ const DEFAULT_EXERCISES = [
 function validateExerciseData(data) {
   const errors = [];
 
-  EXERCISE_CONFIG.requiredFields.forEach((field) => {
+  // Check required fields except equipment
+  const requiredFields = [
+    "name",
+    "location",
+    "type",
+    "level",
+    "description",
+    "instructions",
+    "muscleGroups",
+  ];
+
+  requiredFields.forEach((field) => {
     if (
       !data[field] ||
       (Array.isArray(data[field]) && data[field].length === 0)
@@ -80,6 +91,11 @@ function validateExerciseData(data) {
       errors.push(`Field '${field}' is required.`);
     }
   });
+
+  // Special handling for equipment field - it can be boolean
+  if (data.equipment === undefined || data.equipment === null) {
+    errors.push(`Field 'equipment' is required.`);
+  }
 
   if (data.type && !EXERCISE_CONFIG.validTypes.includes(data.type)) {
     errors.push(
@@ -333,23 +349,43 @@ const FILTER_CONFIG = {
 
 // Apstraktna obrada search filtera
 function buildSearchFilter(search) {
-  if (!search) return {};
+  if (!search || search.trim() === "") return {};
 
-  const searchTerms = search.toLowerCase().split(" ");
-  return {
-    OR: searchTerms.map((term) => ({
-      OR: [
-        ...FILTER_CONFIG.searchFields.map((field) => ({
-          [field]: { contains: term },
-        })),
-        {
-          muscleGroups: {
-            some: { name: { contains: term } },
+  const searchTerm = search.trim().toLowerCase();
+
+  // Split search terms for better matching
+  const searchTerms = searchTerm.split(/\s+/).filter((term) => term.length > 0);
+
+  if (searchTerms.length === 0) return {};
+
+  // Build OR conditions for each search term
+  const searchConditions = searchTerms.map((term) => ({
+    OR: [
+      // Search in name (contains - case insensitive via LOWER)
+      { name: { contains: term } },
+      // Search in description (contains)
+      { description: { contains: term } },
+      // Search in instructions (contains)
+      { instructions: { contains: term } },
+      // Search in muscle groups (contains)
+      {
+        muscleGroups: {
+          some: {
+            name: { contains: term },
           },
         },
-      ],
-    })),
-  };
+      },
+    ],
+  }));
+
+  // If multiple search terms, use AND logic between them
+  if (searchConditions.length === 1) {
+    return searchConditions[0];
+  } else {
+    return {
+      AND: searchConditions,
+    };
+  }
 }
 
 // Apstraktna obrada sortiranja
@@ -369,70 +405,99 @@ function buildSortOrder(sortBy, sortOrder) {
  * Gets all exercises with filtering and pagination
  */
 async function getAllExercises(options = {}) {
-  const {
-    limit,
-    page = 1,
-    search,
-    type,
-    level,
-    location,
-    equipment,
-    sortBy = "name",
-    sortOrder = "asc",
-  } = options;
+  try {
+    const {
+      search = "",
+      type = "",
+      level = "",
+      location = "",
+      equipment = "",
+      sortBy = "name",
+      sortOrder = "asc",
+      page = 1,
+      limit = 12,
+    } = options;
 
-  // Build where clause
-  const where = {
-    ...buildSearchFilter(search),
-    ...(type && { type }),
-    ...(level && { level }),
-    ...(location && { location }),
-    ...(equipment !== undefined &&
-      equipment !== null && { equipment: equipment === "true" }),
-  };
+    // Validate inputs
+    if (page < 1) {
+      throw new Error("Page must be greater than 0");
+    }
 
-  // Build query options
-  const queryOptions = {
-    include: {
-      muscleGroups: true,
-      exerciseInfo: true,
-      trainerInfo: {
+    if (limit < 1 || limit > 100) {
+      throw new Error("Limit must be between 1 and 100");
+    }
+
+    // Validate sort options
+    const validSortFields = ["name", "type", "level", "location", "createdAt"];
+    if (!validSortFields.includes(sortBy)) {
+      throw new Error(`Invalid sort field: ${sortBy}`);
+    }
+
+    if (!["asc", "desc"].includes(sortOrder)) {
+      throw new Error(`Invalid sort order: ${sortOrder}`);
+    }
+
+    // Build where clause
+    const where = {
+      ...(search && buildSearchFilter(search)),
+      ...(type && { type }),
+      ...(level && { level }),
+      ...(location && { location }),
+      ...(equipment !== "" && { equipment: equipment === "true" }),
+    };
+
+    // Build sort order
+    const orderBy = buildSortOrder(sortBy, sortOrder);
+
+    // Calculate pagination
+    const skip = (page - 1) * limit;
+
+    // Execute queries in parallel for better performance
+    const [exercises, totalCount] = await Promise.all([
+      prisma.exercise.findMany({
+        where,
         include: {
-          trainerProfile: {
-            select: {
-              firstName: true,
-              lastName: true,
-              profileImage: true,
+          muscleGroups: true,
+          exerciseInfo: true,
+          trainerInfo: {
+            include: {
+              trainerProfile: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  profileImage: true,
+                },
+              },
             },
           },
         },
+        orderBy,
+        take: limit,
+        skip,
+      }),
+      prisma.exercise.count({ where }),
+    ]);
+
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(totalCount / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
+    return {
+      exercises,
+      pagination: {
+        total: totalCount,
+        pages: totalPages,
+        currentPage: page,
+        limit,
+        hasNextPage,
+        hasPreviousPage,
       },
-    },
-    where,
-    orderBy: buildSortOrder(sortBy, sortOrder),
-  };
-
-  // Add pagination
-  if (limit) {
-    const skip = (page - 1) * limit;
-    queryOptions.take = limit;
-    queryOptions.skip = skip;
+    };
+  } catch (error) {
+    console.error("Error in getAllExercises:", error);
+    throw error;
   }
-
-  const [exercises, totalExercises] = await Promise.all([
-    prisma.exercise.findMany(queryOptions),
-    prisma.exercise.count({ where }),
-  ]);
-
-  return {
-    exercises,
-    pagination: {
-      total: totalExercises,
-      pages: limit ? Math.ceil(totalExercises / limit) : 1,
-      currentPage: page,
-      limit: limit || totalExercises,
-    },
-  };
 }
 
 /**
@@ -458,10 +523,115 @@ async function createOrUpdateExerciseInfo(exerciseId, infoData) {
   }
 }
 
+/**
+ * Gets filtered exercises for a specific trainer with advanced filtering, sorting, and pagination
+ */
+async function getTrainerExercisesWithFilters(trainerInfoId, options = {}) {
+  try {
+    const {
+      search = "",
+      type = "",
+      level = "",
+      location = "",
+      equipment = "",
+      sortBy = "name",
+      sortOrder = "asc",
+      page = 1,
+      limit = 12,
+    } = options;
+
+    // Validate inputs
+    if (!trainerInfoId) {
+      throw new Error("Trainer info ID is required");
+    }
+
+    if (page < 1) {
+      throw new Error("Page must be greater than 0");
+    }
+
+    if (limit < 1 || limit > 100) {
+      throw new Error("Limit must be between 1 and 100");
+    }
+
+    // Validate sort options
+    const validSortFields = ["name", "type", "level", "location", "createdAt"];
+    if (!validSortFields.includes(sortBy)) {
+      throw new Error(`Invalid sort field: ${sortBy}`);
+    }
+
+    if (!["asc", "desc"].includes(sortOrder)) {
+      throw new Error(`Invalid sort order: ${sortOrder}`);
+    }
+
+    // Build where clause for filtering
+    const where = {
+      trainerInfoId,
+      ...(search && buildSearchFilter(search)),
+      ...(type && { type }),
+      ...(level && { level }),
+      ...(location && { location }),
+      ...(equipment !== "" && { equipment: equipment === "true" }),
+    };
+
+    // Build sort order
+    const orderBy = buildSortOrder(sortBy, sortOrder);
+
+    // Calculate pagination
+    const skip = (page - 1) * limit;
+
+    // Execute queries in parallel for better performance
+    const [exercises, totalCount] = await Promise.all([
+      prisma.exercise.findMany({
+        where,
+        include: {
+          muscleGroups: true,
+          exerciseInfo: true,
+          trainerInfo: {
+            include: {
+              trainerProfile: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  profileImage: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy,
+        take: limit,
+        skip,
+      }),
+      prisma.exercise.count({ where }),
+    ]);
+
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(totalCount / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
+    return {
+      exercises,
+      pagination: {
+        total: totalCount,
+        pages: totalPages,
+        currentPage: page,
+        limit,
+        hasNextPage,
+        hasPreviousPage,
+      },
+    };
+  } catch (error) {
+    console.error("Error in getTrainerExercisesWithFilters:", error);
+    throw error;
+  }
+}
+
 export const exerciseService = {
   createExerciseWithDetails,
   createDefaultExercises,
   getExercisesByTrainerInfoId,
+  getTrainerExercisesWithFilters,
   getExerciseById,
   updateExercise,
   deleteExercise,

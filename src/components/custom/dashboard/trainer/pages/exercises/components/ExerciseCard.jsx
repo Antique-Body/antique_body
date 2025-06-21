@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useState } from "react";
 
+import { Button } from "@/components/common/Button";
 import { Card } from "@/components/common/Card";
 
 export const ExerciseCard = ({ exercise, onView, onEdit, onDelete }) => {
@@ -121,7 +122,8 @@ export const ExerciseCard = ({ exercise, onView, onEdit, onDelete }) => {
                   key={index}
                   className="rounded-md bg-[rgba(255,107,0,0.15)] px-2 py-1 text-xs text-[#FF6B00]"
                 >
-                  {muscle.name.charAt(0).toUpperCase() + muscle.name.slice(1)}
+                  {(muscle.name || muscle).charAt(0).toUpperCase() +
+                    (muscle.name || muscle).slice(1)}
                 </div>
               ))}
               {muscleGroups.length > 3 && (
@@ -135,33 +137,39 @@ export const ExerciseCard = ({ exercise, onView, onEdit, onDelete }) => {
 
         {/* Action Buttons */}
         <div className="mt-auto flex justify-end border-t border-gray-800 p-3">
-          <button
-            className="mr-2 rounded-full p-2 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-white"
+          <Button
+            variant="secondary"
+            size="compact"
+            className="mr-2 h-9 w-9 rounded-full p-0 flex items-center justify-center"
             onClick={(e) => {
               e.stopPropagation();
               onView(exercise);
             }}
           >
             <Icon icon="mdi:eye" width={16} height={16} />
-          </button>
-          <button
-            className="mr-2 rounded-full p-2 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-white"
+          </Button>
+          <Button
+            variant="secondary"
+            size="compact"
+            className="mr-2 h-9 w-9 rounded-full p-0 flex items-center justify-center"
             onClick={(e) => {
               e.stopPropagation();
               onEdit(exercise);
             }}
           >
             <Icon icon="mdi:pencil" width={16} height={16} />
-          </button>
-          <button
-            className="rounded-full p-2 text-zinc-400 transition-colors hover:bg-red-900/40 hover:text-red-500"
+          </Button>
+          <Button
+            variant="secondary"
+            size="compact"
+            className="h-9 w-9 rounded-full p-0 flex items-center justify-center hover:bg-red-900/40 hover:text-red-500"
             onClick={(e) => {
               e.stopPropagation();
               onDelete(exercise.id);
             }}
           >
             <Icon icon="mdi:trash-can" width={16} height={16} />
-          </button>
+          </Button>
         </div>
       </div>
     </Card>
