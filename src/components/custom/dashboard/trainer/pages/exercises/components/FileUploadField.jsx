@@ -221,14 +221,17 @@ export const FileUploadField = ({
       )}
 
       {/* Content Area - Fixed height to prevent jumping */}
-      <div className="flex-grow flex" style={{ minHeight: "320px" }}>
+      <div
+        className="flex-grow flex items-center justify-center"
+        style={{ minHeight: "320px" }}
+      >
         {/* File Upload Area - Hidden completely when URL input is active */}
         {!(type === "video" && showVideoUrlInput) && (
           <div className="w-full border border-dashed border-zinc-600 rounded-lg overflow-hidden flex flex-col">
             {preview ? (
               <div className="flex flex-col h-full">
                 {/* Preview Content */}
-                <div className="flex-grow relative bg-zinc-900">
+                <div className="flex-grow relative bg-zinc-900 flex items-center justify-center">
                   {type === "image" ? (
                     <div className="relative aspect-square w-full">
                       <Image
@@ -377,7 +380,7 @@ export const FileUploadField = ({
           <div className="w-full border border-zinc-700 rounded-lg overflow-hidden flex flex-col">
             {preview ? (
               <>
-                <div className="flex-grow relative bg-zinc-900">
+                <div className="flex-grow relative bg-zinc-900 flex items-center justify-center">
                   <div className="relative aspect-video w-full">
                     {isYouTubeVideo(preview) ? (
                       <iframe

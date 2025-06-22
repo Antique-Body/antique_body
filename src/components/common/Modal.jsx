@@ -68,7 +68,7 @@ export const Modal = memo(
         onClick={handleBackdropClick}
       >
         <div
-          className={`animate-modalFadeIn relative w-full ${getMaxWidth()} max-h-[90vh] overflow-hidden rounded-xl border border-[#333] bg-[#121212]/95 shadow-2xl flex flex-col`}
+          className={`animate-modalFadeIn relative w-full ${getMaxWidth()} max-h-[90vh] rounded-xl border border-[#333] bg-[#121212]/95 shadow-2xl flex flex-col`}
           style={{
             animation: "modalFadeIn 0.3s ease-out",
             boxShadow: "0 15px 40px -10px rgba(255,107,0,0.3)",
@@ -105,7 +105,7 @@ export const Modal = memo(
           {/* Footer with action buttons */}
           {footerButtons && (
             <div
-              className={`${
+              className={`max-h-max${
                 footerBorder ? "border-t border-[#333]" : ""
               } p-4 sm:p-5 flex justify-end gap-2 bg-[#121212]/95`}
             >
