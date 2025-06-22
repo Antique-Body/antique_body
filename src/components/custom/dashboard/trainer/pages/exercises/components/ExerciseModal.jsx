@@ -298,6 +298,8 @@ export const ExerciseModal = ({
   const validateForm = () => {
     const newErrors = {};
 
+    console.log(formData, "formData");
+
     if (!formData.name.trim()) newErrors.name = "Name is required";
     if (!formData.description.trim())
       newErrors.description = "Description is required";
@@ -404,6 +406,9 @@ export const ExerciseModal = ({
         setShowVideoUrlInput(true);
       }
     }
+
+    // Clear all validation errors since the form is now populated with valid data
+    setErrors({});
 
     setShowLibrarySelector(false);
   };

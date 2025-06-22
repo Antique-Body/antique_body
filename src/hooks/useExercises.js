@@ -123,7 +123,15 @@ export function useExercises() {
         setLoading(false);
       }
     },
-    []
+    [
+      filters.equipment,
+      filters.level,
+      filters.location,
+      filters.search,
+      filters.type,
+      sortBy,
+      sortOrder,
+    ]
   );
 
   // Fetch exercises for a specific trainer (legacy method for backward compatibility)

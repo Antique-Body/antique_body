@@ -239,7 +239,7 @@ export const ExerciseFilters = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {/* Type filter */}
               <div className="filter-group">
-                <label className="block text-sm font-medium text-zinc-400 mb-2 flex items-center gap-2">
+                <label className="text-sm font-medium text-zinc-400 mb-2 flex items-center gap-2">
                   <Icon
                     icon="mdi:dumbbell"
                     className="w-4 h-4 text-purple-400"
@@ -276,7 +276,7 @@ export const ExerciseFilters = ({
 
               {/* Level filter */}
               <div className="filter-group">
-                <label className="block text-sm font-medium text-zinc-400 mb-2 flex items-center gap-2">
+                <label className=" text-sm font-medium text-zinc-400 mb-2 flex items-center gap-2">
                   <Icon icon="mdi:signal" className="w-4 h-4 text-orange-400" />
                   Difficulty Level
                 </label>
@@ -312,7 +312,7 @@ export const ExerciseFilters = ({
 
               {/* Location filter */}
               <div className="filter-group">
-                <label className="block text-sm font-medium text-zinc-400 mb-2 flex items-center gap-2">
+                <label className=" text-sm font-medium text-zinc-400 mb-2 flex items-center gap-2">
                   <Icon
                     icon="mdi:map-marker"
                     className="w-4 h-4 text-blue-400"
@@ -351,7 +351,7 @@ export const ExerciseFilters = ({
 
               {/* Equipment filter */}
               <div className="filter-group">
-                <label className="block text-sm font-medium text-zinc-400 mb-2 flex items-center gap-2">
+                <label className=" text-sm font-medium text-zinc-400 mb-2 flex items-center gap-2">
                   <Icon icon="mdi:weight" className="w-4 h-4 text-green-400" />
                   Equipment
                 </label>
