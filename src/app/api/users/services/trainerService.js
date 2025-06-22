@@ -124,14 +124,12 @@ async function createTrainerWithDetails(formData, userId) {
       currency: formData.currency,
       contactEmail: formData.contactEmail || null,
       contactPhone: formData.contactPhone || null,
+      trainingEnvironment: formData.trainingEnvironment,
       specialties: {
         create: formData.specialties.map((name) => ({ name })),
       },
       languages: {
         create: formData.languages.map((name) => ({ name })),
-      },
-      trainingEnvironments: {
-        create: [{ name: formData.trainingEnvironment }],
       },
       trainingTypes: {
         create: formData.trainingTypes.map((name) => ({ name })),
@@ -161,7 +159,6 @@ async function createTrainerWithDetails(formData, userId) {
       location: true,
       specialties: true,
       languages: true,
-      trainingEnvironments: true,
       trainingTypes: true,
       certifications: true,
     },
@@ -203,7 +200,6 @@ async function getTrainerProfileByUserId(userId) {
       certifications: { include: { documents: true } },
       specialties: true,
       languages: true,
-      trainingEnvironments: true,
       trainingTypes: true,
       trainerInfo: true,
       location: true,
@@ -212,6 +208,11 @@ async function getTrainerProfileByUserId(userId) {
         include: { gym: { include: { location: true } } },
       },
       availabilities: true,
+      galleryImages: {
+        orderBy: {
+          order: "asc",
+        },
+      },
     },
   });
   return profile;
@@ -230,10 +231,14 @@ async function getTrainerInfoByUserId(userId) {
           certifications: { include: { documents: true } },
           specialties: true,
           languages: true,
-          trainingEnvironments: true,
           trainingTypes: true,
           location: true,
           availabilities: true,
+          galleryImages: {
+            orderBy: {
+              order: "asc",
+            },
+          },
         },
       },
     },
@@ -257,12 +262,12 @@ export async function updateTrainerProfile(userId, data) {
       tx.trainerLanguage.deleteMany({
         where: { trainerProfileId: profile.id },
       }),
-      tx.trainerEnvironment.deleteMany({
-        where: { trainerProfileId: profile.id },
-      }),
       tx.trainerType.deleteMany({ where: { trainerProfileId: profile.id } }),
       tx.certification.deleteMany({ where: { trainerProfileId: profile.id } }),
       tx.trainerAvailability.deleteMany({
+        where: { trainerProfileId: profile.id },
+      }),
+      tx.trainerGalleryImage.deleteMany({
         where: { trainerProfileId: profile.id },
       }),
     ]);
@@ -283,19 +288,22 @@ export async function updateTrainerProfile(userId, data) {
         })),
       });
     }
-    if (data.trainingEnvironments?.length) {
-      await tx.trainerEnvironment.createMany({
-        data: data.trainingEnvironments.map((name) => ({
-          trainerProfileId: profile.id,
-          name,
-        })),
-      });
-    }
     if (data.trainingTypes?.length) {
       await tx.trainerType.createMany({
         data: data.trainingTypes.map((name) => ({
           trainerProfileId: profile.id,
           name,
+        })),
+      });
+    }
+    if (data.galleryImages?.length) {
+      await tx.trainerGalleryImage.createMany({
+        data: data.galleryImages.map((img) => ({
+          trainerProfileId: profile.id,
+          url: img.url,
+          order: img.order,
+          isHighlighted: img.isHighlighted,
+          description: img.description,
         })),
       });
     }
@@ -336,10 +344,10 @@ export async function updateTrainerProfile(userId, data) {
       locationId: _locationId,
       specialties: _specialties,
       languages: _languages,
-      trainingEnvironments: _trainingEnvironments,
       trainingTypes: _trainingTypes,
       certifications: _certifications,
       availabilities: _availabilities,
+      galleryImages: _galleryImages,
       ...allowedProfileData
     } = data;
 
@@ -436,11 +444,15 @@ export async function updateTrainerProfile(userId, data) {
         certifications: { include: { documents: true } },
         specialties: true,
         languages: true,
-        trainingEnvironments: true,
         trainingTypes: true,
         location: true,
         trainerGyms: { include: { gym: true } },
         availabilities: true,
+        galleryImages: {
+          orderBy: {
+            order: "asc",
+          },
+        },
       },
     });
 

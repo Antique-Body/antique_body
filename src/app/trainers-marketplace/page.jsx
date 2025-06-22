@@ -119,7 +119,7 @@ export default function TrainersMarketplace() {
     };
 
     fetchTrainers();
-  }, [userLocation, locationResolved]);
+  }, [userLocation, locationResolved, sortOption, sortOrder]);
 
   // Handle filtering based on search term and filters
   useEffect(() => {
