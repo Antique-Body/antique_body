@@ -126,6 +126,7 @@ CREATE TABLE `TrainerProfile` (
     `profileImage` VARCHAR(191) NULL,
     `description` TEXT NULL,
     `paidAds` DATETIME(3) NULL,
+    `trainingEnvironment` VARCHAR(191) NULL,
     `locationId` VARCHAR(191) NULL,
     `pricingType` VARCHAR(191) NULL,
     `pricePerSession` INTEGER NULL,
@@ -138,6 +139,7 @@ CREATE TABLE `TrainerProfile` (
     `updatedAt` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `TrainerProfile_userId_key`(`userId`),
+    INDEX `TrainerProfile_trainingEnvironment_idx`(`trainingEnvironment`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -154,17 +156,6 @@ CREATE TABLE `TrainerSpecialty` (
 
 -- CreateTable
 CREATE TABLE `TrainerLanguage` (
-    `id` VARCHAR(191) NOT NULL,
-    `trainerProfileId` VARCHAR(191) NOT NULL,
-    `name` VARCHAR(191) NOT NULL,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
-
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `TrainerEnvironment` (
     `id` VARCHAR(191) NOT NULL,
     `trainerProfileId` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
@@ -315,6 +306,21 @@ CREATE TABLE `TrainerAvailability` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `TrainerGalleryImage` (
+    `id` VARCHAR(191) NOT NULL,
+    `trainerProfileId` VARCHAR(191) NOT NULL,
+    `url` VARCHAR(191) NOT NULL,
+    `order` INTEGER NOT NULL,
+    `isHighlighted` BOOLEAN NOT NULL DEFAULT false,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    INDEX `TrainerGalleryImage_trainerProfileId_idx`(`trainerProfileId`),
+    INDEX `TrainerGalleryImage_trainerProfileId_order_idx`(`trainerProfileId`, `order`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `Account` ADD CONSTRAINT `Account_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -341,9 +347,6 @@ ALTER TABLE `TrainerSpecialty` ADD CONSTRAINT `TrainerSpecialty_trainerProfileId
 
 -- AddForeignKey
 ALTER TABLE `TrainerLanguage` ADD CONSTRAINT `TrainerLanguage_trainerProfileId_fkey` FOREIGN KEY (`trainerProfileId`) REFERENCES `TrainerProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `TrainerEnvironment` ADD CONSTRAINT `TrainerEnvironment_trainerProfileId_fkey` FOREIGN KEY (`trainerProfileId`) REFERENCES `TrainerProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `TrainerType` ADD CONSTRAINT `TrainerType_trainerProfileId_fkey` FOREIGN KEY (`trainerProfileId`) REFERENCES `TrainerProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -380,3 +383,6 @@ ALTER TABLE `ClientInfo` ADD CONSTRAINT `ClientInfo_clientProfileId_fkey` FOREIG
 
 -- AddForeignKey
 ALTER TABLE `TrainerAvailability` ADD CONSTRAINT `TrainerAvailability_trainerProfileId_fkey` FOREIGN KEY (`trainerProfileId`) REFERENCES `TrainerProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `TrainerGalleryImage` ADD CONSTRAINT `TrainerGalleryImage_trainerProfileId_fkey` FOREIGN KEY (`trainerProfileId`) REFERENCES `TrainerProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

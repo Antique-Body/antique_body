@@ -171,7 +171,7 @@ export const validateTrainerProfile = (data) => {
     "trainingSince",
     "specialties",
     "languages",
-    "trainingEnvironments",
+    "trainingEnvironment",
     "trainingTypes",
     "location",
     "pricingType",

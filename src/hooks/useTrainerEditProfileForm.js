@@ -17,7 +17,7 @@ export function useTrainerEditProfileForm() {
       gender: "",
       specialties: [],
       languages: [],
-      trainingEnvironments: [],
+      trainingEnvironment: "",
       trainingTypes: [],
       certifications: [],
       description: "",
@@ -30,6 +30,7 @@ export function useTrainerEditProfileForm() {
       sessionDuration: 60,
       cancellationPolicy: 24,
       availabilities: [],
+      galleryImages: [],
       location: {
         city: "",
         state: "",
@@ -68,9 +69,7 @@ export function useTrainerEditProfileForm() {
             specialties:
               data.trainerProfile?.specialties?.map((s) => s.name) || [],
             languages: data.trainerProfile?.languages?.map((l) => l.name) || [],
-            trainingEnvironments:
-              data.trainerProfile?.trainingEnvironments?.map((e) => e.name) ||
-              [],
+            trainingEnvironment: data.trainerProfile?.trainingEnvironment || "",
             trainingTypes:
               data.trainerProfile?.trainingTypes?.map((t) => t.name) || [],
             certifications: data.trainerProfile?.certifications || [],
@@ -87,6 +86,7 @@ export function useTrainerEditProfileForm() {
             sessionDuration: data.trainerProfile?.sessionDuration || 60,
             cancellationPolicy: data.trainerProfile?.cancellationPolicy || 24,
             availabilities: availabilities,
+            galleryImages: data.trainerProfile?.galleryImages || [],
             location: {
               ...(data.trainerProfile?.location || {}),
               city: data.trainerProfile?.location?.city || "",
@@ -122,8 +122,7 @@ export function useTrainerEditProfileForm() {
     if ((trainerData.trainerProfile.specialties || []).length > 0)
       filledFields++;
     if ((trainerData.trainerProfile.languages || []).length > 0) filledFields++;
-    if ((trainerData.trainerProfile.trainingEnvironments || []).length > 0)
-      filledFields++;
+    if (trainerData.trainerProfile.trainingEnvironment) filledFields++;
     if ((trainerData.trainerProfile.trainingTypes || []).length > 0)
       filledFields++;
     if ((trainerData.trainerProfile.certifications || []).length > 0)
@@ -142,6 +141,8 @@ export function useTrainerEditProfileForm() {
     if ((trainerData.services || []).length > 0) filledFields++;
     if ((trainerData.expertise || []).length > 0) filledFields++;
     if ((trainerData.trainerProfile.availabilities || []).length > 0)
+      filledFields++;
+    if ((trainerData.trainerProfile.galleryImages || []).length > 0)
       filledFields++;
     setFormProgress(
       Math.max(20, Math.round((filledFields / totalFields) * 100))
@@ -269,6 +270,15 @@ export function useTrainerEditProfileForm() {
             }
           }
         });
+        // Add new gallery files to form data
+        const newGalleryFilesForUpload = trainerData.trainerProfile.galleryImages
+          .map((img) => img.file)
+          .filter(Boolean);
+
+        newGalleryFilesForUpload.forEach((file) => {
+          formData.append("gallery", file);
+        });
+
         let uploadedUrls = {};
         if ([...formData.keys()].length > 0) {
           const uploadRes = await fetch("/api/upload", {
@@ -302,6 +312,26 @@ export function useTrainerEditProfileForm() {
           }
           return { ...base, documents };
         });
+
+        // Construct the final galleryImages array
+        const finalGalleryImages = [];
+        const uploadedGalleryUrls = uploadedUrls.gallery
+          ? uploadedUrls.gallery.map((u) => u.url)
+          : [];
+        let newUrlIndex = 0;
+
+        trainerData.trainerProfile.galleryImages.forEach((img, index) => {
+          const url = img.file ? uploadedGalleryUrls[newUrlIndex++] : img.url;
+          if (url) {
+            finalGalleryImages.push({
+              url: url,
+              isHighlighted: img.isHighlighted || false,
+              order: index,
+              description: img.description || null,
+            });
+          }
+        });
+
         // Transform relacijska polja u nizove stringova
         const specialties = Array.isArray(
           trainerData.trainerProfile.specialties
@@ -310,11 +340,6 @@ export function useTrainerEditProfileForm() {
           : [];
         const languages = Array.isArray(trainerData.trainerProfile.languages)
           ? trainerData.trainerProfile.languages
-          : [];
-        const trainingEnvironments = Array.isArray(
-          trainerData.trainerProfile.trainingEnvironments
-        )
-          ? trainerData.trainerProfile.trainingEnvironments
           : [];
         const trainingTypes = Array.isArray(
           trainerData.trainerProfile.trainingTypes
@@ -328,9 +353,9 @@ export function useTrainerEditProfileForm() {
             profileImage: profileImageUrl,
             certifications: certificationsForSave,
             availabilities: trainerData.trainerProfile.availabilities,
+            galleryImages: finalGalleryImages,
             specialties,
             languages,
-            trainingEnvironments,
             trainingTypes,
           },
         };

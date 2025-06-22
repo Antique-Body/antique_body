@@ -147,6 +147,7 @@ export async function GET() {
             gyms: gymsArray,
           },
           availabilities: trainerInfo.trainerProfile.availabilities || [],
+          galleryImages: trainerInfo.trainerProfile.galleryImages || [],
         },
       }),
       { status: 200 }
