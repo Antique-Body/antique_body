@@ -36,7 +36,7 @@ export default function ExercisesPage() {
   // Load exercises data on component mount - only once
   useEffect(() => {
     fetchTrainerExercisesWithFilters();
-  }, []); // Empty dependency array to run only once
+  }, [fetchTrainerExercisesWithFilters]); // Include fetchTrainerExercisesWithFilters in dependencies
 
   // Handle page change
   const handlePageChange = async (newPage) => {
