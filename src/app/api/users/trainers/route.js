@@ -162,13 +162,7 @@ export async function GET(request) {
         {
           availabilities: {
             some: {
-              OR: availabilities.map((a) => {
-                const [weekday, timeSlot] = a.split(" ");
-                return {
-                  weekday: weekday,
-                  timeSlot: timeSlot,
-                };
-              }),
+              weekday: { in: availabilities },
             },
           },
         },

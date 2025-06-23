@@ -1,4 +1,5 @@
 import { Icon } from "@iconify/react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useState, useRef, useEffect, forwardRef } from "react";
 
 import { Button } from "@/components/common/Button";
@@ -198,7 +199,7 @@ export const SortControls = forwardRef(
       });
 
     return (
-      <div className={`mb-6 ${className || ""}`}>
+      <div className={`relative z-10 mb-6 ${className || ""}`}>
         <div className="flex flex-col gap-3 bg-zinc-900 backdrop-blur-md p-3 sm:p-4 rounded-xl border border-zinc-800 shadow-lg">
           {/* Search row */}
           <div
@@ -263,33 +264,41 @@ export const SortControls = forwardRef(
                 )}
 
                 {/* Location Suggestions Dropdown */}
-                {showLocationSuggestions &&
-                  (locationSuggestions.length > 0 || isLoadingLocations) && (
-                    <div className="absolute z-50 w-full mt-1 bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                      {isLoadingLocations ? (
-                        <div className="p-3 text-center text-zinc-400">
-                          Loading locations...
-                        </div>
-                      ) : (
-                        locationSuggestions.map((location) => (
-                          <button
-                            key={location.value}
-                            className="w-full px-4 py-2 text-left hover:bg-zinc-700 focus:bg-zinc-700 focus:outline-none"
-                            onClick={() => handleLocationSelect(location)}
-                            type="button"
-                          >
-                            <div className="flex items-center">
-                              <Icon
-                                icon="mdi:map-marker"
-                                className={`w-5 h-5 mr-2 ${colors.accentClass}`}
-                              />
-                              <span>{location.label}</span>
-                            </div>
-                          </button>
-                        ))
-                      )}
-                    </div>
-                  )}
+                <AnimatePresence>
+                  {showLocationSuggestions &&
+                    (locationSuggestions.length > 0 || isLoadingLocations) && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute z-[60] w-full mt-1 bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                      >
+                        {isLoadingLocations ? (
+                          <div className="p-3 text-center text-zinc-400">
+                            Loading locations...
+                          </div>
+                        ) : (
+                          locationSuggestions.map((location) => (
+                            <button
+                              key={location.value}
+                              className="w-full px-4 py-2 text-left hover:bg-zinc-700 focus:bg-zinc-700 focus:outline-none"
+                              onClick={() => handleLocationSelect(location)}
+                              type="button"
+                            >
+                              <div className="flex items-center">
+                                <Icon
+                                  icon="mdi:map-marker"
+                                  className={`w-5 h-5 mr-2 ${colors.accentClass}`}
+                                />
+                                <span>{location.label}</span>
+                              </div>
+                            </button>
+                          ))
+                        )}
+                      </motion.div>
+                    )}
+                </AnimatePresence>
               </div>
             )}
           </div>
@@ -304,10 +313,15 @@ export const SortControls = forwardRef(
               </div>
 
               {/* Active Filters */}
-              {hasActiveFilters && (
-                <div className="flex flex-wrap gap-2 ml-2">
+              <div className="flex flex-wrap gap-2 ml-2">
+                <AnimatePresence>
                   {searchQuery && (
-                    <div
+                    <motion.div
+                      layout
+                      key="search-chip"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
                       className={`flex items-center ${colors.accentBg} px-3 py-1 rounded-full text-sm text-white`}
                     >
                       <span>Search: {searchQuery}</span>
@@ -326,10 +340,15 @@ export const SortControls = forwardRef(
                       >
                         <Icon icon="mdi:close" className="w-4 h-4" />
                       </button>
-                    </div>
+                    </motion.div>
                   )}
                   {selectedLocation && (
-                    <div
+                    <motion.div
+                      layout
+                      key="location-chip"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
                       className={`flex items-center ${colors.accentBg} px-3 py-1 rounded-full text-sm text-white`}
                     >
                       <Icon icon="mdi:map-marker" className="w-4 h-4 mr-1" />
@@ -344,12 +363,17 @@ export const SortControls = forwardRef(
                       >
                         <Icon icon="mdi:close" className="w-4 h-4" />
                       </button>
-                    </div>
+                    </motion.div>
                   )}
 
                   {/* Exercise Type Filter Badge */}
                   {filters.type && (
-                    <div
+                    <motion.div
+                      layout
+                      key="type-chip"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
                       className={`flex items-center ${colors.accentBg} px-3 py-1 rounded-full text-sm text-white`}
                     >
                       <Icon icon="mdi:dumbbell" className="w-4 h-4 mr-1" />
@@ -365,12 +389,17 @@ export const SortControls = forwardRef(
                       >
                         <Icon icon="mdi:close" className="w-4 h-4" />
                       </button>
-                    </div>
+                    </motion.div>
                   )}
 
                   {/* Exercise Level Filter Badge */}
                   {filters.level && (
-                    <div
+                    <motion.div
+                      layout
+                      key="level-chip"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
                       className={`flex items-center ${colors.accentBg} px-3 py-1 rounded-full text-sm text-white`}
                     >
                       <Icon icon="mdi:signal" className="w-4 h-4 mr-1" />
@@ -386,12 +415,17 @@ export const SortControls = forwardRef(
                       >
                         <Icon icon="mdi:close" className="w-4 h-4" />
                       </button>
-                    </div>
+                    </motion.div>
                   )}
 
                   {/* Exercise Location Filter Badge */}
                   {filters.location && (
-                    <div
+                    <motion.div
+                      layout
+                      key="ex-location-chip"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
                       className={`flex items-center ${colors.accentBg} px-3 py-1 rounded-full text-sm text-white`}
                     >
                       <Icon icon="mdi:map" className="w-4 h-4 mr-1" />
@@ -410,13 +444,18 @@ export const SortControls = forwardRef(
                       >
                         <Icon icon="mdi:close" className="w-4 h-4" />
                       </button>
-                    </div>
+                    </motion.div>
                   )}
 
                   {/* Equipment Filter Badge */}
                   {filters.equipment !== undefined &&
                     filters.equipment !== "" && (
-                      <div
+                      <motion.div
+                        layout
+                        key="equipment-chip"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
                         className={`flex items-center ${colors.accentBg} px-3 py-1 rounded-full text-sm text-white`}
                       >
                         <Icon icon="mdi:weight" className="w-4 h-4 mr-1" />
@@ -433,20 +472,28 @@ export const SortControls = forwardRef(
                         >
                           <Icon icon="mdi:close" className="w-4 h-4" />
                         </button>
-                      </div>
+                      </motion.div>
                     )}
 
                   {hasActiveFilters && (
-                    <button
-                      onClick={onClearFilters}
-                      className={`text-sm ${colors.accentClass} hover:underline flex items-center`}
-                      type="button"
+                    <motion.div
+                      layout
+                      key="clear-chip"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
                     >
-                      Clear all
-                    </button>
+                      <button
+                        onClick={onClearFilters}
+                        className={`text-sm ${colors.accentClass} hover:underline flex items-center`}
+                        type="button"
+                      >
+                        Clear all
+                      </button>
+                    </motion.div>
                   )}
-                </div>
-              )}
+                </AnimatePresence>
+              </div>
             </div>
 
             <div className="flex items-center gap-3">
@@ -485,133 +532,141 @@ export const SortControls = forwardRef(
                   </Button>
 
                   {/* Exercise Filters Dropdown */}
-                  {showExerciseFilters && (
-                    <div className="absolute right-0 z-50 mt-2 w-64 bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg overflow-hidden">
-                      <div className="p-3 border-b border-zinc-700">
-                        <h3 className="font-medium text-white">
-                          Filter Exercises
-                        </h3>
-                      </div>
+                  <AnimatePresence>
+                    {showExerciseFilters && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute right-0 z-[60] mt-2 w-64 bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg overflow-hidden"
+                      >
+                        <div className="p-3 border-b border-zinc-700">
+                          <h3 className="font-medium text-white">
+                            Filter Exercises
+                          </h3>
+                        </div>
 
-                      {/* Exercise Type Filter */}
-                      <div className="p-3 border-b border-zinc-700">
-                        <label className="block text-sm font-medium text-zinc-300 mb-1">
-                          Exercise Type
-                        </label>
-                        <select
-                          className="w-full bg-zinc-700 border border-zinc-600 rounded text-white p-2 text-sm"
-                          value={filters.type || ""}
-                          onChange={(e) =>
-                            handleExerciseFilterChange("type", e.target.value)
-                          }
-                        >
-                          <option value="">All Types</option>
-                          {EXERCISE_TYPES.map((type) => (
-                            <option key={type.value} value={type.value}>
-                              {type.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                        {/* Exercise Type Filter */}
+                        <div className="p-3 border-b border-zinc-700">
+                          <label className="block text-sm font-medium text-zinc-300 mb-1">
+                            Exercise Type
+                          </label>
+                          <select
+                            className="w-full bg-zinc-700 border border-zinc-600 rounded text-white p-2 text-sm"
+                            value={filters.type || ""}
+                            onChange={(e) =>
+                              handleExerciseFilterChange("type", e.target.value)
+                            }
+                          >
+                            <option value="">All Types</option>
+                            {EXERCISE_TYPES.map((type) => (
+                              <option key={type.value} value={type.value}>
+                                {type.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
 
-                      {/* Exercise Level Filter */}
-                      <div className="p-3 border-b border-zinc-700">
-                        <label className="block text-sm font-medium text-zinc-300 mb-1">
-                          Difficulty Level
-                        </label>
-                        <select
-                          className="w-full bg-zinc-700 border border-zinc-600 rounded text-white p-2 text-sm"
-                          value={filters.level || ""}
-                          onChange={(e) =>
-                            handleExerciseFilterChange("level", e.target.value)
-                          }
-                        >
-                          <option value="">All Levels</option>
-                          {EXERCISE_LEVELS.map((level) => (
-                            <option key={level.value} value={level.value}>
-                              {level.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                        {/* Exercise Level Filter */}
+                        <div className="p-3 border-b border-zinc-700">
+                          <label className="block text-sm font-medium text-zinc-300 mb-1">
+                            Difficulty Level
+                          </label>
+                          <select
+                            className="w-full bg-zinc-700 border border-zinc-600 rounded text-white p-2 text-sm"
+                            value={filters.level || ""}
+                            onChange={(e) =>
+                              handleExerciseFilterChange("level", e.target.value)
+                            }
+                          >
+                            <option value="">All Levels</option>
+                            {EXERCISE_LEVELS.map((level) => (
+                              <option key={level.value} value={level.value}>
+                                {level.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
 
-                      {/* Exercise Location Filter */}
-                      <div className="p-3 border-b border-zinc-700">
-                        <label className="block text-sm font-medium text-zinc-300 mb-1">
-                          Location
-                        </label>
-                        <select
-                          className="w-full bg-zinc-700 border border-zinc-600 rounded text-white p-2 text-sm"
-                          value={filters.location || ""}
-                          onChange={(e) =>
-                            handleExerciseFilterChange(
-                              "location",
-                              e.target.value
-                            )
-                          }
-                        >
-                          <option value="">All Locations</option>
-                          {EXERCISE_LOCATIONS.map((location) => (
-                            <option key={location.value} value={location.value}>
-                              {location.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                        {/* Exercise Location Filter */}
+                        <div className="p-3 border-b border-zinc-700">
+                          <label className="block text-sm font-medium text-zinc-300 mb-1">
+                            Location
+                          </label>
+                          <select
+                            className="w-full bg-zinc-700 border border-zinc-600 rounded text-white p-2 text-sm"
+                            value={filters.location || ""}
+                            onChange={(e) =>
+                              handleExerciseFilterChange(
+                                "location",
+                                e.target.value
+                              )
+                            }
+                          >
+                            <option value="">All Locations</option>
+                            {EXERCISE_LOCATIONS.map((location) => (
+                              <option key={location.value} value={location.value}>
+                                {location.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
 
-                      {/* Equipment Filter */}
-                      <div className="p-3 border-b border-zinc-700">
-                        <label className="block text-sm font-medium text-zinc-300 mb-1">
-                          Equipment Required
-                        </label>
-                        <select
-                          className="w-full bg-zinc-700 border border-zinc-600 rounded text-white p-2 text-sm"
-                          value={filters.equipment || ""}
-                          onChange={(e) =>
-                            handleExerciseFilterChange(
-                              "equipment",
-                              e.target.value
-                            )
-                          }
-                        >
-                          <option value="">All</option>
-                          {EQUIPMENT_OPTIONS.map((option) => (
-                            <option
-                              key={option.value}
-                              value={option.value === "yes" ? "true" : "false"}
-                            >
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                        {/* Equipment Filter */}
+                        <div className="p-3 border-b border-zinc-700">
+                          <label className="block text-sm font-medium text-zinc-300 mb-1">
+                            Equipment Required
+                          </label>
+                          <select
+                            className="w-full bg-zinc-700 border border-zinc-600 rounded text-white p-2 text-sm"
+                            value={filters.equipment || ""}
+                            onChange={(e) =>
+                              handleExerciseFilterChange(
+                                "equipment",
+                                e.target.value
+                              )
+                            }
+                          >
+                            <option value="">All</option>
+                            {EQUIPMENT_OPTIONS.map((option) => (
+                              <option
+                                key={option.value}
+                                value={option.value === "yes" ? "true" : "false"}
+                              >
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
 
-                      {/* Filter Actions */}
-                      <div className="p-3 flex justify-between">
-                        <Button
-                          variant="secondary"
-                          size="small"
-                          onClick={() => {
-                            handleExerciseFilterChange("type", "");
-                            handleExerciseFilterChange("level", "");
-                            handleExerciseFilterChange("location", "");
-                            handleExerciseFilterChange("equipment", "");
-                          }}
-                        >
-                          Clear Filters
-                        </Button>
-                        <Button
-                          variant={
-                            variant === "blue" ? "primary" : "orangeFilled"
-                          }
-                          size="small"
-                          onClick={() => setShowExerciseFilters(false)}
-                        >
-                          Apply
-                        </Button>
-                      </div>
-                    </div>
-                  )}
+                        {/* Filter Actions */}
+                        <div className="p-3 flex justify-between">
+                          <Button
+                            variant="secondary"
+                            size="small"
+                            onClick={() => {
+                              handleExerciseFilterChange("type", "");
+                              handleExerciseFilterChange("level", "");
+                              handleExerciseFilterChange("location", "");
+                              handleExerciseFilterChange("equipment", "");
+                            }}
+                          >
+                            Clear Filters
+                          </Button>
+                          <Button
+                            variant={
+                              variant === "blue" ? "primary" : "orangeFilled"
+                            }
+                            size="small"
+                            onClick={() => setShowExerciseFilters(false)}
+                          >
+                            Apply
+                          </Button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               )}
 
@@ -680,50 +735,58 @@ export const SortControls = forwardRef(
                 </Button>
 
                 {/* Dropdown menu */}
-                {showSortOptions && (
-                  <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-zinc-800 border border-zinc-700 rounded-lg shadow-xl overflow-hidden">
-                    {sortOptions.map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => {
-                          setSortOption(option.value);
-                          setShowSortOptions(false);
-                        }}
-                        className={`w-full text-left px-4 py-2.5 text-sm hover:bg-zinc-700 transition-colors flex items-center justify-between ${
-                          sortOption === option.value
-                            ? `${colors.accentClass} bg-zinc-700/50`
-                            : "text-zinc-300"
-                        }`}
-                        type="button"
-                      >
-                        {option.label}
-                        {sortOption === option.value && (
-                          <Icon icon="mdi:check" className="w-4 h-4 ml-2" />
-                        )}
-                      </button>
-                    ))}
-                    <div className="border-t border-zinc-700 px-4 py-2.5">
-                      <button
-                        onClick={() => {
-                          toggleSortOrder();
-                          setShowSortOptions(false);
-                        }}
-                        className="flex items-center text-sm text-zinc-300 hover:text-white transition-colors"
-                        type="button"
-                      >
-                        <Icon
-                          icon={
-                            sortOrder === "asc"
-                              ? "mdi:sort-ascending"
-                              : "mdi:sort-descending"
-                          }
-                          className="w-4 h-4 mr-2"
-                        />
-                        {sortOrder === "asc" ? "Ascending" : "Descending"}
-                      </button>
-                    </div>
-                  </div>
-                )}
+                <AnimatePresence>
+                  {showSortOptions && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full left-0 right-0 mt-1 z-[60] bg-zinc-800 border border-zinc-700 rounded-lg shadow-xl overflow-hidden"
+                    >
+                      {sortOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => {
+                            setSortOption(option.value);
+                            setShowSortOptions(false);
+                          }}
+                          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-zinc-700 transition-colors flex items-center justify-between ${
+                            sortOption === option.value
+                              ? `${colors.accentClass} bg-zinc-700/50`
+                              : "text-zinc-300"
+                          }`}
+                          type="button"
+                        >
+                          {option.label}
+                          {sortOption === option.value && (
+                            <Icon icon="mdi:check" className="w-4 h-4 ml-2" />
+                          )}
+                        </button>
+                      ))}
+                      <div className="border-t border-zinc-700 px-4 py-2.5">
+                        <button
+                          onClick={() => {
+                            toggleSortOrder();
+                            setShowSortOptions(false);
+                          }}
+                          className="flex items-center text-sm text-zinc-300 hover:text-white transition-colors"
+                          type="button"
+                        >
+                          <Icon
+                            icon={
+                              sortOrder === "asc"
+                                ? "mdi:sort-ascending"
+                                : "mdi:sort-descending"
+                            }
+                            className="w-4 h-4 mr-2"
+                          />
+                          {sortOrder === "asc" ? "Ascending" : "Descending"}
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           </div>

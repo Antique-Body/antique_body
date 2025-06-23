@@ -327,6 +327,13 @@ CREATE TABLE `Exercise` (
     INDEX `Exercise_level_idx`(`level`),
     INDEX `Exercise_location_idx`(`location`),
     INDEX `Exercise_equipment_idx`(`equipment`),
+    INDEX `Exercise_name_idx`(`name`),
+    INDEX `Exercise_createdAt_idx`(`createdAt`),
+    INDEX `Exercise_trainerInfoId_type_idx`(`trainerInfoId`, `type`),
+    INDEX `Exercise_trainerInfoId_level_idx`(`trainerInfoId`, `level`),
+    INDEX `Exercise_trainerInfoId_location_idx`(`trainerInfoId`, `location`),
+    INDEX `Exercise_trainerInfoId_equipment_idx`(`trainerInfoId`, `equipment`),
+    INDEX `Exercise_trainerInfoId_createdAt_idx`(`trainerInfoId`, `createdAt`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
