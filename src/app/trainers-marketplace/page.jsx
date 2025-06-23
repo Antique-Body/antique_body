@@ -2,7 +2,7 @@
 
 import { Icon } from "@iconify/react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import { useUserLocation } from "@/app/layout";
 import { Footer } from "@/components/common/Footer";
@@ -58,25 +58,28 @@ export default function TrainersMarketplace() {
   const trainersPerPage = 9;
   const totalPages = Math.ceil(totalTrainers / trainersPerPage);
 
-  const updateUrlParams = (newParams) => {
-    const params = new URLSearchParams(searchParams);
-    Object.entries(newParams).forEach(([key, value]) => {
-      if (value === "" || value === null || value === undefined) {
-        params.delete(key);
-      } else if (Array.isArray(value)) {
-        params.delete(key);
-        value.forEach((v) => params.append(key, v));
-      } else {
-        params.set(key, value);
+  const updateUrlParams = useCallback(
+    (newParams) => {
+      const params = new URLSearchParams(searchParams);
+      Object.entries(newParams).forEach(([key, value]) => {
+        if (value === "" || value === null || value === undefined) {
+          params.delete(key);
+        } else if (Array.isArray(value)) {
+          params.delete(key);
+          value.forEach((v) => params.append(key, v));
+        } else {
+          params.set(key, value);
+        }
+      });
+
+      if (!newParams.page) {
+        params.set("page", "1");
       }
-    });
 
-    if (!newParams.page) {
-      params.set("page", "1");
-    }
-
-    router.push(`${pathname}?${params.toString()}`);
-  };
+      router.push(`${pathname}?${params.toString()}`);
+    },
+    [searchParams, pathname, router]
+  );
 
   const setSearchTerm = (value) => updateUrlParams({ search: value });
   const setLocationSearch = (value) =>
@@ -127,7 +130,7 @@ export default function TrainersMarketplace() {
       newParams.tag = null;
     }
     updateUrlParams(newParams);
-  }, [filters]);
+  }, [filters, updateUrlParams]);
 
   // Initial fetch of trainers
   useEffect(() => {
@@ -176,7 +179,13 @@ export default function TrainersMarketplace() {
     };
 
     fetchTrainers();
-  }, [searchParams, userLocation, locationResolved]);
+  }, [
+    searchParams,
+    userLocation,
+    locationResolved,
+    currentPage,
+    trainersPerPage,
+  ]);
 
   // Function to handle viewing a trainer's profile
   const handleViewProfile = (trainer) => {
@@ -191,7 +200,9 @@ export default function TrainersMarketplace() {
 
   // Define sort options
   const sortOptions = [
-    ...(userLocation ? [{ value: "location", label: "Location (Closest)" }] : []),
+    ...(userLocation
+      ? [{ value: "location", label: "Location (Closest)" }]
+      : []),
     { value: "rating", label: "Rating" },
     { value: "price", label: "Price" },
     { value: "experience", label: "Experience" },
