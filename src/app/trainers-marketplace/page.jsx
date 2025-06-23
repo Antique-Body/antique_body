@@ -1,10 +1,10 @@
 "use client";
 
 import { Icon } from "@iconify/react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 
 import { useUserLocation } from "@/app/layout";
-import { FullScreenLoader } from "@/components";
 import { Footer } from "@/components/common/Footer";
 import { Navigation } from "@/components/custom/home-page/shared";
 import { SearchFilters } from "@/components/custom/home-page/trainers-marketplace/components/SearchFilters";
@@ -19,48 +19,115 @@ import {
 } from "@/components/custom/shared/trainers-list";
 
 export default function TrainersMarketplace() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [locationSearch, setLocationSearch] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState(null);
-  const [allTrainers, setAllTrainers] = useState([]);
-  const [filteredTrainers, setFilteredTrainers] = useState([]);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const [trainers, setTrainers] = useState([]);
+  const [totalTrainers, setTotalTrainers] = useState(0);
   const [selectedTrainer, setSelectedTrainer] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [sortOption, setSortOption] = useState("rating");
-  const [sortOrder, setSortOrder] = useState("desc");
 
   // Access user location from context
   const { userLocation, locationResolved } = useUserLocation();
 
-  // Filters state
+  // State derived from URL
+  const searchTerm = searchParams.get("search") || "";
+  const locationSearch = searchParams.get("locationSearch") || "";
+  const selectedLocation = searchParams.get("location")
+    ? {
+        label: searchParams.get("location"),
+        value: searchParams.get("location"),
+      }
+    : null;
+  const sortOption = searchParams.get("sortBy") || "rating";
+  const sortOrder = searchParams.get("sortOrder") || "desc";
+  const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const [filters, setFilters] = useState({
-    location: [],
-    availability: [],
-    price: { min: 0, max: 200 },
-    rating: 0,
-    tags: [],
+    availability: searchParams.getAll("availability") || [],
+    price: {
+      min: parseInt(searchParams.get("priceMin") || "0", 10),
+      max: parseInt(searchParams.get("priceMax") || "200", 10),
+    },
+    rating: parseInt(searchParams.get("rating") || "0", 10),
+    tags: searchParams.getAll("tag") || [],
   });
 
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const trainersPerPage = 9; // Show 9 trainers per page for marketplace
-  const totalPages = Math.ceil(filteredTrainers.length / trainersPerPage);
-  const indexOfLastTrainer = currentPage * trainersPerPage;
-  const indexOfFirstTrainer = indexOfLastTrainer - trainersPerPage;
-  const currentTrainers = filteredTrainers.slice(
-    indexOfFirstTrainer,
-    indexOfLastTrainer
-  );
+  const trainersPerPage = 9;
+  const totalPages = Math.ceil(totalTrainers / trainersPerPage);
 
-  // Update sort option when user location becomes available
-  useEffect(() => {
-    if (userLocation) {
-      setSortOption("location");
-      setSortOrder("asc");
+  const updateUrlParams = (newParams) => {
+    const params = new URLSearchParams(searchParams);
+    Object.entries(newParams).forEach(([key, value]) => {
+      if (value === "" || value === null || value === undefined) {
+        params.delete(key);
+      } else if (Array.isArray(value)) {
+        params.delete(key);
+        value.forEach((v) => params.append(key, v));
+      } else {
+        params.set(key, value);
+      }
+    });
+
+    if (!newParams.page) {
+      params.set("page", "1");
     }
-  }, [userLocation]);
+
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const setSearchTerm = (value) => updateUrlParams({ search: value });
+  const setLocationSearch = (value) =>
+    updateUrlParams({ locationSearch: value });
+  const setSelectedLocation = (value) =>
+    updateUrlParams({ location: value ? value.label : null });
+  const setSortOption = (value) => updateUrlParams({ sortBy: value });
+  const setSortOrder = (value) => updateUrlParams({ sortOrder: value });
+  const setCurrentPage = (value) => updateUrlParams({ page: value });
+
+  useEffect(() => {
+    setFilters({
+      availability: searchParams.getAll("availability") || [],
+      price: {
+        min: parseInt(searchParams.get("priceMin") || "0", 10),
+        max: parseInt(searchParams.get("priceMax") || "200", 10),
+      },
+      rating: parseInt(searchParams.get("rating") || "0", 10),
+      tags: searchParams.getAll("tag") || [],
+    });
+  }, [searchParams]);
+
+  useEffect(() => {
+    const newParams = {};
+    if (filters.availability.length > 0) {
+      newParams.availability = filters.availability;
+    } else {
+      newParams.availability = null;
+    }
+    if (filters.price.min > 0) {
+      newParams.priceMin = filters.price.min;
+    } else {
+      newParams.priceMin = null;
+    }
+    if (filters.price.max < 200) {
+      newParams.priceMax = filters.price.max;
+    } else {
+      newParams.priceMax = null;
+    }
+    if (filters.rating > 0) {
+      newParams.rating = filters.rating;
+    } else {
+      newParams.rating = null;
+    }
+    if (filters.tags.length > 0) {
+      newParams.tag = filters.tags;
+    } else {
+      newParams.tag = null;
+    }
+    updateUrlParams(newParams);
+  }, [filters]);
 
   // Initial fetch of trainers
   useEffect(() => {
@@ -69,22 +136,27 @@ export default function TrainersMarketplace() {
     const fetchTrainers = async () => {
       try {
         setLoading(true);
-        let url = "/api/users/trainers?limit=100";
+        const params = new URLSearchParams(searchParams.toString());
 
-        // Include location parameters if available for distance calculation
+        // We need lat/lon for distance calculation even if not sorting by location
         if (userLocation) {
-          url += `&lat=${userLocation.lat}&lon=${userLocation.lon}&sortBy=location`;
-          console.log("Fetching with location:", {
-            lat: userLocation.lat,
-            lon: userLocation.lon,
-          });
-        } else {
-          url += `&sortBy=${sortOption}&sortOrder=${sortOrder}`;
-          console.log(
-            "Fetching without location - user location not available"
-          );
+          params.set("lat", userLocation.lat);
+          params.set("lon", userLocation.lon);
         }
 
+        // Ensure default sort is location if user location is present and no other sort is set
+        if (userLocation && !params.has("sortBy")) {
+          params.set("sortBy", "location");
+          params.set("sortOrder", "asc");
+        } else if (!params.has("sortBy")) {
+          params.set("sortBy", "rating");
+          params.set("sortOrder", "desc");
+        }
+
+        params.set("limit", trainersPerPage);
+        params.set("page", currentPage);
+
+        const url = `/api/users/trainers?${params.toString()}`;
         console.log("Fetching trainers from URL:", url);
 
         const response = await fetch(url);
@@ -93,23 +165,8 @@ export default function TrainersMarketplace() {
         }
         const data = await response.json();
 
-        // Map distance and distanceSource for each trainer
-        const mapped = data.trainers.map((trainer) => ({
-          ...trainer,
-          distance: trainer.distance ?? null,
-          distanceSource: trainer.distanceSource ?? null,
-        }));
-
-        console.log("Received trainers:", {
-          total: mapped.length,
-          withDistance: mapped.filter((t) => t.distance !== null).length,
-        });
-
-        // Sort trainers based on initial sort option
-        const sorted = sortTrainers(mapped, sortOption, sortOrder);
-
-        setAllTrainers(sorted);
-        setFilteredTrainers(sorted);
+        setTrainers(data.trainers);
+        setTotalTrainers(data.pagination.total);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching trainers:", err);
@@ -119,119 +176,7 @@ export default function TrainersMarketplace() {
     };
 
     fetchTrainers();
-  }, [userLocation, locationResolved, sortOption, sortOrder]);
-
-  // Handle filtering based on search term and filters
-  useEffect(() => {
-    if (!allTrainers.length) return;
-
-    let results = [...allTrainers];
-
-    // Apply name search filter
-    if (searchTerm) {
-      const searchTermLower = searchTerm.toLowerCase();
-      results = results.filter((trainer) => {
-        const fullName = `${trainer.firstName} ${
-          trainer.lastName || ""
-        }`.toLowerCase();
-        const hasNameMatch = fullName.includes(searchTermLower);
-        const hasSpecialtyMatch = trainer.specialties?.some((specialty) =>
-          specialty.name.toLowerCase().includes(searchTermLower)
-        );
-        const hasDescriptionMatch = trainer.description
-          ?.toLowerCase()
-          .includes(searchTermLower);
-
-        return hasNameMatch || hasSpecialtyMatch || hasDescriptionMatch;
-      });
-    }
-
-    // Apply location filter from SearchFilters component
-    if (filters.location.length > 0) {
-      results = results.filter((trainer) => {
-        if (!trainer.location) return false;
-
-        return filters.location.some((location) => {
-          const cityParts = location
-            .split(",")[0]
-            .split("-")
-            .map((part) => part.trim());
-          const trainerCity = trainer.location.city.toLowerCase();
-          return cityParts.some(
-            (part) =>
-              trainerCity.includes(part.toLowerCase()) ||
-              trainerCity === location.split(",")[0].toLowerCase()
-          );
-        });
-      });
-    }
-
-    // Apply location filter from SortControls
-    if (selectedLocation) {
-      const cityParts = selectedLocation.label
-        .split(",")[0]
-        .split("-")
-        .map((part) => part.trim());
-      results = results.filter((trainer) => {
-        if (!trainer.location) return false;
-
-        const trainerCity = trainer.location.city.toLowerCase();
-        return cityParts.some(
-          (part) =>
-            trainerCity.includes(part.toLowerCase()) ||
-            trainerCity === selectedLocation.label.split(",")[0].toLowerCase()
-        );
-      });
-    }
-
-    // Apply price filter
-    if (filters.price.min > 0 || filters.price.max < 200) {
-      results = results.filter((trainer) => {
-        const price = trainer.pricePerSession || 0;
-        return price >= filters.price.min && price <= filters.price.max;
-      });
-    }
-
-    // Apply rating filter
-    if (filters.rating > 0) {
-      results = results.filter((trainer) => {
-        const rating = trainer.trainerInfo?.rating || 0;
-        return rating >= filters.rating;
-      });
-    }
-
-    // Apply tags filter
-    if (filters.tags.length > 0) {
-      results = results.filter((trainer) =>
-        trainer.specialties?.some((specialty) =>
-          filters.tags.includes(specialty.name)
-        )
-      );
-    }
-
-    // Apply availability filter
-    if (filters.availability.length > 0) {
-      results = results.filter((trainer) => {
-        if (!trainer.availability) return false;
-        return filters.availability.some((day) =>
-          trainer.availability.some((slot) => slot.weekday === day)
-        );
-      });
-    }
-
-    // Sort results
-    results = sortTrainers(results, sortOption, sortOrder);
-
-    setFilteredTrainers(results);
-    setCurrentPage(1); // Reset to first page when filters change
-  }, [
-    searchTerm,
-    selectedLocation,
-    filters,
-    allTrainers,
-    sortOption,
-    sortOrder,
-  ]);
+  }, [searchParams, userLocation, locationResolved]);
 
   // Function to handle viewing a trainer's profile
   const handleViewProfile = (trainer) => {
@@ -244,57 +189,9 @@ export default function TrainersMarketplace() {
     setShowProfileModal(false);
   };
 
-  // Function to sort trainers
-  const sortTrainers = (trainersToSort, option, order) => {
-    console.log("Sorting trainers:", { option, order });
-
-    return [...trainersToSort].sort((a, b) => {
-      let comparison = 0;
-
-      switch (option) {
-        case "rating":
-          comparison =
-            (a.trainerInfo?.rating || 0) - (b.trainerInfo?.rating || 0);
-          break;
-        case "price":
-          comparison = (a.pricePerSession || 0) - (b.pricePerSession || 0);
-          break;
-        case "experience":
-          comparison = (a.trainingSince || 0) - (b.trainingSince || 0);
-          break;
-        case "name":
-          comparison = `${a.firstName} ${a.lastName}`.localeCompare(
-            `${b.firstName} ${b.lastName}`
-          );
-          break;
-        case "location":
-          // If distance is available, sort by distance
-          if (
-            typeof a.distance === "number" &&
-            typeof b.distance === "number"
-          ) {
-            comparison = a.distance - b.distance;
-          } else if (typeof a.distance === "number") {
-            comparison = -1; // a comes first if only a has distance
-          } else if (typeof b.distance === "number") {
-            comparison = 1; // b comes first if only b has distance
-          }
-          // If neither has distance, maintain current order
-          break;
-        default:
-          comparison = 0;
-      }
-
-      // Reverse for descending order
-      return order === "asc" ? comparison : -comparison;
-    });
-  };
-
   // Define sort options
   const sortOptions = [
-    ...(allTrainers.some((t) => typeof t.distance === "number")
-      ? [{ value: "location", label: "Location (Closest)" }]
-      : []),
+    ...(userLocation ? [{ value: "location", label: "Location (Closest)" }] : []),
     { value: "rating", label: "Rating" },
     { value: "price", label: "Price" },
     { value: "experience", label: "Experience" },
@@ -309,26 +206,8 @@ export default function TrainersMarketplace() {
 
   // Clear all filters
   const handleClearFilters = () => {
-    setSearchTerm("");
-    setLocationSearch("");
-    setSelectedLocation(null);
-    setFilters({
-      location: [],
-      availability: [],
-      price: { min: 0, max: 200 },
-      rating: 0,
-      tags: [],
-    });
-    setFilteredTrainers(allTrainers);
+    router.push(pathname);
   };
-
-  if (loading) {
-    return (
-      <>
-        <FullScreenLoader text={"Loading trainers..."} />
-      </>
-    );
-  }
 
   if (error) {
     return (
@@ -405,8 +284,6 @@ export default function TrainersMarketplace() {
             {/* Left sidebar with filters */}
             <div className="w-full lg:w-1/4 lg:sticky lg:top-24 lg:self-start">
               <SearchFilters
-                searchQuery={searchTerm}
-                setSearchQuery={setSearchTerm}
                 filters={filters}
                 setFilters={setFilters}
                 onClearFilters={handleClearFilters}
@@ -421,7 +298,7 @@ export default function TrainersMarketplace() {
                 setSortOption={setSortOption}
                 sortOrder={sortOrder}
                 setSortOrder={setSortOrder}
-                itemCount={filteredTrainers.length}
+                itemCount={totalTrainers}
                 sortOptions={sortOptions}
                 variant="orange"
                 searchQuery={searchTerm}
@@ -434,35 +311,46 @@ export default function TrainersMarketplace() {
               />
 
               {/* Trainer List */}
-              {currentTrainers.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5 mb-8">
-                  {currentTrainers.map((trainer) => (
-                    <TrainerCard
-                      key={trainer.id}
-                      trainer={trainer}
-                      onRequestCoaching={() => {}}
-                      onViewProfile={handleViewProfile}
-                      hasRequested={false}
-                      colorVariant="orange"
-                    />
-                  ))}
+              {loading ? (
+                <div className="flex justify-center items-center min-h-[60vh]">
+                  <Icon
+                    icon="line-md:loading-loop"
+                    className="w-12 h-12 text-[#FF6B00]"
+                  />
                 </div>
               ) : (
-                <NoResults
-                  onClearFilters={handleClearFilters}
-                  variant="orange"
-                  title="No trainers match your criteria"
-                  message="We couldn't find any trainers matching your current filters. Try adjusting your search criteria or clearing all filters."
-                />
-              )}
+                <>
+                  {trainers.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5 mb-8">
+                      {trainers.map((trainer) => (
+                        <TrainerCard
+                          key={trainer.id}
+                          trainer={trainer}
+                          onRequestCoaching={() => {}}
+                          onViewProfile={handleViewProfile}
+                          hasRequested={false}
+                          colorVariant="orange"
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <NoResults
+                      onClearFilters={handleClearFilters}
+                      variant="orange"
+                      title="No trainers match your criteria"
+                      message="We couldn't find any trainers matching your current filters. Try adjusting your search criteria or clearing all filters."
+                    />
+                  )}
 
-              {totalPages > 1 && (
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handlePageChange}
-                  variant="orange"
-                />
+                  {totalPages > 1 && (
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={handlePageChange}
+                      variant="orange"
+                    />
+                  )}
+                </>
               )}
             </div>
           </div>

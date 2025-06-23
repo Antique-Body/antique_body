@@ -6,10 +6,13 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { Button, Card, InfoBanner } from "@/components/common";
 import { SectionTitle } from "@/components/custom/dashboard/shared";
 import { DraggableImage } from "@/components/custom/shared";
+import { UPLOAD_CONFIG } from "@/config/upload";
 
-// Accepted image file types and maximum size (1MB)
-const ACCEPTED_FILE_TYPES = ["image/jpeg", "image/png", "image/jpg", "image/gif"];
-const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB in bytes
+const galleryConfig = UPLOAD_CONFIG.gallery;
+
+// Accepted image file types and maximum size
+const ACCEPTED_FILE_TYPES = galleryConfig.allowedTypes;
+const MAX_FILE_SIZE = galleryConfig.maxSize * 1024 * 1024; // in bytes
 const MAX_HIGHLIGHT_COUNT = 6;
 const MAX_GALLERY_IMAGES = 50;
 
@@ -56,7 +59,7 @@ const Gallery = ({ trainerData, setTrainerData }) => {
     
     // Check file size
     if (file.size > MAX_FILE_SIZE) {
-      return `File ${file.name} is too large. Maximum size is 1MB.`;
+      return `File ${file.name} is too large. Maximum size is ${galleryConfig.maxSize}MB.`;
     }
     
     return null;
@@ -259,7 +262,9 @@ const Gallery = ({ trainerData, setTrainerData }) => {
                     </div>
                     <span className="text-center text-sm font-medium">Upload Images</span>
                     <span className="text-center text-xs text-gray-500">JPG, PNG, GIF</span>
-                    <span className="text-center text-xs text-gray-500">Max 1MB</span>
+                    <span className="text-center text-xs text-gray-500">
+                      Max {galleryConfig.maxSize}MB
+                    </span>
                   </div>
                 </div>
               )}

@@ -2,67 +2,10 @@ import { Readable } from "stream";
 
 import formidable from "formidable";
 
+import { UPLOAD_CONFIG } from "@/config/upload";
 import { uploadFile, initGCS } from "@/lib/storage";
 
 export const config = { api: { bodyParser: false } };
-
-// Apstraktna konfiguracija za sve tipove uploada
-const UPLOAD_CONFIG = {
-  profileImage: {
-    allowedTypes: ["image/jpeg", "image/png", "image/jpg", "image/gif"],
-    folder: "profile-images",
-    maxSize: 1,
-    returnType: "single", // single URL
-  },
-  certifications: {
-    allowedTypes: [
-      "image/jpeg",
-      "image/png",
-      "image/jpg",
-      "image/gif",
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ],
-    folder: "certificates",
-    maxSize: 10,
-    returnType: "array", // array of objects
-  },
-  gallery: {
-    allowedTypes: ["image/jpeg", "image/png", "image/jpg", "image/gif"],
-    folder: "gallery",
-    maxSize: 10,
-    returnType: "array",
-  },
-  videos: {
-    allowedTypes: [
-      "video/mp4",
-      "video/quicktime",
-      "video/x-msvideo",
-      "video/webm",
-    ],
-    folder: "videos",
-    maxSize: 100,
-    returnType: "array",
-  },
-  exerciseImage: {
-    allowedTypes: ["image/jpeg", "image/png", "image/jpg", "image/gif"],
-    folder: "exercise-images",
-    maxSize: 5,
-    returnType: "single",
-  },
-  exerciseVideo: {
-    allowedTypes: [
-      "video/mp4",
-      "video/quicktime",
-      "video/x-msvideo",
-      "video/webm",
-    ],
-    folder: "exercise-videos",
-    maxSize: 50,
-    returnType: "single",
-  },
-};
 
 // Apstraktna validacija fajla
 function validateFile(file, config) {

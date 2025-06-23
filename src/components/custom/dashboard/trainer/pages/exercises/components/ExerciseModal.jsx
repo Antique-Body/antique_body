@@ -10,6 +10,7 @@ import { FileUploadField } from "./FileUploadField";
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { Modal } from "@/components/common/Modal";
+import { UPLOAD_CONFIG } from "@/config/upload";
 import {
   EXERCISE_TYPES,
   EXERCISE_LEVELS,
@@ -20,21 +21,8 @@ import {
 
 // File upload validation
 const validateFile = (file, type) => {
-  const config =
-    type === "image"
-      ? {
-          maxSize: 5 * 1024 * 1024,
-          allowedTypes: ["image/jpeg", "image/png", "image/jpg", "image/gif"],
-        }
-      : {
-          maxSize: 50 * 1024 * 1024,
-          allowedTypes: [
-            "video/mp4",
-            "video/quicktime",
-            "video/x-msvideo",
-            "video/webm",
-          ],
-        };
+  const configKey = type === "image" ? "exerciseImage" : "exerciseVideo";
+  const config = UPLOAD_CONFIG[configKey];
 
   if (!file) return null;
 
@@ -44,9 +32,9 @@ const validateFile = (file, type) => {
       .join(", ")}`;
   }
 
-  if (file.size > config.maxSize) {
+  if (file.size > config.maxSize * 1024 * 1024) {
     return `${type === "image" ? "Image" : "Video"} is too large. Maximum: ${
-      config.maxSize / (1024 * 1024)
+      config.maxSize
     }MB`;
   }
 

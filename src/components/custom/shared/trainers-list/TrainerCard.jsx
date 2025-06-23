@@ -178,7 +178,7 @@ export const TrainerCard = ({
 
         {/* Featured badge */}
         {isFeatured && (
-          <div className="absolute right-0 top-0 z-10">
+          <div className="absolute right-0 top-0 z-2">
             <div className="flex items-center gap-1 bg-[#FFD700] px-2 py-0.5 text-xs font-medium text-black rounded-bl-lg">
               <Icon icon="mdi:star" width={12} height={12} />
               Featured

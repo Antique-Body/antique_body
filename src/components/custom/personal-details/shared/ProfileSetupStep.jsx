@@ -6,6 +6,7 @@ import { FormSection } from "./FormSection";
 
 import { FormField } from "@/components/common";
 import { ProfileImageUpload } from "@/components/custom/shared";
+import { UPLOAD_CONFIG } from "@/config/upload";
 
 export const ProfileSetupStep = ({
   formData,
@@ -19,7 +20,7 @@ export const ProfileSetupStep = ({
   guidelines = [
     "Professional headshot with neutral background",
     "Clear, well-lit, and focused on your face",
-    "JPG, PNG, or GIF format (max 1MB)",
+    `JPG, PNG, or GIF format (max ${UPLOAD_CONFIG.profileImage.maxSize}MB)`,
   ],
   guidelineHelpText = "A professional profile photo helps build trust.",
 }) => {

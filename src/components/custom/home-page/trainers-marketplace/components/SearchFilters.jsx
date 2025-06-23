@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
+import { SPECIALTIES } from "@/enums/specialties";
 
 export const SearchFilters = ({
   filters,
@@ -27,20 +28,7 @@ export const SearchFilters = ({
     "Sunday",
   ];
 
-  const tags = [
-    "Weight Loss",
-    "Strength Training",
-    "Cardio",
-    "Yoga",
-    "Pilates",
-    "CrossFit",
-    "HIIT",
-    "Bodybuilding",
-    "Nutrition",
-    "Rehabilitation",
-    "Sports Performance",
-    "Functional Training",
-  ];
+  const tags = SPECIALTIES.map((s) => s.label);
 
   const toggleSection = (section) => {
     setIsExpanded({
