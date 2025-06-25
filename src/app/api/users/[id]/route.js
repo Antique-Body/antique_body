@@ -3,9 +3,10 @@ import { NextResponse } from "next/server";
 import { userService } from "@/services/users";
 
 // Get a user by ID
-export async function GET({ params }) {
+export async function GET(request, { params }) {
   try {
-    const user = await userService.findUserById(params.id);
+    const { id } = await params;
+    const user = await userService.findUserById(id);
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -24,8 +25,9 @@ export async function GET({ params }) {
 // Update a user by ID
 export async function PUT(request, { params }) {
   try {
+    const { id } = await params;
     const body = await request.json();
-    const user = await userService.updateUser(params.id, body);
+    const user = await userService.updateUser(id, body);
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -44,7 +46,8 @@ export async function PUT(request, { params }) {
 // Delete a user by ID
 export async function DELETE(request, { params }) {
   try {
-    await userService.deleteUser(params.id);
+    const { id } = await params;
+    await userService.deleteUser(id);
     return NextResponse.json(
       { message: "User deleted successfully" },
       { status: 200 }
