@@ -225,7 +225,7 @@ export function useTrainerEditProfileForm() {
       trainerData.trainerProfile.profileImage &&
       typeof trainerData.trainerProfile.profileImage === "string"
     ) {
-      setPreviewImage(null);
+      setPreviewImage(trainerData.trainerProfile.profileImage);
     }
   }, [trainerData.trainerProfile.profileImage]);
 
@@ -271,9 +271,10 @@ export function useTrainerEditProfileForm() {
           }
         });
         // Add new gallery files to form data
-        const newGalleryFilesForUpload = trainerData.trainerProfile.galleryImages
-          .map((img) => img.file)
-          .filter(Boolean);
+        const newGalleryFilesForUpload =
+          trainerData.trainerProfile.galleryImages
+            .map((img) => img.file)
+            .filter(Boolean);
 
         newGalleryFilesForUpload.forEach((file) => {
           formData.append("gallery", file);
@@ -366,13 +367,14 @@ export function useTrainerEditProfileForm() {
         });
         if (!res.ok) throw new Error("Failed to update profile");
         setLoading(false);
-        router.push("/trainer/dashboard");
+        // Don't navigate away since this is used in a modal now
+        // router.push("/trainer/dashboard");
       } catch (err) {
         setError(err.message || "Error updating profile");
         setLoading(false);
       }
     },
-    [trainerData, certFields, router]
+    [trainerData, certFields]
   );
 
   const goBack = useCallback(() => {

@@ -51,6 +51,17 @@ export default function ClientDashboardLayout({ children }) {
     fetchClient();
   }, []);
 
+  // Function to refresh client data
+  const refreshClientData = async () => {
+    try {
+      const res = await fetch("/api/users/client");
+      const data = await res.json();
+      setClientData(data);
+    } catch (error) {
+      console.error("Error refreshing client data:", error);
+    }
+  };
+
   // Navigate to appropriate route when tab changes
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
@@ -114,7 +125,12 @@ export default function ClientDashboardLayout({ children }) {
     if (!clientData || clientData.error) {
       return <div className="text-red-400">Failed to load profile.</div>;
     }
-    return <ClientProfile userData={clientData} />;
+    return (
+      <ClientProfile
+        userData={clientData}
+        onProfileUpdate={refreshClientData}
+      />
+    );
   };
 
   return (
