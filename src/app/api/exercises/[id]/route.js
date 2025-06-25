@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 
 export async function GET(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const exercise = await exerciseService.getExerciseById(id);
 
     if (!exercise) {
@@ -32,7 +32,7 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     const { valid, errors } = validateExercise(body);
@@ -89,7 +89,7 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Check if user is authorized to delete this exercise
     const session = await auth();
