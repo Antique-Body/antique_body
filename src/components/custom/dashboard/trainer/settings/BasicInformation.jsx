@@ -22,13 +22,34 @@ const staggerItems = {
   },
 };
 
-export const BasicInformation = ({
+export const TrainerBasicInformation = ({
   trainerData,
   handleChange,
   previewImage,
   handleImageUpload,
   setTrainerData,
 }) => {
+  // Helper function to normalize languages data
+  const normalizeLanguages = (languages) => {
+    if (!languages || languages.length === 0) return [];
+
+    // If languages is an array of objects with 'name' property, extract names
+    if (typeof languages[0] === "object" && languages[0].name) {
+      return languages.map((lang) => lang.name);
+    }
+
+    // If languages is already an array of strings, return as is
+    if (typeof languages[0] === "string") {
+      return languages;
+    }
+
+    // Fallback to empty array
+    return [];
+  };
+
+  // Get normalized languages
+  const normalizedLanguages = normalizeLanguages(trainerData.languages);
+
   // Handler for LanguageSelector
   const handleLanguagesChange = (langs) => {
     if (setTrainerData) {
@@ -142,7 +163,7 @@ export const BasicInformation = ({
           Languages you speak
         </div>
         <LanguageSelector
-          selectedLanguages={trainerData.languages || []}
+          selectedLanguages={normalizedLanguages}
           onChange={handleLanguagesChange}
         />
       </motion.div>

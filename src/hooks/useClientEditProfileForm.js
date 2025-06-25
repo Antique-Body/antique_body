@@ -159,13 +159,14 @@ export function useClientEditProfileForm() {
         });
         if (!res.ok) throw new Error("Failed to update profile");
         setLoading(false);
-        router.push("/client/dashboard");
+        // Don't navigate away since this is used in a modal now
+        // router.push("/client/dashboard");
       } catch (err) {
         setError(err.message || "Error updating profile");
         setLoading(false);
       }
     },
-    [clientData, router]
+    [clientData]
   );
 
   const goBack = useCallback(() => {
