@@ -55,43 +55,43 @@ export const InfoBanner = ({
 
   return (
     <div
-      className={`p-4 bg-gradient-to-r ${styles.gradient} border ${
-        styles.border
-      } rounded-lg ${className} ${buttonText ? "pr-36" : ""}`}
+      className={`relative p-4 bg-gradient-to-r ${styles.gradient} border ${styles.border} rounded-lg ${className}`}
     >
-      <div className="flex items-center gap-3">
-        <div
-          className={`w-10 h-10 ${styles.iconBg} rounded-full flex items-center justify-center`}
-        >
-          <Icon
-            icon={icon}
-            width={20}
-            height={20}
-            className={styles.iconColor}
-          />
-        </div>
-        <div>
-          {title && (
-            <p className={`text-sm font-medium ${styles.titleColor}`}>
-              {title}
-            </p>
-          )}
-          {subtitle && <p className="text-xs text-gray-400">{subtitle}</p>}
-        </div>
-      </div>
-
-      {buttonText && onButtonClick && (
-        <div className="absolute right-4 top-1/2 -translate-y-1/2">
-          <Button
-            variant={variant === "primary" ? "outlineOrange" : "custom"}
-            className={variant !== "primary" ? styles.buttonVariant : ""}
-            size="small"
-            onClick={onButtonClick}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div
+            className={`w-10 h-10 ${styles.iconBg} rounded-full flex items-center justify-center flex-shrink-0`}
           >
-            {buttonText}
-          </Button>
+            <Icon
+              icon={icon}
+              width={20}
+              height={20}
+              className={styles.iconColor}
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            {title && (
+              <p className={`text-sm font-medium ${styles.titleColor}`}>
+                {title}
+              </p>
+            )}
+            {subtitle && <p className="text-xs text-gray-400">{subtitle}</p>}
+          </div>
         </div>
-      )}
+
+        {buttonText && onButtonClick && (
+          <div className="flex-shrink-0">
+            <Button
+              variant={variant === "primary" ? "outlineOrange" : "custom"}
+              className={variant !== "primary" ? styles.buttonVariant : ""}
+              size="small"
+              onClick={onButtonClick}
+            >
+              {buttonText}
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

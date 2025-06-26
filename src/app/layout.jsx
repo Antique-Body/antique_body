@@ -35,23 +35,15 @@ function UserLocationProvider({ children }) {
         setLocationResolved(true);
       }, 5000); // Fallback if no response in 5s
 
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          console.log("✅ User location obtained:", position.coords);
-          clearTimeout(fallbackTimeout);
-          setUserLocation({
-            lat: position.coords.latitude,
-            lon: position.coords.longitude,
-          });
-          setLocationResolved(true);
-        },
-        (err) => {
-          console.error("❌ Error getting user location:", err.message);
-          clearTimeout(fallbackTimeout);
-          setUserLocation(null);
-          setLocationResolved(true);
-        }
-      );
+      navigator.geolocation.getCurrentPosition((position) => {
+        console.log("✅ User location obtained:", position.coords);
+        clearTimeout(fallbackTimeout);
+        setUserLocation({
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+        });
+        setLocationResolved(true);
+      });
     } else {
       console.warn("🚫 Geolocation not supported or window undefined.");
       setLocationResolved(true);

@@ -17,6 +17,7 @@ export const UserProfile = ({
   editProfilePath = "/trainer/edit-profile",
 }) => {
   const [imageError, setImageError] = useState(false);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
   const router = useRouter();
 
   const getInitials = (name) => {
@@ -32,17 +33,21 @@ export const UserProfile = ({
   return (
     <div className="flex flex-col items-start gap-6 py-6 md:flex-row">
       <div className="relative flex h-32 w-32 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#FF6B00] to-[#FF9A00] text-3xl font-semibold text-white transition-transform duration-300 hover:scale-105">
-        {typeof avatarContent === "string" && !imageError ? (
+        {avatarContent && !imageError && (
           <Image
             src={avatarContent}
             alt="Profile"
             fill
             priority
-            className="object-cover"
+            className={`object-cover transition-opacity duration-300 ${
+              isImageLoaded ? "opacity-100" : "opacity-0"
+            }`}
             sizes="(max-width: 128px) 100vw, 128px"
             onError={() => setImageError(true)}
+            onLoadingComplete={() => setIsImageLoaded(true)}
           />
-        ) : (
+        )}
+        {(!avatarContent || imageError || !isImageLoaded) && (
           <span>{getInitials(profileTitle)}</span>
         )}
       </div>
