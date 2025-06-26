@@ -3,10 +3,12 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "#/*": ["./*"], // <-- dodaj ovo za root
+      "#/*": ["./*"],
+
       "@components/*": ["./src/components/*"],
       "@utils/*": ["./src/app/utils/*"],
-      "@hooks/*": ["./src/app/hooks/*"]
+      "@hooks/*": ["./src/app/hooks/*"],
+      "@services/*": ["./src/services/*"] // vercel add
     }
   }
 }
