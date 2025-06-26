@@ -7,8 +7,7 @@
 
       "@components/*": ["./src/components/*"],
       "@utils/*": ["./src/app/utils/*"],
-      "@hooks/*": ["./src/app/hooks/*"],
-      "@services/*": ["./src/services/*"] // vercel add
+      "@hooks/*": ["./src/app/hooks/*"]
     }
   }
 }
