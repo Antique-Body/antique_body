@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 
+import { userService } from "./services";
+
 import { auth } from "#/auth";
-import { userService } from "@/services/users";
 import { parseQueryParams } from "@/utils/api";
 
 export async function GET(request) {
