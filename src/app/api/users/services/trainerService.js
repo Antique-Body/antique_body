@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
 import { exerciseService } from "./exerciseService";
+import { mealService } from "./mealService";
 
 const prisma = new PrismaClient();
 
@@ -189,6 +190,8 @@ async function createOrUpdateTrainerInfo(trainerProfileId, infoData) {
 
     // Create default exercises for new trainer
     await exerciseService.createDefaultExercises(trainerInfo.id);
+    // Create default meals for new trainer
+    await mealService.createDefaultMeals(trainerInfo.id);
 
     return trainerInfo;
   }

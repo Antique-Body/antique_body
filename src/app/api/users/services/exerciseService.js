@@ -72,18 +72,7 @@ const DEFAULT_EXERCISES = [
 function validateExerciseData(data) {
   const errors = [];
 
-  // Check required fields except equipment
-  const requiredFields = [
-    "name",
-    "location",
-    "type",
-    "level",
-    "description",
-    "instructions",
-    "muscleGroups",
-  ];
-
-  requiredFields.forEach((field) => {
+  EXERCISE_CONFIG.requiredFields.forEach((field) => {
     if (
       !data[field] ||
       (Array.isArray(data[field]) && data[field].length === 0)

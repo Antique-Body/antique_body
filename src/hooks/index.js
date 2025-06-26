@@ -1,10 +1,11 @@
 export { useAuthForm } from "./useAuthForm";
-export { usePhoneInput } from "./usePhoneInput";
-export { useVerificationCode } from "./useVerificationCode";
-export { useTrainerRegistration } from "./useTrainerRegistration";
-export { useClientRegistration } from "./useClientRegistration";
-export { usePrefillFromSession } from "./usePrefillFromSession";
 export { useCertificateFiles } from "./useCertificateFiles";
 export { useClientEditProfileForm } from "./useClientEditProfileForm";
-export { useTrainerEditProfileForm } from "./useTrainerEditProfileForm";
+export { useClientRegistration } from "./useClientRegistration";
 export { useExercises } from "./useExercises";
+export { useMeals } from "./useMeals";
+export { usePhoneInput } from "./usePhoneInput";
+export { usePrefillFromSession } from "./usePrefillFromSession";
+export { useTrainerEditProfileForm } from "./useTrainerEditProfileForm";
+export { useTrainerRegistration } from "./useTrainerRegistration";
+export { useVerificationCode } from "./useVerificationCode";

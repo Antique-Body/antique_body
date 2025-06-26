@@ -22,24 +22,38 @@ export const Modal = memo(
     primaryButtonDisabled = false,
     footerBorder = true,
     size = "default", // default, large, small
+    isNested = false, // New prop to handle nested modals
   }) => {
-    // Handle ESC key press
+    // Handle ESC key press and body scroll lock
     useEffect(() => {
       if (!isOpen) return;
 
+      // Lock body scroll when modal is open (only for the first modal)
+      let originalStyle;
+      if (!isNested) {
+        originalStyle = window.getComputedStyle(document.body).overflow;
+        document.body.style.overflow = "hidden";
+      }
+
       const handleEscKey = (event) => {
         if (event.key === "Escape") {
-          onClose();
+          // For nested modals, we let the child handle ESC first
+          if (!isNested) {
+            onClose();
+          }
         }
       };
 
       window.addEventListener("keydown", handleEscKey);
 
-      // Cleanup function to remove event listener
+      // Cleanup function to remove event listener and restore scroll
       return () => {
+        if (!isNested && originalStyle) {
+          document.body.style.overflow = originalStyle;
+        }
         window.removeEventListener("keydown", handleEscKey);
       };
-    }, [isOpen, onClose]);
+    }, [isOpen, onClose, isNested]);
 
     if (!isOpen) return null;
 
@@ -62,9 +76,12 @@ export const Modal = memo(
       }
     };
 
+    // Determine z-index based on whether it's nested
+    const zIndexClass = isNested ? "z-[60]" : "z-50";
+
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 backdrop-blur-[6px] p-2 sm:p-4"
+        className={`fixed inset-0 ${zIndexClass} flex items-center justify-center overflow-hidden bg-black/40 backdrop-blur-[6px] p-2 sm:p-4`}
         onClick={handleBackdropClick}
       >
         <div
