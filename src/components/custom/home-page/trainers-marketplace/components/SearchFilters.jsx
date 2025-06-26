@@ -6,11 +6,7 @@ import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { SPECIALTIES } from "@/enums/specialties";
 
-export const SearchFilters = ({
-  filters,
-  setFilters,
-  onClearFilters,
-}) => {
+export const SearchFilters = ({ filters, setFilters, onClearFilters }) => {
   const [isExpanded, setIsExpanded] = useState({
     availability: false,
     price: true,
@@ -89,9 +85,7 @@ export const SearchFilters = ({
           key={star}
           icon={star <= rating ? "mdi:star" : "mdi:star-outline"}
           className={
-            star <= rating
-              ? "text-[#FF6B00] w-4 h-4"
-              : "text-zinc-600 w-4 h-4"
+            star <= rating ? "text-[#FF6B00] w-4 h-4" : "text-zinc-600 w-4 h-4"
           }
         />
       ))}
@@ -410,7 +404,7 @@ export const SearchFilters = ({
 
       {/* Apply button (mobile) */}
       <div className="mt-6 lg:hidden">
-        <Button variant="orangeFilled" size="medium" className="w-full">
+        <Button variant="outlineOrange" size="large" className="w-full">
           Apply Filters
         </Button>
       </div>
