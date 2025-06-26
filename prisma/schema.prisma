@@ -300,6 +300,8 @@ model TrainerInfo {
   updatedAt         DateTime @updatedAt
 
   trainerProfile    TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
+  exercises         Exercise[]
+  meals             Meal[]
 }
 
 model TrainerGym {
@@ -336,6 +338,65 @@ model TrainerAvailability {
   @@index([timeSlot])
 }
 
+// Exercise models
+model Exercise {
+  id                String   @id @default(cuid())
+  trainerInfoId     String
+  name              String
+  location          String   // "gym", "home", "outdoor"
+  equipment         Boolean  @default(true)
+  type              String   // "strength", "bodyweight", "cardio", "flexibility", "balance"
+  level             String   // "beginner", "intermediate", "advanced"
+  description       String   @db.Text
+  instructions      String   @db.Text
+  video             String?  // URL to video
+  imageUrl          String?  // URL to image
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  trainerInfo       TrainerInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  muscleGroups      ExerciseMuscleGroup[]
+  exerciseInfo      ExerciseInfo?
+  
+  @@index([trainerInfoId])
+  @@index([type])
+  @@index([level])
+  @@index([location])
+  @@index([equipment])
+  @@index([name])
+  @@index([createdAt])
+  @@index([trainerInfoId, type])
+  @@index([trainerInfoId, level])
+  @@index([trainerInfoId, location])
+  @@index([trainerInfoId, equipment])
+  @@index([trainerInfoId, createdAt])
+}
+
+model ExerciseMuscleGroup {
+  id          String   @id @default(cuid())
+  exerciseId  String
+  name        String   // "chest", "back", "shoulders", etc.
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  
+  @@index([exerciseId])
+  @@index([name])
+}
+
+model ExerciseInfo {
+  id                String   @id @default(cuid())
+  exerciseId        String   @unique
+  totalUses         Int      @default(0)
+  averageRating     Float?
+  totalRatings      Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  exercise          Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+}
+
 model TrainerGalleryImage {
   id               String   @id @default(cuid())
   trainerProfileId String
@@ -350,4 +411,39 @@ model TrainerGalleryImage {
 
   @@index([trainerProfileId])
   @@index([trainerProfileId, order])
+}
+
+// Meal models
+model Meal {
+  id              String   @id @default(cuid())
+  trainerId       String
+  name            String
+  mealType        String   // "breakfast", "lunch", "dinner", "snack", "dessert"
+  difficulty      String   // "easy", "medium", "hard"
+  preparationTime Int      // in minutes
+  calories        Float    @default(0)
+  protein         Float    @default(0)
+  carbs           Float    @default(0)
+  fat             Float    @default(0)
+  dietary         Json     // ["vegetarian", "vegan", "gluten-free", etc.]
+  cuisine         String   @default("other") // "italian", "mexican", "asian", etc.
+  ingredients     String   @db.Text
+  recipe          String   @db.Text
+  imageUrl        String?
+  video           String?  // URL to video
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  trainerInfo     TrainerInfo @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  
+  @@index([trainerId])
+  @@index([mealType])
+  @@index([difficulty])
+  @@index([cuisine])
+  @@index([name])
+  @@index([createdAt])
+  @@index([trainerId, mealType])
+  @@index([trainerId, difficulty])
+  @@index([trainerId, cuisine])
+  @@index([trainerId, createdAt])
 }

@@ -3,14 +3,11 @@ import Image from "next/image";
 import React, { useState, useEffect } from "react";
 
 import { Button } from "@/components/common/Button";
+import { UPLOAD_CONFIG } from "@/config/upload";
 
-const ALLOWED_IMAGE_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/jpg",
-  "image/gif",
-];
-const MAX_IMAGE_SIZE_MB = 1;
+const profileImageConfig = UPLOAD_CONFIG.profileImage;
+const ALLOWED_IMAGE_TYPES = profileImageConfig.allowedTypes;
+const MAX_IMAGE_SIZE_MB = profileImageConfig.maxSize;
 
 function validateImageFile(file) {
   if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
@@ -41,7 +38,7 @@ export const ProfileImageUpload = ({
   guidelines = [
     "Professional headshot with neutral background",
     "Clear, well-lit, and focused on your face",
-    "JPG, PNG, or GIF format (max 1MB)",
+    `JPG, PNG, or GIF format (max ${MAX_IMAGE_SIZE_MB}MB)`,
   ],
   guidelineHelpText = "A professional profile photo helps build trust.",
   error = "",
