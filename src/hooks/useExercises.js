@@ -24,53 +24,6 @@ export function useExercises() {
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
 
-  // Fetch all exercises with filters
-  const fetchExercises = useCallback(async (options = {}) => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const {
-        page = 1,
-        limit = 12,
-        search = "",
-        type = "",
-        level = "",
-        location = "",
-        equipment = "",
-        sortBy = "name",
-        sortOrder = "asc",
-      } = options;
-
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-        sortBy,
-        sortOrder,
-      });
-
-      if (search) params.append("search", search);
-      if (type) params.append("type", type);
-      if (level) params.append("level", level);
-      if (location) params.append("location", location);
-      if (equipment) params.append("equipment", equipment);
-
-      const response = await fetch(`/api/exercises?${params}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setExercises(data.exercises);
-        setPagination(data.pagination);
-      } else {
-        setError(data.error || "Failed to fetch exercises");
-      }
-    } catch (err) {
-      setError(err.message || "Failed to fetch exercises");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   // Fetch exercises for a specific trainer with filters
   const fetchTrainerExercisesWithFilters = useCallback(
     async (filterOptions = {}) => {
@@ -317,7 +270,6 @@ export function useExercises() {
     filters,
     sortBy,
     sortOrder,
-    fetchExercises,
     fetchTrainerExercises,
     fetchTrainerExercisesWithFilters,
     updateFilters,

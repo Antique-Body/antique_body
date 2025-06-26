@@ -3,14 +3,14 @@
 import { Icon } from "@iconify/react";
 import { useState, useEffect } from "react";
 
-import exerciseLibrary from "./exerciseLibrary.json";
+import mealLibrary from "./mealLibrary.json";
 
 import { Button } from "@/components/common/Button";
 import { InfoBanner } from "@/components/common/InfoBanner";
 
-export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
+export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredExercises, setFilteredExercises] = useState(exerciseLibrary);
+  const [filteredMeals, setFilteredMeals] = useState(mealLibrary);
 
   // Handle ESC key press for this modal specifically
   useEffect(() => {
@@ -25,24 +25,28 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
     return () => window.removeEventListener("keydown", handleEscKey);
   }, [onClose]);
 
-  // Filter exercises based on search term
+  // Filter meals based on search term
   useEffect(() => {
     if (!searchTerm.trim()) {
-      setFilteredExercises(exerciseLibrary);
+      setFilteredMeals(mealLibrary);
       return;
     }
 
     const lowerCaseSearch = searchTerm.toLowerCase();
-    const filtered = exerciseLibrary.filter(
-      (exercise) =>
-        exercise.name.toLowerCase().includes(lowerCaseSearch) ||
-        exercise.description.toLowerCase().includes(lowerCaseSearch) ||
-        exercise.muscleGroups.some((muscle) =>
-          muscle.toLowerCase().includes(lowerCaseSearch)
-        )
+    const filtered = mealLibrary.filter(
+      (meal) =>
+        meal.name.toLowerCase().includes(lowerCaseSearch) ||
+        meal.ingredients.toLowerCase().includes(lowerCaseSearch) ||
+        meal.recipe.toLowerCase().includes(lowerCaseSearch) ||
+        meal.mealType.toLowerCase().includes(lowerCaseSearch) ||
+        meal.cuisine.toLowerCase().includes(lowerCaseSearch) ||
+        (meal.dietary &&
+          meal.dietary.some((diet) =>
+            diet.toLowerCase().includes(lowerCaseSearch)
+          ))
     );
 
-    setFilteredExercises(filtered);
+    setFilteredMeals(filtered);
   }, [searchTerm]);
 
   return (
@@ -52,7 +56,7 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
         <InfoBanner
           icon="mdi:information-outline"
           title="Templates with placeholder content"
-          subtitle="Some exercises may have generic images or videos. Customize with your own media as needed."
+          subtitle="Some meals may have generic images or videos. Customize with your own media as needed."
           variant="info"
         />
       </div>
@@ -64,7 +68,7 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search exercise library..."
+            placeholder="Search meal library..."
             className="w-full pl-10 pr-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#FF7800] focus:border-[#FF7800]"
           />
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -84,54 +88,67 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
         </div>
       </div>
 
-      {/* Exercise list */}
+      {/* Meal list */}
       <div className="flex-1 overflow-y-auto pr-2 -mr-2">
-        {filteredExercises.length > 0 ? (
+        {filteredMeals.length > 0 ? (
           <div className="grid grid-cols-1 gap-2">
-            {filteredExercises.map((exercise, index) => (
+            {filteredMeals.map((meal, index) => (
               <div
                 key={index}
                 className="p-3 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg cursor-pointer transition-colors"
-                onClick={() => onSelectExercise(exercise)}
+                onClick={() => onSelectMeal(meal)}
               >
                 <div className="flex justify-between items-center">
-                  <h3 className="font-medium text-white">{exercise.name}</h3>
+                  <h3 className="font-medium text-white">{meal.name}</h3>
                   <div className="flex items-center gap-2">
                     <span
                       className={`inline-block rounded-md px-2 py-1 text-xs ${
-                        exercise.type === "strength"
-                          ? "bg-purple-900/60 text-purple-200"
-                          : exercise.type === "bodyweight"
-                          ? "bg-green-900/60 text-green-200"
-                          : exercise.type === "cardio"
+                        meal.mealType === "breakfast"
+                          ? "bg-yellow-900/60 text-yellow-200"
+                          : meal.mealType === "lunch"
                           ? "bg-blue-900/60 text-blue-200"
-                          : "bg-orange-900/60 text-orange-200"
+                          : meal.mealType === "dinner"
+                          ? "bg-purple-900/60 text-purple-200"
+                          : meal.mealType === "snack"
+                          ? "bg-green-900/60 text-green-200"
+                          : "bg-pink-900/60 text-pink-200"
                       }`}
                     >
-                      {exercise.type.charAt(0).toUpperCase() +
-                        exercise.type.slice(1)}
+                      {meal.mealType.charAt(0).toUpperCase() +
+                        meal.mealType.slice(1)}
                     </span>
                     <span
                       className={`inline-block rounded-md px-2 py-1 text-xs ${
-                        exercise.level === "beginner"
+                        meal.difficulty === "easy"
                           ? "bg-green-900/40 text-green-300"
-                          : exercise.level === "intermediate"
+                          : meal.difficulty === "medium"
                           ? "bg-orange-900/40 text-orange-300"
                           : "bg-red-900/40 text-red-300"
                       }`}
                     >
-                      {exercise.level.charAt(0).toUpperCase() +
-                        exercise.level.slice(1)}
+                      {meal.difficulty.charAt(0).toUpperCase() +
+                        meal.difficulty.slice(1)}
                     </span>
                   </div>
                 </div>
                 <div className="mt-1 flex flex-wrap gap-1">
-                  {exercise.muscleGroups.map((muscle, idx) => (
-                    <span key={idx} className="text-xs text-zinc-400">
-                      {muscle.charAt(0).toUpperCase() + muscle.slice(1)}
-                      {idx < exercise.muscleGroups.length - 1 ? ", " : ""}
-                    </span>
-                  ))}
+                  {meal.dietary && meal.dietary.length > 0 && (
+                    <>
+                      {meal.dietary.slice(0, 3).map((diet, idx) => (
+                        <span key={idx} className="text-xs text-zinc-400">
+                          {diet.charAt(0).toUpperCase() + diet.slice(1)}
+                          {idx < Math.min(meal.dietary.length, 3) - 1
+                            ? ", "
+                            : ""}
+                        </span>
+                      ))}
+                      {meal.dietary.length > 3 && (
+                        <span className="text-xs text-zinc-400">
+                          +{meal.dietary.length - 3} more
+                        </span>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
             ))}
@@ -139,11 +156,11 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
         ) : (
           <div className="flex flex-col items-center justify-center h-48 text-center">
             <Icon
-              icon="mdi:dumbbell-off"
+              icon="mdi:food-off"
               className="w-12 h-12 text-zinc-600 mb-2"
             />
             <p className="text-zinc-400">
-              No exercises found matching "{searchTerm}"
+              No meals found matching "{searchTerm}"
             </p>
             <Button
               variant="secondary"
@@ -160,8 +177,8 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
       {/* Footer */}
       <div className="mt-4 pt-4 border-t border-zinc-700 flex justify-between">
         <div className="text-sm text-zinc-400">
-          {filteredExercises.length} exercise
-          {filteredExercises.length !== 1 ? "s" : ""} found
+          {filteredMeals.length} meal
+          {filteredMeals.length !== 1 ? "s" : ""} found
         </div>
         <Button
           variant="secondary"

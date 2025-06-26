@@ -301,6 +301,7 @@ model TrainerInfo {
 
   trainerProfile    TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
   exercises         Exercise[]
+  meals             Meal[]
 }
 
 model TrainerGym {
@@ -410,4 +411,39 @@ model TrainerGalleryImage {
 
   @@index([trainerProfileId])
   @@index([trainerProfileId, order])
+}
+
+// Meal models
+model Meal {
+  id              String   @id @default(cuid())
+  trainerId       String
+  name            String
+  mealType        String   // "breakfast", "lunch", "dinner", "snack", "dessert"
+  difficulty      String   // "easy", "medium", "hard"
+  preparationTime Int      // in minutes
+  calories        Float    @default(0)
+  protein         Float    @default(0)
+  carbs           Float    @default(0)
+  fat             Float    @default(0)
+  dietary         Json     // ["vegetarian", "vegan", "gluten-free", etc.]
+  cuisine         String   @default("other") // "italian", "mexican", "asian", etc.
+  ingredients     String   @db.Text
+  recipe          String   @db.Text
+  imageUrl        String?
+  video           String?  // URL to video
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  trainerInfo     TrainerInfo @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  
+  @@index([trainerId])
+  @@index([mealType])
+  @@index([difficulty])
+  @@index([cuisine])
+  @@index([name])
+  @@index([createdAt])
+  @@index([trainerId, mealType])
+  @@index([trainerId, difficulty])
+  @@index([trainerId, cuisine])
+  @@index([trainerId, createdAt])
 }
