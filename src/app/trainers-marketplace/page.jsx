@@ -332,7 +332,7 @@ export default function TrainersMarketplace() {
               ) : (
                 <>
                   {trainers.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5 mb-8">
+                    <div className="grid grid-cols-2 lg:grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 mb-8">
                       {trainers.map((trainer) => (
                         <TrainerCard
                           key={trainer.id}
