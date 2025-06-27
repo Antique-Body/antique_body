@@ -12,7 +12,7 @@ export function useTrainerRegistration() {
     dateOfBirth: "",
     gender: "",
     // Professional Information
-    trainingSince: "",
+    trainerSince: "",
     specialties: [],
     description: "",
     // Languages and Training Types
@@ -116,8 +116,8 @@ export function useTrainerRegistration() {
         }
       }
       if (!formData.gender) newErrors.gender = "Gender is required";
-      if (!formData.trainingSince)
-        newErrors.trainingSince = "Training since is required";
+      if (!formData.trainerSince)
+        newErrors.trainerSince = "Training since is required";
       if (!formData.specialties || formData.specialties.length === 0)
         newErrors.specialties = "At least one specialty is required";
     }

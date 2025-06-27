@@ -22,9 +22,6 @@ export async function GET(request) {
     const priceMax = searchParams.get("priceMax")
       ? parseFloat(searchParams.get("priceMax"))
       : null;
-    const rating = searchParams.get("rating")
-      ? parseFloat(searchParams.get("rating"))
-      : null;
     const tags = searchParams.getAll("tag"); // can be multiple
     const sortBy =
       searchParams.get("sortBy") ||
@@ -35,12 +32,12 @@ export async function GET(request) {
     // Query parameters for Prisma
     const queryOptions = {
       include: {
-        user: {
-          select: {
-            email: true,
-            phone: true,
-          },
-        },
+        // user: {
+        //   select: {
+        //     email: true,
+        //     phone: true,
+        //   },
+        // },
         location: true,
         specialties: true,
         trainerInfo: true,
@@ -129,19 +126,6 @@ export async function GET(request) {
         },
       ];
     }
-    // Rating filter
-    if (rating !== null && !isNaN(rating) && rating > 0) {
-      queryOptions.where.AND = [
-        ...(queryOptions.where.AND || []),
-        {
-          trainerInfo: {
-            rating: {
-              gte: rating,
-            },
-          },
-        },
-      ];
-    }
     // Tags filter (specialties)
     if (tags && tags.length > 0) {
       queryOptions.where.AND = [
@@ -171,15 +155,10 @@ export async function GET(request) {
 
     // Add default Prisma orderBy for rating/paidAds if not sorting by distance
     if (sortBy !== "location") {
-      if (sortBy === "rating") {
-        queryOptions.orderBy = [
-          { paidAds: { sort: "desc", nulls: "last" } },
-          { trainerInfo: { rating: sortOrder } },
-        ];
-      } else if (sortBy === "price") {
+      if (sortBy === "price") {
         queryOptions.orderBy = [{ pricePerSession: sortOrder }];
       } else if (sortBy === "experience") {
-        queryOptions.orderBy = [{ trainingSince: sortOrder }];
+        queryOptions.orderBy = [{ trainerSince: sortOrder }];
       } else if (sortBy === "name") {
         queryOptions.orderBy = [
           { firstName: sortOrder },

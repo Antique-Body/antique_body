@@ -26,9 +26,10 @@ export const TrainerCard = ({
     featured: colorVariant === "blue" ? "#FFD700" : "#FFD700", // Gold for both variants
   };
 
-  // Calculate experience years based on trainingSince field
-  const experienceYears = trainer.trainingSince
-    ? `${new Date().getFullYear() - trainer.trainingSince}+ years`
+  console.log(trainer, "trainer");
+  // Calculate experience years based on trainerSince field
+  const experienceYears = trainer.trainerSince
+    ? `${new Date().getFullYear() - trainer.trainerSince}+ years`
     : trainer.trainerInfo?.totalSessions
     ? `${trainer.trainerInfo.totalSessions}+ sessions`
     : "Experience not specified";

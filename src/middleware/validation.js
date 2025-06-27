@@ -168,7 +168,7 @@ export const validateTrainerProfile = (data) => {
     "lastName",
     "dateOfBirth",
     "gender",
-    "trainingSince",
+    "trainerSince",
     "specialties",
     "languages",
     "trainingEnvironment",

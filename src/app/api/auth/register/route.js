@@ -61,7 +61,9 @@ export async function POST(request) {
       const existingUser = await prisma.user.findFirst({
         where: {
           email,
-          emailVerified: true,
+          emailVerified: {
+            not: null, // Check if email is verified (has a date)
+          },
         },
       });
 
@@ -89,8 +91,8 @@ export async function POST(request) {
         data: {
           email,
           password: hashedPassword,
-          emailVerified: true,
-          phoneVerified: false,
+          emailVerified: new Date(),
+          phoneVerified: null,
           language: "en", // Set default language
         },
         select: {
@@ -148,8 +150,8 @@ export async function POST(request) {
           phone: formattedPhone,
           email: null, // Allow null email for phone registration
           password: null, // Allow null password for phone registration
-          emailVerified: false,
-          phoneVerified: true,
+          emailVerified: null, // Use null instead of false
+          phoneVerified: new Date(),
           language: "en", // Set default language
         },
         select: {

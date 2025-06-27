@@ -26,10 +26,25 @@ export async function POST(req) {
         );
         body.pricePerSession = priceInEUR;
       } catch (err) {
-        // Ako je greška usage_limit_reached, nastavi dalje s originalnim vrijednostima
-        if (err.message && err.message.includes("usage_limit_reached")) {
-          // samo nastavi, koristi originalne vrijednosti
+        // Provjeri različite tipove grešaka za usage limit
+        const errorMessage = err.message || "";
+        const isUsageLimitError =
+          errorMessage.includes("usage_limit_reached") ||
+          errorMessage.includes("monthly usage limit") ||
+          errorMessage.includes("usage limit") ||
+          errorMessage.includes("limit has been reached") ||
+          errorMessage.includes("subscription") ||
+          errorMessage.includes("upgrade");
+
+        if (isUsageLimitError) {
+          // Ako je dosegnut limit, nastavi sa originalnom cijenom ali postavi valutu na EUR
+          console.log(
+            "Currency conversion limit reached, using original price as EUR"
+          );
+          body.currency = "EUR"; // Postavi valutu na EUR
+          // body.pricePerSession ostaje ista kao što je unesena
         } else {
+          // Za ostale greške, vrati grešku
           return new Response(
             JSON.stringify({
               error: "Currency conversion failed: " + err.message,

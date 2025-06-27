@@ -47,61 +47,73 @@ async function createClientWithDetails(formData, userId) {
   // Find or create location
   const dbLocation = await getOrCreateLocation(prisma, location);
 
-  const data = {
-    userId,
-    firstName: formData.firstName,
-    lastName: formData.lastName,
-    dateOfBirth: new Date(formData.dateOfBirth),
-    gender: formData.gender,
-    height: Number(formData.height || 0),
-    weight: Number(formData.weight || 0),
-    experienceLevel: formData.experienceLevel,
-    previousActivities: formData.previousActivities?.trim() || null,
-    primaryGoal: formData.primaryGoal,
-    secondaryGoal: formData.secondaryGoal?.trim() || null,
-    goalDescription: formData.goalDescription?.trim() || null,
-    locationId: dbLocation.id,
-    profileImage: formData.profileImage?.trim() || null,
-    medicalConditions: formData.medicalConditions?.trim() || null,
-    allergies: formData.allergies?.trim() || null,
-    languages: {
-      create: formData.languages.map((name) => ({ name })),
-    },
-    preferredActivities: {
-      create: formData.preferredActivities.map((name) => ({ name })),
-    },
-  };
-  if (formData.email && formData.email.trim() !== "") {
-    data.email = formData.email;
-  }
-  if (formData.phone && formData.phone.trim() !== "") {
-    data.phone = formData.phone;
-  }
-  try {
-    const client = await prisma.clientProfile.create({
-      data,
-      include: {
-        location: true,
-        languages: true,
-        preferredActivities: true,
+  // Prvo kreiraj ClientInfo i unutar njega ClientProfile
+  const clientInfo = await prisma.clientInfo.create({
+    data: {
+      userId,
+      clientProfile: {
+        create: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          dateOfBirth: new Date(formData.dateOfBirth),
+          gender: formData.gender,
+          height: Number(formData.height || 0),
+          weight: Number(formData.weight || 0),
+          experienceLevel: formData.experienceLevel,
+          previousActivities: formData.previousActivities?.trim() || null,
+          primaryGoal: formData.primaryGoal,
+          secondaryGoal: formData.secondaryGoal?.trim() || null,
+          goalDescription: formData.goalDescription?.trim() || null,
+          locationId: dbLocation.id,
+          profileImage: formData.profileImage?.trim() || null,
+          medicalConditions: formData.medicalConditions?.trim() || null,
+          allergies: formData.allergies?.trim() || null,
+          languages: {
+            create: formData.languages.map((name) => ({ name })),
+          },
+          preferredActivities: {
+            create: formData.preferredActivities.map((name) => ({ name })),
+          },
+          email:
+            formData.email && formData.email.trim() !== ""
+              ? formData.email
+              : undefined,
+          phone:
+            formData.phone && formData.phone.trim() !== ""
+              ? formData.phone
+              : undefined,
+        },
       },
-    });
-    return client;
-  } catch (error) {
-    console.error("Error creating client profile:", error);
-    throw new Error(`Failed to create client profile: ${error.message}`);
-  }
+    },
+    include: {
+      clientProfile: {
+        include: {
+          location: true,
+          languages: true,
+          preferredActivities: true,
+        },
+      },
+    },
+  });
+  return clientInfo.clientProfile;
 }
 
 async function getClientProfileByUserId(userId) {
-  return await prisma.clientProfile.findUnique({
+  // Prvo nađi ClientInfo za userId
+  const clientInfo = await prisma.clientInfo.findUnique({
     where: { userId },
     include: {
-      languages: true,
-      preferredActivities: true,
-      location: true,
+      clientProfile: {
+        include: {
+          languages: true,
+          preferredActivities: true,
+          location: true,
+        },
+      },
     },
   });
+  // Vrati profil ako postoji
+  return clientInfo?.clientProfile || null;
 }
 
 // Helper za dinamički where za lokaciju
@@ -168,17 +180,23 @@ async function getOrCreateLocation(tx, location) {
  */
 export async function updateClientProfile(userId, data) {
   return await prisma.$transaction(async (tx) => {
-    // 1. Nađi profil
-    const profile = await tx.clientProfile.findUnique({ where: { userId } });
+    // 1. Find ClientInfo by userId
+    const clientInfo = await tx.clientInfo.findUnique({ where: { userId } });
+    if (!clientInfo) throw new Error("Client info not found");
+
+    // 2. Find ClientProfile by clientInfoId
+    const profile = await tx.clientProfile.findUnique({
+      where: { clientInfoId: clientInfo.id },
+    });
     if (!profile) throw new Error("Client profile not found");
 
-    // 2. Briši stare relacije
+    // 3. Briši stare relacije
     await Promise.all([
       tx.clientLanguage.deleteMany({ where: { clientProfileId: profile.id } }),
       tx.clientActivity.deleteMany({ where: { clientProfileId: profile.id } }),
     ]);
 
-    // 3. Kreiraj nove relacije (batch insert)
+    // 4. Kreiraj nove relacije (batch insert)
     if (data.languages?.length) {
       await tx.clientLanguage.createMany({
         data: data.languages.map((name) => ({
@@ -196,14 +214,14 @@ export async function updateClientProfile(userId, data) {
       });
     }
 
-    // 4. Update location if needed
+    // 5. Update location if needed
     let locationId = profile.locationId;
     if (data.location && data.location.city && data.location.country) {
       const dbLocation = await getOrCreateLocation(tx, data.location);
       locationId = dbLocation.id;
     }
 
-    // 5. Update profile (samo polja koja su direktno na modelu)
+    // 6. Update profile (samo polja koja su direktno na modelu)
     const {
       languages: _languages,
       preferredActivities: _preferredActivities,

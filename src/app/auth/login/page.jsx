@@ -136,36 +136,45 @@ export default function LoginPage() {
     setError("");
 
     try {
+      console.log("[login] Attempting login with data:", data);
+
+      let result;
       if (data.email) {
         // Email login - no verification code needed
-        const result = await signIn("email", {
+        result = await signIn("email", {
           email: data.email,
           password: data.password,
           redirect: false,
         });
-
-        if (result?.error) {
-          throw new Error(result.error);
-        }
       } else {
         // Phone login - verification code required
         if (!verificationCode) {
           throw new Error(t("validation.verification_code_required"));
         }
 
-        const result = await signIn("phone", {
+        result = await signIn("phone", {
           phone: data.phone,
           code: verificationCode,
           redirect: false,
         });
-
-        if (result?.error) {
-          throw new Error(result.error);
-        }
       }
 
-      // Redirect to select-role page after successful login
-      router.push("/select-role");
+      console.log("[login] SignIn result:", result);
+
+      if (result?.error) {
+        console.error("[login] SignIn error:", result.error);
+        throw new Error(result.error);
+      }
+
+      if (result?.ok) {
+        console.log("[login] SignIn successful, redirecting to /select-role");
+        // Wait a bit for session to be established
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        router.push("/select-role");
+      } else {
+        console.error("[login] SignIn not successful:", result);
+        throw new Error("Login failed");
+      }
     } catch (err) {
       console.error("Login - Error:", err);
       // Custom error message for 'Configuration' error
