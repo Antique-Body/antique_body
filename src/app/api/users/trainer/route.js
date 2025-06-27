@@ -40,9 +40,7 @@ export async function POST(req) {
 
         if (isUsageLimitError) {
           // Ako je dosegnut limit, nastavi sa originalnom cijenom ali postavi valutu na EUR
-          console.log(
-            "Currency conversion limit reached, using original price as EUR"
-          );
+
           body.currency = "EUR"; // Postavi valutu na EUR
           // body.pricePerSession ostaje ista kao što je unesena
         } else {
