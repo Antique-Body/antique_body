@@ -176,6 +176,10 @@ async function createTrainerWithDetails(formData, userId) {
       },
     },
   });
+
+  // Create default exercises for new trainer
+  await exerciseService.createDefaultExercises(trainerInfo.id);
+
   return trainerInfo.trainerProfile;
 }
 
@@ -221,8 +225,12 @@ async function getTrainerInfoByProfileId(trainerProfileId) {
 }
 
 async function getTrainerProfileByUserId(userId) {
-  const profile = await prisma.trainerProfile.findUnique({
-    where: { userId },
+  const profile = await prisma.trainerProfile.findFirst({
+    where: {
+      trainerInfo: {
+        userId: userId,
+      },
+    },
     include: {
       certifications: { include: { documents: true } },
       specialties: true,

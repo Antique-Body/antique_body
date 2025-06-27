@@ -21,8 +21,12 @@ export async function GET(request) {
       );
     }
 
-    const trainerProfile = await prisma.trainerProfile.findUnique({
-      where: { userId: session.user.id },
+    const trainerProfile = await prisma.trainerProfile.findFirst({
+      where: {
+        trainerInfo: {
+          userId: session.user.id,
+        },
+      },
       include: { trainerInfo: true },
     });
 
@@ -107,8 +111,12 @@ export async function POST(request) {
       );
     }
 
-    const trainerProfile = await prisma.trainerProfile.findUnique({
-      where: { userId: session.user.id },
+    const trainerProfile = await prisma.trainerProfile.findFirst({
+      where: {
+        trainerInfo: {
+          userId: session.user.id,
+        },
+      },
       include: { trainerInfo: true },
     });
 
