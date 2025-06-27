@@ -50,6 +50,7 @@ export const UserProfile = ({
     }
   };
 
+  console.log("userData", userData);
   return (
     <>
       <div className="flex flex-col items-start gap-6 py-2 md:flex-row">

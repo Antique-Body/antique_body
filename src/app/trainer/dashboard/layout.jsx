@@ -127,7 +127,7 @@ export default function TrainerDashboardLayout({ children }) {
             </div>
           ) : (
             <TrainerProfile
-              trainerData={trainerData.trainerProfile}
+              trainerData={trainerData.data}
               onProfileUpdate={refreshTrainerData}
             />
           )}

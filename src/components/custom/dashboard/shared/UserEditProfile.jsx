@@ -502,7 +502,7 @@ export const ClientEditProfile = ({
   userData: _userData = {},
   onSave,
 }) => {
-  const hook = useClientEditProfileForm();
+  const hook = useClientEditProfileForm(_userData);
   const {
     activeSection,
     setActiveSection,
@@ -578,7 +578,8 @@ export const TrainerEditProfile = ({
   userData: _userData = {},
   onSave,
 }) => {
-  const hook = useTrainerEditProfileForm();
+  console.log("userdatete", _userData);
+  const hook = useTrainerEditProfileForm(_userData);
   const {
     activeSection,
     setActiveSection,
