@@ -10,6 +10,8 @@ export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
   const info = trainerData?.trainerInfo || {};
   const getOrNoData = (val) => val ?? "No data";
 
+  console.log("trainerData", trainerData);
+
   // Combine first and last name
   const fullName =
     (trainerData?.firstName || "") +
