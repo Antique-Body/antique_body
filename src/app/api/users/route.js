@@ -1,8 +1,19 @@
 import { NextResponse } from "next/server";
 
+import { userService } from "../users/services/userService";
+
 import { auth } from "#/auth";
-import { userService } from "@/services/users";
-import { parseQueryParams } from "@/utils/api";
+
+function parseQueryParams(request) {
+  const url = new URL(request.url);
+  const params = {};
+
+  for (const [key, value] of url.searchParams.entries()) {
+    params[key] = value;
+  }
+
+  return params;
+}
 
 export async function GET(request) {
   try {

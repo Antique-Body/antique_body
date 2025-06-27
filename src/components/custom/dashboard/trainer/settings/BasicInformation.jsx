@@ -64,6 +64,11 @@ export const TrainerBasicInformation = ({
       handleChange({ target: { name: "languages", value: langs } });
     }
   };
+
+  // Generate year options for trainer experience
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: 50 }, (_, i) => currentYear - i);
+
   return (
     <motion.div
       variants={staggerItems}
@@ -141,6 +146,23 @@ export const TrainerBasicInformation = ({
 
       {/* Description (moved from AboutYou) */}
       <motion.div variants={fadeInUp}>
+        <FormField
+          label="Trainer Since (Year)"
+          name="trainerSince"
+          type="select"
+          value={trainerData.trainerSince || ""}
+          onChange={handleChange}
+          options={[
+            { value: "", label: "Select year" },
+            ...yearOptions.map((year) => ({
+              value: year.toString(),
+              label: year.toString(),
+            })),
+          ]}
+          required
+          className=""
+          backgroundStyle="semi-transparent"
+        />
         <FormField
           label="Description"
           name="description"

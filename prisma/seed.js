@@ -1,15 +1,31 @@
 const { PrismaClient } = require("@prisma/client");
+const bcrypt = require("bcrypt");
 const prisma = new PrismaClient();
 
 async function main() {
   // Clean up existing data
   console.log("Cleaning up existing data...");
 
+  // Create password hash for test users
+  const testPassword = await bcrypt.hash("password123", 10);
+
   // Wrap cleanup in try-catch to handle cases where tables don't exist yet
   try {
-    await prisma.trainerGym.deleteMany();
+    await prisma.exercise.deleteMany();
   } catch {
-    console.log("TrainerGym table doesn't exist yet, skipping cleanup");
+    console.log("Exercise table doesn't exist yet, skipping cleanup");
+  }
+
+  try {
+    await prisma.trainerSettings.deleteMany();
+  } catch {
+    console.log("TrainerSettings table doesn't exist yet, skipping cleanup");
+  }
+
+  try {
+    await prisma.clientSettings.deleteMany();
+  } catch {
+    console.log("ClientSettings table doesn't exist yet, skipping cleanup");
   }
 
   try {
@@ -22,6 +38,24 @@ async function main() {
     await prisma.clientProfile.deleteMany();
   } catch {
     console.log("ClientProfile table doesn't exist yet, skipping cleanup");
+  }
+
+  try {
+    await prisma.trainerInfo.deleteMany();
+  } catch {
+    console.log("TrainerInfo table doesn't exist yet, skipping cleanup");
+  }
+
+  try {
+    await prisma.clientInfo.deleteMany();
+  } catch {
+    console.log("ClientInfo table doesn't exist yet, skipping cleanup");
+  }
+
+  try {
+    await prisma.trainerGym.deleteMany();
+  } catch {
+    console.log("TrainerGym table doesn't exist yet, skipping cleanup");
   }
 
   try {
@@ -111,7 +145,10 @@ async function main() {
       user: {
         email: "john.doe@example.com",
         phone: "+1234567890",
+        password: testPassword,
         role: "trainer",
+        emailVerified: new Date(),
+        phoneVerified: new Date(),
       },
       profile: {
         firstName: "John",
@@ -145,24 +182,30 @@ async function main() {
             status: "accepted",
           },
         ],
-        trainerInfo: {
-          rating: 4.9,
-          totalSessions: 1500,
-          totalEarnings: 75000,
-          upcomingSessions: 15,
-        },
         pricingType: "per_session",
         pricePerSession: 100,
         currency: "USD",
         sessionDuration: 60,
         cancellationPolicy: 24,
       },
+      settings: {
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: true,
+        autoAcceptBookings: false,
+        requireDeposit: true,
+        depositAmount: 50,
+        timezone: "America/New_York",
+      },
     },
     {
       user: {
         email: "sarah.smith@example.com",
         phone: "+1234567891",
+        password: testPassword,
         role: "trainer",
+        emailVerified: new Date(),
+        phoneVerified: new Date(),
       },
       profile: {
         firstName: "Sarah",
@@ -191,24 +234,29 @@ async function main() {
             status: "accepted",
           },
         ],
-        trainerInfo: {
-          rating: 4.8,
-          totalSessions: 1200,
-          totalEarnings: 60000,
-          upcomingSessions: 12,
-        },
         pricingType: "per_session",
         pricePerSession: 80,
         currency: "USD",
         sessionDuration: 90,
         cancellationPolicy: 12,
       },
+      settings: {
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        autoAcceptBookings: true,
+        requireDeposit: false,
+        timezone: "America/Los_Angeles",
+      },
     },
     {
       user: {
         email: "mike.johnson@example.com",
         phone: "+1234567892",
+        password: testPassword,
         role: "trainer",
+        emailVerified: new Date(),
+        phoneVerified: new Date(),
       },
       profile: {
         firstName: "Mike",
@@ -236,24 +284,30 @@ async function main() {
             status: "accepted",
           },
         ],
-        trainerInfo: {
-          rating: 4.7,
-          totalSessions: 800,
-          totalEarnings: 40000,
-          upcomingSessions: 8,
-        },
         pricingType: "per_session",
         pricePerSession: 120,
         currency: "GBP",
         sessionDuration: 90,
         cancellationPolicy: 24,
       },
+      settings: {
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        autoAcceptBookings: false,
+        requireDeposit: true,
+        depositAmount: 100,
+        timezone: "Europe/London",
+      },
     },
     {
       user: {
         email: "emma.wilson@example.com",
         phone: "+1234567893",
+        password: testPassword,
         role: "trainer",
+        emailVerified: new Date(),
+        phoneVerified: new Date(),
       },
       profile: {
         firstName: "Emma",
@@ -287,24 +341,29 @@ async function main() {
             status: "pending",
           },
         ],
-        trainerInfo: {
-          rating: 4.6,
-          totalSessions: 600,
-          totalEarnings: 30000,
-          upcomingSessions: 10,
-        },
         pricingType: "package",
         pricePerSession: 90,
         currency: "USD",
         sessionDuration: 60,
         cancellationPolicy: 24,
       },
+      settings: {
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        autoAcceptBookings: false,
+        requireDeposit: false,
+        timezone: "America/New_York",
+      },
     },
     {
       user: {
         email: "david.brown@example.com",
         phone: "+1234567894",
+        password: testPassword,
         role: "trainer",
+        emailVerified: new Date(),
+        phoneVerified: new Date(),
       },
       profile: {
         firstName: "David",
@@ -337,24 +396,29 @@ async function main() {
             status: "accepted",
           },
         ],
-        trainerInfo: {
-          rating: 4.5,
-          totalSessions: 500,
-          totalEarnings: 25000,
-          upcomingSessions: 6,
-        },
         pricingType: "per_session",
         pricePerSession: 85,
         currency: "USD",
         sessionDuration: 45,
         cancellationPolicy: 12,
       },
+      settings: {
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        autoAcceptBookings: true,
+        requireDeposit: false,
+        timezone: "America/Los_Angeles",
+      },
     },
     {
       user: {
         email: "lisa.chen@example.com",
         phone: "+1234567895",
+        password: testPassword,
         role: "trainer",
+        emailVerified: new Date(),
+        phoneVerified: new Date(),
       },
       profile: {
         firstName: "Lisa",
@@ -383,24 +447,29 @@ async function main() {
             status: "pending",
           },
         ],
-        trainerInfo: {
-          rating: 4.4,
-          totalSessions: 400,
-          totalEarnings: 20000,
-          upcomingSessions: 8,
-        },
         pricingType: "per_session",
         pricePerSession: 70,
         currency: "GBP",
         sessionDuration: 60,
         cancellationPolicy: 12,
       },
+      settings: {
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        autoAcceptBookings: false,
+        requireDeposit: false,
+        timezone: "Europe/London",
+      },
     },
     {
       user: {
         email: "james.miller@example.com",
         phone: "+1234567896",
+        password: testPassword,
         role: "trainer",
+        emailVerified: new Date(),
+        phoneVerified: new Date(),
       },
       profile: {
         firstName: "James",
@@ -433,24 +502,30 @@ async function main() {
             status: "pending",
           },
         ],
-        trainerInfo: {
-          rating: 4.3,
-          totalSessions: 300,
-          totalEarnings: 15000,
-          upcomingSessions: 5,
-        },
         pricingType: "per_session",
         pricePerSession: 95,
         currency: "USD",
         sessionDuration: 60,
         cancellationPolicy: 24,
       },
+      settings: {
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        autoAcceptBookings: false,
+        requireDeposit: true,
+        depositAmount: 75,
+        timezone: "America/New_York",
+      },
     },
     {
       user: {
         email: "anna.kowalski@example.com",
         phone: "+1234567897",
+        password: testPassword,
         role: "trainer",
+        emailVerified: new Date(),
+        phoneVerified: new Date(),
       },
       profile: {
         firstName: "Anna",
@@ -484,24 +559,29 @@ async function main() {
             status: "expired",
           },
         ],
-        trainerInfo: {
-          rating: 4.2,
-          totalSessions: 250,
-          totalEarnings: 12500,
-          upcomingSessions: 4,
-        },
         pricingType: "per_session",
         pricePerSession: 75,
         currency: "USD",
         sessionDuration: 55,
         cancellationPolicy: 12,
       },
+      settings: {
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        autoAcceptBookings: true,
+        requireDeposit: false,
+        timezone: "America/Los_Angeles",
+      },
     },
     {
       user: {
         email: "robert.taylor@example.com",
         phone: "+1234567898",
+        password: testPassword,
         role: "trainer",
+        emailVerified: new Date(),
+        phoneVerified: new Date(),
       },
       profile: {
         firstName: "Robert",
@@ -538,24 +618,30 @@ async function main() {
             status: "accepted",
           },
         ],
-        trainerInfo: {
-          rating: 4.1,
-          totalSessions: 200,
-          totalEarnings: 10000,
-          upcomingSessions: 3,
-        },
         pricingType: "per_session",
         pricePerSession: 110,
         currency: "GBP",
         sessionDuration: 60,
         cancellationPolicy: 24,
       },
+      settings: {
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        autoAcceptBookings: false,
+        requireDeposit: true,
+        depositAmount: 120,
+        timezone: "Europe/London",
+      },
     },
     {
       user: {
         email: "maria.garcia@example.com",
         phone: "+1234567899",
+        password: testPassword,
         role: "trainer",
+        emailVerified: new Date(),
+        phoneVerified: new Date(),
       },
       profile: {
         firstName: "Maria",
@@ -588,57 +674,78 @@ async function main() {
             status: "accepted",
           },
         ],
-        trainerInfo: {
-          rating: 4.0,
-          totalSessions: 150,
-          totalEarnings: 7500,
-          upcomingSessions: 2,
-        },
         pricingType: "per_session",
         pricePerSession: 65,
         currency: "USD",
         sessionDuration: 45,
         cancellationPolicy: 12,
       },
+      settings: {
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        autoAcceptBookings: true,
+        requireDeposit: false,
+        timezone: "America/New_York",
+      },
     },
   ];
 
-  // Create trainers with their related data
+  // Create trainers with their nested structure
   for (const trainer of trainers) {
     const user = await prisma.user.create({
       data: trainer.user,
     });
 
-    const trainerProfile = await prisma.trainerProfile.create({
+    // Create TrainerInfo as main container
+    const trainerInfo = await prisma.trainerInfo.create({
       data: {
-        ...trainer.profile,
         userId: user.id,
-        specialties: {
-          create: trainer.profile.specialties.map((specialty) => ({
-            name: specialty,
-          })),
+        trainerProfile: {
+          create: {
+            firstName: trainer.profile.firstName,
+            lastName: trainer.profile.lastName,
+            description: trainer.profile.description,
+            paidAds: trainer.profile.paidAds,
+            locationId: trainer.profile.locationId,
+            profileImage: trainer.profile.profileImage,
+            trainingEnvironment: trainer.profile.trainingEnvironment,
+            pricingType: trainer.profile.pricingType,
+            pricePerSession: trainer.profile.pricePerSession,
+            currency: trainer.profile.currency,
+            sessionDuration: trainer.profile.sessionDuration,
+            cancellationPolicy: trainer.profile.cancellationPolicy,
+            specialties: {
+              create: trainer.profile.specialties.map((specialty) => ({
+                name: specialty,
+              })),
+            },
+            languages: {
+              create: trainer.profile.languages.map((language) => ({
+                name: language,
+              })),
+            },
+            trainingTypes: {
+              create: trainer.profile.trainingTypes.map((type) => ({
+                name: type,
+              })),
+            },
+            certifications: {
+              create: trainer.profile.certifications.map((cert) => ({
+                name: cert.name,
+                issuer: cert.issuer,
+                expiryDate: cert.expiryDate,
+                status: cert.status,
+              })),
+            },
+          },
         },
-        languages: {
-          create: trainer.profile.languages.map((language) => ({
-            name: language,
-          })),
+        trainerSettings: {
+          create: trainer.settings,
         },
-        trainingTypes: {
-          create: trainer.profile.trainingTypes.map((type) => ({
-            name: type,
-          })),
-        },
-        certifications: {
-          create: trainer.profile.certifications.map((cert) => ({
-            name: cert.name,
-            issuer: cert.issuer,
-            expiryDate: cert.expiryDate,
-            status: cert.status,
-          })),
-        },
-        trainerInfo: {
-          create: trainer.profile.trainerInfo,
-        },
+      },
+      include: {
+        trainerProfile: true,
       },
     });
 
@@ -646,37 +753,41 @@ async function main() {
     if (trainer.profile.locationId === locations[0].id) {
       await prisma.trainerGym.create({
         data: {
-          trainerId: trainerProfile.id,
+          trainerId: trainerInfo.trainerProfile.id,
           gymId: gyms[0].id,
         },
       });
     } else if (trainer.profile.locationId === locations[1].id) {
       await prisma.trainerGym.create({
         data: {
-          trainerId: trainerProfile.id,
+          trainerId: trainerInfo.trainerProfile.id,
           gymId: gyms[1].id,
         },
       });
     } else {
       await prisma.trainerGym.create({
         data: {
-          trainerId: trainerProfile.id,
+          trainerId: trainerInfo.trainerProfile.id,
           gymId: gyms[2].id,
         },
       });
     }
   }
 
-  // Create clients with their related data
+  // Create clients with their nested structure
   const clients = [
     {
       user: {
         email: "alex.morgan@example.com",
         phone: "+1234567900",
+        password: testPassword,
         role: "client",
         language: "en",
-        emailVerified: true,
-        phoneVerified: true,
+        emailVerified: new Date(),
+        phoneVerified: new Date(),
+      },
+      clientInfo: {
+        totalSessions: 0,
       },
       profile: {
         firstName: "Alex",
@@ -709,33 +820,31 @@ async function main() {
           "Cardio",
           "Team Sports",
         ],
-        clientInfo: {
-          totalSessions: 0,
-          preferredSessionTime: "Morning",
-          dietaryRestrictions: "None",
-          emergencyContact: {
-            name: "Sarah Morgan",
-            relationship: "Spouse",
-            phone: "+1234567999",
-          },
-          fitnessAssessment: {
-            lastAssessment: new Date("2024-01-15"),
-            bodyFatPercentage: 18,
-            muscleMass: 65,
-            flexibility: "Good",
-            cardiovascularHealth: "Excellent",
-          },
-        },
+      },
+      settings: {
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        reminderTime: 24,
+        privacyLevel: "public",
+        shareProgress: true,
+        timezone: "America/New_York",
+        preferredLanguage: "en",
+        measurementUnit: "metric",
       },
     },
     {
       user: {
         email: "sophia.patel@example.com",
         phone: "+1234567901",
+        password: testPassword,
         role: "client",
         language: "en",
-        emailVerified: true,
-        phoneVerified: true,
+        emailVerified: new Date(),
+        phoneVerified: new Date(),
+      },
+      clientInfo: {
+        totalSessions: 0,
       },
       profile: {
         firstName: "Sophia",
@@ -763,33 +872,31 @@ async function main() {
         allergies: "None. No food allergies or exercise-induced allergies.",
         languages: ["English", "Hindi"],
         preferredActivities: ["Yoga", "Swimming", "Pilates", "Light Cardio"],
-        clientInfo: {
-          totalSessions: 0,
-          preferredSessionTime: "Evening",
-          dietaryRestrictions: "Vegetarian",
-          emergencyContact: {
-            name: "Raj Patel",
-            relationship: "Brother",
-            phone: "+1234567998",
-          },
-          fitnessAssessment: {
-            lastAssessment: new Date("2024-01-20"),
-            bodyFatPercentage: 28,
-            muscleMass: 45,
-            flexibility: "Excellent",
-            cardiovascularHealth: "Good",
-          },
-        },
+      },
+      settings: {
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        reminderTime: 24,
+        privacyLevel: "public",
+        shareProgress: true,
+        timezone: "America/New_York",
+        preferredLanguage: "en",
+        measurementUnit: "metric",
       },
     },
     {
       user: {
         email: "marcus.wilson@example.com",
         phone: "+1234567902",
+        password: testPassword,
         role: "client",
         language: "en",
-        emailVerified: true,
-        phoneVerified: true,
+        emailVerified: new Date(),
+        phoneVerified: new Date(),
+      },
+      clientInfo: {
+        totalSessions: 0,
       },
       profile: {
         firstName: "Marcus",
@@ -822,33 +929,31 @@ async function main() {
           "Running",
           "Strength Training",
         ],
-        clientInfo: {
-          totalSessions: 0,
-          preferredSessionTime: "Early Morning",
-          dietaryRestrictions: "None",
-          emergencyContact: {
-            name: "Coach Thompson",
-            relationship: "Sports Coach",
-            phone: "+1234567997",
-          },
-          fitnessAssessment: {
-            lastAssessment: new Date("2024-01-10"),
-            bodyFatPercentage: 12,
-            muscleMass: 75,
-            flexibility: "Good",
-            cardiovascularHealth: "Excellent",
-          },
-        },
+      },
+      settings: {
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        reminderTime: 24,
+        privacyLevel: "public",
+        shareProgress: true,
+        timezone: "America/New_York",
+        preferredLanguage: "en",
+        measurementUnit: "metric",
       },
     },
     {
       user: {
         email: "emma.rodriguez@example.com",
         phone: "+1234567903",
+        password: testPassword,
         role: "client",
         language: "en",
-        emailVerified: true,
-        phoneVerified: true,
+        emailVerified: new Date(),
+        phoneVerified: new Date(),
+      },
+      clientInfo: {
+        totalSessions: 0,
       },
       profile: {
         firstName: "Emma",
@@ -876,33 +981,31 @@ async function main() {
         allergies: "None. No food allergies or exercise-induced allergies.",
         languages: ["English", "Spanish"],
         preferredActivities: ["Dance", "Cycling", "Group Fitness", "Pilates"],
-        clientInfo: {
-          totalSessions: 0,
-          preferredSessionTime: "Afternoon",
-          dietaryRestrictions: "None",
-          emergencyContact: {
-            name: "Carlos Rodriguez",
-            relationship: "Partner",
-            phone: "+1234567996",
-          },
-          fitnessAssessment: {
-            lastAssessment: new Date("2024-01-18"),
-            bodyFatPercentage: 22,
-            muscleMass: 52,
-            flexibility: "Excellent",
-            cardiovascularHealth: "Good",
-          },
-        },
+      },
+      settings: {
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        reminderTime: 24,
+        privacyLevel: "public",
+        shareProgress: true,
+        timezone: "America/New_York",
+        preferredLanguage: "en",
+        measurementUnit: "metric",
       },
     },
     {
       user: {
         email: "james.chen@example.com",
         phone: "+1234567904",
+        password: testPassword,
         role: "client",
         language: "en",
-        emailVerified: true,
-        phoneVerified: true,
+        emailVerified: new Date(),
+        phoneVerified: new Date(),
+      },
+      clientInfo: {
+        totalSessions: 0,
       },
       profile: {
         firstName: "James",
@@ -930,33 +1033,31 @@ async function main() {
         allergies: "None. No food allergies or exercise-induced allergies.",
         languages: ["English", "Mandarin"],
         preferredActivities: ["Walking", "Swimming", "Yoga", "Light Cardio"],
-        clientInfo: {
-          totalSessions: 0,
-          preferredSessionTime: "Early Morning",
-          dietaryRestrictions: "None",
-          emergencyContact: {
-            name: "Linda Chen",
-            relationship: "Spouse",
-            phone: "+1234567995",
-          },
-          fitnessAssessment: {
-            lastAssessment: new Date("2024-01-25"),
-            bodyFatPercentage: 25,
-            muscleMass: 48,
-            flexibility: "Fair",
-            cardiovascularHealth: "Average",
-          },
-        },
+      },
+      settings: {
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        reminderTime: 24,
+        privacyLevel: "public",
+        shareProgress: true,
+        timezone: "America/New_York",
+        preferredLanguage: "en",
+        measurementUnit: "metric",
       },
     },
     {
       user: {
         email: "olivia.kim@example.com",
         phone: "+1234567905",
+        password: testPassword,
         role: "client",
         language: "en",
-        emailVerified: true,
-        phoneVerified: true,
+        emailVerified: new Date(),
+        phoneVerified: new Date(),
+      },
+      clientInfo: {
+        totalSessions: 0,
       },
       profile: {
         firstName: "Olivia",
@@ -989,33 +1090,31 @@ async function main() {
           "HIIT",
           "Strength Training",
         ],
-        clientInfo: {
-          totalSessions: 0,
-          preferredSessionTime: "Evening",
-          dietaryRestrictions: "None",
-          emergencyContact: {
-            name: "David Kim",
-            relationship: "Brother",
-            phone: "+1234567994",
-          },
-          fitnessAssessment: {
-            lastAssessment: new Date("2024-01-22"),
-            bodyFatPercentage: 20,
-            muscleMass: 55,
-            flexibility: "Excellent",
-            cardiovascularHealth: "Excellent",
-          },
-        },
+      },
+      settings: {
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        reminderTime: 24,
+        privacyLevel: "public",
+        shareProgress: true,
+        timezone: "America/New_York",
+        preferredLanguage: "en",
+        measurementUnit: "metric",
       },
     },
     {
       user: {
         email: "daniel.murphy@example.com",
         phone: "+1234567906",
+        password: testPassword,
         role: "client",
         language: "en",
-        emailVerified: true,
-        phoneVerified: true,
+        emailVerified: new Date(),
+        phoneVerified: new Date(),
+      },
+      clientInfo: {
+        totalSessions: 0,
       },
       profile: {
         firstName: "Daniel",
@@ -1043,33 +1142,31 @@ async function main() {
         allergies: "None. No food allergies or exercise-induced allergies.",
         languages: ["English"],
         preferredActivities: ["Walking", "Swimming", "Yoga", "Light Cardio"],
-        clientInfo: {
-          totalSessions: 0,
-          preferredSessionTime: "Early Morning",
-          dietaryRestrictions: "None",
-          emergencyContact: {
-            name: "Mary Murphy",
-            relationship: "Spouse",
-            phone: "+1234567993",
-          },
-          fitnessAssessment: {
-            lastAssessment: new Date("2024-01-28"),
-            bodyFatPercentage: 28,
-            muscleMass: 45,
-            flexibility: "Poor",
-            cardiovascularHealth: "Average",
-          },
-        },
+      },
+      settings: {
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        reminderTime: 24,
+        privacyLevel: "public",
+        shareProgress: true,
+        timezone: "America/New_York",
+        preferredLanguage: "en",
+        measurementUnit: "metric",
       },
     },
     {
       user: {
         email: "isabella.santos@example.com",
         phone: "+1234567907",
+        password: testPassword,
         role: "client",
         language: "en",
-        emailVerified: true,
-        phoneVerified: true,
+        emailVerified: new Date(),
+        phoneVerified: new Date(),
+      },
+      clientInfo: {
+        totalSessions: 0,
       },
       profile: {
         firstName: "Isabella",
@@ -1102,33 +1199,31 @@ async function main() {
           "Cycling",
           "Strength Training",
         ],
-        clientInfo: {
-          totalSessions: 0,
-          preferredSessionTime: "Morning",
-          dietaryRestrictions: "None",
-          emergencyContact: {
-            name: "Coach Silva",
-            relationship: "Swimming Coach",
-            phone: "+1234567992",
-          },
-          fitnessAssessment: {
-            lastAssessment: new Date("2024-01-15"),
-            bodyFatPercentage: 18,
-            muscleMass: 58,
-            flexibility: "Good",
-            cardiovascularHealth: "Excellent",
-          },
-        },
+      },
+      settings: {
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        reminderTime: 24,
+        privacyLevel: "public",
+        shareProgress: true,
+        timezone: "America/New_York",
+        preferredLanguage: "en",
+        measurementUnit: "metric",
       },
     },
     {
       user: {
         email: "ryan.zhang@example.com",
         phone: "+1234567908",
+        password: testPassword,
         role: "client",
         language: "en",
-        emailVerified: true,
-        phoneVerified: true,
+        emailVerified: new Date(),
+        phoneVerified: new Date(),
+      },
+      clientInfo: {
+        totalSessions: 0,
       },
       profile: {
         firstName: "Ryan",
@@ -1161,49 +1256,68 @@ async function main() {
           "Plyometrics",
           "Mobility Work",
         ],
-        clientInfo: {
-          totalSessions: 0,
-          preferredSessionTime: "Early Morning",
-          dietaryRestrictions: "None",
-          emergencyContact: {
-            name: "Coach Williams",
-            relationship: "Basketball Coach",
-            phone: "+1234567991",
-          },
-          fitnessAssessment: {
-            lastAssessment: new Date("2024-01-20"),
-            bodyFatPercentage: 15,
-            muscleMass: 65,
-            flexibility: "Good",
-            cardiovascularHealth: "Excellent",
-          },
-        },
+      },
+      settings: {
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        reminderTime: 24,
+        privacyLevel: "public",
+        shareProgress: true,
+        timezone: "America/New_York",
+        preferredLanguage: "en",
+        measurementUnit: "metric",
       },
     },
   ];
 
-  // Create clients with their related data
+  // Create clients with their nested structure
   for (const client of clients) {
     const user = await prisma.user.create({
       data: client.user,
     });
 
-    await prisma.clientProfile.create({
+    // Create ClientInfo as main container
+    await prisma.clientInfo.create({
       data: {
-        ...client.profile,
         userId: user.id,
-        languages: {
-          create: client.profile.languages.map((language) => ({
-            name: language,
-          })),
+        totalSessions: client.clientInfo.totalSessions,
+        // Create nested ClientProfile
+        clientProfile: {
+          create: {
+            firstName: client.profile.firstName,
+            lastName: client.profile.lastName,
+            dateOfBirth: client.profile.dateOfBirth,
+            gender: client.profile.gender,
+            height: client.profile.height,
+            weight: client.profile.weight,
+            experienceLevel: client.profile.experienceLevel,
+            previousActivities: client.profile.previousActivities,
+            primaryGoal: client.profile.primaryGoal,
+            secondaryGoal: client.profile.secondaryGoal,
+            goalDescription: client.profile.goalDescription,
+            email: client.profile.email,
+            phone: client.profile.phone,
+            locationId: client.profile.locationId,
+            profileImage: client.profile.profileImage,
+            description: client.profile.description,
+            medicalConditions: client.profile.medicalConditions,
+            allergies: client.profile.allergies,
+            languages: {
+              create: client.profile.languages.map((language) => ({
+                name: language,
+              })),
+            },
+            preferredActivities: {
+              create: client.profile.preferredActivities.map((activity) => ({
+                name: activity,
+              })),
+            },
+          },
         },
-        preferredActivities: {
-          create: client.profile.preferredActivities.map((activity) => ({
-            name: activity,
-          })),
-        },
-        clientInfo: {
-          create: {}, // ClientInfo only needs to be created, no additional fields needed
+        // Create nested ClientSettings
+        clientSettings: {
+          create: client.settings,
         },
       },
     });

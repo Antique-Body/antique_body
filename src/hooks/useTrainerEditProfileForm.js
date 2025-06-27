@@ -29,6 +29,7 @@ export function useTrainerEditProfileForm() {
       profileImage: "",
       sessionDuration: 60,
       cancellationPolicy: 24,
+      trainerSince: "",
       availabilities: [],
       galleryImages: [],
       location: {
@@ -85,6 +86,7 @@ export function useTrainerEditProfileForm() {
             profileImage: data.trainerProfile?.profileImage || "",
             sessionDuration: data.trainerProfile?.sessionDuration || 60,
             cancellationPolicy: data.trainerProfile?.cancellationPolicy || 24,
+            trainerSince: data.trainerProfile?.trainerSince || "",
             availabilities: availabilities,
             galleryImages: data.trainerProfile?.galleryImages || [],
             location: {
@@ -358,6 +360,12 @@ export function useTrainerEditProfileForm() {
             specialties,
             languages,
             trainingTypes,
+            trainerSince:
+              trainerData.trainerProfile.trainerSince !== "" &&
+              trainerData.trainerProfile.trainerSince !== undefined &&
+              trainerData.trainerProfile.trainerSince !== null
+                ? Number(trainerData.trainerProfile.trainerSince)
+                : null,
           },
         };
         const res = await fetch("/api/users/trainer", {
