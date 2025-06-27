@@ -1,11 +1,13 @@
 import { PrismaClient } from "@prisma/client";
+import { NextResponse } from "next/server";
 
-const prisma = new PrismaClient();
-import { convertToEUR, convertFromEUR } from "../../../utils/currency";
-import { trainerService } from "../services";
+import { convertToEUR } from "../../../utils/currency";
+import { trainerService, exerciseService } from "../services";
 
 import { auth } from "#/auth";
 import { validateTrainerProfile } from "@/middleware/validation";
+
+const prisma = new PrismaClient();
 
 export async function POST(req) {
   try {
@@ -70,108 +72,71 @@ export async function POST(req) {
   }
 }
 
-export async function GET() {
+export async function GET(request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-      });
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
-    // Pokušaj fetchati TrainerInfo (sa svim relacijama)
-    let trainerInfo = await trainerService.getTrainerInfoByUserId(
-      session.user.id
-    );
+    // Check if this is a request to create default exercises
+    const { searchParams } = new URL(request.url);
+    const createDefaults = searchParams.get("createDefaults");
 
-    // Ako ne postoji, pokušaj automatski kreirati
-    if (!trainerInfo) {
-      // Pronađi profil
-      const profile = await trainerService.getTrainerProfileByUserId(
-        session.user.id
-      );
-      if (!profile) {
-        return new Response(
-          JSON.stringify({ error: "Trainer profile not found" }),
+    if (createDefaults === "true") {
+      // Find trainer info
+      const trainerInfo = await prisma.trainerInfo.findUnique({
+        where: { userId: session.user.id },
+        include: {
+          exercises: true,
+        },
+      });
+
+      if (!trainerInfo) {
+        return NextResponse.json(
+          { success: false, error: "Trainer info not found" },
           { status: 404 }
         );
       }
-      // Kreiraj prazan TrainerInfo, ali ignoriraj grešku ako već postoji
-      try {
-        await trainerService.createOrUpdateTrainerInfo(profile.id, {});
-      } catch (err) {
-        if (
-          err.code !== "P2002" &&
-          !(
-            err.message &&
-            err.message.includes(
-              "Unique constraint failed on the fields: (`trainerProfileId`)"
-            )
-          )
-        ) {
-          throw err;
-        }
-        // Ako je unique constraint, samo nastavi
+
+      // Only create if no exercises exist
+      if (trainerInfo.exercises.length === 0) {
+        await exerciseService.createDefaultExercises(trainerInfo.id);
+        return NextResponse.json({
+          success: true,
+          message: "Default exercises created successfully",
+        });
+      } else {
+        return NextResponse.json({
+          success: true,
+          message: "Exercises already exist",
+          count: trainerInfo.exercises.length,
+        });
       }
-      // Fetchaj opet
-      trainerInfo = await trainerService.getTrainerInfoByUserId(
-        session.user.id
+    }
+
+    // Regular GET request - return trainer profile
+    const profile = await trainerService.getTrainerProfileByUserId(
+      session.user.id
+    );
+
+    if (!profile) {
+      return NextResponse.json(
+        { success: false, error: "Trainer profile not found" },
+        { status: 404 }
       );
     }
 
-    // Konverzija pricePerSession ako treba (nađi ugniježdeno)
-    let convertedPrice = trainerInfo.trainerProfile?.pricePerSession;
-    if (
-      trainerInfo.trainerProfile?.pricePerSession &&
-      trainerInfo.trainerProfile?.currency &&
-      trainerInfo.trainerProfile?.currency !== "EUR"
-    ) {
-      try {
-        convertedPrice = await convertFromEUR(
-          trainerInfo.trainerProfile.pricePerSession,
-          trainerInfo.trainerProfile.currency
-        );
-      } catch (err) {
-        console.error("Greška pri konverziji iz EUR:", err);
-        convertedPrice = trainerInfo.trainerProfile.pricePerSession;
-      }
-    }
-
-    // Response: sve podatke, ali pricePerSession u originalnoj valuti i location objekt direktno u trainerProfile
-    const location = trainerInfo.trainerProfile?.location || {};
-    // Fetch all gyms for this trainer and include in location.gyms
-    const trainerGyms = await prisma.trainerGym.findMany({
-      where: { trainerId: trainerInfo.trainerProfile.id },
-      include: { gym: true },
-    });
-    const gymsArray = trainerGyms.map((tg) => ({
-      value: tg.gym.placeId,
-      label: tg.gym.name,
-      address: tg.gym.address,
-      lat: tg.gym.lat,
-      lon: tg.gym.lon,
-    }));
-    return new Response(
-      JSON.stringify({
-        ...trainerInfo,
-        trainerProfile: {
-          ...trainerInfo.trainerProfile,
-          pricePerSession: convertedPrice,
-          location: {
-            ...location,
-            gyms: gymsArray,
-          },
-          availabilities: trainerInfo.trainerProfile.availabilities || [],
-          galleryImages: trainerInfo.trainerProfile.galleryImages || [],
-        },
-        exercises: trainerInfo.exercises || [],
-      }),
-      { status: 200 }
-    );
+    return NextResponse.json({ success: true, data: profile });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 400,
-    });
+    console.error("Error in trainer GET:", error);
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
   }
 }
 

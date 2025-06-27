@@ -54,7 +54,13 @@ export async function PUT(request, { params }) {
 
     const exercise = await prisma.exercise.findUnique({
       where: { id },
-      include: { trainerProfile: true },
+      include: {
+        trainerInfo: {
+          include: {
+            trainerProfile: true,
+          },
+        },
+      },
     });
 
     if (!exercise) {
@@ -65,7 +71,7 @@ export async function PUT(request, { params }) {
     }
 
     // Check if the exercise belongs to the authenticated trainer
-    if (exercise.trainerProfile.userId !== session.user.id) {
+    if (exercise.trainerInfo.userId !== session.user.id) {
       return NextResponse.json(
         { success: false, error: "Unauthorized to update this exercise" },
         { status: 403 }
@@ -102,7 +108,13 @@ export async function DELETE(request, { params }) {
 
     const exercise = await prisma.exercise.findUnique({
       where: { id },
-      include: { trainerProfile: true },
+      include: {
+        trainerInfo: {
+          include: {
+            trainerProfile: true,
+          },
+        },
+      },
     });
 
     if (!exercise) {
@@ -113,7 +125,7 @@ export async function DELETE(request, { params }) {
     }
 
     // Check if the exercise belongs to the authenticated trainer
-    if (exercise.trainerProfile.userId !== session.user.id) {
+    if (exercise.trainerInfo.userId !== session.user.id) {
       return NextResponse.json(
         { success: false, error: "Unauthorized to delete this exercise" },
         { status: 403 }
