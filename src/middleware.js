@@ -157,7 +157,7 @@ export async function middleware(request) {
   // 1.1. /select-role je dostupno samo prijavljenima bez role
   if (pathname === "/select-role") {
     if (!token) {
-      // If this might be post-OAuth redirect and has session cookies, allow access
+      //  If this might be post-OAuth redirect and has session cookies, allow access
       if (isPostOAuth && hasSessionCookies(request)) {
         console.log(
           "[middleware] Post-OAuth redirect with session cookies detected, allowing access to /select-role"
