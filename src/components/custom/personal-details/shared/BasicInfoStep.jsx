@@ -229,11 +229,11 @@ export const BasicInfoStep = ({
           <div className="space-y-4">
             <FormField
               label="Training Since (Year)"
-              name="trainingSince"
+              name="trainerSince"
               type="select"
-              value={formData.trainingSince}
+              value={formData.trainerSince}
               onChange={onChange}
-              error={errors.trainingSince}
+              error={errors.trainerSince}
               options={[
                 { value: "", label: "Select year" },
                 ...yearOptions.map((year) => ({
@@ -244,7 +244,7 @@ export const BasicInfoStep = ({
             />
 
             {/* Experience calculation display */}
-            {formData.trainingSince && (
+            {formData.trainerSince && (
               <div className="p-4 bg-gradient-to-r from-[#FF6B00]/10 to-[#FF6B00]/5 border border-[#FF6B00]/30 rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-[#FF6B00]/20 rounded-full flex items-center justify-center">
@@ -257,11 +257,11 @@ export const BasicInfoStep = ({
                   </div>
                   <div>
                     <p className="text-sm font-medium text-[#FF6B00]">
-                      {currentYear - parseInt(formData.trainingSince)} years of
+                      {currentYear - parseInt(formData.trainerSince)} years of
                       experience
                     </p>
                     <p className="text-xs text-gray-400">
-                      Training since {formData.trainingSince}
+                      Training since {formData.trainerSince}
                     </p>
                   </div>
                 </div>

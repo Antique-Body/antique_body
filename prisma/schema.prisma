@@ -27,26 +27,25 @@ enum CertificationStatus {
 
 // Simple User model for authentication
 model User {
-  id                    String    @id @default(cuid())
-  // firstName             String
-  // lastName              String?
-  email                 String?   @unique
-  phone                 String?   @unique
-  password              String?
-  role                  UserRole?
-  language              String    @default("en")
-  emailVerified         Boolean   @default(false)
-  phoneVerified         Boolean   @default(false)
-  resetToken            String?
-  resetTokenExpiry      DateTime?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-  accounts              Account[]
-  sessions              Session[]
-  trainerProfile        TrainerProfile?
-  clientProfile         ClientProfile?
-  emailVerifications    EmailVerification[]
-  phoneVerifications    PhoneVerification[]
+  id                String    @id @default(cuid())
+  email             String?   @unique
+  phone             String?   @unique
+  password          String?
+  role              UserRole?
+  language          String    @default("en")
+  emailVerified     DateTime?
+  phoneVerified     DateTime?
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relacije
+  accounts          Account[]
+  trainerInfo       TrainerInfo?
+  clientInfo        ClientInfo?
+  emailVerifications EmailVerification[]
+  phoneVerifications PhoneVerification[]
 
   @@index([email])
   @@index([phone])
@@ -54,7 +53,7 @@ model User {
   @@index([resetToken])
 }
 
-// NextAuth models
+// NextAuth models - Only Account is needed for OAuth providers
 model Account {
   id                 String    @id @default(cuid())
   userId             String
@@ -72,16 +71,6 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
-  @@index([userId])
-}
-
-model Session {
-  id            String    @id @default(cuid())
-  sessionToken  String    @unique
-  userId        String
-  expires       DateTime
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   @@index([userId])
 }
 
@@ -122,8 +111,8 @@ model Location {
   country String
   lat     Float?
   lon     Float?
-  trainers TrainerProfile[]
-  clients  ClientProfile[]
+  trainerProfiles TrainerProfile[]
+  clientProfiles  ClientProfile[]
   gyms     Gym[]
 
   @@index([city])
@@ -142,20 +131,37 @@ model Gym {
   trainers   TrainerGym[]
 }
 
-model TrainerProfile {
+// Main TrainerInfo container
+model TrainerInfo {
   id                String   @id @default(cuid())
   userId            String   @unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relacije
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainerProfile    TrainerProfile?
+  trainerSettings   TrainerSettings?
+  exercises         Exercise[]
+  meals             Meal[]
+
+}
+
+// TrainerProfile now belongs to TrainerInfo
+model TrainerProfile {
+  id                String   @id @default(cuid())
+  trainerInfoId     String   @unique
   firstName         String
   lastName          String?
   dateOfBirth       DateTime?
   gender            String?
-  trainingSince     Int?     
-  profileImage      String?  
-  description       String?  @db.Text 
-  paidAds           DateTime? // Date until which the trainer has paid advertisement
+  trainerSince      Int?
+  profileImage      String?
+  description       String?  @db.Text
+  paidAds           DateTime?
   specialties       TrainerSpecialty[]
   languages         TrainerLanguage[]
-  trainingEnvironment String? // indoor, outdoor, or both
+  trainingEnvironment String?
   trainingTypes     TrainerType[]
   certifications    Certification[]
   locationId        String?
@@ -165,17 +171,35 @@ model TrainerProfile {
   currency          String?
   contactEmail      String?
   contactPhone      String?
-  sessionDuration   Int? // in minutes
-  cancellationPolicy Int? // in hours
+  sessionDuration   Int?
+  cancellationPolicy Int?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-  trainerInfo       TrainerInfo?
   trainerGyms       TrainerGym[]
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainerInfo       TrainerInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
   availabilities    TrainerAvailability[]
   galleryImages     TrainerGalleryImage[]
 
   @@index([trainingEnvironment])
+}
+
+// TrainerSettings for trainer preferences and configurations
+model TrainerSettings {
+  id                String   @id @default(cuid())
+  trainerInfoId     String   @unique
+  notifications     Boolean  @default(true)
+  emailNotifications Boolean @default(true)
+  smsNotifications  Boolean  @default(false)
+  autoAcceptBookings Boolean @default(false)
+  requireDeposit    Boolean  @default(false)
+  depositAmount     Int?
+  timezone          String   @default("UTC")
+  workingHours      Json?
+  blackoutDates     Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  trainerInfo       TrainerInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
 }
 
 model TrainerSpecialty {
@@ -237,15 +261,30 @@ model CertificationDocument {
   certification   Certification @relation(fields: [certificationId], references: [id], onDelete: Cascade)
 }
 
+// Main ClientInfo container
+model ClientInfo {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  totalSessions     Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relacije
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientProfile     ClientProfile?
+  clientSettings    ClientSettings?
+}
+
+// ClientProfile now belongs to ClientInfo
 model ClientProfile {
   id                   String   @id @default(cuid())
-  userId               String   @unique
+  clientInfoId         String   @unique
   firstName            String
   lastName             String
   dateOfBirth          DateTime
   gender               String
-  height               Int      // in cm
-  weight               Int      // in kg
+  height               Int
+  weight               Int
   experienceLevel      String
   previousActivities   String?  @db.Text
   primaryGoal          String
@@ -256,15 +295,33 @@ model ClientProfile {
   locationId           String?
   location             Location? @relation(fields: [locationId], references: [id])
   profileImage         String?
-  description         String?  @db.Text
+  description          String?  @db.Text
   medicalConditions    String?  @db.Text
   allergies            String?  @db.Text
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
-  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientInfo           ClientInfo @relation(fields: [clientInfoId], references: [id], onDelete: Cascade)
   languages            ClientLanguage[]
   preferredActivities  ClientActivity[]
-  clientInfo           ClientInfo?
+}
+
+// ClientSettings for client preferences and configurations
+model ClientSettings {
+  id                String   @id @default(cuid())
+  clientInfoId      String   @unique
+  notifications     Boolean  @default(true)
+  emailNotifications Boolean @default(true)
+  smsNotifications  Boolean  @default(false)
+  reminderTime      Int      @default(24)
+  privacyLevel      String   @default("public")
+  shareProgress     Boolean  @default(true)
+  timezone          String   @default("UTC")
+  preferredLanguage String   @default("en")
+  measurementUnit   String   @default("metric")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  clientInfo        ClientInfo @relation(fields: [clientInfoId], references: [id], onDelete: Cascade)
 }
 
 model ClientLanguage {
@@ -289,20 +346,7 @@ model ClientActivity {
   clientProfile   ClientProfile @relation(fields: [clientProfileId], references: [id], onDelete: Cascade)
 }
 
-model TrainerInfo {
-  id                String   @id @default(cuid())
-  trainerProfileId  String   @unique
-  rating            Float?
-  totalSessions     Int?
-  totalEarnings     Int?
-  upcomingSessions  Int?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
 
-  trainerProfile    TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
-  exercises         Exercise[]
-  meals             Meal[]
-}
 
 model TrainerGym {
   id              String   @id @default(cuid())
@@ -315,15 +359,6 @@ model TrainerGym {
 
   @@unique([trainerId, gymId])
   @@index([gymId])
-}
-
-model ClientInfo {
-  id                String   @id @default(cuid())
-  clientProfileId   String   @unique
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  clientProfile     ClientProfile @relation(fields: [clientProfileId], references: [id], onDelete: Cascade)
 }
 
 model TrainerAvailability {

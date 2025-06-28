@@ -105,6 +105,67 @@ async function getUserByEmailOrPhone({ email, phone }) {
   return null;
 }
 
+async function getUserWithAccounts(userId) {
+  return prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      accounts: {
+        select: {
+          provider: true,
+          type: true,
+        },
+      },
+      trainerInfo: {
+        include: {
+          trainerProfile: true,
+        },
+      },
+      clientInfo: {
+        include: {
+          clientProfile: true,
+        },
+      },
+    },
+  });
+}
+
+async function createOrUpdateAccount(userId, account) {
+  try {
+    await prisma.account.upsert({
+      where: {
+        provider_providerAccountId: {
+          provider: account.provider,
+          providerAccountId: account.providerAccountId,
+        },
+      },
+      update: {
+        access_token: account.access_token,
+        refresh_token: account.refresh_token,
+        expires_at: account.expires_at,
+        token_type: account.token_type,
+        scope: account.scope,
+        id_token: account.id_token,
+        session_state: account.session_state,
+      },
+      create: {
+        userId: userId,
+        type: account.type,
+        provider: account.provider,
+        providerAccountId: account.providerAccountId,
+        refresh_token: account.refresh_token,
+        access_token: account.access_token,
+        expires_at: account.expires_at,
+        token_type: account.token_type,
+        scope: account.scope,
+        id_token: account.id_token,
+        session_state: account.session_state,
+      },
+    });
+  } catch (error) {
+    console.error("Error creating/updating account:", error);
+  }
+}
+
 export const authConfig = {
   providers,
   //this is change for stage server
@@ -123,17 +184,28 @@ export const authConfig = {
   callbacks: {
     async signIn({ user, account }) {
       if (["google", "facebook"].includes(account?.provider)) {
-        const existingUser = await userService.findUserByEmail(user.email);
+        let existingUser = await userService.findUserByEmail(user.email);
+
         if (!existingUser) {
-          await prisma.user.create({
+          // Create new user
+          existingUser = await prisma.user.create({
             data: {
               email: user.email,
-              emailVerified: true,
-              phoneVerified: false,
+              emailVerified: new Date(),
+              phoneVerified: null,
               language: "en",
             },
           });
+        } else if (!existingUser.emailVerified) {
+          // Update emailVerified if not set
+          await prisma.user.update({
+            where: { id: existingUser.id },
+            data: { emailVerified: new Date() },
+          });
         }
+
+        // Create or update Account record
+        await createOrUpdateAccount(existingUser.id, account);
       }
       return true;
     },
@@ -176,21 +248,22 @@ export const authConfig = {
           phone: token.phone,
         });
         if (userFromDb) {
+          const userWithAccounts = await getUserWithAccounts(userFromDb.id);
           Object.assign(session.user, {
             id: userFromDb.id,
             role: userFromDb.role,
             email: userFromDb.email,
             phone: userFromDb.phone,
-            trainerProfile: userFromDb.trainerProfile,
-            clientProfile: userFromDb.clientProfile,
+            trainerProfile:
+              userWithAccounts?.trainerInfo?.trainerProfile || null,
+            clientProfile: userWithAccounts?.clientInfo?.clientProfile || null,
+            accounts: userWithAccounts?.accounts || [],
+            provider: token.provider,
+            accountType: token.accountType,
           });
         } else {
-          Object.assign(session.user, {
-            id: token.id,
-            role: token.role,
-            email: token.email,
-            phone: token.phone,
-          });
+          // If user does not exist in DB, invalidate session
+          return null;
         }
         session.user.firstName = token.firstName;
         session.user.lastName = token.lastName;

@@ -141,7 +141,6 @@ export const ModernCta = () => (
         ></motion.div>
 
         {/* Grid pattern */}
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
       </div>
     </motion.div>
   </div>

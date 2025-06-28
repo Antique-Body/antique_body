@@ -6,7 +6,7 @@ import { StatCard } from "@/components/custom/dashboard/shared/StatCard";
 import { ACTIVITY_TYPES } from "@/enums/activityTypes";
 import { FITNESS_GOALS } from "@/enums/fitnessGoals";
 
-export const ClientProfile = ({ userData }) => {
+export const ClientProfile = ({ userData, onProfileUpdate }) => {
   // Get label and icon for primary and secondary goals
   const getPrimaryGoal = () => {
     const goal = FITNESS_GOALS.find((g) => g.id === userData.primaryGoal);
@@ -62,7 +62,7 @@ export const ClientProfile = ({ userData }) => {
         showProgressBar={true}
         progressData={userData.progress}
         profileTitle={`${userData.firstName || ""} ${userData.lastName || ""}`}
-        editProfilePath="/client/edit-profile"
+        onProfileUpdate={onProfileUpdate}
       >
         <div className="w-full">
           {/* Header with button */}

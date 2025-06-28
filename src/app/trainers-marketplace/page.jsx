@@ -231,7 +231,6 @@ export default function TrainersMarketplace() {
             className="absolute bottom-1/4 -right-40 w-[800px] h-[800px] rounded-full bg-[#FF9A00]/20 blur-[100px] animate-pulse"
             style={{ animationDelay: "2s" }}
           ></div>
-          <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20"></div>
         </div>
 
         <div className="relative z-10">
@@ -272,7 +271,6 @@ export default function TrainersMarketplace() {
           className="absolute bottom-1/4 -right-40 w-[800px] h-[800px] rounded-full bg-[#FF9A00]/20 blur-[100px] animate-pulse"
           style={{ animationDelay: "2s" }}
         ></div>
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20"></div>
       </div>
 
       {/* Content */}
@@ -382,9 +380,9 @@ export default function TrainersMarketplace() {
               .map((s) => s.name)
               .join(", "),
             rating: selectedTrainer.trainerInfo?.rating || 0,
-            experience: selectedTrainer.trainingSince
+            experience: selectedTrainer.trainerSince
               ? `${
-                  new Date().getFullYear() - selectedTrainer.trainingSince
+                  new Date().getFullYear() - selectedTrainer.trainerSince
                 }+ years`
               : "Experience not specified",
             proximity: selectedTrainer.location

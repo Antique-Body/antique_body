@@ -20,7 +20,7 @@ const staggerItems = {
   },
 };
 
-export const BasicInformation = ({
+export const ClientBasicInformation = ({
   clientData,
   handleChange,
   previewImage,

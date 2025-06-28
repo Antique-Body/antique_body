@@ -19,7 +19,7 @@ function buildLocationWhere(location) {
  * Kreira trenera sa svim detaljima i relacijama.
  * Sva polja su required osim certifikata i description.
  * formData: {
- *   firstName, lastName, dateOfBirth, gender, trainingSince, specialties, languages, trainingEnvironment, trainingTypes,
+ *   firstName, lastName, dateOfBirth, gender, trainerSince, specialties, languages, trainingEnvironment, trainingTypes,
  *   email, phone,  profileImage, location: { city, state, country },
  *   pricingType, pricePerSession, currency, certifications: [{ name, issuer, expiryDate, description, documentUrl }]
  * }
@@ -30,7 +30,7 @@ async function createTrainerWithDetails(formData, userId) {
     "lastName",
     "dateOfBirth",
     "gender",
-    "trainingSince",
+    "trainerSince",
     "specialties",
     "languages",
     "trainingEnvironment",
@@ -107,66 +107,82 @@ async function createTrainerWithDetails(formData, userId) {
     }
   }
 
-  const trainer = await prisma.trainerProfile.create({
+  // Prvo kreiraj TrainerInfo i unutar njega TrainerProfile
+  const trainerInfo = await prisma.trainerInfo.create({
     data: {
       userId,
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      dateOfBirth: new Date(formData.dateOfBirth),
-      gender: formData.gender,
-      trainingSince: Number(formData.trainingSince),
-      profileImage: formData.profileImage,
-      description: formData.description || null,
-      locationId: dbLocation.id,
-      pricingType: formData.pricingType,
-      pricePerSession:
-        formData.pricingType === "fixed" ||
-        formData.pricingType === "package_deals"
-          ? Number(formData.pricePerSession)
-          : null,
-      currency: formData.currency,
-      contactEmail: formData.contactEmail || null,
-      contactPhone: formData.contactPhone || null,
-      trainingEnvironment: formData.trainingEnvironment,
-      specialties: {
-        create: formData.specialties.map((name) => ({ name })),
+      trainerProfile: {
+        create: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          dateOfBirth: new Date(formData.dateOfBirth),
+          gender: formData.gender,
+          trainerSince: Number(formData.trainerSince),
+          profileImage: formData.profileImage,
+          description: formData.description || null,
+          locationId: dbLocation.id,
+          pricingType: formData.pricingType,
+          pricePerSession:
+            formData.pricingType === "fixed" ||
+            formData.pricingType === "package_deals"
+              ? Number(formData.pricePerSession)
+              : null,
+          currency: formData.currency,
+          contactEmail: formData.contactEmail || null,
+          contactPhone: formData.contactPhone || null,
+          trainingEnvironment: formData.trainingEnvironment,
+          specialties: {
+            create: formData.specialties.map((name) => ({ name })),
+          },
+          languages: {
+            create: formData.languages.map((name) => ({ name })),
+          },
+          trainingTypes: {
+            create: formData.trainingTypes.map((name) => ({ name })),
+          },
+          certifications:
+            formData.certifications && formData.certifications.length > 0
+              ? {
+                  create: formData.certifications.map((cert) => ({
+                    name: cert.name,
+                    issuer: cert.issuer || null,
+                    expiryDate: cert.expiryDate
+                      ? new Date(cert.expiryDate)
+                      : null,
+                    documents:
+                      cert.documents && cert.documents.length > 0
+                        ? {
+                            create: cert.documents.map((doc) => ({
+                              url: doc.url,
+                              originalName: doc.originalName,
+                              mimetype: doc.mimetype,
+                            })),
+                          }
+                        : undefined,
+                  })),
+                }
+              : undefined,
+        },
       },
-      languages: {
-        create: formData.languages.map((name) => ({ name })),
-      },
-      trainingTypes: {
-        create: formData.trainingTypes.map((name) => ({ name })),
-      },
-      certifications:
-        formData.certifications && formData.certifications.length > 0
-          ? {
-              create: formData.certifications.map((cert) => ({
-                name: cert.name,
-                issuer: cert.issuer || null,
-                expiryDate: cert.expiryDate ? new Date(cert.expiryDate) : null,
-                documents:
-                  cert.documents && cert.documents.length > 0
-                    ? {
-                        create: cert.documents.map((doc) => ({
-                          url: doc.url,
-                          originalName: doc.originalName,
-                          mimetype: doc.mimetype,
-                        })),
-                      }
-                    : undefined,
-              })),
-            }
-          : undefined,
     },
     include: {
-      location: true,
-      specialties: true,
-      languages: true,
-      trainingTypes: true,
-      certifications: true,
+      trainerProfile: {
+        include: {
+          location: true,
+          specialties: true,
+          languages: true,
+          trainingTypes: true,
+          certifications: true,
+        },
+      },
     },
   });
-  return trainer;
+
+  // Create default exercises for new trainer
+  await exerciseService.createDefaultExercises(trainerInfo.id);
+  await mealService.createDefaultMeals(trainerInfo.id);
+
+  return trainerInfo.trainerProfile;
 }
 
 async function createOrUpdateTrainerInfo(trainerProfileId, infoData) {
@@ -213,8 +229,12 @@ async function getTrainerInfoByProfileId(trainerProfileId) {
 }
 
 async function getTrainerProfileByUserId(userId) {
-  const profile = await prisma.trainerProfile.findUnique({
-    where: { userId },
+  const profile = await prisma.trainerProfile.findFirst({
+    where: {
+      trainerInfo: {
+        userId: userId,
+      },
+    },
     include: {
       certifications: { include: { documents: true } },
       specialties: true,
@@ -238,20 +258,10 @@ async function getTrainerProfileByUserId(userId) {
 }
 
 async function getTrainerInfoByUserId(userId) {
-  const profile = await prisma.trainerProfile.findUnique({
-    where: { userId },
-  });
-  if (!profile) return null;
+  // 1. Pronađi TrainerInfo po userId
   const trainerInfo = await prisma.trainerInfo.findUnique({
-    where: { trainerProfileId: profile.id },
+    where: { userId },
     include: {
-      exercises: {
-        include: {
-          muscleGroups: true,
-          exerciseInfo: true,
-        },
-        orderBy: { createdAt: "desc" },
-      },
       trainerProfile: {
         include: {
           certifications: { include: { documents: true } },
@@ -267,6 +277,13 @@ async function getTrainerInfoByUserId(userId) {
           },
         },
       },
+      exercises: {
+        include: {
+          muscleGroups: true,
+          exerciseInfo: true,
+        },
+        orderBy: { createdAt: "desc" },
+      },
     },
   });
   return trainerInfo;
@@ -278,7 +295,13 @@ async function getTrainerInfoByUserId(userId) {
  */
 export async function updateTrainerProfile(userId, data) {
   return await prisma.$transaction(async (tx) => {
-    const profile = await tx.trainerProfile.findUnique({ where: { userId } });
+    // Prvo pronađi TrainerInfo po userId
+    const trainerInfo = await tx.trainerInfo.findUnique({ where: { userId } });
+    if (!trainerInfo) throw new Error("Trainer info not found");
+    // Zatim pronađi TrainerProfile po trainerInfoId
+    const profile = await tx.trainerProfile.findUnique({
+      where: { trainerInfoId: trainerInfo.id },
+    });
     if (!profile) throw new Error("Trainer profile not found");
     let locationId = profile.locationId;
     await Promise.all([
@@ -387,6 +410,13 @@ export async function updateTrainerProfile(userId, data) {
       if (isNaN(pricePerSession)) pricePerSession = null;
     }
 
+    // Osiguraj da je trainerSince broj
+    let trainerSince = data.trainerSince;
+    if (typeof trainerSince === "string" && trainerSince !== "") {
+      trainerSince = Number(trainerSince);
+      if (isNaN(trainerSince)) trainerSince = null;
+    }
+
     if (location && location.city && location.country) {
       let dbLocation = null;
       // Ako je poslan id, provjeri da li se podaci poklapaju
@@ -461,6 +491,7 @@ export async function updateTrainerProfile(userId, data) {
       data: {
         ...allowedProfileData,
         pricePerSession,
+        trainerSince,
         dateOfBirth: allowedProfileData.dateOfBirth
           ? new Date(allowedProfileData.dateOfBirth)
           : profile.dateOfBirth,
