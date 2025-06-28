@@ -136,8 +136,6 @@ export default function LoginPage() {
     setError("");
 
     try {
-      console.log("[login] Attempting login with data:", data);
-
       let result;
       if (data.email) {
         // Email login - no verification code needed

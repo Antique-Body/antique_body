@@ -1,11 +1,14 @@
+import { PrismaClient } from "@prisma/client";
+
 import { clientService } from "../services";
 
 import { auth } from "#/auth";
+import { formatPhoneNumber } from "@/lib/utils";
+const prisma = new PrismaClient();
 
 export async function POST(req) {
   try {
     const session = await auth();
-    console.log("session", session);
     if (!session?.user?.id) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -87,10 +90,22 @@ export async function PUT(req) {
     }
     const body = await req.json();
     // Ovdje možete dodati validaciju ako želite
+    // Formatiraj broj telefona prije spremanja
+    const phone = body.phone ? formatPhoneNumber(body.phone) : undefined;
     const updatedProfile = await clientService.updateClientProfile(
       session.user.id,
-      body
+      { ...body, phone }
     );
+    // Također update User model (ako je potrebno)
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        phone,
+        email: body.email,
+        phoneVerified: body.phoneVerified ? new Date() : undefined,
+        // Ostala polja po potrebi
+      },
+    });
     return new Response(
       JSON.stringify({ success: true, data: updatedProfile }),
       { status: 200 }

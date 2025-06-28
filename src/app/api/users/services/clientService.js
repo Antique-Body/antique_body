@@ -308,6 +308,25 @@ async function getClientSettings(userId) {
     where: { userId },
     include: {
       clientSettings: true,
+      user: {
+        select: {
+          id: true,
+          email: true,
+          phone: true,
+          role: true,
+          language: true,
+          emailVerified: true,
+          phoneVerified: true,
+          password: true,
+          accounts: {
+            select: {
+              id: true,
+              provider: true,
+              type: true,
+            },
+          },
+        },
+      },
     },
   });
 
@@ -315,26 +334,31 @@ async function getClientSettings(userId) {
     return null;
   }
 
-  // If client settings don't exist, create default ones
-  if (!clientInfo.clientSettings) {
-    const defaultSettings = await prisma.clientSettings.create({
-      data: {
-        clientInfoId: clientInfo.id,
-        notifications: true,
-        emailNotifications: true,
-        smsNotifications: false,
-        reminderTime: 24,
-        privacyLevel: "public",
-        shareProgress: true,
-        timezone: "UTC",
-        preferredLanguage: "en",
-        measurementUnit: "metric",
-      },
-    });
-    return defaultSettings;
-  }
-
-  return clientInfo.clientSettings;
+  // Uvijek koristi upsert, bez if-a
+  const defaultSettings = await prisma.clientSettings.upsert({
+    where: { clientInfoId: clientInfo.id },
+    update: {},
+    create: {
+      clientInfoId: clientInfo.id,
+      notifications: true,
+      emailNotifications: true,
+      smsNotifications: false,
+      reminderTime: 24,
+      privacyLevel: "public",
+      shareProgress: true,
+      timezone: "UTC",
+      preferredLanguage: "en",
+      measurementUnit: "metric",
+    },
+  });
+  const { password, ...userWithoutPassword } = clientInfo.user;
+  return {
+    ...defaultSettings,
+    user: {
+      ...userWithoutPassword,
+      hasPassword: Boolean(password),
+    },
+  };
 }
 
 export const clientService = {
