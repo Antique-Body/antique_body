@@ -196,50 +196,52 @@ export const authConfig = {
       }
       return true;
     },
-    async jwt({ token, user, account }) {
-      if (user) {
-        const userFromDb = await getUserByEmailOrPhone({
-          email: user.email,
-          phone: user.phone,
-        });
-        if (userFromDb) {
-          const userWithAccounts = await getUserWithAccounts(userFromDb.id);
-          Object.assign(token, {
-            id: userFromDb.id,
-            role: userFromDb.role,
-            trainerProfile:
-              userWithAccounts?.trainerInfo?.trainerProfile || null,
-            clientProfile: userWithAccounts?.clientInfo?.clientProfile || null,
-            accounts: userWithAccounts?.accounts || [],
-          });
-        } else {
-          Object.assign(token, { id: user.id, role: user.role, accounts: [] });
-        }
-        token.email = user.email;
-        token.phone = user.phone;
-        token.firstName = user.firstName;
-        token.lastName = user.lastName;
-      }
 
-      // Add account info if available
-      if (account) {
-        token.provider = account.provider;
-        token.accountType = account.type;
-      }
+    //DEBUG
+    async jwt({ token, user }) {
+      console.log("=== JWT CALLBACK DEBUG ===");
+      console.log("User:", user);
+      console.log("Token before:", token);
 
-      if (token.id) {
-        const userWithAccounts = await getUserWithAccounts(token.id);
-        if (userWithAccounts) {
-          Object.assign(token, {
-            role: userWithAccounts.role,
-            trainerProfile:
-              userWithAccounts?.trainerInfo?.trainerProfile || null,
-            clientProfile: userWithAccounts?.clientInfo?.clientProfile || null,
-            accounts: userWithAccounts.accounts,
+      try {
+        if (user) {
+          const userFromDb = await getUserByEmailOrPhone({
+            email: user.email,
+            phone: user.phone,
           });
+          console.log("UserFromDb:", userFromDb);
+
+          if (userFromDb) {
+            Object.assign(token, {
+              id: userFromDb.id,
+              role: userFromDb.role,
+              trainerProfile: userFromDb.trainerProfile,
+              clientProfile: userFromDb.clientProfile,
+            });
+          } else {
+            Object.assign(token, { id: user.id, role: user.role });
+          }
+          token.email = user.email;
+          token.phone = user.phone;
+          token.firstName = user.firstName;
+          token.lastName = user.lastName;
         }
+        if (token.id) {
+          const userFromDb = await prisma.user.findUnique({
+            where: { id: token.id },
+            select: { role: true, trainerProfile: true, clientProfile: true },
+          });
+          if (userFromDb) {
+            Object.assign(token, userFromDb);
+          }
+        }
+        console.log("Token after:", token);
+        console.log("=== JWT CALLBACK SUCCESS ===");
+        return token;
+      } catch (error) {
+        console.error("=== JWT CALLBACK ERROR ===", error);
+        return token;
       }
-      return token;
     },
     async session({ session, token }) {
       if (token) {
