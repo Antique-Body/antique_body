@@ -178,10 +178,184 @@ export async function GET(request) {
     let totalTrainers = 0;
 
     try {
-      trainers = await prisma.trainerProfile.findMany(queryOptions);
-      totalTrainers = await prisma.trainerProfile.count({
-        where: queryOptions.where,
-      });
+      // For location-based sorting, we need to handle it differently
+      if (sortBy === "location" && userLat && userLon) {
+        // First get all trainers without pagination to calculate distances
+        const allTrainersQuery = { ...queryOptions };
+        delete allTrainersQuery.take;
+        delete allTrainersQuery.skip;
+
+        let allTrainers = await prisma.trainerProfile.findMany(
+          allTrainersQuery
+        );
+        totalTrainers = allTrainers.length;
+
+        // Map gyms and calculate distances for all trainers
+        allTrainers = allTrainers.map((trainer) => {
+          let gyms = [];
+          if (Array.isArray(trainer.trainerGyms)) {
+            gyms = trainer.trainerGyms
+              .filter((tg) => tg.gym)
+              .map((tg) => ({
+                value: tg.gym.placeId,
+                label: tg.gym.name,
+                address: tg.gym.address,
+                lat: tg.gym.lat,
+                lon: tg.gym.lon,
+              }));
+          }
+
+          let distance = null;
+          let distanceSource = null;
+
+          // Try to use nearest gym if available
+          if (gyms.length > 0) {
+            let minGymDist = null;
+            gyms.forEach((gym) => {
+              if (
+                typeof gym.lat === "number" &&
+                typeof gym.lon === "number" &&
+                !isNaN(gym.lat) &&
+                !isNaN(gym.lon)
+              ) {
+                const d = haversineDistance(
+                  parseFloat(userLat),
+                  parseFloat(userLon),
+                  gym.lat,
+                  gym.lon
+                );
+                if (minGymDist === null || d < minGymDist) {
+                  minGymDist = d;
+                }
+              }
+            });
+            if (minGymDist !== null) {
+              distance = minGymDist;
+              distanceSource = "gym";
+            }
+          }
+
+          // If no gym distance, fall back to city location
+          if (
+            distance === null &&
+            trainer.location &&
+            typeof trainer.location.lat === "number" &&
+            typeof trainer.location.lon === "number" &&
+            !isNaN(trainer.location.lat) &&
+            !isNaN(trainer.location.lon)
+          ) {
+            distance = haversineDistance(
+              parseFloat(userLat),
+              parseFloat(userLon),
+              trainer.location.lat,
+              trainer.location.lon
+            );
+            distanceSource = "city";
+          }
+
+          return {
+            ...trainer,
+            location: trainer.location ? { ...trainer.location, gyms } : null,
+            distance,
+            distanceSource,
+          };
+        });
+
+        // Sort by distance
+        allTrainers.sort((a, b) => {
+          if (a.distance == null) return 1;
+          if (b.distance == null) return -1;
+          return a.distance - b.distance;
+        });
+
+        // Apply pagination after sorting
+        const skip = (page - 1) * limit;
+        trainers = allTrainers.slice(skip, skip + limit);
+      } else {
+        // Normal case - use database pagination
+        trainers = await prisma.trainerProfile.findMany(queryOptions);
+        totalTrainers = await prisma.trainerProfile.count({
+          where: queryOptions.where,
+        });
+
+        // Map gyms from trainerGyms to location.gyms
+        trainers = trainers.map((trainer) => {
+          let gyms = [];
+          if (Array.isArray(trainer.trainerGyms)) {
+            gyms = trainer.trainerGyms
+              .filter((tg) => tg.gym)
+              .map((tg) => ({
+                value: tg.gym.placeId,
+                label: tg.gym.name,
+                address: tg.gym.address,
+                lat: tg.gym.lat,
+                lon: tg.gym.lon,
+              }));
+          }
+          return {
+            ...trainer,
+            location: trainer.location ? { ...trainer.location, gyms } : null,
+          };
+        });
+
+        // Calculate distances for non-location sorting (for display purposes)
+        if (userLat && userLon) {
+          trainers = trainers.map((trainer) => {
+            let distance = null;
+            let distanceSource = null;
+
+            // Try to use nearest gym if available
+            if (
+              trainer.location &&
+              Array.isArray(trainer.location.gyms) &&
+              trainer.location.gyms.length > 0
+            ) {
+              let minGymDist = null;
+              trainer.location.gyms.forEach((gym) => {
+                if (
+                  typeof gym.lat === "number" &&
+                  typeof gym.lon === "number" &&
+                  !isNaN(gym.lat) &&
+                  !isNaN(gym.lon)
+                ) {
+                  const d = haversineDistance(
+                    parseFloat(userLat),
+                    parseFloat(userLon),
+                    gym.lat,
+                    gym.lon
+                  );
+                  if (minGymDist === null || d < minGymDist) {
+                    minGymDist = d;
+                  }
+                }
+              });
+              if (minGymDist !== null) {
+                distance = minGymDist;
+                distanceSource = "gym";
+              }
+            }
+
+            // If no gym distance, fall back to city location
+            if (
+              distance === null &&
+              trainer.location &&
+              typeof trainer.location.lat === "number" &&
+              typeof trainer.location.lon === "number" &&
+              !isNaN(trainer.location.lat) &&
+              !isNaN(trainer.location.lon)
+            ) {
+              distance = haversineDistance(
+                parseFloat(userLat),
+                parseFloat(userLon),
+                trainer.location.lat,
+                trainer.location.lon
+              );
+              distanceSource = "city";
+            }
+            return { ...trainer, distance, distanceSource };
+          });
+        }
+      }
     } catch (error) {
       // If the table doesn't exist or there's any other error, we'll return empty results
       if (error.code === "P2021") {
@@ -193,90 +367,6 @@ export async function GET(request) {
       }
       trainers = [];
       totalTrainers = 0;
-    }
-
-    // Map gyms from trainerGyms to location.gyms
-    trainers = trainers.map((trainer) => {
-      let gyms = [];
-      if (Array.isArray(trainer.trainerGyms)) {
-        gyms = trainer.trainerGyms
-          .filter((tg) => tg.gym)
-          .map((tg) => ({
-            value: tg.gym.placeId,
-            label: tg.gym.name,
-            address: tg.gym.address,
-            lat: tg.gym.lat,
-            lon: tg.gym.lon,
-          }));
-      }
-      return {
-        ...trainer,
-        location: trainer.location ? { ...trainer.location, gyms } : null,
-      };
-    });
-
-    // If user location is provided, calculate distance for each trainer
-    if (userLat && userLon) {
-      trainers = trainers.map((trainer) => {
-        let distance = null;
-        let distanceSource = null;
-        // Try to use nearest gym if available
-        if (
-          trainer.location &&
-          Array.isArray(trainer.location.gyms) &&
-          trainer.location.gyms.length > 0
-        ) {
-          let minGymDist = null;
-          trainer.location.gyms.forEach((gym) => {
-            if (
-              typeof gym.lat === "number" &&
-              typeof gym.lon === "number" &&
-              !isNaN(gym.lat) &&
-              !isNaN(gym.lon)
-            ) {
-              const d = haversineDistance(
-                parseFloat(userLat),
-                parseFloat(userLon),
-                gym.lat,
-                gym.lon
-              );
-              if (minGymDist === null || d < minGymDist) {
-                minGymDist = d;
-              }
-            }
-          });
-          if (minGymDist !== null) {
-            distance = minGymDist;
-            distanceSource = "gym";
-          }
-        }
-        // If no gym distance, fall back to city location
-        if (
-          distance === null &&
-          trainer.location &&
-          typeof trainer.location.lat === "number" &&
-          typeof trainer.location.lon === "number" &&
-          !isNaN(trainer.location.lat) &&
-          !isNaN(trainer.location.lon)
-        ) {
-          distance = haversineDistance(
-            parseFloat(userLat),
-            parseFloat(userLon),
-            trainer.location.lat,
-            trainer.location.lon
-          );
-          distanceSource = "city";
-        }
-        return { ...trainer, distance, distanceSource };
-      });
-      // Always sort by distance ascending if sortBy=location
-      if (sortBy === "location") {
-        trainers = trainers.sort((a, b) => {
-          if (a.distance == null) return 1;
-          if (b.distance == null) return -1;
-          return a.distance - b.distance;
-        });
-      }
     }
 
     return NextResponse.json({
