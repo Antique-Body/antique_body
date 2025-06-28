@@ -107,6 +107,7 @@ async function getUserByEmailOrPhone({ email, phone }) {
 
 export const authConfig = {
   providers,
+  //this is change for stage server
   cookies: {
     pkceCodeVerifier: {
       name: "next-auth.pkce.code_verifier",
