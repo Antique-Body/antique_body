@@ -53,6 +53,33 @@ function isOAuthCallback(request) {
   return false;
 }
 
+// Check if request might be coming right after OAuth callback
+function isPostOAuthRedirect(request) {
+  const referer = request.headers.get("referer");
+
+  // If referer contains OAuth callback URL, this might be post-OAuth redirect
+  if (referer && referer.includes("/api/auth/callback/")) {
+    return true;
+  }
+
+  return false;
+}
+
+// Check if user has NextAuth session cookies (even if JWT token is not ready yet)
+function hasSessionCookies(request) {
+  const cookies = request.headers.get("cookie") || "";
+
+  // Check for NextAuth session cookies
+  const hasSessionToken =
+    cookies.includes("next-auth.session-token") ||
+    cookies.includes("__Secure-next-auth.session-token");
+  const hasCallbackUrl =
+    cookies.includes("next-auth.callback-url") ||
+    cookies.includes("__Secure-next-auth.callback-url");
+
+  return hasSessionToken || hasCallbackUrl;
+}
+
 function getRedirectUrl(role, token, pathname) {
   if (!role) return pathname === "/select-role" ? null : "/select-role";
 
@@ -108,6 +135,7 @@ export async function middleware(request) {
 
   // Skip user existence check during OAuth flow
   const isOAuthFlow = isOAuthCallback(request);
+  const isPostOAuth = isPostOAuthRedirect(request);
 
   if (isPageNavigation(request)) {
     console.log("[middleware] Page navigation:", {
@@ -117,6 +145,9 @@ export async function middleware(request) {
       tokenEmail: token?.email,
       tokenRole: token?.role,
       isOAuthFlow,
+      isPostOAuth,
+      hasSessionCookies: hasSessionCookies(request),
+      referer: request.headers.get("referer"),
     });
   }
 
@@ -126,6 +157,13 @@ export async function middleware(request) {
   // 1.1. /select-role je dostupno samo prijavljenima bez role
   if (pathname === "/select-role") {
     if (!token) {
+      // If this might be post-OAuth redirect and has session cookies, allow access
+      if (isPostOAuth && hasSessionCookies(request)) {
+        console.log(
+          "[middleware] Post-OAuth redirect with session cookies detected, allowing access to /select-role"
+        );
+        return NextResponse.next();
+      }
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
 
