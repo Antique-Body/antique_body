@@ -59,7 +59,7 @@ export default function TrainersMarketplace() {
   const totalPages = Math.ceil(totalTrainers / trainersPerPage);
 
   const updateUrlParams = useCallback(
-    (newParams) => {
+    (newParams, resetPage = false) => {
       const params = new URLSearchParams(searchParams);
       Object.entries(newParams).forEach(([key, value]) => {
         if (value === "" || value === null || value === undefined) {
@@ -72,7 +72,8 @@ export default function TrainersMarketplace() {
         }
       });
 
-      if (!newParams.page) {
+      // Only reset to page 1 if explicitly requested
+      if (resetPage) {
         params.set("page", "1");
       }
 
@@ -81,14 +82,17 @@ export default function TrainersMarketplace() {
     [searchParams, pathname, router]
   );
 
-  const setSearchTerm = (value) => updateUrlParams({ search: value });
+  const setSearchTerm = (value) => updateUrlParams({ search: value }, true);
   const setLocationSearch = (value) =>
-    updateUrlParams({ locationSearch: value });
+    updateUrlParams({ locationSearch: value }, true);
   const setSelectedLocation = (value) =>
-    updateUrlParams({ location: value ? value.label : null });
-  const setSortOption = (value) => updateUrlParams({ sortBy: value });
-  const setSortOrder = (value) => updateUrlParams({ sortOrder: value });
-  const setCurrentPage = (value) => updateUrlParams({ page: value });
+    updateUrlParams({ location: value ? value.label : null }, true);
+  const setSortOption = (value) => updateUrlParams({ sortBy: value }, true);
+  const setSortOrder = (value) => updateUrlParams({ sortOrder: value }, true);
+  const setCurrentPage = (value) => updateUrlParams({ page: value }, false);
+
+  // Track previous filters to prevent unnecessary resets
+  const [prevFilters, setPrevFilters] = useState(null);
 
   useEffect(() => {
     setFilters({
@@ -103,6 +107,17 @@ export default function TrainersMarketplace() {
   }, [searchParams]);
 
   useEffect(() => {
+    // Only update URL if filters actually changed
+    if (
+      prevFilters &&
+      JSON.stringify(filters) === JSON.stringify(prevFilters)
+    ) {
+      console.log("Filters unchanged, skipping URL update");
+      return;
+    }
+
+    console.log("Filters changed:", { prevFilters, newFilters: filters });
+
     const newParams = {};
     if (filters.availability.length > 0) {
       newParams.availability = filters.availability;
@@ -129,12 +144,23 @@ export default function TrainersMarketplace() {
     } else {
       newParams.tag = null;
     }
-    updateUrlParams(newParams);
-  }, [filters, updateUrlParams]);
+
+    // Only reset page if this is a user-initiated filter change (not initial load)
+    const shouldResetPage = prevFilters !== null;
+    console.log("Should reset page:", shouldResetPage);
+    updateUrlParams(newParams, shouldResetPage);
+    setPrevFilters(filters);
+  }, [filters, prevFilters, updateUrlParams]);
 
   // Initial fetch of trainers
   useEffect(() => {
     if (!locationResolved) return;
+
+    console.log("Fetching trainers with params:", {
+      currentPage,
+      searchParams: searchParams.toString(),
+      userLocation: !!userLocation,
+    });
 
     const fetchTrainers = async () => {
       try {
@@ -168,6 +194,11 @@ export default function TrainersMarketplace() {
         }
         const data = await response.json();
 
+        console.log("Received data:", {
+          trainersCount: data.trainers.length,
+          pagination: data.pagination,
+        });
+
         setTrainers(data.trainers);
         setTotalTrainers(data.pagination.total);
         setLoading(false);
@@ -179,13 +210,7 @@ export default function TrainersMarketplace() {
     };
 
     fetchTrainers();
-  }, [
-    searchParams,
-    userLocation,
-    locationResolved,
-    currentPage,
-    trainersPerPage,
-  ]);
+  }, [searchParams, userLocation, locationResolved, trainersPerPage]);
 
   // Function to handle viewing a trainer's profile
   const handleViewProfile = (trainer) => {
@@ -211,12 +236,15 @@ export default function TrainersMarketplace() {
 
   // Handle page change
   const handlePageChange = (pageNumber) => {
+    console.log("Changing page to:", pageNumber);
     setCurrentPage(pageNumber);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Clear all filters
   const handleClearFilters = () => {
+    console.log("Clearing all filters");
+    setPrevFilters(null); // Reset the prev filters tracking
     router.push(pathname);
   };
 
