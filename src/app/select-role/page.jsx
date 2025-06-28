@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { FullScreenLoader } from "@/components/common";
@@ -59,11 +59,18 @@ const ROLES_CONFIG = {
 
 export default function SelectRole() {
   const { t } = useTranslation();
-  const { data: session, update } = useSession();
+  const { data: session, status, update } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState(null);
   const [error, setError] = useState(null);
+
+  // Redirect to /auth/login if unauthenticated
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/auth/login");
+    }
+  }, [status, router]);
 
   // Handle role selection
   const handleRoleClick = useCallback(
@@ -132,7 +139,6 @@ export default function SelectRole() {
         <div className="absolute top-1/3 -left-40 w-[600px] h-[600px] rounded-full bg-[#FF6B00]/20 blur-[150px]"></div>
         <div className="absolute bottom-1/3 -right-40 w-[600px] h-[600px] rounded-full bg-[#FF9A00]/20 blur-[150px]"></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[#FF6B00]/10 blur-[200px]"></div>
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20"></div>
         <div className="absolute inset-0 bg-radial-gradient pointer-events-none"></div>
       </div>
 

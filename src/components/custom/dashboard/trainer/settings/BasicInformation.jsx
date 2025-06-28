@@ -22,13 +22,34 @@ const staggerItems = {
   },
 };
 
-export const BasicInformation = ({
+export const TrainerBasicInformation = ({
   trainerData,
   handleChange,
   previewImage,
   handleImageUpload,
   setTrainerData,
 }) => {
+  // Helper function to normalize languages data
+  const normalizeLanguages = (languages) => {
+    if (!languages || languages.length === 0) return [];
+
+    // If languages is an array of objects with 'name' property, extract names
+    if (typeof languages[0] === "object" && languages[0].name) {
+      return languages.map((lang) => lang.name);
+    }
+
+    // If languages is already an array of strings, return as is
+    if (typeof languages[0] === "string") {
+      return languages;
+    }
+
+    // Fallback to empty array
+    return [];
+  };
+
+  // Get normalized languages
+  const normalizedLanguages = normalizeLanguages(trainerData.languages);
+
   // Handler for LanguageSelector
   const handleLanguagesChange = (langs) => {
     if (setTrainerData) {
@@ -43,6 +64,11 @@ export const BasicInformation = ({
       handleChange({ target: { name: "languages", value: langs } });
     }
   };
+
+  // Generate year options for trainer experience
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: 50 }, (_, i) => currentYear - i);
+
   return (
     <motion.div
       variants={staggerItems}
@@ -121,6 +147,23 @@ export const BasicInformation = ({
       {/* Description (moved from AboutYou) */}
       <motion.div variants={fadeInUp}>
         <FormField
+          label="Trainer Since (Year)"
+          name="trainerSince"
+          type="select"
+          value={trainerData.trainerSince || ""}
+          onChange={handleChange}
+          options={[
+            { value: "", label: "Select year" },
+            ...yearOptions.map((year) => ({
+              value: year.toString(),
+              label: year.toString(),
+            })),
+          ]}
+          required
+          className=""
+          backgroundStyle="semi-transparent"
+        />
+        <FormField
           label="Description"
           name="description"
           type="textarea"
@@ -142,7 +185,7 @@ export const BasicInformation = ({
           Languages you speak
         </div>
         <LanguageSelector
-          selectedLanguages={trainerData.languages || []}
+          selectedLanguages={normalizedLanguages}
           onChange={handleLanguagesChange}
         />
       </motion.div>

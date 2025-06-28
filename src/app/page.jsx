@@ -126,7 +126,6 @@ export default function Home() {
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] rounded-full bg-[#FF6B00]/10 blur-[150px] animate-pulse"
             style={{ animationDelay: "1s" }}
           ></div>
-          <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20"></div>
         </div>
 
         <EffectBackground />

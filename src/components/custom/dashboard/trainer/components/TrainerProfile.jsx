@@ -6,9 +6,11 @@ import { StatCard } from "@/components/custom/dashboard/shared/StatCard";
 import { SPECIALTIES } from "@/enums/specialties";
 import { TRAINING_TYPES } from "@/enums/trainingTypes";
 
-export const TrainerProfile = ({ trainerData }) => {
+export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
   const info = trainerData?.trainerInfo || {};
   const getOrNoData = (val) => val ?? "No data";
+
+  console.log("trainerData", trainerData);
 
   // Combine first and last name
   const fullName =
@@ -38,6 +40,7 @@ export const TrainerProfile = ({ trainerData }) => {
         profileTitle={fullName}
         certifications={[]}
         className="py-2"
+        onProfileUpdate={onProfileUpdate}
       >
         <div className="w-full">
           {/* Header with button */}
