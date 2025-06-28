@@ -11,10 +11,6 @@ const PUBLIC_PATHS = [
 ];
 const AUTH_PATHS = ["/auth/reset-password"];
 
-function isPageNavigation(request) {
-  return request.headers.get("accept")?.includes("text/html");
-}
-
 // Check if user exists in database via existing /me API endpoint
 async function checkUserExistsInDB(request) {
   try {
@@ -25,13 +21,8 @@ async function checkUserExistsInDB(request) {
         Cookie: request.headers.get("cookie") || "",
       },
     });
-
-    // If user exists and is found, status will be 200
-    // If user doesn't exist, status will be 404
-    // If not authenticated, status will be 401
     return response.status === 200;
-  } catch (error) {
-    console.error("[middleware] Error checking user in DB:", error);
+  } catch {
     return false;
   }
 }
@@ -39,70 +30,58 @@ async function checkUserExistsInDB(request) {
 // Check if request is part of OAuth callback flow
 function isOAuthCallback(request) {
   const { pathname, searchParams } = request.nextUrl;
-
-  // Check for OAuth callback URLs
-  if (pathname.includes("/api/auth/callback/")) {
-    return true;
-  }
-
-  // Check for OAuth state or code parameters
-  if (searchParams.has("code") || searchParams.has("state")) {
-    return true;
-  }
-
-  return false;
+  return (
+    pathname.includes("/api/auth/callback/") ||
+    searchParams.has("code") ||
+    searchParams.has("state")
+  );
 }
 
 // Check if request might be coming right after OAuth callback
 function isPostOAuthRedirect(request) {
   const referer = request.headers.get("referer");
-
-  // If referer contains OAuth callback URL, this might be post-OAuth redirect
-  if (referer && referer.includes("/api/auth/callback/")) {
-    return true;
-  }
-
-  // If referer is from OAuth providers (Google, Facebook, etc.)
-  if (
-    referer &&
-    (referer.includes("accounts.google.com") ||
-      referer.includes("facebook.com") ||
-      referer.includes("oauth"))
-  ) {
-    return true;
-  }
-
-  return false;
+  return (
+    (referer && referer.includes("/api/auth/callback/")) ||
+    (referer &&
+      (referer.includes("accounts.google.com") ||
+        referer.includes("facebook.com") ||
+        referer.includes("oauth")))
+  );
 }
 
 // Check if user has NextAuth session cookies (even if JWT token is not ready yet)
 function hasSessionCookies(request) {
   const cookies = request.headers.get("cookie") || "";
-
-  // Check for NextAuth session cookies (both secure and non-secure variants)
-  const hasSessionToken =
+  return (
     cookies.includes("next-auth.session-token") ||
     cookies.includes("__Secure-next-auth.session-token") ||
     cookies.includes("authjs.session-token") ||
-    cookies.includes("__Secure-authjs.session-token");
-
-  const hasCallbackUrl =
+    cookies.includes("__Secure-authjs.session-token") ||
     cookies.includes("next-auth.callback-url") ||
     cookies.includes("__Secure-next-auth.callback-url") ||
     cookies.includes("authjs.callback-url") ||
-    cookies.includes("__Secure-authjs.callback-url");
-
-  // Also check for PKCE code verifier as it indicates active OAuth flow
-  const hasPKCE =
+    cookies.includes("__Secure-authjs.callback-url") ||
     cookies.includes("authjs.pkce.code_verifier") ||
-    cookies.includes("__Secure-authjs.pkce.code_verifier");
-
-  return hasSessionToken || hasCallbackUrl || hasPKCE;
+    cookies.includes("__Secure-authjs.pkce.code_verifier")
+  );
 }
 
-function getRedirectUrl(role, token, pathname) {
-  if (!role) return pathname === "/select-role" ? null : "/select-role";
+function getDashboardRedirect(token) {
+  if (token.role === "client") {
+    return token.clientProfile
+      ? "/client/dashboard"
+      : "/client/personal-details";
+  }
+  if (token.role === "trainer") {
+    return token.trainerProfile
+      ? "/trainer/dashboard"
+      : "/trainer/personal-details";
+  }
+  return "/select-role";
+}
 
+function getOnboardingRedirect(role, token, pathname) {
+  if (!role) return pathname === "/select-role" ? null : "/select-role";
   const config = {
     client: {
       profile: token.clientProfile,
@@ -138,7 +117,6 @@ function getRedirectUrl(role, token, pathname) {
       fallback: "/trainer/dashboard",
     },
   }[role];
-
   if (!config) return "/select-role";
   if (!config.profile)
     return pathname === config.personal ? null : config.personal;
@@ -146,139 +124,63 @@ function getRedirectUrl(role, token, pathname) {
 }
 
 export async function middleware(request) {
-  const { pathname } = request.nextUrl;
+  if (process.env.NODE_ENV_TYPE === "production") {
+    return NextResponse.next();
+  }
 
+  const { pathname } = request.nextUrl;
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
   });
-
-  // Skip user existence check during OAuth flow
   const isOAuthFlow = isOAuthCallback(request);
   const isPostOAuth = isPostOAuthRedirect(request);
 
-  if (isPageNavigation(request)) {
-    console.log("[middleware] Page navigation:", {
-      pathname,
-      hasToken: !!token,
-      tokenId: token?.id,
-      tokenEmail: token?.email,
-      tokenRole: token?.role,
-      isOAuthFlow,
-      isPostOAuth,
-      hasSessionCookies: hasSessionCookies(request),
-      referer: request.headers.get("referer"),
-      cookies: request.headers.get("cookie")?.substring(0, 200) + "...", // First 200 chars
-    });
-  }
-
-  // 1. Public paths uvijek pusti
+  // 1. Public paths
   if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
 
-  // 1.1. /select-role je dostupno samo prijavljenima bez role
+  // 2. /select-role
   if (pathname === "/select-role") {
     if (!token) {
-      // If this might be post-OAuth redirect, allow access temporarily
-      if (isPostOAuth) {
-        console.log(
-          "[middleware] Post-OAuth redirect detected, allowing access to /select-role"
-        );
-        return NextResponse.next();
-      }
-
-      // If has session cookies (OAuth flow in progress), allow access
-      if (hasSessionCookies(request)) {
-        console.log(
-          "[middleware] Session cookies detected, allowing access to /select-role"
-        );
-        return NextResponse.next();
-      }
-
+      if (isPostOAuth || hasSessionCookies(request)) return NextResponse.next();
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
-
-    // Check if user exists in database - but only for fully authenticated users
-    // Skip this check if user is in the middle of OAuth flow
     if (token.sub && token.email && !isOAuthFlow) {
       const userExists = await checkUserExistsInDB(request);
-      if (!userExists) {
-        console.log("[middleware] User not found in DB, redirecting to login");
+      if (!userExists)
         return NextResponse.redirect(new URL("/auth/login", request.url));
-      }
     }
-
     if (token.role) {
-      // Ako ima rolu, šalji ga na dashboard
-      let redirectUrl = "/";
-      if (token.role === "client") {
-        redirectUrl = token.clientProfile
-          ? "/client/dashboard"
-          : "/client/personal-details";
-      } else if (token.role === "trainer") {
-        redirectUrl = token.trainerProfile
-          ? "/trainer/dashboard"
-          : "/trainer/personal-details";
-      }
-      return NextResponse.redirect(new URL(redirectUrl, request.url));
+      return NextResponse.redirect(
+        new URL(getDashboardRedirect(token), request.url)
+      );
     }
-    // Ako je prijavljen i nema rolu, pusti daljefefeef
     return NextResponse.next();
   }
 
-  // 2. Ako nema tokena, redirect na login
+  // 3. Not logged in
   if (!token) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
-  // 2.0. Check if user exists in database - but only for fully authenticated users
-  // Skip this check if user is in the middle of OAuth flow or doesn't have email yet
+  // 4. User must exist in DB
   if (token.sub && token.email && !isOAuthFlow) {
     const userExists = await checkUserExistsInDB(request);
-    if (!userExists) {
-      console.log("[middleware] User not found in DB, redirecting to login");
+    if (!userExists)
       return NextResponse.redirect(new URL("/auth/login", request.url));
-    }
   }
 
-  // 2.1. Ako je logiran i pokušava na /auth/login ili /auth/register, redirectaj ga na dashboard/personal-details
-  if (["/auth/login", "/auth/register"].includes(pathname)) {
-    let redirectUrl = "/select-role";
-    if (token.role === "client") {
-      redirectUrl = token.clientProfile
-        ? "/client/dashboard"
-        : "/client/personal-details";
-    } else if (token.role === "trainer") {
-      redirectUrl = token.trainerProfile
-        ? "/trainer/dashboard"
-        : "/trainer/personal-details";
-    }
-    console.log("[middleware] Auth page access while logged in:", {
-      pathname,
-      token,
-      redirectUrl,
-    });
-    return NextResponse.redirect(new URL(redirectUrl, request.url));
+  // 5. Auth pages
+  if (["/auth/login", "/auth/register", ...AUTH_PATHS].includes(pathname)) {
+    return NextResponse.redirect(
+      new URL(getDashboardRedirect(token), request.url)
+    );
   }
 
-  // 3. Auth paths uvijek pusti (ali ako je logiran, redirect na dashboard/personal-details)
-  if (AUTH_PATHS.includes(pathname)) {
-    let redirectUrl = "/select-role";
-    if (token.role === "client") {
-      redirectUrl = token.clientProfile
-        ? "/client/dashboard"
-        : "/client/personal-details";
-    } else if (token.role === "trainer") {
-      redirectUrl = token.trainerProfile
-        ? "/trainer/dashboard"
-        : "/trainer/personal-details";
-    }
-    return NextResponse.redirect(new URL(redirectUrl, request.url));
-  }
-
-  // 4. Provjeri treba li usera redirectati na neku onboarding/dashboard stranicu
-  const redirect = getRedirectUrl(token.role, token, pathname, request.url);
-  if (redirect) {
-    return NextResponse.redirect(new URL(redirect, request.url));
+  // 6. Onboarding/dashboard redirect
+  const onboardingRedirect = getOnboardingRedirect(token.role, token, pathname);
+  if (onboardingRedirect) {
+    return NextResponse.redirect(new URL(onboardingRedirect, request.url));
   }
 
   return NextResponse.next();

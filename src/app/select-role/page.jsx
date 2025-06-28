@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { FullScreenLoader } from "@/components/common";
@@ -59,18 +59,11 @@ const ROLES_CONFIG = {
 
 export default function SelectRole() {
   const { t } = useTranslation();
-  const { data: session, status, update } = useSession();
+  const { data: session, update } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState(null);
   const [error, setError] = useState(null);
-
-  // Redirect to /auth/login if unauthenticated
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.replace("/auth/login");
-    }
-  }, [status, router]);
 
   // Handle role selection
   const handleRoleClick = useCallback(
