@@ -32,8 +32,7 @@ export function useClientEditProfileForm(initialUserData = null) {
   });
 
   // Helper function to process client data
-  const processClientData = useCallback((data) => {
-    return {
+  const processClientData = useCallback((data) => ({
       firstName: data.firstName || "",
       lastName: data.lastName || "",
       dateOfBirth: data.dateOfBirth ? data.dateOfBirth.slice(0, 10) : "",
@@ -58,8 +57,7 @@ export function useClientEditProfileForm(initialUserData = null) {
       description: data.description || "",
       medicalConditions: data.medicalConditions || "",
       allergies: data.allergies || "",
-    };
-  }, []);
+    }), []);
 
   // Fetch client profile on mount or use initial data
   useEffect(() => {
