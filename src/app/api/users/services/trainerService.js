@@ -301,6 +301,25 @@ async function getTrainerSettings(userId) {
     where: { userId },
     include: {
       trainerSettings: true,
+      user: {
+        select: {
+          id: true,
+          email: true,
+          phone: true,
+          role: true,
+          language: true,
+          emailVerified: true,
+          phoneVerified: true,
+          password: true,
+          accounts: {
+            select: {
+              id: true,
+              provider: true,
+              type: true,
+            },
+          },
+        },
+      },
     },
   });
 
@@ -308,26 +327,32 @@ async function getTrainerSettings(userId) {
     return null;
   }
 
-  // If trainer settings don't exist, create default ones
-  if (!trainerInfo.trainerSettings) {
-    const defaultSettings = await prisma.trainerSettings.create({
-      data: {
-        trainerInfoId: trainerInfo.id,
-        notifications: true,
-        emailNotifications: true,
-        smsNotifications: false,
-        autoAcceptBookings: false,
-        requireDeposit: false,
-        depositAmount: null,
-        timezone: "UTC",
-        workingHours: null,
-        blackoutDates: null,
-      },
-    });
-    return defaultSettings;
-  }
-
-  return trainerInfo.trainerSettings;
+  // Uvijek koristi upsert, bez if-a
+  const defaultSettings = await prisma.trainerSettings.upsert({
+    where: { trainerInfoId: trainerInfo.id },
+    update: {},
+    create: {
+      trainerInfoId: trainerInfo.id,
+      notifications: true,
+      emailNotifications: true,
+      smsNotifications: false,
+      autoAcceptBookings: false,
+      requireDeposit: false,
+      depositAmount: null,
+      timezone: "UTC",
+      workingHours: null,
+      blackoutDates: null,
+    },
+  });
+  // Ukloni password iz user objekta
+  const { password, ...userWithoutPassword } = trainerInfo.user;
+  return {
+    ...defaultSettings,
+    user: {
+      ...userWithoutPassword,
+      hasPassword: Boolean(password),
+    },
+  };
 }
 
 async function getTrainerProfileByUserId(userId) {

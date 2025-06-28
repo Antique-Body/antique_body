@@ -14,10 +14,10 @@ import {
   SecuritySettings,
 } from "@/components/custom/dashboard/client/settings";
 // Trainer Settings
+import { SecuritySettings as TrainerSecuritySettings } from "@/components/custom/dashboard/shared/SecuritySettings";
 import {
   AccountSettings as TrainerAccountSettings,
   LanguagePreferences as TrainerLanguagePreferences,
-  SecuritySettings as TrainerSecuritySettings,
 } from "@/components/custom/dashboard/trainer/settings";
 
 export const UserSettings = ({
@@ -160,24 +160,6 @@ export const UserSettings = ({
     } catch (err) {
       setError(err.message || "Failed to save settings");
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSaveCurrentSection = async () => {
-    // This will trigger the save for the currently active section
-    // The actual save logic is handled by the individual components
-    setLoading(true);
-    setError("");
-
-    try {
-      // We'll let the individual components handle their own save logic
-      // This is just to show loading state
-      setTimeout(() => {
-        setLoading(false);
-      }, 1000);
-    } catch (err) {
-      setError(err.message || "Failed to save settings");
       setLoading(false);
     }
   };
@@ -647,43 +629,6 @@ export const UserSettings = ({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3 order-1 sm:order-2 w-full sm:w-auto">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              disabled={loading}
-              className="flex-1 sm:flex-none border-[rgba(255,107,0,0.3)] text-gray-300 hover:text-white hover:border-[#FF6B00] hover:bg-[rgba(255,107,0,0.1)] transition-all duration-300 px-4 py-2 text-sm sm:text-base"
-            >
-              Close
-            </Button>
-            <Button
-              onClick={handleSaveCurrentSection}
-              disabled={loading}
-              className="flex-1 sm:flex-none bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] hover:from-[#FF5500] hover:to-[#FF8500] text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-4 py-2 text-sm sm:text-base font-medium"
-            >
-              {loading ? (
-                <>
-                  <Icon
-                    icon="eos-icons:loading"
-                    width={16}
-                    height={16}
-                    className="mr-2 animate-spin"
-                  />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Icon
-                    icon="mdi:content-save"
-                    width={16}
-                    height={16}
-                    className="mr-2"
-                  />
-                  Save {sections.find((s) => s.id === activeSection)?.label}
-                </>
-              )}
-            </Button>
-          </div>
         </div>
       </motion.div>
     </div>

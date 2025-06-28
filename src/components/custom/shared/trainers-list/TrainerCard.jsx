@@ -26,7 +26,6 @@ export const TrainerCard = ({
     featured: colorVariant === "blue" ? "#FFD700" : "#FFD700", // Gold for both variants
   };
 
-  console.log(trainer, "trainer");
   // Calculate experience years based on trainerSince field
   const experienceYears = trainer.trainerSince
     ? `${new Date().getFullYear() - trainer.trainerSince}+ years`

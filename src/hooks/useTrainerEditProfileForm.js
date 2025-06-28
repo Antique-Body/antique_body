@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 
-export function useTrainerEditProfileForm(initialUserData = null) {
+export function useTrainerEditProfileForm() {
   const router = useRouter();
   const [previewImage, setPreviewImage] = useState(null);
   const [activeSection, setActiveSection] = useState("basicInfo");
@@ -103,8 +103,6 @@ export function useTrainerEditProfileForm(initialUserData = null) {
         // Don't use initialUserData as it contains only basic dashboard data
         const res = await fetch("/api/users/trainer?mode=edit");
         if (!res.ok) throw new Error("No trainer profile");
-        const response = await res.json();
-        data = response.data || response;
 
         const processedData = processTrainerData(data);
         setTrainerData(processedData);

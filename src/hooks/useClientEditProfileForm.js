@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 
-export function useClientEditProfileForm(initialUserData = null) {
+export function useClientEditProfileForm() {
   const router = useRouter();
   const [previewImage, setPreviewImage] = useState(null);
   const [activeSection, setActiveSection] = useState("basicInfo");
@@ -32,8 +32,8 @@ export function useClientEditProfileForm(initialUserData = null) {
   });
 
   // Helper function to process client data
-  const processClientData = useCallback((data) => {
-    return {
+  const processClientData = useCallback(
+    (data) => ({
       firstName: data.firstName || "",
       lastName: data.lastName || "",
       dateOfBirth: data.dateOfBirth ? data.dateOfBirth.slice(0, 10) : "",
@@ -58,8 +58,9 @@ export function useClientEditProfileForm(initialUserData = null) {
       description: data.description || "",
       medicalConditions: data.medicalConditions || "",
       allergies: data.allergies || "",
-    };
-  }, []);
+    }),
+    []
+  );
 
   // Fetch client profile on mount or use initial data
   useEffect(() => {
@@ -72,8 +73,6 @@ export function useClientEditProfileForm(initialUserData = null) {
         // Don't use initialUserData as it contains only basic dashboard data
         const res = await fetch("/api/users/client?mode=edit");
         if (!res.ok) throw new Error("No client profile");
-        const response = await res.json();
-        data = response.data || response;
 
         const processedData = processClientData(data);
         setClientData(processedData);
