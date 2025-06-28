@@ -228,6 +228,108 @@ async function getTrainerInfoByProfileId(trainerProfileId) {
   });
 }
 
+// Basic profile for dashboard display - minimal data
+async function getTrainerProfileBasic(userId) {
+  const profile = await prisma.trainerProfile.findFirst({
+    where: {
+      trainerInfo: {
+        userId: userId,
+      },
+    },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      profileImage: true,
+      specialties: {
+        select: { name: true },
+      },
+      trainingTypes: {
+        select: { name: true },
+      },
+      trainerInfo: {
+        select: {
+          id: true,
+          // Add any stats fields that exist in your schema
+          // Note: These fields don't exist in the current schema, but are used in the component
+          // You may need to add them or calculate them differently
+        },
+      },
+      // Empty certifications array for compatibility
+      certifications: {
+        select: { name: true },
+        take: 0, // We don't show certifications in basic view
+      },
+    },
+  });
+  return profile;
+}
+
+// Full profile for editing - all data needed for edit forms
+async function getTrainerProfileForEdit(userId) {
+  const profile = await prisma.trainerProfile.findFirst({
+    where: {
+      trainerInfo: {
+        userId: userId,
+      },
+    },
+    include: {
+      certifications: { include: { documents: true } },
+      specialties: true,
+      languages: true,
+      trainingTypes: true,
+      trainerInfo: true,
+      location: true,
+      trainerGyms: {
+        take: 3,
+        include: { gym: { include: { location: true } } },
+      },
+      availabilities: true,
+      galleryImages: {
+        orderBy: {
+          order: "asc",
+        },
+      },
+    },
+  });
+  return profile;
+}
+
+// Settings data for trainer settings page
+async function getTrainerSettings(userId) {
+  const trainerInfo = await prisma.trainerInfo.findUnique({
+    where: { userId },
+    include: {
+      trainerSettings: true,
+    },
+  });
+
+  if (!trainerInfo) {
+    return null;
+  }
+
+  // If trainer settings don't exist, create default ones
+  if (!trainerInfo.trainerSettings) {
+    const defaultSettings = await prisma.trainerSettings.create({
+      data: {
+        trainerInfoId: trainerInfo.id,
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        autoAcceptBookings: false,
+        requireDeposit: false,
+        depositAmount: null,
+        timezone: "UTC",
+        workingHours: null,
+        blackoutDates: null,
+      },
+    });
+    return defaultSettings;
+  }
+
+  return trainerInfo.trainerSettings;
+}
+
 async function getTrainerProfileByUserId(userId) {
   const profile = await prisma.trainerProfile.findFirst({
     where: {
@@ -550,4 +652,7 @@ export const trainerService = {
   getTrainerInfoByProfileId,
   getTrainerInfoByUserId,
   updateTrainerProfile,
+  getTrainerProfileBasic,
+  getTrainerProfileForEdit,
+  getTrainerSettings,
 };
