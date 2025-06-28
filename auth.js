@@ -168,6 +168,7 @@ async function createOrUpdateAccount(userId, account) {
 
 export const authConfig = {
   providers,
+  debug: true,
   //this is change for stage server
   cookies: {
     pkceCodeVerifier: {
