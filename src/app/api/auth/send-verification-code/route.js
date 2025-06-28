@@ -35,7 +35,6 @@ export async function POST(request) {
         );
       }
 
-      console.log(mode, "  mode", existingUser, "  existingUser");
       if (mode !== "register" && !existingUser) {
         return NextResponse.json(
           { error: "User with this email does not exist" },

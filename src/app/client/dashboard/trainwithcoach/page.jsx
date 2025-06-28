@@ -251,7 +251,7 @@ export default function TrainWithCoachPage() {
           comparison = (a.pricePerSession || 0) - (b.pricePerSession || 0);
           break;
         case "experience":
-          comparison = (a.trainingSince || 0) - (b.trainingSince || 0);
+          comparison = (a.trainerSince || 0) - (b.trainerSince || 0);
           break;
         case "name":
           comparison = `${a.firstName} ${a.lastName}`.localeCompare(
@@ -489,9 +489,9 @@ export default function TrainWithCoachPage() {
               .map((s) => s.name)
               .join(", "),
             rating: selectedTrainer.trainerInfo?.rating || 0,
-            experience: selectedTrainer.trainingSince
+            experience: selectedTrainer.trainerSince
               ? `${
-                  new Date().getFullYear() - selectedTrainer.trainingSince
+                  new Date().getFullYear() - selectedTrainer.trainerSince
                 }+ years`
               : "Experience not specified",
             proximity: selectedTrainer.location

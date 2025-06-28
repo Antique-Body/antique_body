@@ -51,6 +51,17 @@ export default function TrainerDashboardLayout({ children }) {
     fetchTrainer();
   }, []);
 
+  // Function to refresh trainer data
+  const refreshTrainerData = async () => {
+    try {
+      const res = await fetch("/api/users/trainer");
+      const data = await res.json();
+      setTrainerData(data);
+    } catch (error) {
+      console.error("Error refreshing trainer data:", error);
+    }
+  };
+
   // Navigate to appropriate route when tab changes
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
@@ -82,7 +93,8 @@ export default function TrainerDashboardLayout({ children }) {
   };
 
   const handleVerifyClick = () => {
-    router.push("/trainer/edit-profile");
+    // Profile completion can be handled through the profile component's edit modal
+    console.log("Profile completion triggered");
   };
 
   // Get the count of unread messages
@@ -114,7 +126,10 @@ export default function TrainerDashboardLayout({ children }) {
               <div className="h-32 bg-gray-800 rounded" />
             </div>
           ) : (
-            <TrainerProfile trainerData={trainerData.trainerProfile} />
+            <TrainerProfile
+              trainerData={trainerData.data}
+              onProfileUpdate={refreshTrainerData}
+            />
           )}
 
           {/* Verification banner */}
