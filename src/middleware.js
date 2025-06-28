@@ -62,6 +62,16 @@ function isPostOAuthRedirect(request) {
     return true;
   }
 
+  // If referer is from OAuth providers (Google, Facebook, etc.)
+  if (
+    referer &&
+    (referer.includes("accounts.google.com") ||
+      referer.includes("facebook.com") ||
+      referer.includes("oauth"))
+  ) {
+    return true;
+  }
+
   return false;
 }
 
@@ -69,15 +79,25 @@ function isPostOAuthRedirect(request) {
 function hasSessionCookies(request) {
   const cookies = request.headers.get("cookie") || "";
 
-  // Check for NextAuth session cookies
+  // Check for NextAuth session cookies (both secure and non-secure variants)
   const hasSessionToken =
     cookies.includes("next-auth.session-token") ||
-    cookies.includes("__Secure-next-auth.session-token");
+    cookies.includes("__Secure-next-auth.session-token") ||
+    cookies.includes("authjs.session-token") ||
+    cookies.includes("__Secure-authjs.session-token");
+
   const hasCallbackUrl =
     cookies.includes("next-auth.callback-url") ||
-    cookies.includes("__Secure-next-auth.callback-url");
+    cookies.includes("__Secure-next-auth.callback-url") ||
+    cookies.includes("authjs.callback-url") ||
+    cookies.includes("__Secure-authjs.callback-url");
 
-  return hasSessionToken || hasCallbackUrl;
+  // Also check for PKCE code verifier as it indicates active OAuth flow
+  const hasPKCE =
+    cookies.includes("authjs.pkce.code_verifier") ||
+    cookies.includes("__Secure-authjs.pkce.code_verifier");
+
+  return hasSessionToken || hasCallbackUrl || hasPKCE;
 }
 
 function getRedirectUrl(role, token, pathname) {
@@ -148,6 +168,7 @@ export async function middleware(request) {
       isPostOAuth,
       hasSessionCookies: hasSessionCookies(request),
       referer: request.headers.get("referer"),
+      cookies: request.headers.get("cookie")?.substring(0, 200) + "...", // First 200 chars
     });
   }
 
@@ -157,13 +178,22 @@ export async function middleware(request) {
   // 1.1. /select-role je dostupno samo prijavljenima bez role
   if (pathname === "/select-role") {
     if (!token) {
-      //  If this might be post-OAuth redirect and has session cookies, allow access
-      if (isPostOAuth && hasSessionCookies(request)) {
+      // If this might be post-OAuth redirect, allow access temporarily
+      if (isPostOAuth) {
         console.log(
-          "[middleware] Post-OAuth redirect with session cookies detected, allowing access to /select-role"
+          "[middleware] Post-OAuth redirect detected, allowing access to /select-role"
         );
         return NextResponse.next();
       }
+
+      // If has session cookies (OAuth flow in progress), allow access
+      if (hasSessionCookies(request)) {
+        console.log(
+          "[middleware] Session cookies detected, allowing access to /select-role"
+        );
+        return NextResponse.next();
+      }
+
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
 
