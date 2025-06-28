@@ -62,10 +62,26 @@ function getRedirectUrl(role, token, pathname) {
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
+
+  console.log("=== MIDDLEWARE DEBUG ===");
+  console.log("Pathname:", pathname);
+  console.log("AUTH_SECRET exists:", !!process.env.AUTH_SECRET);
+  console.log("AUTH_SECRET length:", process.env.AUTH_SECRET?.length || 0);
+  console.log(
+    "Cookies:",
+    request.cookies
+      .getAll()
+      .map((c) => `${c.name}=${c.value?.substring(0, 20)}...`)
+  );
+
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
   });
+
+  console.log("Token from getToken:", token);
+  console.log("Token exists:", !!token);
+  console.log("=== END MIDDLEWARE DEBUG ===");
 
   if (isPageNavigation(request)) {
     // console.log("token u middleware:", token, "pathname:", pathname);
