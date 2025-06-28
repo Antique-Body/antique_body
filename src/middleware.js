@@ -36,6 +36,23 @@ async function checkUserExistsInDB(request) {
   }
 }
 
+// Check if request is part of OAuth callback flow
+function isOAuthCallback(request) {
+  const { pathname, searchParams } = request.nextUrl;
+
+  // Check for OAuth callback URLs
+  if (pathname.includes("/api/auth/callback/")) {
+    return true;
+  }
+
+  // Check for OAuth state or code parameters
+  if (searchParams.has("code") || searchParams.has("state")) {
+    return true;
+  }
+
+  return false;
+}
+
 function getRedirectUrl(role, token, pathname) {
   if (!role) return pathname === "/select-role" ? null : "/select-role";
 
@@ -89,8 +106,18 @@ export async function middleware(request) {
     secret: process.env.AUTH_SECRET,
   });
 
+  // Skip user existence check during OAuth flow
+  const isOAuthFlow = isOAuthCallback(request);
+
   if (isPageNavigation(request)) {
-    // console.log("token u middleware:", token, "pathname:", pathname);
+    console.log("[middleware] Page navigation:", {
+      pathname,
+      hasToken: !!token,
+      tokenId: token?.id,
+      tokenEmail: token?.email,
+      tokenRole: token?.role,
+      isOAuthFlow,
+    });
   }
 
   // 1. Public paths uvijek pusti
@@ -104,7 +131,7 @@ export async function middleware(request) {
 
     // Check if user exists in database - but only for fully authenticated users
     // Skip this check if user is in the middle of OAuth flow
-    if (token.sub && token.email) {
+    if (token.sub && token.email && !isOAuthFlow) {
       const userExists = await checkUserExistsInDB(request);
       if (!userExists) {
         console.log("[middleware] User not found in DB, redirecting to login");
@@ -137,7 +164,7 @@ export async function middleware(request) {
 
   // 2.0. Check if user exists in database - but only for fully authenticated users
   // Skip this check if user is in the middle of OAuth flow or doesn't have email yet
-  if (token.sub && token.email) {
+  if (token.sub && token.email && !isOAuthFlow) {
     const userExists = await checkUserExistsInDB(request);
     if (!userExists) {
       console.log("[middleware] User not found in DB, redirecting to login");
