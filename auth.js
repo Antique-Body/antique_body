@@ -168,19 +168,7 @@ async function createOrUpdateAccount(userId, account) {
 
 export const authConfig = {
   providers,
-  //this is change for stage server
-  cookies: {
-    pkceCodeVerifier: {
-      name: "next-auth.pkce.code_verifier",
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 15, // 15 minutes
-      },
-    },
-  },
+  debug: true,
   callbacks: {
     async signIn({ user, account }) {
       if (["google", "facebook"].includes(account?.provider)) {
