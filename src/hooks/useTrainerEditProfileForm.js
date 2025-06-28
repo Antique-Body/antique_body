@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 
-export function useTrainerEditProfileForm() {
+export function useTrainerEditProfileForm(initialUserData = null) {
   const router = useRouter();
   const [previewImage, setPreviewImage] = useState(null);
   const [activeSection, setActiveSection] = useState("basicInfo");
@@ -29,6 +29,7 @@ export function useTrainerEditProfileForm() {
       profileImage: "",
       sessionDuration: 60,
       cancellationPolicy: 24,
+      trainerSince: "",
       availabilities: [],
       galleryImages: [],
       location: {
@@ -48,67 +49,79 @@ export function useTrainerEditProfileForm() {
   const [resetCertFieldsTrigger, setResetCertFieldsTrigger] = useState(0);
   const [certFields, setCertFields] = useState([]);
 
-  // Fetch podataka
+  // Helper function to process trainer data
+  const processTrainerData = useCallback((data) => {
+    const availabilities = data.availabilities || [];
+    const processedData = {
+      rating: data.rating || "",
+      trainerProfile: {
+        firstName: data.firstName || "",
+        lastName: data.lastName || "",
+        dateOfBirth: data.dateOfBirth ? data.dateOfBirth.slice(0, 10) : "",
+        gender: data.gender || "",
+        specialties: data.specialties?.map((s) => s.name || s) || [],
+        languages: data.languages?.map((l) => l.name || l) || [],
+        trainingEnvironment: data.trainingEnvironment || "",
+        trainingTypes: data.trainingTypes?.map((t) => t.name || t) || [],
+        certifications: data.certifications || [],
+        description: data.description || "",
+        pricingType: data.pricingType || "",
+        pricePerSession: data.pricePerSession || "",
+        currency: data.currency || "EUR",
+        contactEmail: data.contactEmail || "",
+        contactPhone: data.contactPhone || "",
+        profileImage: data.profileImage || "",
+        sessionDuration: data.sessionDuration || 60,
+        cancellationPolicy: data.cancellationPolicy || 24,
+        trainerSince: data.trainerSince || "",
+        availabilities: availabilities,
+        galleryImages: data.galleryImages || [],
+        location: {
+          city: data.location?.city || "",
+          state: data.location?.state || "",
+          country: data.location?.country || "",
+          lat: data.location?.lat || null,
+          lon: data.location?.lon || null,
+          gyms: data.location?.gyms || data.trainerGyms || [],
+        },
+      },
+      proximity: "",
+      services: [],
+      expertise: [],
+    };
+    return processedData;
+  }, []);
+
+  // Fetch podataka ili koristi inicijalne podatke
   useEffect(() => {
-    const fetchTrainer = async () => {
+    const initializeData = async () => {
       setLoading(true);
       try {
-        const res = await fetch("/api/users/trainer");
-        if (!res.ok) throw new Error("No trainer profile");
-        const data = await res.json();
-        const availabilities = data.trainerProfile?.availabilities || [];
-        const newTrainerData = {
-          ...trainerData,
-          rating: data.rating || "",
-          trainerProfile: {
-            ...trainerData.trainerProfile,
-            ...data.trainerProfile,
-            dateOfBirth: data.trainerProfile?.dateOfBirth
-              ? data.trainerProfile.dateOfBirth.slice(0, 10)
-              : "",
-            specialties:
-              data.trainerProfile?.specialties?.map((s) => s.name) || [],
-            languages: data.trainerProfile?.languages?.map((l) => l.name) || [],
-            trainingEnvironment: data.trainerProfile?.trainingEnvironment || "",
-            trainingTypes:
-              data.trainerProfile?.trainingTypes?.map((t) => t.name) || [],
-            certifications: data.trainerProfile?.certifications || [],
-            pricingType: data.trainerProfile?.pricingType || "",
-            pricePerSession: data.trainerProfile?.pricePerSession || "",
-            currency: data.trainerProfile?.currency || "EUR",
-            contactEmail: data.trainerProfile?.contactEmail || "",
-            contactPhone: data.trainerProfile?.contactPhone || "",
-            profileImage: data.trainerProfile?.profileImage || "",
-            firstName: data.trainerProfile?.firstName || "",
-            lastName: data.trainerProfile?.lastName || "",
-            description: data.trainerProfile?.description || "",
-            profileImage: data.trainerProfile?.profileImage || "",
-            sessionDuration: data.trainerProfile?.sessionDuration || 60,
-            cancellationPolicy: data.trainerProfile?.cancellationPolicy || 24,
-            availabilities: availabilities,
-            galleryImages: data.trainerProfile?.galleryImages || [],
-            location: {
-              ...(data.trainerProfile?.location || {}),
-              city: data.trainerProfile?.location?.city || "",
-              state: data.trainerProfile?.location?.state || "",
-              country: data.trainerProfile?.location?.country || "",
-              lat: data.trainerProfile?.location?.lat || null,
-              lon: data.trainerProfile?.location?.lon || null,
-              gyms: data.trainerProfile?.location?.gyms || [],
-            },
-          },
-        };
-        setTrainerData(newTrainerData);
-        setInitialCertifications(data.trainerProfile?.certifications || []);
+        let data;
+
+        if (initialUserData) {
+          // Koristi proslijećene podatke
+          data = initialUserData;
+        } else {
+          // Fetch podatke iz API-ja
+          const res = await fetch("/api/users/trainer");
+          if (!res.ok) throw new Error("No trainer profile");
+          data = await res.json();
+          data = data.trainerProfile ? data : { trainerProfile: data };
+        }
+
+        const processedData = processTrainerData(data);
+        setTrainerData(processedData);
+        setInitialCertifications(data.certifications || []);
       } catch {
         // Ako nema profila, ostavi prazno
       } finally {
         setLoading(false);
       }
     };
-    fetchTrainer();
-    // eslint-disable-next-line
-  }, []);
+
+    initializeData();
+  }, [initialUserData, processTrainerData]);
 
   // Progress calculation
   const calculateFormProgress = useCallback(() => {
@@ -225,7 +238,7 @@ export function useTrainerEditProfileForm() {
       trainerData.trainerProfile.profileImage &&
       typeof trainerData.trainerProfile.profileImage === "string"
     ) {
-      setPreviewImage(null);
+      setPreviewImage(trainerData.trainerProfile.profileImage);
     }
   }, [trainerData.trainerProfile.profileImage]);
 
@@ -271,9 +284,10 @@ export function useTrainerEditProfileForm() {
           }
         });
         // Add new gallery files to form data
-        const newGalleryFilesForUpload = trainerData.trainerProfile.galleryImages
-          .map((img) => img.file)
-          .filter(Boolean);
+        const newGalleryFilesForUpload =
+          trainerData.trainerProfile.galleryImages
+            .map((img) => img.file)
+            .filter(Boolean);
 
         newGalleryFilesForUpload.forEach((file) => {
           formData.append("gallery", file);
@@ -357,6 +371,12 @@ export function useTrainerEditProfileForm() {
             specialties,
             languages,
             trainingTypes,
+            trainerSince:
+              trainerData.trainerProfile.trainerSince !== "" &&
+              trainerData.trainerProfile.trainerSince !== undefined &&
+              trainerData.trainerProfile.trainerSince !== null
+                ? Number(trainerData.trainerProfile.trainerSince)
+                : null,
           },
         };
         const res = await fetch("/api/users/trainer", {
@@ -366,13 +386,14 @@ export function useTrainerEditProfileForm() {
         });
         if (!res.ok) throw new Error("Failed to update profile");
         setLoading(false);
-        router.push("/trainer/dashboard");
+        // Don't navigate away since this is used in a modal now
+        // router.push("/trainer/dashboard");
       } catch (err) {
         setError(err.message || "Error updating profile");
         setLoading(false);
       }
     },
-    [trainerData, certFields, router]
+    [trainerData, certFields]
   );
 
   const goBack = useCallback(() => {

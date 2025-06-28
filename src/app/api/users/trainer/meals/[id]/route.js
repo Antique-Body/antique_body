@@ -71,7 +71,7 @@ export async function PUT(request, { params }) {
     }
 
     // Check if the meal belongs to the authenticated trainer
-    if (meal.trainerInfo.trainerProfile.userId !== session.user.id) {
+    if (meal.trainerInfo.userId !== session.user.id) {
       return NextResponse.json(
         { success: false, error: "Unauthorized to update this meal" },
         { status: 403 }
@@ -125,7 +125,7 @@ export async function DELETE(request, { params }) {
     }
 
     // Check if the meal belongs to the authenticated trainer
-    if (meal.trainerInfo.trainerProfile.userId !== session.user.id) {
+    if (meal.trainerInfo.userId !== session.user.id) {
       return NextResponse.json(
         { success: false, error: "Unauthorized to delete this meal" },
         { status: 403 }

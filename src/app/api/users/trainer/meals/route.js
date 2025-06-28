@@ -21,19 +21,15 @@ export async function GET(request) {
       );
     }
 
-    const trainerProfile = await prisma.trainerProfile.findUnique({
+    // First get the TrainerInfo, then get the TrainerProfile
+    const trainerInfo = await prisma.trainerInfo.findUnique({
       where: { userId: session.user.id },
-      include: { trainerInfo: true },
+      include: {
+        trainerProfile: true,
+      },
     });
 
-    if (!trainerProfile) {
-      return NextResponse.json(
-        { success: false, error: "Trainer profile not found" },
-        { status: 404 }
-      );
-    }
-
-    if (!trainerProfile.trainerInfo) {
+    if (!trainerInfo) {
       return NextResponse.json(
         { success: false, error: "Trainer info not found" },
         { status: 404 }
@@ -54,7 +50,7 @@ export async function GET(request) {
 
     // Get filtered meals for this trainer
     const result = await mealService.getTrainerMealsWithFilters(
-      trainerProfile.trainerInfo.id,
+      trainerInfo.id,
       {
         search,
         mealType,
@@ -109,29 +105,22 @@ export async function POST(request) {
       );
     }
 
-    const trainerProfile = await prisma.trainerProfile.findUnique({
+    // First get the TrainerInfo, then get the TrainerProfile
+    const trainerInfo = await prisma.trainerInfo.findUnique({
       where: { userId: session.user.id },
-      include: { trainerInfo: true },
+      include: {
+        trainerProfile: true,
+      },
     });
 
-    if (!trainerProfile) {
-      return NextResponse.json(
-        { success: false, error: "Trainer profile not found" },
-        { status: 404 }
-      );
-    }
-
-    if (!trainerProfile.trainerInfo) {
+    if (!trainerInfo) {
       return NextResponse.json(
         { success: false, error: "Trainer info not found" },
         { status: 404 }
       );
     }
 
-    const meal = await mealService.createMealWithDetails(
-      body,
-      trainerProfile.trainerInfo.id
-    );
+    const meal = await mealService.createMealWithDetails(body, trainerInfo.id);
 
     return NextResponse.json({ success: true, data: meal }, { status: 201 });
   } catch (error) {

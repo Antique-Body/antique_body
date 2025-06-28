@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 
-export function useClientEditProfileForm() {
+export function useClientEditProfileForm(initialUserData = null) {
   const router = useRouter();
   const [previewImage, setPreviewImage] = useState(null);
   const [activeSection, setActiveSection] = useState("basicInfo");
@@ -31,31 +31,65 @@ export function useClientEditProfileForm() {
     allergies: "",
   });
 
-  // Fetch client profile on mount
+  // Helper function to process client data
+  const processClientData = useCallback((data) => {
+    return {
+      firstName: data.firstName || "",
+      lastName: data.lastName || "",
+      dateOfBirth: data.dateOfBirth ? data.dateOfBirth.slice(0, 10) : "",
+      gender: data.gender || "",
+      height: data.height || "",
+      weight: data.weight || "",
+      experienceLevel: data.experienceLevel || "",
+      previousActivities: data.previousActivities || "",
+      languages:
+        data.languages?.map((l) => (typeof l === "object" ? l.name : l)) || [],
+      primaryGoal: data.primaryGoal || "",
+      secondaryGoal: data.secondaryGoal || "",
+      goalDescription: data.goalDescription || "",
+      preferredActivities:
+        data.preferredActivities?.map((a) =>
+          typeof a === "object" ? a.name : a
+        ) || [],
+      email: data.email || data.contactEmail || "",
+      phone: data.phone || data.contactPhone || "",
+      location: data.location || { city: "", state: "", country: "" },
+      profileImage: data.profileImage || null,
+      description: data.description || "",
+      medicalConditions: data.medicalConditions || "",
+      allergies: data.allergies || "",
+    };
+  }, []);
+
+  // Fetch client profile on mount or use initial data
   useEffect(() => {
-    const fetchClient = async () => {
+    const initializeData = async () => {
       setLoading(true);
       try {
-        const res = await fetch("/api/users/client");
-        if (!res.ok) throw new Error("No client profile");
-        const data = await res.json();
-        setClientData({
-          ...data,
-          dateOfBirth: data.dateOfBirth ? data.dateOfBirth.slice(0, 10) : "",
-          languages: data.languages?.map((l) => l.name) || [],
-          preferredActivities:
-            data.preferredActivities?.map((a) => a.name) || [],
-          location: data.location || { city: "", state: "", country: "" },
-        });
-        setPreviewImage(data.profileImage || null);
+        let data;
+
+        if (initialUserData) {
+          // Use provided data
+          data = initialUserData;
+        } else {
+          // Fetch data from API
+          const res = await fetch("/api/users/client");
+          if (!res.ok) throw new Error("No client profile");
+          data = await res.json();
+        }
+
+        const processedData = processClientData(data);
+        setClientData(processedData);
+        setPreviewImage(processedData.profileImage || null);
       } catch {
         // If no profile, keep empty
       } finally {
         setLoading(false);
       }
     };
-    fetchClient();
-  }, []);
+
+    initializeData();
+  }, [initialUserData, processClientData]);
 
   // Progress calculation
   const calculateFormProgress = useCallback(() => {
@@ -159,13 +193,14 @@ export function useClientEditProfileForm() {
         });
         if (!res.ok) throw new Error("Failed to update profile");
         setLoading(false);
-        router.push("/client/dashboard");
+        // Don't navigate away since this is used in a modal now
+        // router.push("/client/dashboard");
       } catch (err) {
         setError(err.message || "Error updating profile");
         setLoading(false);
       }
     },
-    [clientData, router]
+    [clientData]
   );
 
   const goBack = useCallback(() => {
