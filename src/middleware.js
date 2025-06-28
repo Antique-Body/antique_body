@@ -191,7 +191,7 @@ export async function middleware(request) {
       }
       return NextResponse.redirect(new URL(redirectUrl, request.url));
     }
-    // Ako je prijavljen i nema rolu, pusti dalje
+    // Ako je prijavljen i nema rolu, pusti daljefefeef
     return NextResponse.next();
   }
 
