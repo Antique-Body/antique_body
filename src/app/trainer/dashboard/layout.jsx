@@ -39,7 +39,7 @@ export default function TrainerDashboardLayout({ children }) {
     async function fetchTrainer() {
       setLoading(true);
       try {
-        const res = await fetch("/api/users/trainer");
+        const res = await fetch("/api/users/trainer?mode=basic");
         const data = await res.json();
         setTrainerData(data);
       } catch {
@@ -54,7 +54,7 @@ export default function TrainerDashboardLayout({ children }) {
   // Function to refresh trainer data
   const refreshTrainerData = async () => {
     try {
-      const res = await fetch("/api/users/trainer");
+      const res = await fetch("/api/users/trainer?mode=basic");
       const data = await res.json();
       setTrainerData(data);
     } catch (error) {

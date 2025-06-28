@@ -80,10 +80,11 @@ export async function GET(request) {
       );
     }
 
-    // Check if this is a request to create default exercises
     const { searchParams } = new URL(request.url);
     const createDefaults = searchParams.get("createDefaults");
+    const mode = searchParams.get("mode"); // 'basic', 'edit', 'settings'
 
+    // Check if this is a request to create default exercises
     if (createDefaults === "true") {
       // Find trainer info
       const trainerInfo = await prisma.trainerInfo.findUnique({
@@ -116,10 +117,26 @@ export async function GET(request) {
       }
     }
 
-    // Regular GET request - return trainer profile
-    const profile = await trainerService.getTrainerProfileByUserId(
-      session.user.id
-    );
+    // Handle different data fetching modes
+    let profile;
+
+    switch (mode) {
+      case "basic":
+        profile = await trainerService.getTrainerProfileBasic(session.user.id);
+        break;
+      case "edit":
+        profile = await trainerService.getTrainerProfileForEdit(
+          session.user.id
+        );
+        break;
+      case "settings":
+        profile = await trainerService.getTrainerSettings(session.user.id);
+        break;
+      default:
+        // Default to basic mode for dashboard
+        profile = await trainerService.getTrainerProfileBasic(session.user.id);
+        break;
+    }
 
     if (!profile) {
       return NextResponse.json(

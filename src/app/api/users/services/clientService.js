@@ -250,8 +250,98 @@ export async function updateClientProfile(userId, data) {
   });
 }
 
+// Basic profile for dashboard display - minimal data
+async function getClientProfileBasic(userId) {
+  const profile = await prisma.clientProfile.findFirst({
+    where: {
+      clientInfo: {
+        userId: userId,
+      },
+    },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      profileImage: true,
+      primaryGoal: true,
+      experienceLevel: true,
+      clientInfo: {
+        select: {
+          id: true,
+          totalSessions: true,
+        },
+      },
+      // Empty arrays for compatibility
+      languages: {
+        select: { name: true },
+        take: 0, // We don't show languages in basic view
+      },
+      preferredActivities: {
+        select: { name: true },
+        take: 0, // We don't show activities in basic view
+      },
+    },
+  });
+  return profile;
+}
+
+// Full profile for editing - all data needed for edit forms
+async function getClientProfileForEdit(userId) {
+  const clientInfo = await prisma.clientInfo.findUnique({
+    where: { userId },
+    include: {
+      clientProfile: {
+        include: {
+          languages: true,
+          preferredActivities: true,
+          location: true,
+        },
+      },
+    },
+  });
+  return clientInfo?.clientProfile || null;
+}
+
+// Settings data for client settings page
+async function getClientSettings(userId) {
+  const clientInfo = await prisma.clientInfo.findUnique({
+    where: { userId },
+    include: {
+      clientSettings: true,
+    },
+  });
+
+  if (!clientInfo) {
+    return null;
+  }
+
+  // If client settings don't exist, create default ones
+  if (!clientInfo.clientSettings) {
+    const defaultSettings = await prisma.clientSettings.create({
+      data: {
+        clientInfoId: clientInfo.id,
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        reminderTime: 24,
+        privacyLevel: "public",
+        shareProgress: true,
+        timezone: "UTC",
+        preferredLanguage: "en",
+        measurementUnit: "metric",
+      },
+    });
+    return defaultSettings;
+  }
+
+  return clientInfo.clientSettings;
+}
+
 export const clientService = {
   createClientWithDetails,
   getClientProfileByUserId,
   updateClientProfile,
+  getClientProfileBasic,
+  getClientProfileForEdit,
+  getClientSettings,
 };

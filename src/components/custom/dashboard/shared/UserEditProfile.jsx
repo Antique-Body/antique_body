@@ -502,7 +502,8 @@ export const ClientEditProfile = ({
   userData: _userData = {},
   onSave,
 }) => {
-  const hook = useClientEditProfileForm(_userData);
+  // Don't pass userData to hook - let it fetch fresh data
+  const hook = useClientEditProfileForm(null);
   const {
     activeSection,
     setActiveSection,
@@ -579,7 +580,8 @@ export const TrainerEditProfile = ({
   onSave,
 }) => {
   console.log("userdatete", _userData);
-  const hook = useTrainerEditProfileForm(_userData);
+  // Don't pass userData to hook - let it fetch fresh data with edit mode
+  const hook = useTrainerEditProfileForm(null);
   const {
     activeSection,
     setActiveSection,
