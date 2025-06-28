@@ -219,8 +219,6 @@ export const authConfig = {
           Object.assign(token, {
             id: userFromDb.id,
             role: userFromDb.role,
-            trainerProfile: userFromDb.trainerProfile,
-            clientProfile: userFromDb.clientProfile,
           });
         } else {
           Object.assign(token, { id: user.id, role: user.role });
@@ -233,10 +231,25 @@ export const authConfig = {
       if (token.id) {
         const userFromDb = await prisma.user.findUnique({
           where: { id: token.id },
-          select: { role: true, trainerProfile: true, clientProfile: true },
+          include: {
+            trainerInfo: {
+              include: {
+                trainerProfile: true,
+              },
+            },
+            clientInfo: {
+              include: {
+                clientProfile: true,
+              },
+            },
+          },
         });
         if (userFromDb) {
-          Object.assign(token, userFromDb);
+          Object.assign(token, {
+            role: userFromDb.role,
+            trainerProfile: userFromDb.trainerInfo?.trainerProfile || null,
+            clientProfile: userFromDb.clientInfo?.clientProfile || null,
+          });
         }
       }
       return token;
