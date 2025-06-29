@@ -11,6 +11,7 @@ import { Button } from "@/components/common/Button";
 export const Navigation = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [logoFontSize, setLogoFontSize] = useState("2rem");
   const pathname = usePathname();
 
   // Handle scroll animation
@@ -21,6 +22,17 @@ export const Navigation = () => {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Handle responsive font size
+  useEffect(() => {
+    const updateFontSize = () => {
+      setLogoFontSize(window.innerWidth < 640 ? "1.5rem" : "2rem");
+    };
+
+    updateFontSize();
+    window.addEventListener("resize", updateFontSize);
+    return () => window.removeEventListener("resize", updateFontSize);
   }, []);
 
   // Close mobile menu when changing routes
@@ -56,8 +68,8 @@ export const Navigation = () => {
       transition={{ duration: 0.3, delay: 0.2 }}
       className={`fixed top-0 z-50 w-full transition-all duration-500 ${
         scrolled
-          ? "bg-black/90 backdrop-blur-xl shadow-lg shadow-black/30 py-3"
-          : "bg-transparent py-6"
+          ? "bg-black/90 backdrop-blur-xl shadow-lg shadow-black/30 py-2 sm:py-3"
+          : "bg-transparent py-4 sm:py-6"
       }`}
     >
       {/* Glass effect border */}
@@ -88,7 +100,7 @@ export const Navigation = () => {
             <BrandLogo
               className="flex items-center relative z-10"
               titleStyle={{
-                fontSize: "2rem",
+                fontSize: logoFontSize,
                 fontWeight: "800",
                 letterSpacing: "0.05em",
                 marginBottom: "0",
@@ -108,7 +120,7 @@ export const Navigation = () => {
             <Link
               key={item.path}
               href={item.path}
-              className="relative px-4 py-2 text-base font-medium tracking-wide text-gray-300 transition-all duration-300 hover:text-white group"
+              className="relative px-4 py-2 text-sm md:text-base font-medium tracking-wide text-gray-300 transition-all duration-300 hover:text-white group"
             >
               <span className="relative z-10">{item.label}</span>
 
@@ -130,9 +142,13 @@ export const Navigation = () => {
         </div>
 
         {/* Auth buttons */}
-        <div className="hidden md:flex items-center space-x-4">
+        <div className="hidden md:flex items-center space-x-3 md:space-x-4">
           <Link href="/auth/login">
-            <Button variant="orangeOutline" size="small" className="px-5">
+            <Button
+              variant="orangeOutline"
+              size="small"
+              className="px-4 md:px-5 text-sm"
+            >
               Login
             </Button>
           </Link>
@@ -149,7 +165,7 @@ export const Navigation = () => {
               <Button
                 variant="orangeFilled"
                 size="small"
-                className="font-medium px-5 py-2 relative z-10 overflow-hidden group"
+                className="font-medium px-4 md:px-5 py-2 relative z-10 overflow-hidden group text-sm"
               >
                 <span className="absolute inset-0 w-0 bg-white transition-all duration-500 ease-out group-hover:w-full opacity-10"></span>
                 <span className="relative z-10">Register</span>
@@ -166,22 +182,26 @@ export const Navigation = () => {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
           >
-            <div className="relative w-6 h-5">
+            <div className="relative w-5 h-4 sm:w-6 sm:h-5">
               <span
-                className={`absolute h-0.5 w-6 bg-white transform transition-all duration-300 ease-in-out ${
-                  mobileMenuOpen ? "rotate-45 translate-y-2" : "-translate-y-2"
+                className={`absolute h-0.5 w-full bg-white transform transition-all duration-300 ease-in-out ${
+                  mobileMenuOpen
+                    ? "rotate-45 translate-y-1.5 sm:translate-y-2"
+                    : "-translate-y-1.5 sm:-translate-y-2"
                 }`}
               ></span>
 
               <span
-                className={`absolute h-0.5 w-6 bg-white transform transition-all duration-300 ease-in-out ${
+                className={`absolute h-0.5 w-full bg-white transform transition-all duration-300 ease-in-out ${
                   mobileMenuOpen ? "opacity-0" : "opacity-100"
                 }`}
               ></span>
 
               <span
-                className={`absolute h-0.5 w-6 bg-white transform transition-all duration-300 ease-in-out ${
-                  mobileMenuOpen ? "-rotate-45 translate-y-2" : "translate-y-2"
+                className={`absolute h-0.5 w-full bg-white transform transition-all duration-300 ease-in-out ${
+                  mobileMenuOpen
+                    ? "-rotate-45 translate-y-1.5 sm:translate-y-2"
+                    : "translate-y-1.5 sm:translate-y-2"
                 }`}
               ></span>
             </div>
@@ -197,17 +217,17 @@ export const Navigation = () => {
             animate={{ opacity: 1, height: "100vh" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="md:hidden fixed inset-0 top-0 z-40 bg-gradient-to-b from-black via-[#0a0a0a] to-black backdrop-blur-xl pt-20"
+            className="md:hidden fixed inset-0 top-0 z-40 bg-gradient-to-b from-black via-[#0a0a0a] to-black backdrop-blur-xl pt-16 sm:pt-20"
           >
             {/* Background decorative elements */}
-            <div className="absolute top-1/4 -left-20 w-40 h-40 bg-[#FF6B00]/10 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute top-1/4 -left-20 w-32 h-32 sm:w-40 sm:h-40 bg-[#FF6B00]/10 rounded-full blur-3xl animate-pulse"></div>
             <div
-              className="absolute bottom-1/4 -right-20 w-40 h-40 bg-[#FF9A00]/10 rounded-full blur-3xl animate-pulse"
+              className="absolute bottom-1/4 -right-20 w-32 h-32 sm:w-40 sm:h-40 bg-[#FF9A00]/10 rounded-full blur-3xl animate-pulse"
               style={{ animationDelay: "1s" }}
             ></div>
 
-            <div className="container mx-auto px-6 py-8 relative z-10">
-              <div className="flex flex-col space-y-6">
+            <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
+              <div className="flex flex-col space-y-4 sm:space-y-6">
                 {navItems.map((item, index) => (
                   <motion.div
                     key={item.path}
@@ -217,7 +237,7 @@ export const Navigation = () => {
                   >
                     <Link
                       href={item.path}
-                      className={`group py-4 text-left text-2xl font-bold tracking-wide transition-all duration-300 border-b border-gray-800/50 flex items-center justify-between hover:border-[#FF6B00]/30
+                      className={`group py-3 sm:py-4 text-left text-xl sm:text-2xl font-bold tracking-wide transition-all duration-300 border-b border-gray-800/50 flex items-center justify-between hover:border-[#FF6B00]/30
                                             ${
                                               pathname === item.path
                                                 ? "text-[#FF6B00]"
@@ -225,7 +245,7 @@ export const Navigation = () => {
                                             }`}
                     >
                       <div className="flex items-center">
-                        <span className="mr-4 text-[#FF6B00]/60 text-lg font-normal">
+                        <span className="mr-3 sm:mr-4 text-[#FF6B00]/60 text-base sm:text-lg font-normal">
                           0{index + 1}
                         </span>
                         <span className="group-hover:translate-x-2 transition-transform duration-300">
@@ -237,14 +257,14 @@ export const Navigation = () => {
                         <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          className="w-2 h-2 rounded-full bg-gradient-to-r from-[#FF6B00] to-[#FF9A00]"
+                          className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gradient-to-r from-[#FF6B00] to-[#FF9A00]"
                         />
                       )}
                     </Link>
                   </motion.div>
                 ))}
 
-                <div className="flex flex-col space-y-4 pt-8 mt-8 border-t border-gray-800/50">
+                <div className="flex flex-col space-y-3 sm:space-y-4 pt-6 sm:pt-8 mt-6 sm:mt-8 border-t border-gray-800/50">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -254,7 +274,7 @@ export const Navigation = () => {
                       <Button
                         variant="orangeOutline"
                         size="medium"
-                        className="w-full py-4 text-lg font-semibold transition-all duration-300 hover:scale-105"
+                        className="w-full py-3 sm:py-4 text-base sm:text-lg font-semibold transition-all duration-300 hover:scale-105"
                       >
                         Login
                       </Button>
@@ -270,7 +290,7 @@ export const Navigation = () => {
                       <Button
                         variant="orangeFilled"
                         size="medium"
-                        className="w-full py-4 text-lg font-semibold relative overflow-hidden group transition-all duration-300 hover:scale-105"
+                        className="w-full py-3 sm:py-4 text-base sm:text-lg font-semibold relative overflow-hidden group transition-all duration-300 hover:scale-105"
                       >
                         <span className="absolute inset-0 w-0 bg-white transition-all duration-500 ease-out group-hover:w-full opacity-10"></span>
                         <span className="relative z-10">Register</span>
@@ -284,7 +304,7 @@ export const Navigation = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.6 }}
-                  className="text-center pt-8 text-sm text-gray-500"
+                  className="text-center pt-6 sm:pt-8 text-xs sm:text-sm text-gray-500"
                 >
                   Discover your ancient strength
                 </motion.div>
