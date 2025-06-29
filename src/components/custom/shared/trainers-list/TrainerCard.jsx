@@ -32,7 +32,7 @@ export const TrainerCard = ({
     ? `${new Date().getFullYear() - trainer.trainerSince}+ years`
     : trainer.trainerInfo?.totalSessions
     ? `${trainer.trainerInfo.totalSessions}+ sessions`
-    : "Experience not specified";
+    : null;
 
   // Check if trainer has paid ads (featured)
   const isFeatured = trainer.paidAds && new Date(trainer.paidAds) > new Date();
@@ -87,6 +87,15 @@ export const TrainerCard = ({
   const handleGymsMouseLeave = (e) => {
     e.stopPropagation();
     setShowGymsTooltip(false);
+  };
+
+  // Handle card click to open profile modal
+  const handleCardClick = (e) => {
+    // Don't trigger if clicking on buttons or interactive elements
+    if (e.target.closest("button") || e.target.closest("a")) {
+      return;
+    }
+    onViewProfile(trainer);
   };
 
   // Format pricing display based on pricing type
@@ -154,7 +163,7 @@ export const TrainerCard = ({
 
   return (
     <div
-      className={`group flex flex-col h-full overflow-hidden rounded-xl border transition-all duration-300 bg-gradient-to-b from-zinc-900 to-black ${
+      className={`group flex flex-col h-full overflow-hidden rounded-xl border transition-all duration-300 bg-gradient-to-b from-zinc-900 to-black cursor-pointer ${
         hasRequested
           ? `border-[${themeColors.primary}]`
           : isFeatured
@@ -165,6 +174,7 @@ export const TrainerCard = ({
       }]/10 hover:translate-y-[-2px] sm:hover:translate-y-[-4px]`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={handleCardClick}
     >
       <div className="relative flex h-full flex-col">
         {/* Top accent */}
@@ -205,7 +215,7 @@ export const TrainerCard = ({
                 <div className="w-full h-full flex items-center justify-center">
                   <Icon
                     icon="mdi:account"
-                    className="w-8 h-8 sm:w-12 sm:h-12 text-zinc-700"
+                    className="w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 text-zinc-700"
                   />
                 </div>
               </div>
@@ -224,7 +234,7 @@ export const TrainerCard = ({
             <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
               <Icon
                 icon="mdi:account"
-                className="w-8 h-8 sm:w-12 sm:h-12 text-zinc-700"
+                className="w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 text-zinc-700"
               />
             </div>
           )}
@@ -234,14 +244,14 @@ export const TrainerCard = ({
 
           {/* Trainer name and location - bottom of image */}
           <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-3">
-            <h3 className="text-sm sm:text-lg font-bold text-white mb-1 line-clamp-1">
+            <h3 className="text-xs sm:text-sm md:text-lg font-bold text-white mb-1 line-clamp-1">
               {trainer.firstName} {trainer.lastName || ""}
             </h3>
             <div className="flex items-center justify-between">
               <p className="text-[10px] sm:text-xs text-zinc-300 flex items-center">
                 <Icon
                   icon="mdi:map-marker"
-                  className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-[${themeColors.primary}] mr-1 flex-shrink-0`}
+                  className={`w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 text-[${themeColors.primary}] mr-1 flex-shrink-0`}
                   style={{ color: themeColors.primary }}
                 />
                 <span className="line-clamp-1">{trainer.location.city}</span>
@@ -263,7 +273,7 @@ export const TrainerCard = ({
         </div>
 
         {/* Card content section */}
-        <div className="p-2 sm:p-4 flex-1 flex flex-col">
+        <div className="p-2 sm:p-3 md:p-4 flex-1 flex flex-col">
           {/* Rating and experience in single row */}
           <div className="flex items-center justify-between mb-2 sm:mb-2.5">
             <div className="flex items-center">
@@ -280,14 +290,16 @@ export const TrainerCard = ({
               </span>
             </div>
 
-            {/* Experience badge */}
-            <div className="text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-0.5 bg-zinc-800/70 rounded-full text-zinc-300">
-              {experienceYears.length > 12
-                ? experienceYears
-                    .replace("+ years", "+y")
-                    .replace("+ sessions", "+s")
-                : experienceYears}
-            </div>
+            {/* Experience badge - only if experienceYears is not null */}
+            {experienceYears && (
+              <div className="text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-0.5 bg-zinc-800/70 rounded-full text-zinc-300">
+                {experienceYears.length > 12
+                  ? experienceYears
+                      .replace("+ years", "+y")
+                      .replace("+ sessions", "+s")
+                  : experienceYears}
+              </div>
+            )}
           </div>
 
           {/* Distance to gym - New section - Hidden on very small screens */}
@@ -334,7 +346,7 @@ export const TrainerCard = ({
                   <div className="flex items-center gap-1 sm:gap-1.5 bg-zinc-800/40 rounded-lg px-2 py-1 sm:px-3 sm:py-1.5 cursor-pointer hover:bg-zinc-800 flex-1">
                     <Icon
                       icon="mdi:dumbbell"
-                      className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-[${themeColors.primary}]`}
+                      className={`w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 text-[${themeColors.primary}]`}
                       style={{ color: themeColors.primary }}
                     />
                     <span className="text-[10px] sm:text-xs text-white">
@@ -343,7 +355,7 @@ export const TrainerCard = ({
                     </span>
                     <Icon
                       icon="mdi:chevron-down"
-                      className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-zinc-400 ml-auto hidden sm:block"
+                      className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 text-zinc-400 ml-auto hidden sm:block"
                     />
                   </div>
 
@@ -351,7 +363,7 @@ export const TrainerCard = ({
                   <div className="flex items-center gap-1 sm:gap-1.5 bg-zinc-800/40 rounded-lg px-2 py-1 sm:px-3 sm:py-1.5 flex-1">
                     <Icon
                       icon="mdi:account-group"
-                      className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-[${themeColors.primary}]`}
+                      className={`w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 text-[${themeColors.primary}]`}
                       style={{ color: themeColors.primary }}
                     />
                     <span className="text-[10px] sm:text-xs text-white">
@@ -416,7 +428,7 @@ export const TrainerCard = ({
               <div className="flex items-center gap-1 sm:gap-1.5 bg-zinc-800/40 rounded-lg px-2 py-1 sm:px-3 sm:py-1.5">
                 <Icon
                   icon="mdi:account-group"
-                  className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-[${themeColors.primary}]`}
+                  className={`w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 text-[${themeColors.primary}]`}
                   style={{ color: themeColors.primary }}
                 />
                 <span className="text-[10px] sm:text-xs text-white">
@@ -428,31 +440,28 @@ export const TrainerCard = ({
 
           {/* Certification badges - Show only 1 on mobile, 2 on larger screens */}
           <div className="mb-2 sm:mb-3 flex flex-wrap gap-1 sm:gap-1.5">
-            {trainer.certifications
-              .slice(0, window.innerWidth < 640 ? 1 : 2)
-              .map((cert, index) => (
-                <span
-                  key={index}
-                  className={`flex items-center gap-1 rounded-full border border-[${themeColors.primary}30] bg-[${themeColors.primary}10] px-1.5 py-0.5 sm:px-2 sm:py-0.5 text-[10px] sm:text-xs font-medium text-[${themeColors.primary}] transition-all duration-300 group-hover:-translate-y-0.5`}
-                  style={{
-                    borderColor: `${themeColors.primary}30`,
-                    backgroundColor: `${themeColors.primary}10`,
-                    color: themeColors.primary,
-                  }}
-                >
-                  <Icon
-                    icon="mdi:certificate"
-                    width={8}
-                    height={8}
-                    className="sm:w-[10px] sm:h-[10px]"
-                  />
-                  <span className="truncate max-w-[60px] sm:max-w-none">
-                    {cert.name}
-                  </span>
+            {trainer.certifications.slice(0, 1).map((cert, index) => (
+              <span
+                key={index}
+                className={`flex items-center gap-1 rounded-full border border-[${themeColors.primary}30] bg-[${themeColors.primary}10] px-1.5 py-0.5 sm:px-2 sm:py-0.5 text-[10px] sm:text-xs font-medium text-[${themeColors.primary}] transition-all duration-300 group-hover:-translate-y-0.5`}
+                style={{
+                  borderColor: `${themeColors.primary}30`,
+                  backgroundColor: `${themeColors.primary}10`,
+                  color: themeColors.primary,
+                }}
+              >
+                <Icon
+                  icon="mdi:certificate"
+                  width={8}
+                  height={8}
+                  className="sm:w-[10px] sm:h-[10px]"
+                />
+                <span className="truncate max-w-[60px] sm:max-w-none">
+                  {cert.name}
                 </span>
-              ))}
-            {trainer.certifications.length >
-              (window.innerWidth < 640 ? 1 : 2) && (
+              </span>
+            ))}
+            {trainer.certifications.length > 1 && (
               <span
                 className={`flex items-center rounded-full border border-[${themeColors.primary}30] bg-[${themeColors.primary}10] px-1.5 py-0.5 sm:px-2 sm:py-0.5 text-[10px] sm:text-xs font-medium text-[${themeColors.primary}]`}
                 style={{
@@ -461,10 +470,7 @@ export const TrainerCard = ({
                   color: themeColors.primary,
                 }}
               >
-                +
-                {trainer.certifications.length -
-                  (window.innerWidth < 640 ? 1 : 2)}{" "}
-                more
+                +{trainer.certifications.length - 1} more
               </span>
             )}
           </div>
@@ -510,7 +516,10 @@ export const TrainerCard = ({
             <Button
               variant="secondary"
               size="small"
-              onClick={() => onViewProfile(trainer)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewProfile(trainer);
+              }}
               className="w-full transition-transform duration-300 group-hover:-translate-y-1 bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-xs sm:text-sm py-1.5 sm:py-2"
               leftIcon={
                 <Icon
@@ -527,7 +536,10 @@ export const TrainerCard = ({
             <Button
               variant={hasRequested ? "secondary" : "primary"}
               size="small"
-              onClick={() => onRequestCoaching(trainer)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onRequestCoaching(trainer);
+              }}
               disabled={hasRequested}
               className={`w-full transition-transform duration-300 group-hover:-translate-y-1 group-hover:scale-105 text-xs sm:text-sm py-1.5 sm:py-2 ${
                 hasRequested
@@ -567,11 +579,12 @@ export const TrainerCard = ({
               <Button
                 variant="outline"
                 size="small"
-                onClick={() =>
+                onClick={(e) => {
+                  e.stopPropagation();
                   router.push(
                     `/client/dashboard/messages?trainer=${trainer.id}`
-                  )
-                }
+                  );
+                }}
                 leftIcon={
                   <Icon
                     icon="mdi:message-outline"

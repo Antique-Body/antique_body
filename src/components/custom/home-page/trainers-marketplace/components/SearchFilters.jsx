@@ -85,7 +85,9 @@ export const SearchFilters = ({ filters, setFilters, onClearFilters }) => {
           key={star}
           icon={star <= rating ? "mdi:star" : "mdi:star-outline"}
           className={
-            star <= rating ? "text-[#FF6B00] w-4 h-4" : "text-zinc-600 w-4 h-4"
+            star <= rating
+              ? "text-[#FF6B00] w-3 h-3 sm:w-4 sm:h-4"
+              : "text-zinc-600 w-3 h-3 sm:w-4 sm:h-4"
           }
         />
       ))}
@@ -93,15 +95,17 @@ export const SearchFilters = ({ filters, setFilters, onClearFilters }) => {
   );
 
   return (
-    <div className="bg-zinc-900/50 backdrop-blur-sm rounded-xl border border-zinc-800 p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-white">Filters</h3>
+    <div className="bg-zinc-900/50 backdrop-blur-sm rounded-xl border border-zinc-800 p-3 sm:p-4">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <h3 className="text-base sm:text-lg font-semibold text-white">
+          Filters
+        </h3>
         {hasActiveFilters && (
           <Button
             variant="orangeText"
             size="small"
             onClick={onClearFilters}
-            className="text-sm"
+            className="text-xs sm:text-sm"
           >
             Clear all
           </Button>
@@ -110,25 +114,28 @@ export const SearchFilters = ({ filters, setFilters, onClearFilters }) => {
 
       {/* Active filters */}
       {hasActiveFilters && (
-        <div className="mb-4">
-          <div className="flex flex-wrap gap-2">
+        <div className="mb-3 sm:mb-4">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2">
             {filters.availability.map((day) => (
               <div
                 key={day}
-                className="flex items-center bg-[#FF6B00] text-white px-2 py-1 rounded-full text-xs"
+                className="flex items-center bg-[#FF6B00] text-white px-2 py-1 rounded-full text-[10px] sm:text-xs"
               >
-                <span className="mr-1">{day}</span>
+                <span className="mr-1">{day.slice(0, 3)}</span>
                 <button
                   onClick={() => handleAvailabilityChange(day)}
                   className="hover:text-zinc-200"
                 >
-                  <Icon icon="mdi:close" className="w-3 h-3" />
+                  <Icon
+                    icon="mdi:close"
+                    className="w-2.5 h-2.5 sm:w-3 sm:h-3"
+                  />
                 </button>
               </div>
             ))}
 
             {(filters.price.min > 0 || filters.price.max < 200) && (
-              <div className="flex items-center bg-[#FF6B00] text-white px-2 py-1 rounded-full text-xs">
+              <div className="flex items-center bg-[#FF6B00] text-white px-2 py-1 rounded-full text-[10px] sm:text-xs">
                 <span className="mr-1">
                   ${filters.price.min} - ${filters.price.max}
                 </span>
@@ -141,19 +148,25 @@ export const SearchFilters = ({ filters, setFilters, onClearFilters }) => {
                   }
                   className="hover:text-zinc-200"
                 >
-                  <Icon icon="mdi:close" className="w-3 h-3" />
+                  <Icon
+                    icon="mdi:close"
+                    className="w-2.5 h-2.5 sm:w-3 sm:h-3"
+                  />
                 </button>
               </div>
             )}
 
             {filters.rating > 0 && (
-              <div className="flex items-center bg-[#FF6B00] text-white px-2 py-1 rounded-full text-xs">
+              <div className="flex items-center bg-[#FF6B00] text-white px-2 py-1 rounded-full text-[10px] sm:text-xs">
                 <span className="mr-1">{filters.rating}+ stars</span>
                 <button
                   onClick={() => handleRatingChange(0)}
                   className="hover:text-zinc-200"
                 >
-                  <Icon icon="mdi:close" className="w-3 h-3" />
+                  <Icon
+                    icon="mdi:close"
+                    className="w-2.5 h-2.5 sm:w-3 sm:h-3"
+                  />
                 </button>
               </div>
             )}
@@ -161,14 +174,19 @@ export const SearchFilters = ({ filters, setFilters, onClearFilters }) => {
             {filters.tags.map((tag) => (
               <div
                 key={tag}
-                className="flex items-center bg-[#FF6B00] text-white px-2 py-1 rounded-full text-xs"
+                className="flex items-center bg-[#FF6B00] text-white px-2 py-1 rounded-full text-[10px] sm:text-xs"
               >
-                <span className="mr-1">{tag}</span>
+                <span className="mr-1">
+                  {tag.length > 10 ? tag.slice(0, 10) + "..." : tag}
+                </span>
                 <button
                   onClick={() => handleTagChange(tag)}
                   className="hover:text-zinc-200"
                 >
-                  <Icon icon="mdi:close" className="w-3 h-3" />
+                  <Icon
+                    icon="mdi:close"
+                    className="w-2.5 h-2.5 sm:w-3 sm:h-3"
+                  />
                 </button>
               </div>
             ))}
@@ -177,18 +195,20 @@ export const SearchFilters = ({ filters, setFilters, onClearFilters }) => {
       )}
 
       {/* Availability filter */}
-      <div className="mb-4 border-t border-zinc-800 pt-4">
+      <div className="mb-3 sm:mb-4 border-t border-zinc-800 pt-3 sm:pt-4">
         <Button
           variant="ghost"
-          className="flex items-center justify-between w-full text-left mb-2"
+          className="flex items-center justify-between w-full text-left mb-2 p-2 sm:p-0"
           onClick={() => toggleSection("availability")}
         >
-          <span className="font-medium text-white">Availability</span>
+          <span className="font-medium text-white text-sm sm:text-base">
+            Availability
+          </span>
           <Icon
             icon={
               isExpanded.availability ? "mdi:chevron-up" : "mdi:chevron-down"
             }
-            className="h-5 w-5 text-zinc-400"
+            className="h-4 w-4 sm:h-5 sm:w-5 text-zinc-400"
           />
         </Button>
 
@@ -201,7 +221,7 @@ export const SearchFilters = ({ filters, setFilters, onClearFilters }) => {
               transition={{ duration: 0.3 }}
               className="overflow-hidden"
             >
-              <div className="flex flex-wrap gap-2 mt-2">
+              <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-1.5 sm:gap-2 mt-2">
                 {availabilityDays.map((day) => (
                   <Button
                     key={day}
@@ -212,9 +232,10 @@ export const SearchFilters = ({ filters, setFilters, onClearFilters }) => {
                     }
                     size="small"
                     onClick={() => handleAvailabilityChange(day)}
-                    className="px-2.5 py-1 text-xs font-medium rounded-full"
+                    className="px-2 sm:px-2.5 py-1.5 sm:py-1 text-[10px] sm:text-xs font-medium rounded-full min-h-[32px] sm:min-h-auto"
                   >
-                    {day}
+                    <span className="sm:hidden">{day.slice(0, 3)}</span>
+                    <span className="hidden sm:inline">{day}</span>
                   </Button>
                 ))}
               </div>
@@ -224,16 +245,18 @@ export const SearchFilters = ({ filters, setFilters, onClearFilters }) => {
       </div>
 
       {/* Price range filter */}
-      <div className="mb-4 border-t border-zinc-800 pt-4">
+      <div className="mb-3 sm:mb-4 border-t border-zinc-800 pt-3 sm:pt-4">
         <Button
           variant="ghost"
-          className="flex items-center justify-between w-full text-left mb-2"
+          className="flex items-center justify-between w-full text-left mb-2 p-2 sm:p-0"
           onClick={() => toggleSection("price")}
         >
-          <span className="font-medium text-white">Price range</span>
+          <span className="font-medium text-white text-sm sm:text-base">
+            Price range
+          </span>
           <Icon
             icon={isExpanded.price ? "mdi:chevron-up" : "mdi:chevron-down"}
-            className="h-5 w-5 text-zinc-400"
+            className="h-4 w-4 sm:h-5 sm:w-5 text-zinc-400"
           />
         </Button>
 
@@ -246,12 +269,12 @@ export const SearchFilters = ({ filters, setFilters, onClearFilters }) => {
               transition={{ duration: 0.3 }}
               className="overflow-hidden"
             >
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-zinc-400">
+                  <span className="text-xs sm:text-sm text-zinc-400">
                     Min: ${filters.price.min}
                   </span>
-                  <span className="text-sm text-zinc-400">
+                  <span className="text-xs sm:text-sm text-zinc-400">
                     Max: ${filters.price.max}
                   </span>
                 </div>
@@ -275,7 +298,7 @@ export const SearchFilters = ({ filters, setFilters, onClearFilters }) => {
                   className="w-full h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-[#FF6B00]"
                 />
 
-                <div className="flex space-x-3">
+                <div className="flex space-x-2 sm:space-x-3">
                   <FormField
                     type="number"
                     name="min"
@@ -283,7 +306,7 @@ export const SearchFilters = ({ filters, setFilters, onClearFilters }) => {
                     onChange={handlePriceChange}
                     min="0"
                     max={filters.price.max}
-                    className="w-1/2 bg-zinc-800 border-zinc-700 text-white rounded-lg focus:ring-2 focus:ring-[#FF6B00]/40 focus:border-[#FF6B00]"
+                    className="w-1/2 bg-zinc-800 border-zinc-700 text-white rounded-lg focus:ring-2 focus:ring-[#FF6B00]/40 focus:border-[#FF6B00] text-sm py-2"
                   />
                   <FormField
                     type="number"
@@ -292,7 +315,7 @@ export const SearchFilters = ({ filters, setFilters, onClearFilters }) => {
                     onChange={handlePriceChange}
                     min={filters.price.min}
                     max="200"
-                    className="w-1/2 bg-zinc-800 border-zinc-700 text-white rounded-lg focus:ring-2 focus:ring-[#FF6B00]/40 focus:border-[#FF6B00]"
+                    className="w-1/2 bg-zinc-800 border-zinc-700 text-white rounded-lg focus:ring-2 focus:ring-[#FF6B00]/40 focus:border-[#FF6B00] text-sm py-2"
                   />
                 </div>
               </div>
@@ -302,16 +325,18 @@ export const SearchFilters = ({ filters, setFilters, onClearFilters }) => {
       </div>
 
       {/* Rating filter */}
-      <div className="mb-4 border-t border-zinc-800 pt-4">
+      <div className="mb-3 sm:mb-4 border-t border-zinc-800 pt-3 sm:pt-4">
         <Button
           variant="ghost"
-          className="flex items-center justify-between w-full text-left mb-2"
+          className="flex items-center justify-between w-full text-left mb-2 p-2 sm:p-0"
           onClick={() => toggleSection("rating")}
         >
-          <span className="font-medium text-white">Rating</span>
+          <span className="font-medium text-white text-sm sm:text-base">
+            Rating
+          </span>
           <Icon
             icon={isExpanded.rating ? "mdi:chevron-up" : "mdi:chevron-down"}
-            className="h-5 w-5 text-zinc-400"
+            className="h-4 w-4 sm:h-5 sm:w-5 text-zinc-400"
           />
         </Button>
 
@@ -334,12 +359,12 @@ export const SearchFilters = ({ filters, setFilters, onClearFilters }) => {
                     label={
                       <div className="flex items-center">
                         {renderStars(rating)}
-                        <span className="ml-2">& up</span>
+                        <span className="ml-2 text-xs sm:text-sm">& up</span>
                       </div>
                     }
                     checked={filters.rating === rating}
                     onChange={() => handleRatingChange(rating)}
-                    className="text-sm text-zinc-300"
+                    className="text-xs sm:text-sm text-zinc-300"
                   />
                 ))}
                 {filters.rating > 0 && (
@@ -350,7 +375,7 @@ export const SearchFilters = ({ filters, setFilters, onClearFilters }) => {
                     label="Any rating"
                     checked={filters.rating === 0}
                     onChange={() => handleRatingChange(0)}
-                    className="text-sm text-zinc-300"
+                    className="text-xs sm:text-sm text-zinc-300"
                   />
                 )}
               </div>
@@ -360,16 +385,18 @@ export const SearchFilters = ({ filters, setFilters, onClearFilters }) => {
       </div>
 
       {/* Tags filter */}
-      <div className="mb-4 border-t border-zinc-800 pt-4">
+      <div className="mb-3 sm:mb-4 border-t border-zinc-800 pt-3 sm:pt-4">
         <Button
           variant="ghost"
-          className="flex items-center justify-between w-full text-left mb-2"
+          className="flex items-center justify-between w-full text-left mb-2 p-2 sm:p-0"
           onClick={() => toggleSection("tags")}
         >
-          <span className="font-medium text-white">Specialties</span>
+          <span className="font-medium text-white text-sm sm:text-base">
+            Specialties
+          </span>
           <Icon
             icon={isExpanded.tags ? "mdi:chevron-up" : "mdi:chevron-down"}
-            className="h-5 w-5 text-zinc-400"
+            className="h-4 w-4 sm:h-5 sm:w-5 text-zinc-400"
           />
         </Button>
 
@@ -382,7 +409,7 @@ export const SearchFilters = ({ filters, setFilters, onClearFilters }) => {
               transition={{ duration: 0.3 }}
               className="overflow-hidden"
             >
-              <div className="flex flex-wrap gap-2 mt-2">
+              <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-1.5 sm:gap-2 mt-2">
                 {tags.map((tag) => (
                   <Button
                     key={tag}
@@ -391,22 +418,17 @@ export const SearchFilters = ({ filters, setFilters, onClearFilters }) => {
                     }
                     size="small"
                     onClick={() => handleTagChange(tag)}
-                    className="px-2.5 py-1 text-xs font-medium rounded-full"
+                    className="px-2 sm:px-2.5 py-1.5 sm:py-1 text-[10px] sm:text-xs font-medium rounded-full min-h-[32px] sm:min-h-auto text-center"
                   >
-                    {tag}
+                    <span className="truncate">
+                      {tag.length > 12 ? tag.slice(0, 12) + "..." : tag}
+                    </span>
                   </Button>
                 ))}
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
-
-      {/* Apply button (mobile) */}
-      <div className="mt-6 lg:hidden">
-        <Button variant="outlineOrange" size="large" className="w-full">
-          Apply Filters
-        </Button>
       </div>
     </div>
   );
