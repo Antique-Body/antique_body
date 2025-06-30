@@ -250,8 +250,122 @@ export async function updateClientProfile(userId, data) {
   });
 }
 
+// Basic profile for dashboard display - minimal data
+async function getClientProfileBasic(userId) {
+  const profile = await prisma.clientProfile.findFirst({
+    where: {
+      clientInfo: {
+        userId: userId,
+      },
+    },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      profileImage: true,
+      primaryGoal: true,
+      experienceLevel: true,
+      clientInfo: {
+        select: {
+          id: true,
+          totalSessions: true,
+        },
+      },
+      // Empty arrays for compatibility
+      languages: {
+        select: { name: true },
+        take: 0, // We don't show languages in basic view
+      },
+      preferredActivities: {
+        select: { name: true },
+        take: 0, // We don't show activities in basic view
+      },
+    },
+  });
+  return profile;
+}
+
+// Full profile for editing - all data needed for edit forms
+async function getClientProfileForEdit(userId) {
+  const clientInfo = await prisma.clientInfo.findUnique({
+    where: { userId },
+    include: {
+      clientProfile: {
+        include: {
+          languages: true,
+          preferredActivities: true,
+          location: true,
+        },
+      },
+    },
+  });
+  return clientInfo?.clientProfile || null;
+}
+
+// Settings data for client settings page
+async function getClientSettings(userId) {
+  const clientInfo = await prisma.clientInfo.findUnique({
+    where: { userId },
+    include: {
+      clientSettings: true,
+      user: {
+        select: {
+          id: true,
+          email: true,
+          phone: true,
+          role: true,
+          language: true,
+          emailVerified: true,
+          phoneVerified: true,
+          password: true,
+          accounts: {
+            select: {
+              id: true,
+              provider: true,
+              type: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!clientInfo) {
+    return null;
+  }
+
+  // Uvijek koristi upsert, bez if-a
+  const defaultSettings = await prisma.clientSettings.upsert({
+    where: { clientInfoId: clientInfo.id },
+    update: {},
+    create: {
+      clientInfoId: clientInfo.id,
+      notifications: true,
+      emailNotifications: true,
+      smsNotifications: false,
+      reminderTime: 24,
+      privacyLevel: "public",
+      shareProgress: true,
+      timezone: "UTC",
+      preferredLanguage: "en",
+      measurementUnit: "metric",
+    },
+  });
+  const { password, ...userWithoutPassword } = clientInfo.user;
+  return {
+    ...defaultSettings,
+    user: {
+      ...userWithoutPassword,
+      hasPassword: Boolean(password),
+    },
+  };
+}
+
 export const clientService = {
   createClientWithDetails,
   getClientProfileByUserId,
   updateClientProfile,
+  getClientProfileBasic,
+  getClientProfileForEdit,
+  getClientSettings,
 };

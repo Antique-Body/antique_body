@@ -194,10 +194,29 @@ export const authConfig = {
 
         // Create or update Account record
         await createOrUpdateAccount(existingUser.id, account);
+      } else if (["email", "phone"].includes(account?.provider)) {
+        // Handle credentials providers (email and phone)
+        let existingUser;
+
+        if (account.provider === "email") {
+          existingUser = await userService.findUserByEmail(user.email);
+        } else if (account.provider === "phone") {
+          existingUser = await userService.findUserByPhone(user.phone);
+        }
+
+        if (existingUser) {
+          // Create or update Account record for credentials login
+          await createOrUpdateAccount(existingUser.id, {
+            type: "credentials",
+            provider: account.provider,
+            providerAccountId: existingUser.id.toString(),
+            userId: existingUser.id,
+          });
+        }
       }
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         const userFromDb = await getUserByEmailOrPhone({
           email: user.email,
@@ -215,6 +234,11 @@ export const authConfig = {
         token.phone = user.phone;
         token.firstName = user.firstName;
         token.lastName = user.lastName;
+
+        // Set provider information from account
+        if (account) {
+          token.provider = account.provider;
+        }
       }
       if (token.id) {
         const userFromDb = await prisma.user.findUnique({
@@ -250,6 +274,14 @@ export const authConfig = {
         });
         if (userFromDb) {
           const userWithAccounts = await getUserWithAccounts(userFromDb.id);
+
+          // Determine provider - first check token, then accounts
+          let provider = token.provider;
+          if (!provider && userWithAccounts?.accounts?.length > 0) {
+            // Get the most recent account provider
+            provider = userWithAccounts.accounts[0].provider;
+          }
+
           Object.assign(session.user, {
             id: userFromDb.id,
             role: userFromDb.role,
@@ -259,8 +291,7 @@ export const authConfig = {
               userWithAccounts?.trainerInfo?.trainerProfile || null,
             clientProfile: userWithAccounts?.clientInfo?.clientProfile || null,
             accounts: userWithAccounts?.accounts || [],
-            provider: token.provider,
-            accountType: token.accountType,
+            provider: provider,
           });
         } else {
           // If user does not exist in DB, invalidate session
