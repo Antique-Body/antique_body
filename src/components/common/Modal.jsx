@@ -22,24 +22,38 @@ export const Modal = memo(
     primaryButtonDisabled = false,
     footerBorder = true,
     size = "default", // default, large, small
+    isNested = false, // New prop to handle nested modals
   }) => {
-    // Handle ESC key press
+    // Handle ESC key press and body scroll lock
     useEffect(() => {
       if (!isOpen) return;
 
+      // Lock body scroll when modal is open (only for the first modal)
+      let originalStyle;
+      if (!isNested) {
+        originalStyle = window.getComputedStyle(document.body).overflow;
+        document.body.style.overflow = "hidden";
+      }
+
       const handleEscKey = (event) => {
         if (event.key === "Escape") {
-          onClose();
+          // For nested modals, we let the child handle ESC first
+          if (!isNested) {
+            onClose();
+          }
         }
       };
 
       window.addEventListener("keydown", handleEscKey);
 
-      // Cleanup function to remove event listener
+      // Cleanup function to remove event listener and restore scroll
       return () => {
+        if (!isNested && originalStyle) {
+          document.body.style.overflow = originalStyle;
+        }
         window.removeEventListener("keydown", handleEscKey);
       };
-    }, [isOpen, onClose]);
+    }, [isOpen, onClose, isNested]);
 
     if (!isOpen) return null;
 
@@ -54,21 +68,24 @@ export const Modal = memo(
     const getMaxWidth = () => {
       switch (size) {
         case "large":
-          return "max-w-3xl"; // Reduced from 4xl to 3xl
+          return "sm:max-w-3xl"; // Only apply on sm+ screens
         case "small":
-          return "max-w-sm"; // Reduced from md to sm
+          return "sm:max-w-sm"; // Only apply on sm+ screens
         default:
-          return "max-w-xl"; // Reduced from 2xl to xl
+          return "sm:max-w-xl"; // Only apply on sm+ screens
       }
     };
 
+    // Determine z-index based on whether it's nested
+    const zIndexClass = isNested ? "z-[60]" : "z-50";
+
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 backdrop-blur-[6px] p-2 sm:p-4"
+        className={`fixed inset-0 ${zIndexClass} flex items-center justify-center overflow-hidden bg-black/40 backdrop-blur-[6px] p-0 sm:p-4`}
         onClick={handleBackdropClick}
       >
         <div
-          className={`animate-modalFadeIn relative w-full ${getMaxWidth()} max-h-[90vh] rounded-xl border border-[#333] bg-[#121212]/95 shadow-2xl flex flex-col`}
+          className={`animate-modalFadeIn relative w-full h-full sm:h-auto ${getMaxWidth()} sm:max-h-[90vh] sm:rounded-xl border-0 sm:border border-[#333] bg-[#121212]/95 shadow-2xl flex flex-col`}
           style={{
             animation: "modalFadeIn 0.3s ease-out",
             boxShadow: "0 15px 40px -10px rgba(255,107,0,0.3)",
@@ -88,7 +105,7 @@ export const Modal = memo(
           </Button>
 
           {/* Modal header */}
-          <div className="border-b border-[#333] p-4 sm:p-5">
+          <div className="border-b border-[#333] p-4 sm:p-5 flex-shrink-0">
             <h2 className="text-lg sm:text-xl font-bold text-white pr-6">
               {title}
             </h2>
@@ -105,15 +122,15 @@ export const Modal = memo(
           {/* Footer with action buttons */}
           {footerButtons && (
             <div
-              className={`max-h-max${
-                footerBorder ? "border-t border-[#333]" : ""
-              } p-4 sm:p-5 flex justify-end gap-2 bg-[#121212]/95`}
+              className={`flex-shrink-0${
+                footerBorder ? " border-t border-[#333]" : ""
+              } p-4 sm:p-5 flex flex-col sm:flex-row justify-end gap-2 bg-[#121212]/95`}
             >
               {secondaryButtonText && (
                 <Button
                   variant="secondary"
                   onClick={secondaryButtonAction || onClose}
-                  className="cursor-pointer rounded-lg px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base font-medium transition-all duration-300"
+                  className="cursor-pointer rounded-lg px-4 sm:px-6 py-3 sm:py-2.5 text-sm sm:text-base font-medium transition-all duration-300 w-full sm:w-auto order-2 sm:order-1"
                 >
                   {secondaryButtonText || cancelButtonText}
                 </Button>
@@ -123,7 +140,7 @@ export const Modal = memo(
                 variant="orangeFilled"
                 onClick={primaryButtonAction || onConfirm}
                 disabled={primaryButtonDisabled}
-                className={`cursor-pointer rounded-lg px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base font-medium transition-all duration-300 ${
+                className={`cursor-pointer rounded-lg px-4 sm:px-6 py-3 sm:py-2.5 text-sm sm:text-base font-medium transition-all duration-300 w-full sm:w-auto order-1 sm:order-2 ${
                   primaryButtonDisabled
                     ? "cursor-not-allowed opacity-50"
                     : "hover:-translate-y-0.5"

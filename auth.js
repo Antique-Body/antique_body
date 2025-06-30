@@ -168,6 +168,7 @@ async function createOrUpdateAccount(userId, account) {
 
 export const authConfig = {
   providers,
+  debug: true,
   callbacks: {
     async signIn({ user, account }) {
       if (["google", "facebook"].includes(account?.provider)) {
@@ -193,6 +194,25 @@ export const authConfig = {
 
         // Create or update Account record
         await createOrUpdateAccount(existingUser.id, account);
+      } else if (["email", "phone"].includes(account?.provider)) {
+        // Handle credentials providers (email and phone)
+        let existingUser;
+
+        if (account.provider === "email") {
+          existingUser = await userService.findUserByEmail(user.email);
+        } else if (account.provider === "phone") {
+          existingUser = await userService.findUserByPhone(user.phone);
+        }
+
+        if (existingUser) {
+          // Create or update Account record for credentials login
+          await createOrUpdateAccount(existingUser.id, {
+            type: "credentials",
+            provider: account.provider,
+            providerAccountId: existingUser.id.toString(),
+            userId: existingUser.id,
+          });
+        }
       }
       return true;
     },
@@ -203,39 +223,44 @@ export const authConfig = {
           phone: user.phone,
         });
         if (userFromDb) {
-          const userWithAccounts = await getUserWithAccounts(userFromDb.id);
           Object.assign(token, {
             id: userFromDb.id,
             role: userFromDb.role,
-            trainerProfile:
-              userWithAccounts?.trainerInfo?.trainerProfile || null,
-            clientProfile: userWithAccounts?.clientInfo?.clientProfile || null,
-            accounts: userWithAccounts?.accounts || [],
           });
         } else {
-          Object.assign(token, { id: user.id, role: user.role, accounts: [] });
+          Object.assign(token, { id: user.id, role: user.role });
         }
         token.email = user.email;
         token.phone = user.phone;
         token.firstName = user.firstName;
         token.lastName = user.lastName;
-      }
 
-      // Add account info if available
-      if (account) {
-        token.provider = account.provider;
-        token.accountType = account.type;
+        // Set provider information from account
+        if (account) {
+          token.provider = account.provider;
+        }
       }
-
       if (token.id) {
-        const userWithAccounts = await getUserWithAccounts(token.id);
-        if (userWithAccounts) {
+        const userFromDb = await prisma.user.findUnique({
+          where: { id: token.id },
+          include: {
+            trainerInfo: {
+              include: {
+                trainerProfile: true,
+              },
+            },
+            clientInfo: {
+              include: {
+                clientProfile: true,
+              },
+            },
+          },
+        });
+        if (userFromDb) {
           Object.assign(token, {
-            role: userWithAccounts.role,
-            trainerProfile:
-              userWithAccounts?.trainerInfo?.trainerProfile || null,
-            clientProfile: userWithAccounts?.clientInfo?.clientProfile || null,
-            accounts: userWithAccounts.accounts,
+            role: userFromDb.role,
+            trainerProfile: userFromDb.trainerInfo?.trainerProfile || null,
+            clientProfile: userFromDb.clientInfo?.clientProfile || null,
           });
         }
       }
@@ -249,6 +274,14 @@ export const authConfig = {
         });
         if (userFromDb) {
           const userWithAccounts = await getUserWithAccounts(userFromDb.id);
+
+          // Determine provider - first check token, then accounts
+          let provider = token.provider;
+          if (!provider && userWithAccounts?.accounts?.length > 0) {
+            // Get the most recent account provider
+            provider = userWithAccounts.accounts[0].provider;
+          }
+
           Object.assign(session.user, {
             id: userFromDb.id,
             role: userFromDb.role,
@@ -258,8 +291,7 @@ export const authConfig = {
               userWithAccounts?.trainerInfo?.trainerProfile || null,
             clientProfile: userWithAccounts?.clientInfo?.clientProfile || null,
             accounts: userWithAccounts?.accounts || [],
-            provider: token.provider,
-            accountType: token.accountType,
+            provider: provider,
           });
         } else {
           // If user does not exist in DB, invalidate session

@@ -1,28 +1,28 @@
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 
-import { exerciseService } from "../../users/services";
+import { mealService } from "../../../services";
 
 import { auth } from "#/auth";
-import { validateExercise } from "@/middleware/validation";
+import { validateMeal } from "@/middleware/validation";
 
 const prisma = new PrismaClient();
 
 export async function GET(request, { params }) {
   try {
     const { id } = await params;
-    const exercise = await exerciseService.getExerciseById(id);
+    const meal = await mealService.getMealById(id);
 
-    if (!exercise) {
+    if (!meal) {
       return NextResponse.json(
-        { success: false, error: "Exercise not found" },
+        { success: false, error: "Meal not found" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ success: true, data: exercise });
+    return NextResponse.json({ success: true, data: meal });
   } catch (error) {
-    console.error("Error fetching exercise:", error);
+    console.error("Error fetching meal:", error);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 400 }
@@ -35,7 +35,7 @@ export async function PUT(request, { params }) {
     const { id } = await params;
     const body = await request.json();
 
-    const { valid, errors } = validateExercise(body);
+    const { valid, errors } = validateMeal(body);
     if (!valid) {
       return NextResponse.json(
         { success: false, error: errors },
@@ -43,7 +43,7 @@ export async function PUT(request, { params }) {
       );
     }
 
-    // Check if user is authorized to update this exercise
+    // Check if user is authorized to update this meal
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -52,7 +52,7 @@ export async function PUT(request, { params }) {
       );
     }
 
-    const exercise = await prisma.exercise.findUnique({
+    const meal = await prisma.meal.findUnique({
       where: { id },
       include: {
         trainerInfo: {
@@ -63,29 +63,29 @@ export async function PUT(request, { params }) {
       },
     });
 
-    if (!exercise) {
+    if (!meal) {
       return NextResponse.json(
-        { success: false, error: "Exercise not found" },
+        { success: false, error: "Meal not found" },
         { status: 404 }
       );
     }
 
-    // Check if the exercise belongs to the authenticated trainer
-    if (exercise.trainerInfo.userId !== session.user.id) {
+    // Check if the meal belongs to the authenticated trainer
+    if (meal.trainerInfo.userId !== session.user.id) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized to update this exercise" },
+        { success: false, error: "Unauthorized to update this meal" },
         { status: 403 }
       );
     }
 
-    const updatedExercise = await exerciseService.updateExercise(id, body);
+    const updatedMeal = await mealService.updateMeal(id, body);
 
     return NextResponse.json(
-      { success: true, data: updatedExercise },
+      { success: true, data: updatedMeal },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error updating exercise:", error);
+    console.error("Error updating meal:", error);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 400 }
@@ -97,7 +97,7 @@ export async function DELETE(request, { params }) {
   try {
     const { id } = await params;
 
-    // Check if user is authorized to delete this exercise
+    // Check if user is authorized to delete this meal
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -106,7 +106,7 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    const exercise = await prisma.exercise.findUnique({
+    const meal = await prisma.meal.findUnique({
       where: { id },
       include: {
         trainerInfo: {
@@ -117,29 +117,29 @@ export async function DELETE(request, { params }) {
       },
     });
 
-    if (!exercise) {
+    if (!meal) {
       return NextResponse.json(
-        { success: false, error: "Exercise not found" },
+        { success: false, error: "Meal not found" },
         { status: 404 }
       );
     }
 
-    // Check if the exercise belongs to the authenticated trainer
-    if (exercise.trainerInfo.userId !== session.user.id) {
+    // Check if the meal belongs to the authenticated trainer
+    if (meal.trainerInfo.userId !== session.user.id) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized to delete this exercise" },
+        { success: false, error: "Unauthorized to delete this meal" },
         { status: 403 }
       );
     }
 
-    await exerciseService.deleteExercise(id);
+    await mealService.deleteMeal(id);
 
     return NextResponse.json(
-      { success: true, message: "Exercise deleted successfully" },
+      { success: true, message: "Meal deleted successfully" },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error deleting exercise:", error);
+    console.error("Error deleting meal:", error);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 400 }

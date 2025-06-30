@@ -35,7 +35,14 @@ export async function POST(request) {
         );
       }
 
-      if (mode !== "register" && !existingUser) {
+      if (mode === "update" && existingUser) {
+        return NextResponse.json(
+          { error: "User with this email already exists" },
+          { status: 400 }
+        );
+      }
+
+      if (mode !== "register" && mode !== "update" && !existingUser) {
         return NextResponse.json(
           { error: "User with this email does not exist" },
           { status: 400 }
@@ -47,7 +54,6 @@ export async function POST(request) {
     } else {
       // Format phone number
       const formattedPhone = formatPhoneNumber(phone);
-      console.log("Checking send-code for phone:", formattedPhone);
 
       // Check if user exists with this phone
       const existingUser = await prisma.user.findFirst({
@@ -62,7 +68,13 @@ export async function POST(request) {
           { status: 400 }
         );
       }
-      if (mode !== "register" && !existingUser) {
+      if (mode === "update" && existingUser) {
+        return NextResponse.json(
+          { error: "User with this phone number already exists" },
+          { status: 400 }
+        );
+      }
+      if (mode !== "register" && mode !== "update" && !existingUser) {
         return NextResponse.json(
           { error: "User with this phone number does not exist" },
           { status: 400 }

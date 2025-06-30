@@ -261,3 +261,88 @@ export const validateExercise = (data) => {
     errors,
   };
 };
+
+export const validateMeal = (data) => {
+  const errors = {};
+  if (!data) {
+    return { valid: false, errors: { general: "No data provided" } };
+  }
+
+  const requiredFields = [
+    "name",
+    "mealType",
+    "difficulty",
+    "ingredients",
+    "recipe",
+  ];
+
+  for (const field of requiredFields) {
+    if (
+      !data[field] ||
+      (typeof data[field] === "string" && data[field].trim() === "")
+    ) {
+      errors[field] = `Field '${field}' is required.`;
+    }
+  }
+
+  // Validate meal type
+  const validMealTypes = ["breakfast", "lunch", "dinner", "snack", "dessert"];
+  if (data.mealType && !validMealTypes.includes(data.mealType)) {
+    errors.mealType = "Invalid meal type.";
+  }
+
+  // Validate difficulty
+  const validDifficulties = ["easy", "medium", "hard"];
+  if (data.difficulty && !validDifficulties.includes(data.difficulty)) {
+    errors.difficulty = "Invalid difficulty level.";
+  }
+
+  // Validate cuisine
+  const validCuisines = [
+    "italian",
+    "mexican",
+    "asian",
+    "mediterranean",
+    "american",
+    "indian",
+    "french",
+    "greek",
+    "middle-eastern",
+    "other",
+  ];
+  if (data.cuisine && !validCuisines.includes(data.cuisine)) {
+    errors.cuisine = "Invalid cuisine type.";
+  }
+
+  // Validate numeric fields
+  if (
+    data.preparationTime !== undefined &&
+    (isNaN(data.preparationTime) || data.preparationTime <= 0)
+  ) {
+    errors.preparationTime = "Preparation time must be a positive number.";
+  }
+
+  if (
+    data.calories !== undefined &&
+    (isNaN(data.calories) || data.calories < 0)
+  ) {
+    errors.calories = "Calories must be 0 or greater.";
+  }
+
+  if (data.protein !== undefined && (isNaN(data.protein) || data.protein < 0)) {
+    errors.protein = "Protein must be 0 or greater.";
+  }
+
+  if (data.carbs !== undefined && (isNaN(data.carbs) || data.carbs < 0)) {
+    errors.carbs = "Carbs must be 0 or greater.";
+  }
+
+  if (data.fat !== undefined && (isNaN(data.fat) || data.fat < 0)) {
+    errors.fat = "Fat must be 0 or greater.";
+  }
+
+  return {
+    valid: Object.keys(errors).length === 0,
+    errors,
+  };
+};

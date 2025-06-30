@@ -29,6 +29,7 @@ export default function TrainersMarketplace() {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   // Access user location from context
   const { userLocation, locationResolved } = useUserLocation();
@@ -55,11 +56,11 @@ export default function TrainersMarketplace() {
     tags: searchParams.getAll("tag") || [],
   });
 
-  const trainersPerPage = 9;
+  const trainersPerPage = 12;
   const totalPages = Math.ceil(totalTrainers / trainersPerPage);
 
   const updateUrlParams = useCallback(
-    (newParams) => {
+    (newParams, resetPage = false) => {
       const params = new URLSearchParams(searchParams);
       Object.entries(newParams).forEach(([key, value]) => {
         if (value === "" || value === null || value === undefined) {
@@ -72,7 +73,8 @@ export default function TrainersMarketplace() {
         }
       });
 
-      if (!newParams.page) {
+      // Only reset to page 1 if explicitly requested
+      if (resetPage) {
         params.set("page", "1");
       }
 
@@ -81,14 +83,17 @@ export default function TrainersMarketplace() {
     [searchParams, pathname, router]
   );
 
-  const setSearchTerm = (value) => updateUrlParams({ search: value });
+  const setSearchTerm = (value) => updateUrlParams({ search: value }, true);
   const setLocationSearch = (value) =>
-    updateUrlParams({ locationSearch: value });
+    updateUrlParams({ locationSearch: value }, true);
   const setSelectedLocation = (value) =>
-    updateUrlParams({ location: value ? value.label : null });
-  const setSortOption = (value) => updateUrlParams({ sortBy: value });
-  const setSortOrder = (value) => updateUrlParams({ sortOrder: value });
-  const setCurrentPage = (value) => updateUrlParams({ page: value });
+    updateUrlParams({ location: value ? value.label : null }, true);
+  const setSortOption = (value) => updateUrlParams({ sortBy: value }, true);
+  const setSortOrder = (value) => updateUrlParams({ sortOrder: value }, true);
+  const setCurrentPage = (value) => updateUrlParams({ page: value }, false);
+
+  // Track previous filters to prevent unnecessary resets
+  const [prevFilters, setPrevFilters] = useState(null);
 
   useEffect(() => {
     setFilters({
@@ -103,6 +108,17 @@ export default function TrainersMarketplace() {
   }, [searchParams]);
 
   useEffect(() => {
+    // Only update URL if filters actually changed
+    if (
+      prevFilters &&
+      JSON.stringify(filters) === JSON.stringify(prevFilters)
+    ) {
+      console.log("Filters unchanged, skipping URL update");
+      return;
+    }
+
+    console.log("Filters changed:", { prevFilters, newFilters: filters });
+
     const newParams = {};
     if (filters.availability.length > 0) {
       newParams.availability = filters.availability;
@@ -129,12 +145,23 @@ export default function TrainersMarketplace() {
     } else {
       newParams.tag = null;
     }
-    updateUrlParams(newParams);
-  }, [filters, updateUrlParams]);
+
+    // Only reset page if this is a user-initiated filter change (not initial load)
+    const shouldResetPage = prevFilters !== null;
+    console.log("Should reset page:", shouldResetPage);
+    updateUrlParams(newParams, shouldResetPage);
+    setPrevFilters(filters);
+  }, [filters, prevFilters, updateUrlParams]);
 
   // Initial fetch of trainers
   useEffect(() => {
     if (!locationResolved) return;
+
+    console.log("Fetching trainers with params:", {
+      currentPage,
+      searchParams: searchParams.toString(),
+      userLocation: !!userLocation,
+    });
 
     const fetchTrainers = async () => {
       try {
@@ -168,6 +195,11 @@ export default function TrainersMarketplace() {
         }
         const data = await response.json();
 
+        console.log("Received data:", {
+          trainersCount: data.trainers.length,
+          pagination: data.pagination,
+        });
+
         setTrainers(data.trainers);
         setTotalTrainers(data.pagination.total);
         setLoading(false);
@@ -179,13 +211,7 @@ export default function TrainersMarketplace() {
     };
 
     fetchTrainers();
-  }, [
-    searchParams,
-    userLocation,
-    locationResolved,
-    currentPage,
-    trainersPerPage,
-  ]);
+  }, [searchParams, userLocation, locationResolved, trainersPerPage]);
 
   // Function to handle viewing a trainer's profile
   const handleViewProfile = (trainer) => {
@@ -211,13 +237,26 @@ export default function TrainersMarketplace() {
 
   // Handle page change
   const handlePageChange = (pageNumber) => {
+    console.log("Changing page to:", pageNumber);
     setCurrentPage(pageNumber);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Clear all filters
   const handleClearFilters = () => {
+    console.log("Clearing all filters");
+    setPrevFilters(null); // Reset the prev filters tracking
     router.push(pathname);
+  };
+
+  // Count active filters for mobile filter button
+  const countActiveFilters = () => {
+    let count = 0;
+    count += filters.availability.length;
+    count += filters.price.min > 0 || filters.price.max < 200 ? 1 : 0;
+    count += filters.rating > 0 ? 1 : 0;
+    count += filters.tags.length;
+    return count;
   };
 
   if (error) {
@@ -276,28 +315,82 @@ export default function TrainersMarketplace() {
       {/* Content */}
       <div className="relative z-10">
         <Navigation />
-        <main className="max-w-[96rem] mx-auto px-4 py-8 sm:py-16 mt-16 sm:mt-24">
+        <main className="max-w-[96rem] mx-auto px-4 py-6 sm:py-8 md:py-16 mt-16 sm:mt-20 md:mt-24">
           {/* Page Title with search stats */}
-          <div className="mb-8 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#FF6B00] to-[#FF9A00]">
+          <div className="mb-6 sm:mb-8 text-center">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#FF6B00] to-[#FF9A00]">
               Find Your Perfect Trainer
             </h1>
-            <p className="text-lg text-zinc-300 max-w-3xl mx-auto">
+            <p className="text-sm sm:text-base md:text-lg text-zinc-300 max-w-3xl mx-auto px-4">
               Browse our marketplace of professional trainers, each specialized
               in different fitness areas. Filter by expertise, location, and
               availability to find your ideal match.
             </p>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-6">
-            {/* Left sidebar with filters */}
-            <div className="w-full lg:w-1/4 lg:sticky lg:top-24 lg:self-start">
+          <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
+            {/* Left sidebar with filters - Desktop */}
+            <div className="hidden lg:block w-full lg:w-1/4 lg:sticky lg:top-24 lg:self-start">
               <SearchFilters
                 filters={filters}
                 setFilters={setFilters}
                 onClearFilters={handleClearFilters}
               />
             </div>
+
+            {/* Mobile Filter Button */}
+            <div className="lg:hidden mb-4">
+              <button
+                onClick={() => setShowMobileFilters(true)}
+                className="flex items-center justify-center w-full px-4 py-3 bg-zinc-900/50 backdrop-blur-sm rounded-xl border border-zinc-800 text-white hover:bg-zinc-800/50 transition-colors"
+              >
+                <Icon icon="mdi:filter-variant" className="w-5 h-5 mr-2" />
+                <span className="font-medium">Filters</span>
+                {countActiveFilters() > 0 && (
+                  <span className="ml-2 bg-[#FF6B00] text-white text-xs rounded-full px-2 py-0.5">
+                    {countActiveFilters()}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {/* Mobile Filters Modal */}
+            {showMobileFilters && (
+              <div className="fixed inset-0 z-50 lg:hidden">
+                <div
+                  className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                  onClick={() => setShowMobileFilters(false)}
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-zinc-900 rounded-t-2xl max-h-[80vh] overflow-y-auto">
+                  <div className="sticky top-0 bg-zinc-900 px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-white">
+                      Filters
+                    </h3>
+                    <button
+                      onClick={() => setShowMobileFilters(false)}
+                      className="p-2 text-zinc-400 hover:text-white"
+                    >
+                      <Icon icon="mdi:close" className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="p-4">
+                    <SearchFilters
+                      filters={filters}
+                      setFilters={setFilters}
+                      onClearFilters={handleClearFilters}
+                    />
+                    <div className="mt-4 pt-4 border-t border-zinc-800">
+                      <button
+                        onClick={() => setShowMobileFilters(false)}
+                        className="w-full bg-[#FF6B00] text-white py-3 rounded-lg font-medium hover:bg-[#E65A00] transition-colors"
+                      >
+                        Apply Filters
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Main content */}
             <div className="w-full lg:w-3/4">
@@ -324,13 +417,13 @@ export default function TrainersMarketplace() {
                 <div className="flex justify-center items-center min-h-[60vh]">
                   <Icon
                     icon="line-md:loading-loop"
-                    className="w-12 h-12 text-[#FF6B00]"
+                    className="w-8 h-8 sm:w-12 sm:h-12 text-[#FF6B00]"
                   />
                 </div>
               ) : (
                 <>
                   {trainers.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5 mb-8">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 lg:max-xl:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6 mb-8">
                       {trainers.map((trainer) => (
                         <TrainerCard
                           key={trainer.id}
@@ -384,7 +477,7 @@ export default function TrainersMarketplace() {
               ? `${
                   new Date().getFullYear() - selectedTrainer.trainerSince
                 }+ years`
-              : "Experience not specified",
+              : "",
             proximity: selectedTrainer.location
               ? `${selectedTrainer.location.city}`
               : "Location not specified",

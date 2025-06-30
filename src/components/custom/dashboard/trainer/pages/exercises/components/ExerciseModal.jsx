@@ -5,11 +5,12 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import { ExerciseLibrarySelector } from "./ExerciseLibrarySelector";
-import { FileUploadField } from "./FileUploadField";
 
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
+import { InfoBanner } from "@/components/common/InfoBanner";
 import { Modal } from "@/components/common/Modal";
+import { FileUploadField } from "@/components/custom/dashboard/shared";
 import { UPLOAD_CONFIG } from "@/config/upload";
 import {
   EXERCISE_TYPES,
@@ -606,15 +607,15 @@ export const ExerciseModal = ({
       )}
 
       {/* Exercise Library Button */}
-      <div className="mb-4">
-        <Button
-          variant="outlineOrange"
-          size="small"
-          leftIcon={<Icon icon="mdi:book-open-variant" className="w-5 h-5" />}
-          onClick={() => setShowLibrarySelector(true)}
-        >
-          Browse Exercise Templates
-        </Button>
+      <div className="mb-6">
+        <InfoBanner
+          icon="mdi:dumbbell"
+          title="Quick Start"
+          subtitle="Use pre-built exercise templates"
+          variant="primary"
+          buttonText="Browse Templates"
+          onButtonClick={() => setShowLibrarySelector(true)}
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -825,6 +826,7 @@ export const ExerciseModal = ({
         title="Exercise Templates"
         size="large"
         footerButtons={false}
+        isNested={true}
       >
         <ExerciseLibrarySelector
           onSelectExercise={handleSelectExerciseFromLibrary}
