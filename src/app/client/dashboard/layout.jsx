@@ -39,7 +39,7 @@ export default function ClientDashboardLayout({ children }) {
     async function fetchClient() {
       setLoading(true);
       try {
-        const res = await fetch("/api/users/client");
+        const res = await fetch("/api/users/client?mode=basic");
         const data = await res.json();
         setClientData(data);
       } catch {
@@ -54,7 +54,7 @@ export default function ClientDashboardLayout({ children }) {
   // Function to refresh client data
   const refreshClientData = async () => {
     try {
-      const res = await fetch("/api/users/client");
+      const res = await fetch("/api/users/client?mode=basic");
       const data = await res.json();
       setClientData(data);
     } catch (error) {
@@ -122,12 +122,12 @@ export default function ClientDashboardLayout({ children }) {
         </div>
       );
     }
-    if (!clientData || clientData.error) {
+    if (!clientData || clientData.error || !clientData.success) {
       return <div className="text-red-400">Failed to load profile.</div>;
     }
     return (
       <ClientProfile
-        userData={clientData}
+        userData={clientData.data}
         onProfileUpdate={refreshClientData}
       />
     );

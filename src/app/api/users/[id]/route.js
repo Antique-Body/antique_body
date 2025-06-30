@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { userService } from "@/services/users";
+import { userService } from "../services";
 
 // Get a user by ID
 export async function GET(request, { params }) {

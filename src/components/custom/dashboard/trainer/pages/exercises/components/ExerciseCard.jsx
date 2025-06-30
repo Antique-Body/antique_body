@@ -44,7 +44,7 @@ export const ExerciseCard = ({ exercise, onView, onEdit, onDelete }) => {
             <Image
               src={
                 imageUrl ||
-                "https://www.nrgfitness.ie/site/wp-content/plugins/bbpowerpack/modules/pp-content-grid/images/placeholder.jpg"
+                "https://wallpapers.com/images/featured/exercise-oaho2ar30d9n9cpe.jpg"
               }
               alt={name}
               fill

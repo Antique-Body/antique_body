@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { userService } from "../users/services/userService";
+import { userService } from "./services";
+
 
 import { auth } from "#/auth";
 

@@ -405,6 +405,40 @@ CREATE TABLE `TrainerGalleryImage` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `Meal` (
+    `id` VARCHAR(191) NOT NULL,
+    `trainerId` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `mealType` VARCHAR(191) NOT NULL,
+    `difficulty` VARCHAR(191) NOT NULL,
+    `preparationTime` INTEGER NOT NULL,
+    `calories` DOUBLE NOT NULL DEFAULT 0,
+    `protein` DOUBLE NOT NULL DEFAULT 0,
+    `carbs` DOUBLE NOT NULL DEFAULT 0,
+    `fat` DOUBLE NOT NULL DEFAULT 0,
+    `dietary` JSON NOT NULL,
+    `cuisine` VARCHAR(191) NOT NULL DEFAULT 'other',
+    `ingredients` TEXT NOT NULL,
+    `recipe` TEXT NOT NULL,
+    `imageUrl` VARCHAR(191) NULL,
+    `video` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    INDEX `Meal_trainerId_idx`(`trainerId`),
+    INDEX `Meal_mealType_idx`(`mealType`),
+    INDEX `Meal_difficulty_idx`(`difficulty`),
+    INDEX `Meal_cuisine_idx`(`cuisine`),
+    INDEX `Meal_name_idx`(`name`),
+    INDEX `Meal_createdAt_idx`(`createdAt`),
+    INDEX `Meal_trainerId_mealType_idx`(`trainerId`, `mealType`),
+    INDEX `Meal_trainerId_difficulty_idx`(`trainerId`, `difficulty`),
+    INDEX `Meal_trainerId_cuisine_idx`(`trainerId`, `cuisine`),
+    INDEX `Meal_trainerId_createdAt_idx`(`trainerId`, `createdAt`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `Account` ADD CONSTRAINT `Account_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -482,3 +516,6 @@ ALTER TABLE `ExerciseInfo` ADD CONSTRAINT `ExerciseInfo_exerciseId_fkey` FOREIGN
 
 -- AddForeignKey
 ALTER TABLE `TrainerGalleryImage` ADD CONSTRAINT `TrainerGalleryImage_trainerProfileId_fkey` FOREIGN KEY (`trainerProfileId`) REFERENCES `TrainerProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Meal` ADD CONSTRAINT `Meal_trainerId_fkey` FOREIGN KEY (`trainerId`) REFERENCES `TrainerInfo`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

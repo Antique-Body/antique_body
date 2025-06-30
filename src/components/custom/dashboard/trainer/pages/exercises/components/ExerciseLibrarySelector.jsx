@@ -6,10 +6,24 @@ import { useState, useEffect } from "react";
 import exerciseLibrary from "./exerciseLibrary.json";
 
 import { Button } from "@/components/common/Button";
+import { InfoBanner } from "@/components/common/InfoBanner";
 
 export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredExercises, setFilteredExercises] = useState(exerciseLibrary);
+
+  // Handle ESC key press for this modal specifically
+  useEffect(() => {
+    const handleEscKey = (event) => {
+      if (event.key === "Escape") {
+        event.stopPropagation(); // Prevent the event from reaching parent modal
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleEscKey);
+    return () => window.removeEventListener("keydown", handleEscKey);
+  }, [onClose]);
 
   // Filter exercises based on search term
   useEffect(() => {
@@ -33,6 +47,16 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
 
   return (
     <div className="flex flex-col h-full">
+      {/* Info message about templates */}
+      <div className="mb-4">
+        <InfoBanner
+          icon="mdi:information-outline"
+          title="Templates with placeholder content"
+          subtitle="Some exercises may have generic images or videos. Customize with your own media as needed."
+          variant="info"
+        />
+      </div>
+
       {/* Search input */}
       <div className="mb-4 relative">
         <div className="relative">

@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 
-export function useClientEditProfileForm(initialUserData = null) {
+export function useClientEditProfileForm() {
   const router = useRouter();
   const [previewImage, setPreviewImage] = useState(null);
   const [activeSection, setActiveSection] = useState("basicInfo");
@@ -32,8 +32,8 @@ export function useClientEditProfileForm(initialUserData = null) {
   });
 
   // Helper function to process client data
-  const processClientData = useCallback((data) => {
-    return {
+  const processClientData = useCallback(
+    (data) => ({
       firstName: data.firstName || "",
       lastName: data.lastName || "",
       dateOfBirth: data.dateOfBirth ? data.dateOfBirth.slice(0, 10) : "",
@@ -58,8 +58,9 @@ export function useClientEditProfileForm(initialUserData = null) {
       description: data.description || "",
       medicalConditions: data.medicalConditions || "",
       allergies: data.allergies || "",
-    };
-  }, []);
+    }),
+    []
+  );
 
   // Fetch client profile on mount or use initial data
   useEffect(() => {
@@ -68,15 +69,10 @@ export function useClientEditProfileForm(initialUserData = null) {
       try {
         let data;
 
-        if (initialUserData) {
-          // Use provided data
-          data = initialUserData;
-        } else {
-          // Fetch data from API
-          const res = await fetch("/api/users/client");
-          if (!res.ok) throw new Error("No client profile");
-          data = await res.json();
-        }
+        // Always fetch fresh data from API with edit mode for complete profile data
+        // Don't use initialUserData as it contains only basic dashboard data
+        const res = await fetch("/api/users/client?mode=edit");
+        if (!res.ok) throw new Error("No client profile");
 
         const processedData = processClientData(data);
         setClientData(processedData);
@@ -89,7 +85,7 @@ export function useClientEditProfileForm(initialUserData = null) {
     };
 
     initializeData();
-  }, [initialUserData, processClientData]);
+  }, [processClientData]); // Remove initialUserData dependency
 
   // Progress calculation
   const calculateFormProgress = useCallback(() => {
