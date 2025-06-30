@@ -2,7 +2,7 @@ import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { AnimatedTabContent } from "./DashboardTabs";
 
@@ -14,10 +14,10 @@ import {
   SecuritySettings,
 } from "@/components/custom/dashboard/client/settings";
 // Trainer Settings
+import { SecuritySettings as TrainerSecuritySettings } from "@/components/custom/dashboard/shared/SecuritySettings";
 import {
   AccountSettings as TrainerAccountSettings,
   LanguagePreferences as TrainerLanguagePreferences,
-  SecuritySettings as TrainerSecuritySettings,
 } from "@/components/custom/dashboard/trainer/settings";
 
 export const UserSettings = ({
@@ -29,8 +29,92 @@ export const UserSettings = ({
   const [activeSection, setActiveSection] = useState("account");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [settingsData, setSettingsData] = useState(userData);
+  const [fetchingSettings, setFetchingSettings] = useState(false);
   const { data: session } = useSession();
   const router = useRouter();
+
+  // Fetch settings data when component mounts for trainers
+  useEffect(() => {
+    const fetchSettingsData = async () => {
+      if (profileType === "trainer") {
+        setFetchingSettings(true);
+        try {
+          const res = await fetch("/api/users/trainer?mode=settings");
+          if (res.ok) {
+            const response = await res.json();
+            if (response.success && response.data) {
+              setSettingsData(response.data);
+            } else {
+              // If no settings exist, use default settings structure
+              setSettingsData({
+                notifications: true,
+                emailNotifications: true,
+                smsNotifications: false,
+                autoAcceptBookings: false,
+                requireDeposit: false,
+                depositAmount: null,
+                timezone: "UTC",
+                workingHours: null,
+                blackoutDates: null,
+                ...userData, // Merge with any existing user data
+              });
+            }
+          } else {
+            console.error("Failed to fetch settings:", res.status);
+            // Use userData as fallback
+            setSettingsData(userData);
+          }
+        } catch (error) {
+          console.error("Error fetching trainer settings:", error);
+          // Continue with provided userData if settings fetch fails
+          setSettingsData(userData);
+        } finally {
+          setFetchingSettings(false);
+        }
+      } else if (profileType === "client") {
+        setFetchingSettings(true);
+        try {
+          const res = await fetch("/api/users/client?mode=settings");
+          if (res.ok) {
+            const response = await res.json();
+            if (response.success && response.data) {
+              setSettingsData(response.data);
+            } else {
+              // If no settings exist, use default settings structure
+              setSettingsData({
+                notifications: true,
+                emailNotifications: true,
+                smsNotifications: false,
+                reminderTime: 24,
+                privacyLevel: "public",
+                shareProgress: true,
+                timezone: "UTC",
+                preferredLanguage: "en",
+                measurementUnit: "metric",
+                ...userData, // Merge with any existing user data
+              });
+            }
+          } else {
+            console.error("Failed to fetch settings:", res.status);
+            // Use userData as fallback
+            setSettingsData(userData);
+          }
+        } catch (error) {
+          console.error("Error fetching client settings:", error);
+          // Continue with provided userData if settings fetch fails
+          setSettingsData(userData);
+        } finally {
+          setFetchingSettings(false);
+        }
+      } else {
+        // For unknown profile types, just use the provided userData
+        setSettingsData(userData);
+      }
+    };
+
+    fetchSettingsData();
+  }, [profileType, userData]);
 
   // Define sections for settings
   const sections = [
@@ -68,7 +152,7 @@ export const UserSettings = ({
       // Call the onSave callback with the updated data
       if (onSave) {
         await onSave({
-          ...userData,
+          ...settingsData,
           ...sectionData,
           section: section,
         });
@@ -76,24 +160,6 @@ export const UserSettings = ({
     } catch (err) {
       setError(err.message || "Failed to save settings");
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSaveCurrentSection = async () => {
-    // This will trigger the save for the currently active section
-    // The actual save logic is handled by the individual components
-    setLoading(true);
-    setError("");
-
-    try {
-      // We'll let the individual components handle their own save logic
-      // This is just to show loading state
-      setTimeout(() => {
-        setLoading(false);
-      }, 1000);
-    } catch (err) {
-      setError(err.message || "Failed to save settings");
       setLoading(false);
     }
   };
@@ -120,6 +186,33 @@ export const UserSettings = ({
     const ClientLanguageComponent = LanguagePreferences;
     const ClientSecurityComponent = SecuritySettings;
 
+    // Show loading state while fetching settings
+    if (
+      fetchingSettings &&
+      (profileType === "trainer" || profileType === "client")
+    ) {
+      return (
+        <div className="bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] rounded-2xl p-8 border border-[rgba(255,107,0,0.1)]">
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <Icon
+              icon="eos-icons:loading"
+              width={32}
+              height={32}
+              className="text-[#FF6B00] animate-spin"
+            />
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-white mb-2">
+                Loading Settings
+              </h3>
+              <p className="text-gray-400 text-sm">
+                Please wait while we fetch your settings...
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="space-y-6">
         <AnimatedTabContent
@@ -128,12 +221,12 @@ export const UserSettings = ({
         >
           {profileType === "trainer" ? (
             <TrainerAccountSettings
-              userData={userData}
+              userData={settingsData}
               onSave={(data) => handleSave(data, "account")}
             />
           ) : (
             <ClientAccountComponent
-              userData={userData}
+              userData={settingsData}
               onSave={(data) => handleSave(data, "account")}
             />
           )}
@@ -145,12 +238,12 @@ export const UserSettings = ({
         >
           {profileType === "trainer" ? (
             <TrainerLanguagePreferences
-              userData={userData}
+              userData={settingsData}
               onSave={(data) => handleSave(data, "preferences")}
             />
           ) : (
             <ClientLanguageComponent
-              userData={userData}
+              userData={settingsData}
               onSave={(data) => handleSave(data, "preferences")}
             />
           )}
@@ -162,12 +255,12 @@ export const UserSettings = ({
         >
           {profileType === "trainer" ? (
             <TrainerSecuritySettings
-              userData={userData}
+              userData={settingsData}
               onSave={(data) => handleSave(data, "security")}
             />
           ) : (
             <ClientSecurityComponent
-              userData={userData}
+              userData={settingsData}
               onSave={(data) => handleSave(data, "security")}
             />
           )}
@@ -536,43 +629,6 @@ export const UserSettings = ({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3 order-1 sm:order-2 w-full sm:w-auto">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              disabled={loading}
-              className="flex-1 sm:flex-none border-[rgba(255,107,0,0.3)] text-gray-300 hover:text-white hover:border-[#FF6B00] hover:bg-[rgba(255,107,0,0.1)] transition-all duration-300 px-4 py-2 text-sm sm:text-base"
-            >
-              Close
-            </Button>
-            <Button
-              onClick={handleSaveCurrentSection}
-              disabled={loading}
-              className="flex-1 sm:flex-none bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] hover:from-[#FF5500] hover:to-[#FF8500] text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-4 py-2 text-sm sm:text-base font-medium"
-            >
-              {loading ? (
-                <>
-                  <Icon
-                    icon="eos-icons:loading"
-                    width={16}
-                    height={16}
-                    className="mr-2 animate-spin"
-                  />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Icon
-                    icon="mdi:content-save"
-                    width={16}
-                    height={16}
-                    className="mr-2"
-                  />
-                  Save {sections.find((s) => s.id === activeSection)?.label}
-                </>
-              )}
-            </Button>
-          </div>
         </div>
       </motion.div>
     </div>
