@@ -97,13 +97,9 @@ export function useTrainerEditProfileForm() {
     const initializeData = async () => {
       setLoading(true);
       try {
-        let data;
-
-        // Always fetch fresh data with edit mode for complete profile data
-        // Don't use initialUserData as it contains only basic dashboard data
         const res = await fetch("/api/users/trainer?mode=edit");
         if (!res.ok) throw new Error("No trainer profile");
-
+        const { data } = await res.json();
         const processedData = processTrainerData(data);
         setTrainerData(processedData);
         setInitialCertifications(data.certifications || []);
