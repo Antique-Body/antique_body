@@ -14,7 +14,7 @@ const AUTH_PATHS = ["/auth/reset-password"];
 // Check if user exists in database via existing /me API endpoint
 async function checkUserExistsInDB(request) {
   try {
-    const url = new URL("/api/users/me", request.url);
+    const url = `${request.nextUrl.origin}/api/users/me`;
     const response = await fetch(url, {
       method: "GET",
       headers: {

@@ -67,13 +67,9 @@ export function useClientEditProfileForm() {
     const initializeData = async () => {
       setLoading(true);
       try {
-        let data;
-
-        // Always fetch fresh data from API with edit mode for complete profile data
-        // Don't use initialUserData as it contains only basic dashboard data
         const res = await fetch("/api/users/client?mode=edit");
         if (!res.ok) throw new Error("No client profile");
-
+        const { data } = await res.json();
         const processedData = processClientData(data);
         setClientData(processedData);
         setPreviewImage(processedData.profileImage || null);
