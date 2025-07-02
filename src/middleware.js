@@ -9,7 +9,7 @@ const PUBLIC_PATHS = [
   "/trainers-marketplace/:path*",
   "/contact",
 ];
-const AUTH_PATHS = ["/auth/reset-password"];
+// const AUTH_PATHS = ["/auth/reset-password"];
 
 // Check if user exists in database via existing /me API endpoint
 async function checkUserExistsInDB(request) {
@@ -80,48 +80,48 @@ function getDashboardRedirect(token) {
   return "/select-role";
 }
 
-function getOnboardingRedirect(role, token, pathname) {
-  if (!role) return pathname === "/select-role" ? null : "/select-role";
-  const config = {
-    client: {
-      profile: token.clientProfile,
-      personal: "/client/personal-details",
-      allowed: [
-        "/client/dashboard",
-        "/client/dashboard/trainwithcoach",
-        "/client/dashboard/overview",
-        "/client/dashboard/upcoming-trainings",
-        "/client/dashboard/trainings",
-        "/client/dashboard/progress",
-        "/client/dashboard/messages",
-        "/client/dashboard/nutrition",
-        "/client/dashboard/health",
-        "/client/edit-profile",
-      ],
-      fallback: "/client/dashboard",
-    },
-    trainer: {
-      profile: token.trainerProfile,
-      personal: "/trainer/personal-details",
-      allowed: [
-        "/trainer/dashboard",
-        "/trainer/dashboard/newclients",
-        "/trainer/dashboard/clients",
-        "/trainer/dashboard/upcoming-trainings",
-        "/trainer/dashboard/messages",
-        "/trainer/dashboard/plans",
-        "/trainer/dashboard/exercises",
-        "/trainer/dashboard/meals",
-        "/trainer/edit-profile",
-      ],
-      fallback: "/trainer/dashboard",
-    },
-  }[role];
-  if (!config) return "/select-role";
-  if (!config.profile)
-    return pathname === config.personal ? null : config.personal;
-  return config.allowed.includes(pathname) ? null : config.fallback;
-}
+// function getOnboardingRedirect(role, token, pathname) {
+//   if (!role) return pathname === "/select-role" ? null : "/select-role";
+//   const config = {
+//     client: {
+//       profile: token.clientProfile,
+//       personal: "/client/personal-details",
+//       allowed: [
+//         "/client/dashboard",
+//         "/client/dashboard/trainwithcoach",
+//         "/client/dashboard/overview",
+//         "/client/dashboard/upcoming-trainings",
+//         "/client/dashboard/trainings",
+//         "/client/dashboard/progress",
+//         "/client/dashboard/messages",
+//         "/client/dashboard/nutrition",
+//         "/client/dashboard/health",
+//         "/client/edit-profile",
+//       ],
+//       fallback: "/client/dashboard",
+//     },
+//     trainer: {
+//       profile: token.trainerProfile,
+//       personal: "/trainer/personal-details",
+//       allowed: [
+//         "/trainer/dashboard",
+//         "/trainer/dashboard/newclients",
+//         "/trainer/dashboard/clients",
+//         "/trainer/dashboard/upcoming-trainings",
+//         "/trainer/dashboard/messages",
+//         "/trainer/dashboard/plans",
+//         "/trainer/dashboard/exercises",
+//         "/trainer/dashboard/meals",
+//         "/trainer/edit-profile",
+//       ],
+//       fallback: "/trainer/dashboard",
+//     },
+//   }[role];
+//   if (!config) return "/select-role";
+//   if (!config.profile)
+//     return pathname === config.personal ? null : config.personal;
+//   return config.allowed.includes(pathname) ? null : config.fallback;
+// }
 
 export async function middleware(request) {
   if (process.env.NODE_ENV_TYPE === "production") {
