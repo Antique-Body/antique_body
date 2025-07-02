@@ -78,6 +78,8 @@ export const ExerciseModal = ({
   const [uploadStatus, setUploadStatus] = useState({ image: "", video: "" });
   const [videoUrl, setVideoUrl] = useState("");
   const [showVideoUrlInput, setShowVideoUrlInput] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [videoFile, setVideoFile] = useState(null);
 
   // Load exercise data if in edit mode
   useEffect(() => {
@@ -213,12 +215,13 @@ export const ExerciseModal = ({
     if (fileType === "video") {
       setVideoPreview(fileUrl);
       setFormData((prev) => ({ ...prev, video: fileUrl }));
-      // Reset video URL input when file is uploaded
+      setVideoFile(file);
       setVideoUrl("");
       setShowVideoUrlInput(false);
     } else {
       setImagePreview(fileUrl);
       setFormData((prev) => ({ ...prev, imageUrl: fileUrl }));
+      setImageFile(file);
     }
   };
 
@@ -228,12 +231,14 @@ export const ExerciseModal = ({
       setVideoPreview(null);
       setVideoUrl("");
       setFormData((prev) => ({ ...prev, video: null }));
+      setVideoFile(null);
       // Reset file input
       const videoInput = document.getElementById("video-upload");
       if (videoInput) videoInput.value = "";
     } else {
       setImagePreview(null);
       setFormData((prev) => ({ ...prev, imageUrl: null }));
+      setImageFile(null);
       // Reset file input
       const imageInput = document.getElementById("image-upload");
       if (imageInput) imageInput.value = "";
@@ -311,25 +316,20 @@ export const ExerciseModal = ({
       setIsSubmitting(true);
       setIsUploading(false);
 
-      // Check if there are files to upload
+      // Pripremi fajlove za upload
       const filesToUpload = {};
-      if (imagePreview && imagePreview.startsWith("blob:")) {
-        // Get file from input
-        const imageInput = document.getElementById("image-upload");
-        if (imageInput?.files[0]) {
-          filesToUpload.image = imageInput.files[0];
-          setUploadStatus((prev) => ({ ...prev, image: "Uploading image..." }));
-        }
+      if (imagePreview && imagePreview.startsWith("blob:") && imageFile) {
+        filesToUpload.image = imageFile;
+        setUploadStatus((prev) => ({ ...prev, image: "Uploading image..." }));
       }
-      if (videoPreview && videoPreview.startsWith("blob:")) {
-        const videoInput = document.getElementById("video-upload");
-        if (videoInput?.files[0]) {
-          filesToUpload.video = videoInput.files[0];
-          setUploadStatus((prev) => ({ ...prev, video: "Uploading video..." }));
-        }
+      if (videoPreview && videoPreview.startsWith("blob:") && videoFile) {
+        filesToUpload.video = videoFile;
+        setUploadStatus((prev) => ({ ...prev, video: "Uploading video..." }));
       }
+      console.log("filesToUpload", filesToUpload);
 
-      // If there are files to upload, show upload progress
+      // Prvo uploaduj fajlove, pa tek onda šalji podatke u bazu
+      let uploadedUrls = {};
       if (Object.keys(filesToUpload).length > 0) {
         setIsUploading(true);
         setUploadStatus((prev) => ({
@@ -337,19 +337,28 @@ export const ExerciseModal = ({
           ...(filesToUpload.image && { image: "Uploading image..." }),
           ...(filesToUpload.video && { video: "Uploading video..." }),
         }));
+        uploadedUrls = await uploadFiles(filesToUpload);
       }
 
-      const uploadedUrls = await uploadFiles(filesToUpload);
-
-      // Prepare final form data
+      // Pripremi podatke za backend
       const finalFormData = {
         ...formData,
-        id: formData.id || undefined, // Remove ID for new exercises
+        id: formData.id || undefined,
         imageUrl: uploadedUrls.exerciseImage || formData.imageUrl,
-        video: uploadedUrls.exerciseVideo || formData.video, // Video URL will be preserved if it's not a blob
+        video: uploadedUrls.exerciseVideo || formData.video,
       };
 
-      // Call the save function
+      // Ako je video bio blob, ali nije uploadovan (npr. greška), nemoj slati blob
+      if (finalFormData.video && finalFormData.video.startsWith("blob:")) {
+        finalFormData.video = "";
+      }
+      if (
+        finalFormData.imageUrl &&
+        finalFormData.imageUrl.startsWith("blob:")
+      ) {
+        finalFormData.imageUrl = "";
+      }
+
       await onSave(finalFormData);
     } catch (error) {
       console.error("Error saving exercise:", error);
