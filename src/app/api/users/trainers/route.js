@@ -359,9 +359,6 @@ export async function GET(request) {
     } catch (error) {
       // If the table doesn't exist or there's any other error, we'll return empty results
       if (error.code === "P2021") {
-        console.log(
-          "Trainer table does not exist yet, returning empty results"
-        );
       } else {
         console.error("Error fetching trainers:", error);
       }

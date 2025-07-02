@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 
-export function useTrainerEditProfileForm(initialUserData = null) {
+export function useTrainerEditProfileForm() {
   const router = useRouter();
   const [previewImage, setPreviewImage] = useState(null);
   const [activeSection, setActiveSection] = useState("basicInfo");
@@ -99,16 +99,10 @@ export function useTrainerEditProfileForm(initialUserData = null) {
       try {
         let data;
 
-        if (initialUserData) {
-          // Koristi proslijećene podatke
-          data = initialUserData;
-        } else {
-          // Fetch podatke iz API-ja
-          const res = await fetch("/api/users/trainer");
-          if (!res.ok) throw new Error("No trainer profile");
-          data = await res.json();
-          data = data.trainerProfile ? data : { trainerProfile: data };
-        }
+        // Always fetch fresh data with edit mode for complete profile data
+        // Don't use initialUserData as it contains only basic dashboard data
+        const res = await fetch("/api/users/trainer?mode=edit");
+        if (!res.ok) throw new Error("No trainer profile");
 
         const processedData = processTrainerData(data);
         setTrainerData(processedData);
@@ -121,7 +115,7 @@ export function useTrainerEditProfileForm(initialUserData = null) {
     };
 
     initializeData();
-  }, [initialUserData, processTrainerData]);
+  }, [processTrainerData]); // Remove initialUserData dependency
 
   // Progress calculation
   const calculateFormProgress = useCallback(() => {
