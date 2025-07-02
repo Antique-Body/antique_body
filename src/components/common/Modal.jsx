@@ -1,6 +1,7 @@
 "use client";
 import { Icon } from "@iconify/react";
 import { memo, useEffect } from "react";
+import ReactDOM from "react-dom";
 
 import { Button } from "@/components/common/Button";
 
@@ -79,13 +80,13 @@ export const Modal = memo(
     // Determine z-index based on whether it's nested
     const zIndexClass = isNested ? "z-[60]" : "z-50";
 
-    return (
+    return ReactDOM.createPortal(
       <div
-        className={`fixed inset-0 ${zIndexClass} flex items-center justify-center overflow-hidden bg-black/40 backdrop-blur-[6px] p-0 sm:p-4`}
+        className={`fixed inset-0 ${zIndexClass} flex items-center justify-center bg-black/40 backdrop-blur-[6px] p-0 sm:p-4`}
         onClick={handleBackdropClick}
       >
         <div
-          className={`animate-modalFadeIn relative w-full h-full sm:h-auto ${getMaxWidth()} sm:max-h-[90vh] sm:rounded-xl border-0 sm:border border-[#333] bg-[#121212]/95 shadow-2xl flex flex-col`}
+          className={`animate-modalFadeIn relative w-full sm:w-auto max-h-screen sm:max-h-[90vh] sm:rounded-xl border-0 sm:border border-[#333] bg-[#121212]/95 shadow-2xl flex flex-col ${getMaxWidth()}`}
           style={{
             animation: "modalFadeIn 0.3s ease-out",
             boxShadow: "0 15px 40px -10px rgba(255,107,0,0.3)",
@@ -151,7 +152,8 @@ export const Modal = memo(
             </div>
           )}
         </div>
-      </div>
+      </div>,
+      typeof window !== "undefined" ? document.body : null
     );
   }
 );
