@@ -159,29 +159,29 @@ export async function middleware(request) {
   }
 
   // 3. Not logged in
-  if (!token) {
-    return NextResponse.redirect(new URL("/auth/login", request.url));
-  }
+  // if (!token) {
+  //   return NextResponse.redirect(new URL("/auth/login", request.url));
+  // }
 
-  // 4. User must exist in DB
-  if (token.sub && token.email && !isOAuthFlow) {
-    const userExists = await checkUserExistsInDB(request);
-    if (!userExists)
-      return NextResponse.redirect(new URL("/auth/login", request.url));
-  }
+  // // 4. User must exist in DB
+  // if (token.sub && token.email && !isOAuthFlow) {
+  //   const userExists = await checkUserExistsInDB(request);
+  //   if (!userExists)
+  //     return NextResponse.redirect(new URL("/auth/login", request.url));
+  // }
 
-  // 5. Auth pages
-  if (["/auth/login", "/auth/register", ...AUTH_PATHS].includes(pathname)) {
-    return NextResponse.redirect(
-      new URL(getDashboardRedirect(token), request.url)
-    );
-  }
+  // // 5. Auth pages
+  // if (["/auth/login", "/auth/register", ...AUTH_PATHS].includes(pathname)) {
+  //   return NextResponse.redirect(
+  //     new URL(getDashboardRedirect(token), request.url)
+  //   );
+  // }
 
-  // 6. Onboarding/dashboard redirect
-  const onboardingRedirect = getOnboardingRedirect(token.role, token, pathname);
-  if (onboardingRedirect) {
-    return NextResponse.redirect(new URL(onboardingRedirect, request.url));
-  }
+  // // 6. Onboarding/dashboard redirect
+  // const onboardingRedirect = getOnboardingRedirect(token.role, token, pathname);
+  // if (onboardingRedirect) {
+  //   return NextResponse.redirect(new URL(onboardingRedirect, request.url));
+  // }
 
   return NextResponse.next();
 }
