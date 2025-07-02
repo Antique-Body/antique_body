@@ -1,5 +1,5 @@
 export { CertificationUpload } from "./CertificationUpload";
-export { RootErrorBoundary } from "./RootErrorBoundary";
+// export { RootErrorBoundary } from "./RootErrorBoundary";
 export { LanguageSelector } from "./LanguageSelector";
 export { ProfileImageUpload } from "./ProfileImageUpload";
 export { SpecialtySelector } from "./SpecialtySelector";
