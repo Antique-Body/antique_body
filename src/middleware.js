@@ -8,6 +8,9 @@ const PUBLIC_PATHS = [
   "/trainers-marketplace",
   "/trainers-marketplace/:path*",
   "/contact",
+  "/trainer/dashboard/plans",
+  "/trainer/dashboard/plans/training/create",
+  "/trainer/dashboard/plans/nutrition/create",
 ];
 const AUTH_PATHS = ["/auth/reset-password"];
 

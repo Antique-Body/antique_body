@@ -1,0 +1,1 @@
+export { TrainingPlanForm } from "./TrainingPlanForm";
