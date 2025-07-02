@@ -75,6 +75,8 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
   const [uploadStatus, setUploadStatus] = useState({ image: "", video: "" });
   const [videoUrl, setVideoUrl] = useState("");
   const [showVideoUrlInput, setShowVideoUrlInput] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [videoFile, setVideoFile] = useState(null);
 
   // Load meal data if in edit mode
   useEffect(() => {
@@ -211,12 +213,13 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
     if (fileType === "video") {
       setVideoPreview(fileUrl);
       setFormData((prev) => ({ ...prev, video: fileUrl }));
-      // Reset video URL input when file is uploaded
+      setVideoFile(file);
       setVideoUrl("");
       setShowVideoUrlInput(false);
     } else {
       setImagePreview(fileUrl);
       setFormData((prev) => ({ ...prev, imageUrl: fileUrl }));
+      setImageFile(file);
     }
   };
 
@@ -226,12 +229,14 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
       setVideoPreview(null);
       setVideoUrl("");
       setFormData((prev) => ({ ...prev, video: null }));
+      setVideoFile(null);
       // Reset file input
       const videoInput = document.getElementById("video-upload");
       if (videoInput) videoInput.value = "";
     } else {
       setImagePreview(null);
       setFormData((prev) => ({ ...prev, imageUrl: null }));
+      setImageFile(null);
       // Reset file input
       const imageInput = document.getElementById("image-upload");
       if (imageInput) imageInput.value = "";
@@ -305,22 +310,15 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
       setIsSubmitting(true);
       setIsUploading(false);
 
-      // Check if there are files to upload
+      // Pripremi fajlove za upload
       const filesToUpload = {};
-      if (imagePreview && imagePreview.startsWith("blob:")) {
-        // Get file from input
-        const imageInput = document.getElementById("image-upload");
-        if (imageInput?.files[0]) {
-          filesToUpload.image = imageInput.files[0];
-          setUploadStatus((prev) => ({ ...prev, image: "Uploading image..." }));
-        }
+      if (imagePreview && imagePreview.startsWith("blob:") && imageFile) {
+        filesToUpload.image = imageFile;
+        setUploadStatus((prev) => ({ ...prev, image: "Uploading image..." }));
       }
-      if (videoPreview && videoPreview.startsWith("blob:")) {
-        const videoInput = document.getElementById("video-upload");
-        if (videoInput?.files[0]) {
-          filesToUpload.video = videoInput.files[0];
-          setUploadStatus((prev) => ({ ...prev, video: "Uploading video..." }));
-        }
+      if (videoPreview && videoPreview.startsWith("blob:") && videoFile) {
+        filesToUpload.video = videoFile;
+        setUploadStatus((prev) => ({ ...prev, video: "Uploading video..." }));
       }
 
       // If there are files to upload, show upload progress
