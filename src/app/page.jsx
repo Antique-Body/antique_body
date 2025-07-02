@@ -133,7 +133,7 @@ export default function Home() {
         <Navigation />
 
         {/* Hero Section */}
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-24">
           <div className="container mx-auto px-4 z-10">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
               <div className="lg:col-span-6 order-2 lg:order-1">
