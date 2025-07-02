@@ -1,17 +1,12 @@
 "use client";
+import { Icon } from "@iconify/react";
+
 import { useClientRegistration } from "../../../hooks/useClientRegistration";
 
 import { EffectBackground } from "@/components/background";
+import { Button, Footer, BrandLogo } from "@/components/common";
+import { ArrowRight, ArrowLeft } from "@/components/common/Icons";
 import {
-  Button,
-  Footer,
-  Card,
-  BrandLogo,
-  StepProgressBar,
-} from "@/components/common";
-import { ArrowRight } from "@/components/common/Icons";
-import {
-  TipsSection,
   BasicInfoStep,
   GoalsAndPreferencesStep,
   ContactAndLocationStep,
@@ -31,138 +26,172 @@ const ClientRegistration = () => {
     handleProfileImageChange,
   } = useClientRegistration();
 
+  const steps = [
+    {
+      id: 1,
+      title: "Basic Info",
+      subtitle: "Tell us about yourself",
+      icon: "mdi:account",
+      component: BasicInfoStep,
+    },
+    {
+      id: 2,
+      title: "Goals & Preferences",
+      subtitle: "What are your fitness goals?",
+      icon: "mdi:target",
+      component: GoalsAndPreferencesStep,
+    },
+    {
+      id: 3,
+      title: "Contact & Location",
+      subtitle: "How can trainers reach you?",
+      icon: "mdi:map-marker",
+      component: ContactAndLocationStep,
+    },
+    {
+      id: 4,
+      title: "Profile Setup",
+      subtitle: "Complete your profile",
+      icon: "mdi:camera-account",
+      component: ProfileSetupStep,
+    },
+  ];
+
+  const currentStepData = steps[step - 1];
+  const CurrentStepComponent = currentStepData.component;
+
   return (
-    <div className="relative min-h-screen text-white">
+    <div className="min-h-screen bg-black text-white">
       <EffectBackground />
-      <div className="relative z-10 mx-auto max-w-4xl px-4 py-8">
-        {/* Header */}
-        <header className="mb-8 flex items-center justify-center py-4">
+
+      <div className="relative z-10 max-w-2xl mx-auto px-4 py-6 sm:py-8">
+        {/* Compact header with logo and progress */}
+        <div className="flex items-center justify-between mb-6">
           <BrandLogo />
-        </header>
 
-        {/* Progress Bar */}
-        <StepProgressBar currentStep={step} totalSteps={4} />
-
-        <Card
-          variant="darkStrong"
-          hover={true}
-          width="100%"
-          maxWidth="none"
-          className="mb-12 md:p-8"
-        >
-          <h1 className="mb-6 text-2xl font-bold md:text-3xl">
-            {step === 1 && "Basic Information"}
-            {step === 2 && "Goals & Preferences"}
-            {step === 3 && "Contact & Location"}
-            {step === 4 && "Profile Setup"}
-          </h1>
-
-          <form onSubmit={handleSubmit}>
-            {/* Step 1: Basic Information */}
-            {step === 1 && (
-              <BasicInfoStep
-                formData={formData}
-                onChange={handleChange}
-                errors={errors}
-                userType="client"
-              />
-            )}
-
-            {/* Step 2: Goals and Preferences */}
-            {step === 2 && (
-              <GoalsAndPreferencesStep
-                formData={formData}
-                onChange={handleChange}
-                errors={errors}
-              />
-            )}
-
-            {/* Step 3: Contact and Location */}
-            {step === 3 && (
-              <ContactAndLocationStep
-                formData={formData}
-                onChange={handleChange}
-                errors={errors}
-                userType="client"
-              />
-            )}
-
-            {/* Step 4: Profile Setup */}
-            {step === 4 && (
-              <ProfileSetupStep
-                formData={formData}
-                onChange={handleChange}
-                onProfileImageChange={handleProfileImageChange}
-                errors={errors}
-                userType="client"
-                titleText="Profile Image"
-                descriptionText="Upload a photo for your profile"
-                bioPlaceholder="Write a brief description about yourself, your fitness journey, and what you're looking for in a trainer..."
-                guidelines={[
-                  "Choose a clear photo that shows your face",
-                  "Well-lit with a simple background",
-                  "JPG, PNG, or GIF format (max 1MB)",
-                ]}
-                guidelineHelpText="A profile photo helps trainers recognize you and personalizes your experience."
-              />
-            )}
-
-            {/* Navigation buttons */}
-            <div className="mt-8 flex justify-between">
-              {step > 1 ? (
-                <Button
-                  onClick={goToPrevStep}
-                  variant="secondary"
-                  type="button"
-                >
-                  Back
-                </Button>
-              ) : (
-                <div></div>
-              )}
-
-              {step < 4 ? (
-                <Button onClick={goToNextStep} type="button">
-                  Continue
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  rightIcon={
-                    loading ? (
-                      <svg
-                        className="animate-spin h-5 w-5 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8v8z"
-                        ></path>
-                      </svg>
-                    ) : (
-                      <ArrowRight size={20} />
-                    )
-                  }
-                  disabled={loading}
-                >
-                  {loading ? "Saving..." : "Complete Profile"}
-                </Button>
-              )}
+          {/* Compact step indicator */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-zinc-400 hidden sm:inline">
+              {step}/{steps.length}
+            </span>
+            <div className="flex gap-1">
+              {steps.map((s, index) => (
+                <div
+                  key={s.id}
+                  className={`h-2 w-8 rounded-full transition-all duration-300 ${
+                    index + 1 <= step ? "bg-[#FF6B00]" : "bg-zinc-700"
+                  }`}
+                />
+              ))}
             </div>
-          </form>
-        </Card>
-        <TipsSection step={step} userType="client" />
+          </div>
+        </div>
+
+        {/* Step header - much more compact */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#FF6B00]/10 border border-[#FF6B00]/20 mb-4">
+            <Icon
+              icon={currentStepData.icon}
+              className="w-7 h-7 text-[#FF6B00]"
+            />
+          </div>
+          <h1 className="text-2xl font-bold mb-2">{currentStepData.title}</h1>
+          <p className="text-zinc-400">{currentStepData.subtitle}</p>
+        </div>
+
+        {/* Main content */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Step content */}
+          <CurrentStepComponent
+            formData={formData}
+            onChange={handleChange}
+            onProfileImageChange={handleProfileImageChange}
+            errors={errors}
+            userType="client"
+          />
+
+          {/* Navigation buttons - inline with content */}
+          <div className="flex items-center justify-between gap-4 pt-8 border-t border-zinc-800">
+            {/* Back button */}
+            {step > 1 ? (
+              <Button
+                onClick={goToPrevStep}
+                variant="secondary"
+                className="bg-zinc-800 hover:bg-zinc-700 border-zinc-700"
+                leftIcon={<ArrowLeft size={18} />}
+              >
+                Back
+              </Button>
+            ) : (
+              <div />
+            )}
+
+            {/* Progress indicator */}
+            <div className="text-center">
+              <div className="text-xs text-zinc-400 mb-1">
+                Step {step} of {steps.length}
+              </div>
+              <div className="text-sm font-medium text-white">
+                {Math.round((step / steps.length) * 100)}% Complete
+              </div>
+            </div>
+
+            {/* Next/Complete button */}
+            {step < steps.length ? (
+              <Button
+                onClick={goToNextStep}
+                variant="primary"
+                className="bg-[#FF6B00] hover:bg-[#E65A00]"
+                rightIcon={<ArrowRight size={18} />}
+              >
+                Continue
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={loading}
+                className="bg-[#FF6B00] hover:bg-[#E65A00]"
+                rightIcon={
+                  loading ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <Icon icon="mdi:check" className="w-4 h-4" />
+                  )
+                }
+                onClick={handleSubmit}
+              >
+                {loading ? "Saving..." : "Complete"}
+              </Button>
+            )}
+          </div>
+        </form>
+
+        {/* Tips section - only show on larger screens and not taking much space */}
+        <div className="hidden lg:block mt-12">
+          <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
+                <Icon icon="mdi:lightbulb" className="w-4 h-4 text-blue-400" />
+              </div>
+              <div>
+                <h3 className="font-medium text-blue-400 mb-1 text-sm">
+                  Quick Tip
+                </h3>
+                <p className="text-sm text-zinc-300 leading-relaxed">
+                  {step === 1 &&
+                    "Be honest about your fitness level - this helps us match you with the right trainer for your needs."}
+                  {step === 2 &&
+                    "Setting clear goals helps trainers create personalized workout plans that get you results faster."}
+                  {step === 3 &&
+                    "Adding your location helps us find trainers near you, making it easier to meet in person."}
+                  {step === 4 &&
+                    "A good profile photo and description help trainers understand who they'll be working with."}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <Footer />
       </div>

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 import { FormSection } from "./";
 
-import { FormField, InfoBanner } from "@/components/common";
+import { FormField } from "@/components/common";
 import { ErrorIcon } from "@/components/common/Icons";
 import { SpecialtySelector } from "@/components/custom/shared";
 import { usePrefillFromSession } from "@/hooks";
@@ -80,56 +80,64 @@ export const BasicInfoStep = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Personal Information */}
       <FormSection
         title="Personal Information"
         description="Basic information about yourself"
-        icon={<Icon icon="mdi:account" width={20} height={20} />}
+        icon="mdi:account"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            label="First Name"
-            name="firstName"
-            value={formData.firstName ?? session?.user?.firstName ?? ""}
-            placeholder="Your first name"
-            onChange={onChange}
-            error={errors.firstName}
-          />
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormField
+              label="First Name"
+              name="firstName"
+              value={formData.firstName ?? session?.user?.firstName ?? ""}
+              placeholder="Your first name"
+              onChange={onChange}
+              error={errors.firstName}
+              backgroundStyle="darker"
+              size="default"
+            />
 
-          <FormField
-            label="Last Name"
-            name="lastName"
-            value={formData.lastName ?? session?.user?.lastName ?? ""}
-            placeholder="Your last name"
-            onChange={onChange}
-            error={errors.lastName}
-          />
-        </div>
+            <FormField
+              label="Last Name"
+              name="lastName"
+              value={formData.lastName ?? session?.user?.lastName ?? ""}
+              placeholder="Your last name"
+              onChange={onChange}
+              error={errors.lastName}
+              backgroundStyle="darker"
+              size="default"
+            />
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            label="Date of Birth"
-            name="dateOfBirth"
-            type="date"
-            value={formData.dateOfBirth}
-            onChange={onChange}
-            error={errors.dateOfBirth}
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormField
+              label="Date of Birth"
+              name="dateOfBirth"
+              type="date"
+              value={formData.dateOfBirth}
+              onChange={onChange}
+              error={errors.dateOfBirth}
+              backgroundStyle="darker"
+            />
 
-          <FormField
-            label="Gender"
-            name="gender"
-            type="select"
-            value={formData.gender}
-            onChange={onChange}
-            error={errors.gender}
-            options={[
-              { value: "", label: "Select gender" },
-              { value: "male", label: "Male" },
-              { value: "female", label: "Female" },
-            ]}
-          />
+            <FormField
+              label="Gender"
+              name="gender"
+              type="select"
+              value={formData.gender}
+              onChange={onChange}
+              error={errors.gender}
+              backgroundStyle="darker"
+              options={[
+                { value: "", label: "Select gender" },
+                { value: "male", label: "Male" },
+                { value: "female", label: "Female" },
+              ]}
+            />
+          </div>
         </div>
       </FormSection>
 
@@ -138,51 +146,59 @@ export const BasicInfoStep = ({
         <FormSection
           title="Physical Information"
           description="Details about your physical characteristics"
-          icon={<Icon icon="mdi:human-male-height" width={20} height={20} />}
+          icon="mdi:human-male-height"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              label="Height (cm)"
-              name="height"
-              type="number"
-              value={formData.height}
-              onChange={onChange}
-              placeholder="Enter your height in cm"
-              min="100"
-              max="250"
-              error={errors.height}
-            />
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField
+                label="Height (cm)"
+                name="height"
+                type="number"
+                value={formData.height}
+                onChange={onChange}
+                placeholder="Enter your height in cm"
+                min="100"
+                max="250"
+                error={errors.height}
+                backgroundStyle="darker"
+              />
 
-            <FormField
-              label="Weight (kg)"
-              name="weight"
-              type="number"
-              value={formData.weight}
-              onChange={onChange}
-              placeholder="Enter your weight in kg"
-              min="30"
-              max="250"
-              error={errors.weight}
-            />
+              <FormField
+                label="Weight (kg)"
+                name="weight"
+                type="number"
+                value={formData.weight}
+                onChange={onChange}
+                placeholder="Enter your weight in kg"
+                min="30"
+                max="250"
+                error={errors.weight}
+                backgroundStyle="darker"
+              />
+            </div>
+
+            {/* BMI Display */}
+            {bmi && (
+              <div className="mt-4 p-4 rounded-xl border border-zinc-700 bg-zinc-900/50">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                    <Icon
+                      icon="mdi:scale-bathroom"
+                      className="w-5 h-5 text-blue-400"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-medium text-white">
+                      BMI: {bmi} - {bmiCategory}
+                    </p>
+                    <p className="text-sm text-zinc-400">
+                      Height: {formData.height}cm, Weight: {formData.weight}kg
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-
-          {/* BMI Display */}
-          {bmi && (
-            <InfoBanner
-              icon="mdi:scale-bathroom"
-              title={`Your BMI: ${bmi} - ${bmiCategory}`}
-              subtitle={`Height: ${formData.height}cm, Weight: ${formData.weight}kg`}
-              variant={
-                bmiCategory === "Normal weight"
-                  ? "success"
-                  : bmiCategory === "Underweight" ||
-                    bmiCategory === "Overweight"
-                  ? "info"
-                  : "primary"
-              }
-              className="mt-4"
-            />
-          )}
         </FormSection>
       )}
 
@@ -191,31 +207,35 @@ export const BasicInfoStep = ({
         <FormSection
           title="Fitness Experience"
           description="Your background in fitness and exercise"
-          icon={<Icon icon="mdi:dumbbell" width={20} height={20} />}
+          icon="mdi:dumbbell"
         >
-          <FormField
-            label="Experience Level"
-            name="experienceLevel"
-            type="select"
-            value={formData.experienceLevel}
-            onChange={onChange}
-            error={errors.experienceLevel}
-            options={[
-              { value: "", label: "Select your experience level" },
-              ...experienceLevels,
-            ]}
-          />
+          <div className="space-y-4">
+            <FormField
+              label="Experience Level"
+              name="experienceLevel"
+              type="select"
+              value={formData.experienceLevel}
+              onChange={onChange}
+              error={errors.experienceLevel}
+              backgroundStyle="darker"
+              options={[
+                { value: "", label: "Select your experience level" },
+                ...experienceLevels,
+              ]}
+            />
 
-          <FormField
-            label="Previous Activities"
-            name="previousActivities"
-            type="textarea"
-            value={formData.previousActivities}
-            onChange={onChange}
-            placeholder="Describe any previous fitness activities or sports you've participated in..."
-            rows={3}
-            error={errors.previousActivities}
-          />
+            <FormField
+              label="Previous Activities"
+              name="previousActivities"
+              type="textarea"
+              value={formData.previousActivities}
+              onChange={onChange}
+              placeholder="Describe any previous fitness activities or sports you've participated in..."
+              rows={3}
+              error={errors.previousActivities}
+              backgroundStyle="darker"
+            />
+          </div>
         </FormSection>
       )}
 
@@ -224,7 +244,7 @@ export const BasicInfoStep = ({
         <FormSection
           title="Professional Information"
           description="Your training background and expertise"
-          icon={<Icon icon="mdi:badge-account" width={20} height={20} />}
+          icon="mdi:badge-account"
         >
           <div className="space-y-4">
             <FormField
@@ -234,6 +254,7 @@ export const BasicInfoStep = ({
               value={formData.trainerSince}
               onChange={onChange}
               error={errors.trainerSince}
+              backgroundStyle="darker"
               options={[
                 { value: "", label: "Select year" },
                 ...yearOptions.map((year) => ({
@@ -245,22 +266,20 @@ export const BasicInfoStep = ({
 
             {/* Experience calculation display */}
             {formData.trainerSince && (
-              <div className="p-4 bg-gradient-to-r from-[#FF6B00]/10 to-[#FF6B00]/5 border border-[#FF6B00]/30 rounded-lg">
+              <div className="p-4 rounded-xl border border-[#FF6B00]/20 bg-[#FF6B00]/5">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#FF6B00]/20 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-[#FF6B00]/20 rounded-xl flex items-center justify-center">
                     <Icon
                       icon="mdi:calendar-clock"
-                      width={20}
-                      height={20}
-                      className="text-[#FF6B00]"
+                      className="w-5 h-5 text-[#FF6B00]"
                     />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-[#FF6B00]">
+                    <p className="font-medium text-[#FF6B00]">
                       {currentYear - parseInt(formData.trainerSince)} years of
                       experience
                     </p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-sm text-zinc-400">
                       Training since {formData.trainerSince}
                     </p>
                   </div>
@@ -276,18 +295,20 @@ export const BasicInfoStep = ({
         <FormSection
           title="Training Specialties"
           description="Select all areas you specialize in or have experience with"
-          icon={<Icon icon="mdi:medal" width={20} height={20} />}
+          icon="mdi:medal"
         >
-          <SpecialtySelector
-            selectedSpecialties={formData.specialties || []}
-            onChange={handleSpecialtyChange}
-          />
-          {errors.specialties && (
-            <p className="mt-3 flex items-center text-sm text-red-500">
-              <ErrorIcon size={16} className="mr-2" />
-              {errors.specialties}
-            </p>
-          )}
+          <div className="space-y-4">
+            <SpecialtySelector
+              selectedSpecialties={formData.specialties || []}
+              onChange={handleSpecialtyChange}
+            />
+            {errors.specialties && (
+              <div className="flex items-center gap-2 text-sm text-red-400">
+                <ErrorIcon size={16} />
+                <span>{errors.specialties}</span>
+              </div>
+            )}
+          </div>
         </FormSection>
       )}
     </div>
