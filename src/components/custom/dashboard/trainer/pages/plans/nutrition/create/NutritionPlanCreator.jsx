@@ -23,17 +23,23 @@ const STEPS = [
   { id: "preview", label: "Preview", icon: "mdi:eye" },
 ];
 
-export const NutritionPlanCreator = () => {
+export const NutritionPlanCreator = ({ initialData }) => {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const { formData, updateFormData, handleSubmit, isValid, isSubmitting } =
-    useNutritionPlanForm();
+    useNutritionPlanForm(initialData);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < STEPS.length - 1) {
       setCurrentStep((prev) => prev + 1);
     } else {
-      handleSubmit();
+      setIsLoading(true);
+      try {
+        await handleSubmit();
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -77,7 +83,9 @@ export const NutritionPlanCreator = () => {
           <div className="flex items-center gap-4">
             <BackButton onClick={handleBack} />
             <h1 className="text-2xl font-bold text-white">
-              Create Nutrition Plan
+              {initialData && initialData.id
+                ? "Update Nutrition Plan"
+                : "Create Nutrition Plan"}
             </h1>
           </div>
           <StepIndicator steps={STEPS} currentStep={currentStep} />
@@ -100,7 +108,8 @@ export const NutritionPlanCreator = () => {
               onNext={handleNext}
               isNextDisabled={!isValid(currentStep)}
               isLastStep={currentStep === STEPS.length - 1}
-              isLoading={isSubmitting}
+              isEdit={!!(initialData && initialData.id)}
+              isLoading={isLoading || isSubmitting}
               planType="nutrition"
             />
           </div>

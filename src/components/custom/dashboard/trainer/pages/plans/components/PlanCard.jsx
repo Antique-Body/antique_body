@@ -7,6 +7,10 @@ import { useState } from "react";
 
 import { PlanPreviewModal } from "./PlanPreviewModal";
 
+import {
+  fetchPlanDetails,
+  deletePlan,
+} from "@/app/api/users/services/planService";
 import { Card } from "@/components/common";
 import { Button } from "@/components/common/Button";
 import {
@@ -19,7 +23,6 @@ import {
   ViewIcon,
 } from "@/components/common/Icons";
 import { Modal } from "@/components/common/Modal";
-import { fetchPlanDetails } from "@/utils/planService";
 
 export const PlanCard = ({
   id,
@@ -102,11 +105,9 @@ export const PlanCard = ({
           : "Not specified",
         clientCount: planData.clientCount || 0,
         price: planData.price,
-        weeklySchedule: planData.weeklySchedule || planData.planSchedule,
-        summary: planData.description,
-        targetAudience: "All fitness levels", // Default value, can be customized
+        weeklySchedule: planData.schedule || planData.weeklySchedule || [],
         keyFeatures: planData.keyFeatures || [],
-        schedule: planData.timeline || [],
+        schedule: planData.schedule || [],
         editUrl,
       };
       if (isNutrition) {
@@ -139,8 +140,6 @@ export const PlanCard = ({
         clientCount,
         price,
         weeklySchedule,
-        summary: description,
-        targetAudience: "All fitness levels",
         keyFeatures: [],
         schedule: [],
         editUrl,
@@ -164,7 +163,12 @@ export const PlanCard = ({
   };
 
   const handleEditClick = () => {
-    router.push(`/trainer/dashboard/plans/edit/${id}`);
+    // Use the correct edit URL based on plan type
+    if (isNutrition) {
+      router.push(`/trainer/dashboard/plans/nutrition/edit/${id}`);
+    } else {
+      router.push(`/trainer/dashboard/plans/training/edit/${id}`);
+    }
   };
 
   const handleDeleteClick = () => {
@@ -174,12 +178,9 @@ export const PlanCard = ({
   const confirmDelete = async () => {
     setDeleting(true);
     try {
-      const endpoint = `/api/users/trainer/plans/${id}`;
-      const res = await fetch(endpoint, { method: "DELETE" });
-      if (res.ok) {
-        if (onDelete) onDelete(id);
-        setShowDeleteModal(false);
-      }
+      await deletePlan(id, isNutrition ? "nutrition" : "training");
+      if (onDelete) onDelete(id);
+      setShowDeleteModal(false);
     } catch {
       // handle error
     } finally {

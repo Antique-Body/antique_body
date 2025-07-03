@@ -135,60 +135,6 @@ export const Features = ({ data, onChange }) => {
             </div>
           </div>
 
-          {/* Plan Schedule */}
-          <div className="bg-gradient-to-br from-[#1a1a1a] via-[#1e1e1e] to-[#222] rounded-xl border border-[#333] p-4 sm:p-6 shadow-lg">
-            <h3 className="text-base sm:text-lg font-semibold text-white mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-              <div className="p-2 sm:p-2.5 rounded-lg bg-gradient-to-r from-[#FF6B00] to-[#FF8533] shadow-md">
-                <Icon
-                  icon="mdi:calendar-clock"
-                  className="w-4 sm:w-5 h-4 sm:h-5 text-white"
-                />
-              </div>
-              <span className="text-sm sm:text-base">
-                Schedule (weeks/blocks)
-              </span>
-            </h3>
-
-            <div className="space-y-3">
-              {(data.planSchedule || [""]).map((item, idx) => (
-                <div key={idx} className="flex items-center gap-3">
-                  <FormField
-                    name={`schedule-${idx}`}
-                    value={item}
-                    onChange={(e) =>
-                      handleArrayChange("planSchedule", idx, e.target.value)
-                    }
-                    placeholder={
-                      [
-                        "Week 1-2: Baseline establishment",
-                        "Week 3-4: Habit formation",
-                        "Week 5-8: Progressive implementation",
-                      ][idx] || `Week ${idx + 1}: ...`
-                    }
-                    className="flex-1"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeArrayItem("planSchedule", idx)}
-                    className="p-2 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors"
-                    disabled={(data.planSchedule || [""]).length === 1}
-                    title="Remove schedule block"
-                  >
-                    <Icon icon="mdi:close" className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={() => addArrayItem("planSchedule")}
-                className="w-full py-2 px-4 bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-lg text-[#FF6B00] hover:bg-[#FF6B00]/20 transition-colors flex items-center justify-center gap-2"
-              >
-                <Icon icon="mdi:plus" className="w-4 h-4" />
-                Add Schedule Block
-              </button>
-            </div>
-          </div>
-
           {/* Additional Info */}
           <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4 sm:p-5">
             <h3 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
@@ -199,8 +145,8 @@ export const Features = ({ data, onChange }) => {
             <div className="space-y-3 sm:space-y-4">
               <FormField
                 label="Recommended Frequency"
-                name="frequency"
-                value={data.frequency || ""}
+                name="recommendedFrequency"
+                value={data.recommendedFrequency || ""}
                 onChange={handleChange}
                 placeholder="Daily meal plans"
               />
@@ -331,24 +277,6 @@ export const Features = ({ data, onChange }) => {
                 Add Timeline Block
               </button>
             </div>
-          </div>
-
-          {/* Summary */}
-          <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4 sm:p-5">
-            <h3 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
-              <Icon icon="mdi:text-box" className="w-4 h-4 text-[#FF6B00]" />
-              Plan Summary
-            </h3>
-
-            <FormField
-              label="Summary"
-              name="summary"
-              type="textarea"
-              value={data.summary || ""}
-              onChange={handleChange}
-              placeholder="This nutrition plan is designed to help clients build consistent eating patterns and introduce key nutritional concepts."
-              rows={4}
-            />
           </div>
         </motion.div>
       </div>

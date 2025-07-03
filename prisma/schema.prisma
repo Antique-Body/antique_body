@@ -496,13 +496,13 @@ model TrainingPlan {
   duration          Int?
   durationType      String?  // "weeks", "days", itd.
   keyFeatures       Json?
-  planSchedule      Json?
   trainingType      String?
   timeline          Json?
   features          Json?
   sessionsPerWeek   Int?
   sessionFormat     Json?
   difficultyLevel   String?
+  schedule          Json?    // Dodano polje za raspored sesija
   isActive          Boolean  @default(true)
   isPublished       Boolean  @default(false)
   createdAt         DateTime @default(now())
@@ -526,14 +526,16 @@ model NutritionPlan {
   duration          Int?
   durationType      String?
   keyFeatures       Json?
-  planSchedule      Json?
   timeline          Json?
   nutritionInfo     Json?
   mealTypes         Json?
   dietaryRestrictions Json?
   supplementRecommendations String?
   cookingTime       String?
-  difficultyLevel   String?
+  targetGoal        String?
+  days              Json?
+  recommendedFrequency String?
+  adaptability      String?
   isActive          Boolean  @default(true)
   isPublished       Boolean  @default(false)
   createdAt         DateTime @default(now())

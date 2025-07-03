@@ -626,6 +626,9 @@ export const Schedule = ({ data, onChange }) => {
     onChange({ schedule: updated });
   };
 
+  // Fallback ako nema schedule
+  const schedule = data.schedule || [];
+
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="space-y-4">
@@ -658,7 +661,7 @@ export const Schedule = ({ data, onChange }) => {
 
         {/* Sessions List with DnD */}
         <div className="space-y-4">
-          {data.schedule.map((session, sessionIndex) => {
+          {schedule.map((session, sessionIndex) => {
             const sessionType =
               SESSION_TYPES.find((t) => t.id === session.type) ||
               SESSION_TYPES[0];

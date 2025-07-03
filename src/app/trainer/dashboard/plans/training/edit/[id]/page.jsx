@@ -1,12 +1,12 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+
+import { fetchPlanDetails } from "@/app/api/users/services/planService";
 import { TrainingPlanCreator } from "@/components/custom/dashboard/trainer/pages/plans/training/create/TrainingPlanCreator";
-import { fetchPlanDetails } from "@/utils/planService";
 
 export default function EditTrainingPlanPage() {
-  const router = useRouter();
   const params = useParams();
   const { id } = params;
   const [initialData, setInitialData] = useState(null);
@@ -22,10 +22,23 @@ export default function EditTrainingPlanPage() {
           ...data,
           id: data.id,
           difficultyLevel: data.difficultyLevel || "",
-          schedule: data.planSchedule || [],
           keyFeatures: data.keyFeatures || [""],
           timeline: data.timeline || [{ week: "", title: "", description: "" }],
           features: data.features || {},
+          schedule: data.schedule || [
+            {
+              id:
+                typeof crypto !== "undefined" && crypto.randomUUID
+                  ? crypto.randomUUID()
+                  : Math.random().toString(36).substr(2, 9),
+              name: "Full Body Workout",
+              duration: 60,
+              day: "Monday",
+              description: "",
+              exercises: [],
+              type: "strength",
+            },
+          ],
         });
         setLoading(false);
       })

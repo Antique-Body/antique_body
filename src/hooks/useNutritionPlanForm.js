@@ -1,60 +1,82 @@
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { createPlan } from "@/utils/planService";
 
-export const useNutritionPlanForm = () => {
-  const router = useRouter();
-  const [formData, setFormData] = useState({
-    // Step 1: Basic Info
-    title: "",
-    description: "",
-    coverImage: null,
-    price: "",
-    duration: "",
-    durationType: "weeks",
+import { createPlan, updatePlan } from "@/app/api/users/services/planService";
 
-    // Nutrition Info
-    nutritionInfo: {
-      calories: "",
-      protein: "",
-      carbs: "",
-      fats: "",
+const initialFormData = {
+  // Step 1: Basic Info
+  title: "",
+  description: "",
+  coverImage: null,
+  price: "",
+  duration: "",
+  durationType: "weeks",
+  targetGoal: "",
+
+  // Nutrition Info
+  nutritionInfo: {
+    calories: "",
+    protein: "",
+    carbs: "",
+    fats: "",
+  },
+
+  // Step 2: Meal Planning
+  days: [
+    {
+      id: uuidv4(),
+      name: "Day 1",
+      isRestDay: false,
+      description: "",
+      meals: [],
     },
+  ],
 
-    // Step 2: Meal Planning
-    days: [
-      {
-        id: uuidv4(),
-        name: "Day 1",
-        isRestDay: false,
-        description: "",
-        meals: [],
-      },
-    ],
+  // Step 3: Features
+  keyFeatures: [""],
+  timeline: [{ week: "", title: "", description: "" }],
+  recommendedFrequency: "",
+  adaptability: "",
 
-    // Step 3: Features
-    keyFeatures: [""],
-    planSchedule: [""],
-    timeline: [{ week: "", title: "", description: "" }],
+  // Additional nutrition-specific fields
+  mealTypes: [],
+  dietaryRestrictions: [],
+  supplementRecommendations: "",
+  cookingTime: "",
+};
 
-    // Additional nutrition-specific fields
-    mealTypes: [],
-    dietaryRestrictions: [],
-    supplementRecommendations: "",
-    cookingTime: "",
-    difficultyLevel: "beginner",
-  });
-
+export const useNutritionPlanForm = (initialData = null) => {
+  const router = useRouter();
+  const [formData, setFormData] = useState(initialData || initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    // Get searchParams only when running in the browser
+    const searchParams =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search)
+        : null;
+    const isCopy = searchParams && searchParams.get("mode") === "copy";
+    if (initialData) {
+      const cleanData = { ...initialData };
+      if (isCopy) {
+        // Remove id for copy mode so a new plan is created
+        delete cleanData.id;
+      }
+      setFormData(cleanData);
+    }
+  }, [initialData]);
 
   const updateFormData = (updates) => {
     setFormData((prev) => {
-      // Handle nested updates like nutritionInfo.calories
       const newData = { ...prev };
-
       Object.keys(updates).forEach((key) => {
-        if (key.includes(".")) {
+        if (key === "frequency") {
+          newData.recommendedFrequency = updates[key];
+        } else if (key === "adaptability") {
+          newData.adaptability = updates[key];
+        } else if (key.includes(".")) {
           const [parent, child] = key.split(".");
           if (!newData[parent]) newData[parent] = {};
           newData[parent] = {
@@ -65,7 +87,6 @@ export const useNutritionPlanForm = () => {
           newData[key] = updates[key];
         }
       });
-
       return newData;
     });
   };
@@ -90,7 +111,6 @@ export const useNutritionPlanForm = () => {
       case 2: // Features
         return (
           formData.keyFeatures.some((feature) => feature.trim()) &&
-          formData.planSchedule.some((schedule) => schedule.trim()) &&
           formData.timeline.some(
             (item) => item.week.trim() && item.title.trim()
           )
@@ -105,22 +125,56 @@ export const useNutritionPlanForm = () => {
   };
 
   const handleSubmit = async () => {
-    if (isSubmitting) return;
-
+    if (isSubmitting) {
+      console.log("[handleSubmit] Prevented double submit");
+      return;
+    }
     setIsSubmitting(true);
-
     try {
-      // Prepare the data for submission - eksplicitno definiram polja
+      // Get searchParams only when running in the browser
+      const searchParams =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search)
+          : null;
+      const isCopy = searchParams && searchParams.get("mode") === "copy";
+      let coverImageUrl = formData.coverImage;
+
+      // 1. Upload image if it's a File object
+      if (formData.coverImage && typeof formData.coverImage !== "string") {
+        const uploadData = new FormData();
+        uploadData.append("coverImage", formData.coverImage);
+
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadData,
+        });
+        const uploadJson = await uploadRes.json();
+
+        if (!uploadRes.ok || !uploadJson.coverImage) {
+          throw new Error(uploadJson.error || "Failed to upload image");
+        }
+        coverImageUrl =
+          typeof uploadJson.coverImage === "string"
+            ? uploadJson.coverImage
+            : uploadJson.coverImage.url;
+      }
+
+      // 2. Prepare the data for submission
       const submitData = {
         title: formData.title,
         description: formData.description,
-        coverImage: formData.coverImage,
-        price: formData.price,
-        duration: formData.duration,
+        coverImage: coverImageUrl || null,
+        price:
+          formData.price !== "" && !isNaN(Number(formData.price))
+            ? Number(formData.price)
+            : null,
+        duration:
+          formData.duration !== "" && !isNaN(Number(formData.duration))
+            ? Number(formData.duration)
+            : null,
         durationType: formData.durationType,
         nutritionInfo: formData.nutritionInfo,
         keyFeatures: formData.keyFeatures.filter((f) => f.trim()),
-        planSchedule: formData.planSchedule.filter((s) => s.trim()),
         timeline: formData.timeline.filter(
           (t) => t.week.trim() && t.title.trim()
         ),
@@ -128,17 +182,24 @@ export const useNutritionPlanForm = () => {
         dietaryRestrictions: formData.dietaryRestrictions,
         supplementRecommendations: formData.supplementRecommendations,
         cookingTime: formData.cookingTime,
-        difficultyLevel: formData.difficultyLevel,
+        targetGoal: formData.targetGoal,
+        days: formData.days,
+        recommendedFrequency: formData.recommendedFrequency,
+        adaptability: formData.adaptability,
       };
 
-      // KORISTI planService
-      await createPlan(submitData, "nutrition");
+      if (formData.id && !isCopy) {
+        // EDIT MODE: PATCH
+        await updatePlan(formData.id, submitData, "nutrition");
+      } else {
+        // CREATE MODE: POST (or COPY)
+        await createPlan(submitData, "nutrition");
+      }
 
       // Redirect to plans page
       router.push("/trainer/dashboard/plans");
     } catch (error) {
       console.error("Error submitting nutrition plan:", error);
-      alert("Failed to save nutrition plan: " + error.message);
     } finally {
       setIsSubmitting(false);
     }

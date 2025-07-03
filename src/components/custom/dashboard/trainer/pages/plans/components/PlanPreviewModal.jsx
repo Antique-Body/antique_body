@@ -5,9 +5,9 @@ import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
 import { Modal } from "@/components/common/Modal";
-import { generatePlanPDF } from "@/utils/pdfGenerator";
-import { TRAINING_TYPES } from "@/enums/trainingTypes";
 import { SESSION_FORMATS } from "@/enums/sessionFormats";
+import { TRAINING_TYPES } from "@/enums/trainingTypes";
+import { generatePlanPDF } from "@/utils/pdfGenerator";
 
 export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -32,8 +32,6 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
     clientCount = 0,
     price,
     weeklySchedule,
-    summary,
-    targetAudience,
     keyFeatures,
     schedule,
     averageRating,
@@ -64,6 +62,14 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
   const handleDownloadPDF = async () => {
     try {
       setIsDownloading(true);
+      // Construct overview for PDF
+      const overview = {
+        summary: description || "No summary available.",
+        keyFeatures:
+          keyFeatures && keyFeatures.length > 0
+            ? keyFeatures
+            : ["No key features specified."],
+      };
       const pdfData = {
         title,
         description,
@@ -71,11 +77,10 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
         duration,
         createdAt: formattedDate,
         image,
-        summary,
-        targetAudience,
         keyFeatures,
         weeklySchedule,
         schedule,
+        overview, // Add overview property
       };
       const success = await generatePlanPDF(pdfData);
       if (success) {
@@ -718,7 +723,7 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
                     Description
                   </h3>
                   <p className="text-gray-300">
-                    {summary || description || "No description available."}
+                    {description || "No description available."}
                   </p>
                 </div>
                 {keyFeatures && keyFeatures.length > 0 && (

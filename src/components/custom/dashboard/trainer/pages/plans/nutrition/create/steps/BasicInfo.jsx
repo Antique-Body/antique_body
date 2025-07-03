@@ -3,7 +3,7 @@
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { FormField } from "@/components/common/FormField";
 
@@ -48,6 +48,17 @@ const GOAL_TYPES = [
 
 export const BasicInfo = ({ data, onChange }) => {
   const [previewImage, setPreviewImage] = useState(null);
+
+  // Handle edit mode - if coverImage is a string URL, set it as preview
+  useEffect(() => {
+    if (
+      !previewImage &&
+      typeof data.coverImage === "string" &&
+      data.coverImage
+    ) {
+      setPreviewImage(data.coverImage);
+    }
+  }, [data.coverImage, previewImage]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -105,7 +116,7 @@ export const BasicInfo = ({ data, onChange }) => {
       >
         <div className="aspect-[2.5/1] w-full rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] via-[#222] to-[#2a2a2a] border-2 border-[#333] hover:border-[#FF6B00]/50 transition-all duration-300 shadow-2xl">
           {previewImage ? (
-            <div className="relative w-full h-full">
+            <div className="relative w-full h-full group">
               <Image
                 src={previewImage}
                 alt="Cover preview"
@@ -113,24 +124,27 @@ export const BasicInfo = ({ data, onChange }) => {
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <FormField
+                <input
                   type="file"
                   accept="image/*"
                   name="coverImage"
-                  label={null}
+                  id="coverImage"
                   onChange={handleImageChange}
-                  className="hidden-file-input"
+                  className="hidden"
                 />
                 <label
-                  className="cursor-pointer px-6 py-3 bg-gradient-to-r from-[#FF6B00] to-[#FF8533] rounded-xl text-white font-semibold hover:shadow-xl hover:scale-105 transition-all"
                   htmlFor="coverImage"
+                  className="cursor-pointer px-6 py-3 bg-gradient-to-r from-[#FF6B00] to-[#FF8533] rounded-xl text-white font-semibold hover:shadow-xl hover:scale-105 transition-all"
                 >
                   Change Image
                 </label>
               </div>
             </div>
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center cursor-pointer group-hover:bg-[#FF6B00]/5 transition-colors">
+            <label
+              htmlFor="coverImage"
+              className="w-full h-full flex flex-col items-center justify-center cursor-pointer group-hover:bg-[#FF6B00]/5 transition-colors"
+            >
               <div className="p-4 rounded-2xl bg-gradient-to-r from-[#FF6B00] to-[#FF8533] shadow-xl mb-4">
                 <Icon icon="mdi:image-plus" className="w-8 h-8 text-white" />
               </div>
@@ -140,15 +154,15 @@ export const BasicInfo = ({ data, onChange }) => {
               <span className="text-gray-400 text-base">
                 Recommended size: 1920x1080px
               </span>
-              <FormField
+              <input
                 type="file"
                 accept="image/*"
                 name="coverImage"
-                label={null}
+                id="coverImage"
                 onChange={handleImageChange}
-                className="hidden-file-input"
+                className="hidden"
               />
-            </div>
+            </label>
           )}
         </div>
       </motion.div>
@@ -192,17 +206,6 @@ export const BasicInfo = ({ data, onChange }) => {
                 placeholder="Describe what makes your nutrition plan unique and effective..."
                 required
                 rows={4}
-                className="bg-[#242424] border-[#333] focus:border-[#FF6B00] transition-all duration-300 px-4 py-4 text-base rounded-xl shadow-inner resize-none"
-              />
-
-              <FormField
-                label="Target Audience"
-                name="targetAudience"
-                type="textarea"
-                value={data.targetAudience || ""}
-                onChange={handleChange}
-                placeholder="Who is this plan designed for? (e.g., Busy professionals, Athletes, Beginners...)"
-                rows={3}
                 className="bg-[#242424] border-[#333] focus:border-[#FF6B00] transition-all duration-300 px-4 py-4 text-base rounded-xl shadow-inner resize-none"
               />
 
