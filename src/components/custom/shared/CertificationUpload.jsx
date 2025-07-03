@@ -39,20 +39,23 @@ const STATUS_COLORS = {
 };
 
 export const CertificationUpload = ({
-  certFields,
+  certFields = [],
   handleCertChange,
   addCertField,
   removeCertField,
   handleRemoveDocument: _externalRemoveDocument,
   onDeleteCert: _onDeleteCert,
 }) => {
+  // Ensure certFields is always an array
+  const safeCertFields = Array.isArray(certFields) ? certFields : [];
+
   const {
     previews,
     errors,
     handleAddFiles,
     handleRemoveFile,
     handleRemoveCertField: removeCertFieldWithCleanup,
-  } = useCertificateFiles(certFields, handleCertChange, removeCertField);
+  } = useCertificateFiles(safeCertFields, handleCertChange, removeCertField);
 
   const [documentPreviews, setDocumentPreviews] = useState({});
   const [uploadError, setUploadError] = useState(null);
@@ -60,15 +63,15 @@ export const CertificationUpload = ({
   // Reset upload error when certFields changes
   useEffect(() => {
     setUploadError(null);
-  }, [certFields]);
+  }, [safeCertFields]);
 
   // Generate previews for existing documents when component mounts or certFields changes
   useEffect(() => {
     const loadExistingDocumentPreviews = () => {
       try {
-        if (!certFields || !Array.isArray(certFields)) return;
+        if (!safeCertFields || !Array.isArray(safeCertFields)) return;
         const newPreviews = {};
-        certFields.forEach((field, index) => {
+        safeCertFields.forEach((field, index) => {
           if (
             field?.documents &&
             Array.isArray(field.documents) &&
@@ -94,7 +97,7 @@ export const CertificationUpload = ({
       }
     };
     loadExistingDocumentPreviews();
-  }, [certFields]);
+  }, [safeCertFields]);
 
   // Function to safely handle file input changes
   const handleFileInputChange = useCallback(
@@ -114,24 +117,30 @@ export const CertificationUpload = ({
 
   // Hide cert (set hidden to true locally)
   const handleHideCert = (index) => {
-    handleCertChange(index, "hidden", true);
+    if (handleCertChange) {
+      handleCertChange(index, "hidden", true);
+    }
   };
 
   // Unhide cert (set hidden to false locally)
   const handleUnhideCert = (index) => {
-    handleCertChange(index, "hidden", false);
+    if (handleCertChange) {
+      handleCertChange(index, "hidden", false);
+    }
   };
 
   // Delete cert (calls external handler or removes from list)
   const handleDeleteCert = (index) => {
-    removeCertField(index);
+    if (removeCertField) {
+      removeCertField(index);
+    }
   };
 
   // Split certs: existing (readonly) vs new (editable)
-  const existingCerts = certFields
+  const existingCerts = safeCertFields
     .map((field, idx) => ({ ...field, _idx: idx }))
     .filter((field) => field.id);
-  const newCerts = certFields
+  const newCerts = safeCertFields
     .map((field, idx) => ({ ...field, _idx: idx }))
     .filter((field) => !field.id);
 
@@ -635,6 +644,7 @@ export const CertificationUpload = ({
                 type="text"
                 value={field?.name || ""}
                 onChange={(e) =>
+                  handleCertChange &&
                   handleCertChange(field._idx, "name", e.target.value)
                 }
                 placeholder="e.g. NASM-CPT, ACE-CPT, ISSA, ACSM, etc."
@@ -649,6 +659,7 @@ export const CertificationUpload = ({
                   type="text"
                   value={field?.issuer || ""}
                   onChange={(e) =>
+                    handleCertChange &&
                     handleCertChange(field._idx, "issuer", e.target.value)
                   }
                   placeholder="e.g. National Academy of Sports Medicine, Personal Trainer Institute"
@@ -659,6 +670,7 @@ export const CertificationUpload = ({
                   type="date"
                   value={field?.expiryDate || ""}
                   onChange={(e) =>
+                    handleCertChange &&
                     handleCertChange(field._idx, "expiryDate", e.target.value)
                   }
                   className="mb-0"

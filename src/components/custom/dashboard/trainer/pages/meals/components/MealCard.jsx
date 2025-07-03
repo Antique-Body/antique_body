@@ -67,7 +67,7 @@ export const MealCard = ({ meal, onView, onEdit, onDelete }) => {
     >
       <div className="flex h-full flex-col">
         {/* Card Header with Image */}
-        <div className="relative h-48 w-full overflow-hidden">
+        <div className="relative h-32 sm:h-40 md:h-48 w-full overflow-hidden">
           <div className="relative h-full w-full">
             <Image
               src={
@@ -76,17 +76,17 @@ export const MealCard = ({ meal, onView, onEdit, onDelete }) => {
               }
               alt={name}
               fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1200px) 25vw, 20vw"
               className="object-cover object-center transition-transform duration-500"
               style={{ transform: isHovered ? "scale(1.1)" : "scale(1)" }}
             />
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-          <div className="absolute bottom-0 left-0 w-full p-4">
-            <div className="flex justify-between">
+          <div className="absolute bottom-0 left-0 w-full p-2 sm:p-3 md:p-4">
+            <div className="flex justify-between gap-1">
               <div>
                 <span
-                  className={`inline-block rounded-md px-2 py-1 text-xs font-semibold ${getMealTypeColor(
+                  className={`inline-block rounded-md px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs font-semibold ${getMealTypeColor(
                     mealType
                   )}`}
                 >
@@ -94,7 +94,7 @@ export const MealCard = ({ meal, onView, onEdit, onDelete }) => {
                 </span>
               </div>
               <div>
-                <span className="ml-2 inline-block rounded-md bg-orange-900/60 text-orange-200 px-2 py-1 text-xs font-semibold">
+                <span className="inline-block rounded-md bg-orange-900/60 text-orange-200 px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs font-semibold">
                   {preparationTime} min
                 </span>
               </div>
@@ -103,46 +103,60 @@ export const MealCard = ({ meal, onView, onEdit, onDelete }) => {
         </div>
 
         {/* Card Content */}
-        <div className="p-5">
-          <h3 className="mb-2 text-xl font-bold text-white">{name}</h3>
+        <div className="p-3 sm:p-4 md:p-5">
+          <h3 className="mb-1 sm:mb-2 text-sm sm:text-lg md:text-xl font-bold text-white leading-tight">
+            {name}
+          </h3>
 
-          <div className="mb-3 flex items-center text-sm text-gray-400">
-            <Icon icon="mdi:fire" width={14} height={14} className="mr-2" />
-            <span>{calories} cal</span>
-            <span className="mx-2">•</span>
-            <Icon icon="mdi:clock" width={14} height={14} className="mr-1" />
-            <span>{preparationTime} min</span>
+          <div className="mb-2 sm:mb-3 flex items-center text-xs sm:text-sm text-gray-400">
+            <Icon
+              icon="mdi:fire"
+              width={12}
+              height={12}
+              className="mr-1 sm:mr-2 flex-shrink-0"
+            />
+            <span className="truncate">{calories} cal</span>
+            <span className="mx-1 sm:mx-2">•</span>
+            <Icon
+              icon="mdi:clock"
+              width={12}
+              height={12}
+              className="mr-1 flex-shrink-0"
+            />
+            <span className="truncate">{preparationTime} min</span>
           </div>
 
-          <div className="mb-3 flex items-center gap-2">
-            <span className="rounded-md bg-gray-800/80 px-2 py-1 text-sm text-white">
+          <div className="mb-2 sm:mb-3 flex items-center gap-1 sm:gap-2">
+            <span className="rounded-md bg-gray-800/80 px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs sm:text-sm text-white">
               {mealType.charAt(0).toUpperCase() + mealType.slice(1)}
             </span>
             <span
               className={`rounded-md ${getDifficultyBadgeColor(
                 difficulty
-              )} px-2 py-1 text-sm`}
+              )} px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs sm:text-sm`}
             >
               {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
             </span>
           </div>
 
           {/* Nutrition Info */}
-          <div className="mt-3">
-            <p className="mb-2 text-xs text-gray-400">Nutrition Info:</p>
-            <div className="flex flex-wrap gap-2 mb-3">
-              <div className="flex items-center gap-1 rounded-lg bg-blue-900/30 border border-blue-500/20 px-2 py-1.5 text-xs">
-                <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+          <div className="mt-2 sm:mt-3">
+            <p className="mb-1 sm:mb-2 text-xs text-gray-400">
+              Nutrition Info:
+            </p>
+            <div className="flex flex-wrap gap-1 sm:gap-2 mb-2 sm:mb-3">
+              <div className="flex items-center gap-1 rounded-lg bg-blue-900/30 border border-blue-500/20 px-1.5 sm:px-2 py-1 sm:py-1.5 text-xs">
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-blue-400"></div>
                 <span className="text-blue-300 font-medium">P</span>
                 <span className="text-white">{protein}g</span>
               </div>
-              <div className="flex items-center gap-1 rounded-lg bg-green-900/30 border border-green-500/20 px-2 py-1.5 text-xs">
-                <div className="w-2 h-2 rounded-full bg-green-400"></div>
+              <div className="flex items-center gap-1 rounded-lg bg-green-900/30 border border-green-500/20 px-1.5 sm:px-2 py-1 sm:py-1.5 text-xs">
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-400"></div>
                 <span className="text-green-300 font-medium">C</span>
                 <span className="text-white">{carbs}g</span>
               </div>
-              <div className="flex items-center gap-1 rounded-lg bg-yellow-900/30 border border-yellow-500/20 px-2 py-1.5 text-xs">
-                <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
+              <div className="flex items-center gap-1 rounded-lg bg-yellow-900/30 border border-yellow-500/20 px-1.5 sm:px-2 py-1 sm:py-1.5 text-xs">
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-yellow-400"></div>
                 <span className="text-yellow-300 font-medium">F</span>
                 <span className="text-white">{fat}g</span>
               </div>
@@ -152,14 +166,14 @@ export const MealCard = ({ meal, onView, onEdit, onDelete }) => {
                 {dietary.slice(0, 2).map((diet, index) => (
                   <div
                     key={index}
-                    className="rounded-md bg-[rgba(255,107,0,0.15)] px-2 py-1 text-xs text-[#FF6B00]"
+                    className="rounded-md bg-[rgba(255,107,0,0.15)] px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs text-[#FF6B00]"
                   >
                     {diet.charAt(0).toUpperCase() + diet.slice(1)}
                   </div>
                 ))}
                 {dietary.length > 2 && (
-                  <div className="rounded-md bg-[rgba(255,255,255,0.1)] px-2 py-1 text-xs text-gray-400">
-                    +{dietary.length - 2} more
+                  <div className="rounded-md bg-[rgba(255,255,255,0.1)] px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs text-gray-400">
+                    +{dietary.length - 2}
                   </div>
                 )}
               </div>
@@ -168,39 +182,54 @@ export const MealCard = ({ meal, onView, onEdit, onDelete }) => {
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-auto flex justify-end border-t border-gray-800 p-3">
+        <div className="mt-auto flex justify-end border-t border-gray-800 p-2 sm:p-3">
           <Button
             variant="secondary"
             size="compact"
-            className="mr-2 h-9 w-9 rounded-full p-0 flex items-center justify-center"
+            className="mr-1 sm:mr-2 h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 rounded-full p-0 flex items-center justify-center"
             onClick={(e) => {
               e.stopPropagation();
               onView(meal);
             }}
           >
-            <Icon icon="mdi:eye" width={16} height={16} />
+            <Icon
+              icon="mdi:eye"
+              width={12}
+              height={12}
+              className="sm:w-4 sm:h-4"
+            />
           </Button>
           <Button
             variant="secondary"
             size="compact"
-            className="mr-2 h-9 w-9 rounded-full p-0 flex items-center justify-center"
+            className="mr-1 sm:mr-2 h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 rounded-full p-0 flex items-center justify-center"
             onClick={(e) => {
               e.stopPropagation();
               onEdit(meal);
             }}
           >
-            <Icon icon="mdi:pencil" width={16} height={16} />
+            <Icon
+              icon="mdi:pencil"
+              width={12}
+              height={12}
+              className="sm:w-4 sm:h-4"
+            />
           </Button>
           <Button
             variant="secondary"
             size="compact"
-            className="h-9 w-9 rounded-full p-0 flex items-center justify-center hover:bg-red-900/40 hover:text-red-500"
+            className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 rounded-full p-0 flex items-center justify-center hover:bg-red-900/40 hover:text-red-500"
             onClick={(e) => {
               e.stopPropagation();
               onDelete(meal.id);
             }}
           >
-            <Icon icon="mdi:trash-can" width={16} height={16} />
+            <Icon
+              icon="mdi:trash-can"
+              width={12}
+              height={12}
+              className="sm:w-4 sm:h-4"
+            />
           </Button>
         </div>
       </div>

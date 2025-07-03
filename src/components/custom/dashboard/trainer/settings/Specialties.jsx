@@ -32,56 +32,6 @@ export const Specialties = ({ trainerData, handleChange, setTrainerData }) => (
   >
     <SectionTitle title="Specialties & Training Types" />
 
-    {/* Stats Overview */}
-    <motion.div
-      variants={fadeInUp}
-      className="grid grid-cols-1 sm:grid-cols-3 gap-4"
-    >
-      <div className="bg-gradient-to-r from-[#1a1a1a] to-[#222] border border-[#333] rounded-lg p-4">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-full bg-[#FF6B00]/20 flex items-center justify-center">
-            <span className="text-[#FF6B00] text-xl font-bold">
-              {trainerData.trainerProfile.specialties?.length || 0}
-            </span>
-          </div>
-          <div>
-            <h3 className="text-gray-300 font-medium">Specialties</h3>
-            <p className="text-xs text-gray-400">Selected expertise areas</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-gradient-to-r from-[#1a1a1a] to-[#222] border border-[#333] rounded-lg p-4">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-full bg-[#FF6B00]/20 flex items-center justify-center">
-            <span className="text-[#FF6B00] text-xl font-bold">
-              {trainerData.trainerProfile.trainingTypes?.length || 0}
-            </span>
-          </div>
-          <div>
-            <h3 className="text-gray-300 font-medium">Training Types</h3>
-            <p className="text-xs text-gray-400">Types of training offered</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-gradient-to-r from-[#1a1a1a] to-[#222] border border-[#333] rounded-lg p-4">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-full bg-[#FF6B00]/20 flex items-center justify-center">
-            <span className="text-[#FF6B00] text-xl font-bold">1</span>
-          </div>
-          <div>
-            <h3 className="text-gray-300 font-medium">Environment</h3>
-            <p className="text-xs text-gray-400">
-              {trainerData.trainerProfile.trainingEnvironment
-                ? "Set"
-                : "Not set yet"}
-            </p>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-
     {/* Specialty Selector */}
     <motion.div
       variants={fadeInUp}

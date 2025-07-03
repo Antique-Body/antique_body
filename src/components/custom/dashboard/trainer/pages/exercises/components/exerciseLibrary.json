@@ -10,7 +10,7 @@
     "description": "A compound exercise that targets the muscles of the lower body and core.",
     "instructions": "Position barbell on upper back, squat down until thighs are parallel to ground, then push back up.",
     "video": "https://www.youtube.com/watch?v=ultWZbUMPL8",
-    "imageUrl": "https://images.pexels.com/photos/1552106/pexels-photo-1552106.jpeg"
+    "imageUrl": null
   },
   {
     "id": 2,
@@ -23,7 +23,7 @@
     "description": "A classic bodyweight exercise that targets the upper body and core.",
     "instructions": "Start in plank position with hands shoulder-width apart, lower body until chest nearly touches floor, then push back up.",
     "video": "https://www.youtube.com/watch?v=IODxDxX7oi4",
-    "imageUrl": "https://images.pexels.com/photos/3775164/pexels-photo-3775164.jpeg"
+    "imageUrl": null
   },
   {
     "id": 3,
@@ -36,7 +36,7 @@
     "description": "An upper body exercise that primarily targets the chest muscles.",
     "instructions": "Lie on bench with dumbbells held at chest level, press weights upward until arms are extended, then lower back to start position.",
     "video": "https://www.youtube.com/watch?v=VmB1G1K7v94",
-    "imageUrl": "https://images.pexels.com/photos/7289233/pexels-photo-7289233.jpeg"
+    "imageUrl": null
   },
   {
     "id": 4,
@@ -49,7 +49,7 @@
     "description": "An isometric core exercise that strengthens the abdominals and back muscles.",
     "instructions": "Get into a push-up position but with forearms on the ground. Keep body in straight line from head to heels.",
     "video": "https://www.youtube.com/watch?v=ASdvN_XEl_c",
-    "imageUrl": "https://images.pexels.com/photos/3768901/pexels-photo-3768901.jpeg"
+    "imageUrl": null
   },
   {
     "id": 5,
@@ -62,7 +62,7 @@
     "description": "A compound strength exercise that works multiple muscle groups simultaneously.",
     "instructions": "Stand with feet hip-width apart, bend at hips and knees to grip barbell, lift by driving hips forward.",
     "video": "https://www.youtube.com/watch?v=op9kVnSso6Q",
-    "imageUrl": "https://images.pexels.com/photos/841130/pexels-photo-841130.jpeg"
+    "imageUrl": null
   },
   {
     "id": 6,
@@ -75,7 +75,7 @@
     "description": "An upper body compound pulling exercise that targets the back and arms.",
     "instructions": "Grip pull-up bar with hands wider than shoulders, pull body up until chin clears bar, then lower back down.",
     "video": "https://www.youtube.com/watch?v=eGo4IYlbE5g",
-    "imageUrl": "https://images.pexels.com/photos/6539785/pexels-photo-6539785.jpeg"
+    "imageUrl": null
   },
   {
     "id": 7,
@@ -88,7 +88,7 @@
     "description": "A fundamental lower body exercise that works the legs and core.",
     "instructions": "Stand with feet shoulder-width apart, lower body by bending knees and pushing hips back, then return to standing.",
     "video": "https://www.youtube.com/watch?v=aclHkVaku9U",
-    "imageUrl": "https://images.pexels.com/photos/4164454/pexels-photo-4164454.jpeg"
+    "imageUrl": null
   },
   {
     "id": 8,
@@ -101,7 +101,7 @@
     "description": "An upper body exercise that targets the shoulder muscles.",
     "instructions": "Sit or stand with dumbbells at shoulder height, press weights overhead until arms extend fully, then lower back down.",
     "video": "https://www.youtube.com/watch?v=qEwKCR5JCog",
-    "imageUrl": "https://images.pexels.com/photos/7289370/pexels-photo-7289370.jpeg"
+    "imageUrl": null
   },
   {
     "id": 9,
@@ -114,7 +114,7 @@
     "description": "A deadlift variation that emphasizes the posterior chain muscles.",
     "instructions": "Hold barbell in front of thighs, hinge at hips while keeping legs nearly straight, lower weight toward floor, then return to standing.",
     "video": "https://www.youtube.com/watch?v=2SHsk9AzdjA",
-    "imageUrl": "https://images.pexels.com/photos/841130/pexels-photo-841130.jpeg"
+    "imageUrl": null
   },
   {
     "id": 10,
@@ -127,7 +127,7 @@
     "description": "A dynamic core exercise that targets all the abdominal muscles.",
     "instructions": "Lie on back with hands behind head, alternate bringing elbow to opposite knee while extending other leg.",
     "video": "https://www.youtube.com/watch?v=9FGilxCbdz8",
-    "imageUrl": "https://images.pexels.com/photos/8038625/pexels-photo-8038625.jpeg"
+    "imageUrl": null
   },
   {
     "id": 11,
@@ -140,7 +140,7 @@
     "description": "A unilateral leg exercise that improves balance and targets each leg individually.",
     "instructions": "Step forward with one leg, lower body until both knees are bent at 90 degrees, then push back to starting position.",
     "video": "https://www.youtube.com/watch?v=3XDriUn0udo",
-    "imageUrl": "https://images.pexels.com/photos/4164454/pexels-photo-4164454.jpeg"
+    "imageUrl": null
   },
   {
     "id": 12,
@@ -153,7 +153,7 @@
     "description": "A high-intensity full-body exercise that combines strength and cardio.",
     "instructions": "Start standing, drop into squat position, kick feet back into plank, do push-up, jump feet back to squat, then jump up.",
     "video": "https://www.youtube.com/watch?v=auBLPXO8Fww",
-    "imageUrl": "https://images.pexels.com/photos/4164454/pexels-photo-4164454.jpeg"
+    "imageUrl": null
   },
   {
     "id": 13,
@@ -166,7 +166,7 @@
     "description": "A dynamic exercise that targets the core while providing cardiovascular benefits.",
     "instructions": "Start in plank position, alternate bringing knees toward chest in running motion while maintaining plank position.",
     "video": "https://www.youtube.com/watch?v=nmwgirgXLYM",
-    "imageUrl": "https://images.pexels.com/photos/3768901/pexels-photo-3768901.jpeg"
+    "imageUrl": null
   },
   {
     "id": 14,
@@ -179,7 +179,7 @@
     "description": "A pulling exercise that targets the back muscles and improves posture.",
     "instructions": "Bend at waist with dumbbell in one hand, pull weight up toward hip while keeping elbow close to body.",
     "video": "https://www.youtube.com/watch?v=roCP6wCXPqo",
-    "imageUrl": "https://images.pexels.com/photos/7289370/pexels-photo-7289370.jpeg"
+    "imageUrl": null
   },
   {
     "id": 15,
@@ -192,7 +192,7 @@
     "description": "A classic cardio exercise that gets the heart rate up quickly.",
     "instructions": "Start standing, jump feet apart while raising arms overhead, then jump back to starting position.",
     "video": "https://www.youtube.com/watch?v=1bumPyvzCmo",
-    "imageUrl": "https://images.pexels.com/photos/4164454/pexels-photo-4164454.jpeg"
+    "imageUrl": null
   },
   {
     "id": 16,
@@ -205,7 +205,7 @@
     "description": "A rotational core exercise that targets the obliques and improves rotational strength.",
     "instructions": "Sit with knees bent, lean back slightly, rotate torso from side to side while keeping feet off ground.",
     "video": "https://www.youtube.com/watch?v=wkD8rjkodUI",
-    "imageUrl": "https://images.pexels.com/photos/8038625/pexels-photo-8038625.jpeg"
+    "imageUrl": null
   },
   {
     "id": 17,
@@ -218,7 +218,7 @@
     "description": "A compound upper body exercise that primarily targets the chest muscles.",
     "instructions": "Lie on bench with barbell at chest level, press weight up until arms are extended, then lower back down.",
     "video": "https://www.youtube.com/watch?v=rT7DgCr-3pg",
-    "imageUrl": "https://images.pexels.com/photos/7289233/pexels-photo-7289233.jpeg"
+    "imageUrl": null
   },
   {
     "id": 18,
@@ -231,7 +231,7 @@
     "description": "An isometric exercise that builds leg strength and endurance.",
     "instructions": "Lean back against wall, slide down until thighs are parallel to ground, hold position with back against wall.",
     "video": "https://www.youtube.com/watch?v=y-wV4Venusw",
-    "imageUrl": "https://images.pexels.com/photos/4164454/pexels-photo-4164454.jpeg"
+    "imageUrl": null
   },
   {
     "id": 19,
@@ -244,7 +244,7 @@
     "description": "A machine-based exercise that targets the latissimus dorsi muscles.",
     "instructions": "Sit at lat pulldown machine, grip bar wider than shoulders, pull bar down to chest while keeping chest up.",
     "video": "https://www.youtube.com/watch?v=CAwf7n6Luuc",
-    "imageUrl": "https://images.pexels.com/photos/6539785/pexels-photo-6539785.jpeg"
+    "imageUrl": null
   },
   {
     "id": 20,
@@ -257,7 +257,7 @@
     "description": "A high-intensity cardio exercise that improves coordination and leg strength.",
     "instructions": "Stand in place, alternate bringing knees up toward chest in running motion while maintaining good posture.",
     "video": "https://www.youtube.com/watch?v=oDdkytliOqE",
-    "imageUrl": "https://images.pexels.com/photos/4164454/pexels-photo-4164454.jpeg"
+    "imageUrl": null
   },
   {
     "id": 21,
@@ -270,7 +270,7 @@
     "description": "A machine-based compound exercise that targets the lower body muscles.",
     "instructions": "Sit in leg press machine, place feet on platform, press weight away by extending legs, then return to start.",
     "video": "https://www.youtube.com/watch?v=IZxyjW7MPJQ",
-    "imageUrl": "https://images.pexels.com/photos/1552106/pexels-photo-1552106.jpeg"
+    "imageUrl": null
   },
   {
     "id": 22,
@@ -283,7 +283,7 @@
     "description": "A bodyweight exercise that primarily targets the triceps muscles.",
     "instructions": "Support body on parallel bars, lower body by bending elbows, then push back up to starting position.",
     "video": "https://www.youtube.com/watch?v=2z8JmcrW-As",
-    "imageUrl": "https://images.pexels.com/photos/3775164/pexels-photo-3775164.jpeg"
+    "imageUrl": null
   },
   {
     "id": 23,
@@ -296,7 +296,7 @@
     "description": "An isolation exercise that targets the calf muscles.",
     "instructions": "Stand with feet shoulder-width apart, raise heels off ground by pushing through balls of feet, then lower back down.",
     "video": "https://www.youtube.com/watch?v=-M4-G8p8fmc",
-    "imageUrl": "https://images.pexels.com/photos/4164454/pexels-photo-4164454.jpeg"
+    "imageUrl": null
   },
   {
     "id": 24,
@@ -309,7 +309,7 @@
     "description": "An isolation exercise that targets the biceps muscles.",
     "instructions": "Stand with dumbbells at sides, curl weights up toward shoulders while keeping elbows stationary, then lower back down.",
     "video": "https://www.youtube.com/watch?v=ykJmrZ5v0Oa",
-    "imageUrl": "https://images.pexels.com/photos/7289370/pexels-photo-7289370.jpeg"
+    "imageUrl": null
   },
   {
     "id": 25,
@@ -322,7 +322,7 @@
     "description": "A variation of the plank that targets the obliques and improves core stability.",
     "instructions": "Lie on side, prop up on one forearm, lift hips off ground to form straight line from head to feet.",
     "video": "https://www.youtube.com/watch?v=_rqkXPVkfqk",
-    "imageUrl": "https://images.pexels.com/photos/3768901/pexels-photo-3768901.jpeg"
+    "imageUrl": null
   },
   {
     "id": 26,
@@ -335,7 +335,7 @@
     "description": "A compound upper body exercise that targets the shoulders and requires core stability.",
     "instructions": "Stand with barbell at shoulder level, press weight overhead until arms are fully extended, then lower back down.",
     "video": "https://www.youtube.com/watch?v=F3QY5vMz_6I",
-    "imageUrl": "https://images.pexels.com/photos/7289370/pexels-photo-7289370.jpeg"
+    "imageUrl": null
   },
   {
     "id": 27,
@@ -348,7 +348,7 @@
     "description": "An isolation exercise that targets the glute muscles and improves hip stability.",
     "instructions": "Lie on back with knees bent, lift hips off ground by squeezing glutes, hold briefly, then lower back down.",
     "video": "https://www.youtube.com/watch?v=OUgsJ8H9uHQ",
-    "imageUrl": "https://images.pexels.com/photos/841130/pexels-photo-841130.jpeg"
+    "imageUrl": null
   },
   {
     "id": 28,
@@ -361,7 +361,7 @@
     "description": "A machine-based pulling exercise that targets the back muscles.",
     "instructions": "Sit at rowing machine, pull handle toward chest while keeping chest up and shoulders back.",
     "video": "https://www.youtube.com/watch?v=G8l_8chR5BE",
-    "imageUrl": "https://images.pexels.com/photos/6539785/pexels-photo-6539785.jpeg"
+    "imageUrl": null
   },
   {
     "id": 29,
@@ -374,7 +374,7 @@
     "description": "A plyometric exercise that combines strength and explosive power.",
     "instructions": "Perform a squat, then explosively jump up, land softly, and immediately go into next squat.",
     "video": "https://www.youtube.com/watch?v=CVaEhXytLMM",
-    "imageUrl": "https://images.pexels.com/photos/4164454/pexels-photo-4164454.jpeg"
+    "imageUrl": null
   },
   {
     "id": 30,
@@ -387,7 +387,7 @@
     "description": "An isolation exercise that targets the chest muscles through a wide range of motion.",
     "instructions": "Lie on bench with dumbbells extended above chest, lower weights in arc motion, then return to start position.",
     "video": "https://www.youtube.com/watch?v=eozdVDA78K0",
-    "imageUrl": "https://images.pexels.com/photos/7289233/pexels-photo-7289233.jpeg"
+    "imageUrl": null
   },
   {
     "id": 31,
@@ -400,7 +400,7 @@
     "description": "A foundational yoga pose that stretches the entire posterior chain and builds shoulder strength.",
     "instructions": "Start on hands and knees, lift hips up and back, forming an inverted V shape with your body.",
     "video": "https://www.youtube.com/watch?v=0tFzJd5oJ0c",
-    "imageUrl": "https://images.pexels.com/photos/4056530/pexels-photo-4056530.jpeg"
+    "imageUrl": null
   },
   {
     "id": 32,
@@ -413,7 +413,7 @@
     "description": "A balance exercise that improves stability and proprioception.",
     "instructions": "Stand on one leg, lift other leg slightly off ground, hold balance for 30-60 seconds, then switch legs.",
     "video": "https://www.youtube.com/watch?v=H4u5RvXw_sk",
-    "imageUrl": "https://images.pexels.com/photos/4164454/pexels-photo-4164454.jpeg"
+    "imageUrl": null
   },
   {
     "id": 33,
@@ -426,7 +426,7 @@
     "description": "A cardiovascular exercise that improves endurance and burns calories.",
     "instructions": "Start at a comfortable pace, gradually increase speed, maintain good posture with arms swinging naturally.",
     "video": "https://www.youtube.com/watch?v=5bEPwoa1FqY",
-    "imageUrl": "https://images.pexels.com/photos/1954524/pexels-photo-1954524.jpeg"
+    "imageUrl": null
   },
   {
     "id": 34,
@@ -439,7 +439,7 @@
     "description": "A dynamic full-body exercise that builds power and cardiovascular fitness.",
     "instructions": "Stand with feet shoulder-width apart, swing kettlebell between legs, then explosively drive hips forward to swing weight up.",
     "video": "https://www.youtube.com/watch?v=mKDIuUbH94Q",
-    "imageUrl": "https://images.pexels.com/photos/7289370/pexels-photo-7289370.jpeg"
+    "imageUrl": null
   },
   {
     "id": 35,
@@ -452,7 +452,7 @@
     "description": "A classic Pilates exercise that strengthens the core and improves breathing.",
     "instructions": "Lie on back, lift head and shoulders off ground, extend legs at 45-degree angle, pump arms up and down 100 times.",
     "video": "https://www.youtube.com/watch?v=4CkZRf6BE8U",
-    "imageUrl": "https://images.pexels.com/photos/4056530/pexels-photo-4056530.jpeg"
+    "imageUrl": null
   },
   {
     "id": 36,
@@ -465,7 +465,7 @@
     "description": "A plyometric exercise that builds explosive power and cardiovascular fitness.",
     "instructions": "Stand in front of box, squat down, then explosively jump up onto box, landing softly with both feet.",
     "video": "https://www.youtube.com/watch?v=DVXlqKqJqKM",
-    "imageUrl": "https://images.pexels.com/photos/1552106/pexels-photo-1552106.jpeg"
+    "imageUrl": null
   },
   {
     "id": 37,
@@ -478,7 +478,7 @@
     "description": "A static stretch that improves hamstring flexibility and reduces injury risk.",
     "instructions": "Sit on ground with legs extended, reach forward toward toes, hold stretch for 30 seconds without bouncing.",
     "video": "https://www.youtube.com/watch?v=joDRtfa59TA",
-    "imageUrl": "https://images.pexels.com/photos/4056530/pexels-photo-4056530.jpeg"
+    "imageUrl": null
   },
   {
     "id": 38,
@@ -491,7 +491,7 @@
     "description": "A balance exercise that challenges stability while building leg strength.",
     "instructions": "Stand on Bosu ball with dome side up, perform squats while maintaining balance on unstable surface.",
     "video": "https://www.youtube.com/watch?v=8bbE64NuDTU",
-    "imageUrl": "https://images.pexels.com/photos/1552106/pexels-photo-1552106.jpeg"
+    "imageUrl": null
   },
   {
     "id": 39,
@@ -504,7 +504,7 @@
     "description": "A full-body cardio exercise that builds endurance and strength simultaneously.",
     "instructions": "Sit on rowing machine, push with legs first, then pull with arms, return to starting position in reverse order.",
     "video": "https://www.youtube.com/watch?v=G8l_8chR5BE",
-    "imageUrl": "https://images.pexels.com/photos/1954524/pexels-photo-1954524.jpeg"
+    "imageUrl": null
   },
   {
     "id": 40,
@@ -517,7 +517,7 @@
     "description": "A strength exercise using resistance bands that targets the back muscles.",
     "instructions": "Anchor resistance band at chest height, step back to create tension, pull band toward chest while squeezing shoulder blades.",
     "video": "https://www.youtube.com/watch?v=roCP6wCXPqo",
-    "imageUrl": "https://images.pexels.com/photos/7289370/pexels-photo-7289370.jpeg"
+    "imageUrl": null
   },
   {
     "id": 41,
@@ -530,7 +530,7 @@
     "description": "A stretch that improves hip flexibility and reduces lower back tension.",
     "instructions": "Kneel on one knee, step other foot forward, lean forward to feel stretch in front of back leg's hip.",
     "video": "https://www.youtube.com/watch?v=7LnuhLi-78I",
-    "imageUrl": "https://images.pexels.com/photos/4056530/pexels-photo-4056530.jpeg"
+    "imageUrl": null
   },
   {
     "id": 42,
@@ -543,7 +543,7 @@
     "description": "A dynamic exercise that builds power and releases stress through explosive movement.",
     "instructions": "Hold medicine ball overhead, slam it down to ground with force, catch it on bounce, repeat immediately.",
     "video": "https://www.youtube.com/watch?v=8iEn6o_1jhs",
-    "imageUrl": "https://images.pexels.com/photos/7289370/pexels-photo-7289370.jpeg"
+    "imageUrl": null
   },
   {
     "id": 43,
@@ -556,7 +556,7 @@
     "description": "A machine-based exercise that isolates and strengthens the calf muscles.",
     "instructions": "Stand on calf raise machine, place balls of feet on platform, raise heels up, then lower back down.",
     "video": "https://www.youtube.com/watch?v=-M4-G8p8fmc",
-    "imageUrl": "https://images.pexels.com/photos/1552106/pexels-photo-1552106.jpeg"
+    "imageUrl": null
   },
   {
     "id": 44,
@@ -569,7 +569,7 @@
     "description": "A high-intensity cardio exercise that improves coordination and burns calories quickly.",
     "instructions": "Hold jump rope handles, swing rope overhead, jump over rope as it comes around, maintain rhythm.",
     "video": "https://www.youtube.com/watch?v=1bumPyvzCmo",
-    "imageUrl": "https://images.pexels.com/photos/4164454/pexels-photo-4164454.jpeg"
+    "imageUrl": null
   },
   {
     "id": 45,
@@ -582,7 +582,7 @@
     "description": "A yoga pose that builds strength, balance, and focus.",
     "instructions": "Step one foot back, bend front knee, raise arms overhead, hold pose while maintaining balance.",
     "video": "https://www.youtube.com/watch?v=0tFzJd5oJ0c",
-    "imageUrl": "https://images.pexels.com/photos/4056530/pexels-photo-4056530.jpeg"
+    "imageUrl": null
   },
   {
     "id": 46,
@@ -595,7 +595,7 @@
     "description": "A rotational exercise that targets the core and improves functional movement patterns.",
     "instructions": "Stand sideways to cable machine, grip handle with both hands, rotate torso to bring weight across body.",
     "video": "https://www.youtube.com/watch?v=8bbE64NuDTU",
-    "imageUrl": "https://images.pexels.com/photos/7289370/pexels-photo-7289370.jpeg"
+    "imageUrl": null
   },
   {
     "id": 47,
@@ -608,7 +608,7 @@
     "description": "A comprehensive stretching routine that improves overall flexibility and reduces muscle tension.",
     "instructions": "Hold each stretch for 30 seconds, breathe deeply, don't bounce, stretch to point of mild discomfort.",
     "video": "https://www.youtube.com/watch?v=joDRtfa59TA",
-    "imageUrl": "https://images.pexels.com/photos/4056530/pexels-photo-4056530.jpeg"
+    "imageUrl": null
   },
   {
     "id": 48,
@@ -621,7 +621,7 @@
     "description": "A core exercise that uses a stability ball to increase range of motion and challenge balance.",
     "instructions": "Lie on stability ball with lower back supported, perform crunches while maintaining balance on ball.",
     "video": "https://www.youtube.com/watch?v=9FGilxCbdz8",
-    "imageUrl": "https://images.pexels.com/photos/8038625/pexels-photo-8038625.jpeg"
+    "imageUrl": null
   },
   {
     "id": 49,
@@ -634,7 +634,7 @@
     "description": "A low-impact cardio exercise that provides a full-body workout without stressing joints.",
     "instructions": "Step onto elliptical, hold handles, maintain upright posture, push and pull with arms while stepping.",
     "video": "https://www.youtube.com/watch?v=5bEPwoa1FqY",
-    "imageUrl": "https://images.pexels.com/photos/1954524/pexels-photo-1954524.jpeg"
+    "imageUrl": null
   },
   {
     "id": 50,
@@ -647,7 +647,7 @@
     "description": "A gentle martial art that improves balance, coordination, and mental focus.",
     "instructions": "Stand with feet shoulder-width apart, move slowly and deliberately through basic Tai Chi movements.",
     "video": "https://www.youtube.com/watch?v=H4u5RvXw_sk",
-    "imageUrl": "https://images.pexels.com/photos/4056530/pexels-photo-4056530.jpeg"
+    "imageUrl": null
   },
   {
     "id": 51,
@@ -660,7 +660,7 @@
     "description": "A high-intensity exercise that builds endurance and upper body strength.",
     "instructions": "Hold battle ropes with both hands, create wave-like motion by moving arms up and down rapidly.",
     "video": "https://www.youtube.com/watch?v=8iEn6o_1jhs",
-    "imageUrl": "https://images.pexels.com/photos/7289370/pexels-photo-7289370.jpeg"
+    "imageUrl": null
   },
   {
     "id": 52,
@@ -673,7 +673,7 @@
     "description": "A self-myofascial release technique that improves flexibility and reduces muscle soreness.",
     "instructions": "Roll foam roller over tight muscles, pause on tender spots, apply pressure for 30-60 seconds.",
     "video": "https://www.youtube.com/watch?v=joDRtfa59TA",
-    "imageUrl": "https://images.pexels.com/photos/4056530/pexels-photo-4056530.jpeg"
+    "imageUrl": null
   },
   {
     "id": 53,
@@ -686,7 +686,7 @@
     "description": "A suspension training system that uses body weight and gravity to build strength and stability.",
     "instructions": "Adjust straps to appropriate length, perform exercises while maintaining proper form and control.",
     "video": "https://www.youtube.com/watch?v=8bbE64NuDTU",
-    "imageUrl": "https://images.pexels.com/photos/1552106/pexels-photo-1552106.jpeg"
+    "imageUrl": null
   },
   {
     "id": 54,
@@ -699,7 +699,7 @@
     "description": "A dance-based cardio workout that combines Latin and international music with dance moves.",
     "instructions": "Follow dance moves to the rhythm of the music, keep moving throughout the entire session.",
     "video": "https://www.youtube.com/watch?v=1bumPyvzCmo",
-    "imageUrl": "https://images.pexels.com/photos/4164454/pexels-photo-4164454.jpeg"
+    "imageUrl": null
   },
   {
     "id": 55,
@@ -712,7 +712,7 @@
     "description": "A Pilates machine that provides resistance training while improving core strength and flexibility.",
     "instructions": "Lie on reformer, secure feet in straps, perform controlled movements against spring resistance.",
     "video": "https://www.youtube.com/watch?v=4CkZRf6BE8U",
-    "imageUrl": "https://images.pexels.com/photos/4056530/pexels-photo-4056530.jpeg"
+    "imageUrl": null
   },
   {
     "id": 56,
@@ -725,7 +725,7 @@
     "description": "A yoga balance pose that improves focus, stability, and leg strength.",
     "instructions": "Stand on one leg, place other foot on inner thigh or calf, bring hands to prayer position, hold balance.",
     "video": "https://www.youtube.com/watch?v=0tFzJd5oJ0c",
-    "imageUrl": "https://images.pexels.com/photos/4056530/pexels-photo-4056530.jpeg"
+    "imageUrl": null
   },
   {
     "id": 57,
@@ -738,7 +738,7 @@
     "description": "A low-impact cardio exercise that builds leg strength and cardiovascular endurance.",
     "instructions": "Adjust seat height, maintain proper posture, pedal at consistent cadence, vary resistance for intensity.",
     "video": "https://www.youtube.com/watch?v=5bEPwoa1FqY",
-    "imageUrl": "https://images.pexels.com/photos/1954524/pexels-photo-1954524.jpeg"
+    "imageUrl": null
   },
   {
     "id": 58,
@@ -751,7 +751,7 @@
     "description": "A strength exercise using resistance bands to add resistance to bodyweight squats.",
     "instructions": "Stand on resistance band, hold handles at shoulders, perform squats while maintaining tension on band.",
     "video": "https://www.youtube.com/watch?v=aclHkVaku9U",
-    "imageUrl": "https://images.pexels.com/photos/4164454/pexels-photo-4164454.jpeg"
+    "imageUrl": null
   },
   {
     "id": 59,
@@ -764,7 +764,7 @@
     "description": "Active stretching that prepares muscles for movement and improves range of motion.",
     "instructions": "Perform controlled movements that take joints through their full range of motion, repeat 10-15 times each.",
     "video": "https://www.youtube.com/watch?v=joDRtfa59TA",
-    "imageUrl": "https://images.pexels.com/photos/4056530/pexels-photo-4056530.jpeg"
+    "imageUrl": null
   },
   {
     "id": 60,
@@ -777,6 +777,6 @@
     "description": "A bridge variation that challenges balance and core stability while targeting the posterior chain.",
     "instructions": "Lie on back with feet on stability ball, lift hips up, maintain balance on ball while holding bridge position.",
     "video": "https://www.youtube.com/watch?v=OUgsJ8H9uHQ",
-    "imageUrl": "https://images.pexels.com/photos/841130/pexels-photo-841130.jpeg"
+    "imageUrl": null
   }
 ]

@@ -208,6 +208,20 @@ export const Card = ({
     glowEffect = true;
     glowColor = "rgba(255,185,0,0.15)";
     variantClassName = "relative overflow-hidden";
+  } else if (variant === "formSection") {
+    // FormSection variant - exact replica of FormSection design
+    borderColor = "rgba(39, 39, 42, 0.5)"; // border-zinc-800/50
+    bgGradientFrom = "rgba(24, 24, 27, 0.4)"; // from-zinc-900/40
+    bgGradientTo = "rgba(24, 24, 27, 0.4)"; // to-zinc-900/40 (via-zinc-900/30 handled in special overlay)
+    borderTop = false;
+    padding = "0"; // No padding - FormSection handles its own spacing
+    borderRadius = "16px"; // rounded-2xl
+    shadow = "0 10px 15px -3px rgba(0, 0, 0, 0.2)"; // shadow-lg shadow-black/20
+    backdropBlur = "sm";
+    width = "100%";
+    hoverBorderColor = "rgba(63, 63, 70, 0.5)"; // hover:border-zinc-700/50
+    variantClassName =
+      "relative overflow-hidden backdrop-blur-sm transition-all duration-300 text-left";
   } else {
     // Default card styling improvements
     borderRadius = "16px";
@@ -382,6 +396,17 @@ export const Card = ({
       {/* Add left orange bar for plan card variant */}
       {variant === "planCard" && (
         <div className="absolute left-0 top-0 h-full w-1 bg-[#FF6B00]"></div>
+      )}
+
+      {/* FormSection variant special overlays */}
+      {variant === "formSection" && (
+        <>
+          {/* Subtle gradient overlay for depth */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B00]/3 via-transparent to-transparent pointer-events-none" />
+
+          {/* Subtle bottom border accent */}
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#FF6B00]/20 to-transparent" />
+        </>
       )}
 
       {showLogo && <BrandLogo logoTagline={logoTagline} />}

@@ -17,6 +17,7 @@ export const TrainerCard = ({
   const [isHovered, setIsHovered] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [showGymsTooltip, setShowGymsTooltip] = useState(false);
+  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
   const gymsTooltipRef = useRef(null);
 
   // Set theme colors based on colorVariant
@@ -52,25 +53,6 @@ export const TrainerCard = ({
     return `${Math.round(distance)}km`;
   };
 
-  // Get closest gym info
-  const getClosestGym = () => {
-    if (
-      !Array.isArray(trainer.trainerGyms) ||
-      trainer.trainerGyms.length === 0
-    ) {
-      return null;
-    }
-
-    // If we have a specific gym that's the source of the distance
-    if (trainer.distanceSource === "gym" && trainer.trainerGyms.length > 0) {
-      return trainer.trainerGyms[0].gym;
-    }
-
-    return null;
-  };
-
-  const closestGym = getClosestGym();
-
   // Map specialties using the specialtyMapper utility
   const mappedSpecialties = trainer.specialties.map((specialty) => ({
     id: specialty.id,
@@ -95,6 +77,12 @@ export const TrainerCard = ({
       return;
     }
     onViewProfile(trainer);
+  };
+
+  // Toggle accordion
+  const toggleAccordion = (e) => {
+    e.stopPropagation();
+    setIsAccordionOpen(!isAccordionOpen);
   };
 
   // Format pricing display based on pricing type
@@ -301,200 +289,113 @@ export const TrainerCard = ({
             )}
           </div>
 
-          {/* Distance to gym - New section - Hidden on very small screens */}
+          {/* Distance to gym - Compact version */}
           {typeof trainer.distance == "number" && (
-            <div className="hidden sm:block mb-2.5 bg-zinc-800/30 rounded-lg p-2 border border-zinc-700/30">
+            <div className="mb-2 bg-zinc-800/30 rounded-lg p-2 border border-zinc-700/30">
               <div className="flex items-center gap-1.5">
                 <Icon
                   icon="mdi:directions"
-                  className={`w-3.5 h-3.5 text-[${themeColors.primary}] flex-shrink-0`}
+                  className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-[${themeColors.primary}] flex-shrink-0`}
                   style={{ color: themeColors.primary }}
                 />
-                <span className="text-xs font-medium text-white">
-                  {trainer.distanceSource === "gym"
-                    ? "Distance to gym:"
-                    : "Distance:"}
+                <span className="text-[10px] sm:text-xs font-medium text-white">
+                  {trainer.distanceSource === "gym" ? "To gym:" : "Distance:"}
                 </span>
                 <span
-                  className={`text-xs font-bold text-[${themeColors.primary}]`}
+                  className={`text-[10px] sm:text-xs font-bold text-[${themeColors.primary}]`}
                   style={{ color: themeColors.primary }}
                 >
                   {formatDistance(trainer.distance)}
                 </span>
               </div>
-              <div className="ml-5 mt-1 text-xs text-zinc-400">
-                {trainer.distanceSource === "gym" && closestGym
-                  ? `${closestGym.name}, ${
-                      closestGym.address?.split(",")[0] || ""
-                    }`
-                  : trainer.location?.city || "Your location"}
-              </div>
             </div>
           )}
 
-          {/* Gym information with tooltip - Simplified for mobile */}
-          {Array.isArray(trainer.trainerGyms) &&
-            trainer.trainerGyms.length > 0 && (
-              <div
-                className="relative mb-2 sm:mb-2.5"
-                onMouseEnter={handleGymsMouseEnter}
-                onMouseLeave={handleGymsMouseLeave}
-                ref={gymsTooltipRef}
-              >
-                <div className="flex items-center justify-between gap-1 sm:gap-2">
-                  <div className="flex items-center gap-1 sm:gap-1.5 bg-zinc-800/40 rounded-lg px-2 py-1 sm:px-3 sm:py-1.5 cursor-pointer hover:bg-zinc-800 flex-1">
-                    <Icon
-                      icon="mdi:dumbbell"
-                      className={`w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 text-[${themeColors.primary}]`}
-                      style={{ color: themeColors.primary }}
-                    />
-                    <span className="text-[10px] sm:text-xs text-white">
-                      {trainer.trainerGyms.length}{" "}
-                      {trainer.trainerGyms.length === 1 ? "gym" : "gyms"}
-                    </span>
-                    <Icon
-                      icon="mdi:chevron-down"
-                      className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 text-zinc-400 ml-auto hidden sm:block"
-                    />
-                  </div>
+          {/* Compact stats row */}
+          <div className="flex items-center gap-2 mb-2 sm:mb-3">
+            {/* Gym count */}
+            {Array.isArray(trainer.trainerGyms) &&
+              trainer.trainerGyms.length > 0 && (
+                <div
+                  className="relative flex items-center gap-1 bg-zinc-800/40 rounded-lg px-2 py-1 cursor-pointer hover:bg-zinc-800 flex-1"
+                  onMouseEnter={handleGymsMouseEnter}
+                  onMouseLeave={handleGymsMouseLeave}
+                  ref={gymsTooltipRef}
+                >
+                  <Icon
+                    icon="mdi:dumbbell"
+                    className={`w-2.5 h-2.5 sm:w-3 sm:h-3 text-[${themeColors.primary}]`}
+                    style={{ color: themeColors.primary }}
+                  />
+                  <span className="text-[10px] sm:text-xs text-white">
+                    {trainer.trainerGyms.length} gym
+                    {trainer.trainerGyms.length !== 1 ? "s" : ""}
+                  </span>
 
-                  {/* Client count */}
-                  <div className="flex items-center gap-1 sm:gap-1.5 bg-zinc-800/40 rounded-lg px-2 py-1 sm:px-3 sm:py-1.5 flex-1">
-                    <Icon
-                      icon="mdi:account-group"
-                      className={`w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 text-[${themeColors.primary}]`}
-                      style={{ color: themeColors.primary }}
-                    />
-                    <span className="text-[10px] sm:text-xs text-white">
-                      {trainer.clientCount || 0} clients
-                    </span>
-                  </div>
-                </div>
-
-                {/* Gyms tooltip - Only show on larger screens */}
-                {showGymsTooltip && (
-                  <div className="hidden sm:block absolute bottom-full left-0 mb-2 w-56 bg-zinc-800 rounded-lg shadow-lg p-2 z-50 border border-zinc-700">
-                    <div className="text-xs font-medium text-white mb-1">
-                      Training Locations:
-                    </div>
-                    <ul className="text-xs text-zinc-300 space-y-1 max-h-40 overflow-y-auto">
-                      {trainer.trainerGyms.map((gymData, idx) => (
-                        <li
-                          key={idx}
-                          className="flex items-start py-1 border-b border-zinc-700/50 last:border-0"
-                        >
-                          <Icon
-                            icon="mdi:map-marker"
-                            className={`w-3 h-3 text-[${themeColors.primary}] mr-1 mt-0.5 flex-shrink-0`}
-                            style={{ color: themeColors.primary }}
-                          />
-                          <div>
-                            <div className="font-medium">
-                              {gymData.gym?.name || "Unnamed Gym"}
-                            </div>
-                            {gymData.gym?.address && (
-                              <div className="text-zinc-400 text-[10px]">
-                                {gymData.gym.address}
+                  {/* Gyms tooltip - Only show on larger screens */}
+                  {showGymsTooltip && (
+                    <div className="hidden sm:block absolute bottom-full left-0 mb-2 w-56 bg-zinc-800 rounded-lg shadow-lg p-2 z-50 border border-zinc-700">
+                      <div className="text-xs font-medium text-white mb-1">
+                        Training Locations:
+                      </div>
+                      <ul className="text-xs text-zinc-300 space-y-1 max-h-40 overflow-y-auto">
+                        {trainer.trainerGyms.map((gymData, idx) => (
+                          <li
+                            key={idx}
+                            className="flex items-start py-1 border-b border-zinc-700/50 last:border-0"
+                          >
+                            <Icon
+                              icon="mdi:map-marker"
+                              className={`w-3 h-3 text-[${themeColors.primary}] mr-1 mt-0.5 flex-shrink-0`}
+                              style={{ color: themeColors.primary }}
+                            />
+                            <div>
+                              <div className="font-medium">
+                                {gymData.gym?.name || "Unnamed Gym"}
                               </div>
-                            )}
-                            {idx === 0 &&
-                              trainer.distanceSource === "gym" &&
-                              typeof trainer.distance === "number" && (
-                                <div
-                                  className={`mt-0.5 text-[10px] bg-[${themeColors.primary}]/20 text-[${themeColors.primary}] px-1.5 py-0.5 rounded-full inline-block`}
-                                  style={{
-                                    backgroundColor: `${themeColors.primary}20`,
-                                    color: themeColors.primary,
-                                  }}
-                                >
-                                  {formatDistance(trainer.distance)} away
+                              {gymData.gym?.address && (
+                                <div className="text-zinc-400 text-[10px]">
+                                  {gymData.gym.address}
                                 </div>
                               )}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="absolute -bottom-1 left-4 w-2 h-2 bg-zinc-800 border-r border-b border-zinc-700 transform rotate-45"></div>
-                  </div>
-                )}
-              </div>
-            )}
+                              {idx === 0 &&
+                                trainer.distanceSource === "gym" &&
+                                typeof trainer.distance === "number" && (
+                                  <div
+                                    className={`mt-0.5 text-[10px] bg-[${themeColors.primary}]/20 text-[${themeColors.primary}] px-1.5 py-0.5 rounded-full inline-block`}
+                                    style={{
+                                      backgroundColor: `${themeColors.primary}20`,
+                                      color: themeColors.primary,
+                                    }}
+                                  >
+                                    {formatDistance(trainer.distance)} away
+                                  </div>
+                                )}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="absolute -bottom-1 left-4 w-2 h-2 bg-zinc-800 border-r border-b border-zinc-700 transform rotate-45"></div>
+                    </div>
+                  )}
+                </div>
+              )}
 
-          {/* Display only client count when no gyms available */}
-          {(!Array.isArray(trainer.trainerGyms) ||
-            trainer.trainerGyms.length === 0) && (
-            <div className="mb-2 sm:mb-2.5">
-              <div className="flex items-center gap-1 sm:gap-1.5 bg-zinc-800/40 rounded-lg px-2 py-1 sm:px-3 sm:py-1.5">
-                <Icon
-                  icon="mdi:account-group"
-                  className={`w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 text-[${themeColors.primary}]`}
-                  style={{ color: themeColors.primary }}
-                />
-                <span className="text-[10px] sm:text-xs text-white">
-                  {trainer.clientCount || 0} clients
-                </span>
-              </div>
+            {/* Client count */}
+            <div className="flex items-center gap-1 bg-zinc-800/40 rounded-lg px-2 py-1 flex-1">
+              <Icon
+                icon="mdi:account-group"
+                className={`w-2.5 h-2.5 sm:w-3 sm:h-3 text-[${themeColors.primary}]`}
+                style={{ color: themeColors.primary }}
+              />
+              <span className="text-[10px] sm:text-xs text-white">
+                {trainer.clientCount || 0} clients
+              </span>
             </div>
-          )}
-
-          {/* Certification badges - Show only 1 on mobile, 2 on larger screens */}
-          <div className="mb-2 sm:mb-3 flex flex-wrap gap-1 sm:gap-1.5">
-            {trainer.certifications.slice(0, 1).map((cert, index) => (
-              <span
-                key={index}
-                className={`flex items-center gap-1 rounded-full border border-[${themeColors.primary}30] bg-[${themeColors.primary}10] px-1.5 py-0.5 sm:px-2 sm:py-0.5 text-[10px] sm:text-xs font-medium text-[${themeColors.primary}] transition-all duration-300 group-hover:-translate-y-0.5`}
-                style={{
-                  borderColor: `${themeColors.primary}30`,
-                  backgroundColor: `${themeColors.primary}10`,
-                  color: themeColors.primary,
-                }}
-              >
-                <Icon
-                  icon="mdi:certificate"
-                  width={8}
-                  height={8}
-                  className="sm:w-[10px] sm:h-[10px]"
-                />
-                <span className="truncate max-w-[60px] sm:max-w-none">
-                  {cert.name}
-                </span>
-              </span>
-            ))}
-            {trainer.certifications.length > 1 && (
-              <span
-                className={`flex items-center rounded-full border border-[${themeColors.primary}30] bg-[${themeColors.primary}10] px-1.5 py-0.5 sm:px-2 sm:py-0.5 text-[10px] sm:text-xs font-medium text-[${themeColors.primary}]`}
-                style={{
-                  borderColor: `${themeColors.primary}30`,
-                  backgroundColor: `${themeColors.primary}10`,
-                  color: themeColors.primary,
-                }}
-              >
-                +{trainer.certifications.length - 1} more
-              </span>
-            )}
           </div>
-
-          {/* Specialties */}
-          <div className="mb-2 sm:mb-3">
-            <p className="text-[10px] sm:text-xs text-zinc-400 mb-1">
-              Specialties:
-            </p>
-            <p className="text-xs sm:text-sm text-zinc-300 line-clamp-1">
-              {mappedSpecialties
-                .slice(0, 2)
-                .map((s) => s.name)
-                .join(", ")}
-              {mappedSpecialties.length > 2 ? "..." : ""}
-            </p>
-          </div>
-
-          {/* Description - Hidden on mobile to save space */}
-          <p className="hidden sm:block mb-3 line-clamp-2 text-xs text-zinc-400 min-h-[2.5em]">
-            {trainer.description || "No description available."}
-          </p>
 
           {/* Price */}
-          <div className="mt-auto mb-2 sm:mb-3 flex items-center justify-between">
+          <div className="mb-2 sm:mb-3 flex items-center justify-between">
             <p
               className={`text-sm sm:text-lg font-bold text-[${themeColors.primary}]`}
               style={{ color: themeColors.primary }}
@@ -502,16 +403,129 @@ export const TrainerCard = ({
               {getPricingDisplay()}
             </p>
 
-            {/* Session duration badge - Hidden on mobile */}
+            {/* Session duration badge */}
             {trainer.sessionDuration && (
-              <span className="hidden sm:inline text-xs px-2 py-0.5 bg-zinc-800 rounded-full text-zinc-400">
-                {trainer.sessionDuration} min sessions
+              <span className="text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-0.5 bg-zinc-800 rounded-full text-zinc-400">
+                {trainer.sessionDuration}min
               </span>
             )}
           </div>
 
+          {/* Collapsible Details Accordion */}
+          <div className="mb-2 sm:mb-3">
+            <button
+              onClick={toggleAccordion}
+              className={`w-full flex items-center justify-between p-2 sm:p-3 bg-zinc-800/30 hover:bg-zinc-800/50 rounded-lg border border-zinc-700/30 transition-all duration-200 ${
+                isAccordionOpen ? "rounded-b-none border-b-0" : ""
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Icon
+                  icon="mdi:information-outline"
+                  className={`w-3 h-3 sm:w-4 sm:h-4 text-[${themeColors.primary}]`}
+                  style={{ color: themeColors.primary }}
+                />
+                <span className="text-[10px] sm:text-xs font-medium text-white">
+                  Details & Specialties
+                </span>
+              </div>
+              <Icon
+                icon="mdi:chevron-down"
+                className={`w-4 h-4 text-zinc-400 transition-transform duration-200 ${
+                  isAccordionOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {/* Accordion Content */}
+            <div
+              className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                isAccordionOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+              }`}
+            >
+              <div className="bg-zinc-800/20 border border-zinc-700/30 border-t-0 rounded-b-lg p-2 sm:p-3 space-y-3">
+                {/* Specialties */}
+                <div>
+                  <p className="text-[10px] sm:text-xs text-zinc-400 mb-1 font-medium">
+                    Specialties:
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {mappedSpecialties.slice(0, 3).map((specialty, index) => (
+                      <span
+                        key={index}
+                        className={`text-[9px] sm:text-[10px] px-1.5 py-0.5 bg-[${themeColors.primary}]/10 text-[${themeColors.primary}] rounded-full border border-[${themeColors.primary}]/20`}
+                        style={{
+                          backgroundColor: `${themeColors.primary}10`,
+                          color: themeColors.primary,
+                          borderColor: `${themeColors.primary}20`,
+                        }}
+                      >
+                        {specialty.name}
+                      </span>
+                    ))}
+                    {mappedSpecialties.length > 3 && (
+                      <span className="text-[9px] sm:text-[10px] px-1.5 py-0.5 bg-zinc-700 text-zinc-300 rounded-full">
+                        +{mappedSpecialties.length - 3} more
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Certifications */}
+                {trainer.certifications &&
+                  trainer.certifications.length > 0 && (
+                    <div>
+                      <p className="text-[10px] sm:text-xs text-zinc-400 mb-1 font-medium">
+                        Certifications:
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        {trainer.certifications
+                          .slice(0, 2)
+                          .map((cert, index) => (
+                            <span
+                              key={index}
+                              className={`flex items-center gap-1 text-[9px] sm:text-[10px] px-1.5 py-0.5 bg-[${themeColors.primary}]/10 text-[${themeColors.primary}] rounded-full border border-[${themeColors.primary}]/20`}
+                              style={{
+                                backgroundColor: `${themeColors.primary}10`,
+                                color: themeColors.primary,
+                                borderColor: `${themeColors.primary}20`,
+                              }}
+                            >
+                              <Icon
+                                icon="mdi:certificate"
+                                className="w-2 h-2 sm:w-2.5 sm:h-2.5"
+                              />
+                              <span className="truncate max-w-[80px] sm:max-w-[100px]">
+                                {cert.name}
+                              </span>
+                            </span>
+                          ))}
+                        {trainer.certifications.length > 2 && (
+                          <span className="text-[9px] sm:text-[10px] px-1.5 py-0.5 bg-zinc-700 text-zinc-300 rounded-full">
+                            +{trainer.certifications.length - 2} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                {/* Description */}
+                {trainer.description && (
+                  <div>
+                    <p className="text-[10px] sm:text-xs text-zinc-400 mb-1 font-medium">
+                      About:
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-zinc-300 line-clamp-3 leading-relaxed">
+                      {trainer.description}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Action buttons - Simplified for mobile */}
-          <div className="grid grid-cols-2 gap-1 sm:gap-2">
+          <div className="grid grid-cols-2 gap-1 sm:gap-2 mt-auto">
             <Button
               variant="secondary"
               size="small"

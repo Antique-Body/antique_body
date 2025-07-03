@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 
 import { Button } from "@/components/common/Button";
-import { FormField } from "@/components/common/FormField";
 import { SPECIALTIES } from "@/enums/specialties";
 
 export const SpecialtySelector = ({
@@ -12,7 +11,7 @@ export const SpecialtySelector = ({
   onChange,
   className = "",
 }) => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm] = useState("");
   const [categorizedSpecialties, setCategorizedSpecialties] = useState({});
   const activeCategory = "all";
   // Extract unique categories and organize specialties by category
@@ -48,46 +47,28 @@ export const SpecialtySelector = ({
     onChange(newSelection);
   };
 
-  const getSelectedSpecialtyLabels = () =>
-    selectedSpecialties
-      .map((id) => SPECIALTIES.find((spec) => spec.id === id)?.label)
-      .filter(Boolean);
-
   return (
     <div className={`space-y-6 ${className}`}>
-      {/* Header with search and counter */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
-        <div className="relative flex-1 max-w-md">
-          <FormField
-            type="text"
-            name="specialtySearch"
-            placeholder="Search specialties..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="mb-0 bg-[#1a1a1a] border-[#333] rounded-lg"
-            prefixIcon="mdi:magnify"
-          />
+      {/* Header with title, description and counter */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h3 className="text-base font-medium text-gray-300 flex items-center">
+            <Icon
+              icon="mdi:star-circle"
+              className="mr-2 text-[#FF6B00]"
+              width={18}
+              height={18}
+            />
+            Choose Your Expertise Areas
+          </h3>
+          <p className="text-sm text-gray-400 mt-1">
+            Pick the fitness areas where you have knowledge and experience
+          </p>
         </div>
 
         {selectedSpecialties.length > 0 && (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-lg">
-            <Icon
-              icon="mdi:check-circle"
-              width={16}
-              height={16}
-              className="text-[#FF6B00]"
-            />
-            <span className="text-sm text-[#FF6B00] font-medium">
-              {selectedSpecialties.length} selected
-            </span>
-            <Button
-              variant="orangeText"
-              type="button"
-              onClick={() => onChange([])}
-              className="ml-2 text-xs text-[#FF6B00] hover:text-[#FF6B00]/80 font-medium transition-colors"
-            >
-              Clear
-            </Button>
+          <div className="px-3 py-1 text-nowrap bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-lg text-[#FF6B00] text-xs font-medium">
+            {selectedSpecialties.length} selected
           </div>
         )}
       </div>
@@ -100,7 +81,7 @@ export const SpecialtySelector = ({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.2 }}
-          className="flex flex-wrap gap-2"
+          className="flex flex-wrap gap-3"
         >
           {filteredSpecialties.map((specialty) => {
             const isSelected = selectedSpecialties.includes(specialty.id);
@@ -164,35 +145,6 @@ export const SpecialtySelector = ({
           )}
         </motion.div>
       </AnimatePresence>
-
-      {/* Selected Specialties Preview */}
-      {selectedSpecialties.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          className="p-4 bg-gradient-to-r from-[#1a1a1a] to-[#222] border border-[#333] rounded-lg"
-        >
-          <h4 className="text-sm font-medium text-gray-300 mb-2 flex items-center">
-            <Icon
-              icon="mdi:bookmark-check"
-              className="mr-2 text-[#FF6B00]"
-              width={16}
-              height={16}
-            />
-            Your Selected Specialties
-          </h4>
-          <div className="flex flex-wrap gap-2">
-            {getSelectedSpecialtyLabels().map((label, index) => (
-              <span
-                key={index}
-                className="px-3 py-1.5 bg-[#FF6B00]/20 text-[#FF6B00] text-xs rounded-full font-medium flex items-center"
-              >
-                {label}
-              </span>
-            ))}
-          </div>
-        </motion.div>
-      )}
     </div>
   );
 };

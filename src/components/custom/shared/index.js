@@ -1,11 +1,12 @@
 export { CertificationUpload } from "./CertificationUpload";
-export { RootErrorBoundary } from "./RootErrorBoundary";
+// export { RootErrorBoundary } from "./RootErrorBoundary";
 export { LanguageSelector } from "./LanguageSelector";
 export { ProfileImageUpload } from "./ProfileImageUpload";
 export { SpecialtySelector } from "./SpecialtySelector";
 export { TrainingTypeSelector } from "./TrainingTypeSelector";
 export { I18nProvider } from "./I18nProvider";
 export { default as DraggableImage } from "./DraggableImage";
+export { AnatomicalViewer } from "./AnatomicalViewer";
 
 // New shared components
 export { SearchFilters } from "./SearchFilters";
