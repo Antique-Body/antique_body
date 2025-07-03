@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-import { createPlan } from "@/utils/planService";
+import { createPlan, updatePlan } from "@/utils/planService";
 
 const initialFormData = {
   // Basic Info
@@ -15,7 +15,7 @@ const initialFormData = {
   durationType: "weeks",
   trainingType: "with-trainer",
   sessionsPerWeek: "3",
-  level: "",
+  difficultyLevel: "",
 
   // Session Format
   sessionFormat: {
@@ -51,9 +51,15 @@ const initialFormData = {
   },
 };
 
-export const useTrainingPlanForm = () => {
+export const useTrainingPlanForm = (initialData = null) => {
   const router = useRouter();
-  const [formData, setFormData] = useState(initialFormData);
+  const [formData, setFormData] = useState(initialData || initialFormData);
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData]);
 
   const updateFormData = (updates) => {
     if (typeof updates === "function") {
@@ -166,14 +172,19 @@ export const useTrainingPlanForm = () => {
             : null,
         sessionFormat: formData.sessionFormat,
         trainingType: formData.trainingType,
-        level: formData.level || null,
+        difficultyLevel: formData.difficultyLevel || null,
       };
 
       // LOGIRAJ PAYLOAD PRIJE SLANJA
       console.log("Plan payload koji će biti poslan na backend:", planPayload);
 
-      // KORISTI planService
-      await createPlan(planPayload, "training");
+      if (formData.id) {
+        // EDIT MODE: PATCH
+        await updatePlan(formData.id, planPayload, "training");
+      } else {
+        // CREATE MODE: POST
+        await createPlan(planPayload, "training");
+      }
 
       // Redirect na plans page
       router.push("/trainer/dashboard/plans");

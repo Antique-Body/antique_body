@@ -27,7 +27,7 @@ export async function GET(req) {
     let plans = [];
     if (type === "nutrition") {
       plans = await prisma.nutritionPlan.findMany({
-        where: { trainerInfoId: trainerInfo.id },
+        where: { trainerInfoId: trainerInfo.id, isActive: true },
         orderBy: { createdAt: "desc" },
         select: {
           id: true,
@@ -46,7 +46,7 @@ export async function GET(req) {
       plans = plans.map((plan) => ({ ...plan, type: "nutrition" }));
     } else {
       plans = await prisma.trainingPlan.findMany({
-        where: { trainerInfoId: trainerInfo.id },
+        where: { trainerInfoId: trainerInfo.id, isActive: true },
         orderBy: { createdAt: "desc" },
         select: {
           id: true,

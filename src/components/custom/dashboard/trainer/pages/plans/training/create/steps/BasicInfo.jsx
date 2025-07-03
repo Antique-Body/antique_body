@@ -3,7 +3,7 @@
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { FormField } from "@/components/common/FormField";
 
@@ -78,6 +78,17 @@ const TRAINING_LEVELS = [
 
 export const BasicInfo = ({ data, onChange }) => {
   const [previewImage, setPreviewImage] = useState(null);
+
+  // Ako je edit mode i postoji coverImage (string), postavi ga kao preview
+  useEffect(() => {
+    if (
+      !previewImage &&
+      typeof data.coverImage === "string" &&
+      data.coverImage
+    ) {
+      setPreviewImage(data.coverImage);
+    }
+  }, [data.coverImage, previewImage]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];

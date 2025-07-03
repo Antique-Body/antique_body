@@ -164,8 +164,7 @@ export const PlanCard = ({
   };
 
   const handleEditClick = () => {
-    // Navigate to the edit page
-    router.push(editUrl);
+    router.push(`/trainer/dashboard/plans/edit/${id}`);
   };
 
   const handleDeleteClick = () => {

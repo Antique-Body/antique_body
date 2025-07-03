@@ -24,3 +24,27 @@ export const fetchPlanDetails = async (planId, type = "training") => {
   if (!res.ok) throw new Error("Failed to fetch plan details");
   return res.json();
 };
+
+export const updatePlan = async (planId, plan, type = "training") => {
+  const res = await fetch(`${API_URL}/${planId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...plan, type }),
+  });
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error || "Failed to update plan");
+  }
+  return res.json();
+};
+
+export const deletePlan = async (planId) => {
+  const res = await fetch(`${API_URL}/${planId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error || "Failed to delete plan");
+  }
+  return res.json();
+};
