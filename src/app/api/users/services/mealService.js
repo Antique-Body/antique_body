@@ -24,6 +24,7 @@ const MEAL_CONFIG = {
     "french",
     "greek",
     "middle-eastern",
+    "international",
     "other",
   ],
 };

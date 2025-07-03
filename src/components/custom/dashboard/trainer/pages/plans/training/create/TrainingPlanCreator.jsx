@@ -13,7 +13,7 @@ import { Schedule } from "./steps/Schedule";
 
 import { Card } from "@/components/common";
 import { BackButton } from "@/components/common/BackButton";
-import { useTrainingPlanForm } from "@/hooks/trainer/useTrainingPlanForm";
+import { useTrainingPlanForm } from "@/hooks/useTrainingPlanForm";
 
 const STEPS = [
   { id: "basic", label: "Basic Info", icon: "mdi:information" },

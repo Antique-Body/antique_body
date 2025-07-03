@@ -10,6 +10,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { ExerciseModal } from "../../../../exercises/components/ExerciseModal";
 
 import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/common/FormField";
 import { Modal } from "@/components/common/Modal";
 
 // Add custom scrollbar styles
@@ -187,6 +188,273 @@ function SessionDndWrapper({ id, index, moveSession, children }) {
   );
 }
 
+const ExerciseCard = React.memo(function ExerciseCard({
+  exercise,
+  sessionIndex,
+  exerciseIndex,
+  handleExerciseChange,
+  onRemove,
+  setShowMediaPreview,
+}) {
+  const [activeMedia, setActiveMedia] = useState("image"); // 'image' or 'video'
+
+  return (
+    <div className="bg-gradient-to-br from-[#3a3a3a] to-[#404040] rounded-xl border border-[#555] hover:border-[#666] transition-all duration-300 overflow-hidden shadow-lg">
+      <div className="flex">
+        {/* Left side - Exercise details */}
+        <div className="flex-1 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="font-semibold text-white text-lg">
+              {exercise.name}
+            </h4>
+            <Button
+              variant="ghost"
+              size="small"
+              onClick={onRemove}
+              className="text-red-400 hover:text-red-300 hover:bg-red-500/30"
+              leftIcon={
+                <Icon icon="mdi:trash-can-outline" className="w-4 h-4" />
+              }
+            />
+          </div>
+
+          {/* Exercise controls */}
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            <FormField
+              label="Sets"
+              type="number"
+              value={exercise.sets}
+              min={1}
+              onChange={(e) =>
+                handleExerciseChange(
+                  sessionIndex,
+                  exerciseIndex,
+                  "sets",
+                  parseInt(e.target.value)
+                )
+              }
+              className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-lg text-white text-center font-semibold text-lg focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm"
+            />
+            <FormField
+              label="Reps"
+              type="number"
+              value={exercise.reps}
+              min={1}
+              onChange={(e) =>
+                handleExerciseChange(
+                  sessionIndex,
+                  exerciseIndex,
+                  "reps",
+                  parseInt(e.target.value)
+                )
+              }
+              className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-lg text-white text-center font-semibold text-lg focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm"
+            />
+            <FormField
+              label="Rest (s)"
+              type="number"
+              value={exercise.rest}
+              min={0}
+              onChange={(e) =>
+                handleExerciseChange(
+                  sessionIndex,
+                  exerciseIndex,
+                  "rest",
+                  parseInt(e.target.value)
+                )
+              }
+              className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-lg text-white text-center font-semibold text-lg focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm"
+            />
+          </div>
+
+          {/* Exercise Instructions - sada editable */}
+          <div className="space-y-2 mb-4">
+            <label className="block text-sm font-medium text-gray-200 mb-1 flex items-center gap-2">
+              <Icon icon="mdi:information-outline" className="w-4 h-4" />
+              Instructions
+            </label>
+            <FormField
+              type="textarea"
+              value={exercise.instructions}
+              onChange={(e) =>
+                handleExerciseChange(
+                  sessionIndex,
+                  exerciseIndex,
+                  "instructions",
+                  e.target.value
+                )
+              }
+              placeholder="Add instructions for this exercise..."
+              rows={3}
+              className="bg-[#4a4a4a]/60 border border-[#666]/40 rounded-lg text-gray-300 text-sm leading-relaxed"
+            />
+          </div>
+
+          <FormField
+            label="Notes"
+            type="textarea"
+            value={exercise.notes}
+            onChange={(e) =>
+              handleExerciseChange(
+                sessionIndex,
+                exerciseIndex,
+                "notes",
+                e.target.value
+              )
+            }
+            placeholder="Add specific instructions, form cues, or modifications..."
+            rows={3}
+            className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-lg resize-none text-white focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm placeholder-gray-400"
+          />
+
+          {/* Muscle Groups */}
+          {exercise.muscleGroups && exercise.muscleGroups.length > 0 && (
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-200 mb-1 flex items-center gap-2">
+                <Icon icon="mdi:muscle" className="w-4 h-4" />
+                Target Muscles
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {exercise.muscleGroups.map((muscle, index) => {
+                  console.log("Muscle data:", muscle);
+
+                  // Generate a unique key based on available data
+                  const uniqueKey =
+                    typeof muscle === "object" && muscle.id
+                      ? muscle.id
+                      : typeof muscle === "object" && muscle.name
+                      ? muscle.name
+                      : typeof muscle === "string"
+                      ? muscle
+                      : `muscle-${index}`;
+
+                  return (
+                    <span
+                      key={uniqueKey}
+                      className="px-3 py-1 bg-gradient-to-r from-[#FF6B00]/20 to-[#FF8500]/20 border border-[#FF6B00]/40 rounded-full text-xs font-medium text-[#FF6B00] capitalize"
+                    >
+                      {typeof muscle === "string"
+                        ? muscle
+                        : muscle.name || muscle}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right side - Media preview */}
+        <div className="w-72 border-l border-[#555] flex flex-col bg-[#3a3a3a]/90">
+          {/* Media type selector */}
+          <div className="flex border-b border-[#555]">
+            <Button
+              variant="ghost"
+              size="small"
+              onClick={() => setActiveMedia("image")}
+              className={`flex-1 rounded-none border-r border-[#555] ${
+                activeMedia === "image"
+                  ? "bg-[#FF6B00]/30 text-[#FF6B00] border-[#FF6B00]/60"
+                  : "text-gray-300 hover:text-white hover:bg-[#555]/70"
+              }`}
+              leftIcon={<Icon icon="mdi:image" className="w-4 h-4" />}
+            >
+              Image
+            </Button>
+            <Button
+              variant="ghost"
+              size="small"
+              onClick={() => setActiveMedia("video")}
+              className={`flex-1 rounded-none ${
+                activeMedia === "video"
+                  ? "bg-[#FF6B00]/30 text-[#FF6B00] border-[#FF6B00]/60"
+                  : "text-gray-300 hover:text-white hover:bg-[#555]/70"
+              }`}
+              leftIcon={<Icon icon="mdi:video" className="w-4 h-4" />}
+            >
+              Video
+            </Button>
+          </div>
+
+          {/* Media preview area */}
+          <div className="flex-1 p-4">
+            {activeMedia === "image" ? (
+              exercise.imageUrl ? (
+                <Button
+                  variant="ghost"
+                  onClick={() =>
+                    setShowMediaPreview({
+                      type: "image",
+                      url: exercise.imageUrl,
+                      name: exercise.name,
+                    })
+                  }
+                  className="w-full h-full p-0 relative rounded-lg overflow-hidden bg-black/40 hover:bg-black/50"
+                >
+                  <Image
+                    src={exercise.imageUrl}
+                    alt={exercise.name}
+                    className="object-cover"
+                    width={1000}
+                    height={1000}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity">
+                    <div className="bg-white/40 backdrop-blur-sm rounded-full p-3">
+                      <Icon icon="mdi:magnify" className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                </Button>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400 bg-[#4a4a4a] rounded-lg border-2 border-dashed border-[#666]">
+                  <div className="text-center py-8">
+                    <Icon
+                      icon="mdi:image-off"
+                      className="w-12 h-12 mx-auto mb-3 text-gray-500"
+                    />
+                    <span className="text-sm text-gray-400">
+                      No image available
+                    </span>
+                  </div>
+                </div>
+              )
+            ) : exercise.videoUrl ? (
+              <Button
+                variant="ghost"
+                onClick={() =>
+                  setShowMediaPreview({
+                    type: "video",
+                    url: exercise.videoUrl,
+                    name: exercise.name,
+                  })
+                }
+                className="w-full h-full p-0 relative rounded-lg overflow-hidden bg-black/40 hover:bg-black/50"
+              >
+                <div className="w-full h-full bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-[#FF6B00]/40 backdrop-blur-sm flex items-center justify-center hover:bg-[#FF6B00]/50 transition-colors">
+                    <Icon icon="mdi:play" className="w-8 h-8 text-[#FF6B00]" />
+                  </div>
+                </div>
+              </Button>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-400 bg-[#4a4a4a] rounded-lg border-2 border-dashed border-[#666]">
+                <div className="text-center py-8">
+                  <Icon
+                    icon="mdi:video-off"
+                    className="w-12 h-12 mx-auto mb-3 text-gray-500"
+                  />
+                  <span className="text-sm text-gray-400">
+                    No video available
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
 export const Schedule = ({ data, onChange }) => {
   const [activeSession, setActiveSession] = useState(0);
   const [showExerciseLibrary, setShowExerciseLibrary] = useState(false);
@@ -197,6 +465,7 @@ export const Schedule = ({ data, onChange }) => {
   const [selectedExercises, setSelectedExercises] = useState([]);
   const [showMediaPreview, setShowMediaPreview] = useState(null);
   const [expandedSession, setExpandedSession] = useState(null);
+  const [activeFilter, setActiveFilter] = useState("All");
 
   // Fetch exercises when modal opens
   useEffect(() => {
@@ -293,23 +562,30 @@ export const Schedule = ({ data, onChange }) => {
   };
 
   const handleExerciseChange = (sessionIndex, exerciseIndex, field, value) => {
-    const newSchedule = [...data.schedule];
-    newSchedule[sessionIndex].exercises[exerciseIndex] = {
-      ...newSchedule[sessionIndex].exercises[exerciseIndex],
-      [field]: value,
-    };
-    onChange({
-      schedule: newSchedule,
+    onChange((prev) => {
+      const newSchedule = [...prev.schedule];
+      newSchedule[sessionIndex] = {
+        ...newSchedule[sessionIndex],
+        exercises: [...newSchedule[sessionIndex].exercises],
+      };
+      newSchedule[sessionIndex].exercises[exerciseIndex] = {
+        ...newSchedule[sessionIndex].exercises[exerciseIndex],
+        [field]: value,
+      };
+      return { ...prev, schedule: newSchedule };
     });
   };
 
   const handleAddSession = (isRestDay = false) => {
+    const defaultType = isRestDay
+      ? "rest"
+      : SESSION_TYPES.find((t) => t.id !== "rest")?.id || "strength";
     const newSession = {
       ...DEFAULT_SESSION,
       id: crypto.randomUUID(),
       day: `day${(data.schedule.length % 7) + 1}`,
       isRestDay,
-      type: isRestDay ? "rest" : "strength",
+      type: defaultType,
       name: isRestDay ? "Rest Day" : "",
       exercises: isRestDay ? [] : DEFAULT_SESSION.exercises,
     };
@@ -348,234 +624,6 @@ export const Schedule = ({ data, onChange }) => {
     const [removed] = updated.splice(from, 1);
     updated.splice(to, 0, removed);
     onChange({ schedule: updated });
-  };
-
-  const ExerciseCard = ({ exercise, sessionIndex, exerciseIndex }) => {
-    const [activeMedia, setActiveMedia] = useState("image"); // 'image' or 'video'
-
-    return (
-      <div className="bg-gradient-to-br from-[#3a3a3a] to-[#404040] rounded-xl border border-[#555] hover:border-[#666] transition-all duration-300 overflow-hidden shadow-lg">
-        <div className="flex">
-          {/* Left side - Exercise details */}
-          <div className="flex-1 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="font-semibold text-white text-lg">
-                {exercise.name}
-              </h4>
-              <Button
-                variant="ghost"
-                size="small"
-                onClick={() => {
-                  const newSchedule = [...data.schedule];
-                  newSchedule[sessionIndex].exercises = newSchedule[
-                    sessionIndex
-                  ].exercises.filter((_, i) => i !== exerciseIndex);
-                  onChange({ schedule: newSchedule });
-                }}
-                className="text-red-400 hover:text-red-300 hover:bg-red-500/30"
-                leftIcon={
-                  <Icon icon="mdi:trash-can-outline" className="w-4 h-4" />
-                }
-              />
-            </div>
-
-            {/* Exercise controls */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-200 mb-1">
-                  Sets
-                </label>
-                <input
-                  type="number"
-                  value={exercise.sets}
-                  onChange={(e) =>
-                    handleExerciseChange(
-                      sessionIndex,
-                      exerciseIndex,
-                      "sets",
-                      parseInt(e.target.value)
-                    )
-                  }
-                  min="1"
-                  className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-lg text-white px-4 py-3 text-center font-semibold text-lg focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-200 mb-1">
-                  Reps
-                </label>
-                <input
-                  type="number"
-                  value={exercise.reps}
-                  onChange={(e) =>
-                    handleExerciseChange(
-                      sessionIndex,
-                      exerciseIndex,
-                      "reps",
-                      parseInt(e.target.value)
-                    )
-                  }
-                  min="1"
-                  className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-lg text-white px-4 py-3 text-center font-semibold text-lg focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-200 mb-1">
-                  Rest (s)
-                </label>
-                <input
-                  type="number"
-                  value={exercise.rest}
-                  onChange={(e) =>
-                    handleExerciseChange(
-                      sessionIndex,
-                      exerciseIndex,
-                      "rest",
-                      parseInt(e.target.value)
-                    )
-                  }
-                  min="0"
-                  className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-lg text-white px-4 py-3 text-center font-semibold text-lg focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-200 mb-1">
-                Notes
-              </label>
-              <textarea
-                value={exercise.notes}
-                onChange={(e) =>
-                  handleExerciseChange(
-                    sessionIndex,
-                    exerciseIndex,
-                    "notes",
-                    e.target.value
-                  )
-                }
-                placeholder="Add specific instructions, form cues, or modifications..."
-                rows="3"
-                className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-lg resize-none text-white px-4 py-3 focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm placeholder-gray-400"
-              />
-            </div>
-          </div>
-
-          {/* Right side - Media preview */}
-          <div className="w-72 border-l border-[#555] flex flex-col bg-[#3a3a3a]/90">
-            {/* Media type selector */}
-            <div className="flex border-b border-[#555]">
-              <Button
-                variant="ghost"
-                size="small"
-                onClick={() => setActiveMedia("image")}
-                className={`flex-1 rounded-none border-r border-[#555] ${
-                  activeMedia === "image"
-                    ? "bg-[#FF6B00]/30 text-[#FF6B00] border-[#FF6B00]/60"
-                    : "text-gray-300 hover:text-white hover:bg-[#555]/70"
-                }`}
-                leftIcon={<Icon icon="mdi:image" className="w-4 h-4" />}
-              >
-                Image
-              </Button>
-              <Button
-                variant="ghost"
-                size="small"
-                onClick={() => setActiveMedia("video")}
-                className={`flex-1 rounded-none ${
-                  activeMedia === "video"
-                    ? "bg-[#FF6B00]/30 text-[#FF6B00] border-[#FF6B00]/60"
-                    : "text-gray-300 hover:text-white hover:bg-[#555]/70"
-                }`}
-                leftIcon={<Icon icon="mdi:video" className="w-4 h-4" />}
-              >
-                Video
-              </Button>
-            </div>
-
-            {/* Media preview area */}
-            <div className="flex-1 p-4">
-              {activeMedia === "image" ? (
-                exercise.imageUrl ? (
-                  <Button
-                    variant="ghost"
-                    onClick={() =>
-                      setShowMediaPreview({
-                        type: "image",
-                        url: exercise.imageUrl,
-                        name: exercise.name,
-                      })
-                    }
-                    className="w-full h-full p-0 relative rounded-lg overflow-hidden bg-black/40 hover:bg-black/50"
-                  >
-                    <Image
-                      src={exercise.imageUrl}
-                      alt={exercise.name}
-                      className="object-cover"
-                      width={1000}
-                      height={1000}
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity">
-                      <div className="bg-white/40 backdrop-blur-sm rounded-full p-3">
-                        <Icon
-                          icon="mdi:magnify"
-                          className="w-6 h-6 text-white"
-                        />
-                      </div>
-                    </div>
-                  </Button>
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400 bg-[#4a4a4a] rounded-lg border-2 border-dashed border-[#666]">
-                    <div className="text-center py-8">
-                      <Icon
-                        icon="mdi:image-off"
-                        className="w-12 h-12 mx-auto mb-3 text-gray-500"
-                      />
-                      <span className="text-sm text-gray-400">
-                        No image available
-                      </span>
-                    </div>
-                  </div>
-                )
-              ) : exercise.videoUrl ? (
-                <Button
-                  variant="ghost"
-                  onClick={() =>
-                    setShowMediaPreview({
-                      type: "video",
-                      url: exercise.videoUrl,
-                      name: exercise.name,
-                    })
-                  }
-                  className="w-full h-full p-0 relative rounded-lg overflow-hidden bg-black/40 hover:bg-black/50"
-                >
-                  <div className="w-full h-full bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-[#FF6B00]/40 backdrop-blur-sm flex items-center justify-center hover:bg-[#FF6B00]/50 transition-colors">
-                      <Icon
-                        icon="mdi:play"
-                        className="w-8 h-8 text-[#FF6B00]"
-                      />
-                    </div>
-                  </div>
-                </Button>
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400 bg-[#4a4a4a] rounded-lg border-2 border-dashed border-[#666]">
-                  <div className="text-center py-8">
-                    <Icon
-                      icon="mdi:video-off"
-                      className="w-12 h-12 mx-auto mb-3 text-gray-500"
-                    />
-                    <span className="text-sm text-gray-400">
-                      No video available
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
   };
 
   return (
@@ -746,10 +794,8 @@ export const Schedule = ({ data, onChange }) => {
                               {/* Session Info */}
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                  <label className="block text-sm font-medium text-white mb-1">
-                                    Session Name
-                                  </label>
-                                  <input
+                                  <FormField
+                                    label="Session Name"
                                     type="text"
                                     value={session.name}
                                     onChange={(e) =>
@@ -764,10 +810,8 @@ export const Schedule = ({ data, onChange }) => {
                                   />
                                 </div>
                                 <div className="space-y-2">
-                                  <label className="block text-sm font-medium text-white mb-1">
-                                    Duration (minutes)
-                                  </label>
-                                  <input
+                                  <FormField
+                                    label="Duration (minutes)"
                                     type="number"
                                     value={session.duration}
                                     onChange={(e) =>
@@ -834,17 +878,29 @@ export const Schedule = ({ data, onChange }) => {
 
                                 {session.exercises.map(
                                   (exercise, exerciseIndex) => (
-                                    <motion.div
-                                      key={exerciseIndex}
-                                      initial={{ opacity: 0, x: -20 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                    >
-                                      <ExerciseCard
-                                        exercise={exercise}
-                                        sessionIndex={sessionIndex}
-                                        exerciseIndex={exerciseIndex}
-                                      />
-                                    </motion.div>
+                                    <ExerciseCard
+                                      key={
+                                        exercise.id ||
+                                        `exercise-${sessionIndex}-${exerciseIndex}`
+                                      }
+                                      exercise={exercise}
+                                      sessionIndex={sessionIndex}
+                                      exerciseIndex={exerciseIndex}
+                                      handleExerciseChange={
+                                        handleExerciseChange
+                                      }
+                                      onRemove={() => {
+                                        const newSchedule = [...data.schedule];
+                                        newSchedule[sessionIndex].exercises =
+                                          newSchedule[
+                                            sessionIndex
+                                          ].exercises.filter(
+                                            (_, i) => i !== exerciseIndex
+                                          );
+                                        onChange({ schedule: newSchedule });
+                                      }}
+                                      setShowMediaPreview={setShowMediaPreview}
+                                    />
                                   )
                                 )}
 
@@ -935,67 +991,97 @@ export const Schedule = ({ data, onChange }) => {
         >
           <div className="space-y-6">
             {/* Search and Filter Bar */}
-            <div className="bg-gradient-to-r from-[#2a2a2a] to-[#3a3a3a] rounded-2xl p-6 border border-[#555]">
-              <div className="flex flex-col md:flex-row gap-4">
+            <div className="backdrop-blur-md bg-gradient-to-r from-[#232323]/80 to-[#323232]/80 rounded-3xl p-6 border border-[#FF7800]/20 shadow-xl">
+              <div className="flex flex-col gap-3">
                 {/* Search Input */}
-                <div className="relative flex-1">
-                  <input
+                <div className="relative w-full">
+                  <FormField
                     type="text"
                     placeholder="Search exercises by name, muscle group, or type..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-xl px-12 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm text-lg"
+                    className=""
+                    prefixIcon={
+                      <Icon
+                        icon="mdi:magnify"
+                        className="w-5 h-5 text-[#FF7800]"
+                      />
+                    }
                   />
-                  <Icon
-                    icon="mdi:magnify"
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400"
-                  />
+
+                  {searchQuery && (
+                    <button
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors duration-150"
+                      onClick={() => setSearchQuery("")}
+                    >
+                      <Icon icon="mdi:close-circle" className="w-5 h-5" />
+                    </button>
+                  )}
                 </div>
 
                 {/* Quick Filter Buttons */}
-                <div className="flex gap-2">
-                  {["All", "Strength", "Cardio", "Flexibility"].map(
-                    (filter) => (
-                      <Button
-                        key={filter}
-                        variant="ghost"
-                        size="small"
-                        className="px-4 py-2 bg-[#4a4a4a]/60 border border-[#666]/40 text-gray-300 hover:bg-[#FF6B00]/20 hover:border-[#FF6B00]/60 hover:text-[#FF6B00] transition-all rounded-xl"
-                      >
-                        {filter}
-                      </Button>
-                    )
-                  )}
+                <div className="flex gap-2 flex-wrap justify-start md:justify-start">
+                  {[
+                    { label: "All", icon: "mdi:apps" },
+                    { label: "Strength", icon: "mdi:dumbbell" },
+                    { label: "Cardio", icon: "mdi:heart-pulse" },
+                    { label: "Flexibility", icon: "mdi:yoga" },
+                  ].map(({ label, icon }) => (
+                    <Button
+                      key={label}
+                      variant="ghost"
+                      size="small"
+                      isActive={activeFilter === label}
+                      onClick={() => setActiveFilter(label)}
+                      className={`flex items-center gap-2 px-5 py-2 rounded-full font-semibold border text-sm shadow-sm transition-all duration-200
+                        ${
+                          activeFilter === label
+                            ? "bg-gradient-to-r from-[#FF7800] to-[#FF5F00] text-white border-[#FF7800] shadow-lg scale-105"
+                            : "bg-zinc-800/80 text-zinc-200 border-zinc-700 hover:bg-[#FF7800]/10 hover:text-[#FF7800] hover:border-[#FF7800]"
+                        }
+                      `}
+                    >
+                      <Icon
+                        icon={icon}
+                        className={`w-4 h-4 ${
+                          activeFilter === label
+                            ? "text-white"
+                            : "text-[#FF7800] group-hover:text-[#FF7800]"
+                        }`}
+                      />
+                      <span>{label}</span>
+                    </Button>
+                  ))}
                 </div>
               </div>
+            </div>
 
-              {/* Selected Counter */}
-              {selectedExercises.length > 0 && (
-                <div className="mt-4 p-4 bg-[#FF6B00]/20 border border-[#FF6B00]/40 rounded-xl">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-[#FF6B00] rounded-full flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">
-                          {selectedExercises.length}
-                        </span>
-                      </div>
-                      <span className="text-[#FF6B00] font-semibold">
-                        {selectedExercises.length} exercise
-                        {selectedExercises.length !== 1 ? "s" : ""} selected
+            {/* Selected Counter */}
+            {selectedExercises.length > 0 && (
+              <div className="mt-4 p-4 bg-[#FF6B00]/20 border border-[#FF6B00]/40 rounded-xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-[#FF6B00] rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">
+                        {selectedExercises.length}
                       </span>
                     </div>
-                    <Button
-                      variant="ghost"
-                      onClick={() => setSelectedExercises([])}
-                      className="text-[#FF6B00] hover:text-white hover:bg-[#FF6B00]/30"
-                      leftIcon={<Icon icon="mdi:close" className="w-4 h-4" />}
-                    >
-                      Clear All
-                    </Button>
+                    <span className="text-[#FF6B00] font-semibold">
+                      {selectedExercises.length} exercise
+                      {selectedExercises.length !== 1 ? "s" : ""} selected
+                    </span>
                   </div>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setSelectedExercises([])}
+                    className="text-[#FF6B00] hover:text-white hover:bg-[#FF6B00]/30"
+                    leftIcon={<Icon icon="mdi:close" className="w-4 h-4" />}
+                  >
+                    Clear All
+                  </Button>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Exercise Grid */}
             {isLoading ? (
@@ -1123,12 +1209,24 @@ export const Schedule = ({ data, onChange }) => {
                                 <div className="flex flex-wrap gap-1">
                                   {exercise.muscleGroups
                                     .slice(0, 2)
-                                    .map((muscle, idx) => (
+                                    .map((muscle) => (
                                       <span
-                                        key={idx}
+                                        key={
+                                          typeof muscle === "object" &&
+                                          muscle.id
+                                            ? muscle.id
+                                            : typeof muscle === "object" &&
+                                              muscle.name
+                                            ? muscle.name
+                                            : typeof muscle === "string"
+                                            ? muscle
+                                            : JSON.stringify(muscle)
+                                        }
                                         className="px-1.5 py-0.5 bg-slate-600/60 rounded text-xs text-slate-300 font-medium"
                                       >
-                                        {muscle.name}
+                                        {typeof muscle === "string"
+                                          ? muscle
+                                          : muscle.name || muscle}
                                       </span>
                                     ))}
                                   {exercise.muscleGroups.length > 2 && (

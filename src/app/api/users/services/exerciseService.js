@@ -72,20 +72,6 @@ const DEFAULT_EXERCISES = [
 function validateExerciseData(data) {
   const errors = [];
 
-  EXERCISE_CONFIG.requiredFields.forEach((field) => {
-    if (
-      !data[field] ||
-      (Array.isArray(data[field]) && data[field].length === 0)
-    ) {
-      errors.push(`Field '${field}' is required.`);
-    }
-  });
-
-  // Special handling for equipment field - it can be boolean
-  if (data.equipment === undefined || data.equipment === null) {
-    errors.push(`Field 'equipment' is required.`);
-  }
-
   if (data.type && !EXERCISE_CONFIG.validTypes.includes(data.type)) {
     errors.push(
       `Invalid exercise type. Valid types: ${EXERCISE_CONFIG.validTypes.join(

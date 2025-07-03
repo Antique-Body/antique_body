@@ -5,3 +5,7 @@ export * from "./fitnessGoals";
 export * from "./mealTypes";
 export * from "./specialties";
 export * from "./trainingTypes";
+export * from "./durationTypes";
+export * from "./planFeatures";
+export * from "./daysOfWeek";
+export * from "./planTypes";

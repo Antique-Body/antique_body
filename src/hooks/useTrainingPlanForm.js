@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { createPlan } from "@/utils/planService";
+
 const initialFormData = {
   // Basic Info
   title: "",
@@ -13,6 +15,7 @@ const initialFormData = {
   durationType: "weeks",
   trainingType: "with-trainer",
   sessionsPerWeek: "3",
+  level: "",
 
   // Session Format
   sessionFormat: {
@@ -29,6 +32,7 @@ const initialFormData = {
       day: "Monday",
       description: "",
       exercises: [],
+      type: "strength",
     },
   ],
 
@@ -151,11 +155,7 @@ export const useTrainingPlanForm = () => {
           ? formData.timeline.map((item) => ({
               ...item,
               week:
-                item.week !== undefined &&
-                item.week !== "" &&
-                !isNaN(Number(item.week))
-                  ? Number(item.week)
-                  : null,
+                item.week !== undefined && item.week !== "" ? item.week : null,
             }))
           : [],
         features: formData.features,
@@ -166,21 +166,14 @@ export const useTrainingPlanForm = () => {
             : null,
         sessionFormat: formData.sessionFormat,
         trainingType: formData.trainingType,
-        // Nema više type
+        level: formData.level || null,
       };
 
-      const response = await fetch("/api/users/trainer/plans", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(planPayload),
-      });
+      // LOGIRAJ PAYLOAD PRIJE SLANJA
+      console.log("Plan payload koji će biti poslan na backend:", planPayload);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create plan");
-      }
+      // KORISTI planService
+      await createPlan(planPayload, "training");
 
       // Redirect na plans page
       router.push("/trainer/dashboard/plans");

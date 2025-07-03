@@ -5,17 +5,14 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
 
-import { Button } from "@/components/common/Button";
-
 export const Preview = ({ data }) => {
   const [activeTab, setActiveTab] = useState("overview");
 
-  const getTotalExercises = () => {
-    return data.schedule?.reduce(
+  const getTotalExercises = () =>
+    data.schedule?.reduce(
       (total, session) => total + session.exercises.length,
       0
     ) || 0;
-  };
 
   const tabs = [
     { id: "overview", label: "Overview" },
@@ -29,7 +26,11 @@ export const Preview = ({ data }) => {
       <div className="relative h-48 sm:h-64 w-full overflow-hidden rounded-2xl mb-6">
         {data.coverImage ? (
           <Image
-            src={URL.createObjectURL(data.coverImage)}
+            src={
+              typeof data.coverImage === "string"
+                ? data.coverImage
+                : URL.createObjectURL(data.coverImage)
+            }
             alt={data.title || "Plan cover"}
             fill
             className="object-cover"
@@ -53,7 +54,10 @@ export const Preview = ({ data }) => {
         {data.price && (
           <div className="absolute top-4 right-4 z-10">
             <span className="flex items-center px-3 py-1.5 text-sm font-medium rounded-md bg-[#FF6B00] text-white">
-              <Icon icon="heroicons:banknotes-20-solid" className="w-4 h-4 mr-1" />
+              <Icon
+                icon="heroicons:banknotes-20-solid"
+                className="w-4 h-4 mr-1"
+              />
               ${data.price}
             </span>
           </div>
@@ -73,28 +77,40 @@ export const Preview = ({ data }) => {
         {/* Quick Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           <div className="p-4 bg-[#1a1a1a] rounded-lg border border-[#333] text-center">
-            <Icon icon="heroicons:calendar-20-solid" className="w-6 h-6 text-[#FF6B00] mx-auto mb-2" />
+            <Icon
+              icon="heroicons:calendar-20-solid"
+              className="w-6 h-6 text-[#FF6B00] mx-auto mb-2"
+            />
             <div className="text-2xl font-bold text-white mb-1">
               {data.duration} {data.durationType}
             </div>
             <div className="text-sm text-gray-400">Duration</div>
           </div>
           <div className="p-4 bg-[#1a1a1a] rounded-lg border border-[#333] text-center">
-            <Icon icon="heroicons:clock-20-solid" className="w-6 h-6 text-[#FF6B00] mx-auto mb-2" />
+            <Icon
+              icon="heroicons:clock-20-solid"
+              className="w-6 h-6 text-[#FF6B00] mx-auto mb-2"
+            />
             <div className="text-2xl font-bold text-white mb-1">
               {data.sessionsPerWeek}
             </div>
             <div className="text-sm text-gray-400">Sessions/Week</div>
           </div>
           <div className="p-4 bg-[#1a1a1a] rounded-lg border border-[#333] text-center">
-            <Icon icon="mdi:dumbbell" className="w-6 h-6 text-[#FF6B00] mx-auto mb-2" />
+            <Icon
+              icon="mdi:dumbbell"
+              className="w-6 h-6 text-[#FF6B00] mx-auto mb-2"
+            />
             <div className="text-2xl font-bold text-white mb-1">
               {data.schedule?.length || 0}
             </div>
             <div className="text-sm text-gray-400">Total Sessions</div>
           </div>
           <div className="p-4 bg-[#1a1a1a] rounded-lg border border-[#333] text-center">
-            <Icon icon="mdi:arm-flex" className="w-6 h-6 text-[#FF6B00] mx-auto mb-2" />
+            <Icon
+              icon="mdi:arm-flex"
+              className="w-6 h-6 text-[#FF6B00] mx-auto mb-2"
+            />
             <div className="text-2xl font-bold text-white mb-1">
               {getTotalExercises()}
             </div>
@@ -150,29 +166,44 @@ export const Preview = ({ data }) => {
                     </h3>
                     <div className="space-y-4">
                       <div className="flex items-center gap-3">
-                        <Icon icon="mdi:target" className="w-5 h-5 text-[#FF6B00]" />
+                        <Icon
+                          icon="mdi:target"
+                          className="w-5 h-5 text-[#FF6B00]"
+                        />
                         <div>
-                          <div className="text-white font-medium">Training Level</div>
+                          <div className="text-white font-medium">
+                            Training Level
+                          </div>
                           <div className="text-gray-400 capitalize">
-                            {data.level || "Not specified"}
+                            {data.difficultyLevel || "Not specified"}
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <Icon icon="mdi:calendar" className="w-5 h-5 text-[#FF6B00]" />
+                        <Icon
+                          icon="mdi:calendar"
+                          className="w-5 h-5 text-[#FF6B00]"
+                        />
                         <div>
-                          <div className="text-white font-medium">Sessions per Week</div>
+                          <div className="text-white font-medium">
+                            Sessions per Week
+                          </div>
                           <div className="text-gray-400">
                             {data.sessionsPerWeek} sessions
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <Icon icon="mdi:format-list-bulleted" className="w-5 h-5 text-[#FF6B00]" />
+                        <Icon
+                          icon="mdi:format-list-bulleted"
+                          className="w-5 h-5 text-[#FF6B00]"
+                        />
                         <div>
-                          <div className="text-white font-medium">Session Formats</div>
+                          <div className="text-white font-medium">
+                            Session Formats
+                          </div>
                           <div className="text-gray-400">
-                            {data.sessionFormats?.length > 0 
+                            {data.sessionFormats?.length > 0
                               ? data.sessionFormats.join(", ")
                               : "Not specified"}
                           </div>
@@ -233,7 +264,9 @@ export const Preview = ({ data }) => {
                           <div className="absolute left-3 top-6 w-0.5 h-full max-h-12 bg-[#333]"></div>
                         )}
                         <div>
-                          <h4 className="text-white font-medium">{block.week}</h4>
+                          <h4 className="text-white font-medium">
+                            {block.week}
+                          </h4>
                           <p className="text-[#FF6B00]">{block.title}</p>
                           <p className="text-sm text-gray-400 mt-1">
                             {block.description}
@@ -245,8 +278,13 @@ export const Preview = ({ data }) => {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <Icon icon="mdi:calendar-outline" className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-400">No timeline structure defined yet.</p>
+                  <Icon
+                    icon="mdi:calendar-outline"
+                    className="w-12 h-12 text-gray-600 mx-auto mb-4"
+                  />
+                  <p className="text-gray-400">
+                    No timeline structure defined yet.
+                  </p>
                 </div>
               )}
             </motion.div>
@@ -273,7 +311,7 @@ export const Preview = ({ data }) => {
                             {session.name || `Session ${index + 1}`}
                           </h4>
                           <p className="text-sm text-gray-400">
-                            {session.day} • {session.duration} minutes
+                            Day {index + 1} • {session.duration} minutes
                           </p>
                         </div>
                         <div className="px-3 py-1 rounded-full bg-[#FF6B00]/20 text-[#FF6B00] text-sm">
@@ -296,7 +334,9 @@ export const Preview = ({ data }) => {
                                 <div className="w-6 h-6 rounded-full bg-[#333] flex items-center justify-center text-sm text-white">
                                   {exerciseIndex + 1}
                                 </div>
-                                <span className="text-white">{exercise.name}</span>
+                                <span className="text-white">
+                                  {exercise.name}
+                                </span>
                               </div>
                               <div className="flex items-center gap-3 text-sm">
                                 <span className="text-gray-400">
@@ -315,7 +355,10 @@ export const Preview = ({ data }) => {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <Icon icon="mdi:dumbbell" className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                  <Icon
+                    icon="mdi:dumbbell"
+                    className="w-12 h-12 text-gray-600 mx-auto mb-4"
+                  />
                   <p className="text-gray-400">No sessions scheduled yet.</p>
                   <p className="text-sm text-gray-500 mt-2">
                     Go back to the Schedule step to add training sessions.

@@ -12,6 +12,8 @@ export const NavigationButtons = ({
   onNext,
   isNextDisabled,
   isLastStep,
+  isLoading = false,
+  planType = "training", // "training" or "nutrition"
 }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -24,24 +26,43 @@ export const NavigationButtons = ({
       {/* Next/Submit button - Primary action first on mobile */}
       <motion.div
         className="order-1 sm:order-2 w-full sm:w-auto"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+        whileHover={{ scale: isLoading ? 1 : 1.02 }}
+        whileTap={{ scale: isLoading ? 1 : 0.98 }}
       >
         <Button
           variant="orangeFilled"
           onClick={onNext}
-          disabled={false}
+          disabled={isNextDisabled || isLoading}
           className="w-full sm:w-auto py-3 px-6 text-base font-semibold shadow-lg shadow-[#FF6B00]/25 disabled:shadow-none"
         >
           {isLastStep ? (
             <>
-              <Icon icon="mdi:rocket-launch" className="w-5 h-5 mr-2" />
-              Create Training Plan
+              {isLoading ? (
+                <Icon
+                  icon="mdi:loading"
+                  className="w-5 h-5 mr-2 animate-spin"
+                />
+              ) : (
+                <Icon icon="mdi:rocket-launch" className="w-5 h-5 mr-2" />
+              )}
+              {isLoading
+                ? `Creating ${
+                    planType === "nutrition" ? "Nutrition" : "Training"
+                  } Plan...`
+                : `Create ${
+                    planType === "nutrition" ? "Nutrition" : "Training"
+                  } Plan`}
             </>
           ) : (
             <>
               Continue to{" "}
-              {currentStep === 0
+              {planType === "nutrition"
+                ? currentStep === 0
+                  ? "Meal Planning"
+                  : currentStep === 1
+                  ? "Features"
+                  : "Preview"
+                : currentStep === 0
                 ? "Schedule"
                 : currentStep === 1
                 ? "Features"
@@ -54,7 +75,9 @@ export const NavigationButtons = ({
         {/* Mobile progress helper */}
         <div className="mt-2 text-center text-sm text-gray-400 sm:hidden">
           {isLastStep
-            ? "Ready to create your plan!"
+            ? isLoading
+              ? "Saving your plan..."
+              : "Ready to create your plan!"
             : `Next: Step ${currentStep + 2} of ${totalSteps}`}
         </div>
       </motion.div>
@@ -62,13 +85,14 @@ export const NavigationButtons = ({
       {/* Back button - Secondary action */}
       <motion.div
         className="order-2 sm:order-1 w-full sm:w-auto"
-        whileHover={{ scale: 1.01 }}
-        whileTap={{ scale: 0.98 }}
+        whileHover={{ scale: isLoading ? 1 : 1.01 }}
+        whileTap={{ scale: isLoading ? 1 : 0.98 }}
       >
         <Button
           variant="outline"
           onClick={onBack}
-          className="w-full sm:w-auto py-3 px-6 text-base font-medium border-[#444] hover:border-[#555] hover:bg-[#222]"
+          disabled={isLoading}
+          className="w-full sm:w-auto py-3 px-6 text-base font-medium border-[#444] hover:border-[#555] hover:bg-[#222] disabled:opacity-50"
         >
           <Icon icon="mdi:arrow-left" className="w-5 h-5 mr-2" />
           {currentStep === 0 ? "Back to Plans" : "Previous Step"}
@@ -91,11 +115,26 @@ export const NavigationButtons = ({
     {/* Helpful hints */}
     <div className="mt-4 text-center">
       <div className="text-xs text-gray-500 max-w-md mx-auto">
-        {currentStep === 0 && "Add basic information about your training plan"}
-        {currentStep === 1 &&
-          "Create sessions and add exercises to build your plan"}
-        {currentStep === 2 && "Set special features and target audience"}
-        {currentStep === 3 && "Review everything before creating your plan"}
+        {planType === "nutrition" ? (
+          <>
+            {currentStep === 0 &&
+              "Add basic information about your nutrition plan"}
+            {currentStep === 1 &&
+              "Create meal plans and daily nutrition schedules"}
+            {currentStep === 2 &&
+              "Set special features and dietary information"}
+            {currentStep === 3 && "Review everything before creating your plan"}
+          </>
+        ) : (
+          <>
+            {currentStep === 0 &&
+              "Add basic information about your training plan"}
+            {currentStep === 1 &&
+              "Create sessions and add exercises to build your plan"}
+            {currentStep === 2 && "Set special features and target audience"}
+            {currentStep === 3 && "Review everything before creating your plan"}
+          </>
+        )}
       </div>
     </div>
   </motion.div>

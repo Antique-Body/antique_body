@@ -3,8 +3,13 @@
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useState } from "react";
+
+import { Button } from "@/components/common/Button";
 
 export const Preview = ({ data }) => {
+  const [activeTab, setActiveTab] = useState("overview");
+
   const getTotalMeals = () => {
     return (
       data.days?.reduce((total, day) => total + (day.meals?.length || 0), 0) ||
@@ -20,390 +25,558 @@ export const Preview = ({ data }) => {
     return data.days?.filter((day) => day.isRestDay)?.length || 0;
   };
 
-  return (
-    <div className="space-y-4 sm:space-y-6 px-2 sm:px-4">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center"
-      >
-        <h2 className="text-lg sm:text-xl font-bold text-white mb-2">
-          Plan Preview
-        </h2>
-        <p className="text-sm sm:text-base text-gray-400">
-          Review your nutrition plan before publishing
-        </p>
-      </motion.div>
+  const tabs = [
+    { id: "overview", label: "Overview" },
+    { id: "meals", label: "Meal Schedule" },
+    { id: "features", label: "Features & Timeline" },
+  ];
 
-      {/* Plan Overview Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="bg-gradient-to-br from-[#1a1a1a] via-[#1e1e1e] to-[#222] rounded-xl border border-[#333] overflow-hidden shadow-lg"
-      >
-        {/* Cover Image */}
-        {data.coverImage && (
-          <div className="aspect-[2/1] w-full relative">
-            <Image
-              src={
-                typeof data.coverImage === "string"
-                  ? data.coverImage
-                  : URL.createObjectURL(data.coverImage)
-              }
-              alt="Plan cover"
-              fill
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-            <div className="absolute bottom-4 left-4 right-4">
-              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
-                {data.title}
-              </h3>
-              <div className="flex items-center gap-4 text-white/80">
-                <span className="flex items-center gap-1 text-sm">
-                  <Icon icon="mdi:clock" className="w-4 h-4" />
-                  {data.duration} {data.durationType}
-                </span>
-                <span className="flex items-center gap-1 text-sm">
-                  <Icon icon="mdi:currency-usd" className="w-4 h-4" />$
-                  {data.price}
-                </span>
-                <span className="flex items-center gap-1 text-sm">
-                  <Icon icon="mdi:target" className="w-4 h-4" />
-                  {data.targetGoal?.replace("-", " ") || "Not specified"}
-                </span>
-              </div>
-            </div>
+  return (
+    <div className="flex flex-col -mx-4 sm:-mx-5">
+      {/* Banner image with gradient overlay */}
+      <div className="relative h-48 sm:h-64 w-full overflow-hidden rounded-2xl mb-6">
+        {data.coverImage ? (
+          <Image
+            src={
+              typeof data.coverImage === "string"
+                ? data.coverImage
+                : URL.createObjectURL(data.coverImage)
+            }
+            alt={data.title || "Plan cover"}
+            fill
+            className="object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a1a] to-[#222] flex items-center justify-center">
+            <Icon icon="mdi:image" className="w-16 h-16 text-gray-600" />
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0.7)] to-[#111]"></div>
+
+        {/* Plan type badge */}
+        <div className="absolute top-4 left-4 z-10">
+          <span className="px-3 py-1.5 text-sm font-medium rounded-md flex items-center gap-2 bg-[#FF6B00]/80 text-white">
+            <Icon icon="mdi:nutrition" className="w-4 h-4" />
+            Nutrition Plan
+          </span>
+        </div>
+
+        {/* Price tag */}
+        {data.price && (
+          <div className="absolute top-4 right-4 z-10">
+            <span className="flex items-center px-3 py-1.5 text-sm font-medium rounded-md bg-green-600 text-white">
+              <Icon
+                icon="heroicons:banknotes-20-solid"
+                className="w-4 h-4 mr-1"
+              />
+              ${data.price}
+            </span>
           </div>
         )}
 
-        <div className="p-4 sm:p-6">
-          {!data.coverImage && (
-            <div className="mb-6">
-              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
-                {data.title}
-              </h3>
-              <div className="flex items-center gap-4 text-gray-400">
-                <span className="flex items-center gap-1 text-sm">
-                  <Icon icon="mdi:clock" className="w-4 h-4" />
-                  {data.duration} {data.durationType}
-                </span>
-                <span className="flex items-center gap-1 text-sm">
-                  <Icon icon="mdi:currency-usd" className="w-4 h-4" />$
-                  {data.price}
-                </span>
-                <span className="flex items-center gap-1 text-sm">
-                  <Icon icon="mdi:target" className="w-4 h-4" />
-                  {data.targetGoal?.replace("-", " ") || "Not specified"}
-                </span>
-              </div>
-            </div>
-          )}
-
-          <p className="text-gray-300 text-sm sm:text-base leading-relaxed mb-6">
-            {data.description}
-          </p>
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-            <div className="bg-[#242424] rounded-lg p-3 text-center">
-              <div className="text-lg sm:text-xl font-bold text-[#FF6B00]">
-                {data.days?.length || 0}
-              </div>
-              <div className="text-xs sm:text-sm text-gray-400">Total Days</div>
-            </div>
-            <div className="bg-[#242424] rounded-lg p-3 text-center">
-              <div className="text-lg sm:text-xl font-bold text-green-400">
-                {getActiveDays()}
-              </div>
-              <div className="text-xs sm:text-sm text-gray-400">Meal Days</div>
-            </div>
-            <div className="bg-[#242424] rounded-lg p-3 text-center">
-              <div className="text-lg sm:text-xl font-bold text-blue-400">
-                {getTotalMeals()}
-              </div>
-              <div className="text-xs sm:text-sm text-gray-400">
-                Total Meals
-              </div>
-            </div>
-            <div className="bg-[#242424] rounded-lg p-3 text-center">
-              <div className="text-lg sm:text-xl font-bold text-yellow-400">
-                {getCheatDays()}
-              </div>
-              <div className="text-xs sm:text-sm text-gray-400">Cheat Days</div>
-            </div>
-          </div>
-
-          {/* Nutrition Targets */}
-          {(data.nutritionInfo?.calories ||
-            data.nutritionInfo?.protein ||
-            data.nutritionInfo?.carbs ||
-            data.nutritionInfo?.fats) && (
-            <div className="bg-[#242424] rounded-lg p-4 mb-6">
-              <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-                <Icon icon="mdi:nutrition" className="w-4 h-4 text-[#FF6B00]" />
-                Daily Nutrition Targets
-              </h4>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {data.nutritionInfo?.calories && (
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-white">
-                      {data.nutritionInfo.calories}
-                    </div>
-                    <div className="text-xs text-gray-400">Calories</div>
-                  </div>
-                )}
-                {data.nutritionInfo?.protein && (
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-white">
-                      {data.nutritionInfo.protein}g
-                    </div>
-                    <div className="text-xs text-gray-400">Protein</div>
-                  </div>
-                )}
-                {data.nutritionInfo?.carbs && (
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-white">
-                      {data.nutritionInfo.carbs}g
-                    </div>
-                    <div className="text-xs text-gray-400">Carbs</div>
-                  </div>
-                )}
-                {data.nutritionInfo?.fats && (
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-white">
-                      {data.nutritionInfo.fats}g
-                    </div>
-                    <div className="text-xs text-gray-400">Fats</div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+        {/* Title overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+            {data.title || "Untitled Plan"}
+          </h1>
+          <p className="text-gray-300 line-clamp-2">{data.description}</p>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Two Column Layout for Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Left Column */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-          className="space-y-4 sm:space-y-5"
-        >
-          {/* Key Features */}
-          {data.keyFeatures?.some((f) => f.trim()) && (
-            <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4 sm:p-5">
-              <h4 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
-                <Icon icon="mdi:star" className="w-4 h-4 text-[#FF6B00]" />
-                Key Features
-              </h4>
-              <ul className="space-y-2">
-                {data.keyFeatures
-                  .filter((f) => f.trim())
-                  .map((feature, idx) => (
-                    <li
-                      key={idx}
-                      className="flex items-center gap-2 text-gray-300 text-sm"
-                    >
-                      <Icon
-                        icon="mdi:check-circle"
-                        className="w-4 h-4 text-green-400 shrink-0"
-                      />
-                      {feature}
-                    </li>
-                  ))}
-              </ul>
+      {/* Content container */}
+      <div className="px-4 sm:px-5">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+          <div className="p-4 bg-[#1a1a1a] rounded-lg border border-[#333] text-center">
+            <Icon
+              icon="heroicons:calendar-20-solid"
+              className="w-6 h-6 text-[#FF6B00] mx-auto mb-2"
+            />
+            <div className="text-2xl font-bold text-white mb-1">
+              {data.duration} {data.durationType}
             </div>
-          )}
-
-          {/* Plan Schedule */}
-          {data.planSchedule?.some((s) => s.trim()) && (
-            <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4 sm:p-5">
-              <h4 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
-                <Icon
-                  icon="mdi:calendar-clock"
-                  className="w-4 h-4 text-[#FF6B00]"
-                />
-                Schedule
-              </h4>
-              <ul className="space-y-2">
-                {data.planSchedule
-                  .filter((s) => s.trim())
-                  .map((schedule, idx) => (
-                    <li
-                      key={idx}
-                      className="flex items-start gap-2 text-gray-300 text-sm"
-                    >
-                      <Icon
-                        icon="mdi:calendar-check"
-                        className="w-4 h-4 text-blue-400 shrink-0 mt-0.5"
-                      />
-                      {schedule}
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Additional Info */}
-          <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4 sm:p-5">
-            <h4 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
-              <Icon icon="mdi:information" className="w-4 h-4 text-[#FF6B00]" />
-              Plan Details
-            </h4>
-            <div className="space-y-3 text-sm">
-              {data.difficultyLevel && (
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Difficulty Level:</span>
-                  <span className="text-white capitalize">
-                    {data.difficultyLevel}
-                  </span>
-                </div>
-              )}
-              {data.frequency && (
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Frequency:</span>
-                  <span className="text-white">{data.frequency}</span>
-                </div>
-              )}
-              {data.cookingTime && (
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Cooking Time:</span>
-                  <span className="text-white">{data.cookingTime}</span>
-                </div>
-              )}
-              {data.targetAudience && (
-                <div>
-                  <div className="text-gray-400 mb-1">Target Audience:</div>
-                  <div className="text-white">{data.targetAudience}</div>
-                </div>
-              )}
-            </div>
+            <div className="text-sm text-gray-400">Duration</div>
           </div>
-        </motion.div>
+          <div className="p-4 bg-[#1a1a1a] rounded-lg border border-[#333] text-center">
+            <Icon
+              icon="mdi:food"
+              className="w-6 h-6 text-[#FF6B00] mx-auto mb-2"
+            />
+            <div className="text-2xl font-bold text-white mb-1">
+              {getTotalMeals()}
+            </div>
+            <div className="text-sm text-gray-400">Total Meals</div>
+          </div>
+          <div className="p-4 bg-[#1a1a1a] rounded-lg border border-[#333] text-center">
+            <Icon
+              icon="mdi:calendar-check"
+              className="w-6 h-6 text-[#FF6B00] mx-auto mb-2"
+            />
+            <div className="text-2xl font-bold text-white mb-1">
+              {getActiveDays()}
+            </div>
+            <div className="text-sm text-gray-400">Meal Days</div>
+          </div>
+          <div className="p-4 bg-[#1a1a1a] rounded-lg border border-[#333] text-center">
+            <Icon
+              icon="mdi:food-off"
+              className="w-6 h-6 text-[#FF6B00] mx-auto mb-2"
+            />
+            <div className="text-2xl font-bold text-white mb-1">
+              {getCheatDays()}
+            </div>
+            <div className="text-sm text-gray-400">Cheat Days</div>
+          </div>
+        </div>
 
-        {/* Right Column */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-          className="space-y-4 sm:space-y-5"
-        >
-          {/* Timeline */}
-          {data.timeline?.some((t) => t.week.trim() && t.title.trim()) && (
-            <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4 sm:p-5">
-              <h4 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
-                <Icon
-                  icon="mdi:timeline-clock"
-                  className="w-4 h-4 text-[#FF6B00]"
-                />
-                Timeline
-              </h4>
-              <div className="space-y-4">
-                {data.timeline
-                  .filter((t) => t.week.trim() && t.title.trim())
-                  .map((item, idx) => (
-                    <div key={idx} className="bg-[#242424] rounded-lg p-3">
-                      <div className="flex items-center gap-2 mb-2">
+        {/* Tabs navigation */}
+        <div className="border-b border-[#333] mb-6">
+          <div className="flex space-x-6 overflow-x-auto pb-1">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-3 relative text-sm font-medium transition-colors whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? "text-[#FF6B00]"
+                    : "text-gray-400 hover:text-white"
+                }`}
+              >
+                {tab.label}
+                {activeTab === tab.id && (
+                  <motion.div
+                    layoutId="activeTabLine"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#FF6B00]"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Tab content */}
+        <div className="mb-6">
+          {/* Overview tab */}
+          {activeTab === "overview" && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-6"
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Left Column */}
+                <div className="space-y-6">
+                  {/* Nutrition Details */}
+                  <div className="p-6 bg-[#1a1a1a] rounded-lg border border-[#333]">
+                    <h3 className="text-lg font-semibold text-white mb-4">
+                      Nutrition Details
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
                         <Icon
-                          icon="mdi:calendar-range"
-                          className="w-4 h-4 text-blue-400"
+                          icon="mdi:target"
+                          className="w-5 h-5 text-[#FF6B00]"
                         />
-                        <span className="text-sm font-medium text-white">
-                          {item.week}
+                        <div>
+                          <div className="text-white font-medium">
+                            Target Goal
+                          </div>
+                          <div className="text-gray-400 capitalize">
+                            {data.targetGoal?.replace("-", " ") ||
+                              "Not specified"}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Icon
+                          icon="mdi:clock-outline"
+                          className="w-5 h-5 text-[#FF6B00]"
+                        />
+                        <div>
+                          <div className="text-white font-medium">
+                            Cooking Time
+                          </div>
+                          <div className="text-gray-400">
+                            {data.cookingTime || "Not specified"}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Daily Nutrition Targets */}
+                  {(data.nutritionInfo?.calories ||
+                    data.nutritionInfo?.protein ||
+                    data.nutritionInfo?.carbs ||
+                    data.nutritionInfo?.fats) && (
+                    <div className="p-6 bg-[#1a1a1a] rounded-lg border border-[#333]">
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <Icon
+                          icon="mdi:nutrition"
+                          className="w-5 h-5 text-[#FF6B00]"
+                        />
+                        Daily Nutrition Targets
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        {data.nutritionInfo?.calories && (
+                          <div className="bg-[#242424] p-4 rounded-lg">
+                            <div className="text-2xl font-bold text-[#FF6B00] mb-1">
+                              {data.nutritionInfo.calories}
+                            </div>
+                            <div className="text-sm text-gray-400">
+                              Calories
+                            </div>
+                          </div>
+                        )}
+                        {data.nutritionInfo?.protein && (
+                          <div className="bg-[#242424] p-4 rounded-lg">
+                            <div className="text-2xl font-bold text-green-400 mb-1">
+                              {data.nutritionInfo.protein}g
+                            </div>
+                            <div className="text-sm text-gray-400">Protein</div>
+                          </div>
+                        )}
+                        {data.nutritionInfo?.carbs && (
+                          <div className="bg-[#242424] p-4 rounded-lg">
+                            <div className="text-2xl font-bold text-blue-400 mb-1">
+                              {data.nutritionInfo.carbs}g
+                            </div>
+                            <div className="text-sm text-gray-400">Carbs</div>
+                          </div>
+                        )}
+                        {data.nutritionInfo?.fats && (
+                          <div className="bg-[#242424] p-4 rounded-lg">
+                            <div className="text-2xl font-bold text-yellow-400 mb-1">
+                              {data.nutritionInfo.fats}g
+                            </div>
+                            <div className="text-sm text-gray-400">Fats</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-6">
+                  {/* Key Features */}
+                  {data.keyFeatures && data.keyFeatures.length > 0 && (
+                    <div className="p-6 bg-[#1a1a1a] rounded-lg border border-[#333]">
+                      <h3 className="text-lg font-semibold text-white mb-4">
+                        Key Features
+                      </h3>
+                      <div className="space-y-2">
+                        {data.keyFeatures.map((feature, index) => (
+                          <div key={index} className="flex items-start gap-2">
+                            <Icon
+                              icon="heroicons:check-circle-20-solid"
+                              className="w-5 h-5 text-[#FF6B00] mt-0.5 flex-shrink-0"
+                            />
+                            <span className="text-gray-300">{feature}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Additional Information */}
+                  <div className="p-6 bg-[#1a1a1a] rounded-lg border border-[#333]">
+                    <h3 className="text-lg font-semibold text-white mb-4">
+                      Additional Information
+                    </h3>
+                    <div className="space-y-4">
+                      {data.frequency && (
+                        <div>
+                          <div className="text-white font-medium mb-1">
+                            Frequency
+                          </div>
+                          <p className="text-gray-400">{data.frequency}</p>
+                        </div>
+                      )}
+                      {data.adaptability && (
+                        <div>
+                          <div className="text-white font-medium mb-1">
+                            Adaptability
+                          </div>
+                          <p className="text-gray-400">{data.adaptability}</p>
+                        </div>
+                      )}
+                      {data.supplementRecommendations && (
+                        <div>
+                          <div className="text-white font-medium mb-1">
+                            Supplement Recommendations
+                          </div>
+                          <p className="text-gray-400">
+                            {data.supplementRecommendations}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Meals tab */}
+          {activeTab === "meals" && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-6"
+            >
+              {data.days && data.days.length > 0 ? (
+                <div className="space-y-6">
+                  {data.days.map((day, dayIndex) => (
+                    <div
+                      key={day.id || dayIndex}
+                      className="bg-[#1a1a1a] rounded-lg border border-[#333] overflow-hidden"
+                    >
+                      <div className="bg-[#242424] p-4 flex justify-between items-center">
+                        <h3 className="text-lg font-semibold text-white">
+                          {day.name}
+                        </h3>
+                        <span
+                          className={`px-3 py-1 rounded-full text-sm ${
+                            day.isRestDay
+                              ? "bg-yellow-500/20 text-yellow-400"
+                              : "bg-green-500/20 text-green-400"
+                          }`}
+                        >
+                          {day.isRestDay
+                            ? "Cheat Day"
+                            : `${day.meals?.length || 0} meals`}
                         </span>
                       </div>
-                      <h5 className="text-sm font-semibold text-white mb-1">
-                        {item.title}
-                      </h5>
-                      {item.description && (
-                        <p className="text-xs text-gray-400 leading-relaxed">
-                          {item.description}
-                        </p>
+
+                      {!day.isRestDay && day.meals && day.meals.length > 0 && (
+                        <div className="p-4 space-y-4">
+                          {day.meals.map((meal, mealIndex) => (
+                            <div
+                              key={meal.id || mealIndex}
+                              className="bg-[#242424] rounded-lg p-4"
+                            >
+                              <div className="flex justify-between items-center mb-3">
+                                <div>
+                                  <h4 className="text-white font-medium">
+                                    {meal.name}
+                                  </h4>
+                                  {meal.time && (
+                                    <p className="text-sm text-gray-400">
+                                      {meal.time}
+                                    </p>
+                                  )}
+                                </div>
+                                <div className="text-sm text-[#FF6B00]">
+                                  {meal.options?.length || 0} options
+                                </div>
+                              </div>
+
+                              {meal.options && meal.options.length > 0 && (
+                                <div className="space-y-3">
+                                  {meal.options.map((option, optionIndex) => (
+                                    <div
+                                      key={option.id || optionIndex}
+                                      className="bg-[#2a2a2a] rounded-lg p-3"
+                                    >
+                                      <div className="flex justify-between items-start mb-2">
+                                        <h5 className="text-white font-medium">
+                                          {option.name}
+                                        </h5>
+                                        <div className="flex gap-2 text-sm">
+                                          {option.calories && (
+                                            <span className="text-[#FF6B00]">
+                                              {option.calories} kcal
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+
+                                      <div className="grid grid-cols-3 gap-2 mb-2">
+                                        {option.protein && (
+                                          <div className="text-sm">
+                                            <span className="text-gray-400">
+                                              Protein:{" "}
+                                            </span>
+                                            <span className="text-green-400">
+                                              {option.protein}g
+                                            </span>
+                                          </div>
+                                        )}
+                                        {option.carbs && (
+                                          <div className="text-sm">
+                                            <span className="text-gray-400">
+                                              Carbs:{" "}
+                                            </span>
+                                            <span className="text-blue-400">
+                                              {option.carbs}g
+                                            </span>
+                                          </div>
+                                        )}
+                                        {option.fat && (
+                                          <div className="text-sm">
+                                            <span className="text-gray-400">
+                                              Fat:{" "}
+                                            </span>
+                                            <span className="text-yellow-400">
+                                              {option.fat}g
+                                            </span>
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      {option.ingredients && (
+                                        <div className="text-sm text-gray-400 mb-2">
+                                          <span className="text-white">
+                                            Ingredients:{" "}
+                                          </span>
+                                          {Array.isArray(option.ingredients)
+                                            ? option.ingredients.join(", ")
+                                            : option.ingredients}
+                                        </div>
+                                      )}
+
+                                      {option.description && (
+                                        <div className="text-sm text-gray-400">
+                                          <span className="text-white">
+                                            Instructions:{" "}
+                                          </span>
+                                          {option.description}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       )}
                     </div>
                   ))}
-              </div>
-            </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Icon
+                    icon="mdi:food-off"
+                    className="w-12 h-12 text-gray-600 mx-auto mb-4"
+                  />
+                  <p className="text-gray-400">No meal schedule defined yet.</p>
+                </div>
+              )}
+            </motion.div>
           )}
 
-          {/* Days Overview */}
-          {data.days?.length > 0 && (
-            <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4 sm:p-5">
-              <h4 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
-                <Icon
-                  icon="mdi:calendar-month"
-                  className="w-4 h-4 text-[#FF6B00]"
-                />
-                Days Overview
-              </h4>
-              <div className="grid grid-cols-2 gap-2">
-                {data.days.map((day, idx) => (
-                  <div
-                    key={day.id}
-                    className={`p-2 rounded text-center text-xs ${
-                      day.isRestDay
-                        ? "bg-yellow-500/10 border border-yellow-500/30 text-yellow-400"
-                        : "bg-green-500/10 border border-green-500/30 text-green-400"
-                    }`}
-                  >
-                    <div className="font-medium">{day.name}</div>
-                    <div className="text-xs opacity-80">
-                      {day.isRestDay
-                        ? "Cheat Day"
-                        : `${day.meals?.length || 0} meals`}
+          {/* Features & Timeline tab */}
+          {activeTab === "features" && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-8"
+            >
+              {/* Plan Schedule */}
+              {data.planSchedule && data.planSchedule.length > 0 && (
+                <div className="bg-gradient-to-br from-[#1a1a1a] via-[#1e1e1e] to-[#222] rounded-xl border border-[#333] p-6 sm:p-8">
+                  <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-3">
+                    <div className="p-2.5 rounded-lg bg-gradient-to-r from-[#FF6B00] to-[#FF8533]">
+                      <Icon
+                        icon="mdi:calendar-clock"
+                        className="w-5 h-5 text-white"
+                      />
                     </div>
+                    Plan Schedule
+                  </h3>
+                  <div className="space-y-4">
+                    {data.planSchedule.map((schedule, index) => (
+                      <div
+                        key={index}
+                        className="flex items-start gap-4 bg-[#242424] p-5 rounded-xl border border-[#333] hover:border-[#FF6B00]/30 transition-colors group"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF6B00] to-[#FF8533] flex items-center justify-center flex-shrink-0 shadow-lg">
+                          <span className="text-sm font-medium text-white">
+                            {index + 1}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-gray-300 text-base group-hover:text-white transition-colors">
+                            {schedule}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                </div>
+              )}
 
-          {/* Summary */}
-          {data.summary && (
-            <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4 sm:p-5">
-              <h4 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
-                <Icon icon="mdi:text-box" className="w-4 h-4 text-[#FF6B00]" />
-                Summary
-              </h4>
-              <p className="text-gray-300 text-sm leading-relaxed">
-                {data.summary}
-              </p>
-            </div>
-          )}
+              {/* Timeline */}
+              {data.timeline && data.timeline.length > 0 && (
+                <div className="bg-gradient-to-br from-[#1a1a1a] via-[#1e1e1e] to-[#222] rounded-xl border border-[#333] p-6 sm:p-8">
+                  <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-3">
+                    <div className="p-2.5 rounded-lg bg-gradient-to-r from-[#FF6B00] to-[#FF8533]">
+                      <Icon
+                        icon="mdi:timeline-clock"
+                        className="w-5 h-5 text-white"
+                      />
+                    </div>
+                    Program Timeline
+                  </h3>
+                  <div className="relative space-y-8 before:absolute before:left-[28px] before:top-0 before:bottom-0 before:w-0.5 before:bg-gradient-to-b before:from-[#FF6B00] before:to-[#FF8533]/30 before:opacity-50">
+                    {data.timeline.map((block, index) => (
+                      <div key={index} className="relative pl-16">
+                        <div className="absolute left-[15px] top-0 w-[25px] h-[25px] rounded-full bg-gradient-to-br from-[#FF6B00] to-[#FF8533] flex items-center justify-center shadow-lg">
+                          <span className="text-xs font-medium text-white">
+                            {index + 1}
+                          </span>
+                        </div>
+                        <div className="bg-[#242424] rounded-xl border border-[#333] p-5 hover:border-[#FF6B00]/30 transition-colors group">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Icon
+                              icon="mdi:calendar-range"
+                              className="w-5 h-5 text-[#FF6B00]"
+                            />
+                            <h4 className="text-lg font-medium text-white">
+                              {block.week}
+                            </h4>
+                          </div>
+                          <p className="text-[#FF6B00] font-medium mb-2">
+                            {block.title}
+                          </p>
+                          <p className="text-gray-400 text-sm leading-relaxed group-hover:text-gray-300 transition-colors">
+                            {block.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-          {/* Additional Features */}
-          {(data.adaptability || data.supplementRecommendations) && (
-            <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4 sm:p-5">
-              <h4 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
-                <Icon icon="mdi:cog" className="w-4 h-4 text-[#FF6B00]" />
-                Additional Features
-              </h4>
-              <div className="space-y-3 text-sm">
-                {data.adaptability && (
-                  <div>
-                    <div className="text-gray-400 mb-1">Adaptability:</div>
-                    <div className="text-white">{data.adaptability}</div>
-                  </div>
-                )}
-                {data.supplementRecommendations && (
-                  <div>
-                    <div className="text-gray-400 mb-1">
-                      Supplement Recommendations:
+              {/* Summary */}
+              {data.summary && (
+                <div className="bg-gradient-to-br from-[#1a1a1a] via-[#1e1e1e] to-[#222] rounded-xl border border-[#333] p-6 sm:p-8">
+                  <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-3">
+                    <div className="p-2.5 rounded-lg bg-gradient-to-r from-[#FF6B00] to-[#FF8533]">
+                      <Icon
+                        icon="mdi:text-box"
+                        className="w-5 h-5 text-white"
+                      />
                     </div>
-                    <div className="text-white">
-                      {data.supplementRecommendations}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+                    Plan Summary
+                  </h3>
+                  <p className="text-gray-300 leading-relaxed">
+                    {data.summary}
+                  </p>
+                </div>
+              )}
+            </motion.div>
           )}
-        </motion.div>
+        </div>
       </div>
     </div>
   );
