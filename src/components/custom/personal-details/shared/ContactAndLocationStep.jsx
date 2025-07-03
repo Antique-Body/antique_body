@@ -73,7 +73,7 @@ export const ContactAndLocationStep = ({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Contact Information */}
       <FormSection
         title="Contact Information"
@@ -83,8 +83,9 @@ export const ContactAndLocationStep = ({
             : "How trainers can reach you"
         }
         icon="mdi:contact-mail"
+        className="mb-6 sm:mb-8"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <FormField
             label="Email"
             name="contactEmail"
@@ -118,8 +119,9 @@ export const ContactAndLocationStep = ({
             : "Where you're based and looking for trainers"
         }
         icon="mdi:map-marker"
+        className={userType === "trainer" ? "mb-6 sm:mb-8" : "mb-0"}
       >
-        <div className="space-y-4">
+        <div className="space-y-4 sm:space-y-5">
           <FormField
             label="City"
             name="location.city"
@@ -133,7 +135,7 @@ export const ContactAndLocationStep = ({
             backgroundStyle="darker"
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <FormField
               label="State/Province"
               name="location.state"
@@ -203,8 +205,9 @@ export const ContactAndLocationStep = ({
           title="Pricing"
           description="Set your session rates and pricing preferences"
           icon="mdi:currency-usd"
+          className="mb-0"
         >
-          <div className="space-y-4">
+          <div className="space-y-4 sm:space-y-5">
             <FormField
               label="Pricing Approach"
               name="pricingType"
@@ -230,7 +233,7 @@ export const ContactAndLocationStep = ({
             {/* Show price field only for specific pricing types */}
             {(formData.pricingType === "fixed" ||
               formData.pricingType === "package_deals") && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <FormField
                   label={
                     formData.pricingType === "package_deals"

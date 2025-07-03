@@ -1,16 +1,15 @@
 import { Icon } from "@iconify/react";
+import { useState } from "react";
 
-import { Accordion } from "@/components/common/Accordion";
+import { Modal } from "@/components/common/Modal";
 import { UserProfile } from "@/components/custom/dashboard/shared";
-import { StatCard } from "@/components/custom/dashboard/shared/StatCard";
 import { SPECIALTIES } from "@/enums/specialties";
 import { TRAINING_TYPES } from "@/enums/trainingTypes";
 
 export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const info = trainerData?.trainerInfo || {};
   const getOrNoData = (val) => val ?? "No data";
-
-  console.log("trainerData", trainerData);
 
   // Combine first and last name
   const fullName =
@@ -19,229 +18,309 @@ export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
     trainerData?.name ||
     "No data";
 
-  // Specialties (array of objects with .name or array of strings)
-  const specialties =
-    trainerData?.specialties?.map((s) => s.name) ||
-    trainerData?.specialties ||
-    [];
+  // Subtitle with stats
+  const profileSubtitle = (
+    <div className="flex items-center gap-4 text-xs text-zinc-400">
+      <div className="flex items-center gap-1">
+        <Icon
+          icon="mdi:star"
+          width={12}
+          height={12}
+          className="text-[#FF6B00]"
+        />
+        <span>4.8 rating</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <Icon
+          icon="mdi:account-group"
+          width={12}
+          height={12}
+          className="text-[#FF6B00]"
+        />
+        <span>24 clients</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <Icon
+          icon="mdi:calendar"
+          width={12}
+          height={12}
+          className="text-[#FF6B00]"
+        />
+        <span>5+ years</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <Icon
+          icon="mdi:dumbbell"
+          width={12}
+          height={12}
+          className="text-[#FF6B00]"
+        />
+        <span>120+ sessions</span>
+      </div>
+    </div>
+  );
 
-  // Training types (array of objects with .name or array of strings)
-  const trainingTypes =
-    trainerData?.trainingTypes?.map((t) => t.name) ||
-    trainerData?.trainingTypes ||
-    [];
+  // Format specialties
+  const formatSpecialties = (specialties) => {
+    if (!specialties || !Array.isArray(specialties)) return [];
+    return specialties.map((specialty) => {
+      const specialtyData = SPECIALTIES.find((s) => s.id === specialty);
+      return specialtyData ? specialtyData.label : specialty;
+    });
+  };
+
+  // Format training types
+  const formatTrainingTypes = (trainingTypes) => {
+    if (!trainingTypes || !Array.isArray(trainingTypes)) return [];
+    return trainingTypes.map((type) => {
+      const typeData = TRAINING_TYPES.find((t) => t.id === type);
+      return typeData ? typeData.label : type;
+    });
+  };
+
+  const handleHeaderClick = () => {
+    setShowDetailModal(true);
+  };
 
   return (
-    <div className="relative">
+    <>
       <UserProfile
-        userData={trainerData}
         profileType="trainer"
-        avatarContent={trainerData?.profileImage || trainerData?.avatarContent}
+        avatarContent={trainerData?.profileImage}
         profileTitle={fullName}
-        certifications={[]}
-        className="py-2"
+        profileSubtitle={profileSubtitle}
+        userData={trainerData}
         onProfileUpdate={onProfileUpdate}
+        onHeaderClick={handleHeaderClick}
+        showDetailedView={true}
+      />
+
+      {/* Detail Modal */}
+      <Modal
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+        title={
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full overflow-hidden bg-zinc-800">
+              {trainerData?.profileImage ? (
+                <img
+                  src={trainerData.profileImage}
+                  alt={fullName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Icon
+                    icon="mdi:account"
+                    width={24}
+                    height={24}
+                    className="text-zinc-400"
+                  />
+                </div>
+              )}
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-white">{fullName}</h3>
+              <p className="text-sm text-zinc-400">Personal Trainer</p>
+            </div>
+          </div>
+        }
+        size="large"
+        primaryButtonText="Close"
+        primaryButtonAction={() => setShowDetailModal(false)}
       >
-        <div className="w-full">
-          {/* Header with button */}
+        <div className="space-y-6">
+          {/* Statistics */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-zinc-800 rounded-lg p-4 text-center">
+              <Icon
+                icon="mdi:star"
+                width={24}
+                height={24}
+                className="text-[#FF6B00] mx-auto mb-2"
+              />
+              <div className="text-xl font-bold text-white">4.8</div>
+              <div className="text-xs text-zinc-400">Rating</div>
+            </div>
+            <div className="bg-zinc-800 rounded-lg p-4 text-center">
+              <Icon
+                icon="mdi:account-group"
+                width={24}
+                height={24}
+                className="text-[#FF6B00] mx-auto mb-2"
+              />
+              <div className="text-xl font-bold text-white">24</div>
+              <div className="text-xs text-zinc-400">Clients</div>
+            </div>
+            <div className="bg-zinc-800 rounded-lg p-4 text-center">
+              <Icon
+                icon="mdi:calendar"
+                width={24}
+                height={24}
+                className="text-[#FF6B00] mx-auto mb-2"
+              />
+              <div className="text-xl font-bold text-white">5+</div>
+              <div className="text-xs text-zinc-400">Years</div>
+            </div>
+            <div className="bg-zinc-800 rounded-lg p-4 text-center">
+              <Icon
+                icon="mdi:dumbbell"
+                width={24}
+                height={24}
+                className="text-[#FF6B00] mx-auto mb-2"
+              />
+              <div className="text-xl font-bold text-white">120+</div>
+              <div className="text-xs text-zinc-400">Sessions</div>
+            </div>
+          </div>
 
-          {/* Main Advanced Information Accordion */}
-          <Accordion
-            title="Advanced Information"
-            subtitle="Detailed profile information and statistics"
-            icon="mdi:shield-star"
-            iconColor="#00B4FF"
-            gradientFrom="#00B4FF"
-            gradientTo="white"
-            bgColor="rgba(0,180,255,0.03)"
-            borderColor="rgba(0,180,255,0.15)"
-            shadowColor="rgba(0,180,255,0.1)"
-            defaultOpen={false}
-            cardVariant="glass"
-            className="backdrop-blur-sm hover:shadow-lg"
-          >
-            <div className="space-y-6">
-              {/* Specialties section - first row */}
-              <div className="w-full bg-[rgba(0,180,255,0.03)] p-5 rounded-xl border border-[rgba(0,180,255,0.15)] transition-all duration-300 hover:shadow-lg hover:shadow-[rgba(0,180,255,0.05)] backdrop-blur-sm">
-                <h3 className="text-sm font-semibold text-white mb-4 flex items-center">
-                  <div className="flex items-center justify-center mr-2 rounded-full p-1.5 bg-[rgba(0,180,255,0.15)]">
-                    <Icon
-                      icon="mdi:star-circle"
-                      className="text-[#00B4FF]"
-                      width={18}
-                      height={18}
-                    />
-                  </div>
-                  <span className="bg-gradient-to-r from-[#00B4FF] to-white bg-clip-text text-transparent">
-                    Specialties
-                  </span>
-                </h3>
-                <div className="flex flex-wrap gap-2.5">
-                  {specialties.length > 0 ? (
-                    specialties.map((spec, idx) => {
-                      const obj = SPECIALTIES.find((s) => s.id === spec);
-                      const label = obj?.label || spec;
-                      const icon = obj?.icon;
-                      return (
-                        <span
-                          key={idx}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-[rgba(0,180,255,0.3)] bg-[rgba(0,180,255,0.1)] px-3 py-1.5 text-sm font-medium text-[#00B4FF] shadow-sm transition-all duration-300 hover:bg-[rgba(0,180,255,0.15)] hover:transform hover:scale-105"
-                        >
-                          {icon && (
-                            <Icon
-                              icon={icon}
-                              width={16}
-                              height={16}
-                              className="mr-1"
-                            />
-                          )}
-                          {label}
-                        </span>
-                      );
-                    })
-                  ) : (
-                    <span className="text-gray-400 text-sm">
-                      No specialties
-                    </span>
-                  )}
-                </div>
+          {/* Professional Details */}
+          <div className="bg-zinc-800 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+              <Icon
+                icon="mdi:account-tie"
+                width={16}
+                height={16}
+                className="text-[#FF6B00]"
+              />
+              Professional Details
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div className="flex justify-between">
+                <span className="text-zinc-400">Experience:</span>
+                <span className="text-white">
+                  {getOrNoData(info.experience)}
+                </span>
               </div>
-
-              {/* Training Types section - second row */}
-              <div className="w-full bg-[rgba(255,107,0,0.03)] p-5 rounded-xl border border-[rgba(255,107,0,0.15)] transition-all duration-300 hover:shadow-lg hover:shadow-[rgba(255,107,0,0.05)] backdrop-blur-sm">
-                <h3 className="text-sm font-semibold text-white mb-4 flex items-center">
-                  <div className="flex items-center justify-center mr-2 rounded-full p-1.5 bg-[rgba(255,107,0,0.15)]">
-                    <Icon
-                      icon="mdi:dumbbell"
-                      className="text-[#FF6B00]"
-                      width={18}
-                      height={18}
-                    />
-                  </div>
-                  <span className="bg-gradient-to-r from-[#FF6B00] to-white bg-clip-text text-transparent">
-                    Training Types
-                  </span>
-                </h3>
-                <div className="flex flex-wrap gap-2.5">
-                  {trainingTypes.length > 0 ? (
-                    trainingTypes.map((type, idx) => {
-                      const obj = TRAINING_TYPES.find((t) => t.id === type);
-                      const label = obj?.label || type;
-                      const icon = obj?.icon;
-                      return (
-                        <span
-                          key={idx}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-[rgba(255,107,0,0.3)] bg-[rgba(255,107,0,0.1)] px-3 py-1.5 text-sm font-medium text-[#FF6B00] shadow-sm transition-all duration-300 hover:bg-[rgba(255,107,0,0.15)] hover:transform hover:scale-105"
-                        >
-                          {icon && (
-                            <Icon
-                              icon={icon}
-                              width={16}
-                              height={16}
-                              className="mr-1"
-                            />
-                          )}
-                          {label}
-                        </span>
-                      );
-                    })
-                  ) : (
-                    <span className="text-gray-400 text-sm">
-                      No training types
-                    </span>
-                  )}
-                </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-400">Certification:</span>
+                <span className="text-white">
+                  {getOrNoData(info.certification)}
+                </span>
               </div>
-
-              {/* Stats Section - third row */}
-              <div className="w-full bg-[rgba(151,71,255,0.03)] p-5 rounded-xl border border-[rgba(151,71,255,0.15)] transition-all duration-300 hover:shadow-lg hover:shadow-[rgba(151,71,255,0.05)] backdrop-blur-sm">
-                <h3 className="text-sm font-semibold text-white mb-4 flex items-center">
-                  <div className="flex items-center justify-center mr-2 rounded-full p-1.5 bg-[rgba(151,71,255,0.15)]">
-                    <Icon
-                      icon="mdi:chart-bar"
-                      className="text-[#9747FF]"
-                      width={18}
-                      height={18}
-                    />
-                  </div>
-                  <span className="bg-gradient-to-r from-[#9747FF] to-white bg-clip-text text-transparent">
-                    Performance Statistics
-                  </span>
-                </h3>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-5">
-                  <StatCard
-                    label="Total Sessions"
-                    value={getOrNoData(info.totalSessions)}
-                    subtext={
-                      info.sessionChange > 0 ? (
-                        <span className="text-[#4CAF50]">
-                          +{info.sessionChange} sessions
-                        </span>
-                      ) : null
-                    }
-                    icon="mdi:calendar-check"
-                    variant="primary"
-                  />
-                  <StatCard
-                    label="Active Clients"
-                    value={
-                      trainerData?.clients
-                        ? trainerData.clients.filter(
-                            (c) => c.status === "active"
-                          ).length
-                        : "No data"
-                    }
-                    subtext={
-                      info.clientChange > 0 ? (
-                        <span className="text-[#4CAF50]">
-                          +{info.clientChange} clients
-                        </span>
-                      ) : null
-                    }
-                    icon="mdi:account-group"
-                    variant="orange"
-                  />
-                  <StatCard
-                    label="Upcoming Sessions"
-                    value={getOrNoData(info.upcomingSessions)}
-                    subtext={
-                      info.upcomingSessionsChange > 0 ? (
-                        <span className="text-[#4CAF50]">
-                          +{info.upcomingSessionsChange} sessions
-                        </span>
-                      ) : null
-                    }
-                    icon="mdi:calendar-clock"
-                    variant="purple"
-                  />
-                  <StatCard
-                    label="Total Earnings"
-                    value={
-                      info.totalEarnings ? `$${info.totalEarnings}` : "No data"
-                    }
-                    subtext={
-                      info.earningsChange > 0 ? (
-                        <span className="text-[#4CAF50]">
-                          +${info.earningsChange}
-                        </span>
-                      ) : null
-                    }
-                    icon="mdi:cash"
-                    variant="success"
-                  />
-                  <StatCard
-                    label="Rating"
-                    value={getOrNoData(info.rating)}
-                    subtext={<span className="text-[#FF6B00]">★★★★★</span>}
-                    icon="mdi:star"
-                    variant="orange"
-                  />
-                </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-400">Training Environment:</span>
+                <span className="text-white">
+                  {getOrNoData(info.trainingEnvironment)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-400">Session Rate:</span>
+                <span className="text-white">
+                  {getOrNoData(info.sessionRate)}
+                </span>
               </div>
             </div>
-          </Accordion>
+          </div>
+
+          {/* Contact Information */}
+          <div className="bg-zinc-800 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+              <Icon
+                icon="mdi:contact-mail"
+                width={16}
+                height={16}
+                className="text-[#FF6B00]"
+              />
+              Contact Information
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div className="flex justify-between">
+                <span className="text-zinc-400">Email:</span>
+                <span className="text-white">
+                  {getOrNoData(trainerData?.email)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-400">Phone:</span>
+                <span className="text-white">
+                  {getOrNoData(trainerData?.phone)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-400">City:</span>
+                <span className="text-white">
+                  {getOrNoData(trainerData?.city)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-400">Country:</span>
+                <span className="text-white">
+                  {getOrNoData(trainerData?.country)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Specialties */}
+          {info.specialties && info.specialties.length > 0 && (
+            <div className="bg-zinc-800 rounded-lg p-4">
+              <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+                <Icon
+                  icon="mdi:star-circle"
+                  width={16}
+                  height={16}
+                  className="text-[#FF6B00]"
+                />
+                Specialties
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {formatSpecialties(info.specialties).map((specialty, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 bg-zinc-700 text-zinc-300 rounded-full text-sm"
+                  >
+                    {specialty}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Training Types */}
+          {info.trainingTypes && info.trainingTypes.length > 0 && (
+            <div className="bg-zinc-800 rounded-lg p-4">
+              <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+                <Icon
+                  icon="mdi:dumbbell"
+                  width={16}
+                  height={16}
+                  className="text-[#FF6B00]"
+                />
+                Training Types
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {formatTrainingTypes(info.trainingTypes).map((type, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 bg-zinc-700 text-zinc-300 rounded-full text-sm"
+                  >
+                    {type}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* About */}
+          {info.bio && (
+            <div className="bg-zinc-800 rounded-lg p-4">
+              <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+                <Icon
+                  icon="mdi:information"
+                  width={16}
+                  height={16}
+                  className="text-[#FF6B00]"
+                />
+                About Me
+              </h4>
+              <p className="text-sm text-zinc-300 leading-relaxed">
+                {info.bio}
+              </p>
+            </div>
+          )}
         </div>
-      </UserProfile>
-    </div>
+      </Modal>
+    </>
   );
 };

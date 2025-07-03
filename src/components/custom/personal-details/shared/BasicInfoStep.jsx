@@ -80,15 +80,16 @@ export const BasicInfoStep = ({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Personal Information */}
       <FormSection
         title="Personal Information"
         description="Basic information about yourself"
         icon="mdi:account"
+        className="mb-6 sm:mb-8"
       >
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-4 sm:space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <FormField
               label="First Name"
               name="firstName"
@@ -112,7 +113,7 @@ export const BasicInfoStep = ({
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <FormField
               label="Date of Birth"
               name="dateOfBirth"
@@ -147,9 +148,10 @@ export const BasicInfoStep = ({
           title="Physical Information"
           description="Details about your physical characteristics"
           icon="mdi:human-male-height"
+          className="mb-6 sm:mb-8"
         >
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-4 sm:space-y-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <FormField
                 label="Height (cm)"
                 name="height"
@@ -208,8 +210,9 @@ export const BasicInfoStep = ({
           title="Fitness Experience"
           description="Your background in fitness and exercise"
           icon="mdi:dumbbell"
+          className="mb-6 sm:mb-8"
         >
-          <div className="space-y-4">
+          <div className="space-y-4 sm:space-y-5">
             <FormField
               label="Experience Level"
               name="experienceLevel"
@@ -245,8 +248,9 @@ export const BasicInfoStep = ({
           title="Professional Information"
           description="Your training background and expertise"
           icon="mdi:badge-account"
+          className="mb-6 sm:mb-8"
         >
-          <div className="space-y-4">
+          <div className="space-y-4 sm:space-y-5">
             <FormField
               label="Training Since (Year)"
               name="trainerSince"
@@ -296,8 +300,9 @@ export const BasicInfoStep = ({
           title="Training Specialties"
           description="Select all areas you specialize in or have experience with"
           icon="mdi:medal"
+          className="mb-0"
         >
-          <div className="space-y-4">
+          <div className="space-y-4 sm:space-y-5">
             <SpecialtySelector
               selectedSpecialties={formData.specialties || []}
               onChange={handleSpecialtyChange}

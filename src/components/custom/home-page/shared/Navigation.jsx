@@ -260,41 +260,31 @@ export const Navigation = () => {
                   }`}
                 >
                   {/* Hamburger lines with enhanced sizing */}
-                  <div
+                  <motion.div
                     className={`absolute flex flex-col justify-between transition-all duration-300 ${
                       scrolled ? "w-5 h-4" : "w-6 h-5"
                     }`}
+                    animate={{ rotate: mobileMenuOpen ? 90 : 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
                   >
                     <span
-                      className={`block bg-white transform transition-all duration-300 ease-in-out origin-center ${
+                      className={`block bg-white ${
                         scrolled ? "h-0.5" : "h-[2.5px]"
-                      } w-full ${
-                        mobileMenuOpen
-                          ? "rotate-45 translate-y-1.5"
-                          : "rotate-0 translate-y-0"
-                      }`}
+                      } w-full`}
                     ></span>
 
                     <span
-                      className={`block bg-white transform transition-all duration-300 ease-in-out ${
+                      className={`block bg-white ${
                         scrolled ? "h-0.5" : "h-[2.5px]"
-                      } w-full ${
-                        mobileMenuOpen
-                          ? "opacity-0 scale-0"
-                          : "opacity-100 scale-100"
-                      }`}
+                      } w-full`}
                     ></span>
 
                     <span
-                      className={`block bg-white transform transition-all duration-300 ease-in-out origin-center ${
+                      className={`block bg-white ${
                         scrolled ? "h-0.5" : "h-[2.5px]"
-                      } w-full ${
-                        mobileMenuOpen
-                          ? "-rotate-45 -translate-y-1.5"
-                          : "rotate-0 translate-y-0"
-                      }`}
+                      } w-full`}
                     ></span>
-                  </div>
+                  </motion.div>
                 </div>
               </motion.button>
             </div>
@@ -321,19 +311,29 @@ export const Navigation = () => {
               onClick={() => setMobileMenuOpen(false)}
             />
 
-            {/* Close Button - Always Visible */}
+            {/* Hamburger Menu Button - Always Visible */}
             <motion.button
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{ delay: 0.1 }}
-              className="absolute top-6 right-6 z-[70] p-3 rounded-full bg-[#FF6B00]/10 border border-[#FF6B00]/20 backdrop-blur-sm"
+              className="absolute top-2 right-4 z-[70] p-3 text-white focus:outline-none focus:ring-0 outline-none border-none bg-transparent"
               onClick={() => setMobileMenuOpen(false)}
+              aria-label="Close menu"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <Icon
-                icon="solar:close-circle-bold-duotone"
-                className="w-6 h-6 text-white"
-              />
+              <motion.div
+                className="relative flex items-center justify-center w-8 h-8"
+                animate={{ rotate: mobileMenuOpen ? 90 : 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <div className="absolute flex flex-col justify-between w-6 h-5">
+                  <span className="block bg-white h-[2.5px] w-full"></span>
+                  <span className="block bg-white h-[2.5px] w-full"></span>
+                  <span className="block bg-white h-[2.5px] w-full"></span>
+                </div>
+              </motion.div>
             </motion.button>
 
             {/* Menu Content */}
@@ -343,7 +343,7 @@ export const Navigation = () => {
                 initial={{ y: -50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="pt-20 pb-8 px-6 text-center border-b border-gray-800/50"
+                className="pt-6 pb-8 px-6 text-center border-b border-gray-800/50"
               >
                 <BrandLogo
                   logoTitle="ANTIQUE BODY"
@@ -446,7 +446,7 @@ export const Navigation = () => {
                     <Button
                       variant="orangeOutline"
                       size="medium"
-                      className="w-full py-4 text-base font-semibold border-2 hover:bg-[#FF6B00]/10 transition-all duration-300 flex items-center justify-center space-x-2"
+                      className="w-full py-4 mb-4 text-base font-semibold border-2 hover:bg-[#FF6B00]/10 transition-all duration-300 flex items-center justify-center space-x-2"
                     >
                       <Icon
                         icon="solar:login-3-bold-duotone"
