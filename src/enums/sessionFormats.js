@@ -1,0 +1,38 @@
+export const SESSION_FORMATS = [
+  {
+    id: "inPerson",
+    label: "In-Person",
+    description: "Face-to-face training sessions",
+    icon: "mdi:account-group",
+    color: "from-blue-500 to-indigo-600",
+    bgColor: "bg-blue-500/10",
+    borderColor: "border-blue-500/30",
+  },
+  {
+    id: "online",
+    label: "Online",
+    description: "Virtual training sessions",
+    icon: "mdi:video-outline",
+    color: "from-emerald-500 to-green-600",
+    bgColor: "bg-emerald-500/10",
+    borderColor: "border-emerald-500/30",
+  },
+  {
+    id: "hybrid",
+    label: "Hybrid",
+    description: "Mix of in-person and online",
+    icon: "mdi:swap-horizontal",
+    color: "from-violet-500 to-purple-600",
+    bgColor: "bg-violet-500/10",
+    borderColor: "border-violet-500/30",
+  },
+  {
+    id: "selfGuided",
+    label: "Self-Guided",
+    description: "Independent workout plans",
+    icon: "mdi:clipboard-text-outline",
+    color: "from-[#FF6B00] to-[#FF8533]",
+    bgColor: "bg-[#FF6B00]/10",
+    borderColor: "border-[#FF6B00]/30",
+  },
+];

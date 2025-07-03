@@ -6,6 +6,8 @@ import { useState } from "react";
 import { Button } from "@/components/common/Button";
 import { Modal } from "@/components/common/Modal";
 import { generatePlanPDF } from "@/utils/pdfGenerator";
+import { TRAINING_TYPES } from "@/enums/trainingTypes";
+import { SESSION_FORMATS } from "@/enums/sessionFormats";
 
 export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -410,7 +412,10 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
                 />
                 Training Type
               </h3>
-              <p className="text-gray-300">{trainingType}</p>
+              <p className="text-gray-300">
+                {TRAINING_TYPES.find((t) => t.id === trainingType)?.label ||
+                  trainingType}
+              </p>
             </div>
           )}
 
@@ -485,7 +490,10 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
                     )}
                   </>
                 ) : (
-                  <p className="text-gray-300">{sessionFormat}</p>
+                  <p className="text-gray-300">
+                    {SESSION_FORMATS.find((f) => f.id === sessionFormat)
+                      ?.label || sessionFormat}
+                  </p>
                 )}
               </div>
             </div>

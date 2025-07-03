@@ -22,17 +22,25 @@ const STEPS = [
   { id: "preview", label: "Preview", icon: "mdi:eye" },
 ];
 
-export const TrainingPlanCreator = () => {
+export const TrainingPlanCreator = ({ initialData }) => {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const { formData, updateFormData, handleSubmit, isValid } =
-    useTrainingPlanForm();
+    useTrainingPlanForm(initialData);
 
-  const handleNext = () => {
+  console.log(initialData, "initialData");
+
+  const handleNext = async () => {
     if (currentStep < STEPS.length - 1) {
       setCurrentStep((prev) => prev + 1);
     } else {
-      handleSubmit();
+      setIsLoading(true);
+      try {
+        await handleSubmit();
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -76,7 +84,9 @@ export const TrainingPlanCreator = () => {
           <div className="flex items-center gap-4">
             <BackButton onClick={handleBack} />
             <h1 className="text-2xl font-bold text-white">
-              Create Training Plan
+              {initialData && initialData.id
+                ? "Create Training Plan"
+                : "Update Training Plan"}
             </h1>
           </div>
           <StepIndicator steps={STEPS} currentStep={currentStep} />
@@ -99,6 +109,8 @@ export const TrainingPlanCreator = () => {
               onNext={handleNext}
               isNextDisabled={!isValid(currentStep)}
               isLastStep={currentStep === STEPS.length - 1}
+              isEdit={!!(initialData && initialData.id)}
+              isLoading={isLoading}
             />
           </div>
         </Card>

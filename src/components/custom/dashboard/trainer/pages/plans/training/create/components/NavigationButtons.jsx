@@ -14,6 +14,7 @@ export const NavigationButtons = ({
   isLastStep,
   isLoading = false,
   planType = "training", // "training" or "nutrition"
+  isEdit = false,
 }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -45,7 +46,15 @@ export const NavigationButtons = ({
               ) : (
                 <Icon icon="mdi:rocket-launch" className="w-5 h-5 mr-2" />
               )}
-              {isLoading
+              {isEdit
+                ? isLoading
+                  ? `Updating ${
+                      planType === "nutrition" ? "Nutrition" : "Training"
+                    } Plan...`
+                  : `Update ${
+                      planType === "nutrition" ? "Nutrition" : "Training"
+                    } Plan`
+                : isLoading
                 ? `Creating ${
                     planType === "nutrition" ? "Nutrition" : "Training"
                   } Plan...`

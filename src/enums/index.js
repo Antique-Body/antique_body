@@ -9,3 +9,4 @@ export * from "./durationTypes";
 export * from "./planFeatures";
 export * from "./daysOfWeek";
 export * from "./planTypes";
+export * from "./sessionFormats";
