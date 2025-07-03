@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
-import { createPlan, updatePlan } from "@/utils/planService";
+import { createPlan, updatePlan } from "@/app/api/users/services/planService";
 
 const initialFormData = {
   // Basic Info
@@ -54,10 +54,26 @@ const initialFormData = {
 export const useTrainingPlanForm = (initialData = null) => {
   const router = useRouter();
   const [formData, setFormData] = useState(initialData || initialFormData);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    // Get searchParams only when running in the browser
+    const searchParams =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search)
+        : null;
+    const isCopy = searchParams && searchParams.get("mode") === "copy";
     if (initialData) {
-      setFormData(initialData);
+      const cleanData = { ...initialData };
+      if (isCopy) {
+        // Remove id for copy mode so a new plan is created
+        delete cleanData.id;
+        // Prefix title with 'Copy of ' if not already present
+        if (cleanData.title && !cleanData.title.startsWith("Copy of ")) {
+          cleanData.title = `Copy of ${cleanData.title}`;
+        }
+      }
+      setFormData(cleanData);
     }
   }, [initialData]);
 
@@ -104,9 +120,19 @@ export const useTrainingPlanForm = (initialData = null) => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    if (e) e.preventDefault && e.preventDefault();
+  const handleSubmit = async () => {
+    if (isSubmitting) {
+      console.log("[handleSubmit] Prevented double submit");
+      return;
+    }
+    setIsSubmitting(true);
     try {
+      // Get searchParams only when running in the browser
+      const searchParams =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search)
+          : null;
+      const isCopy = searchParams && searchParams.get("mode") === "copy";
       let coverImageUrl = formData.coverImage;
 
       // DEBUG: Log file info
@@ -156,7 +182,6 @@ export const useTrainingPlanForm = (initialData = null) => {
             : null,
         durationType: formData.durationType,
         keyFeatures: formData.keyFeatures,
-        planSchedule: formData.schedule,
         timeline: Array.isArray(formData.timeline)
           ? formData.timeline.map((item) => ({
               ...item,
@@ -165,6 +190,7 @@ export const useTrainingPlanForm = (initialData = null) => {
             }))
           : [],
         features: formData.features,
+        schedule: formData.schedule,
         sessionsPerWeek:
           formData.sessionsPerWeek !== "" &&
           !isNaN(Number(formData.sessionsPerWeek))
@@ -174,23 +200,23 @@ export const useTrainingPlanForm = (initialData = null) => {
         trainingType: formData.trainingType,
         difficultyLevel: formData.difficultyLevel || null,
       };
-
-      // LOGIRAJ PAYLOAD PRIJE SLANJA
-      console.log("Plan payload koji će biti poslan na backend:", planPayload);
-
-      if (formData.id) {
+      console.log("[handleSubmit] planPayload:", planPayload);
+      if (formData.id && !isCopy) {
         // EDIT MODE: PATCH
+        console.log("[handleSubmit] PATCH (updatePlan)");
         await updatePlan(formData.id, planPayload, "training");
       } else {
-        // CREATE MODE: POST
+        // CREATE MODE: POST (or COPY)
+        console.log("[handleSubmit] POST (createPlan)");
         await createPlan(planPayload, "training");
       }
-
       // Redirect na plans page
       router.push("/trainer/dashboard/plans");
     } catch (error) {
       console.error("Error submitting form:", error);
       // Ovdje možeš postaviti error state za prikaz korisniku
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

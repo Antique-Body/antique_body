@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import { convertToEUR } from "../../../utils/currency";
 import { trainerService, exerciseService } from "../services";
+import { createDefaultPlansForTrainer } from "../services/planService";
 
 import { auth } from "#/auth";
 import { validateTrainerProfile } from "@/middleware/validation";
@@ -63,6 +64,13 @@ export async function POST(req) {
       body,
       session.user.id
     );
+    // After trainer is created, create default plans
+    const trainerInfo = await prisma.trainerInfo.findUnique({
+      where: { userId: session.user.id },
+    });
+    if (trainerInfo) {
+      await createDefaultPlansForTrainer(trainerInfo.id);
+    }
     return new Response(JSON.stringify(trainer), { status: 201 });
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {

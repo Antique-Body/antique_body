@@ -266,8 +266,6 @@ export const generatePlanPDF = async (planData) => {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
     doc.setTextColor(60, 60, 60);
-    yPos =
-      addWrappedText(overview.targetAudience, 20, yPos, pageWidth - 40, 5) + 15;
 
     // Add weekly schedule section
     // Check if we need to add a new page
