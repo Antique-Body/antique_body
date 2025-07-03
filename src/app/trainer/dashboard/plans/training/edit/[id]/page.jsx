@@ -6,6 +6,11 @@ import { useEffect, useState } from "react";
 import { fetchPlanDetails } from "@/app/api/users/services/planService";
 import { TrainingPlanCreator } from "@/components/custom/dashboard/trainer/pages/plans/training/create/TrainingPlanCreator";
 
+/**
+ * React component for editing a training plan based on the route parameter `id`.
+ *
+ * Fetches the training plan details using the provided `id`, normalizes missing fields with default values, and renders the `TrainingPlanCreator` component with the prepared data. Displays loading and error states as appropriate.
+ */
 export default function EditTrainingPlanPage() {
   const params = useParams();
   const { id } = params;

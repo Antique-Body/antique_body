@@ -11,6 +11,13 @@ import { validateTrainerProfile } from "@/middleware/validation";
 
 const prisma = new PrismaClient();
 
+/**
+ * Handles creation of a new trainer profile for the authenticated user.
+ *
+ * Authenticates the user, processes the request payload, and creates a trainer record with associated details. If a session price is provided in a non-EUR currency, attempts to convert it to EUR, handling API usage limits gracefully. After creation, generates default plans for the new trainer. Returns the created trainer data on success, or an error response on failure.
+ * @param {Request} req - The HTTP request containing trainer details in JSON format.
+ * @returns {Promise<Response>} The HTTP response with the created trainer data or an error message.
+ */
 export async function POST(req) {
   try {
     const session = await auth();

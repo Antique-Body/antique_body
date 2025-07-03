@@ -250,7 +250,11 @@ export async function updateClientProfile(userId, data) {
   });
 }
 
-// Basic profile for dashboard display - minimal data
+/**
+ * Retrieves a minimal client profile for dashboard display, including basic personal, contact, and goal information, as well as related client info, location, languages, and preferred activities.
+ * @param {string} userId - The unique identifier of the user whose client profile is requested.
+ * @returns {Promise<Object|null>} The basic client profile data if found, or null if no profile exists for the given user.
+ */
 async function getClientProfileBasic(userId) {
   const profile = await prisma.clientProfile.findFirst({
     where: {

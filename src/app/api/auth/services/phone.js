@@ -56,6 +56,16 @@ export async function sendVerificationCode(phone) {
   }
 }
 
+/**
+ * Verifies a phone number using a provided verification code.
+ *
+ * Checks if the given code matches the most recent unused and unexpired verification code for the phone number. If the verification is not for registration, marks the code as used after successful verification.
+ *
+ * @param {string} phone - The phone number to verify.
+ * @param {string} code - The verification code to check.
+ * @param {boolean} [isRegistration=false] - Whether the verification is for registration (prevents marking the code as used).
+ * @return {boolean} Returns `true` if verification succeeds, or `false` if the code is invalid, expired, or an error occurs.
+ */
 export async function verifyPhoneCode(phone, code, isRegistration = false) {
   try {
     const formattedPhone = formatPhoneNumber(phone);

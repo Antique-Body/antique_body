@@ -153,6 +153,14 @@ const DEFAULT_EXERCISE = {
   location: "gym",
 };
 
+/**
+ * Enables drag-and-drop reordering for a session element within a list.
+ * @param {string|number} id - Unique identifier for the session.
+ * @param {number} index - Current index of the session in the list.
+ * @param {function} moveSession - Callback to move a session from one index to another.
+ * @param {React.ReactNode} children - The session content to be rendered inside the draggable wrapper.
+ * @return {JSX.Element} The wrapped session element with drag-and-drop functionality.
+ */
 function SessionDndWrapper({ id, index, moveSession, children }) {
   const ref = React.useRef(null);
   const [{ handlerId }, drop] = useDrop({

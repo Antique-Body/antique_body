@@ -6,6 +6,11 @@ import { useEffect, useState } from "react";
 import { fetchPlanDetails } from "@/app/api/users/services/planService";
 import { NutritionPlanCreator } from "@/components/custom/dashboard/trainer/pages/plans/nutrition/create/NutritionPlanCreator";
 
+/**
+ * React component for editing or copying a nutrition plan based on the provided plan ID.
+ *
+ * Fetches nutrition plan details using the route parameter `id`, normalizes the data with default values for missing fields, and prepares the data for editing or duplication depending on the query parameter `mode`. Displays loading and error states as appropriate, and renders the nutrition plan editor UI when data is ready.
+ */
 export default function EditNutritionPlanPage() {
   const params = useParams();
   const searchParams = useSearchParams();

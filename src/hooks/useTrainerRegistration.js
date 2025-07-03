@@ -2,6 +2,13 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 
+/**
+ * React hook for managing a multi-step trainer registration form, including state, validation, file uploads, and submission logic.
+ *
+ * Provides state and handlers for form data, validation errors, step navigation, certification management, file uploads, and form submission. Supports dynamic certification fields and synchronizes certification data for backward compatibility.
+ *
+ * @return {object} An object containing form state, error state, loading state, step navigation, certification management utilities, and all relevant handlers for use in a trainer registration form component.
+ */
 export function useTrainerRegistration() {
   const router = useRouter();
   const { update } = useSession();

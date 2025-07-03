@@ -751,6 +751,12 @@ export const NUTRITION_PLAN_CONFIG = [
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
+/**
+ * Creates default training and nutrition plans for a trainer if none exist.
+ *
+ * Checks whether any training or nutrition plans are already associated with the given trainer. If not, inserts all default plans from the configuration into the database, linking them to the trainer and marking them as active but unpublished.
+ * @param {string} trainerInfoId - The unique identifier for the trainer.
+ */
 export async function createDefaultPlansForTrainer(trainerInfoId) {
   // Check if plans already exist
   const existingTraining = await prisma.trainingPlan.count({

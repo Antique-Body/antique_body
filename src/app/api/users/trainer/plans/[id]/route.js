@@ -5,7 +5,11 @@ import { auth } from "#/auth";
 
 const prisma = new PrismaClient();
 
-// GET: Fetch single plan by id and type
+/**
+ * Retrieves a single training or nutrition plan by its ID for the authenticated trainer.
+ * 
+ * The plan type is determined by the "type" query parameter ("training" by default). Returns the plan data as JSON if found, or an appropriate error response if not authenticated, not authorized, or not found.
+ */
 export async function GET(req, { params }) {
   try {
     const { id } = await params;
@@ -46,7 +50,11 @@ export async function GET(req, { params }) {
   }
 }
 
-// PATCH: Update plan by id
+/**
+ * Updates a training or nutrition plan by its ID for the authenticated trainer.
+ * 
+ * Accepts update data and plan type in the request body, verifies trainer authorization, and updates the corresponding plan record. Returns the updated plan as JSON, or an error response if authorization fails or the plan is not found.
+ */
 export async function PATCH(req, { params }) {
   try {
     const { id } = await params;
@@ -83,7 +91,11 @@ export async function PATCH(req, { params }) {
   }
 }
 
-// DELETE: Soft delete plan by id
+/**
+ * Performs a soft delete on a training or nutrition plan by setting its `isActive` field to false.
+ * 
+ * The plan is identified by its ID and type (either "training" or "nutrition", defaulting to "training"). Only plans belonging to the authenticated trainer are affected. Returns a success response if the operation completes, or an error response if the plan is not found or the user is unauthorized.
+ */
 export async function DELETE(req, { params }) {
   try {
     const { id } = await params;

@@ -6,6 +6,11 @@ import { useEffect, useState } from "react";
 import { TrainingPlanCreator } from "@/components/custom/dashboard/trainer/pages/plans/training/create/TrainingPlanCreator";
 import { fetchPlanDetails } from "@/utils/planService";
 
+/**
+ * React component for editing or copying a training plan based on the plan ID from the route.
+ *
+ * Fetches plan details using the provided ID, normalizes missing fields, and supports a "copy" mode that removes unique identifiers and prefixes the title. Renders a loading indicator, error message, or the training plan editor as appropriate.
+ */
 export default function EditPlanPage() {
   const params = useParams();
   const searchParams = useSearchParams();

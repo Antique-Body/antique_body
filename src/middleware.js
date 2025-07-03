@@ -80,6 +80,16 @@ function getDashboardRedirect(token) {
   return "/select-role";
 }
 
+/**
+ * Determines if a user should be redirected during onboarding based on their role, profile completion, and current pathname.
+ *
+ * Returns a redirect path if the user needs to complete onboarding steps or access is restricted, or `null` if the current pathname is allowed.
+ *
+ * @param {string} role - The user's role, such as 'client' or 'trainer'.
+ * @param {object} token - The user's authentication token containing profile information.
+ * @param {string} pathname - The current request pathname.
+ * @return {string|null} The redirect path if a redirect is needed, or `null` if access is permitted.
+ */
 function getOnboardingRedirect(role, token, pathname) {
   if (!role) return pathname === "/select-role" ? null : "/select-role";
   const config = {
@@ -141,6 +151,14 @@ function getOnboardingRedirect(role, token, pathname) {
   return isAllowed ? null : config.fallback;
 }
 
+/**
+ * Middleware for handling authentication, user existence, and role-based routing in a Next.js application.
+ *
+ * Applies access control by allowing public paths, enforcing login for protected routes, verifying user existence in the database, and redirecting users based on their authentication state, role, and onboarding progress. Handles special cases for OAuth flows and onboarding routes, ensuring users are directed to the appropriate dashboard or onboarding step.
+ *
+ * @param {import('next/server').NextRequest} request - The incoming Next.js request object.
+ * @return {Promise<import('next/server').NextResponse>} The response, which may be a redirect or continuation of the request.
+ */
 export async function middleware(request) {
   if (process.env.NODE_ENV_TYPE === "production") {
     return NextResponse.next();

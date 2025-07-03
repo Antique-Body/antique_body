@@ -68,7 +68,11 @@ const DEFAULT_EXERCISES = [
   },
 ];
 
-// Apstraktna validacija exercise podataka
+/**
+ * Validates the `type`, `level`, and `location` fields of exercise data against allowed values.
+ * @param {Object} data - The exercise data to validate.
+ * @return {string[]} An array of error messages for any invalid fields; empty if all fields are valid or not present.
+ */
 function validateExerciseData(data) {
   const errors = [];
 

@@ -106,6 +106,11 @@ const updatedFeatures = [
   },
 ];
 
+/**
+ * Renders the animated homepage for the fitness platform, featuring hero, features, benefits, trainers, call-to-action, and footer sections.
+ *
+ * Integrates multiple custom and third-party components to create a visually rich, interactive landing page with responsive layouts and animated effects.
+ */
 export default function Home() {
   const featuresRef = useRef(null);
   const benefitsRef = useRef(null);

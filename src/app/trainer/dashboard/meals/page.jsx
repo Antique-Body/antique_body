@@ -12,6 +12,11 @@ import {
 import { NoResults, Pagination } from "@/components/custom/shared";
 import { useMeals } from "@/hooks";
 
+/**
+ * Displays and manages the trainer's meal library, providing filtering, pagination, and CRUD operations via a modal interface.
+ *
+ * Renders a responsive grid of meal cards with options to view, create, edit, and delete meals. Includes filter controls, pagination, and handles loading and error states. Meal details and editing are managed through a modal dialog.
+ */
 export default function MealsPage() {
   const {
     meals,

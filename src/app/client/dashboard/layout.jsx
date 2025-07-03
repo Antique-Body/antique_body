@@ -8,6 +8,15 @@ import { BrandLogo } from "@/components/common/BrandLogo";
 import { ClientProfile } from "@/components/custom/dashboard/client/components";
 import { DashboardTabs } from "@/components/custom/dashboard/shared/DashboardTabs";
 
+/**
+ * Provides the main layout for the client dashboard, including profile display, tab navigation, and nested content rendering.
+ * 
+ * Fetches and manages client profile data, handles loading and error states, and enables navigation between dashboard sections via tabs. Renders the appropriate child components based on the selected tab.
+ * 
+ * @param {object} props
+ * @param {React.ReactNode} props.children - The nested page content to display within the dashboard layout.
+ * @returns {JSX.Element} The rendered client dashboard layout.
+ */
 export default function ClientDashboardLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();

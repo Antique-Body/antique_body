@@ -12,6 +12,11 @@ import {
 import { NoResults, Pagination } from "@/components/custom/shared";
 import { useExercises } from "@/hooks";
 
+/**
+ * Displays and manages the trainer's exercise library with filtering, pagination, and CRUD operations via a modal interface.
+ *
+ * Handles loading and error states, allows users to create, view, edit, and delete exercises, and provides filtering and pagination controls for navigating the exercise list.
+ */
 export default function ExercisesPage() {
   const {
     exercises,

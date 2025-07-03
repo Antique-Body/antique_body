@@ -17,13 +17,14 @@ function buildLocationWhere(location) {
 }
 
 /**
- * Kreira trenera sa svim detaljima i relacijama.
- * Sva polja su required osim certifikata i description.
- * formData: {
- *   firstName, lastName, dateOfBirth, gender, trainerSince, specialties, languages, trainingEnvironment, trainingTypes,
- *   email, phone,  profileImage, location: { city, state, country },
- *   pricingType, pricePerSession, currency, certifications: [{ name, issuer, expiryDate, description, documentUrl }]
- * }
+ * Creates a new trainer profile with detailed information and related entities.
+ *
+ * Validates required fields and pricing conditions, finds or creates the trainer's location, and creates a new `TrainerInfo` with a nested `TrainerProfile` including specialties, languages, training types, and optional certifications with documents. Also creates default exercises, meals, and plans for the new trainer.
+ *
+ * @param {Object} formData - The trainer's profile data, including personal details, specialties, languages, training types, location, pricing, and optional certifications.
+ * @param {string|number} userId - The user ID to associate with the new trainer profile.
+ * @returns {Promise<Object>} The created trainer profile with related entities.
+ * @throws {Error} If required fields are missing or pricing data is invalid.
  */
 async function createTrainerWithDetails(formData, userId) {
   const requiredFields = [
@@ -230,7 +231,13 @@ async function getTrainerInfoByProfileId(trainerProfileId) {
   });
 }
 
-// Basic profile for dashboard display - minimal data
+/**
+ * Retrieves a comprehensive basic trainer profile for dashboard display by user ID.
+ *
+ * Returns key personal, contact, and profile details, including specialties, training types, languages, non-hidden certifications, trainer info summary (with exercise and meal counts), availabilities, and up to three highlighted gallery images. Also includes location and pricing information.
+ * @param {string|number} userId - The unique identifier of the user whose trainer profile is requested.
+ * @returns {Promise<Object|null>} The trainer profile object with selected fields, or null if not found.
+ */
 async function getTrainerProfileBasic(userId) {
   const profile = await prisma.trainerProfile.findFirst({
     where: {
