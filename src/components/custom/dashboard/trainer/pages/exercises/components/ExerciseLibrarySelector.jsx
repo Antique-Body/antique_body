@@ -7,6 +7,7 @@ import exerciseLibrary from "./exerciseLibrary.json";
 
 import { Button } from "@/components/common/Button";
 import { InfoBanner } from "@/components/common/InfoBanner";
+import { formatMuscleDisplayName } from "@/utils/muscleMapper";
 
 export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -46,73 +47,65 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
   }, [searchTerm]);
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Info message about templates */}
+    <div className="flex flex-col h-full max-h-[80vh]">
+      {/* Header */}
       <div className="mb-4">
         <InfoBanner
-          icon="mdi:information-outline"
-          title="Templates with placeholder content"
-          subtitle="Some exercises may have generic images or videos. Customize with your own media as needed."
+          icon="mdi:information"
+          title="Exercise Templates"
+          subtitle="Select a pre-built exercise to quickly populate your form"
           variant="info"
         />
       </div>
 
-      {/* Search input */}
-      <div className="mb-4 relative">
+      {/* Search */}
+      <div className="mb-4">
         <div className="relative">
+          <Icon
+            icon="mdi:magnify"
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400"
+            width={20}
+            height={20}
+          />
           <input
             type="text"
+            placeholder="Search exercises by name, description, or muscle group..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search exercise library..."
-            className="w-full pl-10 pr-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#FF7800] focus:border-[#FF7800]"
+            className="w-full pl-10 pr-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-400 focus:outline-none focus:border-orange-500"
           />
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Icon icon="mdi:magnify" className="w-5 h-5 text-zinc-500" />
-          </div>
-          {searchTerm && (
-            <button
-              className="absolute inset-y-0 right-0 pr-3 flex items-center"
-              onClick={() => setSearchTerm("")}
-            >
-              <Icon
-                icon="mdi:close-circle"
-                className="w-5 h-5 text-zinc-500 hover:text-zinc-300"
-              />
-            </button>
-          )}
         </div>
       </div>
 
-      {/* Exercise list */}
-      <div className="flex-1 overflow-y-auto pr-2 -mr-2">
+      {/* Exercise List */}
+      <div className="flex-1 overflow-y-auto">
         {filteredExercises.length > 0 ? (
-          <div className="grid grid-cols-1 gap-2">
-            {filteredExercises.map((exercise, index) => (
+          <div className="grid gap-3">
+            {filteredExercises.map((exercise) => (
               <div
-                key={index}
-                className="p-3 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg cursor-pointer transition-colors"
+                key={exercise.id}
                 onClick={() => onSelectExercise(exercise)}
+                className="p-4 bg-zinc-800 rounded-lg border border-zinc-700 hover:border-orange-500 cursor-pointer transition-colors"
               >
-                <div className="flex justify-between items-center">
-                  <h3 className="font-medium text-white">{exercise.name}</h3>
-                  <div className="flex items-center gap-2">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="text-white font-semibold text-sm">
+                    {exercise.name}
+                  </h3>
+                  <div className="flex gap-1">
                     <span
-                      className={`inline-block rounded-md px-2 py-1 text-xs ${
+                      className={`text-xs px-2 py-1 rounded ${
                         exercise.type === "strength"
-                          ? "bg-purple-900/60 text-purple-200"
+                          ? "bg-purple-900/40 text-purple-300"
                           : exercise.type === "bodyweight"
-                          ? "bg-green-900/60 text-green-200"
-                          : exercise.type === "cardio"
-                          ? "bg-blue-900/60 text-blue-200"
-                          : "bg-orange-900/60 text-orange-200"
+                          ? "bg-green-900/40 text-green-300"
+                          : "bg-blue-900/40 text-blue-300"
                       }`}
                     >
                       {exercise.type.charAt(0).toUpperCase() +
                         exercise.type.slice(1)}
                     </span>
                     <span
-                      className={`inline-block rounded-md px-2 py-1 text-xs ${
+                      className={`text-xs px-2 py-1 rounded ${
                         exercise.level === "beginner"
                           ? "bg-green-900/40 text-green-300"
                           : exercise.level === "intermediate"
@@ -125,10 +118,13 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
                     </span>
                   </div>
                 </div>
+                <p className="text-zinc-400 text-xs mb-2 line-clamp-2">
+                  {exercise.description}
+                </p>
                 <div className="mt-1 flex flex-wrap gap-1">
                   {exercise.muscleGroups.map((muscle, idx) => (
                     <span key={idx} className="text-xs text-zinc-400">
-                      {muscle.charAt(0).toUpperCase() + muscle.slice(1)}
+                      {formatMuscleDisplayName(muscle)}
                       {idx < exercise.muscleGroups.length - 1 ? ", " : ""}
                     </span>
                   ))}

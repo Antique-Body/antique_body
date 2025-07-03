@@ -127,7 +127,7 @@ export default function ClientDashboardLayout({ children }) {
     }
     return (
       <ClientProfile
-        userData={clientData.data}
+        clientData={clientData.data}
         onProfileUpdate={refreshClientData}
       />
     );

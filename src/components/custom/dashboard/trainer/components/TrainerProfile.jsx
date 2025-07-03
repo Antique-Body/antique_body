@@ -3,13 +3,45 @@ import { useState } from "react";
 
 import { Modal } from "@/components/common/Modal";
 import { UserProfile } from "@/components/custom/dashboard/shared";
-import { SPECIALTIES } from "@/enums/specialties";
+import { SPECIALTIES, TRAINING_ENVIRONMENTS } from "@/enums/specialties";
 import { TRAINING_TYPES } from "@/enums/trainingTypes";
 
 export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const info = trainerData?.trainerInfo || {};
   const getOrNoData = (val) => val ?? "No data";
+
+  // Function to map training type names to proper labels
+  const mapTrainingTypeToLabel = (typeName) => {
+    const type = TRAINING_TYPES.find(
+      (t) =>
+        t.id === typeName || t.label.toLowerCase() === typeName.toLowerCase()
+    );
+    return type
+      ? type.label
+      : typeName.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+  };
+
+  // Function to map specialty names to proper labels
+  const mapSpecialtyToLabel = (specialtyName) => {
+    const specialty = SPECIALTIES.find(
+      (s) =>
+        s.id === specialtyName ||
+        s.label.toLowerCase() === specialtyName.toLowerCase()
+    );
+    return specialty
+      ? specialty.label
+      : specialtyName
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, (l) => l.toUpperCase());
+  };
+
+  // Function to map training environment to proper label
+  const mapTrainingEnvironmentToLabel = (environment) => {
+    const env = TRAINING_ENVIRONMENTS.find((e) => e.id === environment);
+    return env
+      ? env.label
+      : environment.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+  };
 
   // Combine first and last name
   const fullName =
@@ -18,7 +50,47 @@ export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
     trainerData?.name ||
     "No data";
 
-  // Subtitle with stats
+  // Calculate age from dateOfBirth
+  const calculateAge = (dateOfBirth) => {
+    if (!dateOfBirth) return "N/A";
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+    return age;
+  };
+
+  // Calculate experience in years from trainerSince
+  const calculateExperience = (trainerSince) => {
+    if (!trainerSince) return "N/A";
+    const currentYear = new Date().getFullYear();
+    const yearsExperience = currentYear - parseInt(trainerSince);
+
+    if (yearsExperience === 0) {
+      return "Less than 1 year";
+    }
+    return `${yearsExperience} year${yearsExperience !== 1 ? "s" : ""}`;
+  };
+
+  // Get trainer info with fallback
+  const trainerInfo = trainerData?.trainerInfo || {};
+
+  console.log("trainerData", trainerData);
+
+  // Calculate real stats from API data
+  const exerciseCount = trainerInfo?.exercises?.length || 0;
+  const mealCount = trainerInfo?.meals?.length || 0;
+  const totalClients = 15; // This would come from actual client count
+  const totalSessions = 150; // This would come from actual session count
+  const rating = 4.9; // This would come from actual ratings
+
+  // Subtitle with stats using real data
   const profileSubtitle = (
     <div className="flex items-center gap-4 text-xs text-zinc-400">
       <div className="flex items-center gap-1">
@@ -28,7 +100,7 @@ export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
           height={12}
           className="text-[#FF6B00]"
         />
-        <span>4.8 rating</span>
+        <span>{rating} rating</span>
       </div>
       <div className="flex items-center gap-1">
         <Icon
@@ -37,7 +109,7 @@ export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
           height={12}
           className="text-[#FF6B00]"
         />
-        <span>24 clients</span>
+        <span>{totalClients} clients</span>
       </div>
       <div className="flex items-center gap-1">
         <Icon
@@ -46,7 +118,7 @@ export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
           height={12}
           className="text-[#FF6B00]"
         />
-        <span>5+ years</span>
+        <span>{calculateExperience(trainerInfo.trainerSince)} experience</span>
       </div>
       <div className="flex items-center gap-1">
         <Icon
@@ -55,28 +127,10 @@ export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
           height={12}
           className="text-[#FF6B00]"
         />
-        <span>120+ sessions</span>
+        <span>{totalSessions} sessions</span>
       </div>
     </div>
   );
-
-  // Format specialties
-  const formatSpecialties = (specialties) => {
-    if (!specialties || !Array.isArray(specialties)) return [];
-    return specialties.map((specialty) => {
-      const specialtyData = SPECIALTIES.find((s) => s.id === specialty);
-      return specialtyData ? specialtyData.label : specialty;
-    });
-  };
-
-  // Format training types
-  const formatTrainingTypes = (trainingTypes) => {
-    if (!trainingTypes || !Array.isArray(trainingTypes)) return [];
-    return trainingTypes.map((type) => {
-      const typeData = TRAINING_TYPES.find((t) => t.id === type);
-      return typeData ? typeData.label : type;
-    });
-  };
 
   const handleHeaderClick = () => {
     setShowDetailModal(true);
@@ -89,198 +143,185 @@ export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
         avatarContent={trainerData?.profileImage}
         profileTitle={fullName}
         profileSubtitle={profileSubtitle}
+        certifications={trainerData?.certifications || []}
         userData={trainerData}
         onProfileUpdate={onProfileUpdate}
         onHeaderClick={handleHeaderClick}
         showDetailedView={true}
       />
 
-      {/* Detail Modal */}
+      {/* Simplified Detail Modal */}
       <Modal
         isOpen={showDetailModal}
         onClose={() => setShowDetailModal(false)}
-        title={
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full overflow-hidden bg-zinc-800">
-              {trainerData?.profileImage ? (
-                <img
-                  src={trainerData.profileImage}
-                  alt={fullName}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Icon
-                    icon="mdi:account"
-                    width={24}
-                    height={24}
-                    className="text-zinc-400"
-                  />
-                </div>
-              )}
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-white">{fullName}</h3>
-              <p className="text-sm text-zinc-400">Personal Trainer</p>
-            </div>
-          </div>
-        }
+        title="Trainer Profile"
         size="large"
         primaryButtonText="Close"
+        footerButtons={true}
         primaryButtonAction={() => setShowDetailModal(false)}
+        secondaryButtonText=""
       >
         <div className="space-y-6">
-          {/* Statistics */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-zinc-800 rounded-lg p-4 text-center">
-              <Icon
-                icon="mdi:star"
-                width={24}
-                height={24}
-                className="text-[#FF6B00] mx-auto mb-2"
-              />
-              <div className="text-xl font-bold text-white">4.8</div>
+          <div className="grid grid-cols-4 gap-3">
+            <div className="bg-zinc-800/30 rounded-lg p-3 text-center border border-zinc-700/30">
+              <div className="text-lg font-bold text-white">{rating}</div>
               <div className="text-xs text-zinc-400">Rating</div>
             </div>
-            <div className="bg-zinc-800 rounded-lg p-4 text-center">
-              <Icon
-                icon="mdi:account-group"
-                width={24}
-                height={24}
-                className="text-[#FF6B00] mx-auto mb-2"
-              />
-              <div className="text-xl font-bold text-white">24</div>
+            <div className="bg-zinc-800/30 rounded-lg p-3 text-center border border-zinc-700/30">
+              <div className="text-lg font-bold text-white">{totalClients}</div>
               <div className="text-xs text-zinc-400">Clients</div>
             </div>
-            <div className="bg-zinc-800 rounded-lg p-4 text-center">
-              <Icon
-                icon="mdi:calendar"
-                width={24}
-                height={24}
-                className="text-[#FF6B00] mx-auto mb-2"
-              />
-              <div className="text-xl font-bold text-white">5+</div>
-              <div className="text-xs text-zinc-400">Years</div>
+            <div className="bg-zinc-800/30 rounded-lg p-3 text-center border border-zinc-700/30">
+              <div className="text-lg font-bold text-white">
+                {calculateExperience(trainerInfo.trainerSince)}
+              </div>
+              <div className="text-xs text-zinc-400">Experience</div>
             </div>
-            <div className="bg-zinc-800 rounded-lg p-4 text-center">
-              <Icon
-                icon="mdi:dumbbell"
-                width={24}
-                height={24}
-                className="text-[#FF6B00] mx-auto mb-2"
-              />
-              <div className="text-xl font-bold text-white">120+</div>
+            <div className="bg-zinc-800/30 rounded-lg p-3 text-center border border-zinc-700/30">
+              <div className="text-lg font-bold text-white">
+                {totalSessions}
+              </div>
               <div className="text-xs text-zinc-400">Sessions</div>
             </div>
           </div>
 
-          {/* Professional Details */}
-          <div className="bg-zinc-800 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+          {/* Professional Information */}
+          <div className="bg-zinc-800/30 rounded-lg p-4 border border-zinc-700/50">
+            <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
               <Icon
                 icon="mdi:account-tie"
                 width={16}
                 height={16}
                 className="text-[#FF6B00]"
               />
-              Professional Details
+              Professional Information
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div className="flex justify-between">
-                <span className="text-zinc-400">Experience:</span>
-                <span className="text-white">
-                  {getOrNoData(info.experience)}
-                </span>
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+              <div>
+                <span className="text-zinc-400">Age</span>
+                <p className="text-white">
+                  {calculateAge(trainerData?.dateOfBirth)} years old
+                </p>
               </div>
-              <div className="flex justify-between">
-                <span className="text-zinc-400">Certification:</span>
-                <span className="text-white">
-                  {getOrNoData(info.certification)}
-                </span>
+              <div>
+                <span className="text-zinc-400">Experience</span>
+                <p className="text-white">
+                  {calculateExperience(trainerInfo.trainerSince)}
+                </p>
               </div>
-              <div className="flex justify-between">
-                <span className="text-zinc-400">Training Environment:</span>
-                <span className="text-white">
-                  {getOrNoData(info.trainingEnvironment)}
-                </span>
+              <div>
+                <span className="text-zinc-400">Session Duration</span>
+                <p className="text-white">
+                  {trainerData?.sessionDuration || "N/A"} minutes
+                </p>
               </div>
-              <div className="flex justify-between">
-                <span className="text-zinc-400">Session Rate:</span>
-                <span className="text-white">
-                  {getOrNoData(info.sessionRate)}
-                </span>
+              <div>
+                <span className="text-zinc-400">Pricing Type</span>
+                <p className="text-white capitalize">
+                  {trainerData?.pricingType
+                    ? trainerData.pricingType.replace(/_/g, " ")
+                    : "N/A"}
+                </p>
+              </div>
+              <div>
+                <span className="text-zinc-400">Price Per Session</span>
+                <p className="text-white">
+                  {trainerData?.pricePerSession
+                    ? `${trainerData.currency || "EUR"} ${
+                        trainerData.pricePerSession
+                      }`
+                    : "Free consultation"}
+                </p>
+              </div>
+              <div>
+                <span className="text-zinc-400">Cancellation Policy</span>
+                <p className="text-white">
+                  {trainerData?.cancellationPolicy || "N/A"} hours
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Contact Information */}
-          <div className="bg-zinc-800 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+          {/* Contact & Location */}
+          <div className="bg-zinc-800/30 rounded-lg p-4 border border-zinc-700/50">
+            <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
               <Icon
                 icon="mdi:contact-mail"
                 width={16}
                 height={16}
                 className="text-[#FF6B00]"
               />
-              Contact Information
+              Contact & Location
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div className="flex justify-between">
-                <span className="text-zinc-400">Email:</span>
-                <span className="text-white">
-                  {getOrNoData(trainerData?.email)}
-                </span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+              <div>
+                <span className="text-zinc-400">Email</span>
+                <p className="text-white break-all">
+                  {getOrNoData(trainerData?.contactEmail)}
+                </p>
               </div>
-              <div className="flex justify-between">
-                <span className="text-zinc-400">Phone:</span>
-                <span className="text-white">
-                  {getOrNoData(trainerData?.phone)}
-                </span>
+              <div>
+                <span className="text-zinc-400">Phone</span>
+                <p className="text-white">
+                  {getOrNoData(trainerData?.contactPhone)}
+                </p>
               </div>
-              <div className="flex justify-between">
-                <span className="text-zinc-400">City:</span>
-                <span className="text-white">
-                  {getOrNoData(trainerData?.city)}
-                </span>
+              <div className="md:col-span-2">
+                <span className="text-zinc-400">Location</span>
+                <p className="text-white">
+                  {trainerData?.location
+                    ? `${trainerData.location.city}, ${trainerData.location.country}`
+                    : "No location data"}
+                </p>
               </div>
-              <div className="flex justify-between">
-                <span className="text-zinc-400">Country:</span>
-                <span className="text-white">
-                  {getOrNoData(trainerData?.country)}
-                </span>
+              <div>
+                <span className="text-zinc-400">Training Environment</span>
+                <p className="text-white capitalize">
+                  {trainerInfo?.trainingEnvironment
+                    ? mapTrainingEnvironmentToLabel(
+                        trainerInfo.trainingEnvironment
+                      )
+                    : "N/A"}
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Specialties */}
-          {info.specialties && info.specialties.length > 0 && (
-            <div className="bg-zinc-800 rounded-lg p-4">
-              <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+          {/* Specialties & Training Types */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Specialties */}
+            <div className="bg-zinc-800/30 rounded-lg p-4 border border-zinc-700/50">
+              <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
                 <Icon
-                  icon="mdi:star-circle"
+                  icon="mdi:medal"
                   width={16}
                   height={16}
                   className="text-[#FF6B00]"
                 />
                 Specialties
               </h4>
-              <div className="flex flex-wrap gap-2">
-                {formatSpecialties(info.specialties).map((specialty, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-zinc-700 text-zinc-300 rounded-full text-sm"
-                  >
-                    {specialty}
-                  </span>
-                ))}
-              </div>
+              {trainerData?.specialties &&
+              trainerData.specialties.length > 0 ? (
+                <div className="flex flex-wrap gap-1">
+                  {trainerData.specialties.map((specialty, index) => (
+                    <span
+                      key={index}
+                      className="px-2 py-1 bg-[#FF6B00]/20 border border-[#FF6B00]/30 text-[#FF6B00] rounded text-xs"
+                    >
+                      {mapSpecialtyToLabel(specialty.name || specialty)}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-zinc-400 text-sm">
+                  No specialties specified
+                </p>
+              )}
             </div>
-          )}
 
-          {/* Training Types */}
-          {info.trainingTypes && info.trainingTypes.length > 0 && (
-            <div className="bg-zinc-800 rounded-lg p-4">
-              <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+            {/* Training Types */}
+            <div className="bg-zinc-800/30 rounded-lg p-4 border border-zinc-700/50">
+              <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
                 <Icon
                   icon="mdi:dumbbell"
                   width={16}
@@ -289,23 +330,175 @@ export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
                 />
                 Training Types
               </h4>
-              <div className="flex flex-wrap gap-2">
-                {formatTrainingTypes(info.trainingTypes).map((type, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-zinc-700 text-zinc-300 rounded-full text-sm"
-                  >
-                    {type}
-                  </span>
-                ))}
+              {trainerData?.trainingTypes &&
+              trainerData.trainingTypes.length > 0 ? (
+                <div className="flex flex-wrap gap-1">
+                  {trainerData.trainingTypes.map((type, index) => (
+                    <span
+                      key={index}
+                      className="px-2 py-1 bg-[#FF6B00]/20 border border-[#FF6B00]/30 text-[#FF6B00] rounded text-xs"
+                    >
+                      {mapTrainingTypeToLabel(type.name || type)}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-zinc-400 text-sm">
+                  No training types specified
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Certifications & Languages */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Certifications */}
+            <div className="bg-zinc-800/30 rounded-lg p-4 border border-zinc-700/50">
+              <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
+                <Icon
+                  icon="mdi:certificate"
+                  width={16}
+                  height={16}
+                  className="text-[#FF6B00]"
+                />
+                Certifications
+              </h4>
+              {trainerData?.certifications &&
+              trainerData.certifications.length > 0 ? (
+                <div className="space-y-2">
+                  {trainerData.certifications.map((cert, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          cert.status === "approved"
+                            ? "bg-green-500"
+                            : cert.status === "pending"
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
+                        }`}
+                      ></div>
+                      <div className="flex-1">
+                        <span className="text-white text-sm font-medium">
+                          {cert.name}
+                        </span>
+                        {cert.issuer && (
+                          <p className="text-zinc-400 text-xs">
+                            Issued by: {cert.issuer}
+                          </p>
+                        )}
+                        {cert.expiryDate && (
+                          <p className="text-zinc-400 text-xs">
+                            Expires:{" "}
+                            {new Date(cert.expiryDate).toLocaleDateString()}
+                          </p>
+                        )}
+                        <span
+                          className={`inline-block px-2 py-1 text-xs rounded-full mt-1 ${
+                            cert.status === "approved"
+                              ? "bg-green-500/20 text-green-400"
+                              : cert.status === "pending"
+                              ? "bg-yellow-500/20 text-yellow-400"
+                              : "bg-red-500/20 text-red-400"
+                          }`}
+                        >
+                          {cert.status}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-zinc-400 text-sm">
+                  No certifications specified
+                </p>
+              )}
+            </div>
+
+            {/* Languages */}
+            <div className="bg-zinc-800/30 rounded-lg p-4 border border-zinc-700/50">
+              <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
+                <Icon
+                  icon="mdi:translate"
+                  width={16}
+                  height={16}
+                  className="text-[#FF6B00]"
+                />
+                Languages
+              </h4>
+              {trainerData?.languages && trainerData.languages.length > 0 ? (
+                <div className="flex flex-wrap gap-1">
+                  {trainerData.languages.map((language, index) => (
+                    <span
+                      key={index}
+                      className="px-2 py-1 bg-zinc-700/50 border border-zinc-600/50 text-zinc-300 rounded text-xs"
+                    >
+                      {language.name}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-zinc-400 text-sm">No languages specified</p>
+              )}
+            </div>
+          </div>
+
+          {/* Content Stats */}
+          <div className="bg-zinc-800/30 rounded-lg p-4 border border-zinc-700/50">
+            <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
+              <Icon
+                icon="mdi:library"
+                width={16}
+                height={16}
+                className="text-[#FF6B00]"
+              />
+              Content Library
+            </h4>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <span className="text-zinc-400">Exercise Library</span>
+                <p className="text-white">{exerciseCount} exercises</p>
+              </div>
+              <div>
+                <span className="text-zinc-400">Meal Library</span>
+                <p className="text-white">{mealCount} meals</p>
               </div>
             </div>
-          )}
+          </div>
 
-          {/* About */}
-          {info.bio && (
-            <div className="bg-zinc-800 rounded-lg p-4">
-              <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+          {/* Gallery Images */}
+          {trainerData?.galleryImages &&
+            trainerData.galleryImages.length > 0 && (
+              <div className="bg-zinc-800/30 rounded-lg p-4 border border-zinc-700/50">
+                <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
+                  <Icon
+                    icon="mdi:image-multiple"
+                    width={16}
+                    height={16}
+                    className="text-[#FF6B00]"
+                  />
+                  Gallery
+                </h4>
+                <div className="grid grid-cols-3 gap-2">
+                  {trainerData.galleryImages.slice(0, 6).map((image, index) => (
+                    <div
+                      key={index}
+                      className="aspect-square rounded-lg overflow-hidden bg-zinc-700"
+                    >
+                      <img
+                        src={image.url || image}
+                        alt={`Gallery ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          {/* About Me */}
+          {trainerData?.description && (
+            <div className="bg-zinc-800/30 rounded-lg p-4 border border-zinc-700/50">
+              <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
                 <Icon
                   icon="mdi:information"
                   width={16}
@@ -314,8 +507,8 @@ export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
                 />
                 About Me
               </h4>
-              <p className="text-sm text-zinc-300 leading-relaxed">
-                {info.bio}
+              <p className="text-white leading-relaxed text-sm">
+                {trainerData.description}
               </p>
             </div>
           )}

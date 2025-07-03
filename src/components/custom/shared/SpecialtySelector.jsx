@@ -50,7 +50,7 @@ export const SpecialtySelector = ({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header with title, description and counter */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between">
         <div>
           <h3 className="text-base font-medium text-gray-300 flex items-center">
             <Icon
@@ -67,7 +67,7 @@ export const SpecialtySelector = ({
         </div>
 
         {selectedSpecialties.length > 0 && (
-          <div className="px-3 py-1 bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-lg text-[#FF6B00] text-xs font-medium">
+          <div className="px-3 py-1 text-nowrap bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-lg text-[#FF6B00] text-xs font-medium">
             {selectedSpecialties.length} selected
           </div>
         )}

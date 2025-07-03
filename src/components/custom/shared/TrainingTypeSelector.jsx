@@ -38,24 +38,25 @@ export const TrainingTypeSelector = ({
         transition={{ duration: 0.3 }}
         className="space-y-5"
       >
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-base font-medium text-gray-300 flex items-center">
+        <div className="flex items-start justify-between">
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-white flex items-center gap-3">
+              <div className="w-1 h-6 bg-gradient-to-b from-[#FF6B00] to-[#FF8A00] rounded-full"></div>
               <Icon
                 icon="mdi:home-variant"
-                className="mr-2 text-[#FF6B00]"
-                width={18}
-                height={18}
+                className="text-[#FF6B00]"
+                width={20}
+                height={20}
               />
               Training Environment
             </h3>
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="text-sm text-zinc-400 leading-relaxed">
               Where do you prefer to conduct your training sessions?
             </p>
           </div>
 
           {selectedEnvironment && (
-            <div className="px-3 py-1 bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-lg text-[#FF6B00] text-xs font-medium">
+            <div className="px-3 py-1.5 bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-lg text-[#FF6B00] text-xs font-medium backdrop-blur-sm">
               {TRAINING_ENVIRONMENTS.find(
                 (env) => env.id === selectedEnvironment
               )?.label || "Selected"}
@@ -63,12 +64,13 @@ export const TrainingTypeSelector = ({
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {TRAINING_ENVIRONMENTS.map((env) => (
             <motion.div
               key={env.id}
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
               className="h-full"
             >
               <Button
@@ -77,69 +79,86 @@ export const TrainingTypeSelector = ({
                 }
                 type="button"
                 onClick={() => onEnvironmentChange(env.id)}
-                className={`w-full h-full rounded-xl text-left transition-all duration-200 p-0 overflow-hidden ${
+                className={`w-full h-full rounded-2xl text-left transition-all duration-300 p-0 overflow-hidden border-2 group ${
                   selectedEnvironment === env.id
-                    ? "border-[#FF6B00]/40 shadow-lg shadow-[#FF6B00]/5"
-                    : "border-[#333] hover:border-[#444]"
+                    ? "border-[#FF6B00]/50 shadow-xl shadow-[#FF6B00]/10 bg-gradient-to-br from-[#FF6B00]/5 to-transparent"
+                    : "border-zinc-800/50 hover:border-zinc-700/50 bg-gradient-to-br from-zinc-900/40 via-zinc-900/30 to-zinc-900/40 backdrop-blur-sm"
                 }`}
               >
-                <div className={`w-full h-full flex flex-col`}>
+                <div className="w-full h-full flex flex-col relative">
+                  {/* Subtle gradient overlay */}
+                  {selectedEnvironment === env.id && (
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B00]/3 via-transparent to-transparent pointer-events-none" />
+                  )}
+
                   {/* Header */}
-                  <div
-                    className={`p-4 flex items-center gap-3 ${
-                      selectedEnvironment === env.id
-                        ? "bg-[#FF6B00]/10"
-                        : "bg-[rgba(35,35,35,0.7)]"
-                    }`}
-                  >
+                  <div className="relative z-10 p-6 flex items-center gap-4">
                     <div
-                      className={`w-10 h-10 flex items-center justify-center rounded-full ${
+                      className={`w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-300 ${
                         selectedEnvironment === env.id
-                          ? "bg-[#FF6B00]/20"
-                          : "bg-[rgba(255,255,255,0.05)]"
+                          ? "bg-[#FF6B00]/20 border border-[#FF6B00]/30"
+                          : "bg-zinc-800/50 border border-zinc-700/50 group-hover:bg-zinc-700/50"
                       }`}
                     >
                       <Icon
                         icon={env.icon}
-                        className={`text-2xl ${
+                        className={`text-2xl transition-colors duration-300 ${
                           selectedEnvironment === env.id
                             ? "text-[#FF6B00]"
-                            : "text-gray-400"
+                            : "text-zinc-400 group-hover:text-zinc-300"
                         }`}
                       />
                     </div>
-                    <span
-                      className={`font-medium text-base ${
-                        selectedEnvironment === env.id
-                          ? "text-[#FF6B00]"
-                          : "text-gray-300"
-                      }`}
-                    >
-                      {env.label}
-                    </span>
+
+                    <div className="flex-1 min-w-0">
+                      <h4
+                        className={`font-semibold text-base transition-colors duration-300 ${
+                          selectedEnvironment === env.id
+                            ? "text-[#FF6B00]"
+                            : "text-white group-hover:text-zinc-100"
+                        }`}
+                      >
+                        {env.label}
+                      </h4>
+                    </div>
 
                     {selectedEnvironment === env.id && (
-                      <Icon
-                        icon="mdi:check-circle"
-                        className="ml-auto text-[#FF6B00]"
-                        width={20}
-                        height={20}
-                      />
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 500,
+                          damping: 30,
+                        }}
+                      >
+                        <Icon
+                          icon="mdi:check-circle"
+                          className="text-[#FF6B00]"
+                          width={24}
+                          height={24}
+                        />
+                      </motion.div>
                     )}
                   </div>
 
                   {/* Description */}
-                  <div
-                    className={`p-4 flex-grow ${
-                      selectedEnvironment === env.id
-                        ? "bg-[#FF6B00]/5"
-                        : "bg-[rgba(30,30,30,0.5)]"
-                    }`}
-                  >
-                    <p className="text-sm text-gray-400 line-clamp-3">
+                  <div className="relative z-10 px-6 pb-6 flex-grow">
+                    <p
+                      className={`text-sm leading-relaxed transition-colors duration-300 ${
+                        selectedEnvironment === env.id
+                          ? "text-zinc-300"
+                          : "text-zinc-400 group-hover:text-zinc-300"
+                      }`}
+                    >
                       {env.description}
                     </p>
                   </div>
+
+                  {/* Bottom accent line for selected */}
+                  {selectedEnvironment === env.id && (
+                    <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#FF6B00]/30 to-transparent" />
+                  )}
                 </div>
               </Button>
             </motion.div>
@@ -168,25 +187,26 @@ export const TrainingTypeSelector = ({
         transition={{ duration: 0.3, delay: 0.1 }}
         className="space-y-5"
       >
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-base font-medium text-gray-300 flex items-center">
+        <div className="flex items-start justify-between">
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-white flex items-center gap-3">
+              <div className="w-1 h-6 bg-gradient-to-b from-[#FF6B00] to-[#FF8A00] rounded-full"></div>
               <Icon
                 icon="mdi:dumbbell"
-                className="mr-2 text-[#FF6B00]"
-                width={18}
-                height={18}
+                className="text-[#FF6B00]"
+                width={20}
+                height={20}
               />
               Training Types
             </h3>
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="text-sm text-zinc-400 leading-relaxed">
               Select all types of training you offer (multiple selections
               allowed)
             </p>
           </div>
 
           {selectedTypes.length > 0 && (
-            <div className="px-3 py-1 bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-lg text-[#FF6B00] text-xs font-medium">
+            <div className="px-3 py-1.5 bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-lg text-[#FF6B00] text-xs font-medium backdrop-blur-sm">
               {selectedTypes.length} selected
             </div>
           )}
