@@ -83,7 +83,7 @@ export const ContactAndLocationStep = ({
             : "How trainers can reach you"
         }
         icon="mdi:contact-mail"
-        className="mb-6 sm:mb-8"
+        className="mb-4 sm:mb-6"
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <FormField
@@ -119,7 +119,7 @@ export const ContactAndLocationStep = ({
             : "Where you're based and looking for trainers"
         }
         icon="mdi:map-marker"
-        className={userType === "trainer" ? "mb-6 sm:mb-8" : "mb-0"}
+        className={userType === "trainer" ? "mb-4 sm:mb-6" : "mb-0"}
       >
         <div className="space-y-4 sm:space-y-5">
           <FormField

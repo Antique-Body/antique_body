@@ -86,7 +86,7 @@ export const BasicInfoStep = ({
         title="Personal Information"
         description="Basic information about yourself"
         icon="mdi:account"
-        className="mb-6 sm:mb-8"
+        className="mb-4 sm:mb-6"
       >
         <div className="space-y-4 sm:space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -148,7 +148,7 @@ export const BasicInfoStep = ({
           title="Physical Information"
           description="Details about your physical characteristics"
           icon="mdi:human-male-height"
-          className="mb-6 sm:mb-8"
+          className="mb-4 sm:mb-6"
         >
           <div className="space-y-4 sm:space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -210,7 +210,7 @@ export const BasicInfoStep = ({
           title="Fitness Experience"
           description="Your background in fitness and exercise"
           icon="mdi:dumbbell"
-          className="mb-6 sm:mb-8"
+          className="mb-4 sm:mb-6"
         >
           <div className="space-y-4 sm:space-y-5">
             <FormField
@@ -248,7 +248,7 @@ export const BasicInfoStep = ({
           title="Professional Information"
           description="Your training background and expertise"
           icon="mdi:badge-account"
-          className="mb-6 sm:mb-8"
+          className="mb-4 sm:mb-6"
         >
           <div className="space-y-4 sm:space-y-5">
             <FormField

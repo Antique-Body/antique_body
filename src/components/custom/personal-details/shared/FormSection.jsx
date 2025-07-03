@@ -2,6 +2,8 @@
 import { Icon } from "@iconify/react";
 import { useState } from "react";
 
+import { Card } from "@/components/common/Card";
+
 /**
  * Modern form section component with elegant card design
  * Clean content with beautiful container styling
@@ -18,20 +20,8 @@ export const FormSection = ({
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   return (
-    <div
-      className={`
-        relative overflow-hidden rounded-2xl border border-zinc-800/50 
-        bg-gradient-to-br from-zinc-900/40 via-zinc-900/30 to-zinc-900/40
-        backdrop-blur-sm shadow-lg shadow-black/20
-        transition-all duration-300 hover:border-zinc-700/50
-        ${className}
-      `}
-    >
-      {/* Subtle gradient overlay for depth */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B00]/3 via-transparent to-transparent pointer-events-none" />
-
-      {/* Main content container */}
-      <div className="relative z-10 p-6 sm:p-8">
+    <Card variant="formSection" className={className}>
+      <div className="p-6 sm:p-8 w-full">
         {/* Modern section header */}
         {(title || description) && (
           <div
@@ -78,9 +68,6 @@ export const FormSection = ({
           <div className="space-y-4 sm:space-y-5">{children}</div>
         </div>
       </div>
-
-      {/* Subtle bottom border accent */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#FF6B00]/20 to-transparent" />
-    </div>
+    </Card>
   );
 };

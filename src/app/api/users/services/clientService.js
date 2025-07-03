@@ -264,21 +264,39 @@ async function getClientProfileBasic(userId) {
       lastName: true,
       profileImage: true,
       primaryGoal: true,
+      secondaryGoal: true,
+      goalDescription: true,
       experienceLevel: true,
+      height: true,
+      weight: true,
+      gender: true,
+      dateOfBirth: true,
+      email: true,
+      phone: true,
+      description: true,
+      medicalConditions: true,
+      allergies: true,
+      previousActivities: true,
+      createdAt: true,
       clientInfo: {
         select: {
           id: true,
           totalSessions: true,
+          createdAt: true,
         },
       },
-      // Empty arrays for compatibility
+      location: {
+        select: {
+          city: true,
+          country: true,
+          state: true,
+        },
+      },
       languages: {
         select: { name: true },
-        take: 0, // We don't show languages in basic view
       },
       preferredActivities: {
         select: { name: true },
-        take: 0, // We don't show activities in basic view
       },
     },
   });

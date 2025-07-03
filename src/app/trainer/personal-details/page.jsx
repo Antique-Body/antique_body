@@ -74,12 +74,12 @@ const TrainerRegistration = () => {
       <div className="relative z-10 min-h-screen">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6 sm:mb-8">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
             <BrandLogo />
           </div>
 
           {/* Enhanced Steps Design - Mobile Optimized */}
-          <div className="mb-8 sm:mb-10">
+          <div className="mb-4 sm:mb-6">
             {/* Progress Card */}
             <div className="relative overflow-hidden rounded-xl border border-zinc-800/50 bg-gradient-to-r from-zinc-900/40 to-zinc-900/30 backdrop-blur-sm p-4 sm:p-6 lg:p-8">
               {/* Subtle gradient overlay */}
@@ -88,7 +88,7 @@ const TrainerRegistration = () => {
               {/* Content */}
               <div className="relative z-10">
                 {/* Steps with Icons and Connection Lines - Responsive */}
-                <div className="flex items-center justify-center mb-6 sm:mb-8 lg:mb-10">
+                <div className="flex items-center justify-center mb-4 sm:mb-6 lg:mb-6">
                   <div className="flex items-center gap-2 sm:gap-4 lg:gap-6">
                     {steps.map((s, index) => (
                       <div key={s.id} className="flex items-center">
@@ -197,7 +197,7 @@ const TrainerRegistration = () => {
             />
 
             {/* Navigation */}
-            <div className="flex items-center justify-between gap-4 pt-6 border-t border-zinc-800/50">
+            <div className="flex items-center justify-between gap-4 border-t border-zinc-800/50">
               {/* Back button */}
               {step > 1 ? (
                 <Button
