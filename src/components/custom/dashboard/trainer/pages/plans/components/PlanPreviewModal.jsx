@@ -79,15 +79,72 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
             ? keyFeatures
             : ["No key features specified."],
       };
+      // Weekly schedule mapping for PDF
+      let weeklySchedule = {};
+      if (isNutrition) {
+        // Nutrition: map days by their real name (e.g. Monday, Day 1, ...)
+        (days || plan.days || []).forEach((day) => {
+          weeklySchedule[day.name || day.day] = {
+            title: day.name || day.day,
+            meals: (day.meals || []).flatMap(
+              (meal) =>
+                meal.options?.map((option) => ({
+                  name: meal.name,
+                  type: meal.type || "Meal",
+                  time: meal.time || "",
+                  calories: option.calories || 0,
+                  protein: option.protein || 0,
+                  carbs: option.carbs || 0,
+                  fat: option.fat || 0,
+                  description: option.description || "",
+                  ingredients: option.ingredients || [],
+                })) || []
+            ),
+            isRestDay: day.isRestDay,
+            description: day.description,
+          };
+        });
+      } else {
+        // Training: map schedule by day name
+        (schedule || plan.schedule || []).forEach((day, idx) => {
+          weeklySchedule[day.day?.toLowerCase() || `day${idx + 1}`] = {
+            title: day.name || day.day || `Day ${idx + 1}`,
+            exercises: (day.exercises || []).map((ex) => ({
+              name: ex.name,
+              sets: ex.sets,
+              reps: ex.reps,
+              rest: ex.rest,
+              notes: ex.notes,
+            })),
+            description: day.description,
+          };
+        });
+      }
       const pdfData = {
         title,
         description,
+        planType: isNutrition ? "nutrition" : "training",
         duration,
         createdAt: formattedDate,
-        image,
+        image: image || plan.coverImage,
         keyFeatures,
         schedule,
-        overview, // Add overview property
+        timeline,
+        features,
+        overview,
+        weeklySchedule,
+        // Nutrition
+        nutritionInfo,
+        days: days || plan.days,
+        mealTypes: plan.mealTypes,
+        supplementRecommendations,
+        cookingTime,
+        targetGoal: plan.targetGoal,
+        // Training
+        trainingType,
+        sessionsPerWeek,
+        sessionFormat,
+        difficultyLevel,
       };
       const success = await generatePlanPDF(pdfData);
       if (success) {

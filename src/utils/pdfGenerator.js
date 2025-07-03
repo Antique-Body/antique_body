@@ -86,6 +86,31 @@ export const generatePlanPDF = async (planData) => {
     doc.setFillColor(255, 107, 0);
     doc.rect(0, pageHeight - 15, pageWidth, 3, "F");
 
+    // Add cover image if exists
+    if (planData.image) {
+      try {
+        const img = await new Promise((resolve, reject) => {
+          const image = new window.Image();
+          image.crossOrigin = "Anonymous";
+          image.onload = () => resolve(image);
+          image.onerror = reject;
+          image.src = planData.image;
+        });
+        doc.addImage(
+          img,
+          "JPEG",
+          30,
+          50,
+          pageWidth - 60,
+          40,
+          undefined,
+          "FAST"
+        );
+      } catch (e) {
+        console.error("Error adding image:", e);
+      }
+    }
+
     // Add Antique Body logo
     doc.setFontSize(28);
     doc.setTextColor(255, 107, 0);
@@ -115,18 +140,140 @@ export const generatePlanPDF = async (planData) => {
     // Add title with bigger font size and centered
     doc.setFontSize(32);
     doc.setTextColor(40, 40, 40);
-    doc.text(title, pageWidth / 2, 80, { align: "center" });
+    doc.text(title, pageWidth / 2, 100, { align: "center" });
 
     // Add a decorative line below title
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.5);
-    doc.line(50, 90, pageWidth - 50, 90);
+    doc.line(50, 110, pageWidth - 50, 110);
 
     // Description with no background
     doc.setTextColor(80, 80, 80);
     doc.setFont("helvetica", "italic");
     doc.setFontSize(11);
-    yPos = addWrappedText(description, 30, 110, pageWidth - 60, 6);
+    yPos = addWrappedText(description, 30, 120, pageWidth - 60, 6);
+
+    // Add timeline if exists
+    if (planData.timeline && planData.timeline.length > 0) {
+      yPos += 10;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.setTextColor(255, 107, 0);
+      doc.text("Timeline", 30, yPos);
+      yPos += 7;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(60, 60, 60);
+      planData.timeline.forEach((block) => {
+        doc.setFont("helvetica", "bold");
+        doc.text(`${block.week}: ${block.title}`, 35, yPos);
+        yPos += 5;
+        doc.setFont("helvetica", "normal");
+        yPos = addWrappedText(block.description, 40, yPos, pageWidth - 80, 5);
+        yPos += 2;
+      });
+    }
+
+    // Add features grid if exists
+    if (planData.features && typeof planData.features === "object") {
+      yPos += 8;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.setTextColor(255, 107, 0);
+      doc.text("Features", 30, yPos);
+      yPos += 7;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(60, 60, 60);
+      const featuresArr = Object.entries(planData.features)
+        .filter(([_k, v]) => v)
+        .map(([_k, _]) =>
+          typeof _k === "string"
+            ? _k
+                .replace(/([A-Z])/g, " $1")
+                .replace(/^./, (str) => str.toUpperCase())
+            : String(_k)
+        );
+      for (let i = 0; i < featuresArr.length; i++) {
+        doc.circle(33, yPos + 2, 1.5, "F");
+        doc.text(featuresArr[i], 38, yPos + 3);
+        yPos += 7;
+      }
+    }
+
+    // Add nutrition info table if exists
+    if (isNutrition && planData.nutritionInfo) {
+      yPos += 8;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.setTextColor(34, 197, 94);
+      doc.text("Nutrition Info", 30, yPos);
+      yPos += 7;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(60, 60, 60);
+      autoTable(doc, {
+        startY: yPos,
+        head: [["Calories", "Protein (g)", "Carbs (g)", "Fat (g)"]],
+        body: [
+          [
+            planData.nutritionInfo.calories || "-",
+            planData.nutritionInfo.protein || "-",
+            planData.nutritionInfo.carbs || "-",
+            planData.nutritionInfo.fats || "-",
+          ],
+        ],
+        theme: "grid",
+        headStyles: {
+          fillColor: [34, 197, 94],
+          textColor: [255, 255, 255],
+          fontStyle: "bold",
+          halign: "center",
+        },
+        styles: {
+          cellPadding: 4,
+          fontSize: 10,
+          textColor: [60, 60, 60],
+        },
+        margin: { left: 30, right: 30 },
+      });
+      yPos = doc.lastAutoTable.finalY + 5;
+    }
+
+    // Add supplement recommendations, cooking time, target goal
+    if (isNutrition && planData.supplementRecommendations) {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.setTextColor(34, 197, 94);
+      doc.text("Supplements: ", 30, yPos);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(60, 60, 60);
+      doc.text(planData.supplementRecommendations, 60, yPos);
+      yPos += 7;
+    }
+    if (isNutrition && planData.cookingTime) {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.setTextColor(34, 197, 94);
+      doc.text("Cooking Time: ", 30, yPos);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(60, 60, 60);
+      doc.text(planData.cookingTime, 60, yPos);
+      yPos += 7;
+    }
+    if (planData.targetGoal) {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.setTextColor(255, 107, 0);
+      doc.text("Target Goal: ", 30, yPos);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(60, 60, 60);
+      doc.text(planData.targetGoal, 60, yPos);
+      yPos += 7;
+    }
 
     // Add decorative line below description
     doc.setDrawColor(220, 220, 220);
@@ -289,154 +436,129 @@ export const generatePlanPDF = async (planData) => {
     yPos += 15;
 
     // For each day in the weekly schedule
-    if (weeklySchedule) {
-      const days = [
-        "monday",
-        "tuesday",
-        "wednesday",
-        "thursday",
-        "friday",
-        "saturday",
-        "sunday",
-      ];
-
-      for (const day of days) {
-        if (weeklySchedule[day]) {
-          // Add a new page if we're running out of space
-          if (yPos > pageHeight - 60) {
-            doc.addPage();
-            addPageHeader();
-            yPos = 30;
-          }
-
-          const daySchedule = weeklySchedule[day];
-          const dayTitle =
-            daySchedule.title ||
-            `${day.charAt(0).toUpperCase() + day.slice(1)}`;
-
-          // Day header - removed background color, just color text
-          if (isNutrition) {
-            doc.setTextColor(34, 197, 94);
+    if (weeklySchedule && Object.keys(weeklySchedule).length > 0) {
+      for (const dayKey of Object.keys(weeklySchedule)) {
+        const daySchedule = weeklySchedule[dayKey];
+        // Add a new page if we're running out of space
+        if (yPos > pageHeight - 60) {
+          doc.addPage();
+          addPageHeader();
+          yPos = 30;
+        }
+        const dayTitle = daySchedule.title || dayKey;
+        // Day header - removed background color, just color text
+        if (isNutrition) {
+          doc.setTextColor(34, 197, 94);
+        } else {
+          doc.setTextColor(30, 64, 158);
+        }
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.text(dayTitle, 15, yPos);
+        // Add thin underline in plan color
+        doc.setDrawColor(
+          isNutrition ? 34 : 30,
+          isNutrition ? 197 : 64,
+          isNutrition ? 94 : 158
+        );
+        doc.setLineWidth(0.3);
+        const titleWidth = doc.getTextWidth(dayTitle);
+        doc.line(15, yPos + 2, 15 + titleWidth, yPos + 2);
+        yPos += 10;
+        if (isNutrition) {
+          // Render nutrition meals using a clean table
+          if (daySchedule.meals && daySchedule.meals.length > 0) {
+            const mealsData = daySchedule.meals.map((meal) => [
+              meal.name,
+              meal.type.charAt(0).toUpperCase() + meal.type.slice(1),
+              `${meal.time}`,
+              `${meal.calories} kcal`,
+              `P: ${meal.protein}g | C: ${meal.carbs}g | F: ${meal.fat}g`,
+            ]);
+            autoTable(doc, {
+              startY: yPos,
+              head: [["Meal", "Type", "Time", "Calories", "Macros"]],
+              body: mealsData,
+              theme: "grid",
+              headStyles: {
+                fillColor: [34, 197, 94],
+                textColor: [255, 255, 255],
+                fontStyle: "bold",
+                halign: "center",
+              },
+              alternateRowStyles: {
+                fillColor: [245, 252, 245],
+              },
+              styles: {
+                cellPadding: 4,
+                fontSize: 9,
+                lineColor: [200, 200, 200],
+                lineWidth: 0.1,
+                textColor: [60, 60, 60],
+              },
+              margin: { left: 15, right: 15 },
+              columnStyles: {
+                0: { fontStyle: "bold" },
+                1: { halign: "center" },
+                2: { halign: "center" },
+                3: { halign: "center" },
+                4: { halign: "center" },
+              },
+            });
+            yPos = doc.lastAutoTable.finalY + 10;
           } else {
-            doc.setTextColor(30, 64, 158);
+            doc.setFont("helvetica", "italic");
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text("No meals scheduled for this day.", 20, yPos);
+            yPos += 8;
           }
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(12);
-          doc.text(dayTitle, 15, yPos);
-
-          // Add thin underline in plan color
-          doc.setDrawColor(
-            isNutrition ? 34 : 30,
-            isNutrition ? 197 : 64,
-            isNutrition ? 94 : 158
-          );
-          doc.setLineWidth(0.3);
-          const titleWidth = doc.getTextWidth(dayTitle);
-          doc.line(15, yPos + 2, 15 + titleWidth, yPos + 2);
-
-          yPos += 10;
-
-          if (isNutrition) {
-            // Render nutrition meals using a clean table
-            if (daySchedule.meals && daySchedule.meals.length > 0) {
-              const mealsData = daySchedule.meals.map((meal) => [
-                meal.name,
-                meal.type.charAt(0).toUpperCase() + meal.type.slice(1),
-                `${meal.time}`,
-                `${meal.calories} kcal`,
-                `P: ${meal.protein}g | C: ${meal.carbs}g | F: ${meal.fat}g`,
-              ]);
-
-              autoTable(doc, {
-                startY: yPos,
-                head: [["Meal", "Type", "Time", "Calories", "Macros"]],
-                body: mealsData,
-                theme: "grid",
-                headStyles: {
-                  fillColor: [34, 197, 94],
-                  textColor: [255, 255, 255],
-                  fontStyle: "bold",
-                  halign: "center",
-                },
-                alternateRowStyles: {
-                  fillColor: [245, 252, 245],
-                },
-                styles: {
-                  cellPadding: 4,
-                  fontSize: 9,
-                  lineColor: [200, 200, 200],
-                  lineWidth: 0.1,
-                  textColor: [60, 60, 60],
-                },
-                margin: { left: 15, right: 15 },
-                columnStyles: {
-                  0: { fontStyle: "bold" },
-                  1: { halign: "center" },
-                  2: { halign: "center" },
-                  3: { halign: "center" },
-                  4: { halign: "center" },
-                },
-              });
-
-              yPos = doc.lastAutoTable.finalY + 10;
-            } else {
-              doc.setFont("helvetica", "italic");
-              doc.setFontSize(10);
-              doc.setTextColor(100, 100, 100);
-              doc.text("No meals scheduled for this day.", 20, yPos);
-              yPos += 8;
-            }
+        } else {
+          // Render training exercises using a clean table
+          if (daySchedule.exercises && daySchedule.exercises.length > 0) {
+            const exercisesData = daySchedule.exercises.map((exercise, idx) => [
+              `${idx + 1}. ${exercise.name}`,
+              `${exercise.sets} sets`,
+              `${exercise.reps} reps`,
+              `${exercise.rest}`,
+              exercise.notes || "-",
+            ]);
+            autoTable(doc, {
+              startY: yPos,
+              head: [["Exercise", "Sets", "Reps", "Rest", "Notes"]],
+              body: exercisesData,
+              theme: "grid",
+              headStyles: {
+                fillColor: [30, 64, 158],
+                textColor: [255, 255, 255],
+                fontStyle: "bold",
+                halign: "center",
+              },
+              alternateRowStyles: {
+                fillColor: [240, 245, 252],
+              },
+              styles: {
+                cellPadding: 4,
+                fontSize: 9,
+                lineColor: [200, 200, 200],
+                lineWidth: 0.1,
+                textColor: [60, 60, 60],
+              },
+              columnStyles: {
+                0: { fontStyle: "bold" },
+                1: { halign: "center" },
+                2: { halign: "center" },
+                3: { halign: "center" },
+              },
+              margin: { left: 15, right: 15 },
+            });
+            yPos = doc.lastAutoTable.finalY + 10;
           } else {
-            // Render training exercises using a clean table
-            if (daySchedule.exercises && daySchedule.exercises.length > 0) {
-              const exercisesData = daySchedule.exercises.map(
-                (exercise, idx) => [
-                  `${idx + 1}. ${exercise.name}`,
-                  `${exercise.sets} sets`,
-                  `${exercise.reps} reps`,
-                  `${exercise.rest}`,
-                  exercise.notes || "-",
-                ]
-              );
-
-              autoTable(doc, {
-                startY: yPos,
-                head: [["Exercise", "Sets", "Reps", "Rest", "Notes"]],
-                body: exercisesData,
-                theme: "grid",
-                headStyles: {
-                  fillColor: [30, 64, 158],
-                  textColor: [255, 255, 255],
-                  fontStyle: "bold",
-                  halign: "center",
-                },
-                alternateRowStyles: {
-                  fillColor: [240, 245, 252],
-                },
-                styles: {
-                  cellPadding: 4,
-                  fontSize: 9,
-                  lineColor: [200, 200, 200],
-                  lineWidth: 0.1,
-                  textColor: [60, 60, 60],
-                },
-                columnStyles: {
-                  0: { fontStyle: "bold" },
-                  1: { halign: "center" },
-                  2: { halign: "center" },
-                  3: { halign: "center" },
-                },
-                margin: { left: 15, right: 15 },
-              });
-
-              yPos = doc.lastAutoTable.finalY + 10;
-            } else {
-              doc.setFont("helvetica", "italic");
-              doc.setFontSize(10);
-              doc.setTextColor(100, 100, 100);
-              doc.text("No exercises scheduled for this day.", 20, yPos);
-              yPos += 8;
-            }
+            doc.setFont("helvetica", "italic");
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text("No exercises scheduled for this day.", 20, yPos);
+            yPos += 8;
           }
         }
       }
