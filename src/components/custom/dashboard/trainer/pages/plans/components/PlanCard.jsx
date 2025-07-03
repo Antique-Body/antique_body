@@ -30,13 +30,11 @@ export const PlanCard = ({
   description,
   coverImage,
   createdAt,
-  planType,
   type,
   duration,
   clientCount = 0,
   price,
   editUrl,
-  weeklySchedule,
   index = 0,
   onDelete,
 }) => {
@@ -52,9 +50,7 @@ export const PlanCard = ({
     day: "numeric",
   });
 
-  // Use planType or type - handle both for backward compatibility
-  const currentPlanType = planType || type;
-  const isNutrition = currentPlanType === "nutrition";
+  const isNutrition = type === "nutrition";
 
   // Animation variants
   const cardVariants = {
@@ -91,7 +87,7 @@ export const PlanCard = ({
   const fetchPlanDetailsHandler = async () => {
     try {
       setLoadingPlanDetails(true);
-      const planData = await fetchPlanDetails(id, currentPlanType);
+      const planData = await fetchPlanDetails(id, type);
       // Transform the data to match what PlanPreviewModal expects
       const transformedData = {
         id: planData.id,
@@ -99,25 +95,26 @@ export const PlanCard = ({
         description: planData.description,
         image: planData.coverImage,
         createdAt: planData.createdAt,
-        planType: planData.type,
         duration: planData.duration
           ? `${planData.duration} ${planData.durationType || "weeks"}`
           : "Not specified",
         clientCount: planData.clientCount || 0,
         price: planData.price,
-        weeklySchedule: planData.schedule || planData.weeklySchedule || [],
         keyFeatures: planData.keyFeatures || [],
         schedule: planData.schedule || [],
+        timeline: planData.timeline || [],
         editUrl,
       };
       if (isNutrition) {
         transformedData.nutritionInfo = planData.nutritionInfo;
         transformedData.mealTypes = planData.mealTypes;
-        transformedData.dietaryRestrictions = planData.dietaryRestrictions;
         transformedData.supplementRecommendations =
           planData.supplementRecommendations;
         transformedData.cookingTime = planData.cookingTime;
-        transformedData.difficultyLevel = planData.difficultyLevel;
+        if (planData.days) {
+          transformedData.days = planData.days;
+        }
+        transformedData.targetGoal = planData.targetGoal;
       } else {
         transformedData.trainingType = planData.trainingType;
         transformedData.sessionsPerWeek = planData.sessionsPerWeek;
@@ -135,11 +132,9 @@ export const PlanCard = ({
         description,
         image: coverImage,
         createdAt,
-        planType: currentPlanType,
         duration,
         clientCount,
         price,
-        weeklySchedule,
         keyFeatures: [],
         schedule: [],
         editUrl,
@@ -315,6 +310,8 @@ export const PlanCard = ({
         plan={detailedPlanData}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        days={detailedPlanData?.days}
+        type={type}
       />
 
       {/* Delete Confirm Modal */}

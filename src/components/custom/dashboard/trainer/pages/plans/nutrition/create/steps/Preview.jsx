@@ -5,8 +5,6 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
 
-import { Button } from "@/components/common/Button";
-
 export const Preview = ({ data }) => {
   const [activeTab, setActiveTab] = useState("overview");
 
