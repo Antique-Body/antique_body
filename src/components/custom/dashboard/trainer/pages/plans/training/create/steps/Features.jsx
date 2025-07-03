@@ -131,17 +131,19 @@ export const Features = ({ data, onChange }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center"
       >
         <h2 className="text-xl font-bold text-white mb-2">Plan Features</h2>
-        <p className="text-gray-400">Define what makes your training plan special</p>
+        <p className="text-gray-400">
+          Define what makes your training plan special
+        </p>
       </motion.div>
 
       {/* Simple Key Benefits */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
@@ -151,11 +153,11 @@ export const Features = ({ data, onChange }) => {
           <Icon icon="mdi:star" className="w-5 h-5 text-[#FF6B00]" />
           Key Benefits
         </h3>
-        
+
         <div className="space-y-3">
           {data.keyFeatures.map((feature, index) => (
-            <motion.div 
-              key={index} 
+            <motion.div
+              key={index}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
@@ -180,7 +182,7 @@ export const Features = ({ data, onChange }) => {
               )}
             </motion.div>
           ))}
-          
+
           {data.keyFeatures.length < 5 && (
             <button
               onClick={handleAddKeyFeature}
@@ -194,7 +196,7 @@ export const Features = ({ data, onChange }) => {
       </motion.div>
 
       {/* Simple Timeline */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
@@ -204,7 +206,7 @@ export const Features = ({ data, onChange }) => {
           <Icon icon="mdi:timeline-clock" className="w-5 h-5 text-purple-400" />
           Training Phases
         </h3>
-        
+
         <div className="space-y-4">
           {data.timeline.map((block, index) => (
             <motion.div
@@ -218,29 +220,35 @@ export const Features = ({ data, onChange }) => {
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-[#FF6B00] to-purple-500 flex items-center justify-center font-semibold text-white text-sm flex-shrink-0">
                   {index + 1}
                 </div>
-                
+
                 <div className="flex-1 space-y-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <FormField
                       label="Duration"
                       placeholder="Week 1-4"
                       value={block.week}
-                      onChange={(e) => handleTimelineChange(index, "week", e.target.value)}
+                      onChange={(e) =>
+                        handleTimelineChange(index, "week", e.target.value)
+                      }
                     />
                     <FormField
                       label="Phase Name"
                       placeholder="Foundation Phase"
                       value={block.title}
-                      onChange={(e) => handleTimelineChange(index, "title", e.target.value)}
+                      onChange={(e) =>
+                        handleTimelineChange(index, "title", e.target.value)
+                      }
                     />
                   </div>
-                  
+
                   <FormField
                     label="Description"
                     type="textarea"
                     placeholder="What happens in this phase..."
                     value={block.description}
-                    onChange={(e) => handleTimelineChange(index, "description", e.target.value)}
+                    onChange={(e) =>
+                      handleTimelineChange(index, "description", e.target.value)
+                    }
                     rows={2}
                   />
                 </div>
@@ -256,7 +264,7 @@ export const Features = ({ data, onChange }) => {
               </div>
             </motion.div>
           ))}
-          
+
           {data.timeline.length < 4 && (
             <button
               onClick={handleAddTimelineBlock}
@@ -270,7 +278,7 @@ export const Features = ({ data, onChange }) => {
       </motion.div>
 
       {/* Simplified Additional Services */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
@@ -280,62 +288,75 @@ export const Features = ({ data, onChange }) => {
           <Icon icon="mdi:gift" className="w-5 h-5 text-green-400" />
           Additional Services
         </h3>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {FEATURE_OPTIONS.map((feature) => (
-            <motion.label
-              key={feature.key}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className={`relative p-4 rounded-lg border cursor-pointer transition-all ${
-                data.features[feature.key]
-                  ? "bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/30"
-                  : "bg-[#222] border-[#333] hover:border-[#444]"
-              }`}
-            >
-              <div className="flex items-center gap-3">
+          {FEATURE_OPTIONS.map((feature) => {
+            const checked = data.features[feature.key];
+            return (
+              <motion.button
+                key={feature.key}
+                type="button"
+                onClick={() => handleFeatureToggle(feature.key)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={
+                  `relative p-4 rounded-lg border w-full text-left transition-all duration-200 flex items-center gap-4 ` +
+                  (checked
+                    ? "bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/60 shadow-lg"
+                    : "bg-[#222] border-[#333] hover:border-[#444]") +
+                  " focus:outline-none"
+                }
+                style={{ minHeight: 80 }}
+              >
                 <div
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                    data.features[feature.key] 
-                      ? "bg-green-500/20 text-green-400" 
-                      : "bg-[#333] text-gray-400"
-                  }`}
+                  className={
+                    `w-12 h-12 rounded-lg flex items-center justify-center transition-all duration-200 ` +
+                    (checked
+                      ? "bg-green-500/20 text-green-400"
+                      : "bg-[#333] text-gray-400")
+                  }
                 >
-                  <Icon icon={feature.icon} className="w-5 h-5" />
+                  <Icon icon={feature.icon} className="w-6 h-6" />
                 </div>
-                
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <h4 className={`font-medium text-sm ${
-                      data.features[feature.key] ? "text-green-300" : "text-white"
-                    }`}>
+                    <h4
+                      className={`font-medium text-base ${
+                        checked ? "text-green-300" : "text-white"
+                      }`}
+                    >
                       {feature.label}
                     </h4>
-                    {data.features[feature.key] && (
-                      <Icon icon="mdi:check-circle" className="w-4 h-4 text-green-400" />
+                    {checked && (
+                      <span className="ml-1 flex items-center justify-center w-6 h-6 rounded-full bg-green-500/80">
+                        <Icon icon="mdi:check" className="w-4 h-4 text-white" />
+                      </span>
                     )}
                   </div>
                   <p className="text-xs text-gray-400 mt-1">
                     {feature.description}
                   </p>
                 </div>
-              </div>
-              
-              <input
-                type="checkbox"
-                checked={data.features[feature.key] || false}
-                onChange={() => handleFeatureToggle(feature.key)}
-                className="sr-only"
-              />
-            </motion.label>
-          ))}
+                {/* Hidden checkbox for accessibility */}
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => handleFeatureToggle(feature.key)}
+                  className="sr-only"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                />
+              </motion.button>
+            );
+          })}
         </div>
-        
+
         {Object.values(data.features).some(Boolean) && (
           <div className="mt-4 p-3 bg-green-500/10 rounded-lg border border-green-500/20">
             <p className="text-sm text-green-400">
               <Icon icon="mdi:check" className="w-4 h-4 inline mr-1" />
-              {Object.values(data.features).filter(Boolean).length} additional services selected
+              {Object.values(data.features).filter(Boolean).length} additional
+              services selected
             </p>
           </div>
         )}

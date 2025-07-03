@@ -1,8 +1,8 @@
 "use client";
 
+import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Icon } from "@iconify/react";
 
 import { Card } from "@/components/common";
 import { FormField } from "@/components/common/FormField";
@@ -17,10 +17,6 @@ import {
   PlanCard,
   TabsComponent,
 } from "@/components/custom/dashboard/trainer/pages/plans/components";
-import {
-  mockTrainingPlans,
-  mockNutritionPlans,
-} from "@/components/custom/dashboard/trainer/pages/plans/data";
 
 const PLAN_FILTERS = [
   { id: "all", label: "All Plans", icon: "mdi:view-grid-outline" },
@@ -33,7 +29,11 @@ const SORT_OPTIONS = [
   { id: "newest", label: "Newest First", icon: "mdi:sort-calendar-descending" },
   { id: "oldest", label: "Oldest First", icon: "mdi:sort-calendar-ascending" },
   { id: "popular", label: "Most Popular", icon: "mdi:star-outline" },
-  { id: "alphabetical", label: "A to Z", icon: "mdi:sort-alphabetical-ascending" },
+  {
+    id: "alphabetical",
+    label: "A to Z",
+    icon: "mdi:sort-alphabetical-ascending",
+  },
 ];
 
 const PlanManagementPage = () => {
@@ -42,32 +42,78 @@ const PlanManagementPage = () => {
   const [activeFilter, setActiveFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState("grid"); // grid or list
-  const [filteredNutritionPlans, setFilteredNutritionPlans] = useState([]);
-  const [filteredTrainingPlans, setFilteredTrainingPlans] = useState([]);
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    // Apply search filter to nutrition plans
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      setFilteredNutritionPlans(
-        mockNutritionPlans.filter(
-          (plan) =>
-            plan.title.toLowerCase().includes(query) ||
-            plan.description.toLowerCase().includes(query)
-        )
-      );
-      setFilteredTrainingPlans(
-        mockTrainingPlans.filter(
-          (plan) =>
-            plan.title.toLowerCase().includes(query) ||
-            plan.description.toLowerCase().includes(query)
-        )
-      );
-    } else {
-      setFilteredNutritionPlans(mockNutritionPlans);
-      setFilteredTrainingPlans(mockTrainingPlans);
+  // Refactored fetchPlans function
+  const fetchPlans = async () => {
+    try {
+      setLoading(true);
+      // Only send type param if training or nutrition
+      const typeParam = ["training", "nutrition"].includes(activeTab)
+        ? `?type=${activeTab}`
+        : "";
+      const response = await fetch(`/api/users/trainer/plans${typeParam}`);
+      if (!response.ok) throw new Error("Failed to fetch plans");
+      const data = await response.json();
+      setPlans(data);
+    } catch (error) {
+      console.error("Error fetching plans:", error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
-  }, [searchQuery]);
+  };
+
+  // Fetch plans from API on mount and when activeTab changes
+  useEffect(() => {
+    fetchPlans();
+  }, [activeTab]);
+
+  // Filter plans based on active tab and search query
+  const filteredPlans = plans
+    .filter((plan) => {
+      if (activeTab === "training") {
+        return plan.type === "training";
+      } else if (activeTab === "nutrition") {
+        return plan.type === "nutrition";
+      }
+      return true;
+    })
+    .filter((plan) => {
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        return (
+          plan.title.toLowerCase().includes(query) ||
+          plan.description.toLowerCase().includes(query)
+        );
+      }
+      return true;
+    })
+    .filter((plan) => {
+      if (activeFilter === "active") return plan.isActive && plan.isPublished;
+      if (activeFilter === "draft") return !plan.isPublished;
+      if (activeFilter === "archived") return !plan.isActive;
+      return true;
+    });
+
+  // Sort plans
+  const sortedPlans = [...filteredPlans].sort((a, b) => {
+    switch (sortBy) {
+      case "newest":
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      case "oldest":
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      case "alphabetical":
+        return a.title.localeCompare(b.title);
+      case "popular":
+        // For now, sort by price as a placeholder for popularity
+        return (b.price || 0) - (a.price || 0);
+      default:
+        return 0;
+    }
+  });
 
   // Animation variants
   const containerVariants = {
@@ -85,15 +131,21 @@ const PlanManagementPage = () => {
     visible: { opacity: 1, y: 0 },
   };
 
-  const currentPlans = activeTab === "nutrition" ? filteredNutritionPlans : filteredTrainingPlans;
-  const totalEarnings = currentPlans.reduce((sum, plan) => sum + (plan.price || 0), 0);
-  const totalClients = currentPlans.reduce((sum, plan) => sum + (plan.clientCount || 0), 0);
+  const currentPlans = sortedPlans;
+  const totalEarnings = currentPlans.reduce(
+    (sum, plan) => sum + (plan.price || 0),
+    0
+  );
+  const totalClients = currentPlans.reduce(
+    (sum, plan) => sum + (plan.clientCount || 0),
+    0
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#111111] to-[#0a0a0a]">
       <main className="py-6 sm:py-8 px-4 sm:px-6 max-w-7xl mx-auto">
         {/* Enhanced Header */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
@@ -117,34 +169,33 @@ const PlanManagementPage = () => {
             {/* Search and Filters */}
             <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
               <div className="relative w-full sm:w-80">
-                <Icon 
-                  icon="mdi:magnify" 
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" 
+                <Icon
+                  icon="mdi:magnify"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
                 />
-                <input
+
+                <FormField
                   type="text"
-                  placeholder="Search plans..."
+                  placeholder="Search plans by name, description, or type..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-[#1a1a1a] border border-[#333] rounded-xl pl-10 pr-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] transition-colors"
+                  className=""
+                  prefixIcon={
+                    <Icon
+                      icon="mdi:magnify"
+                      className="w-5 h-5 text-[#FF7800]"
+                    />
+                  }
                 />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-                  >
-                    <Icon icon="mdi:close" className="w-4 h-4" />
-                  </button>
-                )}
               </div>
-              
+
               {/* View Mode Toggle */}
               <div className="flex bg-[#1a1a1a] border border-[#333] rounded-xl p-1">
                 <button
                   onClick={() => setViewMode("grid")}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                    viewMode === "grid" 
-                      ? "bg-[#FF6B00] text-white shadow-sm" 
+                    viewMode === "grid"
+                      ? "bg-[#FF6B00] text-white shadow-sm"
                       : "text-gray-400 hover:text-white"
                   }`}
                 >
@@ -154,8 +205,8 @@ const PlanManagementPage = () => {
                 <button
                   onClick={() => setViewMode("list")}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                    viewMode === "list" 
-                      ? "bg-[#FF6B00] text-white shadow-sm" 
+                    viewMode === "list"
+                      ? "bg-[#FF6B00] text-white shadow-sm"
                       : "text-gray-400 hover:text-white"
                   }`}
                 >
@@ -168,7 +219,7 @@ const PlanManagementPage = () => {
         </motion.div>
 
         {/* Enhanced Create Plan Section */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -177,20 +228,27 @@ const PlanManagementPage = () => {
           {/* Background Pattern */}
           <div className="absolute inset-0 bg-gradient-to-r from-[#FF6B00]/5 to-purple-500/5 opacity-50"></div>
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[#FF6B00]/10 to-transparent rounded-bl-full"></div>
-          
+
           <div className="relative">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-3 rounded-xl bg-gradient-to-r from-[#FF6B00]/20 to-purple-500/20">
-                <Icon icon="mdi:plus-circle" className="w-6 h-6 text-[#FF6B00]" />
+                <Icon
+                  icon="mdi:plus-circle"
+                  className="w-6 h-6 text-[#FF6B00]"
+                />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Create New Plan</h2>
-                <p className="text-gray-400 text-sm">Build powerful training or nutrition plans for your clients</p>
+                <h2 className="text-xl font-bold text-white">
+                  Create New Plan
+                </h2>
+                <p className="text-gray-400 text-sm">
+                  Build powerful training or nutrition plans for your clients
+                </p>
               </div>
             </div>
 
             <TabsComponent activeTab={activeTab} setActiveTab={setActiveTab} />
-            
+
             <div className="mt-6">
               <CreatePlanCard type={activeTab} />
             </div>
@@ -198,7 +256,7 @@ const PlanManagementPage = () => {
         </motion.div>
 
         {/* Enhanced Dashboard Stats */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -211,10 +269,7 @@ const PlanManagementPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-400 mb-1">Total Plans</p>
-                <p className="text-2xl font-bold text-white">
-                  {mockNutritionPlans.length + mockTrainingPlans.length}
-                </p>
-                <p className="text-xs text-[#FF6B00] mt-1">+{activeTab === "nutrition" ? filteredNutritionPlans.length : filteredTrainingPlans.length} {activeTab}</p>
+                <p className="text-2xl font-bold text-white">{plans.length}</p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-[#FF6B00]/20 to-orange-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <PlanManagementIcon className="text-[#FF6B00] w-6 h-6" />
@@ -230,7 +285,9 @@ const PlanManagementPage = () => {
               <div>
                 <p className="text-xs text-gray-400 mb-1">Active Clients</p>
                 <p className="text-2xl font-bold text-white">{totalClients}</p>
-                <p className="text-xs text-green-400 mt-1">Currently enrolled</p>
+                <p className="text-xs text-green-400 mt-1">
+                  Currently enrolled
+                </p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-green-500/20 to-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <UsersIcon className="text-emerald-400 w-6 h-6" />
@@ -245,11 +302,18 @@ const PlanManagementPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-400 mb-1">Total Revenue</p>
-                <p className="text-2xl font-bold text-white">${totalEarnings}</p>
-                <p className="text-xs text-purple-400 mt-1">From active plans</p>
+                <p className="text-2xl font-bold text-white">
+                  ${totalEarnings}
+                </p>
+                <p className="text-xs text-purple-400 mt-1">
+                  From active plans
+                </p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-purple-500/20 to-violet-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Icon icon="mdi:currency-usd" className="text-purple-400 w-6 h-6" />
+                <Icon
+                  icon="mdi:currency-usd"
+                  className="text-purple-400 w-6 h-6"
+                />
               </div>
             </div>
           </Card>
@@ -264,19 +328,26 @@ const PlanManagementPage = () => {
                 <p className="text-2xl font-bold text-white">4.8</p>
                 <div className="flex items-center gap-1 mt-1">
                   {[...Array(5)].map((_, i) => (
-                    <Icon key={i} icon="mdi:star" className="w-3 h-3 text-yellow-400" />
+                    <Icon
+                      key={i}
+                      icon="mdi:star"
+                      className="w-3 h-3 text-yellow-400"
+                    />
                   ))}
                 </div>
               </div>
               <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-yellow-500/20 to-orange-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Icon icon="mdi:star-outline" className="text-yellow-400 w-6 h-6" />
+                <Icon
+                  icon="mdi:star-outline"
+                  className="text-yellow-400 w-6 h-6"
+                />
               </div>
             </div>
           </Card>
         </motion.div>
 
         {/* Enhanced Filters */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
@@ -322,7 +393,47 @@ const PlanManagementPage = () => {
 
         {/* Content sections with enhanced animations */}
         <AnimatePresence mode="wait">
-          {activeTab === "nutrition" ? (
+          {loading ? (
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex items-center justify-center py-12"
+            >
+              <div className="text-center">
+                <Icon
+                  icon="mdi:loading"
+                  className="w-8 h-8 text-[#FF6B00] animate-spin mx-auto mb-4"
+                />
+                <p className="text-gray-400">Loading your plans...</p>
+              </div>
+            </motion.div>
+          ) : error ? (
+            <motion.div
+              key="error"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex items-center justify-center py-12"
+            >
+              <div className="text-center">
+                <Icon
+                  icon="mdi:alert-circle"
+                  className="w-8 h-8 text-red-400 mx-auto mb-4"
+                />
+                <p className="text-red-400 mb-4">
+                  Failed to load plans: {error}
+                </p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="px-6 py-3 bg-[#FF6B00] text-white rounded-xl hover:bg-[#FF6B00]/90 transition-colors"
+                >
+                  Try Again
+                </button>
+              </div>
+            </motion.div>
+          ) : activeTab === "nutrition" ? (
             <motion.div
               key="nutrition"
               initial={{ opacity: 0, x: -20 }}
@@ -335,7 +446,7 @@ const PlanManagementPage = () => {
                   <NutritionPlanIcon size={20} className="text-green-400" />
                 </div>
                 <h2 className="text-xl font-bold text-white">
-                  Nutrition Plans ({filteredNutritionPlans.length})
+                  Nutrition Plans ({filteredPlans.length})
                 </h2>
               </div>
 
@@ -344,19 +455,39 @@ const PlanManagementPage = () => {
                 initial="hidden"
                 animate="visible"
                 className={`grid gap-6 ${
-                  viewMode === "grid" 
-                    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" 
+                  viewMode === "grid"
+                    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
                     : "grid-cols-1"
                 }`}
               >
-                {filteredNutritionPlans.map((plan, index) => (
+                {filteredPlans.map((plan) => (
                   <motion.div key={plan.id} variants={itemVariants}>
-                    <PlanCard {...plan} viewMode={viewMode} />
+                    <PlanCard
+                      id={plan.id}
+                      title={plan.title}
+                      description={plan.description}
+                      coverImage={plan.coverImage}
+                      createdAt={plan.createdAt}
+                      planType={plan.type}
+                      type={plan.type}
+                      duration={
+                        plan.duration
+                          ? `${plan.duration} ${plan.durationType || "weeks"}`
+                          : "Not specified"
+                      }
+                      clientCount={plan.clientCount || 0}
+                      price={plan.price}
+                      editUrl={`/trainer/dashboard/plans/${plan.type}/edit/${plan.id}`}
+                      weeklySchedule={plan.weeklySchedule}
+                      index={filteredPlans.indexOf(plan)}
+                      viewMode={viewMode}
+                      onDelete={fetchPlans}
+                    />
                   </motion.div>
                 ))}
 
-                {filteredNutritionPlans.length === 0 && (
-                  <motion.div 
+                {filteredPlans.length === 0 && (
+                  <motion.div
                     variants={itemVariants}
                     className="col-span-full bg-gradient-to-r from-[#1a1a1a] to-[#222] rounded-2xl border border-[#333] p-8 text-center"
                   >
@@ -367,25 +498,9 @@ const PlanManagementPage = () => {
                       No nutrition plans found
                     </h3>
                     <p className="text-gray-400 mb-6 max-w-md mx-auto">
-                      {searchQuery
-                        ? `No plans match your search for "${searchQuery}"`
-                        : "Start creating nutrition plans to help your clients achieve their dietary goals"}
+                      Start creating nutrition plans to help your clients
+                      achieve their dietary goals
                     </p>
-                    {searchQuery ? (
-                      <button
-                        onClick={() => setSearchQuery("")}
-                        className="px-6 py-3 bg-[#333] text-white rounded-xl hover:bg-[#444] transition-colors"
-                      >
-                        Clear search
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => setActiveTab("nutrition")}
-                        className="px-6 py-3 bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] text-white rounded-xl hover:shadow-lg hover:shadow-[#FF6B00]/25 transition-all"
-                      >
-                        Create Your First Plan
-                      </button>
-                    )}
                   </motion.div>
                 )}
               </motion.div>
@@ -393,17 +508,17 @@ const PlanManagementPage = () => {
           ) : (
             <motion.div
               key="training"
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
+              exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 rounded-lg bg-orange-500/20">
-                  <TrainingPlanIcon size={20} className="text-orange-400" />
+                <div className="p-2 rounded-lg bg-blue-500/20">
+                  <TrainingPlanIcon size={20} className="text-blue-400" />
                 </div>
                 <h2 className="text-xl font-bold text-white">
-                  Training Plans ({filteredTrainingPlans.length})
+                  Training Plans ({filteredPlans.length})
                 </h2>
               </div>
 
@@ -412,19 +527,39 @@ const PlanManagementPage = () => {
                 initial="hidden"
                 animate="visible"
                 className={`grid gap-6 ${
-                  viewMode === "grid" 
-                    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" 
+                  viewMode === "grid"
+                    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
                     : "grid-cols-1"
                 }`}
               >
-                {filteredTrainingPlans.map((plan, index) => (
+                {filteredPlans.map((plan) => (
                   <motion.div key={plan.id} variants={itemVariants}>
-                    <PlanCard {...plan} viewMode={viewMode} />
+                    <PlanCard
+                      id={plan.id}
+                      title={plan.title}
+                      description={plan.description}
+                      coverImage={plan.coverImage}
+                      createdAt={plan.createdAt}
+                      planType={plan.type}
+                      type={plan.type}
+                      duration={
+                        plan.duration
+                          ? `${plan.duration} ${plan.durationType || "weeks"}`
+                          : "Not specified"
+                      }
+                      clientCount={plan.clientCount || 0}
+                      price={plan.price}
+                      editUrl={`/trainer/dashboard/plans/${plan.type}/edit/${plan.id}`}
+                      weeklySchedule={plan.weeklySchedule}
+                      index={filteredPlans.indexOf(plan)}
+                      viewMode={viewMode}
+                      onDelete={fetchPlans}
+                    />
                   </motion.div>
                 ))}
 
-                {filteredTrainingPlans.length === 0 && (
-                  <motion.div 
+                {filteredPlans.length === 0 && (
+                  <motion.div
                     variants={itemVariants}
                     className="col-span-full bg-gradient-to-r from-[#1a1a1a] to-[#222] rounded-2xl border border-[#333] p-8 text-center"
                   >
@@ -435,25 +570,9 @@ const PlanManagementPage = () => {
                       No training plans found
                     </h3>
                     <p className="text-gray-400 mb-6 max-w-md mx-auto">
-                      {searchQuery
-                        ? `No plans match your search for "${searchQuery}"`
-                        : "Create your first training plan to help clients reach their fitness goals"}
+                      Create your first training plan to help clients reach
+                      their fitness goals
                     </p>
-                    {searchQuery ? (
-                      <button
-                        onClick={() => setSearchQuery("")}
-                        className="px-6 py-3 bg-[#333] text-white rounded-xl hover:bg-[#444] transition-colors"
-                      >
-                        Clear search
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => setActiveTab("training")}
-                        className="px-6 py-3 bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] text-white rounded-xl hover:shadow-lg hover:shadow-[#FF6B00]/25 transition-all"
-                      >
-                        Create Your First Plan
-                      </button>
-                    )}
                   </motion.div>
                 )}
               </motion.div>

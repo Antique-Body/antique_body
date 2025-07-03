@@ -16,23 +16,32 @@ import {
   EditIcon,
   TrashIcon,
   UsersIcon,
+  ViewIcon,
 } from "@/components/common/Icons";
+import { Modal } from "@/components/common/Modal";
+import { fetchPlanDetails } from "@/utils/planService";
 
 export const PlanCard = ({
   id,
   title,
   description,
-  image,
+  coverImage,
   createdAt,
   planType,
+  type,
   duration,
   clientCount = 0,
   price,
   editUrl,
   weeklySchedule,
   index = 0,
+  onDelete,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [loadingPlanDetails, setLoadingPlanDetails] = useState(false);
+  const [detailedPlanData, setDetailedPlanData] = useState(null);
   const router = useRouter();
   const formattedDate = new Date(createdAt).toLocaleDateString("en-US", {
     year: "numeric",
@@ -40,7 +49,9 @@ export const PlanCard = ({
     day: "numeric",
   });
 
-  const isNutrition = planType === "nutrition";
+  // Use planType or type - handle both for backward compatibility
+  const currentPlanType = planType || type;
+  const isNutrition = currentPlanType === "nutrition";
 
   // Animation variants
   const cardVariants = {
@@ -71,6 +82,77 @@ export const PlanCard = ({
     if (e.target.closest("button")) {
       return;
     }
+    handleViewClick();
+  };
+
+  const fetchPlanDetailsHandler = async () => {
+    try {
+      setLoadingPlanDetails(true);
+      const planData = await fetchPlanDetails(id, currentPlanType);
+      // Transform the data to match what PlanPreviewModal expects
+      const transformedData = {
+        id: planData.id,
+        title: planData.title,
+        description: planData.description,
+        image: planData.coverImage,
+        createdAt: planData.createdAt,
+        planType: planData.type,
+        duration: planData.duration
+          ? `${planData.duration} ${planData.durationType || "weeks"}`
+          : "Not specified",
+        clientCount: planData.clientCount || 0,
+        price: planData.price,
+        weeklySchedule: planData.weeklySchedule || planData.planSchedule,
+        summary: planData.description,
+        targetAudience: "All fitness levels", // Default value, can be customized
+        keyFeatures: planData.keyFeatures || [],
+        schedule: planData.timeline || [],
+        editUrl,
+      };
+      if (isNutrition) {
+        transformedData.nutritionInfo = planData.nutritionInfo;
+        transformedData.mealTypes = planData.mealTypes;
+        transformedData.dietaryRestrictions = planData.dietaryRestrictions;
+        transformedData.supplementRecommendations =
+          planData.supplementRecommendations;
+        transformedData.cookingTime = planData.cookingTime;
+        transformedData.difficultyLevel = planData.difficultyLevel;
+      } else {
+        transformedData.trainingType = planData.trainingType;
+        transformedData.sessionsPerWeek = planData.sessionsPerWeek;
+        transformedData.sessionFormat = planData.sessionFormat;
+        transformedData.difficultyLevel = planData.difficultyLevel;
+        transformedData.features = planData.features;
+      }
+      setDetailedPlanData(transformedData);
+      return transformedData;
+    } catch (error) {
+      console.error("Error fetching plan details:", error);
+      return {
+        id,
+        title,
+        description,
+        image: coverImage,
+        createdAt,
+        planType: currentPlanType,
+        duration,
+        clientCount,
+        price,
+        weeklySchedule,
+        summary: description,
+        targetAudience: "All fitness levels",
+        keyFeatures: [],
+        schedule: [],
+        editUrl,
+      };
+    } finally {
+      setLoadingPlanDetails(false);
+    }
+  };
+
+  const handleViewClick = async () => {
+    const planData = await fetchPlanDetailsHandler();
+    setDetailedPlanData(planData);
     setIsModalOpen(true);
   };
 
@@ -86,18 +168,24 @@ export const PlanCard = ({
     router.push(editUrl);
   };
 
-  const planData = {
-    id,
-    title,
-    description,
-    image,
-    createdAt,
-    planType,
-    duration,
-    clientCount,
-    price,
-    editUrl,
-    weeklySchedule,
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    setDeleting(true);
+    try {
+      const endpoint = `/api/users/trainer/plans/${id}`;
+      const res = await fetch(endpoint, { method: "DELETE" });
+      if (res.ok) {
+        if (onDelete) onDelete(id);
+        setShowDeleteModal(false);
+      }
+    } catch {
+      // handle error
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
@@ -116,10 +204,10 @@ export const PlanCard = ({
           className="flex h-full flex-col overflow-hidden hover:border-[#FF6B00] transition-all duration-300"
         >
           <div className="relative h-40 overflow-hidden">
-            {image && (
+            {coverImage && (
               <div className="absolute inset-0 transition-transform duration-300 group-hover:scale-105">
                 <Image
-                  src={image}
+                  src={coverImage}
                   alt={title}
                   fill
                   className="object-cover"
@@ -160,7 +248,7 @@ export const PlanCard = ({
               <div className="flex flex-wrap items-center gap-3 text-sm text-gray-400">
                 <div className="flex items-center gap-1">
                   <ClockIcon size={16} className="text-gray-500" />
-                  <span>{duration}</span>
+                  <span>{duration || "Not specified"}</span>
                 </div>
 
                 <div className="flex items-center gap-1">
@@ -176,31 +264,43 @@ export const PlanCard = ({
               </div>
 
               <div
-                className="flex items-center justify-between"
+                className="flex items-center justify-center gap-2 w-full"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex space-x-2">
-                  <Button
-                    variant="darkOutline"
-                    size="small"
-                    leftIcon={<CopyIcon size={16} />}
-                    onClick={handleCopyClick}
-                  >
-                    Copy
-                  </Button>
-                  <Button
-                    variant="dangerOutline"
-                    size="small"
-                    leftIcon={<TrashIcon size={16} />}
-                  >
-                    Delete
-                  </Button>
-                </div>
+                <Button
+                  variant="darkOutline"
+                  size="small"
+                  leftIcon={<CopyIcon size={16} />}
+                  onClick={handleCopyClick}
+                  className="hover:border-[#FF6B00] hover:text-[#FF6B00] hover:scale-105 hover:shadow-md transition-all duration-200"
+                >
+                  Copy
+                </Button>
+                <Button
+                  variant="darkOutline"
+                  size="small"
+                  leftIcon={<ViewIcon size={16} />}
+                  onClick={handleViewClick}
+                  loading={loadingPlanDetails}
+                  className="hover:border-blue-400 hover:text-blue-300 hover:scale-105 hover:shadow-md transition-all duration-200"
+                >
+                  {loadingPlanDetails ? "Loading..." : "View"}
+                </Button>
+                <Button
+                  variant="dangerOutline"
+                  size="small"
+                  leftIcon={<TrashIcon size={16} />}
+                  onClick={handleDeleteClick}
+                  className="hover:border-red-500 hover:text-red-400 hover:scale-105 hover:shadow-md transition-all duration-200"
+                >
+                  Delete
+                </Button>
                 <Button
                   onClick={handleEditClick}
                   variant="orangeOutline"
                   size="small"
                   leftIcon={<EditIcon size={16} />}
+                  className="hover:border-orange-400 hover:text-orange-300 hover:scale-105 hover:shadow-md transition-all duration-200"
                 >
                   Edit
                 </Button>
@@ -212,9 +312,33 @@ export const PlanCard = ({
 
       {/* Preview Modal */}
       <PlanPreviewModal
-        plan={planData}
+        plan={detailedPlanData}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+      />
+
+      {/* Delete Confirm Modal */}
+      <Modal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={confirmDelete}
+        title="Obriši plan"
+        message={
+          <span>
+            Jesi li siguran da želiš obrisati plan{" "}
+            <span className="font-semibold">{title}</span>?
+          </span>
+        }
+        confirmButtonText={deleting ? "Brišem..." : "Da, obriši"}
+        cancelButtonText="Ne"
+        primaryButtonDisabled={deleting}
+        secondaryButtonText="Ne"
+        primaryButtonText={deleting ? "Brišem..." : "Da, obriši"}
+        primaryButtonAction={confirmDelete}
+        secondaryButtonAction={() => setShowDeleteModal(false)}
+        footerButtons
+        footerBorder
+        size="small"
       />
     </>
   );

@@ -2,8 +2,12 @@
 
 import { Icon } from "@iconify/react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
+
+import { MealLibrarySelector } from "../../../../meals/components";
+import { MealModal } from "../../../../meals/components/MealModal";
 
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
@@ -14,12 +18,18 @@ export const MealPlanning = ({ data, onChange }) => {
   const [showAddDayPopover, setShowAddDayPopover] = useState(false);
   const [showCopyDayModal, setShowCopyDayModal] = useState(false);
   const [showCopyMealModal, setShowCopyMealModal] = useState(false);
+  const [showMealLibraryModal, setShowMealLibraryModal] = useState(false);
+  const [activeMealIndex, setActiveMealIndex] = useState(null);
+  const [activeMediaType, setActiveMediaType] = useState({});
+  const [showMediaPreview, setShowMediaPreview] = useState(null);
   const [popoverPosition, setPopoverPosition] = useState({
     right: false,
     top: false,
   });
   const popoverRef = useRef(null);
   const buttonRef = useRef(null);
+  const [showCreateMeal, setShowCreateMeal] = useState(false);
+  const [meals, setMeals] = useState([]);
 
   const days = data.days || [];
   const selectedDay = days[selectedDayIndex];
@@ -91,7 +101,8 @@ export const MealPlanning = ({ data, onChange }) => {
       meals: newMeals,
     };
 
-    onChange({ days: [...days, newDay] });
+    const newDays = [...days, newDay];
+    onChange({ days: newDays });
     setSelectedDayIndex(days.length);
     setShowAddDayPopover(false);
     setShowCopyDayModal(false);
@@ -102,19 +113,26 @@ export const MealPlanning = ({ data, onChange }) => {
 
     const cheatDay = {
       id: uuidv4(),
-      name: "Cheat Day",
+      name: `Day ${days.length + 1}`,
       isRestDay: true,
       description: "Describe your cheat day (e.g. free meal, treat, etc.)",
       meals: [],
     };
 
-    onChange({ days: [...days, cheatDay] });
+    const newDays = [...days, cheatDay];
+    onChange({ days: newDays });
     setSelectedDayIndex(days.length);
     setShowAddDayPopover(false);
   };
 
   const deleteDay = (idx) => {
-    const newDays = days.filter((_, i) => i !== idx);
+    const newDays = days
+      .filter((_, i) => i !== idx)
+      .map((day, index) => ({
+        ...day,
+        name: `Day ${index + 1}`,
+      }));
+
     onChange({ days: newDays });
 
     if (selectedDayIndex >= newDays.length) {
@@ -138,20 +156,9 @@ export const MealPlanning = ({ data, onChange }) => {
 
     const newMeal = {
       id: generateId(),
-      name: `Meal ${selectedDay.meals.length + 1}`,
+      name: "New Meal",
       time: "",
-      options: [
-        {
-          id: generateId(),
-          name: "",
-          description: "",
-          ingredients: [],
-          calories: "",
-          protein: "",
-          carbs: "",
-          fat: "",
-        },
-      ],
+      options: [], // Start with no options
     };
 
     updateDay(selectedDayIndex, "meals", [...selectedDay.meals, newMeal]);
@@ -176,21 +183,53 @@ export const MealPlanning = ({ data, onChange }) => {
     updateDay(selectedDayIndex, "meals", updatedMeals);
   };
 
-  const addMealOption = (mealIndex) => {
+  const addMealFromLibrary = async (mealIndex) => {
     if (!selectedDay) return;
 
-    const updatedMeals = [...selectedDay.meals];
-    updatedMeals[mealIndex].options.push({
-      id: generateId(),
-      name: "",
-      description: "",
-      ingredients: [],
-      calories: "",
-      protein: "",
-      carbs: "",
-      fat: "",
-    });
-    updateDay(selectedDayIndex, "meals", updatedMeals);
+    try {
+      const response = await fetch("/api/users/trainer/meals");
+      const data = await response.json();
+      if (data.success) {
+        setMeals(data.meals);
+        setShowMealLibraryModal(true);
+        setActiveMealIndex(mealIndex);
+      }
+    } catch (error) {
+      console.error("Error fetching meals:", error);
+    }
+  };
+
+  const handleCreateMeal = async (mealData) => {
+    try {
+      const response = await fetch("/api/users/trainer/meals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(mealData),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        const mealToAdd = {
+          id: generateId(),
+          name: mealData.name,
+          description: mealData.recipe,
+          ingredients: mealData.ingredients.split(",").map((i) => i.trim()),
+          calories: mealData.calories,
+          protein: mealData.protein,
+          carbs: mealData.carbs,
+          fat: mealData.fat,
+          imageUrl: mealData.imageUrl,
+          videoUrl: mealData.video,
+        };
+
+        const updatedMeals = [...selectedDay.meals];
+        updatedMeals[activeMealIndex].options.push(mealToAdd);
+        updateDay(selectedDayIndex, "meals", updatedMeals);
+        setShowCreateMeal(false);
+      }
+    } catch (error) {
+      console.error("Error creating meal:", error);
+    }
   };
 
   const removeMealOption = (mealIndex, optionIndex) => {
@@ -201,15 +240,28 @@ export const MealPlanning = ({ data, onChange }) => {
     updateDay(selectedDayIndex, "meals", updatedMeals);
   };
 
-  const updateMealOption = (mealIndex, optionIndex, field, value) => {
-    if (!selectedDay) return;
+  const handleSelectMealFromLibrary = async (libraryMeal) => {
+    if (!selectedDay || activeMealIndex === null) return;
+
+    const newMealOption = {
+      id: generateId(),
+      name: libraryMeal.name,
+      description: libraryMeal.recipe,
+      ingredients: libraryMeal.ingredients.split(",").map((i) => i.trim()),
+      calories: libraryMeal.calories,
+      protein: libraryMeal.protein,
+      carbs: libraryMeal.carbs,
+      fat: libraryMeal.fat,
+      imageUrl: libraryMeal.imageUrl,
+      videoUrl: libraryMeal.videoUrl,
+    };
 
     const updatedMeals = [...selectedDay.meals];
-    updatedMeals[mealIndex].options[optionIndex] = {
-      ...updatedMeals[mealIndex].options[optionIndex],
-      [field]: value,
-    };
+    updatedMeals[activeMealIndex].options.push(newMealOption);
     updateDay(selectedDayIndex, "meals", updatedMeals);
+
+    setShowMealLibraryModal(false);
+    setActiveMealIndex(null);
   };
 
   const copyDayFromAnother = (fromDayIdx) => {
@@ -229,7 +281,8 @@ export const MealPlanning = ({ data, onChange }) => {
       })),
     }));
 
-    onChange({ days: [...days, dayToCopy] });
+    const newDays = [...days, dayToCopy];
+    onChange({ days: newDays });
     setSelectedDayIndex(days.length);
     setShowCopyDayModal(false);
     setShowAddDayPopover(false);
@@ -245,6 +298,17 @@ export const MealPlanning = ({ data, onChange }) => {
 
     updateDay(selectedDayIndex, "meals", [...selectedDay.meals, mealToCopy]);
     setShowCopyMealModal(false);
+  };
+
+  const updateMealOption = (mealIndex, optionIndex, field, value) => {
+    if (!selectedDay) return;
+
+    const updatedMeals = [...selectedDay.meals];
+    updatedMeals[mealIndex].options[optionIndex] = {
+      ...updatedMeals[mealIndex].options[optionIndex],
+      [field]: value,
+    };
+    updateDay(selectedDayIndex, "meals", updatedMeals);
   };
 
   if (!selectedDay) {
@@ -559,135 +623,346 @@ export const MealPlanning = ({ data, onChange }) => {
                   </div>
 
                   {/* Meal Options */}
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h4 className="text-sm font-medium text-white">
-                        Meal Options ({meal.options.length})
+                        Options
                       </h4>
-                      <Button
-                        variant="secondary"
-                        size="small"
-                        onClick={() => addMealOption(mealIndex)}
-                      >
-                        Add Option
-                      </Button>
                     </div>
 
-                    {meal.options.map((option, optionIndex) => (
-                      <div
-                        key={option.id}
-                        className="bg-[#2a2a2a] rounded-lg border border-[#555] p-4 space-y-3"
-                      >
-                        <div className="flex flex-col sm:flex-row sm:items-end gap-3">
-                          <FormField
-                            label="Option Name"
-                            name="name"
-                            value={option.name}
-                            onChange={(e) =>
-                              updateMealOption(
-                                mealIndex,
-                                optionIndex,
-                                "name",
-                                e.target.value
-                              )
-                            }
-                            placeholder="e.g., Scrambled Eggs with Toast"
-                            className="flex-1"
-                          />
-                          {meal.options.length > 1 && (
-                            <button
-                              onClick={() =>
-                                removeMealOption(mealIndex, optionIndex)
-                              }
-                              className="self-end p-2 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors"
-                              title="Remove option"
-                            >
-                              <Icon icon="mdi:close" className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
-
-                        <FormField
-                          label="Description/Instructions"
-                          name="description"
-                          type="textarea"
-                          value={option.description}
-                          onChange={(e) =>
-                            updateMealOption(
-                              mealIndex,
-                              optionIndex,
-                              "description",
-                              e.target.value
-                            )
-                          }
-                          placeholder="Cooking instructions and description..."
-                          rows={2}
+                    {meal.options.length === 0 ? (
+                      <div className="text-center py-8 bg-[#2a2a2a] rounded-lg border border-[#444]">
+                        <Icon
+                          icon="mdi:food-off"
+                          className="w-12 h-12 text-gray-500 mx-auto mb-4"
                         />
-
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                          <FormField
-                            label="Calories"
-                            name="calories"
-                            type="number"
-                            value={option.calories}
-                            onChange={(e) =>
-                              updateMealOption(
-                                mealIndex,
-                                optionIndex,
-                                "calories",
-                                e.target.value
-                              )
-                            }
-                            placeholder="400"
-                          />
-                          <FormField
-                            label="Protein (g)"
-                            name="protein"
-                            type="number"
-                            value={option.protein}
-                            onChange={(e) =>
-                              updateMealOption(
-                                mealIndex,
-                                optionIndex,
-                                "protein",
-                                e.target.value
-                              )
-                            }
-                            placeholder="25"
-                          />
-                          <FormField
-                            label="Carbs (g)"
-                            name="carbs"
-                            type="number"
-                            value={option.carbs}
-                            onChange={(e) =>
-                              updateMealOption(
-                                mealIndex,
-                                optionIndex,
-                                "carbs",
-                                e.target.value
-                              )
-                            }
-                            placeholder="30"
-                          />
-                          <FormField
-                            label="Fat (g)"
-                            name="fat"
-                            type="number"
-                            value={option.fat}
-                            onChange={(e) =>
-                              updateMealOption(
-                                mealIndex,
-                                optionIndex,
-                                "fat",
-                                e.target.value
-                              )
-                            }
-                            placeholder="15"
-                          />
-                        </div>
+                        <p className="text-gray-400 mb-2">
+                          No meal options added yet
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Add options from the library or create new ones
+                        </p>
                       </div>
-                    ))}
+                    ) : (
+                      <div className="grid gap-4">
+                        {meal.options.map((option, optionIndex) => {
+                          const activeMedia =
+                            activeMediaType[option.id] || "image";
+
+                          return (
+                            <div
+                              key={option.id}
+                              className="bg-[#2a2a2a] rounded-lg border border-[#555] overflow-hidden"
+                            >
+                              <div className="flex">
+                                {/* Left side - Meal details */}
+                                <div className="flex-1 p-4">
+                                  <div className="flex items-start justify-between mb-4">
+                                    <FormField
+                                      label="Name"
+                                      name="name"
+                                      value={option.name}
+                                      onChange={(e) =>
+                                        updateMealOption(
+                                          mealIndex,
+                                          optionIndex,
+                                          "name",
+                                          e.target.value
+                                        )
+                                      }
+                                      placeholder="Enter meal name"
+                                      className="flex-1 mr-2"
+                                    />
+                                    <button
+                                      onClick={() =>
+                                        removeMealOption(mealIndex, optionIndex)
+                                      }
+                                      className="p-2 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors"
+                                      title="Remove option"
+                                    >
+                                      <Icon
+                                        icon="mdi:trash"
+                                        className="w-5 h-5"
+                                      />
+                                    </button>
+                                  </div>
+
+                                  {/* Nutritional Info */}
+                                  <div className="grid grid-cols-4 gap-2 mb-4">
+                                    <FormField
+                                      label="Calories"
+                                      name="calories"
+                                      type="number"
+                                      value={option.calories}
+                                      onChange={(e) =>
+                                        updateMealOption(
+                                          mealIndex,
+                                          optionIndex,
+                                          "calories",
+                                          e.target.value
+                                        )
+                                      }
+                                      placeholder="kcal"
+                                      className="text-center"
+                                    />
+                                    <FormField
+                                      label="Protein"
+                                      name="protein"
+                                      type="number"
+                                      value={option.protein}
+                                      onChange={(e) =>
+                                        updateMealOption(
+                                          mealIndex,
+                                          optionIndex,
+                                          "protein",
+                                          e.target.value
+                                        )
+                                      }
+                                      placeholder="g"
+                                      className="text-center"
+                                    />
+                                    <FormField
+                                      label="Carbs"
+                                      name="carbs"
+                                      type="number"
+                                      value={option.carbs}
+                                      onChange={(e) =>
+                                        updateMealOption(
+                                          mealIndex,
+                                          optionIndex,
+                                          "carbs",
+                                          e.target.value
+                                        )
+                                      }
+                                      placeholder="g"
+                                      className="text-center"
+                                    />
+                                    <FormField
+                                      label="Fat"
+                                      name="fat"
+                                      type="number"
+                                      value={option.fat}
+                                      onChange={(e) =>
+                                        updateMealOption(
+                                          mealIndex,
+                                          optionIndex,
+                                          "fat",
+                                          e.target.value
+                                        )
+                                      }
+                                      placeholder="g"
+                                      className="text-center"
+                                    />
+                                  </div>
+
+                                  {/* Ingredients and Instructions */}
+                                  <div className="space-y-3">
+                                    <FormField
+                                      label="Ingredients"
+                                      name="ingredients"
+                                      type="textarea"
+                                      value={
+                                        Array.isArray(option.ingredients)
+                                          ? option.ingredients.join(", ")
+                                          : option.ingredients
+                                      }
+                                      onChange={(e) =>
+                                        updateMealOption(
+                                          mealIndex,
+                                          optionIndex,
+                                          "ingredients",
+                                          e.target.value
+                                            .split(",")
+                                            .map((i) => i.trim())
+                                        )
+                                      }
+                                      placeholder="Enter ingredients, separated by commas"
+                                      rows={2}
+                                    />
+                                    <FormField
+                                      label="Instructions"
+                                      name="description"
+                                      type="textarea"
+                                      value={option.description}
+                                      onChange={(e) =>
+                                        updateMealOption(
+                                          mealIndex,
+                                          optionIndex,
+                                          "description",
+                                          e.target.value
+                                        )
+                                      }
+                                      placeholder="Enter meal preparation instructions"
+                                      rows={2}
+                                    />
+                                  </div>
+                                </div>
+
+                                {/* Right side - Media preview */}
+                                <div className="w-72 border-l border-[#555] flex flex-col bg-[#3a3a3a]/90">
+                                  {/* Media type selector */}
+                                  <div className="flex border-b border-[#555]">
+                                    <Button
+                                      variant="ghost"
+                                      size="small"
+                                      onClick={() =>
+                                        setActiveMediaType((prev) => ({
+                                          ...prev,
+                                          [option.id]: "image",
+                                        }))
+                                      }
+                                      className={`flex-1 rounded-none border-r border-[#555] ${
+                                        activeMedia === "image"
+                                          ? "bg-[#FF6B00]/30 text-[#FF6B00] border-[#FF6B00]/60"
+                                          : "text-gray-300 hover:text-white hover:bg-[#555]/70"
+                                      }`}
+                                      leftIcon={
+                                        <Icon
+                                          icon="mdi:image"
+                                          className="w-4 h-4"
+                                        />
+                                      }
+                                    >
+                                      Image
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="small"
+                                      onClick={() =>
+                                        setActiveMediaType((prev) => ({
+                                          ...prev,
+                                          [option.id]: "video",
+                                        }))
+                                      }
+                                      className={`flex-1 rounded-none ${
+                                        activeMedia === "video"
+                                          ? "bg-[#FF6B00]/30 text-[#FF6B00] border-[#FF6B00]/60"
+                                          : "text-gray-300 hover:text-white hover:bg-[#555]/70"
+                                      }`}
+                                      leftIcon={
+                                        <Icon
+                                          icon="mdi:video"
+                                          className="w-4 h-4"
+                                        />
+                                      }
+                                    >
+                                      Video
+                                    </Button>
+                                  </div>
+
+                                  {/* Media preview area */}
+                                  <div className="flex-1 p-4">
+                                    {activeMedia === "image" ? (
+                                      option.imageUrl ? (
+                                        <Button
+                                          variant="ghost"
+                                          onClick={() =>
+                                            setShowMediaPreview({
+                                              type: "image",
+                                              url: option.imageUrl,
+                                              name: option.name,
+                                            })
+                                          }
+                                          className="w-full h-full p-0 relative rounded-lg overflow-hidden bg-black/40 hover:bg-black/50"
+                                        >
+                                          <Image
+                                            src={option.imageUrl}
+                                            alt={option.name}
+                                            className="object-cover"
+                                            width={1000}
+                                            height={1000}
+                                          />
+                                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity">
+                                            <div className="bg-white/40 backdrop-blur-sm rounded-full p-3">
+                                              <Icon
+                                                icon="mdi:magnify"
+                                                className="w-6 h-6 text-white"
+                                              />
+                                            </div>
+                                          </div>
+                                        </Button>
+                                      ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-gray-400 bg-[#4a4a4a] rounded-lg border-2 border-dashed border-[#666]">
+                                          <div className="text-center py-8">
+                                            <Icon
+                                              icon="mdi:image-off"
+                                              className="w-12 h-12 mx-auto mb-3 text-gray-500"
+                                            />
+                                            <span className="text-sm text-gray-400">
+                                              No image available
+                                            </span>
+                                          </div>
+                                        </div>
+                                      )
+                                    ) : option.videoUrl ? (
+                                      <Button
+                                        variant="ghost"
+                                        onClick={() =>
+                                          setShowMediaPreview({
+                                            type: "video",
+                                            url: option.videoUrl,
+                                            name: option.name,
+                                          })
+                                        }
+                                        className="w-full h-full p-0 relative rounded-lg overflow-hidden bg-black/40 hover:bg-black/50"
+                                      >
+                                        <div className="w-full h-full bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center">
+                                          <div className="w-16 h-16 rounded-full bg-[#FF6B00]/40 backdrop-blur-sm flex items-center justify-center hover:bg-[#FF6B00]/50 transition-colors">
+                                            <Icon
+                                              icon="mdi:play"
+                                              className="w-8 h-8 text-[#FF6B00]"
+                                            />
+                                          </div>
+                                        </div>
+                                      </Button>
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center text-gray-400 bg-[#4a4a4a] rounded-lg border-2 border-dashed border-[#666]">
+                                        <div className="text-center py-8">
+                                          <Icon
+                                            icon="mdi:video-off"
+                                            className="w-12 h-12 mx-auto mb-3 text-gray-500"
+                                          />
+                                          <span className="text-sm text-gray-400">
+                                            No video available
+                                          </span>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Novi gumbi ispod kartica */}
+                    <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                      <Button
+                        variant="primary"
+                        onClick={() => addMealFromLibrary(mealIndex)}
+                        className="w-full py-3 text-base font-semibold bg-[#FF6B00] hover:bg-[#FF6B00]/90 border-0"
+                        leftIcon={
+                          <Icon icon="mdi:library" className="w-5 h-5" />
+                        }
+                      >
+                        Add Option from Library
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setActiveMealIndex(mealIndex);
+                          setShowCreateMeal(true);
+                        }}
+                        className="w-full py-3 text-base font-semibold border-2 border-green-400/60 text-green-300 hover:bg-green-500/20 hover:border-green-400/80 hover:text-green-200 backdrop-blur-sm"
+                        leftIcon={
+                          <Icon icon="mdi:plus-circle" className="w-5 h-5" />
+                        }
+                      >
+                        Create New Meal Option
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))
@@ -828,6 +1103,74 @@ export const MealPlanning = ({ data, onChange }) => {
             </div>
           )}
         </div>
+      </Modal>
+
+      {/* Add MealModal */}
+      <MealModal
+        isOpen={showCreateMeal}
+        onClose={() => setShowCreateMeal(false)}
+        mode="create"
+        onSave={handleCreateMeal}
+      />
+
+      {/* Meal Library Modal */}
+      <Modal
+        isOpen={showMealLibraryModal}
+        onClose={() => {
+          setShowMealLibraryModal(false);
+          setActiveMealIndex(null);
+          setMeals([]);
+        }}
+        title="Add Meal from Library"
+        size="large"
+        footerButtons={false}
+      >
+        <MealLibrarySelector
+          meals={meals}
+          onSelectMeal={handleSelectMealFromLibrary}
+          onClose={() => {
+            setShowMealLibraryModal(false);
+            setActiveMealIndex(null);
+            setMeals([]);
+          }}
+        />
+      </Modal>
+
+      {/* Add Media Preview Modal */}
+      <Modal
+        isOpen={!!showMediaPreview}
+        onClose={() => setShowMediaPreview(null)}
+        title={showMediaPreview?.name || "Media Preview"}
+        size="large"
+      >
+        {showMediaPreview && (
+          <>
+            {showMediaPreview.type === "image" ? (
+              <Image
+                src={showMediaPreview.url}
+                alt={showMediaPreview.name || "Preview"}
+                className="w-full h-auto rounded-lg"
+                width={1000}
+                height={1000}
+              />
+            ) : showMediaPreview.type === "video" && showMediaPreview.url ? (
+              <video
+                src={showMediaPreview.url}
+                controls
+                autoPlay
+                className="w-full h-auto rounded-lg"
+              />
+            ) : (
+              <div className="text-center py-8">
+                <Icon
+                  icon="mdi:file-question"
+                  className="w-12 h-12 text-gray-500 mx-auto mb-3"
+                />
+                <p className="text-gray-400">Media not available</p>
+              </div>
+            )}
+          </>
+        )}
       </Modal>
     </div>
   );

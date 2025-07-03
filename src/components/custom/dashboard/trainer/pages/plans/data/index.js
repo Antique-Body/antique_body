@@ -1,8 +1,7 @@
-import mockDetails from "./mockDetails";
 import mockNutritionPlans from "./mockNutritionPlans";
 import mockTrainingPlans from "./mockTrainingPlans";
 
 // Combine all plans for easy use
 const mockPlans = [...mockTrainingPlans, ...mockNutritionPlans];
 
-export { mockTrainingPlans, mockNutritionPlans, mockPlans, mockDetails };
+export { mockTrainingPlans, mockNutritionPlans, mockPlans };

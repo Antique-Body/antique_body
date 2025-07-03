@@ -1,53 +1,49 @@
 "use client";
 
 import { Icon } from "@iconify/react";
-import { useState, useEffect } from "react";
-
-import mealLibrary from "./mealLibrary.json";
+import Image from "next/image";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 import { Button } from "@/components/common/Button";
 import { InfoBanner } from "@/components/common/InfoBanner";
+import mealLibrary from "./mealLibrary.json";
+import { FormField } from "@/components/common/FormField";
 
 export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredMeals, setFilteredMeals] = useState(mealLibrary);
+  const [isLoading, setIsLoading] = useState(false);
+  const [totalCount, setTotalCount] = useState(mealLibrary.length);
+  const listRef = useRef(null);
 
-  // Handle ESC key press for this modal specifically
+  // Filter meals on search
+  useEffect(() => {
+    setIsLoading(true);
+    const timeout = setTimeout(() => {
+      const filtered = mealLibrary.filter(
+        (meal) =>
+          meal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (meal.ingredients &&
+            meal.ingredients.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+      setFilteredMeals(filtered);
+      setTotalCount(filtered.length);
+      setIsLoading(false);
+    }, 200);
+    return () => clearTimeout(timeout);
+  }, [searchTerm]);
+
+  // ESC key close
   useEffect(() => {
     const handleEscKey = (event) => {
       if (event.key === "Escape") {
-        event.stopPropagation(); // Prevent the event from reaching parent modal
+        event.stopPropagation();
         onClose();
       }
     };
-
     window.addEventListener("keydown", handleEscKey);
     return () => window.removeEventListener("keydown", handleEscKey);
   }, [onClose]);
-
-  // Filter meals based on search term
-  useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredMeals(mealLibrary);
-      return;
-    }
-
-    const lowerCaseSearch = searchTerm.toLowerCase();
-    const filtered = mealLibrary.filter(
-      (meal) =>
-        meal.name.toLowerCase().includes(lowerCaseSearch) ||
-        meal.ingredients.toLowerCase().includes(lowerCaseSearch) ||
-        meal.recipe.toLowerCase().includes(lowerCaseSearch) ||
-        meal.mealType.toLowerCase().includes(lowerCaseSearch) ||
-        meal.cuisine.toLowerCase().includes(lowerCaseSearch) ||
-        (meal.dietary &&
-          meal.dietary.some((diet) =>
-            diet.toLowerCase().includes(lowerCaseSearch)
-          ))
-    );
-
-    setFilteredMeals(filtered);
-  }, [searchTerm]);
 
   return (
     <div className="flex flex-col h-full">
@@ -64,7 +60,7 @@ export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
       {/* Search input */}
       <div className="mb-4 relative">
         <div className="relative">
-          <input
+          <FormField
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -89,69 +85,165 @@ export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
       </div>
 
       {/* Meal list */}
-      <div className="flex-1 overflow-y-auto pr-2 -mr-2">
+      <div
+        className="flex-1 overflow-y-auto pr-2 -mr-2"
+        ref={listRef}
+        style={{ minHeight: 200, maxHeight: 400 }}
+      >
         {filteredMeals.length > 0 ? (
           <div className="grid grid-cols-1 gap-2">
-            {filteredMeals.map((meal, index) => (
+            {filteredMeals.map((meal) => (
               <div
-                key={index}
-                className="p-3 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg cursor-pointer transition-colors"
+                key={meal.id}
+                className="group relative rounded-xl border-2 transition-all duration-300 cursor-pointer overflow-hidden bg-gradient-to-r from-slate-700/80 to-slate-600/80 border-slate-500/60 hover:border-blue-400/60 hover:shadow-md hover:shadow-blue-400/10"
                 onClick={() => onSelectMeal(meal)}
               >
-                <div className="flex justify-between items-center">
-                  <h3 className="font-medium text-white">{meal.name}</h3>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`inline-block rounded-md px-2 py-1 text-xs ${
-                        meal.mealType === "breakfast"
-                          ? "bg-yellow-900/60 text-yellow-200"
-                          : meal.mealType === "lunch"
-                          ? "bg-blue-900/60 text-blue-200"
-                          : meal.mealType === "dinner"
-                          ? "bg-purple-900/60 text-purple-200"
-                          : meal.mealType === "snack"
-                          ? "bg-green-900/60 text-green-200"
-                          : "bg-pink-900/60 text-pink-200"
-                      }`}
-                    >
-                      {meal.mealType.charAt(0).toUpperCase() +
-                        meal.mealType.slice(1)}
-                    </span>
-                    <span
-                      className={`inline-block rounded-md px-2 py-1 text-xs ${
-                        meal.difficulty === "easy"
-                          ? "bg-green-900/40 text-green-300"
-                          : meal.difficulty === "medium"
-                          ? "bg-orange-900/40 text-orange-300"
-                          : "bg-red-900/40 text-red-300"
-                      }`}
-                    >
-                      {meal.difficulty.charAt(0).toUpperCase() +
-                        meal.difficulty.slice(1)}
-                    </span>
+                <div className="p-3 flex items-center gap-3 relative z-10">
+                  {/* Meal Image with Overlay */}
+                  <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-slate-600 flex-shrink-0 shadow-md">
+                    {meal.imageUrl ? (
+                      <>
+                        <Image
+                          src={meal.imageUrl}
+                          alt={meal.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          width={48}
+                          height={48}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-600 to-slate-700">
+                        <Icon
+                          icon="mdi:food"
+                          className="w-5 h-5 text-slate-300 group-hover:text-blue-400 transition-colors"
+                        />
+                      </div>
+                    )}
                   </div>
-                </div>
-                <div className="mt-1 flex flex-wrap gap-1">
-                  {meal.dietary && meal.dietary.length > 0 && (
-                    <>
-                      {meal.dietary.slice(0, 3).map((diet, idx) => (
-                        <span key={idx} className="text-xs text-zinc-400">
-                          {diet.charAt(0).toUpperCase() + diet.slice(1)}
-                          {idx < Math.min(meal.dietary.length, 3) - 1
-                            ? ", "
-                            : ""}
+
+                  {/* Meal Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between mb-1">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-bold text-base text-white truncate group-hover:text-blue-300 transition-colors">
+                          {meal.name}
+                        </h4>
+                      </div>
+                    </div>
+
+                    {/* Meal Details Row */}
+                    <div className="flex items-center gap-3 mb-1">
+                      {/* Type Badge */}
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                        <span className="text-xs font-medium text-slate-200 capitalize">
+                          {meal.mealType}
                         </span>
-                      ))}
-                      {meal.dietary.length > 3 && (
-                        <span className="text-xs text-zinc-400">
-                          +{meal.dietary.length - 3} more
-                        </span>
+                      </div>
+
+                      {/* Difficulty Badge */}
+                      <div
+                        className={`px-1.5 py-0.5 rounded text-xs font-bold uppercase tracking-wide ${
+                          meal.difficulty === "easy"
+                            ? "bg-emerald-500/30 text-emerald-300"
+                            : meal.difficulty === "medium"
+                            ? "bg-amber-500/30 text-amber-300"
+                            : "bg-red-500/30 text-red-300"
+                        }`}
+                      >
+                        {meal.difficulty.charAt(0).toUpperCase()}
+                      </div>
+
+                      {/* Preparation Time */}
+                      <div className="flex items-center gap-0.5 text-xs text-slate-300">
+                        <Icon icon="mdi:clock-outline" className="w-3 h-3" />
+                        {meal.preparationTime}m
+                      </div>
+
+                      {/* Calories */}
+                      <div className="flex items-center gap-0.5 text-xs text-slate-300">
+                        <Icon
+                          icon="mdi:fire"
+                          className="w-3 h-3 text-orange-400"
+                        />
+                        {meal.calories}
+                      </div>
+                    </div>
+
+                    {/* Dietary Tags */}
+                    {meal.dietary && meal.dietary.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {meal.dietary.slice(0, 2).map((diet, idx) => (
+                          <span
+                            key={idx}
+                            className="px-1.5 py-0.5 bg-slate-600/60 rounded text-xs text-slate-300 font-medium"
+                          >
+                            {diet}
+                          </span>
+                        ))}
+                        {meal.dietary.length > 2 && (
+                          <span className="px-1.5 py-0.5 bg-slate-600/60 rounded text-xs text-slate-300 font-medium">
+                            +{meal.dietary.length - 2}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Media Indicators */}
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      {meal.imageUrl && (
+                        <div className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-500/20">
+                          <Icon
+                            icon="mdi:image"
+                            className="w-2.5 h-2.5 text-blue-400"
+                          />
+                        </div>
                       )}
-                    </>
-                  )}
+                      {meal.videoUrl && (
+                        <div className="flex items-center justify-center w-5 h-5 rounded-full bg-purple-500/20">
+                          <Icon
+                            icon="mdi:video"
+                            className="w-2.5 h-2.5 text-purple-400"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
+            {isLoading && (
+              <div className="flex justify-center py-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#FF6B00]/30 border-t-[#FF6B00]" />
+              </div>
+            )}
+            {!isLoading && filteredMeals.length === 0 && (
+              <div className="flex flex-col items-center justify-center h-48 text-center">
+                <Icon
+                  icon="mdi:food-off"
+                  className="w-12 h-12 text-zinc-600 mb-2"
+                />
+                <p className="text-zinc-400">
+                  No meals found{searchTerm ? ` matching "${searchTerm}"` : ""}
+                </p>
+                <Button
+                  variant="secondary"
+                  size="small"
+                  onClick={() => setSearchTerm("")}
+                  className="mt-2 h-8 px-3"
+                >
+                  Clear search
+                </Button>
+              </div>
+            )}
+          </div>
+        ) : isLoading ? (
+          <div className="flex flex-col items-center justify-center h-48 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#FF6B00]/30 border-t-[#FF6B00] mb-4"></div>
+            <p className="text-gray-400 text-lg">Loading meals...</p>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-48 text-center">
@@ -160,7 +252,7 @@ export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
               className="w-12 h-12 text-zinc-600 mb-2"
             />
             <p className="text-zinc-400">
-              No meals found matching "{searchTerm}"
+              No meals found{searchTerm ? ` matching "${searchTerm}"` : ""}
             </p>
             <Button
               variant="secondary"
@@ -177,8 +269,7 @@ export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
       {/* Footer */}
       <div className="mt-4 pt-4 border-t border-zinc-700 flex justify-between">
         <div className="text-sm text-zinc-400">
-          {filteredMeals.length} meal
-          {filteredMeals.length !== 1 ? "s" : ""} found
+          {totalCount} meal{totalCount !== 1 ? "s" : ""} found
         </div>
         <Button
           variant="secondary"

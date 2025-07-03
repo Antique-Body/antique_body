@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import exerciseLibrary from "./exerciseLibrary.json";
 
 import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/common/FormField";
 import { InfoBanner } from "@/components/common/InfoBanner";
 
 export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
@@ -60,7 +61,7 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
       {/* Search input */}
       <div className="mb-4 relative">
         <div className="relative">
-          <input
+          <FormField
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

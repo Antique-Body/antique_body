@@ -1,14 +1,14 @@
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
+import { createPlan } from "@/utils/planService";
 
 export const useNutritionPlanForm = () => {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     // Step 1: Basic Info
     title: "",
     description: "",
-    summary: "",
-    targetAudience: "",
-    targetGoal: "weight-loss",
     coverImage: null,
     price: "",
     duration: "",
@@ -37,8 +37,6 @@ export const useNutritionPlanForm = () => {
     keyFeatures: [""],
     planSchedule: [""],
     timeline: [{ week: "", title: "", description: "" }],
-    frequency: "",
-    adaptability: "",
 
     // Additional nutrition-specific fields
     mealTypes: [],
@@ -47,6 +45,8 @@ export const useNutritionPlanForm = () => {
     cookingTime: "",
     difficultyLevel: "beginner",
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const updateFormData = (updates) => {
     setFormData((prev) => {
@@ -76,7 +76,6 @@ export const useNutritionPlanForm = () => {
         return (
           formData.title.trim() &&
           formData.description.trim() &&
-          formData.targetGoal &&
           formData.price &&
           formData.duration &&
           formData.durationType
@@ -106,22 +105,42 @@ export const useNutritionPlanForm = () => {
   };
 
   const handleSubmit = async () => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+
     try {
-      // Here you would submit to your API
-      console.log("Submitting nutrition plan:", formData);
+      // Prepare the data for submission - eksplicitno definiram polja
+      const submitData = {
+        title: formData.title,
+        description: formData.description,
+        coverImage: formData.coverImage,
+        price: formData.price,
+        duration: formData.duration,
+        durationType: formData.durationType,
+        nutritionInfo: formData.nutritionInfo,
+        keyFeatures: formData.keyFeatures.filter((f) => f.trim()),
+        planSchedule: formData.planSchedule.filter((s) => s.trim()),
+        timeline: formData.timeline.filter(
+          (t) => t.week.trim() && t.title.trim()
+        ),
+        mealTypes: formData.mealTypes,
+        dietaryRestrictions: formData.dietaryRestrictions,
+        supplementRecommendations: formData.supplementRecommendations,
+        cookingTime: formData.cookingTime,
+        difficultyLevel: formData.difficultyLevel,
+      };
 
-      // Example API call:
-      // const response = await fetch("/api/nutrition-plans", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(formData),
-      // });
+      // KORISTI planService
+      await createPlan(submitData, "nutrition");
 
-      // if (response.ok) {
-      //   router.push("/trainer/dashboard/plans");
-      // }
+      // Redirect to plans page
+      router.push("/trainer/dashboard/plans");
     } catch (error) {
       console.error("Error submitting nutrition plan:", error);
+      alert("Failed to save nutrition plan: " + error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -176,6 +195,7 @@ export const useNutritionPlanForm = () => {
     updateFormData,
     handleSubmit,
     isValid,
+    isSubmitting,
     addDay,
     addCheatDay,
     updateDay,

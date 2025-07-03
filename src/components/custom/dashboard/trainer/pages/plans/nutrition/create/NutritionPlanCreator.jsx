@@ -6,14 +6,15 @@ import { useState } from "react";
 import { MobileStepHeader } from "../../training/create/components/MobileStepHeader";
 import { NavigationButtons } from "../../training/create/components/NavigationButtons";
 import { StepIndicator } from "../../training/create/components/StepIndicator";
+
 import { BasicInfo } from "./steps/BasicInfo";
-import { MealPlanning } from "./steps/MealPlanning";
 import { Features } from "./steps/Features";
+import { MealPlanning } from "./steps/MealPlanning";
 import { Preview } from "./steps/Preview";
 
 import { Card } from "@/components/common";
 import { BackButton } from "@/components/common/BackButton";
-import { useNutritionPlanForm } from "@/hooks/trainer/useNutritionPlanForm";
+import { useNutritionPlanForm } from "@/hooks/useNutritionPlanForm";
 
 const STEPS = [
   { id: "basic", label: "Basic Info", icon: "mdi:information" },
@@ -25,7 +26,7 @@ const STEPS = [
 export const NutritionPlanCreator = () => {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
-  const { formData, updateFormData, handleSubmit, isValid } =
+  const { formData, updateFormData, handleSubmit, isValid, isSubmitting } =
     useNutritionPlanForm();
 
   const handleNext = () => {
@@ -99,6 +100,8 @@ export const NutritionPlanCreator = () => {
               onNext={handleNext}
               isNextDisabled={!isValid(currentStep)}
               isLastStep={currentStep === STEPS.length - 1}
+              isLoading={isSubmitting}
+              planType="nutrition"
             />
           </div>
         </Card>

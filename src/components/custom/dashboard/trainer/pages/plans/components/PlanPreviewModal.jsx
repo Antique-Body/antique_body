@@ -3,15 +3,19 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
 
-import mockDetails from "../data/mockDetails";
-
 import { Button } from "@/components/common/Button";
 import { Modal } from "@/components/common/Modal";
 import { generatePlanPDF } from "@/utils/pdfGenerator";
 
 export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState("overview");
-  const [activeDay, setActiveDay] = useState("monday");
+  const [activeDay, setActiveDay] = useState(
+    plan?.weeklySchedule &&
+      Array.isArray(plan.weeklySchedule) &&
+      plan.weeklySchedule.length > 0
+      ? plan.weeklySchedule[0].day
+      : null
+  );
   const [isDownloading, setIsDownloading] = useState(false);
 
   if (!plan) return null;
@@ -26,6 +30,25 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
     clientCount = 0,
     price,
     weeklySchedule,
+    summary,
+    targetAudience,
+    keyFeatures,
+    schedule,
+    averageRating,
+    successRate,
+    testimonial,
+    // Nutrition-specific fields
+    nutritionInfo,
+    mealTypes,
+    dietaryRestrictions,
+    supplementRecommendations,
+    cookingTime,
+    // Training-specific fields
+    trainingType,
+    sessionsPerWeek,
+    sessionFormat,
+    difficultyLevel,
+    features, // Training plan features
   } = plan;
 
   const isNutrition = planType === "nutrition";
@@ -36,34 +59,9 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
     day: "numeric",
   });
 
-  // Prepare mockDetails data based on plan type
-  const planDetails = {
-    overview: {
-      ...mockDetails.overview,
-      targetAudience: isNutrition
-        ? mockDetails.overview.targetAudience.nutrition
-        : mockDetails.overview.targetAudience.training,
-    },
-    schedule: {
-      ...mockDetails.schedule,
-      weeks: isNutrition
-        ? mockDetails.schedule.weeks.nutrition
-        : mockDetails.schedule.weeks.training,
-      frequency: isNutrition
-        ? mockDetails.schedule.frequency.nutrition
-        : mockDetails.schedule.frequency.training,
-    },
-    clients: {
-      activeCount: clientCount,
-      ...mockDetails.clients,
-    },
-  };
-
   const handleDownloadPDF = async () => {
     try {
       setIsDownloading(true);
-
-      // Collect only the essential data for the PDF
       const pdfData = {
         title,
         description,
@@ -71,16 +69,14 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
         duration,
         createdAt: formattedDate,
         image,
-        overview: planDetails.overview,
+        summary,
+        targetAudience,
+        keyFeatures,
         weeklySchedule,
-        schedule: planDetails.schedule,
+        schedule,
       };
-
       const success = await generatePlanPDF(pdfData);
-
       if (success) {
-        // You could add a toast notification here if you have a toast component
-        // eslint-disable-next-line no-console
         console.log("PDF generated successfully");
       }
     } catch (error) {
@@ -92,24 +88,18 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
 
   const tabs = [
     { id: "overview", label: "Overview" },
+    { id: "details", label: "Plan Details" },
     { id: "schedule", label: "Schedule & Timeline" },
     { id: "weekly", label: "Weekly Schedule" },
-    { id: "clients", label: "Client Stats" },
-  ];
-
-  const days = [
-    { id: "monday", label: "Monday" },
-    { id: "tuesday", label: "Tuesday" },
-    { id: "wednesday", label: "Wednesday" },
-    { id: "thursday", label: "Thursday" },
-    { id: "friday", label: "Friday" },
-    { id: "saturday", label: "Saturday" },
-    { id: "sunday", label: "Sunday" },
+    { id: "stats", label: "Statistics" },
   ];
 
   // Render exercise item for training plan
   const renderExerciseItem = (exercise, index) => (
-    <div key={exercise.id} className="mb-4 rounded-lg bg-[#1a1a1a] p-4">
+    <div
+      key={exercise.id || index}
+      className="mb-4 rounded-lg bg-[#1a1a1a] p-4"
+    >
       <div className="flex items-start justify-between">
         <div>
           <h4 className="font-medium text-white">
@@ -180,14 +170,15 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
         <div className="mb-2">
           <span className="text-sm text-gray-500">Ingredients:</span>
           <div className="mt-1 flex flex-wrap gap-1.5">
-            {meal.ingredients.map((ingredient, idx) => (
-              <span
-                key={idx}
-                className="rounded-md bg-[#333] px-2 py-0.5 text-xs text-gray-300"
-              >
-                {typeof ingredient === "string" ? ingredient : "Item"}
-              </span>
-            ))}
+            {meal.ingredients &&
+              meal.ingredients.map((ingredient, idx) => (
+                <span
+                  key={idx}
+                  className="rounded-md bg-[#333] px-2 py-0.5 text-xs text-gray-300"
+                >
+                  {typeof ingredient === "string" ? ingredient : "Item"}
+                </span>
+              ))}
           </div>
         </div>
         <div className="text-sm text-gray-400">
@@ -200,50 +191,349 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
 
   // Render daily schedule content based on plan type
   const renderDailySchedule = () => {
-    if (!weeklySchedule || !weeklySchedule[activeDay]) {
+    if (
+      !weeklySchedule ||
+      !Array.isArray(weeklySchedule) ||
+      weeklySchedule.length === 0
+    ) {
       return (
-        <div className="rounded-lg border border-[#333] bg-[#1A1A1A] p-4 text-center">
+        <div className="rounded-lg border border-[#333] bg-[#1A1A1A] p-6 text-center">
+          <Icon
+            icon={
+              isNutrition
+                ? "heroicons:no-symbol"
+                : "heroicons:exclamation-triangle"
+            }
+            className="w-12 h-12 text-gray-500 mx-auto mb-3"
+          />
+          <p className="text-gray-400">No schedule available for this day.</p>
+          <p className="text-sm text-gray-500 mt-1">
+            Configure your weekly schedule in the plan settings.
+          </p>
+        </div>
+      );
+    }
+    const daySchedule = weeklySchedule.find((d) => d.day === activeDay);
+    if (!daySchedule) {
+      return (
+        <div className="rounded-lg border border-[#333] bg-[#1A1A1A] p-6 text-center">
+          <Icon
+            icon={
+              isNutrition
+                ? "heroicons:no-symbol"
+                : "heroicons:exclamation-triangle"
+            }
+            className="w-12 h-12 text-gray-500 mx-auto mb-3"
+          />
           <p className="text-gray-400">No schedule available for this day.</p>
         </div>
       );
     }
-
-    const daySchedule = weeklySchedule[activeDay];
-    const dayTitle =
-      daySchedule.title ||
-      `${activeDay.charAt(0).toUpperCase() + activeDay.slice(1)}`;
-
+    const dayTitle = daySchedule.name || daySchedule.day;
     return (
       <div>
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-xl font-semibold text-white">{dayTitle}</h3>
+          {daySchedule.isRestDay && (
+            <span className="rounded-full bg-green-900/20 px-3 py-1 text-sm text-green-400">
+              Rest Day
+            </span>
+          )}
         </div>
-
         {isNutrition ? (
-          // Render nutrition meals
           <div className="space-y-2">
             {daySchedule.meals && daySchedule.meals.length > 0 ? (
               daySchedule.meals.map((meal) => renderMealItem(meal))
             ) : (
-              <p className="text-gray-400">No meals scheduled for this day.</p>
+              <div className="rounded-lg border border-[#333] bg-[#1A1A1A] p-4 text-center">
+                <p className="text-gray-400">
+                  No meals scheduled for this day.
+                </p>
+              </div>
             )}
           </div>
         ) : (
-          // Render training exercises
           <div className="space-y-2">
             {daySchedule.exercises && daySchedule.exercises.length > 0 ? (
               daySchedule.exercises.map((exercise, index) =>
                 renderExerciseItem(exercise, index)
               )
             ) : (
-              <p className="text-gray-400">
-                No exercises scheduled for this day.
-              </p>
+              <div className="rounded-lg border border-[#333] bg-[#1A1A1A] p-4 text-center">
+                <p className="text-gray-400">
+                  No exercises scheduled for this day.
+                </p>
+              </div>
             )}
           </div>
         )}
       </div>
     );
+  };
+
+  // Render plan-specific details
+  const renderPlanDetails = () => {
+    if (isNutrition) {
+      return (
+        <div className="space-y-6">
+          {/* Nutrition Info */}
+          {nutritionInfo && (
+            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
+              <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                <Icon
+                  icon="heroicons:beaker-20-solid"
+                  className="w-5 h-5 text-green-400"
+                />
+                Nutrition Information
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {nutritionInfo.dailyCalories && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Daily Calories:</span>
+                    <span className="text-white font-medium">
+                      {nutritionInfo.dailyCalories} kcal
+                    </span>
+                  </div>
+                )}
+                {nutritionInfo.macroRatio && (
+                  <div className="col-span-full">
+                    <span className="text-gray-400 block mb-2">
+                      Macro Ratio:
+                    </span>
+                    <div className="flex gap-3">
+                      <span className="bg-blue-900/20 text-blue-400 px-2 py-1 rounded text-sm">
+                        Protein: {nutritionInfo.macroRatio.protein}%
+                      </span>
+                      <span className="bg-green-900/20 text-green-400 px-2 py-1 rounded text-sm">
+                        Carbs: {nutritionInfo.macroRatio.carbs}%
+                      </span>
+                      <span className="bg-yellow-900/20 text-yellow-400 px-2 py-1 rounded text-sm">
+                        Fats: {nutritionInfo.macroRatio.fats}%
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Meal Types */}
+          {mealTypes && mealTypes.length > 0 && (
+            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Meal Types
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {mealTypes.map((type, index) => (
+                  <span
+                    key={index}
+                    className="bg-[#FF6B00]/20 text-[#FF6B00] px-3 py-1 rounded-full text-sm"
+                  >
+                    {type}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Dietary Restrictions */}
+          {dietaryRestrictions && dietaryRestrictions.length > 0 && (
+            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Dietary Restrictions
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {dietaryRestrictions.map((restriction, index) => (
+                  <span
+                    key={index}
+                    className="bg-red-900/20 text-red-400 px-3 py-1 rounded-full text-sm"
+                  >
+                    {restriction}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Cooking Time */}
+          {cookingTime && (
+            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Preparation Time
+              </h3>
+              <p className="text-gray-300">{cookingTime}</p>
+            </div>
+          )}
+
+          {/* Supplement Recommendations */}
+          {supplementRecommendations && (
+            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Supplement Recommendations
+              </h3>
+              <p className="text-gray-300">{supplementRecommendations}</p>
+            </div>
+          )}
+
+          {/* Difficulty Level */}
+          {difficultyLevel && (
+            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Difficulty Level
+              </h3>
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  difficultyLevel.toLowerCase() === "beginner"
+                    ? "bg-green-900/20 text-green-400"
+                    : difficultyLevel.toLowerCase() === "intermediate"
+                    ? "bg-yellow-900/20 text-yellow-400"
+                    : "bg-red-900/20 text-red-400"
+                }`}
+              >
+                {difficultyLevel}
+              </span>
+            </div>
+          )}
+        </div>
+      );
+    } else {
+      // Training plan details
+      return (
+        <div className="space-y-6">
+          {/* Training Type */}
+          {trainingType && (
+            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
+              <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                <Icon
+                  icon="heroicons:bolt-20-solid"
+                  className="w-5 h-5 text-blue-400"
+                />
+                Training Type
+              </h3>
+              <p className="text-gray-300">{trainingType}</p>
+            </div>
+          )}
+
+          {/* Sessions Per Week */}
+          {sessionsPerWeek && (
+            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Sessions Per Week
+              </h3>
+              <p className="text-[#FF6B00] text-2xl font-bold">
+                {sessionsPerWeek}
+              </p>
+            </div>
+          )}
+
+          {/* Difficulty Level */}
+          {difficultyLevel && (
+            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Difficulty Level
+              </h3>
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  difficultyLevel.toLowerCase() === "beginner"
+                    ? "bg-green-900/20 text-green-400"
+                    : difficultyLevel.toLowerCase() === "intermediate"
+                    ? "bg-yellow-900/20 text-yellow-400"
+                    : "bg-red-900/20 text-red-400"
+                }`}
+              >
+                {difficultyLevel}
+              </span>
+            </div>
+          )}
+
+          {/* Session Format */}
+          {sessionFormat && (
+            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Session Format
+              </h3>
+              <div className="space-y-2">
+                {typeof sessionFormat === "object" ? (
+                  <>
+                    {sessionFormat.duration && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Duration:</span>
+                        <span className="text-white">
+                          {sessionFormat.duration}
+                        </span>
+                      </div>
+                    )}
+                    {sessionFormat.structure && (
+                      <div>
+                        <span className="text-gray-400 block mb-1">
+                          Structure:
+                        </span>
+                        <p className="text-gray-300">
+                          {sessionFormat.structure}
+                        </p>
+                      </div>
+                    )}
+                    {sessionFormat.equipment && (
+                      <div>
+                        <span className="text-gray-400 block mb-1">
+                          Equipment:
+                        </span>
+                        <p className="text-gray-300">
+                          {sessionFormat.equipment}
+                        </p>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-gray-300">{sessionFormat}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Training Features */}
+          {features && (
+            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
+              <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                <Icon
+                  icon="heroicons:star-20-solid"
+                  className="w-5 h-5 text-[#FF6B00]"
+                />
+                Training Features
+              </h3>
+              {Array.isArray(features) ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {features.map((feature, index) => (
+                    <div key={index} className="flex items-start gap-2">
+                      <Icon
+                        icon="heroicons:check-circle-20-solid"
+                        className="w-[18px] h-[18px] text-[#FF6B00] mt-0.5 flex-shrink-0"
+                      />
+                      <span className="text-gray-300">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : typeof features === "object" ? (
+                <div className="space-y-3">
+                  {Object.entries(features).map(([key, value]) => (
+                    <div key={key}>
+                      <span className="text-gray-400 block mb-1 capitalize">
+                        {key.replace(/([A-Z])/g, " $1")}:
+                      </span>
+                      <p className="text-gray-300">
+                        {Array.isArray(value) ? value.join(", ") : value}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-300">{features}</p>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
   };
 
   return (
@@ -420,26 +710,57 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
                     Description
                   </h3>
                   <p className="text-gray-300">
-                    {planDetails.overview.summary}
+                    {summary || description || "No description available."}
                   </p>
                 </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-3">
-                    Key Features
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {planDetails.overview.keyFeatures.map((feature, index) => (
-                      <div key={index} className="flex items-start gap-2">
-                        <Icon
-                          icon="heroicons:check-circle-20-solid"
-                          className="w-[18px] h-[18px] text-[#FF6B00] mt-0.5 flex-shrink-0"
-                        />
-                        <span className="text-gray-300">{feature}</span>
-                      </div>
-                    ))}
+                {keyFeatures && keyFeatures.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-3">
+                      Key Features
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {keyFeatures.map((feature, index) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <Icon
+                            icon="heroicons:check-circle-20-solid"
+                            className="w-[18px] h-[18px] text-[#FF6B00] mt-0.5 flex-shrink-0"
+                          />
+                          <span className="text-gray-300">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
+                {/* Training Level prikaz */}
+                {difficultyLevel && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-3">
+                      Training Level
+                    </h3>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        difficultyLevel.toLowerCase() === "beginner"
+                          ? "bg-green-900/20 text-green-400"
+                          : difficultyLevel.toLowerCase() === "intermediate"
+                          ? "bg-yellow-900/20 text-yellow-400"
+                          : "bg-red-900/20 text-red-400"
+                      }`}
+                    >
+                      {difficultyLevel}
+                    </span>
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* Plan Details tab */}
+            {activeTab === "details" && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {renderPlanDetails()}
               </motion.div>
             )}
 
@@ -456,26 +777,30 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
                     Timeline Structure
                   </h3>
                   <div className="space-y-4">
-                    {planDetails.schedule.weeks.map((week, index) => (
-                      <div key={index} className="relative pl-8">
-                        <div className="absolute left-0 top-0 w-6 h-6 rounded-full bg-[#FF6B00]/20 flex items-center justify-center">
-                          <span className="text-xs font-medium text-[#FF6B00]">
-                            {index + 1}
-                          </span>
+                    {schedule &&
+                    Array.isArray(schedule) &&
+                    schedule.length > 0 ? (
+                      schedule.map((week, index) => (
+                        <div key={index} className="relative pl-8">
+                          <div className="absolute left-0 top-0 w-6 h-6 rounded-full bg-[#FF6B00]/20 flex items-center justify-center">
+                            <span className="text-xs font-medium text-[#FF6B00]">
+                              {index + 1}
+                            </span>
+                          </div>
+                          {index !== schedule.length - 1 && (
+                            <div className="absolute left-3 top-6 w-0.5 h-full max-h-12 bg-[#333]"></div>
+                          )}
+                          <div>
+                            <h4 className="text-white font-medium">
+                              {week.name || `Week ${index + 1}`}
+                            </h4>
+                            <p className="text-gray-300">{week.description}</p>
+                          </div>
                         </div>
-                        {index !== planDetails.schedule.weeks.length - 1 && (
-                          <div className="absolute left-3 top-6 w-0.5 h-full max-h-12 bg-[#333]"></div>
-                        )}
-                        <div>
-                          <h4 className="text-white font-medium">{week}</h4>
-                          <p className="text-sm text-gray-400 mt-1">
-                            {isNutrition
-                              ? "Focus on building consistent eating patterns and introducing key nutritional concepts."
-                              : "Gradually increase intensity and volume while maintaining proper form and technique."}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                      ))
+                    ) : (
+                      <p className="text-gray-400">No schedule available.</p>
+                    )}
                   </div>
                 </div>
               </motion.div>
@@ -489,103 +814,69 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
                 transition={{ duration: 0.3 }}
                 className="space-y-6"
               >
-                {/* Day selection tabs */}
-                <div className="mb-4 overflow-x-auto">
-                  <div className="flex space-x-2 pb-2">
-                    {days.map((day) => (
-                      <button
-                        key={day.id}
-                        onClick={() => setActiveDay(day.id)}
-                        className={`px-3 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap
-                                                    ${
-                                                      activeDay === day.id
-                                                        ? isNutrition
-                                                          ? "bg-green-900/30 text-green-300"
-                                                          : "bg-blue-900/30 text-blue-300"
-                                                        : "bg-[#222] text-gray-400 hover:text-white"
-                                                    }
-                                                `}
-                      >
-                        {day.label}
-                      </button>
-                    ))}
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-4">
+                    Weekly Schedule
+                  </h3>
+                  <div className="flex space-x-2 overflow-x-auto">
+                    {weeklySchedule &&
+                      Array.isArray(weeklySchedule) &&
+                      weeklySchedule.length > 0 &&
+                      weeklySchedule.map((day) => (
+                        <button
+                          key={day.day}
+                          onClick={() => setActiveDay(day.day)}
+                          className={`py-2 px-4 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
+                            activeDay === day.day
+                              ? "bg-[#FF6B00] text-white"
+                              : "bg-[#1A1A1A] text-gray-400 hover:text-white"
+                          }`}
+                        >
+                          {day.name || day.day}
+                        </button>
+                      ))}
                   </div>
+                  <div className="mt-4">{renderDailySchedule()}</div>
                 </div>
-
-                {/* Daily schedule content */}
-                {renderDailySchedule()}
               </motion.div>
             )}
 
-            {/* Clients tab */}
-            {activeTab === "clients" && (
+            {/* Statistics tab */}
+            {activeTab === "stats" && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
                 className="space-y-6"
               >
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-4 text-center">
-                    <Icon
-                      icon="heroicons:users-20-solid"
-                      className="w-6 h-6 text-[#FF6B00] mx-auto mb-2"
-                    />
-                    <div className="text-2xl font-bold text-white mb-1">
-                      {clientCount}
-                    </div>
-                    <div className="text-sm text-gray-400">Active Clients</div>
-                  </div>
-
-                  <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-4 text-center">
-                    <div className="text-[#FF6B00] mx-auto mb-2 text-2xl">
-                      %
-                    </div>
-                    <div className="text-2xl font-bold text-white mb-1">
-                      {planDetails.clients.successRate}
-                    </div>
-                    <div className="text-sm text-gray-400">Success Rate</div>
-                  </div>
-
-                  <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-4 text-center">
-                    <div className="flex justify-center mb-2">
-                      {[...Array(5)].map((_, i) => (
-                        <Icon
-                          key={i}
-                          icon="heroicons:star-20-solid"
-                          className={`w-5 h-5 ${
-                            i < Math.floor(planDetails.clients.averageRating)
-                              ? "text-[#FF6B00]"
-                              : "text-gray-600"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <div className="text-2xl font-bold text-white mb-1">
-                      {planDetails.clients.averageRating}
-                    </div>
-                    <div className="text-sm text-gray-400">Average Rating</div>
-                  </div>
-                </div>
-
-                <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
+                <div>
                   <h3 className="text-lg font-semibold text-white mb-4">
-                    Client Testimonial
+                    Statistics
                   </h3>
-                  <div className="relative">
-                    <div className="absolute left-4 top-0 text-4xl text-[#FF6B00]/20">
-                      "
-                    </div>
-                    <blockquote className="pl-8 pr-8 relative z-10">
-                      <p className="text-gray-300 italic mb-3">
-                        {planDetails.clients.testimonial.text}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
+                      <h4 className="text-white font-medium mb-2">
+                        Average Rating
+                      </h4>
+                      <p className="text-[#FF6B00] text-2xl font-bold">
+                        {averageRating || "N/A"}
                       </p>
-                      <footer className="text-sm text-gray-400">
-                        — {planDetails.clients.testimonial.author}
-                      </footer>
-                    </blockquote>
-                    <div className="absolute right-4 bottom-0 text-4xl text-[#FF6B00]/20">
-                      "
+                    </div>
+                    <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
+                      <h4 className="text-white font-medium mb-2">
+                        Success Rate
+                      </h4>
+                      <p className="text-[#FF6B00] text-2xl font-bold">
+                        {successRate || "N/A"}
+                      </p>
+                    </div>
+                    <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
+                      <h4 className="text-white font-medium mb-2">
+                        Testimonial
+                      </h4>
+                      <p className="text-gray-300">
+                        {testimonial || "No testimonial available."}
+                      </p>
                     </div>
                   </div>
                 </div>

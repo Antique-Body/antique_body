@@ -374,6 +374,7 @@ export const ExerciseModal = ({
 
   // Handle exercise selection from library
   const handleSelectExerciseFromLibrary = (libraryExercise) => {
+    console.log(libraryExercise, "libraryExercise");
     setFormData({
       ...formData,
       name: libraryExercise.name,
