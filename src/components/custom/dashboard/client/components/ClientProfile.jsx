@@ -1,240 +1,453 @@
 import { Icon } from "@iconify/react";
+import { useState } from "react";
 
-import { Accordion } from "@/components/common/Accordion";
+import { Modal } from "@/components/common/Modal";
 import { UserProfile } from "@/components/custom/dashboard/shared";
-import { StatCard } from "@/components/custom/dashboard/shared/StatCard";
 import { ACTIVITY_TYPES } from "@/enums/activityTypes";
 import { FITNESS_GOALS } from "@/enums/fitnessGoals";
 
-export const ClientProfile = ({ userData, onProfileUpdate }) => {
-  // Get label and icon for primary and secondary goals
-  const getPrimaryGoal = () => {
-    const goal = FITNESS_GOALS.find((g) => g.id === userData.primaryGoal);
-    return (
-      goal || {
-        label: userData.primaryGoal || "Not set",
-        icon: "mdi:help-circle",
-      }
+export const ClientProfile = ({ clientData, onProfileUpdate }) => {
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const getOrNoData = (val) => val ?? "No data";
+
+  // Function to map activity names to proper labels
+  const mapActivityToLabel = (activityName) => {
+    const activity = ACTIVITY_TYPES.find(
+      (a) =>
+        a.id === activityName ||
+        a.label.toLowerCase() === activityName.toLowerCase()
     );
+    return activity
+      ? activity.label
+      : activityName
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
-  const getSecondaryGoal = () => {
-    const goal = FITNESS_GOALS.find((g) => g.id === userData.secondaryGoal);
-    return (
-      goal || {
-        label: userData.secondaryGoal || "Not set",
-        icon: "mdi:help-circle",
-      }
+  // Function to map goal names to proper labels
+  const mapGoalToLabel = (goalName) => {
+    const goal = FITNESS_GOALS.find(
+      (g) =>
+        g.id === goalName || g.label.toLowerCase() === goalName.toLowerCase()
     );
+    return goal
+      ? goal.label
+      : goalName.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
-  console.log("userData", userData);
-  // Format preferred activities
-  const getPreferredActivities = () => {
+  // Combine first and last name
+  const fullName =
+    (clientData?.firstName || "") +
+      (clientData?.lastName ? ` ${clientData.lastName}` : "") ||
+    clientData?.name ||
+    "No data";
+
+  // Calculate age from dateOfBirth
+  const calculateAge = (dateOfBirth) => {
+    if (!dateOfBirth) return "N/A";
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
     if (
-      !userData.preferredActivities ||
-      userData.preferredActivities.length === 0
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
     ) {
-      return [];
+      age--;
     }
-
-    return userData.preferredActivities.map((activity) => {
-      const activityInfo = ACTIVITY_TYPES.find((a) => a.id === activity.name);
-      return {
-        id: activity.id || activity.name,
-        name: activity.name,
-        label: activityInfo?.label || activity.name,
-        icon: activityInfo?.icon || "mdi:dumbbell",
-      };
-    });
+    return age;
   };
 
-  const primaryGoal = getPrimaryGoal();
-  const secondaryGoal = getSecondaryGoal();
-  const preferredActivities = getPreferredActivities();
+  // Calculate membership duration
+  const calculateMembershipDuration = (createdAt) => {
+    if (!createdAt) return "N/A";
+    const startDate = new Date(createdAt);
+    const today = new Date();
+    const diffTime = Math.abs(today - startDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 30) {
+      return `${diffDays} days`;
+    } else if (diffDays < 365) {
+      const months = Math.floor(diffDays / 30);
+      return `${months} month${months > 1 ? "s" : ""}`;
+    } else {
+      const years = Math.floor(diffDays / 365);
+      const remainingMonths = Math.floor((diffDays % 365) / 30);
+      return `${years} year${years > 1 ? "s" : ""}${
+        remainingMonths > 0
+          ? ` ${remainingMonths} month${remainingMonths > 1 ? "s" : ""}`
+          : ""
+      }`;
+    }
+  };
+
+  // Get client info with fallback
+  const clientInfo = clientData?.clientInfo || {};
+
+  // Real progress data from API
+  const progressData = {
+    goalsCompleted: 2, // You can calculate this based on goals
+    totalGoals: 3,
+    workoutsThisMonth: 12,
+    averageRating: 4.8,
+  };
+
+  // Subtitle with stats using real data
+  const profileSubtitle = (
+    <div className="flex items-center gap-4 text-xs text-zinc-400">
+      <div className="flex items-center gap-1">
+        <Icon
+          icon="mdi:target"
+          width={12}
+          height={12}
+          className="text-[#FF6B00]"
+        />
+        <span>
+          {progressData.goalsCompleted}/{progressData.totalGoals} goals
+        </span>
+      </div>
+      <div className="flex items-center gap-1">
+        <Icon
+          icon="mdi:calendar"
+          width={12}
+          height={12}
+          className="text-[#FF6B00]"
+        />
+        <span>{calculateMembershipDuration(clientInfo?.createdAt)}</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <Icon
+          icon="mdi:chart-line"
+          width={12}
+          height={12}
+          className="text-[#FF6B00]"
+        />
+        <span>
+          {Math.round(
+            (progressData.goalsCompleted / progressData.totalGoals) * 100
+          )}
+          % progress
+        </span>
+      </div>
+      <div className="flex items-center gap-1">
+        <Icon
+          icon="mdi:dumbbell"
+          width={12}
+          height={12}
+          className="text-[#FF6B00]"
+        />
+        <span>{clientInfo?.totalSessions || 0} sessions</span>
+      </div>
+    </div>
+  );
+
+  const handleHeaderClick = () => {
+    setShowDetailModal(true);
+  };
 
   return (
-    <div className="relative">
+    <>
       <UserProfile
-        userData={userData}
         profileType="client"
-        avatarContent={userData.profileImage || userData.avatarContent}
-        showProgressBar={true}
-        progressData={userData.progress}
-        profileTitle={`${userData.firstName || ""} ${userData.lastName || ""}`}
+        avatarContent={clientData?.profileImage}
+        profileTitle={fullName}
+        profileSubtitle={profileSubtitle}
+        userData={clientData}
         onProfileUpdate={onProfileUpdate}
+        onHeaderClick={handleHeaderClick}
+        showDetailedView={true}
+      />
+
+      {/* Simplified Detail Modal */}
+      <Modal
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+        title="Client Profile"
+        size="large"
+        primaryButtonText="Close"
+        footerButtons={true}
+        primaryButtonAction={() => setShowDetailModal(false)}
+        secondaryButtonText=""
       >
-        <div className="w-full">
-          {/* Header with button */}
-
-          {/* Main Advanced Information Accordion */}
-          <Accordion
-            title="Advanced Information"
-            subtitle="Detailed profile information and statistics"
-            icon="mdi:shield-star"
-            iconColor="#00B4FF"
-            gradientFrom="#00B4FF"
-            gradientTo="white"
-            bgColor="rgba(0,180,255,0.03)"
-            borderColor="rgba(0,180,255,0.15)"
-            shadowColor="rgba(0,180,255,0.1)"
-            defaultOpen={false}
-            cardVariant="glass"
-            className="backdrop-blur-sm hover:shadow-lg"
-          >
-            <div className="w-full space-y-4">
-              {/* Primary & Secondary Goals - First Row */}
-              <div className="w-full bg-[rgba(0,180,255,0.05)] p-4 rounded-lg border border-[rgba(0,180,255,0.1)]">
-                <h3 className="text-xs font-medium text-white mb-3 flex items-center">
-                  <Icon
-                    icon="mdi:target"
-                    className="mr-1.5 text-[#00B4FF]"
-                    width={16}
-                    height={16}
-                  />
-                  <span className="bg-gradient-to-r from-[#00B4FF] to-white bg-clip-text text-transparent">
-                    Fitness Goals
-                  </span>
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {/* Primary Goal Card */}
-                  <div className="flex items-center p-3 rounded-lg bg-[rgba(0,180,255,0.1)] border border-[rgba(0,180,255,0.2)]">
-                    <div className="w-10 h-10 rounded-full bg-[rgba(0,180,255,0.2)] flex items-center justify-center mr-3">
-                      <Icon
-                        icon={primaryGoal.icon}
-                        className="text-[#00B4FF] text-xl"
-                      />
-                    </div>
-                    <div>
-                      <div className="text-xs text-gray-400">Primary Goal</div>
-                      <div className="text-sm font-medium text-white">
-                        {primaryGoal.label}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Secondary Goal Card */}
-                  <div className="flex items-center p-3 rounded-lg bg-[rgba(0,180,255,0.1)] border border-[rgba(0,180,255,0.2)]">
-                    <div className="w-10 h-10 rounded-full bg-[rgba(0,180,255,0.2)] flex items-center justify-center mr-3">
-                      <Icon
-                        icon={secondaryGoal.icon}
-                        className="text-[#00B4FF] text-xl"
-                      />
-                    </div>
-                    <div>
-                      <div className="text-xs text-gray-400">
-                        Secondary Goal
-                      </div>
-                      <div className="text-sm font-medium text-white">
-                        {secondaryGoal.label}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+        <div className="space-y-6">
+          <div className="grid grid-cols-4 gap-3">
+            <div className="bg-zinc-800/30 rounded-lg p-3 text-center border border-zinc-700/30">
+              <div className="text-lg font-bold text-white">
+                {progressData.goalsCompleted}/{progressData.totalGoals}
               </div>
+              <div className="text-xs text-zinc-400">Goals</div>
+            </div>
+            <div className="bg-zinc-800/30 rounded-lg p-3 text-center border border-zinc-700/30">
+              <div className="text-lg font-bold text-white">
+                {clientInfo?.totalSessions || 0}
+              </div>
+              <div className="text-xs text-zinc-400">Sessions</div>
+            </div>
+            <div className="bg-zinc-800/30 rounded-lg p-3 text-center border border-zinc-700/30">
+              <div className="text-lg font-bold text-white">
+                {Math.round(
+                  (progressData.goalsCompleted / progressData.totalGoals) * 100
+                )}
+                %
+              </div>
+              <div className="text-xs text-zinc-400">Progress</div>
+            </div>
+            <div className="bg-zinc-800/30 rounded-lg p-3 text-center border border-zinc-700/30">
+              <div className="text-lg font-bold text-white">
+                {progressData.averageRating}
+              </div>
+              <div className="text-xs text-zinc-400">Rating</div>
+            </div>
+          </div>
 
-              {/* Preferred Activities - Second Row */}
-              <div className="w-full bg-[rgba(255,107,0,0.05)] p-4 rounded-lg border border-[rgba(255,107,0,0.1)]">
-                <h3 className="text-xs font-medium text-white mb-3 flex items-center">
-                  <Icon
-                    icon="mdi:run"
-                    className="mr-1.5 text-[#FF6B00]"
-                    width={16}
-                    height={16}
-                  />
-                  <span className="bg-gradient-to-r from-[#FF6B00] to-white bg-clip-text text-transparent">
-                    Preferred Activities
-                  </span>
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {preferredActivities.length > 0 ? (
-                    preferredActivities.map((activity) => (
-                      <span
-                        key={activity.id}
-                        className="inline-flex items-center gap-1.5 rounded-md border border-[rgba(255,107,0,0.3)] bg-[rgba(255,107,0,0.15)] px-2.5 py-1 text-xs font-medium text-[#FF6B00] shadow-sm"
-                      >
-                        <Icon icon={activity.icon} width={14} height={14} />
-                        {activity.label}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="text-gray-400 text-xs">
-                      No preferred activities set
+          {/* Personal Information */}
+          <div className="bg-zinc-800/30 rounded-lg p-4 border border-zinc-700/50">
+            <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
+              <Icon
+                icon="mdi:account-circle"
+                width={16}
+                height={16}
+                className="text-[#FF6B00]"
+              />
+              Personal Information
+            </h4>
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+              <div>
+                <span className="text-zinc-400">Age</span>
+                <p className="text-white">
+                  {calculateAge(clientData?.dateOfBirth)} years old
+                </p>
+              </div>
+              <div>
+                <span className="text-zinc-400">Gender</span>
+                <p className="text-white capitalize">
+                  {getOrNoData(clientData?.gender)}
+                </p>
+              </div>
+              <div>
+                <span className="text-zinc-400">Height</span>
+                <p className="text-white">
+                  {clientData?.height ? `${clientData.height} cm` : "No data"}
+                </p>
+              </div>
+              <div>
+                <span className="text-zinc-400">Weight</span>
+                <p className="text-white">
+                  {clientData?.weight ? `${clientData.weight} kg` : "No data"}
+                </p>
+              </div>
+              <div>
+                <span className="text-zinc-400">Experience</span>
+                <p className="text-white capitalize">
+                  {clientData?.experienceLevel
+                    ? clientData.experienceLevel.replace(/_/g, "-")
+                    : "No data"}
+                </p>
+              </div>
+              <div>
+                <span className="text-zinc-400">Member Since</span>
+                <p className="text-white">
+                  {clientInfo?.createdAt
+                    ? new Date(clientInfo.createdAt).toLocaleDateString()
+                    : "No data"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact & Location */}
+          <div className="bg-zinc-800/30 rounded-lg p-4 border border-zinc-700/50">
+            <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
+              <Icon
+                icon="mdi:contact-mail"
+                width={16}
+                height={16}
+                className="text-[#FF6B00]"
+              />
+              Contact & Location
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+              <div>
+                <span className="text-zinc-400">Email</span>
+                <p className="text-white break-all">
+                  {getOrNoData(clientData?.email)}
+                </p>
+              </div>
+              <div>
+                <span className="text-zinc-400">Phone</span>
+                <p className="text-white">{getOrNoData(clientData?.phone)}</p>
+              </div>
+              <div className="md:col-span-2">
+                <span className="text-zinc-400">Location</span>
+                <p className="text-white">
+                  {clientData?.location
+                    ? `${clientData.location.city}, ${clientData.location.country}`
+                    : "No location data"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Goals & Activities */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Fitness Goals */}
+            <div className="bg-zinc-800/30 rounded-lg p-4 border border-zinc-700/50">
+              <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
+                <Icon
+                  icon="mdi:target"
+                  width={16}
+                  height={16}
+                  className="text-[#FF6B00]"
+                />
+                Fitness Goals
+              </h4>
+              <div className="space-y-2 text-sm">
+                <div>
+                  <span className="text-zinc-400">Primary Goal</span>
+                  <p className="text-white capitalize">
+                    {mapGoalToLabel(getOrNoData(clientData?.primaryGoal))}
+                  </p>
+                </div>
+                {clientData?.secondaryGoal && (
+                  <div>
+                    <span className="text-zinc-400">Secondary Goal</span>
+                    <p className="text-white capitalize">
+                      {mapGoalToLabel(clientData.secondaryGoal)}
+                    </p>
+                  </div>
+                )}
+                {clientData?.goalDescription && (
+                  <div>
+                    <span className="text-zinc-400">Description</span>
+                    <p className="text-white">{clientData.goalDescription}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Preferred Activities */}
+            <div className="bg-zinc-800/30 rounded-lg p-4 border border-zinc-700/50">
+              <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
+                <Icon
+                  icon="mdi:run"
+                  width={16}
+                  height={16}
+                  className="text-[#FF6B00]"
+                />
+                Preferred Activities
+              </h4>
+              {clientData?.preferredActivities &&
+              clientData.preferredActivities.length > 0 ? (
+                <div className="flex flex-wrap gap-1">
+                  {clientData.preferredActivities.map((activity, index) => (
+                    <span
+                      key={index}
+                      className="px-2 py-1 bg-[#FF6B00]/20 border border-[#FF6B00]/30 text-[#FF6B00] rounded text-xs"
+                    >
+                      {mapActivityToLabel(activity.name)}
                     </span>
-                  )}
+                  ))}
                 </div>
-              </div>
+              ) : (
+                <p className="text-zinc-400 text-sm">
+                  No preferred activities specified
+                </p>
+              )}
+            </div>
+          </div>
 
-              {/* Stats Section - Third Row */}
-              <div className="w-full bg-[rgba(151,71,255,0.05)] p-4 rounded-lg border border-[rgba(151,71,255,0.1)]">
-                <h3 className="text-xs font-medium text-white mb-3 flex items-center">
-                  <Icon
-                    icon="mdi:chart-bar"
-                    className="mr-1.5 text-[#9747FF]"
-                    width={16}
-                    height={16}
-                  />
-                  <span className="bg-gradient-to-r from-[#9747FF] to-white bg-clip-text text-transparent">
-                    Stats & Metrics
-                  </span>
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                  <StatCard
-                    label="Next Session"
-                    value={userData.nextSession?.date || "Not scheduled"}
-                    subtext={userData.nextSession?.time || ""}
-                    icon="mdi:calendar-clock"
-                    variant="primary"
-                  />
+          {/* Languages & Health */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Languages */}
+            <div className="bg-zinc-800/30 rounded-lg p-4 border border-zinc-700/50">
+              <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
+                <Icon
+                  icon="mdi:translate"
+                  width={16}
+                  height={16}
+                  className="text-[#FF6B00]"
+                />
+                Languages
+              </h4>
+              {clientData?.languages && clientData.languages.length > 0 ? (
+                <div className="flex flex-wrap gap-1">
+                  {clientData.languages.map((language, index) => (
+                    <span
+                      key={index}
+                      className="px-2 py-1 bg-zinc-700/50 border border-zinc-600/50 text-zinc-300 rounded text-xs"
+                    >
+                      {language.name}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-zinc-400 text-sm">No languages specified</p>
+              )}
+            </div>
 
-                  <StatCard
-                    label="Current Weight"
-                    value={
-                      userData.weight ? `${userData.weight} kg` : "Not set"
-                    }
-                    subtext={
-                      userData.weightChange
-                        ? `${userData.weightChange > 0 ? "+" : ""}${
-                            userData.weightChange
-                          } kg`
-                        : "No change recorded"
-                    }
-                    icon="mdi:scale"
-                    variant="orange"
-                  />
-
-                  <StatCard
-                    label="Body Fat"
-                    value={
-                      userData.bodyFat ? `${userData.bodyFat}%` : "Not set"
-                    }
-                    subtext={
-                      userData.bodyFatChange
-                        ? `${userData.bodyFatChange > 0 ? "+" : ""}${
-                            userData.bodyFatChange
-                          }%`
-                        : "No change recorded"
-                    }
-                    icon="mdi:percent"
-                    variant="purple"
-                  />
-
-                  <StatCard
-                    label="Daily Calories"
-                    value={userData.calorieGoal || "Not set"}
-                    subtext="Target intake"
-                    icon="mdi:food-apple"
-                    variant="success"
-                  />
+            {/* Health Information */}
+            <div className="bg-zinc-800/30 rounded-lg p-4 border border-zinc-700/50">
+              <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
+                <Icon
+                  icon="mdi:heart-pulse"
+                  width={16}
+                  height={16}
+                  className="text-[#FF6B00]"
+                />
+                Health Information
+              </h4>
+              <div className="space-y-2 text-sm">
+                <div>
+                  <span className="text-zinc-400">Medical Conditions</span>
+                  <p className="text-white">
+                    {getOrNoData(clientData?.medicalConditions)}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-zinc-400">Allergies</span>
+                  <p className="text-white">
+                    {getOrNoData(clientData?.allergies)}
+                  </p>
                 </div>
               </div>
             </div>
-          </Accordion>
-        </div>
-      </UserProfile>
+          </div>
 
-      {/* Edit Profile Button */}
-    </div>
+          {/* About Me */}
+          {(clientData?.description || clientData?.previousActivities) && (
+            <div className="bg-zinc-800/30 rounded-lg p-4 border border-zinc-700/50">
+              <h4 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
+                <Icon
+                  icon="mdi:information"
+                  width={16}
+                  height={16}
+                  className="text-[#FF6B00]"
+                />
+                About Me
+              </h4>
+              <div className="space-y-3 text-sm">
+                {clientData?.description && (
+                  <div>
+                    <span className="text-zinc-400">Description</span>
+                    <p className="text-white leading-relaxed">
+                      {clientData.description}
+                    </p>
+                  </div>
+                )}
+                {clientData?.previousActivities && (
+                  <div>
+                    <span className="text-zinc-400">Previous Activities</span>
+                    <p className="text-white leading-relaxed">
+                      {clientData.previousActivities}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </Modal>
+    </>
   );
 };

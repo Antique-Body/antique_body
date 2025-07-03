@@ -327,7 +327,7 @@ export const FormField = ({
     };
 
     return (
-      <div className={`mb-4 ${className}`}>
+      <div className={`mb-3 sm:mb-4 ${className}`}>
         <LabelComponent htmlFor={id || name} />
         {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
 
@@ -604,7 +604,7 @@ export const FormField = ({
     );
 
     return (
-      <div className={`mb-4 ${className}`}>
+      <div className={`mb-3 sm:mb-4 ${className}`}>
         <LabelComponent htmlFor={id || name} />
         {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
         <div className="relative">
@@ -651,7 +651,7 @@ export const FormField = ({
   if (type === "select") {
     // Standard select
     return (
-      <div className={`mb-4 ${className}`}>
+      <div className={`mb-3 sm:mb-4 ${className}`}>
         <LabelComponent htmlFor={id || name} />
         {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
         <div className="relative">
@@ -691,7 +691,7 @@ export const FormField = ({
 
   if (type === "textarea") {
     return (
-      <div className={`mb-4 ${className}`}>
+      <div className={`mb-3 sm:mb-4 ${className}`}>
         <LabelComponent htmlFor={id || name} />
         {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
         <textarea {...inputProps} className={inputClass} rows={rows}></textarea>
@@ -708,7 +708,7 @@ export const FormField = ({
   // If type is date, use our custom DatePicker
   if (type === "date") {
     return (
-      <div className={`mb-4 ${className}`}>
+      <div className={`mb-3 sm:mb-4 ${className}`}>
         <LabelComponent htmlFor={id || name} />
         {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
         <DatePicker
@@ -730,7 +730,7 @@ export const FormField = ({
   }
 
   return (
-    <div className={`mb-4 ${className}`}>
+    <div className={`mb-3 sm:mb-4 ${className}`}>
       <LabelComponent htmlFor={id || name} />
       {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
       <div className="relative">
