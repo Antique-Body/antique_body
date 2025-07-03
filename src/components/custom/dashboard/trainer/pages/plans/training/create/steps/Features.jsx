@@ -4,7 +4,6 @@ import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 
 import { FormField } from "@/components/common/FormField";
-import { Button } from "@/components/common/Button";
 
 const FEATURE_OPTIONS = [
   {

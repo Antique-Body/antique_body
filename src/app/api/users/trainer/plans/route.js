@@ -105,7 +105,6 @@ export async function POST(req) {
           timeline: body.timeline,
           nutritionInfo: body.nutritionInfo || null,
           mealTypes: body.mealTypes || null,
-          dietaryRestrictions: body.dietaryRestrictions || null,
           supplementRecommendations: body.supplementRecommendations || null,
           cookingTime: body.cookingTime || null,
           targetGoal: body.targetGoal || null,
@@ -148,8 +147,7 @@ export async function POST(req) {
 
 // Helper to infer plan type if not provided
 function inferPlanType(body) {
-  if (body.nutritionInfo || body.mealTypes || body.dietaryRestrictions)
-    return "nutrition";
+  if (body.nutritionInfo || body.mealTypes) return "nutrition";
   return "training";
 }
 

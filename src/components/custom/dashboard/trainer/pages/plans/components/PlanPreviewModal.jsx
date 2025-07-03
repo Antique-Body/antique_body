@@ -1,7 +1,7 @@
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { Button } from "@/components/common/Button";
 import { Modal } from "@/components/common/Modal";
@@ -9,16 +9,29 @@ import { SESSION_FORMATS } from "@/enums/sessionFormats";
 import { TRAINING_TYPES } from "@/enums/trainingTypes";
 import { generatePlanPDF } from "@/utils/pdfGenerator";
 
-export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
+export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
   const [activeTab, setActiveTab] = useState("overview");
-  const [activeDay, setActiveDay] = useState(
-    plan?.weeklySchedule &&
-      Array.isArray(plan.weeklySchedule) &&
-      plan.weeklySchedule.length > 0
-      ? plan.weeklySchedule[0].day
-      : null
-  );
+  const [activeDay, setActiveDay] = useState(null);
   const [isDownloading, setIsDownloading] = useState(false);
+
+  const isNutrition = type === "nutrition";
+
+  // Set first day as default when plan/days/type/schedule changes
+  useEffect(() => {
+    let firstDay = null;
+    if (isNutrition) {
+      const dayArr = days || plan?.days || [];
+      if (dayArr.length > 0) {
+        firstDay = dayArr[0].day || dayArr[0].name;
+      }
+    } else {
+      const schedArr = plan?.schedule || [];
+      if (schedArr.length > 0) {
+        firstDay = schedArr[0].day || schedArr[0].name;
+      }
+    }
+    setActiveDay(firstDay);
+  }, [isNutrition, days, plan, plan?.schedule]);
 
   if (!plan) return null;
 
@@ -27,20 +40,17 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
     description,
     image,
     createdAt,
-    planType,
     duration,
     clientCount = 0,
     price,
-    weeklySchedule,
     keyFeatures,
     schedule,
+
     averageRating,
     successRate,
     testimonial,
     // Nutrition-specific fields
     nutritionInfo,
-    mealTypes,
-    dietaryRestrictions,
     supplementRecommendations,
     cookingTime,
     // Training-specific fields
@@ -49,9 +59,8 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
     sessionFormat,
     difficultyLevel,
     features, // Training plan features
+    timeline,
   } = plan;
-
-  const isNutrition = planType === "nutrition";
 
   const formattedDate = new Date(createdAt).toLocaleDateString("en-US", {
     year: "numeric",
@@ -73,18 +82,15 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
       const pdfData = {
         title,
         description,
-        planType,
         duration,
         createdAt: formattedDate,
         image,
         keyFeatures,
-        weeklySchedule,
         schedule,
         overview, // Add overview property
       };
       const success = await generatePlanPDF(pdfData);
       if (success) {
-        console.log("PDF generated successfully");
       }
     } catch (error) {
       console.error("Error generating PDF:", error);
@@ -96,193 +102,79 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
   const tabs = [
     { id: "overview", label: "Overview" },
     { id: "details", label: "Plan Details" },
-    { id: "schedule", label: "Schedule & Timeline" },
+    { id: "schedule", label: "Timeline" },
     { id: "weekly", label: "Weekly Schedule" },
     { id: "stats", label: "Statistics" },
   ];
 
-  // Render exercise item for training plan
-  const renderExerciseItem = (exercise, index) => (
-    <div
-      key={exercise.id || index}
-      className="mb-4 rounded-lg bg-[#1a1a1a] p-4"
-    >
-      <div className="flex items-start justify-between">
-        <div>
-          <h4 className="font-medium text-white">
-            {index + 1}. {exercise.name}
-          </h4>
-          <div className="mt-1 flex flex-wrap gap-2 text-sm">
-            <span className="rounded-md bg-[rgba(255,107,0,0.15)] px-2 py-0.5 text-[#FF6B00]">
-              {exercise.sets} sets
-            </span>
-            <span className="rounded-md bg-[rgba(59,130,246,0.15)] px-2 py-0.5 text-blue-500">
-              {exercise.reps} reps
-            </span>
-            <span className="rounded-md bg-[rgba(234,179,8,0.15)] px-2 py-0.5 text-yellow-500">
-              {exercise.rest} rest
-            </span>
-          </div>
-        </div>
-      </div>
-      {exercise.notes && (
-        <div className="mt-2 text-sm text-gray-400">
-          <span className="text-gray-500">Notes:</span> {exercise.notes}
-        </div>
-      )}
-    </div>
-  );
-
-  // Render meal item for nutrition plan
-  const renderMealItem = (meal) => (
-    <div key={meal.id} className="mb-4 rounded-lg bg-[#1a1a1a] p-4">
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <h4 className="font-medium text-white">{meal.name}</h4>
-            <span className="rounded-md bg-[rgba(255,107,0,0.2)] px-2 py-0.5 text-xs text-[#FF6B00]">
-              {meal.time}
-            </span>
-            <span
-              className={`rounded-md px-2 py-0.5 text-xs ${
-                meal.type === "breakfast"
-                  ? "bg-yellow-900/20 text-yellow-400"
-                  : meal.type === "lunch"
-                  ? "bg-green-900/20 text-green-400"
-                  : meal.type === "dinner"
-                  ? "bg-blue-900/20 text-blue-400"
-                  : "bg-purple-900/20 text-purple-400"
-              }`}
-            >
-              {meal.type.charAt(0).toUpperCase() + meal.type.slice(1)}
-            </span>
-          </div>
-          <div className="mt-2 flex flex-wrap gap-2 text-sm">
-            <span className="rounded-md bg-[rgba(255,107,0,0.15)] px-2 py-0.5 text-[#FF6B00]">
-              {meal.calories} kcal
-            </span>
-            <span className="rounded-md bg-[rgba(59,130,246,0.15)] px-2 py-0.5 text-blue-500">
-              P: {meal.protein}g
-            </span>
-            <span className="rounded-md bg-[rgba(34,197,94,0.15)] px-2 py-0.5 text-green-500">
-              C: {meal.carbs}g
-            </span>
-            <span className="rounded-md bg-[rgba(234,179,8,0.15)] px-2 py-0.5 text-yellow-500">
-              F: {meal.fat}g
-            </span>
-          </div>
-        </div>
-      </div>
-      <div className="mt-3">
-        <div className="mb-2">
-          <span className="text-sm text-gray-500">Ingredients:</span>
-          <div className="mt-1 flex flex-wrap gap-1.5">
-            {meal.ingredients &&
-              meal.ingredients.map((ingredient, idx) => (
-                <span
-                  key={idx}
-                  className="rounded-md bg-[#333] px-2 py-0.5 text-xs text-gray-300"
-                >
-                  {typeof ingredient === "string" ? ingredient : "Item"}
-                </span>
-              ))}
-          </div>
-        </div>
-        <div className="text-sm text-gray-400">
-          <span className="text-gray-500">Instructions:</span>{" "}
-          {meal.instructions}
-        </div>
-      </div>
-    </div>
-  );
-
-  // Render daily schedule content based on plan type
-  const renderDailySchedule = () => {
-    if (
-      !weeklySchedule ||
-      !Array.isArray(weeklySchedule) ||
-      weeklySchedule.length === 0
-    ) {
-      return (
-        <div className="rounded-lg border border-[#333] bg-[#1A1A1A] p-6 text-center">
-          <Icon
-            icon={
-              isNutrition
-                ? "heroicons:no-symbol"
-                : "heroicons:exclamation-triangle"
-            }
-            className="w-12 h-12 text-gray-500 mx-auto mb-3"
-          />
-          <p className="text-gray-400">No schedule available for this day.</p>
-          <p className="text-sm text-gray-500 mt-1">
-            Configure your weekly schedule in the plan settings.
-          </p>
-        </div>
-      );
-    }
-    const daySchedule = weeklySchedule.find((d) => d.day === activeDay);
-    if (!daySchedule) {
-      return (
-        <div className="rounded-lg border border-[#333] bg-[#1A1A1A] p-6 text-center">
-          <Icon
-            icon={
-              isNutrition
-                ? "heroicons:no-symbol"
-                : "heroicons:exclamation-triangle"
-            }
-            className="w-12 h-12 text-gray-500 mx-auto mb-3"
-          />
-          <p className="text-gray-400">No schedule available for this day.</p>
-        </div>
-      );
-    }
-    const dayTitle = daySchedule.name || daySchedule.day;
-    return (
-      <div>
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-xl font-semibold text-white">{dayTitle}</h3>
-          {daySchedule.isRestDay && (
-            <span className="rounded-full bg-green-900/20 px-3 py-1 text-sm text-green-400">
-              Rest Day
-            </span>
-          )}
-        </div>
-        {isNutrition ? (
-          <div className="space-y-2">
-            {daySchedule.meals && daySchedule.meals.length > 0 ? (
-              daySchedule.meals.map((meal) => renderMealItem(meal))
-            ) : (
-              <div className="rounded-lg border border-[#333] bg-[#1A1A1A] p-4 text-center">
-                <p className="text-gray-400">
-                  No meals scheduled for this day.
-                </p>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {daySchedule.exercises && daySchedule.exercises.length > 0 ? (
-              daySchedule.exercises.map((exercise, index) =>
-                renderExerciseItem(exercise, index)
-              )
-            ) : (
-              <div className="rounded-lg border border-[#333] bg-[#1A1A1A] p-4 text-center">
-                <p className="text-gray-400">
-                  No exercises scheduled for this day.
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    );
-  };
-
   // Render plan-specific details
   const renderPlanDetails = () => {
     if (isNutrition) {
+      // Izračunaj prosječno vrijeme kuhanja po danima ako postoji
+      let averageCookingTime = null;
+      if (plan.days && Array.isArray(plan.days) && plan.days.length > 0) {
+        const times = plan.days
+          .map((d) => parseInt(d.cookingTime, 10))
+          .filter((t) => !isNaN(t));
+        if (times.length > 0) {
+          averageCookingTime = Math.round(
+            times.reduce((a, b) => a + b, 0) / times.length
+          );
+        }
+      }
+
       return (
         <div className="space-y-6">
+          {/* Supplement Recommendations */}
+          {supplementRecommendations && (
+            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Supplement Recommendations
+              </h3>
+              <p className="text-gray-300">{supplementRecommendations}</p>
+            </div>
+          )}
+
+          {/* Duration */}
+          {duration && (
+            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Duration
+              </h3>
+              <p className="text-gray-300">{duration}</p>
+            </div>
+          )}
+
+          {/* Cooking Time (from plan) */}
+          {cookingTime && (
+            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Preparation Time
+              </h3>
+              <p className="text-gray-300">{cookingTime}</p>
+            </div>
+          )}
+
+          {/* Average Cooking Time (from days) */}
+          {averageCookingTime && (
+            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Average Cooking Time (per day)
+              </h3>
+              <p className="text-gray-300">{averageCookingTime} min</p>
+            </div>
+          )}
+
+          {/* Target Goal */}
+          {plan.targetGoal && (
+            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Target Goal
+              </h3>
+              <p className="text-gray-300">{plan.targetGoal}</p>
+            </div>
+          )}
+
           {/* Nutrition Info */}
           {nutritionInfo && (
             <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
@@ -294,111 +186,39 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
                 Nutrition Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {nutritionInfo.dailyCalories && (
+                {nutritionInfo.calories && (
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Daily Calories:</span>
+                    <span className="text-gray-400">Calories:</span>
                     <span className="text-white font-medium">
-                      {nutritionInfo.dailyCalories} kcal
+                      {nutritionInfo.calories} kcal
                     </span>
                   </div>
                 )}
-                {nutritionInfo.macroRatio && (
-                  <div className="col-span-full">
-                    <span className="text-gray-400 block mb-2">
-                      Macro Ratio:
+                {nutritionInfo.protein && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Protein:</span>
+                    <span className="text-white font-medium">
+                      {nutritionInfo.protein} g
                     </span>
-                    <div className="flex gap-3">
-                      <span className="bg-blue-900/20 text-blue-400 px-2 py-1 rounded text-sm">
-                        Protein: {nutritionInfo.macroRatio.protein}%
-                      </span>
-                      <span className="bg-green-900/20 text-green-400 px-2 py-1 rounded text-sm">
-                        Carbs: {nutritionInfo.macroRatio.carbs}%
-                      </span>
-                      <span className="bg-yellow-900/20 text-yellow-400 px-2 py-1 rounded text-sm">
-                        Fats: {nutritionInfo.macroRatio.fats}%
-                      </span>
-                    </div>
+                  </div>
+                )}
+                {nutritionInfo.carbs && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Carbs:</span>
+                    <span className="text-white font-medium">
+                      {nutritionInfo.carbs} g
+                    </span>
+                  </div>
+                )}
+                {nutritionInfo.fats && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Fats:</span>
+                    <span className="text-white font-medium">
+                      {nutritionInfo.fats} g
+                    </span>
                   </div>
                 )}
               </div>
-            </div>
-          )}
-
-          {/* Meal Types */}
-          {mealTypes && mealTypes.length > 0 && (
-            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
-              <h3 className="text-lg font-semibold text-white mb-3">
-                Meal Types
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {mealTypes.map((type, index) => (
-                  <span
-                    key={index}
-                    className="bg-[#FF6B00]/20 text-[#FF6B00] px-3 py-1 rounded-full text-sm"
-                  >
-                    {type}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Dietary Restrictions */}
-          {dietaryRestrictions && dietaryRestrictions.length > 0 && (
-            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
-              <h3 className="text-lg font-semibold text-white mb-3">
-                Dietary Restrictions
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {dietaryRestrictions.map((restriction, index) => (
-                  <span
-                    key={index}
-                    className="bg-red-900/20 text-red-400 px-3 py-1 rounded-full text-sm"
-                  >
-                    {restriction}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Cooking Time */}
-          {cookingTime && (
-            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
-              <h3 className="text-lg font-semibold text-white mb-3">
-                Preparation Time
-              </h3>
-              <p className="text-gray-300">{cookingTime}</p>
-            </div>
-          )}
-
-          {/* Supplement Recommendations */}
-          {supplementRecommendations && (
-            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
-              <h3 className="text-lg font-semibold text-white mb-3">
-                Supplement Recommendations
-              </h3>
-              <p className="text-gray-300">{supplementRecommendations}</p>
-            </div>
-          )}
-
-          {/* Difficulty Level */}
-          {difficultyLevel && (
-            <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-5">
-              <h3 className="text-lg font-semibold text-white mb-3">
-                Difficulty Level
-              </h3>
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  difficultyLevel.toLowerCase() === "beginner"
-                    ? "bg-green-900/20 text-green-400"
-                    : difficultyLevel.toLowerCase() === "intermediate"
-                    ? "bg-yellow-900/20 text-yellow-400"
-                    : "bg-red-900/20 text-red-400"
-                }`}
-              >
-                {difficultyLevel}
-              </span>
             </div>
           )}
         </div>
@@ -517,7 +337,14 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
               {Array.isArray(features) ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {features.map((feature, index) => (
-                    <div key={index} className="flex items-start gap-2">
+                    <div
+                      key={
+                        typeof feature === "string"
+                          ? feature
+                          : `feature-${index}`
+                      }
+                      className="flex items-start gap-2"
+                    >
                       <Icon
                         icon="heroicons:check-circle-20-solid"
                         className="w-[18px] h-[18px] text-[#FF6B00] mt-0.5 flex-shrink-0"
@@ -529,7 +356,7 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
               ) : typeof features === "object" ? (
                 <div className="space-y-3">
                   {Object.entries(features).map(([key, value]) => (
-                    <div key={key}>
+                    <div key={typeof key === "string" ? key : `key-${key}`}>
                       <span className="text-gray-400 block mb-1 capitalize">
                         {key.replace(/([A-Z])/g, " $1")}:
                       </span>
@@ -733,7 +560,14 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {keyFeatures.map((feature, index) => (
-                        <div key={index} className="flex items-start gap-2">
+                        <div
+                          key={
+                            typeof feature === "string"
+                              ? feature
+                              : `keyfeature-${index}`
+                          }
+                          className="flex items-start gap-2"
+                        >
                           <Icon
                             icon="heroicons:check-circle-20-solid"
                             className="w-[18px] h-[18px] text-[#FF6B00] mt-0.5 flex-shrink-0"
@@ -790,11 +624,99 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
                     Timeline Structure
                   </h3>
                   <div className="space-y-4">
-                    {schedule &&
-                    Array.isArray(schedule) &&
-                    schedule.length > 0 ? (
+                    {/* Prvo prikazujemo timeline ako postoji */}
+                    {timeline &&
+                    Array.isArray(timeline) &&
+                    timeline.length > 0 ? (
+                      timeline.map((item, index) => (
+                        <div
+                          key={item.id ?? item.day ?? `timeline-${index}`}
+                          className="relative pl-8"
+                        >
+                          <div className="absolute left-0 top-0 w-6 h-6 rounded-full bg-[#FF6B00]/20 flex items-center justify-center">
+                            <span className="text-xs font-medium text-[#FF6B00]">
+                              {index + 1}
+                            </span>
+                          </div>
+                          {index !== timeline.length - 1 && (
+                            <div className="absolute left-3 top-6 w-0.5 h-full max-h-12 bg-[#333]"></div>
+                          )}
+                          <div>
+                            <h4 className="text-white font-medium">
+                              {item.title || item.name || `Week ${index + 1}`}
+                            </h4>
+                            <p className="text-gray-300">{item.description}</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : isNutrition ? (
+                      // Za nutrition plan prikazujemo days ili schedule
+                      (days || plan.days || []).length > 0 ? (
+                        (days || plan.days || []).map((day, index) => (
+                          <div
+                            key={
+                              day.id ?? day.day ?? day.name ?? `day-${index}`
+                            }
+                            className="relative pl-8"
+                          >
+                            <div className="absolute left-0 top-0 w-6 h-6 rounded-full bg-[#FF6B00]/20 flex items-center justify-center">
+                              <span className="text-xs font-medium text-[#FF6B00]">
+                                {index + 1}
+                              </span>
+                            </div>
+                            {index !== (days || plan.days || []).length - 1 && (
+                              <div className="absolute left-3 top-6 w-0.5 h-full max-h-12 bg-[#333]"></div>
+                            )}
+                            <div>
+                              <h4 className="text-white font-medium">
+                                {day.name || day.day || `Day ${index + 1}`}
+                              </h4>
+                              <p className="text-gray-300">{day.description}</p>
+                            </div>
+                          </div>
+                        ))
+                      ) : schedule &&
+                        Array.isArray(schedule) &&
+                        schedule.length > 0 ? (
+                        schedule.map((item, index) => (
+                          <div
+                            key={item.id ?? item.day ?? `schedule-${index}`}
+                            className="relative pl-8"
+                          >
+                            <div className="absolute left-0 top-0 w-6 h-6 rounded-full bg-[#FF6B00]/20 flex items-center justify-center">
+                              <span className="text-xs font-medium text-[#FF6B00]">
+                                {index + 1}
+                              </span>
+                            </div>
+                            {index !== schedule.length - 1 && (
+                              <div className="absolute left-3 top-6 w-0.5 h-full max-h-12 bg-[#333]"></div>
+                            )}
+                            <div>
+                              <h4 className="text-white font-medium">
+                                {item.name || `Day ${index + 1}`}
+                              </h4>
+                              <p className="text-gray-300">
+                                {item.description}
+                              </p>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-gray-400">
+                          No timeline or days available.
+                        </p>
+                      )
+                    ) : schedule &&
+                      Array.isArray(schedule) &&
+                      schedule.length > 0 ? (
+                      // Za training plan prikazujemo schedule
                       schedule.map((week, index) => (
-                        <div key={index} className="relative pl-8">
+                        <div
+                          key={
+                            week.id ?? week.day ?? week.name ?? `week-${index}`
+                          }
+                          className="relative pl-8"
+                        >
                           <div className="absolute left-0 top-0 w-6 h-6 rounded-full bg-[#FF6B00]/20 flex items-center justify-center">
                             <span className="text-xs font-medium text-[#FF6B00]">
                               {index + 1}
@@ -812,7 +734,9 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
                         </div>
                       ))
                     ) : (
-                      <p className="text-gray-400">No schedule available.</p>
+                      <p className="text-gray-400">
+                        No timeline or schedule available.
+                      </p>
                     )}
                   </div>
                 </div>
@@ -831,25 +755,349 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose }) => {
                   <h3 className="text-lg font-semibold text-white mb-4">
                     Weekly Schedule
                   </h3>
-                  <div className="flex space-x-2 overflow-x-auto">
-                    {weeklySchedule &&
-                      Array.isArray(weeklySchedule) &&
-                      weeklySchedule.length > 0 &&
-                      weeklySchedule.map((day) => (
-                        <button
-                          key={day.day}
-                          onClick={() => setActiveDay(day.day)}
-                          className={`py-2 px-4 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
-                            activeDay === day.day
-                              ? "bg-[#FF6B00] text-white"
-                              : "bg-[#1A1A1A] text-gray-400 hover:text-white"
-                          }`}
-                        >
-                          {day.name || day.day}
-                        </button>
-                      ))}
+                  <div className="flex space-x-2 overflow-x-auto mb-6">
+                    {/* Nutrition: use days, Training: use schedule */}
+                    {isNutrition
+                      ? (days || plan.days || []).map((day) => (
+                          <button
+                            key={
+                              day.id ??
+                              day.day ??
+                              day.name ??
+                              `daybtn-${day.id || day.day || day.name}`
+                            }
+                            onClick={() => setActiveDay(day.day || day.name)}
+                            className={`py-2 px-4 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
+                              activeDay === (day.day || day.name)
+                                ? "bg-[#FF6B00] text-white"
+                                : "bg-[#1A1A1A] text-gray-400 hover:text-white"
+                            }`}
+                          >
+                            {day.name || day.day}
+                          </button>
+                        ))
+                      : (schedule || plan.schedule || []).map((day) => (
+                          <button
+                            key={
+                              day.id ??
+                              day.day ??
+                              day.name ??
+                              `schedbtn-${day.id || day.day || day.name}`
+                            }
+                            onClick={() => setActiveDay(day.day || day.name)}
+                            className={`py-2 px-4 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
+                              activeDay === (day.day || day.name)
+                                ? "bg-[#FF6B00] text-white"
+                                : "bg-[#1A1A1A] text-gray-400 hover:text-white"
+                            }`}
+                          >
+                            {day.name || day.day}
+                          </button>
+                        ))}
                   </div>
-                  <div className="mt-4">{renderDailySchedule()}</div>
+
+                  {/* Day details */}
+                  <div>
+                    {(() => {
+                      // Find the selected day object
+                      const dayList = isNutrition
+                        ? days || plan.days || []
+                        : schedule || plan.schedule || [];
+                      const selectedDay = dayList.find(
+                        (d) => (d.day || d.name) === activeDay
+                      );
+                      if (!selectedDay) {
+                        return (
+                          <p className="text-gray-400">No data for this day.</p>
+                        );
+                      }
+                      if (selectedDay.isRestDay) {
+                        return (
+                          <div className="bg-[#1A1A1A] rounded-lg border border-[#333] p-6 text-center">
+                            <h4 className="text-xl font-semibold text-[#FF6B00] mb-2">
+                              Rest/Cheat Day
+                            </h4>
+                            <p className="text-gray-300">
+                              {selectedDay.description ||
+                                "Enjoy your rest day!"}
+                            </p>
+                          </div>
+                        );
+                      }
+                      // Nutrition plan: show meals
+                      if (isNutrition) {
+                        if (
+                          !selectedDay.meals ||
+                          selectedDay.meals.length === 0
+                        ) {
+                          return (
+                            <p className="text-gray-400">
+                              No meals for this day.
+                            </p>
+                          );
+                        }
+                        return (
+                          <div className="space-y-8">
+                            {selectedDay.meals.map((meal, index) => (
+                              <div
+                                key={meal.id ?? meal.name ?? `meal-${index}`}
+                                className="bg-[#181818] rounded-lg border border-[#333] p-5"
+                              >
+                                <div className="flex items-center gap-3 mb-4">
+                                  <h5 className="text-lg font-semibold text-white">
+                                    {meal.name}
+                                  </h5>
+                                  {meal.time && (
+                                    <span className="text-xs bg-[#222] text-gray-400 px-2 py-1 rounded-md">
+                                      {meal.time}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                  {meal.options && meal.options.length > 0 ? (
+                                    meal.options.map((option, index) => (
+                                      <div
+                                        key={
+                                          option.id ??
+                                          option.name ??
+                                          `option-${index}`
+                                        }
+                                        className="flex flex-col md:flex-row gap-4 bg-[#222] rounded-md p-4 border border-[#333]"
+                                      >
+                                        {option.imageUrl && (
+                                          <div className="w-full md:w-32 h-32 relative flex-shrink-0">
+                                            <Image
+                                              src={option.imageUrl}
+                                              alt={option.name}
+                                              fill
+                                              className="object-cover rounded-md"
+                                              sizes="128px"
+                                            />
+                                          </div>
+                                        )}
+                                        <div className="flex-1 flex flex-col gap-2">
+                                          <div className="flex items-center gap-2">
+                                            <h6 className="text-md font-bold text-[#FF6B00]">
+                                              {option.name}
+                                            </h6>
+                                          </div>
+                                          <div className="flex flex-wrap gap-2 text-xs text-gray-400">
+                                            <span>
+                                              Protein:{" "}
+                                              <span className="text-white font-medium">
+                                                {option.protein}g
+                                              </span>
+                                            </span>
+                                            <span>
+                                              Carbs:{" "}
+                                              <span className="text-white font-medium">
+                                                {option.carbs}g
+                                              </span>
+                                            </span>
+                                            <span>
+                                              Fat:{" "}
+                                              <span className="text-white font-medium">
+                                                {option.fat}g
+                                              </span>
+                                            </span>
+                                            <span>
+                                              Calories:{" "}
+                                              <span className="text-white font-medium">
+                                                {option.calories}
+                                              </span>
+                                            </span>
+                                          </div>
+                                          {option.description && (
+                                            <div>
+                                              <span className="block text-gray-300 text-sm mb-1 font-semibold">
+                                                Preparation:
+                                              </span>
+                                              <p className="text-gray-300 text-sm whitespace-pre-line">
+                                                {option.description}
+                                              </p>
+                                            </div>
+                                          )}
+                                          {option.ingredients &&
+                                            option.ingredients.length > 0 && (
+                                              <div>
+                                                <span className="block text-gray-300 text-sm mb-1 font-semibold">
+                                                  Ingredients:
+                                                </span>
+                                                <ul className="list-disc list-inside text-gray-400 text-sm">
+                                                  {option.ingredients.map(
+                                                    (ing, idx) => (
+                                                      <li
+                                                        key={
+                                                          typeof ing ===
+                                                          "string"
+                                                            ? `${ing}-${idx}`
+                                                            : idx
+                                                        }
+                                                      >
+                                                        {ing}
+                                                      </li>
+                                                    )
+                                                  )}
+                                                </ul>
+                                              </div>
+                                            )}
+                                        </div>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <p className="text-gray-400">
+                                      No options for this meal.
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
+                      // Training plan: show exercises
+                      if (
+                        selectedDay.exercises &&
+                        selectedDay.exercises.length > 0
+                      ) {
+                        return (
+                          <div className="space-y-8">
+                            {selectedDay.exercises.map((exercise, index) => (
+                              <div
+                                key={
+                                  exercise.id ??
+                                  exercise.name ??
+                                  `exercise-${index}`
+                                }
+                                className="bg-[#181818] rounded-lg border border-[#333] p-5 flex flex-col md:flex-row gap-6"
+                              >
+                                {exercise.imageUrl && (
+                                  <div className="w-full md:w-40 h-40 relative flex-shrink-0">
+                                    <Image
+                                      src={exercise.imageUrl}
+                                      alt={exercise.name}
+                                      fill
+                                      className="object-cover rounded-md"
+                                      sizes="160px"
+                                    />
+                                  </div>
+                                )}
+                                <div className="flex-1 flex flex-col gap-2">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <h5 className="text-lg font-bold text-[#FF6B00]">
+                                      {exercise.name}
+                                    </h5>
+                                    {exercise.level && (
+                                      <span className="text-xs bg-[#222] text-gray-400 px-2 py-1 rounded-md capitalize">
+                                        {exercise.level}
+                                      </span>
+                                    )}
+                                    {exercise.type && (
+                                      <span className="text-xs bg-[#222] text-gray-400 px-2 py-1 rounded-md capitalize">
+                                        {exercise.type}
+                                      </span>
+                                    )}
+                                    {exercise.location && (
+                                      <span className="text-xs bg-[#222] text-gray-400 px-2 py-1 rounded-md capitalize">
+                                        {exercise.location}
+                                      </span>
+                                    )}
+                                    {exercise.equipment !== undefined && (
+                                      <span className="text-xs bg-[#222] text-gray-400 px-2 py-1 rounded-md">
+                                        {exercise.equipment
+                                          ? "Equipment"
+                                          : "No Equipment"}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="flex flex-wrap gap-4 text-sm text-gray-300 mb-2">
+                                    <span>
+                                      Sets:{" "}
+                                      <span className="text-white font-medium">
+                                        {exercise.sets}
+                                      </span>
+                                    </span>
+                                    <span>
+                                      Reps:{" "}
+                                      <span className="text-white font-medium">
+                                        {exercise.reps}
+                                      </span>
+                                    </span>
+                                    <span>
+                                      Rest:{" "}
+                                      <span className="text-white font-medium">
+                                        {exercise.rest} sec
+                                      </span>
+                                    </span>
+                                  </div>
+                                  {exercise.instructions && (
+                                    <div>
+                                      <span className="block text-gray-300 text-sm mb-1 font-semibold">
+                                        Instructions:
+                                      </span>
+                                      <p className="text-gray-300 text-sm whitespace-pre-line">
+                                        {exercise.instructions}
+                                      </p>
+                                    </div>
+                                  )}
+                                  {exercise.muscleGroups &&
+                                    exercise.muscleGroups.length > 0 && (
+                                      <div>
+                                        <span className="block text-gray-300 text-sm mb-1 font-semibold">
+                                          Muscle Groups:
+                                        </span>
+                                        <div className="flex flex-wrap gap-2">
+                                          {exercise.muscleGroups.map(
+                                            (mg, idx) => (
+                                              <span
+                                                key={
+                                                  mg.id ??
+                                                  mg.name ??
+                                                  `mg-${idx}`
+                                                }
+                                                className="bg-[#333] text-gray-200 px-2 py-1 rounded text-xs capitalize"
+                                              >
+                                                {mg.name}
+                                              </span>
+                                            )
+                                          )}
+                                        </div>
+                                      </div>
+                                    )}
+                                  {exercise.tips && (
+                                    <div>
+                                      <span className="block text-gray-300 text-sm mb-1 font-semibold">
+                                        Tips:
+                                      </span>
+                                      <p className="text-gray-300 text-sm whitespace-pre-line">
+                                        {exercise.tips}
+                                      </p>
+                                    </div>
+                                  )}
+                                  {exercise.notes && (
+                                    <div>
+                                      <span className="block text-gray-300 text-sm mb-1 font-semibold">
+                                        Notes:
+                                      </span>
+                                      <p className="text-gray-300 text-sm whitespace-pre-line">
+                                        {exercise.notes}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
+                      // Fallback for training plan: no exercises
+                      return (
+                        <p className="text-gray-400">
+                          No exercises for this day.
+                        </p>
+                      );
+                    })()}
+                  </div>
                 </div>
               </motion.div>
             )}

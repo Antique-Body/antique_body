@@ -41,7 +41,6 @@ const initialFormData = {
 
   // Additional nutrition-specific fields
   mealTypes: [],
-  dietaryRestrictions: [],
   supplementRecommendations: "",
   cookingTime: "",
 };
@@ -179,7 +178,6 @@ export const useNutritionPlanForm = (initialData = null) => {
           (t) => t.week.trim() && t.title.trim()
         ),
         mealTypes: formData.mealTypes,
-        dietaryRestrictions: formData.dietaryRestrictions,
         supplementRecommendations: formData.supplementRecommendations,
         cookingTime: formData.cookingTime,
         targetGoal: formData.targetGoal,

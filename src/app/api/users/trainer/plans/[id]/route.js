@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+
 import { auth } from "#/auth";
 
 const prisma = new PrismaClient();
@@ -38,9 +39,8 @@ export async function GET(req, { params }) {
       return NextResponse.json({ error: "Plan not found" }, { status: 404 });
     }
     // Filter out internal fields before returning
-    const { trainerInfoId, deletedAt, updatedAt, createdAt, ...userPlan } =
-      plan;
-    return NextResponse.json(userPlan);
+    const { ...userPlan } = plan;
+    return NextResponse.json({ ...userPlan, createdAt: plan.createdAt });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -104,16 +104,9 @@ export async function DELETE(req, { params }) {
     }
     let plan;
     if (type === "nutrition") {
-      console.log(
-        "[DELETE] nutrition id:",
-        id,
-        "trainerInfoId:",
-        trainerInfo.id
-      );
       plan = await prisma.nutritionPlan.findUnique({
         where: { id: id, trainerInfoId: trainerInfo.id },
       });
-      console.log("[DELETE] found nutrition plan:", plan);
       if (!plan) {
         return NextResponse.json({ error: "Plan not found" }, { status: 404 });
       }
@@ -122,16 +115,9 @@ export async function DELETE(req, { params }) {
         data: { isActive: false },
       });
     } else {
-      console.log(
-        "[DELETE] training id:",
-        id,
-        "trainerInfoId:",
-        trainerInfo.id
-      );
       plan = await prisma.trainingPlan.findUnique({
         where: { id: id, trainerInfoId: trainerInfo.id },
       });
-      console.log("[DELETE] found training plan:", plan);
       if (!plan) {
         return NextResponse.json({ error: "Plan not found" }, { status: 404 });
       }

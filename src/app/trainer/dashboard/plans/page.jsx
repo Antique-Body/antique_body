@@ -2,10 +2,10 @@
 
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Card } from "@/components/common";
-import { FormField } from "@/components/common/FormField";
 import {
   NutritionPlanIcon,
   PlanManagementIcon,
@@ -17,13 +17,6 @@ import {
   PlanCard,
   TabsComponent,
 } from "@/components/custom/dashboard/trainer/pages/plans/components";
-
-const PLAN_FILTERS = [
-  { id: "all", label: "All Plans", icon: "mdi:view-grid-outline" },
-  { id: "active", label: "Active", icon: "mdi:play-circle-outline" },
-  { id: "draft", label: "Drafts", icon: "mdi:file-document-edit-outline" },
-  { id: "archived", label: "Archived", icon: "mdi:archive-outline" },
-];
 
 const SORT_OPTIONS = [
   { id: "newest", label: "Newest First", icon: "mdi:sort-calendar-descending" },
@@ -38,13 +31,20 @@ const SORT_OPTIONS = [
 
 const PlanManagementPage = () => {
   const [activeTab, setActiveTab] = useState("training");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState("grid"); // grid or list
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const searchParams = useSearchParams();
+
+  // Set activeTab from query param on mount
+  useEffect(() => {
+    const fromTab = searchParams.get("fromTab");
+    if (fromTab === "nutrition" || fromTab === "training") {
+      setActiveTab(fromTab);
+    }
+  }, [searchParams]);
 
   // Refactored fetchPlans function
   const fetchPlans = async () => {
@@ -71,32 +71,15 @@ const PlanManagementPage = () => {
     fetchPlans();
   }, [activeTab]);
 
-  // Filter plans based on active tab and search query
-  const filteredPlans = plans
-    .filter((plan) => {
-      if (activeTab === "training") {
-        return plan.type === "training";
-      } else if (activeTab === "nutrition") {
-        return plan.type === "nutrition";
-      }
-      return true;
-    })
-    .filter((plan) => {
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        return (
-          plan.title.toLowerCase().includes(query) ||
-          plan.description.toLowerCase().includes(query)
-        );
-      }
-      return true;
-    })
-    .filter((plan) => {
-      if (activeFilter === "active") return plan.isActive && plan.isPublished;
-      if (activeFilter === "draft") return !plan.isPublished;
-      if (activeFilter === "archived") return !plan.isActive;
-      return true;
-    });
+  // Filter plans based on active tab
+  const filteredPlans = plans.filter((plan) => {
+    if (activeTab === "training") {
+      return plan.type === "training";
+    } else if (activeTab === "nutrition") {
+      return plan.type === "nutrition";
+    }
+    return true;
+  });
 
   // Sort plans
   const sortedPlans = [...filteredPlans].sort((a, b) => {
@@ -168,27 +151,6 @@ const PlanManagementPage = () => {
 
             {/* Search and Filters */}
             <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-              <div className="relative w-full sm:w-80">
-                <Icon
-                  icon="mdi:magnify"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
-                />
-
-                <FormField
-                  type="text"
-                  placeholder="Search plans by name, description, or type..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className=""
-                  prefixIcon={
-                    <Icon
-                      icon="mdi:magnify"
-                      className="w-5 h-5 text-[#FF7800]"
-                    />
-                  }
-                />
-              </div>
-
               {/* View Mode Toggle */}
               <div className="flex bg-[#1a1a1a] border border-[#333] rounded-xl p-1">
                 <button
@@ -353,23 +315,16 @@ const PlanManagementPage = () => {
           transition={{ delay: 0.3 }}
           className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
         >
-          {/* Filter Pills */}
-          <div className="flex flex-wrap gap-2">
-            {PLAN_FILTERS.map((filter) => (
-              <button
-                key={filter.id}
-                onClick={() => setActiveFilter(filter.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
-                  activeFilter === filter.id
-                    ? "bg-[#FF6B00] text-white shadow-lg shadow-[#FF6B00]/25"
-                    : "bg-[#1a1a1a] border border-[#333] text-gray-400 hover:text-white hover:border-[#444]"
-                }`}
-              >
-                <Icon icon={filter.icon} className="w-4 h-4" />
-                <span className="text-sm font-medium">{filter.label}</span>
-              </button>
-            ))}
-          </div>
+          {/* Static All Plans Label as Button */}
+          <button
+            className="flex items-center gap-2 px-4 py-2 rounded-xl transition-all bg-[#FF6B00] text-white shadow-lg shadow-[#FF6B00]/25"
+            type="button"
+            tabIndex={-1}
+            disabled
+          >
+            <Icon icon="mdi:view-grid-outline" className="w-4 h-4" />
+            <span className="text-sm font-medium">All Plans</span>
+          </button>
 
           {/* Sort Dropdown */}
           <div className="relative">
@@ -468,8 +423,7 @@ const PlanManagementPage = () => {
                       description={plan.description}
                       coverImage={plan.coverImage}
                       createdAt={plan.createdAt}
-                      planType={plan.type}
-                      type={plan.type}
+                      type={"nutrition"}
                       duration={
                         plan.duration
                           ? `${plan.duration} ${plan.durationType || "weeks"}`
@@ -540,8 +494,7 @@ const PlanManagementPage = () => {
                       description={plan.description}
                       coverImage={plan.coverImage}
                       createdAt={plan.createdAt}
-                      planType={plan.type}
-                      type={plan.type}
+                      type={"training"}
                       duration={
                         plan.duration
                           ? `${plan.duration} ${plan.durationType || "weeks"}`

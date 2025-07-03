@@ -48,7 +48,7 @@ export const TrainingPlanCreator = ({ initialData }) => {
     if (currentStep > 0) {
       setCurrentStep((prev) => prev - 1);
     } else {
-      router.push("/trainer/dashboard/plans");
+      router.push("/trainer/dashboard/plans?fromTab=training");
     }
   };
 

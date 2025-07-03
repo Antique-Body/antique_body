@@ -32,7 +32,6 @@ export default function EditNutritionPlanPage() {
             fats: "",
           },
           mealTypes: data.mealTypes || [],
-          dietaryRestrictions: data.dietaryRestrictions || [],
           supplementRecommendations: data.supplementRecommendations || "",
           cookingTime: data.cookingTime || "",
           days: data.days || [

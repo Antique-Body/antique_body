@@ -2,12 +2,13 @@
 
 import { Icon } from "@iconify/react";
 import Image from "next/image";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
+
+import mealLibrary from "./mealLibrary.json";
 
 import { Button } from "@/components/common/Button";
-import { InfoBanner } from "@/components/common/InfoBanner";
-import mealLibrary from "./mealLibrary.json";
 import { FormField } from "@/components/common/FormField";
+import { InfoBanner } from "@/components/common/InfoBanner";
 
 export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
   const [searchTerm, setSearchTerm] = useState("");

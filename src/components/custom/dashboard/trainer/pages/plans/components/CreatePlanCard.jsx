@@ -2,13 +2,14 @@
 
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export const CreatePlanCard = ({ type }) => {
   const isNutrition = type === "nutrition";
+  const router = useRouter();
   const url = isNutrition
-    ? "/trainer/dashboard/plans/nutrition/create"
-    : "/trainer/dashboard/plans/training/create";
+    ? `/trainer/dashboard/plans/nutrition/create?fromTab=nutrition`
+    : `/trainer/dashboard/plans/training/create?fromTab=training`;
 
   const config = {
     nutrition: {
@@ -31,66 +32,67 @@ export const CreatePlanCard = ({ type }) => {
 
   const planConfig = config[type];
 
+  const handleCreate = (e) => {
+    e.preventDefault();
+    router.push(url);
+  };
+
   return (
-    <Link href={url}>
-      <motion.div
-        whileHover={{ scale: 1.02, y: -2 }}
-        whileTap={{ scale: 0.98 }}
-        className="relative group"
+    <motion.div
+      whileHover={{ scale: 1.02, y: -2 }}
+      whileTap={{ scale: 0.98 }}
+      className="relative group"
+    >
+      <div
+        className={`relative overflow-hidden rounded-2xl border border-[#333] ${planConfig.bgColor} backdrop-blur-sm transition-all duration-300 group-hover:border-[#444] group-hover:shadow-xl`}
       >
+        {/* Background gradient */}
         <div
-          className={`relative overflow-hidden rounded-2xl border border-[#333] ${planConfig.bgColor} backdrop-blur-sm transition-all duration-300 group-hover:border-[#444] group-hover:shadow-xl`}
-        >
-          {/* Background gradient */}
-          <div
-            className={`absolute inset-0 bg-gradient-to-br ${planConfig.color} opacity-5 group-hover:opacity-10 transition-opacity`}
-          ></div>
+          className={`absolute inset-0 bg-gradient-to-br ${planConfig.color} opacity-5 group-hover:opacity-10 transition-opacity`}
+        ></div>
 
-          <div className="relative p-6">
-            {/* Header */}
-            <div className="flex items-center gap-4 mb-4">
-              <div
-                className={`p-3 rounded-xl bg-gradient-to-r ${planConfig.color} shadow-lg`}
-              >
-                <Icon icon={planConfig.icon} className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-white mb-1">
-                  {planConfig.title}
-                </h3>
-                <p className="text-gray-400 text-sm">
-                  {planConfig.description}
-                </p>
-              </div>
-            </div>
-
-            {/* Features */}
-            <div className="space-y-2 mb-6">
-              {planConfig.features.map((feature, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-2 text-sm text-gray-300"
-                >
-                  <div
-                    className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${planConfig.color}`}
-                  ></div>
-                  {feature}
-                </div>
-              ))}
-            </div>
-
-            {/* CTA Button */}
+        <div className="relative p-6">
+          {/* Header */}
+          <div className="flex items-center gap-4 mb-4">
             <div
-              className={`w-full py-3 px-4 rounded-xl bg-gradient-to-r ${planConfig.color} text-white font-medium text-center shadow-lg group-hover:shadow-xl transition-all`}
+              className={`p-3 rounded-xl bg-gradient-to-r ${planConfig.color} shadow-lg`}
             >
-              <div className="flex items-center justify-center gap-2">
-                <Icon icon="mdi:plus" className="w-5 h-5" />
-                Start Creating
-              </div>
+              <Icon icon={planConfig.icon} className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white mb-1">
+                {planConfig.title}
+              </h3>
+              <p className="text-gray-400 text-sm">{planConfig.description}</p>
             </div>
           </div>
+
+          {/* Features */}
+          <div className="space-y-2 mb-6">
+            {planConfig.features.map((feature, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-2 text-sm text-gray-300"
+              >
+                <div
+                  className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${planConfig.color}`}
+                ></div>
+                {feature}
+              </div>
+            ))}
+          </div>
+
+          {/* CTA Button */}
+          <button
+            className={`w-full py-3 px-4 rounded-xl bg-gradient-to-r ${planConfig.color} text-white font-medium text-center shadow-lg group-hover:shadow-xl transition-all flex items-center justify-center gap-2`}
+            onClick={handleCreate}
+            type="button"
+          >
+            <Icon icon="mdi:plus" className="w-5 h-5" />
+            Start Creating
+          </button>
         </div>
-      </motion.div>
-    </Link>
+      </div>
+    </motion.div>
   );
 };

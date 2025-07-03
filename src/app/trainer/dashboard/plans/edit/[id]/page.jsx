@@ -19,7 +19,7 @@ export default function EditPlanPage() {
     setLoading(true);
     fetchPlanDetails(id, "training")
       .then((data) => {
-        let planData = {
+        const planData = {
           ...data,
           keyFeatures: data.keyFeatures || [""],
           timeline: data.timeline || [{ week: "", title: "", description: "" }],

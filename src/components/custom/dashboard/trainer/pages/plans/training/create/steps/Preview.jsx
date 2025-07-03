@@ -69,6 +69,16 @@ export const Preview = ({ data }) => {
             {data.title || "Untitled Plan"}
           </h1>
           <p className="text-gray-300 line-clamp-2">{data.description}</p>
+          {data.createdAt && (
+            <div className="text-gray-400 text-xs mt-1">
+              Created:{" "}
+              {new Date(data.createdAt).toLocaleDateString("hr-HR", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              })}
+            </div>
+          )}
         </div>
       </div>
 

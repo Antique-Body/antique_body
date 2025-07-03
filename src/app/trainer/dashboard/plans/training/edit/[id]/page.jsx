@@ -43,6 +43,7 @@ export default function EditTrainingPlanPage() {
         setLoading(false);
       })
       .catch((err) => {
+        console.error("Error fetching plan details:", err);
         setError("Failed to load plan data");
         setLoading(false);
       });
