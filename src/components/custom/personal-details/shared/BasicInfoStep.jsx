@@ -257,8 +257,8 @@ export const BasicInfoStep = ({
                   </div>
                   <div>
                     <p className="text-sm font-medium text-[#FF6B00]">
-                      {currentYear - parseInt(formData.trainerSince)} years of
-                      experience
+                      {currentYear - Number.parseInt(formData.trainerSince)}{" "}
+                      years of experience
                     </p>
                     <p className="text-xs text-gray-400">
                       Training since {formData.trainerSince}

@@ -414,7 +414,7 @@ export const TrainerCard = ({
                         </li>
                       ))}
                     </ul>
-                    <div className="absolute -bottom-1 left-4 w-2 h-2 bg-zinc-800 border-r border-b border-zinc-700 transform rotate-45"></div>
+                    <div className="absolute -bottom-1 left-4 w-2 h-2 bg-zinc-800 border-r border-b border-zinc-700 transform rotate-45" />
                   </div>
                 )}
               </div>

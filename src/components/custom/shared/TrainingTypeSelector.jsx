@@ -6,7 +6,7 @@ import { Button } from "@/components/common/Button";
 import { ErrorIcon } from "@/components/common/Icons";
 import { TRAINING_ENVIRONMENTS } from "@/enums/specialties";
 import { TRAINING_TYPES } from "@/enums/trainingTypes";
-
+ 
 export const TrainingTypeSelector = ({
   selectedEnvironment,
   selectedTypes = [],
@@ -159,7 +159,7 @@ export const TrainingTypeSelector = ({
       </motion.div>
 
       {/* Divider */}
-      <div className="h-px bg-gradient-to-r from-transparent via-gray-700/50 to-transparent"></div>
+      <div className="h-px bg-gradient-to-r from-transparent via-gray-700/50 to-transparent" />
 
       {/* Training Types Section */}
       <motion.div

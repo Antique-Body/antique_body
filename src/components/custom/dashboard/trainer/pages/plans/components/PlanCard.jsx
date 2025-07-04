@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { PlanPreviewModal } from "./PlanPreviewModal";
 
@@ -44,6 +45,7 @@ export const PlanCard = ({
   const [loadingPlanDetails, setLoadingPlanDetails] = useState(false);
   const [detailedPlanData, setDetailedPlanData] = useState(null);
   const router = useRouter();
+  const { t } = useTranslation();
   const formattedDate = new Date(createdAt).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
@@ -319,18 +321,23 @@ export const PlanCard = ({
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={confirmDelete}
-        title="Obriši plan"
+        title={t("plans.delete_title", "Obriši plan")}
         message={
           <span>
-            Jesi li siguran da želiš obrisati plan{" "}
+            {t(
+              "plans.delete_message",
+              "Jesi li siguran da želiš obrisati plan"
+            )}{" "}
             <span className="font-semibold">{title}</span>?
           </span>
         }
-        confirmButtonText={deleting ? "Brišem..." : "Da, obriši"}
-        cancelButtonText="Ne"
+        confirmButtonText={
+          deleting
+            ? t("plans.deleting", "Brišem...")
+            : t("plans.delete_confirm", "Da, obriši")
+        }
+        cancelButtonText={t("common.cancel", "Ne")}
         primaryButtonDisabled={deleting}
-        secondaryButtonText="Ne"
-        primaryButtonText={deleting ? "Brišem..." : "Da, obriši"}
         primaryButtonAction={confirmDelete}
         secondaryButtonAction={() => setShowDeleteModal(false)}
         footerButtons

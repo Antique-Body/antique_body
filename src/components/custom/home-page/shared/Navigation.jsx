@@ -95,7 +95,7 @@ export const Navigation = () => {
         >
           <Link href="/" className="flex items-center space-x-2 relative group">
             {/* Logo glow effect */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-[#FF6B00]/20 to-[#FF9A00]/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="absolute -inset-1 bg-gradient-to-r from-[#FF6B00]/20 to-[#FF9A00]/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
             <BrandLogo
               className="flex items-center relative z-10"
@@ -189,13 +189,13 @@ export const Navigation = () => {
                     ? "rotate-45 translate-y-1.5 sm:translate-y-2"
                     : "-translate-y-1.5 sm:-translate-y-2"
                 }`}
-              ></span>
+              />
 
               <span
                 className={`absolute h-0.5 w-full bg-white transform transition-all duration-300 ease-in-out ${
                   mobileMenuOpen ? "opacity-0" : "opacity-100"
                 }`}
-              ></span>
+              />
 
               <span
                 className={`absolute h-0.5 w-full bg-white transform transition-all duration-300 ease-in-out ${
@@ -203,7 +203,7 @@ export const Navigation = () => {
                     ? "-rotate-45 translate-y-1.5 sm:translate-y-2"
                     : "translate-y-1.5 sm:translate-y-2"
                 }`}
-              ></span>
+              />
             </div>
           </Button>
         </div>

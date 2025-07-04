@@ -20,7 +20,6 @@ const staggerItems = {
 };
 
 export const ClientLocation = ({ clientData, setClientData }) => {
-  console.log(clientData, "clientData");
   // Handler for location fields
   const handleLocationChange = (e) => {
     const { name, value } = e.target;

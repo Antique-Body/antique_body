@@ -635,7 +635,7 @@ export const CertificationUpload = ({
                 type="text"
                 value={field?.name || ""}
                 onChange={(e) =>
-                  handleCertChange(field._idx, "name", e.target.value)
+                  handleCertChange?.(field._idx, "name", e.target.value)
                 }
                 placeholder="e.g. NASM-CPT, ACE-CPT, ISSA, ACSM, etc."
                 className="mb-0"
@@ -649,7 +649,7 @@ export const CertificationUpload = ({
                   type="text"
                   value={field?.issuer || ""}
                   onChange={(e) =>
-                    handleCertChange(field._idx, "issuer", e.target.value)
+                    handleCertChange?.(field._idx, "issuer", e.target.value)
                   }
                   placeholder="e.g. National Academy of Sports Medicine, Personal Trainer Institute"
                   className="mb-0"
@@ -659,7 +659,7 @@ export const CertificationUpload = ({
                   type="date"
                   value={field?.expiryDate || ""}
                   onChange={(e) =>
-                    handleCertChange(field._idx, "expiryDate", e.target.value)
+                    handleCertChange?.(field._idx, "expiryDate", e.target.value)
                   }
                   className="mb-0"
                 />

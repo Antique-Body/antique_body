@@ -1,10 +1,7 @@
-import { PrismaClient } from "@prisma/client";
-
 import { exerciseService } from "./exerciseService";
 import { mealService } from "./mealService";
-import { createDefaultPlansForTrainer } from "./planService";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 // Helper za dinamički where za lokaciju
 function buildLocationWhere(location) {
@@ -182,9 +179,11 @@ async function createTrainerWithDetails(formData, userId) {
   // Create default exercises for new trainer
   await exerciseService.createDefaultExercises(trainerInfo.id);
   await mealService.createDefaultMeals(trainerInfo.id);
-  await createDefaultPlansForTrainer(trainerInfo.id);
 
-  return trainerInfo.trainerProfile;
+  return {
+    trainerProfile: trainerInfo.trainerProfile,
+    trainerInfoId: trainerInfo.id,
+  };
 }
 
 async function createOrUpdateTrainerInfo(trainerProfileId, infoData) {

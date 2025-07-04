@@ -3,74 +3,9 @@
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 
+import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
-
-const FEATURE_OPTIONS = [
-  {
-    key: "support24_7",
-    label: "24/7 Support & Consultation",
-    icon: "mdi:clock-time-four-outline",
-    description: "Round-the-clock support for your clients",
-    color: "from-blue-500/20 to-indigo-500/20 border-indigo-500/30",
-    iconColor: "text-indigo-400",
-  },
-  {
-    key: "liveTraining",
-    label: "Live Training Sessions",
-    icon: "mdi:dumbbell",
-    description: "Real-time workout sessions with clients",
-    color: "from-orange-500/20 to-red-500/20 border-red-500/30",
-    iconColor: "text-red-400",
-  },
-  {
-    key: "onlineCalls",
-    label: "Online Video Calls",
-    icon: "mdi:video-outline",
-    description: "Virtual consultations and check-ins",
-    color: "from-green-500/20 to-emerald-500/20 border-emerald-500/30",
-    iconColor: "text-emerald-400",
-  },
-  {
-    key: "personalizedNutrition",
-    label: "Personalized Nutrition Plan",
-    icon: "mdi:nutrition",
-    description: "Custom diet plans for each client",
-    color: "from-purple-500/20 to-violet-500/20 border-violet-500/30",
-    iconColor: "text-violet-400",
-  },
-  {
-    key: "progressTracking",
-    label: "Progress Tracking",
-    icon: "mdi:chart-line",
-    description: "Detailed progress monitoring and analytics",
-    color: "from-cyan-500/20 to-blue-500/20 border-blue-500/30",
-    iconColor: "text-cyan-400",
-  },
-  {
-    key: "mealPlanning",
-    label: "Weekly Meal Planning",
-    icon: "mdi:food-apple-outline",
-    description: "Structured meal plans and recipes",
-    color: "from-green-500/20 to-lime-500/20 border-lime-500/30",
-    iconColor: "text-lime-400",
-  },
-  {
-    key: "flexibleScheduling",
-    label: "Flexible Scheduling",
-    icon: "mdi:calendar-clock",
-    description: "Adaptable training schedule",
-    color: "from-yellow-500/20 to-amber-500/20 border-amber-500/30",
-    iconColor: "text-amber-400",
-  },
-  {
-    key: "recoveryPlans",
-    label: "Recovery Plans",
-    icon: "mdi:meditation",
-    description: "Rest and recovery guidance",
-    color: "from-teal-500/20 to-cyan-500/20 border-teal-500/30",
-    iconColor: "text-teal-400",
-  },
-];
+import { TRAINING_FEATURE_OPTIONS } from "@/enums";
 
 export const Features = ({ data, onChange }) => {
   const handleFeatureToggle = (key) => {
@@ -172,24 +107,28 @@ export const Features = ({ data, onChange }) => {
                 className="flex-1"
               />
               {data.keyFeatures.length > 1 && (
-                <button
+                <Button
+                  type="button"
                   onClick={() => handleRemoveKeyFeature(index)}
                   className="p-1 text-gray-400 hover:text-red-400 transition-colors rounded"
+                  variant="ghost"
                 >
                   <Icon icon="mdi:close" className="w-4 h-4" />
-                </button>
+                </Button>
               )}
             </motion.div>
           ))}
 
           {data.keyFeatures.length < 5 && (
-            <button
+            <Button
+              type="button"
               onClick={handleAddKeyFeature}
               className="flex items-center gap-2 text-sm text-gray-400 hover:text-[#FF6B00] transition-colors p-2 rounded-lg hover:bg-[#FF6B00]/10"
+              variant="ghost"
             >
               <Icon icon="mdi:plus" className="w-4 h-4" />
               Add benefit
-            </button>
+            </Button>
           )}
         </div>
       </motion.div>
@@ -253,25 +192,29 @@ export const Features = ({ data, onChange }) => {
                 </div>
 
                 {data.timeline.length > 1 && (
-                  <button
+                  <Button
+                    type="button"
                     onClick={() => handleRemoveTimelineBlock(index)}
                     className="p-1 text-gray-400 hover:text-red-400 transition-colors rounded"
+                    variant="ghost"
                   >
                     <Icon icon="mdi:close" className="w-4 h-4" />
-                  </button>
+                  </Button>
                 )}
               </div>
             </motion.div>
           ))}
 
           {data.timeline.length < 4 && (
-            <button
+            <Button
+              type="button"
               onClick={handleAddTimelineBlock}
               className="w-full py-3 border border-dashed border-[#333] rounded-lg text-gray-400 hover:text-purple-400 hover:border-purple-500/50 transition-all flex items-center justify-center gap-2"
+              variant="ghost"
             >
               <Icon icon="mdi:plus" className="w-4 h-4" />
               Add phase
-            </button>
+            </Button>
           )}
         </div>
       </motion.div>
@@ -289,7 +232,7 @@ export const Features = ({ data, onChange }) => {
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {FEATURE_OPTIONS.map((feature) => {
+          {TRAINING_FEATURE_OPTIONS.map((feature) => {
             const checked = data.features[feature.key];
             return (
               <motion.button
@@ -298,22 +241,22 @@ export const Features = ({ data, onChange }) => {
                 onClick={() => handleFeatureToggle(feature.key)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className={
-                  `relative p-4 rounded-lg border w-full text-left transition-all duration-200 flex items-center gap-4 ` +
-                  (checked
+                className={`${`relative p-4 rounded-lg border w-full text-left transition-all duration-200 flex items-center gap-4 ${
+                  checked
                     ? "bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/60 shadow-lg"
-                    : "bg-[#222] border-[#333] hover:border-[#444]") +
-                  " focus:outline-none"
-                }
+                    : "bg-[#222] border-[#333] hover:border-[#444]"
+                } focus:outline-none`}`}
                 style={{ minHeight: 80 }}
+                role="button"
+                aria-pressed={checked}
+                aria-label={feature.label}
               >
                 <div
-                  className={
-                    `w-12 h-12 rounded-lg flex items-center justify-center transition-all duration-200 ` +
-                    (checked
+                  className={`w-12 h-12 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                    checked
                       ? "bg-green-500/20 text-green-400"
-                      : "bg-[#333] text-gray-400")
-                  }
+                      : "bg-[#333] text-gray-400"
+                  }`}
                 >
                   <Icon icon={feature.icon} className="w-6 h-6" />
                 </div>
@@ -336,15 +279,6 @@ export const Features = ({ data, onChange }) => {
                     {feature.description}
                   </p>
                 </div>
-                {/* Hidden checkbox for accessibility */}
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => handleFeatureToggle(feature.key)}
-                  className="sr-only"
-                  tabIndex={-1}
-                  aria-hidden="true"
-                />
               </motion.button>
             );
           })}

@@ -40,6 +40,7 @@ export const TabsComponent = ({ activeTab, setActiveTab }) => {
           {tabs.map((tab) => (
             <button
               key={tab.id}
+              type="button"
               onClick={() => handleTabChange(tab.id)}
               className={`
                                 relative flex-1 flex items-center justify-center gap-1 sm:gap-3 py-2 sm:py-4 px-2 sm:px-6 text-xs sm:text-sm font-medium transition-all duration-300

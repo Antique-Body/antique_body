@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
 
+import { Button } from "@/components/common/Button";
+
 export const Preview = ({ data }) => {
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -40,7 +42,7 @@ export const Preview = ({ data }) => {
             <Icon icon="mdi:image" className="w-16 h-16 text-gray-600" />
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0.7)] to-[#111]"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0.7)] to-[#111]" />
 
         {/* Plan type badge */}
         <div className="absolute top-4 left-4 z-10">
@@ -132,14 +134,17 @@ export const Preview = ({ data }) => {
         <div className="border-b border-[#333] mb-6">
           <div className="flex space-x-6 overflow-x-auto pb-1">
             {tabs.map((tab) => (
-              <button
+              <Button
                 key={tab.id}
+                type="button"
                 onClick={() => setActiveTab(tab.id)}
                 className={`py-3 relative text-sm font-medium transition-colors whitespace-nowrap ${
                   activeTab === tab.id
                     ? "text-[#FF6B00]"
                     : "text-gray-400 hover:text-white"
                 }`}
+                variant="tab"
+                isActive={activeTab === tab.id}
               >
                 {tab.label}
                 {activeTab === tab.id && (
@@ -151,7 +156,7 @@ export const Preview = ({ data }) => {
                     transition={{ duration: 0.3 }}
                   />
                 )}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -271,7 +276,7 @@ export const Preview = ({ data }) => {
                           </span>
                         </div>
                         {index !== data.timeline.length - 1 && (
-                          <div className="absolute left-3 top-6 w-0.5 h-full max-h-12 bg-[#333]"></div>
+                          <div className="absolute left-3 top-6 w-0.5 h-full max-h-12 bg-[#333]" />
                         )}
                         <div>
                           <h4 className="text-white font-medium">

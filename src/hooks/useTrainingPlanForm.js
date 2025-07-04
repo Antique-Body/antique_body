@@ -13,7 +13,7 @@ const initialFormData = {
   price: "",
   duration: "4",
   durationType: "weeks",
-  trainingType: "with-trainer",
+  trainingType: "with_trainer",
   sessionsPerWeek: "3",
   difficultyLevel: "",
 
@@ -55,6 +55,7 @@ export const useTrainingPlanForm = (initialData = null) => {
   const router = useRouter();
   const [formData, setFormData] = useState(initialData || initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // Get searchParams only when running in the browser
@@ -67,7 +68,7 @@ export const useTrainingPlanForm = (initialData = null) => {
       const cleanData = { ...initialData };
       if (isCopy) {
         // Remove id for copy mode so a new plan is created
-        delete cleanData.id;
+        cleanData.id = undefined;
         // Prefix title with 'Copy of ' if not already present
         if (cleanData.title && !cleanData.title.startsWith("Copy of ")) {
           cleanData.title = `Copy of ${cleanData.title}`;
@@ -122,10 +123,10 @@ export const useTrainingPlanForm = (initialData = null) => {
 
   const handleSubmit = async () => {
     if (isSubmitting) {
-      console.log("[handleSubmit] Prevented double submit");
       return;
     }
     setIsSubmitting(true);
+    setError(null);
     try {
       // Get searchParams only when running in the browser
       const searchParams =
@@ -136,15 +137,6 @@ export const useTrainingPlanForm = (initialData = null) => {
       let coverImageUrl = formData.coverImage;
 
       // DEBUG: Log file info
-      if (formData.coverImage) {
-        console.log("Uploading file:", formData.coverImage);
-        console.log(
-          "Is file instance of File?",
-          formData.coverImage instanceof File
-        );
-        console.log("File type:", formData.coverImage.type);
-        console.log("File size (MB):", formData.coverImage.size / 1024 / 1024);
-      }
 
       // 1. Upload slike ako je File
       if (formData.coverImage && typeof formData.coverImage !== "string") {
@@ -157,7 +149,6 @@ export const useTrainingPlanForm = (initialData = null) => {
         });
         const uploadJson = await uploadRes.json();
         // DEBUG: Log upload response
-        console.log("Upload response:", uploadJson);
         if (!uploadRes.ok || !uploadJson.coverImage) {
           throw new Error(uploadJson.error || "Failed to upload image");
         }
@@ -200,21 +191,18 @@ export const useTrainingPlanForm = (initialData = null) => {
         trainingType: formData.trainingType,
         difficultyLevel: formData.difficultyLevel || null,
       };
-      console.log("[handleSubmit] planPayload:", planPayload);
       if (formData.id && !isCopy) {
         // EDIT MODE: PATCH
-        console.log("[handleSubmit] PATCH (updatePlan)");
         await updatePlan(formData.id, planPayload, "training");
       } else {
         // CREATE MODE: POST (or COPY)
-        console.log("[handleSubmit] POST (createPlan)");
         await createPlan(planPayload, "training");
       }
       // Redirect na plans page
       router.push("/trainer/dashboard/plans");
     } catch (error) {
       console.error("Error submitting form:", error);
-      // Ovdje možeš postaviti error state za prikaz korisniku
+      setError(error.message || "An error occurred while submitting the form.");
     } finally {
       setIsSubmitting(false);
     }
@@ -225,5 +213,6 @@ export const useTrainingPlanForm = (initialData = null) => {
     updateFormData,
     isValid,
     handleSubmit,
+    error,
   };
 };

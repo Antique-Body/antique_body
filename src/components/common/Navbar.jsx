@@ -50,10 +50,6 @@ export const Navbar = () => {
   }
 
   // DEBUG: Ispis session i status
-  if (typeof window !== "undefined") {
-    console.log("[Navbar] session:", session);
-    console.log("[Navbar] status:", status);
-  }
 
   return (
     <nav className="fixed top-0 right-0 z-50 p-4 flex justify-end">

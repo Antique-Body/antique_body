@@ -3,9 +3,9 @@
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
-import { Card } from "@/components/common";
+import { Card, Button } from "@/components/common";
 import {
   NutritionPlanIcon,
   PlanManagementIcon,
@@ -30,24 +30,21 @@ const SORT_OPTIONS = [
 ];
 
 const PlanManagementPage = () => {
-  const [activeTab, setActiveTab] = useState("training");
+  const searchParams = useSearchParams();
+  const initialTab =
+    searchParams.get("fromTab") === "nutrition" ||
+    searchParams.get("fromTab") === "training"
+      ? searchParams.get("fromTab")
+      : "training";
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState("grid"); // grid or list
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const searchParams = useSearchParams();
-
-  // Set activeTab from query param on mount
-  useEffect(() => {
-    const fromTab = searchParams.get("fromTab");
-    if (fromTab === "nutrition" || fromTab === "training") {
-      setActiveTab(fromTab);
-    }
-  }, [searchParams]);
 
   // Refactored fetchPlans function
-  const fetchPlans = async () => {
+  const fetchPlans = useCallback(async () => {
     try {
       setLoading(true);
       // Only send type param if training or nutrition
@@ -58,18 +55,18 @@ const PlanManagementPage = () => {
       if (!response.ok) throw new Error("Failed to fetch plans");
       const data = await response.json();
       setPlans(data);
-    } catch (error) {
-      console.error("Error fetching plans:", error);
-      setError(error.message);
+    } catch (err) {
+      console.error("Error fetching plans:", err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab]);
 
   // Fetch plans from API on mount and when activeTab changes
   useEffect(() => {
     fetchPlans();
-  }, [activeTab]);
+  }, [activeTab, fetchPlans]);
 
   // Filter plans based on active tab
   const filteredPlans = plans.filter((plan) => {
@@ -91,8 +88,8 @@ const PlanManagementPage = () => {
       case "alphabetical":
         return a.title.localeCompare(b.title);
       case "popular":
-        // For now, sort by price as a placeholder for popularity
-        return (b.price || 0) - (a.price || 0);
+        // Sort by clientCount in descending order, defaulting to zero if undefined or null
+        return (b.clientCount || 0) - (a.clientCount || 0);
       default:
         return 0;
     }
@@ -124,6 +121,20 @@ const PlanManagementPage = () => {
     0
   );
 
+  useEffect(() => {
+    if (searchParams.get("refresh") === "1") {
+      fetchPlans();
+      // Očisti refresh param iz URL-a
+      const params = new URLSearchParams(window.location.search);
+      params.delete("refresh");
+      window.history.replaceState(
+        {},
+        "",
+        `${window.location.pathname}?${params}`
+      );
+    }
+  }, [searchParams, fetchPlans]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#111111] to-[#0a0a0a]">
       <main className="py-6 sm:py-8 px-4 sm:px-6 max-w-7xl mx-auto">
@@ -153,28 +164,30 @@ const PlanManagementPage = () => {
             <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
               {/* View Mode Toggle */}
               <div className="flex bg-[#1a1a1a] border border-[#333] rounded-xl p-1">
-                <button
+                <Button
                   onClick={() => setViewMode("grid")}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
                     viewMode === "grid"
                       ? "bg-[#FF6B00] text-white shadow-sm"
                       : "text-gray-400 hover:text-white"
                   }`}
+                  type="button"
                 >
                   <Icon icon="mdi:view-grid-outline" className="w-4 h-4" />
                   <span className="hidden sm:inline text-sm">Grid</span>
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => setViewMode("list")}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
                     viewMode === "list"
                       ? "bg-[#FF6B00] text-white shadow-sm"
                       : "text-gray-400 hover:text-white"
                   }`}
+                  type="button"
                 >
                   <Icon icon="mdi:view-list-outline" className="w-4 h-4" />
                   <span className="hidden sm:inline text-sm">List</span>
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -279,33 +292,6 @@ const PlanManagementPage = () => {
               </div>
             </div>
           </Card>
-
-          <Card
-            variant="dark"
-            className="p-6 border border-[#333] hover:border-[#444] transition-all duration-300 bg-gradient-to-r from-[#1a1a1a] to-[#222] group"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-gray-400 mb-1">Avg. Rating</p>
-                <p className="text-2xl font-bold text-white">4.8</p>
-                <div className="flex items-center gap-1 mt-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Icon
-                      key={i}
-                      icon="mdi:star"
-                      className="w-3 h-3 text-yellow-400"
-                    />
-                  ))}
-                </div>
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-yellow-500/20 to-orange-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Icon
-                  icon="mdi:star-outline"
-                  className="text-yellow-400 w-6 h-6"
-                />
-              </div>
-            </div>
-          </Card>
         </motion.div>
 
         {/* Enhanced Filters */}
@@ -380,12 +366,13 @@ const PlanManagementPage = () => {
                 <p className="text-red-400 mb-4">
                   Failed to load plans: {error}
                 </p>
-                <button
+                <Button
                   onClick={() => window.location.reload()}
                   className="px-6 py-3 bg-[#FF6B00] text-white rounded-xl hover:bg-[#FF6B00]/90 transition-colors"
+                  type="button"
                 >
                   Try Again
-                </button>
+                </Button>
               </div>
             </motion.div>
           ) : activeTab === "nutrition" ? (

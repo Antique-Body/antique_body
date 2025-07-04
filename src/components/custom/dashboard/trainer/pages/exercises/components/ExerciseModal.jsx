@@ -292,8 +292,6 @@ export const ExerciseModal = ({
   const validateForm = () => {
     const newErrors = {};
 
-    console.log(formData, "formData");
-
     if (!formData.name.trim()) newErrors.name = "Name is required";
     if (!formData.description.trim())
       newErrors.description = "Description is required";
@@ -326,7 +324,6 @@ export const ExerciseModal = ({
         filesToUpload.video = videoFile;
         setUploadStatus((prev) => ({ ...prev, video: "Uploading video..." }));
       }
-      console.log("filesToUpload", filesToUpload);
 
       // Prvo uploaduj fajlove, pa tek onda šalji podatke u bazu
       let uploadedUrls = {};
@@ -374,7 +371,6 @@ export const ExerciseModal = ({
 
   // Handle exercise selection from library
   const handleSelectExerciseFromLibrary = (libraryExercise) => {
-    console.log(libraryExercise, "libraryExercise");
     setFormData({
       ...formData,
       name: libraryExercise.name,

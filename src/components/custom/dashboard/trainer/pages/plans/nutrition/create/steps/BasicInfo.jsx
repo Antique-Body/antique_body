@@ -3,8 +3,10 @@
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import PropTypes from "prop-types";
 import { useState, useEffect } from "react";
 
+import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { FormField } from "@/components/common/FormField";
 
 const GOAL_TYPES = [
@@ -16,6 +18,7 @@ const GOAL_TYPES = [
     color: "from-emerald-500 to-green-600",
     bgColor: "bg-emerald-500/10",
     borderColor: "border-emerald-500/30",
+    ringColor: "ring-emerald-500/20",
   },
   {
     id: "muscle-gain",
@@ -25,6 +28,7 @@ const GOAL_TYPES = [
     color: "from-blue-500 to-indigo-600",
     bgColor: "bg-blue-500/10",
     borderColor: "border-blue-500/30",
+    ringColor: "ring-blue-500/20",
   },
   {
     id: "maintenance",
@@ -34,6 +38,7 @@ const GOAL_TYPES = [
     color: "from-violet-500 to-purple-600",
     bgColor: "bg-violet-500/10",
     borderColor: "border-violet-500/30",
+    ringColor: "ring-violet-500/20",
   },
   {
     id: "performance",
@@ -43,11 +48,13 @@ const GOAL_TYPES = [
     color: "from-[#FF6B00] to-[#FF8533]",
     bgColor: "bg-[#FF6B00]/10",
     borderColor: "border-[#FF6B00]/30",
+    ringColor: "ring-orange-500/20",
   },
 ];
 
 export const BasicInfo = ({ data, onChange }) => {
   const [previewImage, setPreviewImage] = useState(null);
+  const [imageError, setImageError] = useState("");
 
   // Handle edit mode - if coverImage is a string URL, set it as preview
   useEffect(() => {
@@ -63,12 +70,33 @@ export const BasicInfo = ({ data, onChange }) => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // File size validation (5MB = 5 * 1024 * 1024 bytes)
+      if (file.size > 5 * 1024 * 1024) {
+        setImageError(
+          "File size exceeds 5MB limit. Please choose a smaller image."
+        );
+        setPreviewImage(null);
+        onChange({ coverImage: null });
+        return;
+      }
       const reader = new FileReader();
       reader.onload = () => {
         setPreviewImage(reader.result);
+        setImageError("");
         onChange({ coverImage: file });
       };
+      reader.onerror = () => {
+        setImageError(
+          "Failed to read the image file. Please try another image."
+        );
+        setPreviewImage(null);
+        onChange({ coverImage: null });
+      };
       reader.readAsDataURL(file);
+    } else {
+      setImageError("");
+      setPreviewImage(null);
+      onChange({ coverImage: null });
     }
   };
 
@@ -114,6 +142,8 @@ export const BasicInfo = ({ data, onChange }) => {
         transition={{ delay: 0.1 }}
         className="relative group"
       >
+        {/* Show error message above image upload */}
+        {imageError && <ErrorMessage error={imageError} />}
         <div className="aspect-[2.5/1] w-full rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] via-[#222] to-[#2a2a2a] border-2 border-[#333] hover:border-[#FF6B00]/50 transition-all duration-300 shadow-2xl">
           {previewImage ? (
             <div className="relative w-full h-full group">
@@ -269,6 +299,7 @@ export const BasicInfo = ({ data, onChange }) => {
                 value={data.nutritionInfo?.calories || ""}
                 onChange={handleChange}
                 placeholder="2000"
+                min={0}
                 className="bg-[#242424] border-[#333] focus:border-emerald-500 transition-all duration-300 px-4 py-4 text-base rounded-xl shadow-inner"
                 prefixIcon="mdi:fire"
               />
@@ -279,6 +310,8 @@ export const BasicInfo = ({ data, onChange }) => {
                 value={data.nutritionInfo?.protein || ""}
                 onChange={handleChange}
                 placeholder="150"
+                min={0}
+                max={500}
                 className="bg-[#242424] border-[#333] focus:border-blue-500 transition-all duration-300 px-4 py-4 text-base rounded-xl shadow-inner"
                 prefixIcon="mdi:food-drumstick"
               />
@@ -289,6 +322,8 @@ export const BasicInfo = ({ data, onChange }) => {
                 value={data.nutritionInfo?.carbs || ""}
                 onChange={handleChange}
                 placeholder="200"
+                min={0}
+                max={1000}
                 className="bg-[#242424] border-[#333] focus:border-yellow-500 transition-all duration-300 px-4 py-4 text-base rounded-xl shadow-inner"
                 prefixIcon="mdi:bread-slice"
               />
@@ -299,6 +334,8 @@ export const BasicInfo = ({ data, onChange }) => {
                 value={data.nutritionInfo?.fats || ""}
                 onChange={handleChange}
                 placeholder="70"
+                min={0}
+                max={300}
                 className="bg-[#242424] border-[#333] focus:border-purple-500 transition-all duration-300 px-4 py-4 text-base rounded-xl shadow-inner"
                 prefixIcon="mdi:oil"
               />
@@ -341,11 +378,7 @@ export const BasicInfo = ({ data, onChange }) => {
                     onClick={() => handleGoalSelect(goal.id)}
                     className={`relative p-6 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
                       isSelected
-                        ? `bg-gradient-to-br ${goal.color}/10 ${
-                            goal.borderColor
-                          } shadow-xl ring-2 ring-${
-                            goal.color.split("-")[1]
-                          }-500/20`
+                        ? `bg-gradient-to-br ${goal.color}/10 ${goal.borderColor} shadow-xl ring-2 ${goal.ringColor}`
                         : "bg-[#242424] border-[#333] hover:border-[#444] hover:bg-[#2a2a2a]"
                     }`}
                   >
@@ -400,4 +433,26 @@ export const BasicInfo = ({ data, onChange }) => {
       </div>
     </div>
   );
+};
+
+BasicInfo.propTypes = {
+  data: PropTypes.shape({
+    coverImage: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.object, // File object
+    ]),
+    title: PropTypes.string,
+    description: PropTypes.string,
+    price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    duration: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    durationType: PropTypes.string,
+    nutritionInfo: PropTypes.shape({
+      calories: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      protein: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      carbs: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      fats: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    }),
+    targetGoal: PropTypes.string,
+  }).isRequired,
+  onChange: PropTypes.func.isRequired,
 };

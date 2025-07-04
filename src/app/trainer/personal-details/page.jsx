@@ -122,7 +122,7 @@ const TrainerRegistration = () => {
                   Back
                 </Button>
               ) : (
-                <div></div>
+                <div />
               )}
 
               {step < 4 ? (

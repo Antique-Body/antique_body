@@ -45,15 +45,16 @@ export default function EditNutritionPlanPage() {
           ],
         };
         if (searchParams.get("mode") === "copy") {
-          delete planData.id;
-          delete planData.createdAt;
-          delete planData.clientCount;
+          planData.id = undefined;
+          planData.createdAt = undefined;
+          planData.clientCount = undefined;
           planData.title = `Copy of ${data.title}`;
         }
         setInitialData(planData);
         setLoading(false);
       })
       .catch((err) => {
+        console.error(err);
         setError("Failed to load nutrition plan data");
         setLoading(false);
       });

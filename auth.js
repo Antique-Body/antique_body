@@ -1,4 +1,3 @@
-import { PrismaClient } from "@prisma/client";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import FacebookProvider from "next-auth/providers/facebook";
@@ -6,8 +5,7 @@ import GoogleProvider from "next-auth/providers/google";
 
 import { verifyPhoneCode } from "@/app/api/auth/services/phone";
 import { userService } from "@/app/api/users/services";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 const mapGoogleProfile = (profile) => ({
   id: profile.sub,

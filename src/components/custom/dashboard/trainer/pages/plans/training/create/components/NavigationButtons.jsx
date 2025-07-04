@@ -5,6 +5,31 @@ import { motion } from "framer-motion";
 
 import { Button } from "@/components/common/Button";
 
+// Helper function to get the main button text
+function getMainButtonText({ isEdit, isLoading, planType }) {
+  const typeLabel = planType === "nutrition" ? "Nutrition" : "Training";
+  if (isEdit) {
+    return isLoading
+      ? `Updating ${typeLabel} Plan...`
+      : `Update ${typeLabel} Plan`;
+  } else {
+    return isLoading
+      ? `Creating ${typeLabel} Plan...`
+      : `Create ${typeLabel} Plan`;
+  }
+}
+
+// Mapping for next step labels based on planType and currentStep
+const nextStepLabels = {
+  nutrition: ["Meal Planning", "Features", "Preview"],
+  training: ["Schedule", "Features", "Preview"],
+};
+
+function getNextStepLabel(planType, currentStep) {
+  const labels = nextStepLabels[planType] || nextStepLabels["training"];
+  return labels[currentStep] || "Preview";
+}
+
 export const NavigationButtons = ({
   currentStep,
   totalSteps,
@@ -46,36 +71,11 @@ export const NavigationButtons = ({
               ) : (
                 <Icon icon="mdi:rocket-launch" className="w-5 h-5 mr-2" />
               )}
-              {isEdit
-                ? isLoading
-                  ? `Updating ${
-                      planType === "nutrition" ? "Nutrition" : "Training"
-                    } Plan...`
-                  : `Update ${
-                      planType === "nutrition" ? "Nutrition" : "Training"
-                    } Plan`
-                : isLoading
-                ? `Creating ${
-                    planType === "nutrition" ? "Nutrition" : "Training"
-                  } Plan...`
-                : `Create ${
-                    planType === "nutrition" ? "Nutrition" : "Training"
-                  } Plan`}
+              {getMainButtonText({ isEdit, isLoading, planType })}
             </>
           ) : (
             <>
-              Continue to{" "}
-              {planType === "nutrition"
-                ? currentStep === 0
-                  ? "Meal Planning"
-                  : currentStep === 1
-                  ? "Features"
-                  : "Preview"
-                : currentStep === 0
-                ? "Schedule"
-                : currentStep === 1
-                ? "Features"
-                : "Preview"}
+              Continue to {getNextStepLabel(planType, currentStep)}
               <Icon icon="mdi:arrow-right" className="w-5 h-5 ml-2" />
             </>
           )}

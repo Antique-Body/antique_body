@@ -1,6 +1,6 @@
 export const TRAINING_TYPES = [
   { id: "personal", label: "1-on-1 Personal Training", icon: "mdi:account" },
-  { id: "with-trainer", label: "With Trainer", icon: "mdi:account-tie" },
+  { id: "with_trainer", label: "With Trainer", icon: "mdi:account-tie" },
   {
     id: "small_group",
     label: "Small Group Training (2-5)",

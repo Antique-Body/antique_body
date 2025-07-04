@@ -10,6 +10,7 @@ import { MealLibrarySelector } from "../../../../meals/components";
 import { MealModal } from "../../../../meals/components/MealModal";
 
 import { Button } from "@/components/common/Button";
+import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { FormField } from "@/components/common/FormField";
 import { Modal } from "@/components/common/Modal";
 
@@ -30,6 +31,7 @@ export const MealPlanning = ({ data, onChange }) => {
   const buttonRef = useRef(null);
   const [showCreateMeal, setShowCreateMeal] = useState(false);
   const [meals, setMeals] = useState([]);
+  const [error, setError] = useState(null);
 
   const days = data.days || [];
   const selectedDay = days[selectedDayIndex];
@@ -80,10 +82,7 @@ export const MealPlanning = ({ data, onChange }) => {
     setShowAddDayPopover(!showAddDayPopover);
   };
 
-  const generateId = () =>
-    window.crypto?.randomUUID
-      ? crypto.randomUUID()
-      : Math.random().toString(36).substr(2, 9);
+  const generateId = () => uuidv4();
 
   const addDay = (copyFromIdx = null) => {
     if (days.length >= 30) return;
@@ -185,28 +184,33 @@ export const MealPlanning = ({ data, onChange }) => {
 
   const addMealFromLibrary = async (mealIndex) => {
     if (!selectedDay) return;
-
+    setError(null);
     try {
       const response = await fetch("/api/users/trainer/meals");
+      if (!response.ok) throw new Error("Failed to fetch meals");
       const data = await response.json();
       if (data.success) {
         setMeals(data.meals);
         setShowMealLibraryModal(true);
         setActiveMealIndex(mealIndex);
+      } else {
+        throw new Error(data.error || "Failed to load meals");
       }
     } catch (error) {
       console.error("Error fetching meals:", error);
+      setError("Failed to load meal library. Please try again.");
     }
   };
 
   const handleCreateMeal = async (mealData) => {
+    setError(null);
     try {
       const response = await fetch("/api/users/trainer/meals", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(mealData),
       });
-
+      if (!response.ok) throw new Error("Failed to create meal");
       const result = await response.json();
       if (result.success) {
         const mealToAdd = {
@@ -221,14 +225,16 @@ export const MealPlanning = ({ data, onChange }) => {
           imageUrl: mealData.imageUrl,
           videoUrl: mealData.video,
         };
-
         const updatedMeals = [...selectedDay.meals];
         updatedMeals[activeMealIndex].options.push(mealToAdd);
         updateDay(selectedDayIndex, "meals", updatedMeals);
         setShowCreateMeal(false);
+      } else {
+        throw new Error(result.error || "Failed to create meal");
       }
     } catch (error) {
       console.error("Error creating meal:", error);
+      setError("Failed to create meal. Please try again.");
     }
   };
 
@@ -311,6 +317,8 @@ export const MealPlanning = ({ data, onChange }) => {
     updateDay(selectedDayIndex, "meals", updatedMeals);
   };
 
+  // Add logging for IDs at the top of the component
+
   if (!selectedDay) {
     return (
       <div className="space-y-4 sm:space-y-6 px-2 sm:px-4">
@@ -354,6 +362,7 @@ export const MealPlanning = ({ data, onChange }) => {
           Create daily meal plans for your nutrition program
         </p>
       </motion.div>
+      {error && <ErrorMessage error={error} />}
 
       {/* Day Selector */}
       <motion.div
@@ -375,8 +384,8 @@ export const MealPlanning = ({ data, onChange }) => {
         {/* Days Grid - Mobile Optimized */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 sm:gap-3">
           {days.map((day, idx) => (
-            <div key={day.id} className="relative group">
-              <button
+            <div key={day.id || idx} className="relative group">
+              <Button
                 onClick={() => setSelectedDayIndex(idx)}
                 className={`w-full px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg font-medium transition-all duration-200 text-xs sm:text-sm relative overflow-hidden ${
                   selectedDayIndex === idx
@@ -386,14 +395,14 @@ export const MealPlanning = ({ data, onChange }) => {
               >
                 <div className="truncate">{day.name}</div>
                 {day.isRestDay && (
-                  <div className="absolute top-0 right-0 w-2 h-2 bg-green-400 rounded-full"></div>
+                  <div className="absolute top-0 right-0 w-2 h-2 bg-green-400 rounded-full" />
                 )}
                 {day.meals && day.meals.length > 0 && !day.isRestDay && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#FF6B00] opacity-60"></div>
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#FF6B00] opacity-60" />
                 )}
-              </button>
+              </Button>
               {days.length > 1 && (
-                <button
+                <Button
                   onClick={(e) => {
                     e.stopPropagation();
                     deleteDay(idx);
@@ -402,7 +411,7 @@ export const MealPlanning = ({ data, onChange }) => {
                   title="Delete day"
                 >
                   <Icon icon="mdi:close" className="w-3 h-3" />
-                </button>
+                </Button>
               )}
             </div>
           ))}
@@ -410,7 +419,7 @@ export const MealPlanning = ({ data, onChange }) => {
           {/* Add Day Quick Button with Popover */}
           {days.length < 30 && (
             <div className="relative">
-              <button
+              <Button
                 ref={buttonRef}
                 onClick={handleOpenPopover}
                 className="w-full px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg border-2 border-dashed border-[#444] text-gray-500 hover:border-[#FF6B00] hover:text-[#FF6B00] transition-all duration-200 text-xs sm:text-sm flex items-center justify-center group"
@@ -420,7 +429,7 @@ export const MealPlanning = ({ data, onChange }) => {
                   icon="mdi:plus"
                   className="w-4 h-4 group-hover:scale-110 transition-transform"
                 />
-              </button>
+              </Button>
 
               {/* Add Day Popover */}
               <AnimatePresence>
@@ -450,7 +459,7 @@ export const MealPlanning = ({ data, onChange }) => {
                     }}
                   >
                     <div className="p-2">
-                      <button
+                      <Button
                         onClick={() => addDay()}
                         className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white hover:bg-[#FF6B00] rounded-lg transition-all duration-200 group"
                       >
@@ -466,10 +475,10 @@ export const MealPlanning = ({ data, onChange }) => {
                             Create a blank day
                           </div>
                         </div>
-                      </button>
+                      </Button>
 
                       {days.length > 0 && (
-                        <button
+                        <Button
                           onClick={() => {
                             setShowCopyDayModal(true);
                             setShowAddDayPopover(false);
@@ -490,11 +499,11 @@ export const MealPlanning = ({ data, onChange }) => {
                               Duplicate existing day
                             </div>
                           </div>
-                        </button>
+                        </Button>
                       )}
 
                       <div className="border-t border-[#444] mt-2 pt-2">
-                        <button
+                        <Button
                           onClick={addCheatDay}
                           className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white hover:bg-[#FF6B00] rounded-lg transition-all duration-200 group"
                         >
@@ -512,7 +521,7 @@ export const MealPlanning = ({ data, onChange }) => {
                               Free meal day
                             </div>
                           </div>
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </motion.div>
@@ -589,7 +598,7 @@ export const MealPlanning = ({ data, onChange }) => {
             ) : (
               selectedDay.meals.map((meal, mealIndex) => (
                 <div
-                  key={meal.id}
+                  key={meal.id || mealIndex}
                   className="bg-[#242424] rounded-lg border border-[#444] p-4 space-y-4"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-end gap-3">
@@ -613,13 +622,13 @@ export const MealPlanning = ({ data, onChange }) => {
                       placeholder="e.g., 8:00 AM"
                       className="w-full sm:w-32"
                     />
-                    <button
+                    <Button
                       onClick={() => removeMeal(mealIndex)}
                       className="self-end p-2 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors"
                       title="Remove meal"
                     >
                       <Icon icon="mdi:delete" className="w-5 h-5" />
-                    </button>
+                    </Button>
                   </div>
 
                   {/* Meal Options */}
@@ -651,7 +660,7 @@ export const MealPlanning = ({ data, onChange }) => {
 
                           return (
                             <div
-                              key={option.id}
+                              key={option.id || optionIndex}
                               className="bg-[#2a2a2a] rounded-lg border border-[#555] overflow-hidden"
                             >
                               <div className="flex">
@@ -673,7 +682,7 @@ export const MealPlanning = ({ data, onChange }) => {
                                       placeholder="Enter meal name"
                                       className="flex-1 mr-2"
                                     />
-                                    <button
+                                    <Button
                                       onClick={() =>
                                         removeMealOption(mealIndex, optionIndex)
                                       }
@@ -684,7 +693,7 @@ export const MealPlanning = ({ data, onChange }) => {
                                         icon="mdi:trash"
                                         className="w-5 h-5"
                                       />
-                                    </button>
+                                    </Button>
                                   </div>
 
                                   {/* Nutritional Info */}
@@ -995,8 +1004,8 @@ export const MealPlanning = ({ data, onChange }) => {
           ) : (
             <div className="space-y-2 max-h-80 overflow-y-auto">
               {days.map((day, idx) => (
-                <button
-                  key={day.id}
+                <Button
+                  key={day.id || idx}
                   onClick={() => copyDayFromAnother(idx)}
                   className="w-full text-left p-4 rounded-lg bg-[#222] hover:bg-[#FF6B00] transition-all duration-200 group border border-[#333] hover:border-[#FF6B00]"
                 >
@@ -1028,7 +1037,7 @@ export const MealPlanning = ({ data, onChange }) => {
                       className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors"
                     />
                   </div>
-                </button>
+                </Button>
               ))}
             </div>
           )}
@@ -1063,13 +1072,13 @@ export const MealPlanning = ({ data, onChange }) => {
             <div className="space-y-4 max-h-80 overflow-y-auto">
               {days.map((d, dIdx) =>
                 dIdx !== selectedDayIndex && d.meals && d.meals.length > 0 ? (
-                  <div key={d.id} className="space-y-2">
+                  <div key={d.id || dIdx} className="space-y-2">
                     <h4 className="font-medium text-white text-sm bg-[#333] px-3 py-2 rounded-lg">
                       {d.name}
                     </h4>
                     {d.meals.map((meal, mIdx) => (
-                      <button
-                        key={meal.id}
+                      <Button
+                        key={meal.id || mIdx}
                         className="w-full text-left px-4 py-3 rounded-lg bg-[#222] text-white hover:bg-[#FF6B00] transition-all duration-200 border border-[#333] hover:border-[#FF6B00] group"
                         onClick={() => copyMealFromAnotherDay(dIdx, mIdx)}
                       >
@@ -1095,7 +1104,7 @@ export const MealPlanning = ({ data, onChange }) => {
                             className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors"
                           />
                         </div>
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 ) : null
@@ -1143,34 +1152,39 @@ export const MealPlanning = ({ data, onChange }) => {
         title={showMediaPreview?.name || "Media Preview"}
         size="large"
       >
-        {showMediaPreview && (
-          <>
-            {showMediaPreview.type === "image" ? (
-              <Image
-                src={showMediaPreview.url}
-                alt={showMediaPreview.name || "Preview"}
-                className="w-full h-auto rounded-lg"
-                width={1000}
-                height={1000}
+        {showMediaPreview &&
+          (showMediaPreview.type === "image" ? (
+            <Image
+              src={showMediaPreview.url}
+              alt={showMediaPreview.name || "Preview"}
+              className="w-full h-auto rounded-lg"
+              width={1000}
+              height={1000}
+            />
+          ) : showMediaPreview.type === "video" && showMediaPreview.url ? (
+            <video
+              src={showMediaPreview.url}
+              controls
+              autoPlay
+              className="w-full h-auto rounded-lg"
+            >
+              <track
+                kind="captions"
+                src="/captions/sample-captions.vtt"
+                srcLang="en"
+                label="English captions"
+                default
               />
-            ) : showMediaPreview.type === "video" && showMediaPreview.url ? (
-              <video
-                src={showMediaPreview.url}
-                controls
-                autoPlay
-                className="w-full h-auto rounded-lg"
+            </video>
+          ) : (
+            <div className="text-center py-8">
+              <Icon
+                icon="mdi:file-question"
+                className="w-12 h-12 text-gray-500 mx-auto mb-3"
               />
-            ) : (
-              <div className="text-center py-8">
-                <Icon
-                  icon="mdi:file-question"
-                  className="w-12 h-12 text-gray-500 mx-auto mb-3"
-                />
-                <p className="text-gray-400">Media not available</p>
-              </div>
-            )}
-          </>
-        )}
+              <p className="text-gray-400">Media not available</p>
+            </div>
+          ))}
       </Modal>
     </div>
   );

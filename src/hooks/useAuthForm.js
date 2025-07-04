@@ -113,7 +113,6 @@ export const useAuthForm = ({
     // Only require verification code for phone login
     if (loginMethod === "phone") {
       if (!formData.code) {
-        console.log(formData, "formData");
         setError("code", { message: "Verification code is required" });
         setCodeError("Verification code is required");
         return;

@@ -1,9 +1,9 @@
-export const DAYS_OF_WEEK = [
-  { id: "monday", label: "Monday" },
-  { id: "tuesday", label: "Tuesday" },
-  { id: "wednesday", label: "Wednesday" },
-  { id: "thursday", label: "Thursday" },
-  { id: "friday", label: "Friday" },
-  { id: "saturday", label: "Saturday" },
-  { id: "sunday", label: "Sunday" },
-];
+export const DAYS_OF_WEEK = Object.freeze([
+  Object.freeze({ id: "monday", label: "Monday" }),
+  Object.freeze({ id: "tuesday", label: "Tuesday" }),
+  Object.freeze({ id: "wednesday", label: "Wednesday" }),
+  Object.freeze({ id: "thursday", label: "Thursday" }),
+  Object.freeze({ id: "friday", label: "Friday" }),
+  Object.freeze({ id: "saturday", label: "Saturday" }),
+  Object.freeze({ id: "sunday", label: "Sunday" }),
+]);

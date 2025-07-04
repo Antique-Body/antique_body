@@ -94,6 +94,14 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
                 key={index}
                 className="p-3 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg cursor-pointer transition-colors"
                 onClick={() => onSelectExercise(exercise)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onSelectExercise(exercise);
+                  }
+                }}
+                tabIndex={0}
+                role="button"
               >
                 <div className="flex justify-between items-center">
                   <h3 className="font-medium text-white">{exercise.name}</h3>

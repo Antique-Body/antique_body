@@ -28,7 +28,6 @@ export const ClientProfile = ({ userData, onProfileUpdate }) => {
     );
   };
 
-  console.log("userData", userData);
   // Format preferred activities
   const getPreferredActivities = () => {
     if (

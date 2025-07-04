@@ -1,82 +1,55 @@
-const { PrismaClient } = require("@prisma/client");
-const bcrypt = require("bcrypt");
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
+const bcrypt = require("bcrypt");
 async function main() {
   // Clean up existing data
-  console.log("Cleaning up existing data...");
-
   // Create password hash for test users
   const testPassword = await bcrypt.hash("password123", 10);
 
   // Wrap cleanup in try-catch to handle cases where tables don't exist yet
   try {
     await prisma.exercise.deleteMany();
-  } catch {
-    console.log("Exercise table doesn't exist yet, skipping cleanup");
-  }
+  } catch {}
 
   try {
     await prisma.trainerSettings.deleteMany();
-  } catch {
-    console.log("TrainerSettings table doesn't exist yet, skipping cleanup");
-  }
+  } catch {}
 
   try {
     await prisma.clientSettings.deleteMany();
-  } catch {
-    console.log("ClientSettings table doesn't exist yet, skipping cleanup");
-  }
+  } catch {}
 
   try {
     await prisma.trainerProfile.deleteMany();
-  } catch {
-    console.log("TrainerProfile table doesn't exist yet, skipping cleanup");
-  }
+  } catch {}
 
   try {
     await prisma.clientProfile.deleteMany();
-  } catch {
-    console.log("ClientProfile table doesn't exist yet, skipping cleanup");
-  }
+  } catch {}
 
   try {
     await prisma.trainerInfo.deleteMany();
-  } catch {
-    console.log("TrainerInfo table doesn't exist yet, skipping cleanup");
-  }
+  } catch {}
 
   try {
     await prisma.clientInfo.deleteMany();
-  } catch {
-    console.log("ClientInfo table doesn't exist yet, skipping cleanup");
-  }
+  } catch {}
 
   try {
     await prisma.trainerGym.deleteMany();
-  } catch {
-    console.log("TrainerGym table doesn't exist yet, skipping cleanup");
-  }
+  } catch {}
 
   try {
     await prisma.user.deleteMany();
-  } catch {
-    console.log("User table doesn't exist yet, skipping cleanup");
-  }
+  } catch {}
 
   try {
     await prisma.gym.deleteMany();
-  } catch {
-    console.log("Gym table doesn't exist yet, skipping cleanup");
-  }
+  } catch {}
 
   try {
     await prisma.location.deleteMany();
-  } catch {
-    console.log("Location table doesn't exist yet, skipping cleanup");
-  }
-
-  console.log("Cleanup completed.");
+  } catch {}
 
   // Create locations first
   const locations = await Promise.all([
@@ -1322,8 +1295,6 @@ async function main() {
       },
     });
   }
-
-  console.log("Seed data created successfully");
 }
 
 main()

@@ -1,9 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 
+import prisma from "@/lib/prisma";
 import { formatPhoneNumber } from "@/lib/utils";
-
-const prisma = new PrismaClient();
 
 const userSelectFields = {
   id: true,

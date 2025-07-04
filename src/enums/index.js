@@ -10,3 +10,4 @@ export * from "./planFeatures";
 export * from "./daysOfWeek";
 export * from "./planTypes";
 export * from "./sessionFormats";
+export * from "./trainingLevels";

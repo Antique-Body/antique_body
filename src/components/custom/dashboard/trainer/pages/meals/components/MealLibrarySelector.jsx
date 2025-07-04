@@ -24,8 +24,7 @@ export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
       const filtered = mealLibrary.filter(
         (meal) =>
           meal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (meal.ingredients &&
-            meal.ingredients.toLowerCase().includes(searchTerm.toLowerCase()))
+          meal.ingredients?.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredMeals(filtered);
       setTotalCount(filtered.length);
@@ -98,6 +97,15 @@ export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
                 key={meal.id}
                 className="group relative rounded-xl border-2 transition-all duration-300 cursor-pointer overflow-hidden bg-gradient-to-r from-slate-700/80 to-slate-600/80 border-slate-500/60 hover:border-blue-400/60 hover:shadow-md hover:shadow-blue-400/10"
                 onClick={() => onSelectMeal(meal)}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onSelectMeal(meal);
+                  }
+                }}
+                role="button"
+                aria-pressed="false"
               >
                 <div className="p-3 flex items-center gap-3 relative z-10">
                   {/* Meal Image with Overlay */}

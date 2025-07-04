@@ -1,9 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 import { auth } from "#/auth";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 // GET: Fetch plans by type (training/nutrition)
 export async function GET(req) {
@@ -24,11 +22,11 @@ export async function GET(req) {
         { status: 404 }
       );
     }
-    let plans = [];
-    if (type === "nutrition") {
-      plans = await prisma.nutritionPlan.findMany({
-        where: { trainerInfoId: trainerInfo.id, isActive: true },
-        orderBy: { createdAt: "desc" },
+
+    // DRY: Model and select fields by type
+    const modelMap = {
+      nutrition: {
+        model: prisma.nutritionPlan,
         select: {
           id: true,
           title: true,
@@ -43,12 +41,9 @@ export async function GET(req) {
           isPublished: true,
           days: true,
         },
-      });
-      plans = plans.map((plan) => ({ ...plan, type: "nutrition" }));
-    } else {
-      plans = await prisma.trainingPlan.findMany({
-        where: { trainerInfoId: trainerInfo.id, isActive: true },
-        orderBy: { createdAt: "desc" },
+      },
+      training: {
+        model: prisma.trainingPlan,
         select: {
           id: true,
           title: true,
@@ -62,12 +57,23 @@ export async function GET(req) {
           isActive: true,
           isPublished: true,
         },
-      });
-      plans = plans.map((plan) => ({ ...plan, type: "training" }));
-    }
+      },
+    };
+    const planType = type === "nutrition" ? "nutrition" : "training";
+    const { model, select } = modelMap[planType];
+    let plans = await model.findMany({
+      where: { trainerInfoId: trainerInfo.id, isActive: true },
+      orderBy: { createdAt: "desc" },
+      select,
+    });
+    plans = plans.map((plan) => ({ ...plan, type: planType }));
     return NextResponse.json(plans);
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("GET /api/users/trainer/plans error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
@@ -89,6 +95,24 @@ export async function POST(req) {
       );
     }
     const body = await req.json();
+    // Validation for required fields
+    const requiredFields = ["title", "description", "duration", "durationType"];
+    const missingFields = requiredFields.filter((field) => !body[field]);
+    if (missingFields.length > 0) {
+      return NextResponse.json(
+        { error: `Missing required field(s): ${missingFields.join(", ")}` },
+        { status: 400 }
+      );
+    }
+    if (
+      body.price !== undefined &&
+      (typeof body.price !== "number" || isNaN(body.price) || body.price < 0)
+    ) {
+      return NextResponse.json(
+        { error: "Price must be a non-negative number if provided." },
+        { status: 400 }
+      );
+    }
     // Accepts type in body or infers from payload
     const type = body.type || inferPlanType(body);
     let plan;
@@ -141,7 +165,11 @@ export async function POST(req) {
     }
     return NextResponse.json(plan);
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("POST /api/users/trainer/plans error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
@@ -186,6 +214,10 @@ export async function GET_planId(req, { params }) {
     }
     return NextResponse.json(plan);
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("GET_planId /api/users/trainer/plans error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
