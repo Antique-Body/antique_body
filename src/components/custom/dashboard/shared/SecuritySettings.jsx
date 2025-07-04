@@ -1,6 +1,6 @@
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
 import { Card } from "@/components/common/Card";
@@ -29,7 +29,7 @@ const formatEmailDisplay = (email) => {
   return `${hiddenUsername}@${domain}`;
 };
 
-export const SecuritySettings = ({ userData, onSave }) => {
+export const SecuritySettings = ({ userData }) => {
   const [settings, setSettings] = useState({
     twoFactorAuth: {
       enabled: userData.user?.twoFactorAuth?.enabled || false,
@@ -117,13 +117,6 @@ export const SecuritySettings = ({ userData, onSave }) => {
           : value,
     }));
   };
-
-  // Auto-save changes
-  useEffect(() => {
-    if (onSave) {
-      onSave(settings);
-    }
-  }, [settings, onSave]);
 
   const enable2FA = async () => {
     setLoading(true);

@@ -1,5 +1,5 @@
 import { Icon } from "@iconify/react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import { Card } from "@/components/common/Card";
 
@@ -31,7 +31,7 @@ const TIME_ZONES = [
   { id: "America/Los_Angeles", name: "Los Angeles (PST/PDT)" },
 ];
 
-export const LanguagePreferences = ({ userData, onSave }) => {
+export const LanguagePreferences = ({ userData }) => {
   const [settings, setSettings] = useState({
     language: userData.language || "en",
     currency: userData.currency || "USD",
@@ -68,13 +68,6 @@ export const LanguagePreferences = ({ userData, onSave }) => {
           : value,
     }));
   };
-
-  // Auto-save changes
-  useEffect(() => {
-    if (onSave) {
-      onSave(settings);
-    }
-  }, [settings, onSave]);
 
   return (
     <div className="space-y-6">

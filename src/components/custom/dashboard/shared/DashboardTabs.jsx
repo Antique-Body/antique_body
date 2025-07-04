@@ -1,11 +1,13 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/common/Button";
 
 export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
+  const router = useRouter();
   const tabsRef = useRef([]);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
   const [hoverIndicatorStyle, setHoverIndicatorStyle] = useState(null);
@@ -30,17 +32,28 @@ export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
         width: tabElement.offsetWidth,
       });
     }
+    // Prefetch route on hover if href exists
+    if (tabs[index].href) {
+      router.prefetch(tabs[index].href);
+    }
   };
 
   const handleMouseLeave = () => {
     setHoverIndicatorStyle(null);
   };
 
+  const handleTabClick = (tab) => {
+    setActiveTab(tab.id);
+    if (tab.href) {
+      router.push(tab.href);
+    }
+  };
+
   return (
     <div className="relative top-3 mb-8 flex overflow-x-auto pb-2 pt-3">
       {/* Active tab indicator */}
       <div
-        className="absolute bottom-0 h-1 rounded-t-md bg-[#FF6B00] transition-all duration-300 ease-in-out"
+        className="absolute bottom-0 h-1 rounded-t-md bg-[#FF6B00] transition-all duration-100 ease-in-out"
         style={{
           left: `${indicatorStyle.left}px`,
           width: `${indicatorStyle.width}px`,
@@ -50,7 +63,7 @@ export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
       {/* Hover indicator */}
       {hoverIndicatorStyle && (
         <div
-          className="absolute bottom-0 h-1 rounded-t-md bg-[#FF6B00]/30 transition-all duration-300 ease-in-out"
+          className="absolute bottom-0 h-1 rounded-t-md bg-[#FF6B00]/30 transition-all duration-100 ease-in-out"
           style={{
             left: `${hoverIndicatorStyle.left}px`,
             width: `${hoverIndicatorStyle.width}px`,
@@ -62,18 +75,18 @@ export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
         <Button
           key={tab.id}
           ref={(el) => (tabsRef.current[index] = el)}
-          className={`whitespace-nowrap px-6 py-3 mx-2 text-sm font-medium transition-all duration-300 focus:ring-0 ${
+          className={`whitespace-nowrap px-6 py-3 mx-2 text-sm font-medium transition-all duration-100 focus:ring-0 ${
             activeTab === tab.id
               ? "scale-105 transform text-white"
               : "text-gray-400 hover:text-white"
           } rounded-md first:ml-0 last:mr-0`}
-          onClick={() => setActiveTab(tab.id)}
+          onClick={() => handleTabClick(tab)}
           onMouseEnter={() => handleMouseEnter(index)}
           onMouseLeave={handleMouseLeave}
           variant="ghost"
         >
           <span
-            className={`transition-all duration-300 ${
+            className={`transition-all duration-100 ${
               activeTab === tab.id ? "translate-y-[-2px] transform" : ""
             }`}
           >
@@ -97,7 +110,7 @@ export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
 // AnimatedTabContent component for smooth tab transitions
 export const AnimatedTabContent = ({ children, isActive }) => (
   <div
-    className="relative transition-opacity duration-300"
+    className="relative transition-opacity duration-100"
     style={{
       opacity: isActive ? 1 : 0,
       visibility: isActive ? "visible" : "hidden",
@@ -140,8 +153,8 @@ export const AnimatedPageTransition = ({ children, routeKey }) => {
           exit="exit"
           variants={pageVariants}
           transition={{
-            y: { type: "tween", duration: 0.2 },
-            opacity: { duration: 0.2 },
+            y: { type: "tween", duration: 0.1 },
+            opacity: { duration: 0.1 },
           }}
           style={{ width: "100%" }}
         >

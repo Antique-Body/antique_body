@@ -207,22 +207,6 @@ export const AccountSettings = ({ userData, onSave }) => {
     }
   };
 
-  // Call parent onSave when data changes
-  useEffect(() => {
-    if (onSave) {
-      onSave({
-        ...formData,
-        emailVerified: verification.email.isVerified,
-        phoneVerified: verification.phone.isVerified,
-      });
-    }
-  }, [
-    formData,
-    verification.email.isVerified,
-    verification.phone.isVerified,
-    onSave,
-  ]);
-
   const emailChanged = formData.email !== verification.email.originalEmail;
   const phoneChanged = formData.phone !== verification.phone.originalPhone;
 

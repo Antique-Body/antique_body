@@ -415,7 +415,6 @@ async function getTrainerSettings(userId) {
       error.code === "P2002" &&
       error.meta?.target?.includes("trainerInfoId")
     ) {
-      console.log("TrainerSettings already exists, fetching existing record");
       const existingSettings = await prisma.trainerSettings.findUnique({
         where: { trainerInfoId: trainerInfo.id },
       });
