@@ -80,7 +80,7 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
             : ["No key features specified."],
       };
       // Weekly schedule mapping for PDF
-      let weeklySchedule = {};
+      const weeklySchedule = {};
       if (isNutrition) {
         // Nutrition: map days by their real name (e.g. Monday, Day 1, ...)
         (days || plan.days || []).forEach((day) => {
@@ -453,7 +453,7 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
               sizes="(max-width: 768px) 100vw, 800px"
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0.7)] to-[#111]"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0.7)] to-[#111]" />
 
           {/* Plan type badge */}
           <div className="absolute top-4 left-4 z-10">
@@ -568,14 +568,18 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
           <div className="border-b border-[#333] mb-6">
             <div className="flex space-x-6 overflow-x-auto pb-1">
               {tabs.map((tab) => (
-                <button
+                <Button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  type="button"
                   className={`py-3 relative text-sm font-medium transition-colors whitespace-nowrap ${
                     activeTab === tab.id
-                      ? "text-[#FF6B00]"
-                      : "text-gray-400 hover:text-white"
-                  }`}
+                      ? "text-[#FF6B00] border-b-2 border-[#FF6B00]"
+                      : "text-gray-400 hover:text-white border-b-2 border-transparent"
+                  } bg-transparent rounded-none`}
+                  onClick={() => setActiveTab(tab.id)}
+                  variant="tab"
+                  isActive={activeTab === tab.id}
+                  style={{ position: "relative" }}
                 >
                   {tab.label}
                   {activeTab === tab.id && (
@@ -587,7 +591,7 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
                       transition={{ duration: 0.3 }}
                     />
                   )}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -696,7 +700,7 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
                             </span>
                           </div>
                           {index !== timeline.length - 1 && (
-                            <div className="absolute left-3 top-6 w-0.5 h-full max-h-12 bg-[#333]"></div>
+                            <div className="absolute left-3 top-6 w-0.5 h-full max-h-12 bg-[#333]" />
                           )}
                           <div>
                             <h4 className="text-white font-medium">
@@ -722,7 +726,7 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
                               </span>
                             </div>
                             {index !== (days || plan.days || []).length - 1 && (
-                              <div className="absolute left-3 top-6 w-0.5 h-full max-h-12 bg-[#333]"></div>
+                              <div className="absolute left-3 top-6 w-0.5 h-full max-h-12 bg-[#333]" />
                             )}
                             <div>
                               <h4 className="text-white font-medium">
@@ -746,7 +750,7 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
                               </span>
                             </div>
                             {index !== schedule.length - 1 && (
-                              <div className="absolute left-3 top-6 w-0.5 h-full max-h-12 bg-[#333]"></div>
+                              <div className="absolute left-3 top-6 w-0.5 h-full max-h-12 bg-[#333]" />
                             )}
                             <div>
                               <h4 className="text-white font-medium">
@@ -780,7 +784,7 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
                             </span>
                           </div>
                           {index !== schedule.length - 1 && (
-                            <div className="absolute left-3 top-6 w-0.5 h-full max-h-12 bg-[#333]"></div>
+                            <div className="absolute left-3 top-6 w-0.5 h-full max-h-12 bg-[#333]" />
                           )}
                           <div>
                             <h4 className="text-white font-medium">
@@ -816,40 +820,46 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
                     {/* Nutrition: use days, Training: use schedule */}
                     {isNutrition
                       ? (days || plan.days || []).map((day) => (
-                          <button
+                          <Button
                             key={
                               day.id ??
                               day.day ??
                               day.name ??
                               `daybtn-${day.id || day.day || day.name}`
                             }
+                            type="button"
                             onClick={() => setActiveDay(day.day || day.name)}
                             className={`py-2 px-4 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
                               activeDay === (day.day || day.name)
                                 ? "bg-[#FF6B00] text-white"
                                 : "bg-[#1A1A1A] text-gray-400 hover:text-white"
                             }`}
+                            variant="ghost"
+                            isActive={activeDay === (day.day || day.name)}
                           >
                             {day.name || day.day}
-                          </button>
+                          </Button>
                         ))
                       : (schedule || plan.schedule || []).map((day) => (
-                          <button
+                          <Button
                             key={
                               day.id ??
                               day.day ??
                               day.name ??
                               `schedbtn-${day.id || day.day || day.name}`
                             }
+                            type="button"
                             onClick={() => setActiveDay(day.day || day.name)}
                             className={`py-2 px-4 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
                               activeDay === (day.day || day.name)
                                 ? "bg-[#FF6B00] text-white"
                                 : "bg-[#1A1A1A] text-gray-400 hover:text-white"
                             }`}
+                            variant="ghost"
+                            isActive={activeDay === (day.day || day.name)}
                           >
                             {day.name || day.day}
-                          </button>
+                          </Button>
                         ))}
                   </div>
 

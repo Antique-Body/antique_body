@@ -29,8 +29,6 @@ export const TrainingPlanCreator = ({ initialData }) => {
   const { formData, updateFormData, handleSubmit, isValid } =
     useTrainingPlanForm(initialData);
 
-  console.log(initialData, "initialData");
-
   const handleNext = async () => {
     if (currentStep < STEPS.length - 1) {
       setCurrentStep((prev) => prev + 1);
@@ -84,9 +82,7 @@ export const TrainingPlanCreator = ({ initialData }) => {
           <div className="flex items-center gap-4">
             <BackButton onClick={handleBack} />
             <h1 className="text-2xl font-bold text-white">
-              {initialData && initialData.id
-                ? "Create Training Plan"
-                : "Update Training Plan"}
+              {initialData.id ? "Update Training Plan" : "Create Training Plan"}
             </h1>
           </div>
           <StepIndicator steps={STEPS} currentStep={currentStep} />

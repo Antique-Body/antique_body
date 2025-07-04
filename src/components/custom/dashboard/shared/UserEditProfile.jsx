@@ -579,7 +579,6 @@ export const TrainerEditProfile = ({
   userData: _userData = {},
   onSave,
 }) => {
-  console.log("userdatete", _userData);
   // Don't pass userData to hook - let it fetch fresh data with edit mode
   const hook = useTrainerEditProfileForm(null);
   const {

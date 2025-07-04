@@ -42,15 +42,12 @@ export const UserProfile = ({
         // Add a small delay to ensure data is refreshed
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
-
-      console.log("Profile data saved successfully:", profileData);
     } catch (error) {
       console.error("Error saving profile:", error);
       throw error; // Re-throw to let the modal handle the error
     }
   };
 
-  console.log("userData", userData);
   return (
     <>
       <div className="flex flex-col items-start gap-6 py-2 md:flex-row">

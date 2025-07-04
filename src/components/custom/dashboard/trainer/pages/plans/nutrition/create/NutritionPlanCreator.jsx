@@ -47,7 +47,7 @@ export const NutritionPlanCreator = ({ initialData }) => {
     if (currentStep > 0) {
       setCurrentStep((prev) => prev - 1);
     } else {
-      router.push("/trainer/dashboard/plans?fromTab=nutrition");
+      router.push("/trainer/dashboard/plans?fromTab=nutrition&refresh=1");
     }
   };
 
@@ -83,7 +83,7 @@ export const NutritionPlanCreator = ({ initialData }) => {
           <div className="flex items-center gap-4">
             <BackButton onClick={handleBack} />
             <h1 className="text-2xl font-bold text-white">
-              {initialData && initialData.id
+              {initialData?.id
                 ? "Update Nutrition Plan"
                 : "Create Nutrition Plan"}
             </h1>
@@ -108,7 +108,7 @@ export const NutritionPlanCreator = ({ initialData }) => {
               onNext={handleNext}
               isNextDisabled={!isValid(currentStep)}
               isLastStep={currentStep === STEPS.length - 1}
-              isEdit={!!(initialData && initialData.id)}
+              isEdit={!!initialData?.id}
               isLoading={isLoading || isSubmitting}
               planType="nutrition"
             />

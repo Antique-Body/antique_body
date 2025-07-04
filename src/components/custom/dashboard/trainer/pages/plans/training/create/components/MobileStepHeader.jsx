@@ -7,7 +7,7 @@ export const MobileStepHeader = ({ currentStep, steps, onBack }) => {
   const currentStepData = steps[currentStep];
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       className="bg-gradient-to-r from-[#1a1a1a]/90 to-[#222]/90 backdrop-blur-md border border-[#333] rounded-2xl p-4 shadow-xl"
@@ -47,9 +47,13 @@ export const MobileStepHeader = ({ currentStep, steps, onBack }) => {
             {/* Shimmer effect */}
             <motion.div
               className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-              animate={{ x: ['-100%', '100%'] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-              style={{ width: '30%' }}
+              animate={{ x: ["-100%", "100%"] }}
+              transition={{
+                duration: 1.5,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "linear",
+              }}
+              style={{ width: "30%" }}
             />
           </div>
 
@@ -58,16 +62,14 @@ export const MobileStepHeader = ({ currentStep, steps, onBack }) => {
             <div className="text-sm font-medium text-gray-300">
               Step {currentStep + 1} of {steps.length}
             </div>
-            
+
             {/* Mini step dots */}
             <div className="flex gap-1.5">
               {steps.map((_, index) => (
                 <div
                   key={index}
                   className={`w-2 h-2 rounded-full transition-colors ${
-                    index <= currentStep
-                      ? 'bg-[#FF6B00]'
-                      : 'bg-[#333]'
+                    index <= currentStep ? "bg-[#FF6B00]" : "bg-[#333]"
                   }`}
                 />
               ))}

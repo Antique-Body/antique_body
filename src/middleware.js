@@ -130,10 +130,7 @@ function getOnboardingRedirect(role, token, pathname) {
   const isAllowed = config.allowed.some((allowedPath) => {
     if (allowedPath.includes(":id")) {
       // Pretvori allowedPath u regex, npr. "/trainer/dashboard/plans/edit/:id" => /^\/trainer\/dashboard\/plans\/edit\/[^\/]+$/
-      const regex = new RegExp(
-        "^" + allowedPath.replace(":id", "[^/]+") + "$",
-        "i"
-      );
+      const regex = new RegExp(`^${allowedPath.replace(":id", "[^/]+")}$`, "i");
       return regex.test(pathname);
     }
     return allowedPath === pathname;

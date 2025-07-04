@@ -1,10 +1,8 @@
-import { PrismaClient } from "@prisma/client";
-
 import { clientService } from "../services";
 
 import { auth } from "#/auth";
+import prisma from "@/lib/prisma";
 import { formatPhoneNumber } from "@/lib/utils";
-const prisma = new PrismaClient();
 
 export async function POST(req) {
   try {

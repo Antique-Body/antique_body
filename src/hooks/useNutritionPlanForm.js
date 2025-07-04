@@ -49,6 +49,7 @@ export const useNutritionPlanForm = (initialData = null) => {
   const router = useRouter();
   const [formData, setFormData] = useState(initialData || initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // Get searchParams only when running in the browser
@@ -58,10 +59,13 @@ export const useNutritionPlanForm = (initialData = null) => {
         : null;
     const isCopy = searchParams && searchParams.get("mode") === "copy";
     if (initialData) {
-      const cleanData = { ...initialData };
+      let cleanData;
       if (isCopy) {
         // Remove id for copy mode so a new plan is created
-        delete cleanData.id;
+        const { id: _id, ...rest } = initialData;
+        cleanData = { ...rest };
+      } else {
+        cleanData = { ...initialData };
       }
       setFormData(cleanData);
     }
@@ -125,10 +129,10 @@ export const useNutritionPlanForm = (initialData = null) => {
 
   const handleSubmit = async () => {
     if (isSubmitting) {
-      console.log("[handleSubmit] Prevented double submit");
       return;
     }
     setIsSubmitting(true);
+    setError(null);
     try {
       // Get searchParams only when running in the browser
       const searchParams =
@@ -198,6 +202,10 @@ export const useNutritionPlanForm = (initialData = null) => {
       router.push("/trainer/dashboard/plans");
     } catch (error) {
       console.error("Error submitting nutrition plan:", error);
+      setError(
+        error?.message ||
+          "An unexpected error occurred while submitting the nutrition plan. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -228,7 +236,7 @@ export const useNutritionPlanForm = (initialData = null) => {
 
     const cheatDay = {
       id: uuidv4(),
-      name: "Cheat Day",
+      name: `Day ${formData.days.length + 1}`,
       isRestDay: true,
       description: "Describe your cheat day (e.g. free meal, treat, etc.)",
       meals: [],
@@ -259,5 +267,6 @@ export const useNutritionPlanForm = (initialData = null) => {
     addCheatDay,
     updateDay,
     deleteDay,
+    error,
   };
 };

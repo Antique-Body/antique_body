@@ -3,6 +3,7 @@
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 
+import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 
 export const Features = ({ data, onChange }) => {
@@ -12,20 +13,25 @@ export const Features = ({ data, onChange }) => {
   };
 
   const handleArrayChange = (name, index, value) => {
-    const array = data[name] || [""];
+    if (!name || !(name in data)) return;
+    const array = Array.isArray(data[name]) ? data[name] : [""];
+    if (typeof index !== "number" || index < 0 || index >= array.length) return;
     const newArray = [...array];
     newArray[index] = value;
     onChange({ [name]: newArray });
   };
 
   const addArrayItem = (name) => {
-    const array = data[name] || [""];
+    if (!name || !(name in data)) return;
+    const array = Array.isArray(data[name]) ? data[name] : [""];
     onChange({ [name]: [...array, ""] });
   };
 
   const removeArrayItem = (name, index) => {
-    const array = data[name] || [""];
+    if (!name || !(name in data)) return;
+    const array = Array.isArray(data[name]) ? data[name] : [""];
     if (array.length === 1) return;
+    if (typeof index !== "number" || index < 0 || index >= array.length) return;
     const newArray = array.filter((_, i) => i !== index);
     onChange({ [name]: newArray });
   };
@@ -113,25 +119,27 @@ export const Features = ({ data, onChange }) => {
                     }
                     className="flex-1"
                   />
-                  <button
+                  <Button
                     type="button"
                     onClick={() => removeArrayItem("keyFeatures", idx)}
                     className="p-2 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors"
                     disabled={(data.keyFeatures || [""]).length === 1}
                     title="Remove feature"
+                    variant="ghost"
                   >
                     <Icon icon="mdi:close" className="w-4 h-4" />
-                  </button>
+                  </Button>
                 </div>
               ))}
-              <button
+              <Button
                 type="button"
                 onClick={() => addArrayItem("keyFeatures")}
                 className="w-full py-2 px-4 bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-lg text-[#FF6B00] hover:bg-[#FF6B00]/20 transition-colors flex items-center justify-center gap-2"
+                variant="orangeOutline"
               >
                 <Icon icon="mdi:plus" className="w-4 h-4" />
                 Add Feature
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -222,7 +230,7 @@ export const Features = ({ data, onChange }) => {
                       }
                       className="flex-1"
                     />
-                    <button
+                    <Button
                       type="button"
                       onClick={() => removeTimelineItem(idx)}
                       className="p-2 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors"
@@ -234,9 +242,10 @@ export const Features = ({ data, onChange }) => {
                         ).length === 1
                       }
                       title="Remove timeline block"
+                      variant="ghost"
                     >
                       <Icon icon="mdi:close" className="w-4 h-4" />
-                    </button>
+                    </Button>
                   </div>
 
                   <FormField
@@ -268,14 +277,15 @@ export const Features = ({ data, onChange }) => {
                   />
                 </div>
               ))}
-              <button
+              <Button
                 type="button"
                 onClick={addTimelineItem}
                 className="w-full py-2 px-4 bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-lg text-[#FF6B00] hover:bg-[#FF6B00]/20 transition-colors flex items-center justify-center gap-2"
+                variant="orangeOutline"
               >
                 <Icon icon="mdi:plus" className="w-4 h-4" />
                 Add Timeline Block
-              </button>
+              </Button>
             </div>
           </div>
         </motion.div>

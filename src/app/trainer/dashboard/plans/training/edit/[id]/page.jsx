@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useSearchParams, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { fetchPlanDetails } from "@/app/api/users/services/planService";
@@ -8,6 +8,7 @@ import { TrainingPlanCreator } from "@/components/custom/dashboard/trainer/pages
 
 export default function EditTrainingPlanPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const { id } = params;
   const [initialData, setInitialData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -18,7 +19,7 @@ export default function EditTrainingPlanPage() {
     setLoading(true);
     fetchPlanDetails(id, "training")
       .then((data) => {
-        setInitialData({
+        const planData = {
           ...data,
           id: data.id,
           difficultyLevel: data.difficultyLevel || "",
@@ -39,7 +40,13 @@ export default function EditTrainingPlanPage() {
               type: "strength",
             },
           ],
-        });
+        };
+        if (searchParams.get("mode") === "copy") {
+          planData.id = undefined;
+          if ("createdAt" in planData) planData.createdAt = undefined;
+          planData.title = `Copy of ${data.title}`;
+        }
+        setInitialData(planData);
         setLoading(false);
       })
       .catch((err) => {
@@ -47,7 +54,7 @@ export default function EditTrainingPlanPage() {
         setError("Failed to load plan data");
         setLoading(false);
       });
-  }, [id]);
+  }, [id, searchParams]);
 
   if (loading) return <div className="text-white">Loading...</div>;
   if (error) return <div className="text-red-500">{error}</div>;

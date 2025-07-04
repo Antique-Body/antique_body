@@ -1,80 +1,15 @@
 "use client";
 
 import { Icon } from "@iconify/react";
+import clsx from "clsx";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { SESSION_FORMATS } from "src/enums/sessionFormats";
+import { TRAINING_LEVELS } from "src/enums/trainingLevels";
 
 import { FormField } from "@/components/common/FormField";
-
-const SESSION_FORMATS = [
-  {
-    id: "inPerson",
-    label: "In-Person",
-    description: "Face-to-face training sessions",
-    icon: "mdi:account-group",
-    color: "from-blue-500 to-indigo-600",
-    bgColor: "bg-blue-500/10",
-    borderColor: "border-blue-500/30",
-  },
-  {
-    id: "online",
-    label: "Online",
-    description: "Virtual training sessions",
-    icon: "mdi:video-outline",
-    color: "from-emerald-500 to-green-600",
-    bgColor: "bg-emerald-500/10",
-    borderColor: "border-emerald-500/30",
-  },
-  {
-    id: "hybrid",
-    label: "Hybrid",
-    description: "Mix of in-person and online",
-    icon: "mdi:swap-horizontal",
-    color: "from-violet-500 to-purple-600",
-    bgColor: "bg-violet-500/10",
-    borderColor: "border-violet-500/30",
-  },
-  {
-    id: "selfGuided",
-    label: "Self-Guided",
-    description: "Independent workout plans",
-    icon: "mdi:clipboard-text-outline",
-    color: "from-[#FF6B00] to-[#FF8533]",
-    bgColor: "bg-[#FF6B00]/10",
-    borderColor: "border-[#FF6B00]/30",
-  },
-];
-
-const TRAINING_LEVELS = [
-  {
-    id: "beginner",
-    label: "Beginner",
-    description: "New to fitness training",
-    icon: "mdi:baby-face-outline",
-    color: "from-emerald-500 to-green-600",
-    bgColor: "bg-emerald-500/10",
-    borderColor: "border-emerald-500/30",
-  },
-  {
-    id: "intermediate",
-    label: "Intermediate",
-    description: "Some training experience",
-    icon: "mdi:account-outline",
-    color: "from-blue-500 to-indigo-600",
-    bgColor: "bg-blue-500/10",
-    borderColor: "border-blue-500/30",
-  },
-  {
-    id: "advanced",
-    label: "Advanced",
-    description: "Experienced athletes",
-    icon: "mdi:trophy-outline",
-    color: "from-violet-500 to-purple-600",
-    bgColor: "bg-violet-500/10",
-    borderColor: "border-violet-500/30",
-  },
-];
+import { updateFormData } from "@/lib/utils";
 
 export const BasicInfo = ({ data, onChange }) => {
   const [previewImage, setPreviewImage] = useState(null);
@@ -103,18 +38,7 @@ export const BasicInfo = ({ data, onChange }) => {
   };
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    if (name.includes(".")) {
-      const [parent, child] = name.split(".");
-      onChange({
-        [parent]: {
-          ...data[parent],
-          [child]: type === "checkbox" ? checked : value,
-        },
-      });
-    } else {
-      onChange({ [name]: type === "checkbox" ? checked : value });
-    }
+    onChange(updateFormData(data, e));
   };
 
   const handleFormatSelect = (formatId) => {
@@ -320,29 +244,38 @@ export const BasicInfo = ({ data, onChange }) => {
                     whileHover={{ scale: 1.02, y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleLevelSelect(difficultyLevel.id)}
-                    className={`relative p-6 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
+                    className={clsx(
+                      "relative p-6 rounded-xl border-2 cursor-pointer transition-all duration-300",
                       isSelected
-                        ? `bg-gradient-to-br ${difficultyLevel.color}/10 ${
-                            difficultyLevel.borderColor
-                          } shadow-xl ring-2 ring-${
-                            difficultyLevel.color.split("-")[1]
-                          }-500/20`
+                        ? [
+                            "bg-gradient-to-br shadow-xl",
+                            `${difficultyLevel.color}/10`,
+                            difficultyLevel.borderColor,
+                            `ring-2 ring-${
+                              difficultyLevel.color.split("-")[1]
+                            }-500/20`,
+                          ]
                         : "bg-[#242424] border-[#333] hover:border-[#444] hover:bg-[#2a2a2a]"
-                    }`}
+                    )}
                   >
                     <div className="flex items-center gap-4">
                       <div
-                        className={`p-3 rounded-xl border transition-all duration-300 ${
+                        className={clsx(
+                          "p-3 rounded-xl border transition-all duration-300",
                           isSelected
-                            ? `bg-gradient-to-r ${difficultyLevel.color} border-white/20 shadow-lg`
+                            ? [
+                                "bg-gradient-to-r border-white/20 shadow-lg",
+                                difficultyLevel.color,
+                              ]
                             : "bg-[#333] border-[#444]"
-                        }`}
+                        )}
                       >
                         <Icon
                           icon={difficultyLevel.icon}
-                          className={`w-6 h-6 ${
+                          className={clsx(
+                            "w-6 h-6",
                             isSelected ? "text-white" : "text-gray-300"
-                          }`}
+                          )}
                         />
                       </div>
                       <div className="flex-1">
@@ -373,8 +306,8 @@ export const BasicInfo = ({ data, onChange }) => {
             <div className="mt-6 p-4 bg-gradient-to-r from-emerald-500/10 to-green-600/10 rounded-xl border border-emerald-500/20">
               <p className="text-sm text-emerald-400 flex items-center gap-2">
                 <Icon icon="mdi:information" className="w-4 h-4" />
-                Choose the appropriate training difficultyLevel to customize
-                workout intensity and complexity.
+                Choose the appropriate training level to customize workout
+                intensity and complexity.
               </p>
             </div>
           </div>
@@ -401,29 +334,36 @@ export const BasicInfo = ({ data, onChange }) => {
                     whileHover={{ scale: 1.02, y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleFormatSelect(format.id)}
-                    className={`relative p-6 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
+                    className={clsx(
+                      "relative p-6 rounded-xl border-2 cursor-pointer transition-all duration-300",
                       isSelected
-                        ? `bg-gradient-to-br ${format.color}/10 ${
-                            format.borderColor
-                          } shadow-xl ring-2 ring-${
-                            format.color.split("-")[1]
-                          }-500/20`
+                        ? [
+                            "bg-gradient-to-br shadow-xl",
+                            `${format.color}/10`,
+                            format.borderColor,
+                            `ring-2 ring-${format.color.split("-")[1]}-500/20`,
+                          ]
                         : "bg-[#242424] border-[#333] hover:border-[#444] hover:bg-[#2a2a2a]"
-                    }`}
+                    )}
                   >
                     <div className="flex items-center gap-4">
                       <div
-                        className={`p-3 rounded-xl border transition-all duration-300 ${
+                        className={clsx(
+                          "p-3 rounded-xl border transition-all duration-300",
                           isSelected
-                            ? `bg-gradient-to-r ${format.color} border-white/20 shadow-lg`
+                            ? [
+                                "bg-gradient-to-r border-white/20 shadow-lg",
+                                format.color,
+                              ]
                             : "bg-[#333] border-[#444]"
-                        }`}
+                        )}
                       >
                         <Icon
                           icon={format.icon}
-                          className={`w-6 h-6 ${
+                          className={clsx(
+                            "w-6 h-6",
                             isSelected ? "text-white" : "text-gray-300"
-                          }`}
+                          )}
                         />
                       </div>
                       <div className="flex-1">

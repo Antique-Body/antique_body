@@ -64,18 +64,9 @@ export default function TrainWithCoachPage() {
         // Always include location parameters if available for initial sorting
         if (userLocation) {
           url += `&lat=${userLocation.lat}&lon=${userLocation.lon}&sortBy=location`;
-          console.log("Fetching with location:", {
-            lat: userLocation.lat,
-            lon: userLocation.lon,
-          });
         } else {
           url += "&sortBy=rating&sortOrder=desc";
-          console.log(
-            "Fetching without location - user location not available"
-          );
         }
-
-        console.log("Fetching trainers from URL:", url);
 
         const response = await fetch(url);
         if (!response.ok) {
@@ -90,28 +81,8 @@ export default function TrainWithCoachPage() {
           distanceSource: trainer.distanceSource ?? null,
         }));
 
-        console.log("Received trainers:", {
-          total: mapped.length,
-          withDistance: mapped.filter((t) => t.distance !== null).length,
-          firstFive: mapped.slice(0, 5).map((t) => ({
-            name: `${t.firstName} ${t.lastName}`,
-            distance: t.distance,
-            distanceSource: t.distanceSource,
-            location: t.location,
-          })),
-        });
-
         // Ensure initial sort by distance if available
         const sorted = sortTrainers(mapped, "location", "asc");
-
-        console.log("After sorting:", {
-          firstFive: sorted.slice(0, 5).map((t) => ({
-            name: `${t.firstName} ${t.lastName}`,
-            distance: t.distance,
-            distanceSource: t.distanceSource,
-            location: t.location,
-          })),
-        });
 
         setAllTrainers(sorted);
         setFilteredTrainers(sorted);
@@ -236,10 +207,8 @@ export default function TrainWithCoachPage() {
     requestedTrainers.includes(trainerId);
 
   // Function to sort trainers
-  const sortTrainers = (trainersToSort, option, order) => {
-    console.log("Sorting trainers:", { option, order });
-
-    return [...trainersToSort].sort((a, b) => {
+  const sortTrainers = (trainersToSort, option, order) =>
+    [...trainersToSort].sort((a, b) => {
       let comparison = 0;
 
       switch (option) {
@@ -279,7 +248,6 @@ export default function TrainWithCoachPage() {
       // Reverse for descending order
       return order === "asc" ? comparison : -comparison;
     });
-  };
 
   // Define sort options
   const sortOptions = [

@@ -157,15 +157,12 @@ export default function LoginPage() {
         });
       }
 
-      console.log("[login] SignIn result:", result);
-
       if (result?.error) {
         console.error("[login] SignIn error:", result.error);
         throw new Error(result.error);
       }
 
       if (result?.ok) {
-        console.log("[login] SignIn successful, redirecting to /select-role");
         // Wait a bit for session to be established
         await new Promise((resolve) => setTimeout(resolve, 1000));
         router.push("/select-role");

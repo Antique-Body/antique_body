@@ -1,10 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import twilio from "twilio";
 
-import { findUserByPhone } from "@/app/api/users/services";
+import prisma from "@/lib/prisma";
 import { formatPhoneNumber } from "@/lib/utils";
-
-const prisma = new PrismaClient();
 
 // Initialize Twilio client
 const twilioClient = twilio(
@@ -95,4 +92,4 @@ export async function verifyPhoneCode(phone, code, isRegistration = false) {
 }
 
 // Re-export findUserByPhone from user services
-export { findUserByPhone };
+export { findUserByPhone } from "@/app/api/users/services";

@@ -9,44 +9,11 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { ExerciseModal } from "../../../../exercises/components/ExerciseModal";
 
+import styles from "./Schedule.module.css";
+
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { Modal } from "@/components/common/Modal";
-
-// Add custom scrollbar styles
-const customScrollbarStyles = `
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 8px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(74, 74, 74, 0.3);
-    border-radius: 10px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #FF6B00, #FF8500);
-    border-radius: 10px;
-    border: 2px solid rgba(74, 74, 74, 0.3);
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #FF8500, #FFA500);
-  }
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-`;
-
-// Add styles to document head
-if (typeof document !== "undefined") {
-  const styleElement = document.createElement("style");
-  styleElement.textContent = customScrollbarStyles;
-  if (!document.head.querySelector("style[data-custom-scrollbar]")) {
-    styleElement.setAttribute("data-custom-scrollbar", "true");
-    document.head.appendChild(styleElement);
-  }
-}
 
 const SESSION_TYPES = [
   {
@@ -230,7 +197,7 @@ const ExerciseCard = React.memo(function ExerciseCard({
                   sessionIndex,
                   exerciseIndex,
                   "sets",
-                  parseInt(e.target.value)
+                  Number.parseInt(e.target.value)
                 )
               }
               className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-lg text-white text-center font-semibold text-lg focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm"
@@ -245,7 +212,7 @@ const ExerciseCard = React.memo(function ExerciseCard({
                   sessionIndex,
                   exerciseIndex,
                   "reps",
-                  parseInt(e.target.value)
+                  Number.parseInt(e.target.value)
                 )
               }
               className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-lg text-white text-center font-semibold text-lg focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm"
@@ -260,7 +227,7 @@ const ExerciseCard = React.memo(function ExerciseCard({
                   sessionIndex,
                   exerciseIndex,
                   "rest",
-                  parseInt(e.target.value)
+                  Number.parseInt(e.target.value)
                 )
               }
               className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-lg text-white text-center font-semibold text-lg focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm"
@@ -269,11 +236,15 @@ const ExerciseCard = React.memo(function ExerciseCard({
 
           {/* Exercise Instructions - sada editable */}
           <div className="space-y-2 mb-4">
-            <label className="block text-sm font-medium text-gray-200 mb-1 flex items-center gap-2">
+            <label
+              htmlFor={`instructions-${sessionIndex}-${exerciseIndex}`}
+              className="block text-sm font-medium text-gray-200 mb-1 flex items-center gap-2"
+            >
               <Icon icon="mdi:information-outline" className="w-4 h-4" />
               Instructions
             </label>
             <FormField
+              id={`instructions-${sessionIndex}-${exerciseIndex}`}
               type="textarea"
               value={exercise.instructions}
               onChange={(e) =>
@@ -310,14 +281,18 @@ const ExerciseCard = React.memo(function ExerciseCard({
           {/* Muscle Groups */}
           {exercise.muscleGroups && exercise.muscleGroups.length > 0 && (
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-200 mb-1 flex items-center gap-2">
+              <label
+                htmlFor={`target-muscles-${sessionIndex}-${exerciseIndex}`}
+                className="block text-sm font-medium text-gray-200 mb-1 flex items-center gap-2"
+              >
                 <Icon icon="mdi:muscle" className="w-4 h-4" />
                 Target Muscles
               </label>
-              <div className="flex flex-wrap gap-2">
+              <div
+                id={`target-muscles-${sessionIndex}-${exerciseIndex}`}
+                className="flex flex-wrap gap-2"
+              >
                 {exercise.muscleGroups.map((muscle, index) => {
-                  console.log("Muscle data:", muscle);
-
                   // Generate a unique key based on available data
                   const uniqueKey =
                     typeof muscle === "object" && muscle.id
@@ -654,7 +629,15 @@ export const Schedule = ({ data, onChange }) => {
                 controls
                 autoPlay
                 className="w-full h-auto rounded-lg"
-              />
+              >
+                <track
+                  kind="captions"
+                  src={showMediaPreview.url.replace(/\.[^/.]+$/, ".vtt")}
+                  srcLang="en"
+                  label="English"
+                  default
+                />
+              </video>
             )}
           </Modal>
         )}
@@ -821,7 +804,7 @@ export const Schedule = ({ data, onChange }) => {
                                       handleSessionChange(
                                         sessionIndex,
                                         "duration",
-                                        parseInt(e.target.value)
+                                        Number.parseInt(e.target.value)
                                       )
                                     }
                                     min="1"
@@ -871,7 +854,10 @@ export const Schedule = ({ data, onChange }) => {
 
                               {/* Exercises */}
                               <div className="space-y-3">
-                                <h4 className="text-lg font-semibold text-white flex items-center gap-2">
+                                <h4
+                                  id={`exercises-label-${sessionIndex}`}
+                                  className="text-lg font-semibold text-white flex items-center gap-2"
+                                >
                                   <Icon
                                     icon="mdi:dumbbell"
                                     className="w-5 h-5"
@@ -1013,12 +999,13 @@ export const Schedule = ({ data, onChange }) => {
                   />
 
                   {searchQuery && (
-                    <button
+                    <Button
+                      type="button"
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors duration-150"
                       onClick={() => setSearchQuery("")}
                     >
                       <Icon icon="mdi:close-circle" className="w-5 h-5" />
-                    </button>
+                    </Button>
                   )}
                 </div>
 
@@ -1089,11 +1076,13 @@ export const Schedule = ({ data, onChange }) => {
             {/* Exercise Grid */}
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-20">
-                <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#FF6B00]/30 border-t-[#FF6B00] mb-4"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#FF6B00]/30 border-t-[#FF6B00] mb-4" />
                 <p className="text-gray-400 text-lg">Loading exercises...</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 max-h-[65vh] overflow-y-auto pr-2 custom-scrollbar">
+              <div
+                className={`grid grid-cols-1 lg:grid-cols-2 gap-3 max-h-[65vh] overflow-y-auto pr-2 ${styles.customScrollbar}`}
+              >
                 {exercises
                   .filter((exercise) =>
                     exercise.name
@@ -1110,11 +1099,12 @@ export const Schedule = ({ data, onChange }) => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className={`group relative rounded-xl border-2 transition-all duration-300 cursor-pointer overflow-hidden ${
+                        className={[
+                          "group relative rounded-xl border-2 transition-all duration-300 cursor-pointer overflow-hidden",
                           isSelected
                             ? "bg-gradient-to-r from-blue-600/25 to-indigo-600/25 border-blue-500 shadow-lg shadow-blue-500/20"
-                            : "bg-gradient-to-r from-slate-700/80 to-slate-600/80 border-slate-500/60 hover:border-blue-400/60 hover:shadow-md hover:shadow-blue-400/10"
-                        }`}
+                            : "bg-gradient-to-r from-slate-700/80 to-slate-600/80 border-slate-500/60 hover:border-blue-400/60 hover:shadow-md hover:shadow-blue-400/10",
+                        ].join(" ")}
                         onClick={() => toggleExerciseSelection(exercise)}
                       >
                         {/* Selection Overlay */}
@@ -1294,12 +1284,7 @@ export const Schedule = ({ data, onChange }) => {
                     .includes(searchQuery.toLowerCase())
                 ).length === 0 && (
                   <div className="lg:col-span-2 flex flex-col items-center justify-center py-12">
-                    <div className="w-16 h-16 rounded-full bg-slate-600 flex items-center justify-center mb-3">
-                      <Icon
-                        icon="mdi:dumbbell"
-                        className="w-8 h-8 text-slate-400"
-                      />
-                    </div>
+                    <div className="w-16 h-16 rounded-full bg-slate-600 flex items-center justify-center mb-3" />
                     <h3 className="text-lg font-semibold text-slate-300 mb-2">
                       No exercises found
                     </h3>

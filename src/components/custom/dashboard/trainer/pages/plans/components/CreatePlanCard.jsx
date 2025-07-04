@@ -76,7 +76,7 @@ export const CreatePlanCard = ({ type }) => {
               >
                 <div
                   className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${planConfig.color}`}
-                ></div>
+                />
                 {feature}
               </div>
             ))}

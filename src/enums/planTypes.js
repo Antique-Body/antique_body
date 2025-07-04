@@ -1,4 +1,4 @@
-export const PLAN_TYPES = [
-  { id: "training", label: "Training" },
-  { id: "nutrition", label: "Nutrition" },
-];
+export const PLAN_TYPES = Object.freeze([
+  Object.freeze({ id: "training", label: "Training" }),
+  Object.freeze({ id: "nutrition", label: "Nutrition" }),
+]);

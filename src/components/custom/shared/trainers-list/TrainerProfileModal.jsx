@@ -89,8 +89,6 @@ export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
     return stars;
   };
 
-  console.log(trainer, 'tetteet');
-
   // Prepare trainer data with mapped specialties for child components
   const enhancedTrainer = {
     ...trainer,

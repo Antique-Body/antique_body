@@ -28,15 +28,12 @@ function UserLocationProvider({ children }) {
 
   useEffect(() => {
     if (typeof window !== "undefined" && navigator.geolocation) {
-      console.log("🌍 Attempting to get user location...");
-
       const fallbackTimeout = setTimeout(() => {
         console.warn("⚠️ Location request timed out. Proceeding without it.");
         setLocationResolved(true);
       }, 5000); // Fallback if no response in 5s
 
       navigator.geolocation.getCurrentPosition((position) => {
-        console.log("✅ User location obtained:", position.coords);
         clearTimeout(fallbackTimeout);
         setUserLocation({
           lat: position.coords.latitude,

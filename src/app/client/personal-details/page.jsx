@@ -118,7 +118,7 @@ const ClientRegistration = () => {
                   Back
                 </Button>
               ) : (
-                <div></div>
+                <div />
               )}
 
               {step < 4 ? (

@@ -84,6 +84,12 @@ export const Modal = memo(
       <div
         className={`fixed inset-0 ${zIndexClass} flex items-center justify-center bg-black/40 backdrop-blur-[6px] p-0 sm:p-4`}
         onClick={handleBackdropClick}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") {
+            onClose();
+          }
+        }}
       >
         <div
           className={`animate-modalFadeIn relative w-full sm:w-auto max-h-screen sm:max-h-[90vh] sm:rounded-xl border-0 sm:border border-[#333] bg-[#121212]/95 shadow-2xl flex flex-col ${getMaxWidth()}`}

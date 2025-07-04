@@ -76,12 +76,12 @@ export const MealCard = ({ meal, onView, onEdit, onDelete }) => {
               }
               alt={name}
               fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
               className="object-cover object-center transition-transform duration-500"
               style={{ transform: isHovered ? "scale(1.1)" : "scale(1)" }}
             />
           </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
           <div className="absolute bottom-0 left-0 w-full p-4">
             <div className="flex justify-between">
               <div>
@@ -132,17 +132,16 @@ export const MealCard = ({ meal, onView, onEdit, onDelete }) => {
             <p className="mb-2 text-xs text-gray-400">Nutrition Info:</p>
             <div className="flex flex-wrap gap-2 mb-3">
               <div className="flex items-center gap-1 rounded-lg bg-blue-900/30 border border-blue-500/20 px-2 py-1.5 text-xs">
-                <div className="w-2 h-2 rounded-full bg-blue-400"></div>
                 <span className="text-blue-300 font-medium">P</span>
                 <span className="text-white">{protein}g</span>
               </div>
               <div className="flex items-center gap-1 rounded-lg bg-green-900/30 border border-green-500/20 px-2 py-1.5 text-xs">
-                <div className="w-2 h-2 rounded-full bg-green-400"></div>
+                <div className="w-2 h-2 rounded-full bg-green-400" />
                 <span className="text-green-300 font-medium">C</span>
                 <span className="text-white">{carbs}g</span>
               </div>
               <div className="flex items-center gap-1 rounded-lg bg-yellow-900/30 border border-yellow-500/20 px-2 py-1.5 text-xs">
-                <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
+                <div className="w-2 h-2 rounded-full bg-yellow-400" />
                 <span className="text-yellow-300 font-medium">F</span>
                 <span className="text-white">{fat}g</span>
               </div>
