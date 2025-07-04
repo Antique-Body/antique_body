@@ -148,7 +148,7 @@ function SessionDndWrapper({ id, index, moveSession, children }) {
   return (
     <div
       ref={ref}
-      style={{ opacity: isDragging ? 0.5 : 1 }}
+      style={{ opacity: isDragging ? 1 : 0.5 }}
       data-handler-id={handlerId}
     >
       {children}
@@ -311,9 +311,9 @@ const ExerciseCard = React.memo(function ExerciseCard({
                 id={`target-muscles-${sessionIndex}-${exerciseIndex}`}
                 className="flex flex-wrap gap-2"
               >
-                {normalizedMuscleGroups.map((muscle) => (
+                {normalizedMuscleGroups.map((muscle, idx) => (
                   <span
-                    key={muscle.id}
+                    key={muscle.id || muscle.name || idx}
                     className="px-3 py-1 bg-gradient-to-r from-[#FF6B00]/20 to-[#FF8500]/20 border border-[#FF6B00]/40 rounded-full text-xs font-medium text-[#FF6B00] capitalize"
                   >
                     {muscle.name}
@@ -927,10 +927,9 @@ export const Schedule = ({ data, onChange }) => {
                                 {session.exercises.map(
                                   (exercise, exerciseIndex) => (
                                     <ExerciseCard
-                                      key={
-                                        exercise.id ||
-                                        `exercise-${sessionIndex}-${exerciseIndex}`
-                                      }
+                                      key={`${session.id}-${
+                                        exercise.id || exerciseIndex
+                                      }`}
                                       exercise={exercise}
                                       sessionIndex={sessionIndex}
                                       exerciseIndex={exerciseIndex}
@@ -1076,9 +1075,9 @@ export const Schedule = ({ data, onChange }) => {
                     { label: "Strength", icon: "mdi:dumbbell" },
                     { label: "Cardio", icon: "mdi:heart-pulse" },
                     { label: "Flexibility", icon: "mdi:yoga" },
-                  ].map(({ label, icon }) => (
+                  ].map(({ label, icon }, idx) => (
                     <Button
-                      key={label}
+                      key={`${label}-${icon}-${idx}`}
                       variant="ghost"
                       size="small"
                       isActive={activeFilter === label}
@@ -1152,7 +1151,7 @@ export const Schedule = ({ data, onChange }) => {
                   );
                   return (
                     <motion.div
-                      key={exercise.id}
+                      key={exercise.id || `exercise-lib-${index}`}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
@@ -1254,25 +1253,16 @@ export const Schedule = ({ data, onChange }) => {
                           </div>
 
                           {/* Muscle Groups */}
-                          {normalizedMuscleGroups.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
-                              {normalizedMuscleGroups
-                                .slice(0, 2)
-                                .map((muscle) => (
-                                  <span
-                                    key={muscle.id}
-                                    className="px-1.5 py-0.5 bg-slate-600/60 rounded text-xs text-slate-300 font-medium"
-                                  >
-                                    {muscle.name}
-                                  </span>
-                                ))}
-                              {normalizedMuscleGroups.length > 2 && (
-                                <span className="px-1.5 py-0.5 bg-slate-600/60 rounded text-xs text-slate-300 font-medium">
-                                  +{normalizedMuscleGroups.length - 2}
-                                </span>
-                              )}
-                            </div>
-                          )}
+                          {normalizedMuscleGroups
+                            .slice(0, 2)
+                            .map((muscle, idx) => (
+                              <span
+                                key={muscle.id || muscle.name || idx}
+                                className="px-1.5 py-0.5 bg-slate-600/60 rounded text-xs text-slate-300 font-medium"
+                              >
+                                {muscle.name}
+                              </span>
+                            ))}
                         </div>
 
                         {/* Media Indicators and Selection */}
