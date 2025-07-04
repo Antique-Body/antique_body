@@ -114,7 +114,8 @@ export const UserSettings = ({
     };
 
     fetchSettingsData();
-  }, [profileType, userData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profileType]);
 
   // Define sections for settings
   const sections = [
