@@ -238,9 +238,9 @@ export const ProfessionalDetailsStep = ({
       {/* Training Setup */}
       <motion.div variants={fadeInUp}>
         <FormSection
-          title="Training Setup"
+          title=""
           icon={<Icon icon="mdi:dumbbell" width={20} height={20} />}
-          description="Define your training environment and the types of training you offer"
+          description=""
         >
           <TrainingTypeSelector
             selectedEnvironment={formData.trainingEnvironment}
