@@ -1,9 +1,9 @@
 "use client";
 
+import * as Tooltip from "@radix-ui/react-tooltip";
 import { Inter } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
 import { createContext, useContext, useEffect, useState } from "react";
-import * as Tooltip from "@radix-ui/react-tooltip";
 
 import { I18nProvider } from "@/components/custom/shared";
 import { AuthProvider } from "@/contexts/AuthContext";

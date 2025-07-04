@@ -134,7 +134,7 @@ const PlanManagementPage = () => {
         scroll: false,
       });
     }
-  }, [searchParams, fetchPlans]);
+  }, [searchParams, fetchPlans, router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#111111] to-[#0a0a0a]">

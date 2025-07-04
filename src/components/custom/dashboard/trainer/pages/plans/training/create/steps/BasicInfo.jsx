@@ -8,9 +8,9 @@ import { useState, useEffect } from "react";
 import { SESSION_FORMATS } from "src/enums/sessionFormats";
 import { TRAINING_LEVELS } from "src/enums/trainingLevels";
 
+import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { FormField } from "@/components/common/FormField";
 import { updateFormData } from "@/lib/utils";
-import { ErrorMessage } from "@/components/common/ErrorMessage";
 
 export const BasicInfo = ({ data, onChange }) => {
   const [previewImage, setPreviewImage] = useState(null);

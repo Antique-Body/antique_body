@@ -2,10 +2,10 @@
 
 import { Icon } from "@iconify/react";
 import { motion, AnimatePresence } from "framer-motion";
+import cloneDeep from "lodash/cloneDeep";
 import Image from "next/image";
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
-import cloneDeep from "lodash/cloneDeep";
 
 import { MealLibrarySelector } from "../../../../meals/components";
 import { MealModal } from "../../../../meals/components/MealModal";
@@ -34,7 +34,7 @@ export const MealPlanning = ({ data, onChange }) => {
   const [meals, setMeals] = useState([]);
   const [error, setError] = useState(null);
 
-  const days = data.days || [];
+  const days = useMemo(() => data.days || [], [data.days]);
   const selectedDay = useMemo(
     () => days[selectedDayIndex],
     [days, selectedDayIndex]
@@ -86,7 +86,7 @@ export const MealPlanning = ({ data, onChange }) => {
     setShowAddDayPopover(!showAddDayPopover);
   };
 
-  const generateId = () => uuidv4();
+  const generateId = useCallback(() => uuidv4(), []);
 
   const addDay = useCallback(
     (copyFromIdx = null) => {
@@ -217,7 +217,11 @@ export const MealPlanning = ({ data, onChange }) => {
           throw new Error(data.error || "Failed to load meals");
         }
       } catch (error) {
-        setError("Failed to load meal library. Please try again.");
+        setError(
+          `Failed to load meal library. ${
+            error?.message ? "Error: " + error.message : ""
+          }`
+        );
       }
     },
     [selectedDay]
@@ -255,7 +259,11 @@ export const MealPlanning = ({ data, onChange }) => {
           throw new Error(result.error || "Failed to create meal");
         }
       } catch (error) {
-        setError("Failed to create meal. Please try again.");
+        setError(
+          `Failed to create meal. ${
+            error?.message ? "Error: " + error.message : ""
+          }`
+        );
       }
     },
     [selectedDay, activeMealIndex, updateDay, selectedDayIndex, generateId]

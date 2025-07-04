@@ -68,7 +68,7 @@ export async function GET(req) {
     });
     plans = plans.map((plan) => ({ ...plan, type: planType }));
     return NextResponse.json(plans);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -163,7 +163,7 @@ export async function POST(req) {
       });
     }
     return NextResponse.json(plan);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -211,7 +211,7 @@ export async function GET_planId(req, { params }) {
       return NextResponse.json({ error: "Plan not found" }, { status: 404 });
     }
     return NextResponse.json(plan);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
