@@ -92,42 +92,44 @@ export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
 
   // Subtitle with stats using real data
   const profileSubtitle = (
-    <div className="flex items-center gap-4 text-xs text-zinc-400">
-      <div className="flex items-center gap-1">
+    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-4 text-xs sm:text-sm">
+      <div className="flex items-center gap-1.5">
         <Icon
           icon="mdi:star"
-          width={12}
-          height={12}
-          className="text-[#FF6B00]"
+          width={14}
+          height={14}
+          className="text-[#FF6B00] flex-shrink-0"
         />
-        <span>{rating} rating</span>
+        <span className="whitespace-nowrap">{rating} rating</span>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1.5">
         <Icon
           icon="mdi:account-group"
-          width={12}
-          height={12}
-          className="text-[#FF6B00]"
+          width={14}
+          height={14}
+          className="text-[#FF6B00] flex-shrink-0"
         />
-        <span>{totalClients} clients</span>
+        <span className="whitespace-nowrap">{totalClients} clients</span>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1.5">
         <Icon
           icon="mdi:calendar"
-          width={12}
-          height={12}
-          className="text-[#FF6B00]"
+          width={14}
+          height={14}
+          className="text-[#FF6B00] flex-shrink-0"
         />
-        <span>{calculateExperience(trainerInfo.trainerSince)} experience</span>
+        <span className="whitespace-nowrap">
+          {calculateExperience(trainerInfo.trainerSince)} experience
+        </span>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1.5">
         <Icon
           icon="mdi:dumbbell"
-          width={12}
-          height={12}
-          className="text-[#FF6B00]"
+          width={14}
+          height={14}
+          className="text-[#FF6B00] flex-shrink-0"
         />
-        <span>{totalSessions} sessions</span>
+        <span className="whitespace-nowrap">{totalSessions} sessions</span>
       </div>
     </div>
   );

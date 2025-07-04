@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
+import { AnatomicalViewer } from "./AnatomicalViewer";
 import { ExerciseLibrarySelector } from "./ExerciseLibrarySelector";
 
 import { Button } from "@/components/common/Button";
@@ -11,7 +12,6 @@ import { FormField } from "@/components/common/FormField";
 import { InfoBanner } from "@/components/common/InfoBanner";
 import { Modal } from "@/components/common/Modal";
 import { FileUploadField } from "@/components/custom/dashboard/shared";
-import { AnatomicalViewer } from "@/components/custom/shared";
 import { UPLOAD_CONFIG } from "@/config/upload";
 import {
   EXERCISE_TYPES,

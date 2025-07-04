@@ -95,49 +95,53 @@ export const ClientProfile = ({ clientData, onProfileUpdate }) => {
 
   // Subtitle with stats using real data
   const profileSubtitle = (
-    <div className="flex items-center gap-4 text-xs text-zinc-400">
-      <div className="flex items-center gap-1">
+    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-4 text-xs sm:text-sm">
+      <div className="flex items-center gap-1.5">
         <Icon
           icon="mdi:target"
-          width={12}
-          height={12}
-          className="text-[#FF6B00]"
+          width={14}
+          height={14}
+          className="text-[#FF6B00] flex-shrink-0"
         />
-        <span>
+        <span className="whitespace-nowrap">
           {progressData.goalsCompleted}/{progressData.totalGoals} goals
         </span>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1.5">
         <Icon
           icon="mdi:calendar"
-          width={12}
-          height={12}
-          className="text-[#FF6B00]"
+          width={14}
+          height={14}
+          className="text-[#FF6B00] flex-shrink-0"
         />
-        <span>{calculateMembershipDuration(clientInfo?.createdAt)}</span>
+        <span className="whitespace-nowrap">
+          {calculateMembershipDuration(clientInfo?.createdAt)}
+        </span>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1.5">
         <Icon
           icon="mdi:chart-line"
-          width={12}
-          height={12}
-          className="text-[#FF6B00]"
+          width={14}
+          height={14}
+          className="text-[#FF6B00] flex-shrink-0"
         />
-        <span>
+        <span className="whitespace-nowrap">
           {Math.round(
             (progressData.goalsCompleted / progressData.totalGoals) * 100
           )}
           % progress
         </span>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1.5">
         <Icon
           icon="mdi:dumbbell"
-          width={12}
-          height={12}
-          className="text-[#FF6B00]"
+          width={14}
+          height={14}
+          className="text-[#FF6B00] flex-shrink-0"
         />
-        <span>{clientInfo?.totalSessions || 0} sessions</span>
+        <span className="whitespace-nowrap">
+          {clientInfo?.totalSessions || 0} sessions
+        </span>
       </div>
     </div>
   );

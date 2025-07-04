@@ -1,7 +1,15 @@
 "use client";
 
-export default function HealthPage() {
-  // Sample data for demo purposes
+import { WorkInProgress } from "@/components/common";
 
-  return <div className="px-4 py-5">HEALTH</div>;
+export default function HealthPage() {
+  return (
+    <div className="px-4 py-5">
+      <WorkInProgress
+        title="Health"
+        subtitle="Your health and wellness"
+        description="We're building a comprehensive health and wellness system with personalized recommendations, progress tracking, and AI-powered insights. Your path to health awaits!"
+      />
+    </div>
+  );
 }
