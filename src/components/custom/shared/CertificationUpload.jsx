@@ -1,7 +1,7 @@
 "use client";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 
 import { FormField, Button } from "@/components/common";
 import { useCertificateFiles } from "@/hooks";
@@ -47,7 +47,10 @@ export const CertificationUpload = ({
   onDeleteCert: _onDeleteCert,
 }) => {
   // Ensure certFields is always an array
-  const safeCertFields = Array.isArray(certFields) ? certFields : [];
+  const safeCertFields = useMemo(
+    () => (Array.isArray(certFields) ? certFields : []),
+    [certFields]
+  );
 
   const {
     previews,
@@ -644,8 +647,7 @@ export const CertificationUpload = ({
                 type="text"
                 value={field?.name || ""}
                 onChange={(e) =>
-                  handleCertChange &&
-                  handleCertChange(field._idx, "name", e.target.value)
+                  handleCertChange?.(field._idx, "name", e.target.value)
                 }
                 placeholder="e.g. NASM-CPT, ACE-CPT, ISSA, ACSM, etc."
                 className="mb-0"
@@ -659,8 +661,7 @@ export const CertificationUpload = ({
                   type="text"
                   value={field?.issuer || ""}
                   onChange={(e) =>
-                    handleCertChange &&
-                    handleCertChange(field._idx, "issuer", e.target.value)
+                    handleCertChange?.(field._idx, "issuer", e.target.value)
                   }
                   placeholder="e.g. National Academy of Sports Medicine, Personal Trainer Institute"
                   className="mb-0"
@@ -670,8 +671,7 @@ export const CertificationUpload = ({
                   type="date"
                   value={field?.expiryDate || ""}
                   onChange={(e) =>
-                    handleCertChange &&
-                    handleCertChange(field._idx, "expiryDate", e.target.value)
+                    handleCertChange?.(field._idx, "expiryDate", e.target.value)
                   }
                   className="mb-0"
                 />

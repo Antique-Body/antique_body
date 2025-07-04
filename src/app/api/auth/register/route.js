@@ -1,12 +1,10 @@
-import { PrismaClient } from "@prisma/client";
 import { hash } from "bcrypt";
 import { NextResponse } from "next/server";
 
 import { verifyEmailCode } from "@/app/api/auth/services/email";
 import { verifyPhoneCode } from "@/app/api/auth/services/phone";
+import prisma from "@/lib/prisma";
 import { checkRateLimit, formatPhoneNumber } from "@/lib/utils";
-
-const prisma = new PrismaClient();
 
 export async function POST(request) {
   try {

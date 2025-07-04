@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client";
 import { twMerge } from "tailwind-merge";
 
 // Create a single PrismaClient instance
-export const prisma = new PrismaClient();
 
 // Rate limiting map
 const rateLimitMap = new Map();
@@ -72,4 +70,37 @@ export function haversineDistance(lat1, lon1, lat2, lon2) {
       Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
+}
+
+/**
+ * Updates form data for both flat and nested fields (dot notation), handling checkboxes.
+ * @param {object} data - The current form data object
+ * @param {object} e - The event from the input
+ * @returns {object} - The updated data object
+ */
+export function updateFormData(data, e) {
+  const { name, value, type, checked } = e.target;
+  if (name.includes(".")) {
+    const keys = name.split(".");
+    // Recursively/iteratively build the new object structure
+    const updateNested = (obj, keys, val) => {
+      if (keys.length === 1) {
+        return {
+          ...obj,
+          [keys[0]]: val,
+        };
+      }
+      const [first, ...rest] = keys;
+      return {
+        ...obj,
+        [first]: updateNested(obj?.[first] || {}, rest, val),
+      };
+    };
+    return updateNested(data, keys, type === "checkbox" ? checked : value);
+  } else {
+    return {
+      ...data,
+      [name]: type === "checkbox" ? checked : value,
+    };
+  }
 }

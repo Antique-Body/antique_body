@@ -113,11 +113,8 @@ export default function TrainersMarketplace() {
       prevFilters &&
       JSON.stringify(filters) === JSON.stringify(prevFilters)
     ) {
-      console.log("Filters unchanged, skipping URL update");
       return;
     }
-
-    console.log("Filters changed:", { prevFilters, newFilters: filters });
 
     const newParams = {};
     if (filters.availability.length > 0) {
@@ -148,7 +145,6 @@ export default function TrainersMarketplace() {
 
     // Only reset page if this is a user-initiated filter change (not initial load)
     const shouldResetPage = prevFilters !== null;
-    console.log("Should reset page:", shouldResetPage);
     updateUrlParams(newParams, shouldResetPage);
     setPrevFilters(filters);
   }, [filters, prevFilters, updateUrlParams]);
@@ -156,12 +152,6 @@ export default function TrainersMarketplace() {
   // Initial fetch of trainers
   useEffect(() => {
     if (!locationResolved) return;
-
-    console.log("Fetching trainers with params:", {
-      currentPage,
-      searchParams: searchParams.toString(),
-      userLocation: !!userLocation,
-    });
 
     const fetchTrainers = async () => {
       try {
@@ -187,18 +177,12 @@ export default function TrainersMarketplace() {
         params.set("page", currentPage);
 
         const url = `/api/users/trainers?${params.toString()}`;
-        console.log("Fetching trainers from URL:", url);
 
         const response = await fetch(url);
         if (!response.ok) {
           throw new Error("Failed to fetch trainers");
         }
         const data = await response.json();
-
-        console.log("Received data:", {
-          trainersCount: data.trainers.length,
-          pagination: data.pagination,
-        });
 
         setTrainers(data.trainers);
         setTotalTrainers(data.pagination.total);
@@ -211,7 +195,13 @@ export default function TrainersMarketplace() {
     };
 
     fetchTrainers();
-  }, [searchParams, userLocation, locationResolved, trainersPerPage]);
+  }, [
+    searchParams,
+    userLocation,
+    locationResolved,
+    trainersPerPage,
+    currentPage,
+  ]);
 
   // Function to handle viewing a trainer's profile
   const handleViewProfile = (trainer) => {
@@ -237,14 +227,12 @@ export default function TrainersMarketplace() {
 
   // Handle page change
   const handlePageChange = (pageNumber) => {
-    console.log("Changing page to:", pageNumber);
     setCurrentPage(pageNumber);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Clear all filters
   const handleClearFilters = () => {
-    console.log("Clearing all filters");
     setPrevFilters(null); // Reset the prev filters tracking
     router.push(pathname);
   };

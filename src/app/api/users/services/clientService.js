@@ -1,6 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
-
+import prisma from "@/lib/prisma";
 /**
  * Creates a client with all details and relations.
  * Required fields validation happens at the API layer.

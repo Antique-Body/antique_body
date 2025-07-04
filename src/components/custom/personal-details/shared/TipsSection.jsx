@@ -4,36 +4,22 @@ import { InfoIcon } from "@/components/common/Icons";
  * Tips section component with motivational quotes and tips based on registration step
  */
 export const TipsSection = ({ step, userType = "client" }) => {
-  const quotes = {
-    client: [
-      {
-        quote: "The only bad workout is the one that didn't happen.",
-        author: "Unknown",
-      },
-      {
-        quote:
-          "Fitness is not about being better than someone else. It's about being better than you used to be.",
-        author: "Khloe Kardashian",
-      },
-      {
-        quote: "The difference between try and triumph is just a little umph!",
-        author: "Marvin Phillips",
-      },
-      {
-        quote: "The body achieves what the mind believes.",
-        author: "Napoleon Hill",
-      },
-      {
-        quote:
-          "You don't have to be great to start, but you have to start to be great.",
-        author: "Zig Ziglar",
-      },
-    ],
-  };
+  const clientTips = [
+    {
+      tip: "Fill in your basic information to help trainers get to know you.",
+    },
+    {
+      tip: "Share your fitness goals and preferences to find the best trainer match.",
+    },
+    {
+      tip: "Provide accurate contact and location details for better communication.",
+    },
+    {
+      tip: "Upload a clear profile photo and write a short bio to personalize your experience.",
+    },
+  ];
 
   // Pick a random quote based on user type
-  const userQuotes = quotes[userType] || quotes.client;
-  const randomQuote = userQuotes[Math.floor(Math.random() * userQuotes.length)];
 
   // Steps for trainers
   const renderTrainerTips = () => {
@@ -113,9 +99,8 @@ export const TipsSection = ({ step, userType = "client" }) => {
       ) : (
         <div>
           <blockquote className="text-lg italic text-gray-300">
-            "{randomQuote.quote}"
+            {clientTips[step - 1]?.tip}
           </blockquote>
-          <p className="mt-2 text-[#FF6B00]">- {randomQuote.author}</p>
         </div>
       )}
     </div>

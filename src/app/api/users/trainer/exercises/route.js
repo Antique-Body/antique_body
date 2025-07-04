@@ -1,12 +1,10 @@
-import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 import { exerciseService } from "../../services";
 
 import { auth } from "#/auth";
+import prisma from "@/lib/prisma";
 import { validateExercise } from "@/middleware/validation";
-
-const prisma = new PrismaClient();
 
 export async function GET(request) {
   try {

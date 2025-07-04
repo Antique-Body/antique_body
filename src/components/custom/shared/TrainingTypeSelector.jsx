@@ -178,7 +178,7 @@ export const TrainingTypeSelector = ({
       </motion.div>
 
       {/* Divider */}
-      <div className="h-px bg-gradient-to-r from-transparent via-gray-700/50 to-transparent"></div>
+      <hr className="h-px bg-gradient-to-r from-transparent via-gray-700/50 to-transparent" />
 
       {/* Training Types Section */}
       <motion.div

@@ -40,8 +40,8 @@ export function useTrainerRegistration() {
   const [certFields, setCertFields] = useState([
     { name: "", issuer: "", expiryDate: "", files: [] },
   ]);
+  
 
-  console.log(formData, "fpr,dDate");
   // Handle form input changes
   const handleChange = (e) => {
     if (!e.target || typeof e.target.name !== "string") return;
@@ -162,8 +162,6 @@ export function useTrainerRegistration() {
     return Object.keys(newErrors).length === 0;
   };
 
-  console.log(errors, "errors");
-
   // Scroll to top helper
   const scrollToTop = () => {
     if (typeof window !== "undefined") {
@@ -211,11 +209,10 @@ export function useTrainerRegistration() {
         return;
       }
       uploadedUrls = await uploadRes.json();
-      console.log("uploadedUrls from /api/upload:", uploadedUrls);
     }
     // 3. Pripremi podatke za API
-    console.log("certFields before mapping:", certFields);
-    let certifications = certFields.map((cert, i) => ({
+
+    let certifications = formData.certifications.map((cert, i) => ({
       ...cert,
       documents:
         Array.isArray(uploadedUrls.certifications) &&
@@ -228,13 +225,11 @@ export function useTrainerRegistration() {
       certifications = certifications.flat();
     }
     // Debug: logaj certifications prije slanja
-    console.log("Certifications payload:", certifications);
     const trainerData = {
       ...formData,
       profileImage: uploadedUrls.profileImage || formData.profileImage,
       certifications,
     };
-    console.log("Final trainerData payload:", trainerData);
     // 4. Pošalji podatke na backend
     const res = await fetch("/api/users/trainer", {
       method: "POST",

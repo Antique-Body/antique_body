@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import exerciseLibrary from "./exerciseLibrary.json";
 
 import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/common/FormField";
 import { InfoBanner } from "@/components/common/InfoBanner";
 import { formatMuscleDisplayName } from "@/utils/muscleMapper";
 
@@ -61,13 +62,7 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
       {/* Search */}
       <div className="mb-4">
         <div className="relative">
-          <Icon
-            icon="mdi:magnify"
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400"
-            width={20}
-            height={20}
-          />
-          <input
+          <FormField
             type="text"
             placeholder="Search exercises by name, description, or muscle group..."
             value={searchTerm}
@@ -82,10 +77,11 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
         {filteredExercises.length > 0 ? (
           <div className="grid gap-3">
             {filteredExercises.map((exercise) => (
-              <div
+              <button
                 key={exercise.id}
+                type="button"
                 onClick={() => onSelectExercise(exercise)}
-                className="p-4 bg-zinc-800 rounded-lg border border-zinc-700 hover:border-orange-500 cursor-pointer transition-colors"
+                className="w-full text-left bg-transparent border-none p-0 m-0 focus:outline-none"
               >
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="text-white font-semibold text-sm">
@@ -129,7 +125,7 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
                     </span>
                   ))}
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         ) : (

@@ -84,8 +84,6 @@ export const ProfessionalDetailsStep = ({
 
   const status = getCompletionStatus();
 
-  console.log(certFields, "status");
-
   return (
     <motion.div
       variants={staggerContainer}

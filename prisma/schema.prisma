@@ -144,6 +144,8 @@ model TrainerInfo {
   trainerSettings   TrainerSettings?
   exercises         Exercise[]
   meals             Meal[]
+  trainingPlans     TrainingPlan[]
+  nutritionPlans    NutritionPlan[]
 
 }
 
@@ -481,4 +483,67 @@ model Meal {
   @@index([trainerId, difficulty])
   @@index([trainerId, cuisine])
   @@index([trainerId, createdAt])
+}
+
+
+model TrainingPlan {
+  id                String   @id @default(cuid())
+  trainerInfoId     String
+  title             String
+  description       String?
+  coverImage        String?
+  price             Float?
+  duration          Int?
+  durationType      String?  // "weeks", "days", etc.
+  keyFeatures       Json?
+  trainingType      String?
+  timeline          Json?
+  features          Json?
+  sessionsPerWeek   Int?
+  sessionFormat     Json?
+  difficultyLevel   String?
+  schedule          Json?    // Dodano polje za raspored sesija
+  isActive          Boolean  @default(true)
+  isPublished       Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  deletedAt         DateTime?
+  clientCount       Int?     // Dodano polje za broj klijenata
+  trainerInfo       TrainerInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+
+  @@index([trainerInfoId])
+  @@index([isActive])
+  @@index([isPublished])
+}
+
+model NutritionPlan {
+  id                String   @id @default(cuid())
+  trainerInfoId     String
+  title             String
+  description       String?
+  coverImage        String?
+  price             Float?
+  duration          Int?
+  durationType      String?
+  keyFeatures       Json?
+  timeline          Json?
+  nutritionInfo     Json?
+  mealTypes         Json?
+  supplementRecommendations String?
+  cookingTime       String?
+  targetGoal        String?
+  days              Json?
+  recommendedFrequency String?
+  adaptability      String?
+  isActive          Boolean  @default(true)
+  isPublished       Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  deletedAt         DateTime?
+  clientCount       Int?     // Dodano polje za broj klijenata
+  trainerInfo       TrainerInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+
+  @@index([trainerInfoId])
+  @@index([isActive])
+  @@index([isPublished])
 }

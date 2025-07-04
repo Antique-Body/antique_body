@@ -103,11 +103,9 @@ export const Navigation = () => {
               `}
         ></div>
 
-        {/* Desktop Layout */}
-        <div className="hidden md:flex container mx-auto items-center justify-between px-4 h-full">
-          {/* Logo Section - Desktop */}
+        <div className="container mx-auto flex items-center justify-between px-4">
           <motion.div
-            className="flex items-center justify-start flex-shrink-0"
+            className="flex items-center"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
@@ -117,7 +115,7 @@ export const Navigation = () => {
               className="flex items-center space-x-2 relative group"
             >
               {/* Logo glow effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-[#FF6B00]/20 to-[#FF9A00]/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-[#FF6B00]/20 to-[#FF9A00]/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
               <BrandLogo
                 logoTitle="ANTIQUE BODY"
@@ -201,94 +199,38 @@ export const Navigation = () => {
           </div>
         </div>
 
-        {/* Mobile Layout - Enhanced Height and Spacing */}
-        <div className="md:hidden container mx-auto px-4">
-          <div
-            className={`flex items-center justify-center relative transition-all duration-500 ${
-              scrolled ? "h-12 py-2" : "h-12 py-2"
-            }`}
+        {/* Mobile Menu Button */}
+        <div className="md:hidden flex items-center">
+          <Button
+            variant="ghost"
+            className="text-white focus:outline-none !focus-ring-0 !ring-0 relative z-50 w-10 h-10 flex items-center justify-center"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
           >
-            {/* Centered Logo - Mobile with Better Sizing */}
-            <motion.div
-              className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
-            >
-              <Link href="/" className="flex items-center relative group">
-                {/* Logo glow effect */}
-                <div className="absolute -inset-2 bg-gradient-to-r from-[#FF6B00]/20 to-[#FF9A00]/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-                <BrandLogo
-                  logoTitle="ANTIQUE BODY"
-                  className="relative z-10"
-                  titleStyle={{
-                    fontSize: scrolled ? "1.4rem" : "1.6rem",
-                    fontWeight: "800",
-                    letterSpacing: "0.05em",
-                    marginBottom: "0",
-                    lineHeight: "1",
-                    textAlign: "center",
-                    transition: "font-size 0.3s ease",
-                  }}
-                  containerStyle={{
-                    marginBottom: "0",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                  firstWordColor="#FF6B00"
-                  secondWordColor="#ffffff"
-                />
-              </Link>
-            </motion.div>
-
-            {/* Mobile Menu Button - Enhanced Size and Spacing */}
-            <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`relative z-50 text-white focus:outline-none focus:ring-0 outline-none border-none bg-transparent transition-all duration-300 ${
-                  scrolled ? "p-2" : "p-3"
+            <div className="relative w-5 h-4 sm:w-6 sm:h-5">
+              <span
+                className={`absolute h-0.5 w-full bg-white transform transition-all duration-300 ease-in-out ${
+                  mobileMenuOpen
+                    ? "rotate-45 translate-y-1.5 sm:translate-y-2"
+                    : "-translate-y-1.5 sm:-translate-y-2"
                 }`}
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-              >
-                <div
-                  className={`relative flex items-center justify-center transition-all duration-300 ${
-                    scrolled ? "w-7 h-7" : "w-8 h-8"
-                  }`}
-                >
-                  {/* Hamburger lines with enhanced sizing */}
-                  <motion.div
-                    className={`absolute flex flex-col justify-between transition-all duration-300 ${
-                      scrolled ? "w-5 h-4" : "w-6 h-5"
-                    }`}
-                    animate={{ rotate: mobileMenuOpen ? 90 : 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                  >
-                    <span
-                      className={`block bg-white ${
-                        scrolled ? "h-0.5" : "h-[2.5px]"
-                      } w-full`}
-                    ></span>
+              />
 
-                    <span
-                      className={`block bg-white ${
-                        scrolled ? "h-0.5" : "h-[2.5px]"
-                      } w-full`}
-                    ></span>
+              <span
+                className={`absolute h-0.5 w-full bg-white transform transition-all duration-300 ease-in-out ${
+                  mobileMenuOpen ? "opacity-0" : "opacity-100"
+                }`}
+              />
 
-                    <span
-                      className={`block bg-white ${
-                        scrolled ? "h-0.5" : "h-[2.5px]"
-                      } w-full`}
-                    ></span>
-                  </motion.div>
-                </div>
-              </motion.button>
+              <span
+                className={`absolute h-0.5 w-full bg-white transform transition-all duration-300 ease-in-out ${
+                  mobileMenuOpen
+                    ? "-rotate-45 translate-y-1.5 sm:translate-y-2"
+                    : "translate-y-1.5 sm:translate-y-2"
+                }`}
+              />
             </div>
-          </div>
+          </Button>
         </div>
       </motion.nav>
 
