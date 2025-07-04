@@ -1,12 +1,19 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 import { EffectBackground } from "@/components/background";
-import { BrandLogo } from "@/components/common/BrandLogo";
-import { ClientProfile } from "@/components/custom/dashboard/client/components";
-import { DashboardTabs } from "@/components/custom/dashboard/shared/DashboardTabs";
+import { ClientProfileModal } from "@/components/custom/dashboard/client/components";
+import {
+  SidebarDashboard,
+  UserEditProfile,
+  UserSettings,
+} from "@/components/custom/dashboard/shared";
+import {
+  getNavigationConfig,
+  updateNavigationBadges,
+} from "@/config/navigation";
 
 export default function ClientDashboardLayout({ children }) {
   const router = useRouter();
@@ -29,6 +36,10 @@ export default function ClientDashboardLayout({ children }) {
   const [activeTab, setActiveTab] = useState(getActiveTabFromPath(pathname));
   const [clientData, setClientData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Update active tab when pathname changes
   useEffect(() => {
@@ -50,17 +61,6 @@ export default function ClientDashboardLayout({ children }) {
     }
     fetchClient();
   }, []);
-
-  // Function to refresh client data
-  const refreshClientData = async () => {
-    try {
-      const res = await fetch("/api/users/client?mode=basic");
-      const data = await res.json();
-      setClientData(data);
-    } catch (error) {
-      console.error("Error refreshing client data:", error);
-    }
-  };
 
   // Navigate to appropriate route when tab changes
   const handleTabChange = (tabId) => {
@@ -95,66 +95,104 @@ export default function ClientDashboardLayout({ children }) {
     }
   };
 
-  // Get the count of unread messages
-  const unreadMessagesCount = 2; // Placeholder value
-  const tabsConfig = [
-    { id: "trainwithcoach", label: "Train with Coach" },
-    { id: "overview", label: "Overview" },
-    {
-      id: "upcoming-trainings",
-      label: "Upcoming Trainings",
-    },
-    { id: "trainings", label: "Trainings" },
-    { id: "progress", label: "Progress" },
-    { id: "messages", label: "Messages", badgeCount: unreadMessagesCount },
-    { id: "nutrition", label: "Nutrition" },
-    { id: "health", label: "Health" },
-  ];
-
-  // Helper for displaying client info
-  const renderClientProfile = () => {
-    if (loading) {
-      return (
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-700 rounded w-1/3" />
-          <div className="h-6 bg-gray-700 rounded w-1/2" />
-          <div className="h-32 bg-gray-800 rounded" />
-        </div>
-      );
-    }
-    if (!clientData || clientData.error || !clientData.success) {
-      return <div className="text-red-400">Failed to load profile.</div>;
-    }
-    return (
-      <ClientProfile
-        clientData={clientData.data}
-        onProfileUpdate={refreshClientData}
-      />
-    );
+  // Handle profile click to show detailed modal
+  const handleProfileClick = () => {
+    setShowDetailModal(true);
   };
 
+  // Handle edit click
+  const handleEditClick = () => {
+    setShowEditModal(true);
+  };
+
+  // Handle settings click
+  const handleSettingsClick = () => {
+    setShowSettingsModal(true);
+  };
+
+  // Handle profile save
+  const handleProfileSave = async (profileData) => {
+    try {
+      // Update the client data
+      setClientData((prev) => ({
+        ...prev,
+        data: { ...prev.data, ...profileData },
+      }));
+      setShowEditModal(false);
+      return { success: true };
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  // Get navigation items with updated badge counts
+  const navigationItems = useMemo(() => {
+    const baseNavigation = getNavigationConfig("client");
+    const badges = {
+      messages: 2, // Placeholder - would come from real data
+    };
+    return updateNavigationBadges(baseNavigation, badges);
+  }, []);
+
   return (
-    <div className="min-h-screen  text-white">
+    <div className="min-h-screen text-white">
       <EffectBackground />
-      <div className="relative z-10 mx-auto max-w-screen-xl px-4 py-6">
-        <div className="mb-8 flex items-center justify-center">
-          <BrandLogo />
-        </div>
-        <div className="flex flex-col gap-6">
-          {/* Client profile section (top) */}
-          {renderClientProfile()}
-          {/* Tabs and main content section */}
-          <div>
-            <DashboardTabs
-              activeTab={activeTab}
-              setActiveTab={handleTabChange}
-              tabs={tabsConfig}
-            />
-            {/* Render the nested page content */}
-            <div className="mt-6">{children}</div>
+
+      {/* Sidebar */}
+      <SidebarDashboard
+        profileType="client"
+        userData={clientData?.data}
+        loading={loading}
+        navigationItems={navigationItems}
+        activeItem={activeTab}
+        onNavigationChange={handleTabChange}
+        onProfileClick={handleProfileClick}
+        onEditClick={handleEditClick}
+        onSettingsClick={handleSettingsClick}
+        onCollapseChange={setSidebarCollapsed}
+      />
+
+      {/* Main Content */}
+      <div
+        className={`transition-all duration-300 ease-in-out ${
+          sidebarCollapsed ? "lg:ml-20" : "lg:ml-80"
+        }`}
+      >
+        <div className="relative z-10 min-h-screen">
+          <div className="pt-16 lg:pt-6 px-4 lg:px-6">
+            {/* Page Content */}
+            <div className="max-w-7xl mx-auto">{children}</div>
           </div>
         </div>
       </div>
+
+      {/* Profile Detail Modal */}
+      <ClientProfileModal
+        clientData={clientData?.data}
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+      />
+
+      {/* Edit Profile Modal */}
+      {showEditModal && (
+        <UserEditProfile
+          profileType="client"
+          userData={clientData?.data}
+          onClose={() => setShowEditModal(false)}
+          onSave={handleProfileSave}
+        />
+      )}
+
+      {/* Settings Modal */}
+      {showSettingsModal && (
+        <UserSettings
+          profileType="client"
+          userData={clientData?.data}
+          onClose={() => setShowSettingsModal(false)}
+          onSave={handleProfileSave}
+        />
+      )}
     </div>
   );
 }

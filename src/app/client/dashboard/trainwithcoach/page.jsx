@@ -366,7 +366,7 @@ export default function TrainWithCoachPage() {
 
         {/* Trainer List */}
         {currentTrainers.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-8">
+          <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-8">
             {currentTrainers.map((trainer) => (
               <TrainerCard
                 key={trainer.id}
