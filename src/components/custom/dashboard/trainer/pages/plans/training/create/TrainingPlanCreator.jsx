@@ -82,7 +82,9 @@ export const TrainingPlanCreator = ({ initialData }) => {
           <div className="flex items-center gap-4">
             <BackButton onClick={handleBack} />
             <h1 className="text-2xl font-bold text-white">
-              {initialData.id ? "Update Training Plan" : "Create Training Plan"}
+              {initialData?.id
+                ? "Update Training Plan"
+                : "Create Training Plan"}
             </h1>
           </div>
           <StepIndicator steps={STEPS} currentStep={currentStep} />
