@@ -1,10 +1,9 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
-
 import { FullScreenLoader } from "@/components/common";
 
 export default function Loading() {
-  const { t } = useTranslation();
-  return <FullScreenLoader text={t("role.preparing.journey")} />;
+  return (
+    <FullScreenLoader text="Preparing your Ancient Journey" isVisible={true} />
+  );
 }

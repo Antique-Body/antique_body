@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
 
-export function RoleCard({ role, config, isSelected, onClick, loading, t }) {
+export function RoleCard({ role, config, isSelected, onClick, t }) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -24,7 +24,7 @@ export function RoleCard({ role, config, isSelected, onClick, loading, t }) {
                 }
                 bg-gradient-to-b from-[#111111] to-[#0A0A0A]
             `}
-      onClick={() => !loading && onClick(role)}
+      onClick={() => onClick(role)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -192,7 +192,7 @@ export function RoleCard({ role, config, isSelected, onClick, loading, t }) {
                         `}
             onClick={(e) => {
               e.stopPropagation();
-              if (!loading) onClick(role);
+              onClick(role);
             }}
             variant={isSelected ? "custom" : "ghost"}
           >
@@ -219,23 +219,6 @@ export function RoleCard({ role, config, isSelected, onClick, loading, t }) {
           </Button>
         </div>
       </div>
-
-      {/* Loading overlay */}
-      {loading && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md">
-          <div className="flex flex-col items-center gap-3">
-            <div className="relative w-10 h-10">
-              <div className="absolute inset-0 rounded-full border-2 border-white/20 animate-pulse"></div>
-              <div
-                className={`absolute inset-0 rounded-full border-2 border-t-${role}-500 border-r-transparent border-b-transparent border-l-transparent animate-spin`}
-              ></div>
-            </div>
-            <p className="text-white text-sm font-medium">
-              {t("common.loading")}
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

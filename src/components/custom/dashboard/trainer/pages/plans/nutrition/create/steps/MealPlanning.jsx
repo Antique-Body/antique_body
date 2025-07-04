@@ -1176,7 +1176,13 @@ export const MealPlanning = ({ data, onChange }) => {
         }}
         title="Add Meal from Library"
         size="large"
-        footerButtons={false}
+        secondaryButtonText="Cancel"
+        secondaryButtonAction={() => {
+          setShowMealLibraryModal(false);
+          setActiveMealIndex(null);
+          setMeals([]);
+        }}
+        footerButtons={true}
       >
         <MealLibrarySelector
           meals={meals}

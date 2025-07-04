@@ -61,7 +61,7 @@ export default function LoadingTestPage() {
         </div>
       </div>
 
-      {showLoader && <FullScreenLoader text={loadingText} />}
+      <FullScreenLoader text={loadingText} isVisible={showLoader} />
     </div>
   );
 }

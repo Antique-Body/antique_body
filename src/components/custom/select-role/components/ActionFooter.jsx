@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/common/Button";
 
-export function ActionFooter({ selectedRole, config, loading, onContinue, t }) {
+export function ActionFooter({ selectedRole, config, onContinue, t }) {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl border-t border-white/10 bg-gradient-to-t from-black to-black/90">
       <div className="container mx-auto px-4 py-5">
@@ -35,7 +35,6 @@ export function ActionFooter({ selectedRole, config, loading, onContinue, t }) {
           <Button
             variant="primary"
             onClick={onContinue}
-            disabled={loading}
             className={`
                             relative overflow-hidden
                             px-8 py-3 rounded-lg 
@@ -44,7 +43,6 @@ export function ActionFooter({ selectedRole, config, loading, onContinue, t }) {
                             transition-all duration-300 
                             hover:shadow-lg hover:shadow-${selectedRole}-500/20
                             flex items-center justify-center gap-2 group
-                            ${loading ? "opacity-70 cursor-not-allowed" : ""}
                             min-w-[140px]
                             transform hover:translate-y-[-2px] active:translate-y-0
                         `}
@@ -52,17 +50,8 @@ export function ActionFooter({ selectedRole, config, loading, onContinue, t }) {
             {/* Button hover effect */}
             <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-            {loading ? (
-              <>
-                <span className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
-                <span>{t("common.loading")}</span>
-              </>
-            ) : (
-              <>
-                <span>{t("common.continue")}</span>
-                <span className="mdi mdi-arrow-right group-hover:translate-x-1 transition-transform duration-300"></span>
-              </>
-            )}
+            <span>{t("common.continue")}</span>
+            <span className="mdi mdi-arrow-right group-hover:translate-x-1 transition-transform duration-300"></span>
           </Button>
         </div>
       </div>
