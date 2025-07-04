@@ -814,10 +814,10 @@ export const Schedule = ({ data, onChange }) => {
                               </div>
 
                               {/* Session Type Selector */}
-                              <div>
-                                <label className="block text-sm font-medium text-white mb-3">
+                              <fieldset className="mb-6">
+                                <legend className="block text-sm font-medium text-white mb-3">
                                   Session Type
-                                </label>
+                                </legend>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                   {SESSION_TYPES.filter(
                                     (type) => type.id !== "rest"
@@ -850,7 +850,7 @@ export const Schedule = ({ data, onChange }) => {
                                     </Button>
                                   ))}
                                 </div>
-                              </div>
+                              </fieldset>
 
                               {/* Exercises */}
                               <div className="space-y-3">

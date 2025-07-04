@@ -3,12 +3,25 @@
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { Button } from "@/components/common/Button";
 
 export const Preview = ({ data }) => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [coverImageUrl, setCoverImageUrl] = useState(null);
+
+  useEffect(() => {
+    if (data.coverImage && typeof data.coverImage !== "string") {
+      const url = URL.createObjectURL(data.coverImage);
+      setCoverImageUrl(url);
+      return () => {
+        URL.revokeObjectURL(url);
+      };
+    } else {
+      setCoverImageUrl(null);
+    }
+  }, [data.coverImage]);
 
   const getTotalExercises = () =>
     data.schedule?.reduce(
@@ -31,7 +44,7 @@ export const Preview = ({ data }) => {
             src={
               typeof data.coverImage === "string"
                 ? data.coverImage
-                : URL.createObjectURL(data.coverImage)
+                : coverImageUrl || ""
             }
             alt={data.title || "Plan cover"}
             fill

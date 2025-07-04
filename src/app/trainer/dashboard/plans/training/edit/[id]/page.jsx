@@ -29,9 +29,10 @@ export default function EditTrainingPlanPage() {
           schedule: data.schedule || [
             {
               id:
-                typeof crypto !== "undefined" && crypto.randomUUID
+                typeof crypto !== "undefined" &&
+                typeof crypto.randomUUID === "function"
                   ? crypto.randomUUID()
-                  : Math.random().toString(36).substr(2, 9),
+                  : Math.random().toString(36) + Date.now().toString(36),
               name: "Full Body Workout",
               duration: 60,
               day: "Monday",

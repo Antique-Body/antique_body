@@ -14,7 +14,7 @@ import { updateFormData } from "@/lib/utils";
 export const BasicInfo = ({ data, onChange }) => {
   const [previewImage, setPreviewImage] = useState(null);
 
-  // Ako je edit mode i postoji coverImage (string), postavi ga kao preview
+  // Handle edit mode - if coverImage is a string URL, set it as preview
   useEffect(() => {
     if (
       !previewImage &&

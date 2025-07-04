@@ -103,16 +103,19 @@ export const Navigation = () => {
               `}
         ></div>
 
-      <div className="container mx-auto flex items-center justify-between px-4">
-        <motion.div
-          className="flex items-center"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.98 }}
-          transition={{ type: "spring", stiffness: 400, damping: 10 }}
-        >
-          <Link href="/" className="flex items-center space-x-2 relative group">
-            {/* Logo glow effect */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-[#FF6B00]/20 to-[#FF9A00]/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="container mx-auto flex items-center justify-between px-4">
+          <motion.div
+            className="flex items-center"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
+            <Link
+              href="/"
+              className="flex items-center space-x-2 relative group"
+            >
+              {/* Logo glow effect */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-[#FF6B00]/20 to-[#FF9A00]/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
               <BrandLogo
                 logoTitle="ANTIQUE BODY"
@@ -227,7 +230,7 @@ export const Navigation = () => {
                 }`}
               />
             </div>
-          </div>
+          </Button>
         </div>
       </motion.nav>
 

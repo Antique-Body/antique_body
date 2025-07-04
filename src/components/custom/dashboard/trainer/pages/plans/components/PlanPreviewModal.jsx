@@ -13,6 +13,7 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
   const [activeTab, setActiveTab] = useState("overview");
   const [activeDay, setActiveDay] = useState(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [pdfError, setPdfError] = useState("");
 
   const isNutrition = type === "nutrition";
 
@@ -71,6 +72,7 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
   const handleDownloadPDF = async () => {
     try {
       setIsDownloading(true);
+      setPdfError(""); // Reset error before starting
       // Construct overview for PDF
       const overview = {
         summary: description || "No summary available.",
@@ -151,6 +153,7 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
       }
     } catch (error) {
       console.error("Error generating PDF:", error);
+      setPdfError("Failed to generate PDF. Please try again later.");
     } finally {
       setIsDownloading(false);
     }
@@ -515,7 +518,11 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
                   />
                   {isDownloading ? "Generating PDF..." : "Download PDF"}
                 </Button>
-
+                {pdfError && (
+                  <div className="w-full text-red-500 text-sm mt-2">
+                    {pdfError}
+                  </div>
+                )}
                 {/* Client assignments button */}
                 <Button
                   variant="orangeFilled"

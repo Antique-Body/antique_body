@@ -12,7 +12,7 @@ export async function GET(req) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    // Dohvati trainerInfoId preko userId
+    // Fetch trainerInfoId using userId
     const trainerInfo = await prisma.trainerInfo.findUnique({
       where: { userId: session.user.id },
     });
@@ -84,7 +84,7 @@ export async function POST(req) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    // Dohvati trainerInfoId preko userId
+    // Fetch trainerInfoId using userId
     const trainerInfo = await prisma.trainerInfo.findUnique({
       where: { userId: session.user.id },
     });
@@ -189,7 +189,7 @@ export async function GET_planId(req, { params }) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    // Dohvati trainerInfoId preko userId
+    // Fetch trainerInfoId using userId
     const trainerInfo = await prisma.trainerInfo.findUnique({
       where: { userId: session.user.id },
     });

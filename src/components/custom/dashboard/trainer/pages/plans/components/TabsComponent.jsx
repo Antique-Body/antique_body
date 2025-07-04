@@ -35,7 +35,7 @@ export const TabsComponent = ({ activeTab, setActiveTab }) => {
       <div className="backdrop-blur-md bg-gradient-to-r from-[#1a1a1a]/70 to-[#2a2a2a]/70 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.2)] border border-[#333]/50 p-1 sm:p-1.5 overflow-hidden">
         <div className="flex rounded-lg overflow-hidden relative">
           {/* Animated background glow effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#FF6B00]/5 to-[#FF9500]/5 animate-pulse-slow opacity-30"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[#FF6B00]/5 to-[#FF9500]/5 animate-pulse-slow opacity-30" />
 
           {tabs.map((tab) => (
             <button

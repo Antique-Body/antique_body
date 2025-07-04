@@ -36,7 +36,6 @@ export const WeeklyScheduleTab = ({
                     : "bg-[#1A1A1A] text-gray-400 hover:text-white"
                 }`}
                 variant="ghost"
-                isActive={activeDay === (day.day || day.name)}
               >
                 {day.name || day.day}
               </Button>
@@ -57,7 +56,6 @@ export const WeeklyScheduleTab = ({
                     : "bg-[#1A1A1A] text-gray-400 hover:text-white"
                 }`}
                 variant="ghost"
-                isActive={activeDay === (day.day || day.name)}
               >
                 {day.name || day.day}
               </Button>

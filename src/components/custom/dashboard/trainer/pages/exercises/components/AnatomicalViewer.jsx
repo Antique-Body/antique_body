@@ -2,7 +2,7 @@
 
 import { Icon } from "@iconify/react";
 import React, { useState, useMemo } from "react";
-import Modal from "react-body-highlighter";
+import Model from "react-body-highlighter";
 
 import { Button } from "@/components/common/Button";
 import {
@@ -186,7 +186,7 @@ export const AnatomicalViewer = ({
         >
           {hasMusclesToShow ? (
             <div className="p-3 flex items-center justify-center">
-              <Modal
+              <Model
                 data={exerciseData}
                 type={activeView}
                 style={{ width: "100%", height: "auto" }}

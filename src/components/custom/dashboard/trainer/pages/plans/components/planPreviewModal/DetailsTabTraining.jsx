@@ -3,6 +3,17 @@ import { Icon } from "@iconify/react";
 import { SESSION_FORMATS } from "@/enums/sessionFormats";
 import { TRAINING_TYPES } from "@/enums/trainingTypes";
 
+// Helper to convert camelCase to spaced words and capitalize the first letter
+function formatKey(key) {
+  if (!key) return "";
+  const result = key
+    .replace(/([A-Z])/g, " $1") // insert space before capital letters
+    .replace(/[_-]+/g, " ") // replace underscores and dashes with space
+    .replace(/\s+/g, " ") // collapse multiple spaces
+    .trim();
+  return result.charAt(0).toUpperCase() + result.slice(1);
+}
+
 export const DetailsTabTraining = ({
   trainingType,
   sessionsPerWeek,
@@ -117,7 +128,7 @@ export const DetailsTabTraining = ({
             {Object.entries(features).map(([key, value]) => (
               <div key={typeof key === "string" ? key : `key-${key}`}>
                 <span className="text-gray-400 block mb-1 capitalize">
-                  {key.replace(/([A-Z])/g, " $1")}:
+                  {formatKey(key)}:
                 </span>
                 <p className="text-gray-300">
                   {Array.isArray(value) ? value.join(", ") : value}
