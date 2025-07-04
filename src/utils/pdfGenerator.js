@@ -27,8 +27,9 @@ export const generatePlanPDF = async (planData) => {
   ) {
     // TODO: Send error to error tracking service
     throw new Error(
-      "Invalid planData: Missing required properties or not an object. Required: " +
-        requiredProps.join(", ")
+      `Invalid planData: Missing required properties or not an object. Required: ${requiredProps.join(
+        ", "
+      )}`
     );
   }
   try {
@@ -41,7 +42,7 @@ export const generatePlanPDF = async (planData) => {
   } catch (err) {
     // TODO: Send error to error tracking service
     throw new Error(
-      "PDF generation failed: " + (err && err.message ? err.message : err)
+      `PDF generation failed: ${err && err.message ? err.message : err}`
     );
   }
 };
@@ -72,7 +73,8 @@ async function addCoverPage(doc, planData) {
   const isNutrition = planData.planType === "nutrition";
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  let yPos = 0;
+  const initialYPos = 0;
+  let localYPos = initialYPos;
   // Clean white background
   doc.setFillColor(255, 255, 255);
   doc.rect(0, 0, pageWidth, pageHeight, "F");
@@ -132,42 +134,49 @@ async function addCoverPage(doc, planData) {
   doc.setTextColor(80, 80, 80);
   doc.setFont("helvetica", "italic");
   doc.setFontSize(11);
-  yPos = addWrappedText(doc, planData.description, 30, 120, pageWidth - 60, 6);
+  localYPos = addWrappedText(
+    doc,
+    planData.description,
+    30,
+    120,
+    pageWidth - 60,
+    6
+  );
   // Timeline
   if (planData.timeline && planData.timeline.length > 0) {
-    yPos += 10;
+    localYPos += 10;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
     doc.setTextColor(255, 107, 0);
-    doc.text("Timeline", 30, yPos);
-    yPos += 7;
+    doc.text("Timeline", 30, localYPos);
+    localYPos += 7;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
     doc.setTextColor(60, 60, 60);
     planData.timeline.forEach((block) => {
       doc.setFont("helvetica", "bold");
-      doc.text(`${block.week}: ${block.title}`, 35, yPos);
-      yPos += 5;
+      doc.text(`${block.week}: ${block.title}`, 35, localYPos);
+      localYPos += 5;
       doc.setFont("helvetica", "normal");
-      yPos = addWrappedText(
+      localYPos = addWrappedText(
         doc,
         block.description,
         40,
-        yPos,
+        localYPos,
         pageWidth - 80,
         5
       );
-      yPos += 2;
+      localYPos += 2;
     });
   }
   // Features
   if (planData.features && typeof planData.features === "object") {
-    yPos += 8;
+    localYPos += 8;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
     doc.setTextColor(255, 107, 0);
-    doc.text("Features", 30, yPos);
-    yPos += 7;
+    doc.text("Features", 30, localYPos);
+    localYPos += 7;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
     doc.setTextColor(60, 60, 60);
@@ -181,24 +190,24 @@ async function addCoverPage(doc, planData) {
           : String(_k)
       );
     for (let i = 0; i < featuresArr.length; i++) {
-      doc.circle(33, yPos + 2, 1.5, "F");
-      doc.text(featuresArr[i], 38, yPos + 3);
-      yPos += 7;
+      doc.circle(33, localYPos + 2, 1.5, "F");
+      doc.text(featuresArr[i], 38, localYPos + 3);
+      localYPos += 7;
     }
   }
   // Nutrition info
   if (isNutrition && planData.nutritionInfo) {
-    yPos += 8;
+    localYPos += 8;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
     doc.setTextColor(34, 197, 94);
-    doc.text("Nutrition Info", 30, yPos);
-    yPos += 7;
+    doc.text("Nutrition Info", 30, localYPos);
+    localYPos += 7;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
     doc.setTextColor(60, 60, 60);
     autoTable(doc, {
-      startY: yPos,
+      startY: localYPos,
       head: [["Calories", "Protein (g)", "Carbs (g)", "Fat (g)"]],
       body: [
         [
@@ -222,46 +231,46 @@ async function addCoverPage(doc, planData) {
       },
       margin: { left: 30, right: 30 },
     });
-    yPos = doc.lastAutoTable.finalY + 5;
+    localYPos = doc.lastAutoTable.finalY + 5;
   }
   // Supplements, cooking time, target goal
   if (isNutrition && planData.supplementRecommendations) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
     doc.setTextColor(34, 197, 94);
-    doc.text("Supplements: ", 30, yPos);
+    doc.text("Supplements: ", 30, localYPos);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
     doc.setTextColor(60, 60, 60);
-    doc.text(planData.supplementRecommendations, 60, yPos);
-    yPos += 7;
+    doc.text(planData.supplementRecommendations, 60, localYPos);
+    localYPos += 7;
   }
   if (isNutrition && planData.cookingTime) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
     doc.setTextColor(34, 197, 94);
-    doc.text("Cooking Time: ", 30, yPos);
+    doc.text("Cooking Time: ", 30, localYPos);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
     doc.setTextColor(60, 60, 60);
-    doc.text(planData.cookingTime, 60, yPos);
-    yPos += 7;
+    doc.text(planData.cookingTime, 60, localYPos);
+    localYPos += 7;
   }
   if (planData.targetGoal) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
     doc.setTextColor(255, 107, 0);
-    doc.text("Target Goal: ", 30, yPos);
+    doc.text("Target Goal: ", 30, localYPos);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
     doc.setTextColor(60, 60, 60);
-    doc.text(planData.targetGoal, 60, yPos);
-    yPos += 7;
+    doc.text(planData.targetGoal, 60, localYPos);
+    localYPos += 7;
   }
   // Decorative line
   doc.setDrawColor(220, 220, 220);
   doc.setLineWidth(0.3);
-  doc.line(50, yPos + 10, pageWidth - 50, yPos + 10);
+  doc.line(50, localYPos + 10, pageWidth - 50, localYPos + 10);
   // Footer area
   const footerY = pageHeight - 40;
   doc.setTextColor(80, 80, 80);
