@@ -3,6 +3,7 @@
 import { Inter } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
 import { createContext, useContext, useEffect, useState } from "react";
+import * as Tooltip from "@radix-ui/react-tooltip";
 
 import { I18nProvider } from "@/components/custom/shared";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -60,7 +61,9 @@ export default function RootLayout({ children }) {
         <SessionProvider>
           <I18nProvider>
             <AuthProvider>
-              <UserLocationProvider>{children}</UserLocationProvider>
+              <Tooltip.Provider>
+                <UserLocationProvider>{children}</UserLocationProvider>
+              </Tooltip.Provider>
             </AuthProvider>
           </I18nProvider>
         </SessionProvider>

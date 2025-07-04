@@ -3,8 +3,8 @@
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { fetchPlanDetails } from "@/app/api/users/services/planService";
 import { TrainingPlanCreator } from "@/components/custom/dashboard/trainer/pages/plans/training/create/TrainingPlanCreator";
-import { fetchPlanDetails } from "@/utils/planService";
 
 export default function EditPlanPage() {
   const params = useParams();
@@ -27,9 +27,9 @@ export default function EditPlanPage() {
         };
         // If mode=copy, remove id and other unique fields
         if (searchParams.get("mode") === "copy") {
-          delete planData.id;
-          delete planData.createdAt;
-          delete planData.clientCount;
+          planData.id = undefined;
+          planData.createdAt = undefined;
+          planData.clientCount = undefined;
           planData.title = `Copy of ${data.title}`;
         }
         setInitialData(planData);

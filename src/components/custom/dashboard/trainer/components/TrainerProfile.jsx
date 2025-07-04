@@ -482,14 +482,13 @@ export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
                   {trainerData.galleryImages.slice(0, 6).map((image, index) => (
                     <div
                       key={index}
-                      className="aspect-square rounded-lg overflow-hidden bg-zinc-700"
+                      className="relative aspect-square rounded-lg overflow-hidden bg-zinc-700"
                     >
                       <Image
                         src={image.url || image}
                         alt={`Gallery ${index + 1}`}
                         className="w-full h-full object-cover"
-                        width={100}
-                        height={100}
+                        fill
                       />
                     </div>
                   ))}

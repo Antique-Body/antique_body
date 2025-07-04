@@ -24,6 +24,7 @@ import {
   ViewIcon,
 } from "@/components/common/Icons";
 import { Modal } from "@/components/common/Modal";
+import { ErrorMessage } from "@/components/common";
 
 export const PlanCard = ({
   id,
@@ -44,6 +45,7 @@ export const PlanCard = ({
   const [deleting, setDeleting] = useState(false);
   const [loadingPlanDetails, setLoadingPlanDetails] = useState(false);
   const [detailedPlanData, setDetailedPlanData] = useState(null);
+  const [deleteError, setDeleteError] = useState("");
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const formattedDate = new Date(createdAt).toLocaleDateString(i18n.language, {
@@ -127,7 +129,6 @@ export const PlanCard = ({
       setDetailedPlanData(transformedData);
       return transformedData;
     } catch (error) {
-      console.error("Error fetching plan details:", error);
       return {
         id,
         title,
@@ -174,12 +175,16 @@ export const PlanCard = ({
 
   const confirmDelete = async () => {
     setDeleting(true);
+    setDeleteError("");
     try {
       await deletePlan(id, isNutrition ? "nutrition" : "training");
       if (onDelete) onDelete(id);
       setShowDeleteModal(false);
-    } catch {
-      // handle error
+    } catch (error) {
+      console.error("Failed to delete plan:", error);
+      setDeleteError(
+        t("plans.delete_error", "Failed to delete plan. Please try again.")
+      );
     } finally {
       setDeleting(false);
     }
@@ -195,6 +200,7 @@ export const PlanCard = ({
         className="h-full cursor-pointer"
         onClick={handleCardClick}
       >
+        {deleteError && <ErrorMessage error={deleteError} />}
         <Card
           variant="darkStrong"
           width="100%"

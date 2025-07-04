@@ -49,7 +49,7 @@ export const CreatePlanCard = ({ type }) => {
         {/* Background gradient */}
         <div
           className={`absolute inset-0 bg-gradient-to-br ${planConfig.color} opacity-5 group-hover:opacity-10 transition-opacity`}
-        ></div>
+        />
 
         <div className="relative p-6">
           {/* Header */}

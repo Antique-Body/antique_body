@@ -24,36 +24,42 @@ function renderScheduleItem(item, index, list, type) {
   );
 }
 
-function renderScheduleContent({
-  timeline,
-  isNutrition,
-  days,
-  plan,
-  schedule,
-}) {
+function selectScheduleData({ timeline, isNutrition, days, plan, schedule }) {
   if (timeline && Array.isArray(timeline) && timeline.length > 0) {
-    return timeline.map((item, index) =>
-      renderScheduleItem(item, index, timeline, "timeline")
-    );
-  } else if (isNutrition) {
+    return { list: timeline, type: "timeline" };
+  }
+  if (isNutrition) {
     const dayList = days || plan.days || [];
     if (dayList.length > 0) {
-      return dayList.map((day, index) =>
-        renderScheduleItem(day, index, dayList, "day")
-      );
-    } else if (schedule && Array.isArray(schedule) && schedule.length > 0) {
-      return schedule.map((item, index) =>
-        renderScheduleItem(item, index, schedule, "schedule")
-      );
-    } else {
-      return <p className="text-gray-400">No timeline or days available.</p>;
+      return { list: dayList, type: "day" };
     }
-  } else if (schedule && Array.isArray(schedule) && schedule.length > 0) {
-    return schedule.map((week, index) =>
-      renderScheduleItem(week, index, schedule, "schedule")
+    if (schedule && Array.isArray(schedule) && schedule.length > 0) {
+      return { list: schedule, type: "schedule" };
+    }
+    return {
+      list: [],
+      type: "none",
+      fallback: "No timeline or days available.",
+    };
+  }
+  if (schedule && Array.isArray(schedule) && schedule.length > 0) {
+    return { list: schedule, type: "schedule" };
+  }
+  return {
+    list: [],
+    type: "none",
+    fallback: "No timeline or schedule available.",
+  };
+}
+
+function renderScheduleContent(props) {
+  const { list, type, fallback } = selectScheduleData(props);
+  if (list.length > 0) {
+    return list.map((item, index) =>
+      renderScheduleItem(item, index, list, type)
     );
   } else {
-    return <p className="text-gray-400">No timeline or schedule available.</p>;
+    return <p className="text-gray-400">{fallback}</p>;
   }
 }
 

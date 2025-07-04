@@ -65,6 +65,16 @@ export const BasicInfo = ({ data, onChange }) => {
     ) {
       setPreviewImage(data.coverImage);
     }
+    // Cleanup for FileReader data URLs
+    let urlToRevoke = null;
+    if (previewImage && previewImage.startsWith("blob:")) {
+      urlToRevoke = previewImage;
+    }
+    return () => {
+      if (urlToRevoke) {
+        URL.revokeObjectURL(urlToRevoke);
+      }
+    };
   }, [data.coverImage, previewImage]);
 
   const handleImageChange = (e) => {

@@ -36,7 +36,7 @@ export default function EditNutritionPlanPage() {
           cookingTime: data.cookingTime || "",
           days: data.days || [
             {
-              id: crypto.randomUUID(),
+              id: safeUUID(),
               name: "Day 1",
               isRestDay: false,
               description: "",
@@ -59,6 +59,19 @@ export default function EditNutritionPlanPage() {
         setLoading(false);
       });
   }, [id, searchParams]);
+
+  // Fallback UUID generator
+  const fallbackUUID = () =>
+    "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+      const r = (Math.random() * 16) | 0,
+        v = c === "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  // Safe UUID generator
+  const safeUUID = () =>
+    typeof crypto !== "undefined" && crypto.randomUUID
+      ? crypto.randomUUID()
+      : fallbackUUID();
 
   if (loading) return <div className="text-white">Loading...</div>;
   if (error) return <div className="text-red-500">{error}</div>;

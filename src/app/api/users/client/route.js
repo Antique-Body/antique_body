@@ -1,7 +1,6 @@
 import { clientService } from "../services";
 
 import { auth } from "#/auth";
-import prisma from "@/lib/prisma";
 import { formatPhoneNumber } from "@/lib/utils";
 
 export async function POST(req) {
@@ -95,6 +94,7 @@ export async function PUT(req) {
       { ...body, phone }
     );
     // Također update User model (ako je potrebno)
+    const prisma = (await import("@/lib/prisma")).default;
     await prisma.user.update({
       where: { id: session.user.id },
       data: {

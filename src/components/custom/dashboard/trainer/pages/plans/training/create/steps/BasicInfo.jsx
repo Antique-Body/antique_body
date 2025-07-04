@@ -10,9 +10,11 @@ import { TRAINING_LEVELS } from "src/enums/trainingLevels";
 
 import { FormField } from "@/components/common/FormField";
 import { updateFormData } from "@/lib/utils";
+import { ErrorMessage } from "@/components/common/ErrorMessage";
 
 export const BasicInfo = ({ data, onChange }) => {
   const [previewImage, setPreviewImage] = useState(null);
+  const [imageError, setImageError] = useState("");
 
   // Handle edit mode - if coverImage is a string URL, set it as preview
   useEffect(() => {
@@ -28,12 +30,40 @@ export const BasicInfo = ({ data, onChange }) => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        setImageError("File must be an image (JPG, PNG, GIF, etc.).");
+        setPreviewImage(null);
+        onChange({ coverImage: null });
+        return;
+      }
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        setImageError(
+          "File size exceeds 5MB limit. Please choose a smaller image."
+        );
+        setPreviewImage(null);
+        onChange({ coverImage: null });
+        return;
+      }
       const reader = new FileReader();
       reader.onload = () => {
         setPreviewImage(reader.result);
+        setImageError("");
         onChange({ coverImage: file });
       };
+      reader.onerror = () => {
+        setImageError(
+          "Failed to read the image file. Please try another image."
+        );
+        setPreviewImage(null);
+        onChange({ coverImage: null });
+      };
       reader.readAsDataURL(file);
+    } else {
+      setImageError("");
+      setPreviewImage(null);
+      onChange({ coverImage: null });
     }
   };
 
@@ -73,6 +103,8 @@ export const BasicInfo = ({ data, onChange }) => {
         transition={{ delay: 0.1 }}
         className="relative group"
       >
+        {/* Show error message above image upload */}
+        {imageError && <ErrorMessage error={imageError} />}
         <div className="aspect-[2/1] w-full rounded-lg overflow-hidden bg-gradient-to-br from-[#1a1a1a] via-[#222] to-[#2a2a2a] border border-[#333] hover:border-[#FF6B00]/50 transition-all duration-300">
           {previewImage ? (
             <div className="relative w-full h-full group">
@@ -248,12 +280,9 @@ export const BasicInfo = ({ data, onChange }) => {
                       "relative p-6 rounded-xl border-2 cursor-pointer transition-all duration-300",
                       isSelected
                         ? [
-                            "bg-gradient-to-br shadow-xl",
-                            `${difficultyLevel.color}/10`,
+                            difficultyLevel.color,
                             difficultyLevel.borderColor,
-                            `ring-2 ring-${
-                              difficultyLevel.color.split("-")[1]
-                            }-500/20`,
+                            difficultyLevel.ringClass,
                           ]
                         : "bg-[#242424] border-[#333] hover:border-[#444] hover:bg-[#2a2a2a]"
                     )}
@@ -337,12 +366,7 @@ export const BasicInfo = ({ data, onChange }) => {
                     className={clsx(
                       "relative p-6 rounded-xl border-2 cursor-pointer transition-all duration-300",
                       isSelected
-                        ? [
-                            "bg-gradient-to-br shadow-xl",
-                            `${format.color}/10`,
-                            format.borderColor,
-                            `ring-2 ring-${format.color.split("-")[1]}-500/20`,
-                          ]
+                        ? [format.color, format.borderColor, format.ringClass]
                         : "bg-[#242424] border-[#333] hover:border-[#444] hover:bg-[#2a2a2a]"
                     )}
                   >

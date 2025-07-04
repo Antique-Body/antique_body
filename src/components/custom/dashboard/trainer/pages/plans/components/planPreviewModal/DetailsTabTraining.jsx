@@ -14,6 +14,18 @@ function formatKey(key) {
   return result.charAt(0).toUpperCase() + result.slice(1);
 }
 
+// Helper to get className for difficulty level
+const getDifficultyClass = (level) => {
+  switch ((level || "").toLowerCase()) {
+    case "beginner":
+      return "bg-green-900/20 text-green-400";
+    case "intermediate":
+      return "bg-yellow-900/20 text-yellow-400";
+    default:
+      return "bg-red-900/20 text-red-400";
+  }
+};
+
 export const DetailsTabTraining = ({
   trainingType,
   sessionsPerWeek,
@@ -51,13 +63,9 @@ export const DetailsTabTraining = ({
           Difficulty Level
         </h3>
         <span
-          className={`px-3 py-1 rounded-full text-sm font-medium ${
-            difficultyLevel.toLowerCase() === "beginner"
-              ? "bg-green-900/20 text-green-400"
-              : difficultyLevel.toLowerCase() === "intermediate"
-              ? "bg-yellow-900/20 text-yellow-400"
-              : "bg-red-900/20 text-red-400"
-          }`}
+          className={`px-3 py-1 rounded-full text-sm font-medium ${getDifficultyClass(
+            difficultyLevel
+          )}`}
         >
           {difficultyLevel}
         </span>
@@ -112,7 +120,11 @@ export const DetailsTabTraining = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {features.map((feature, index) => (
               <div
-                key={typeof feature === "string" ? feature : `feature-${index}`}
+                key={`feature-${index}-${
+                  typeof feature === "string"
+                    ? feature
+                    : JSON.stringify(feature)
+                }`}
                 className="flex items-start gap-2"
               >
                 <Icon
@@ -126,7 +138,7 @@ export const DetailsTabTraining = ({
         ) : typeof features === "object" ? (
           <div className="space-y-3">
             {Object.entries(features).map(([key, value]) => (
-              <div key={typeof key === "string" ? key : `key-${key}`}>
+              <div key={key}>
                 <span className="text-gray-400 block mb-1 capitalize">
                   {formatKey(key)}:
                 </span>

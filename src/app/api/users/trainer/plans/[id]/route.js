@@ -58,7 +58,7 @@ export async function GET(req, { params }) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    // Dohvati trainerInfoId preko userId
+    // Catch trainerInfoId
     const trainerInfo = await prisma.trainerInfo.findUnique({
       where: { userId: session.user.id },
     });
@@ -94,7 +94,7 @@ export async function GET(req, { params }) {
 // PATCH: Update plan by id
 export async function PATCH(req, { params }) {
   try {
-    const { id } = await params;
+    const { id } = params;
     const body = await req.json();
     const session = await auth();
     if (!session?.user?.id) {
@@ -139,7 +139,7 @@ export async function PATCH(req, { params }) {
 // DELETE: Soft delete plan by id
 export async function DELETE(req, { params }) {
   try {
-    const { id } = await params;
+    const { id } = params;
     const { searchParams } = new URL(req.url);
     const type = searchParams.get("type") || "training";
     const session = await auth();

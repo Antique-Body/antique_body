@@ -26,7 +26,6 @@ const STEPS = [
 export const NutritionPlanCreator = ({ initialData }) => {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
   const { formData, updateFormData, handleSubmit, isValid, isSubmitting } =
     useNutritionPlanForm(initialData);
 
@@ -34,12 +33,7 @@ export const NutritionPlanCreator = ({ initialData }) => {
     if (currentStep < STEPS.length - 1) {
       setCurrentStep((prev) => prev + 1);
     } else {
-      setIsLoading(true);
-      try {
-        await handleSubmit();
-      } finally {
-        setIsLoading(false);
-      }
+      await handleSubmit();
     }
   };
 
@@ -109,7 +103,7 @@ export const NutritionPlanCreator = ({ initialData }) => {
               isNextDisabled={!isValid(currentStep)}
               isLastStep={currentStep === STEPS.length - 1}
               isEdit={!!initialData?.id}
-              isLoading={isLoading || isSubmitting}
+              isLoading={isSubmitting}
               planType="nutrition"
             />
           </div>

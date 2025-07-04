@@ -107,7 +107,7 @@ export const TrainingPlanCreator = ({ initialData }) => {
               onNext={handleNext}
               isNextDisabled={!isValid(currentStep)}
               isLastStep={currentStep === STEPS.length - 1}
-              isEdit={!!(initialData && initialData.id)}
+              isEdit={!!initialData?.id}
               isLoading={isLoading}
             />
           </div>

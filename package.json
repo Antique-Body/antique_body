@@ -29,6 +29,7 @@
     "@google-cloud/storage": "^7.16.0",
     "@iconify/react": "^6.0.0",
     "@prisma/client": "^6.10.1",
+    "@radix-ui/react-tooltip": "^1.2.7",
     "bcrypt": "^6.0.0",
     "clsx": "^2.1.1",
     "dotenv": "^17.0.0",

@@ -1,5 +1,5 @@
-export const DURATION_TYPES = Object.freeze([
-  Object.freeze({ id: "days", label: "Days" }),
-  Object.freeze({ id: "weeks", label: "Weeks" }),
-  Object.freeze({ id: "months", label: "Months" }),
-]);
+export const DURATION_TYPES = [
+  { id: "days", label: "Days" },
+  { id: "weeks", label: "Weeks" },
+  { id: "months", label: "Months" },
+];

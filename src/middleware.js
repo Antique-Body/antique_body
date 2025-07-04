@@ -126,10 +126,10 @@ function getOnboardingRedirect(role, token, pathname) {
   if (!config) return "/select-role";
   if (!config.profile)
     return pathname === config.personal ? null : config.personal;
-  // Dinamička provera za allowed rute
+  // Check if request path is allowed
   const isAllowed = config.allowed.some((allowedPath) => {
     if (allowedPath.includes(":id")) {
-      // Pretvori allowedPath u regex, npr. "/trainer/dashboard/plans/edit/:id" => /^\/trainer\/dashboard\/plans\/edit\/[^\/]+$/
+      // Convert allowedPath to regex, e.g. "/trainer/dashboard/plans/edit/:id" => /^\/trainer\/dashboard\/plans\/edit\/[^\/]+$/
       const regex = new RegExp(`^${allowedPath.replace(":id", "[^/]+")}$`, "i");
       return regex.test(pathname);
     }
@@ -203,7 +203,7 @@ export async function middleware(request) {
 
 export const config = {
   matcher: [
-    // Sve osim API ruta, statike, slika i favicon-a
+    // All except API routes, static files, images and favicon
     "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 };

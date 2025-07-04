@@ -51,6 +51,61 @@ const initialFormData = {
   },
 };
 
+// Helper to upload cover image and return URL or original string
+async function uploadCoverImage(coverImage) {
+  if (coverImage && typeof coverImage !== "string") {
+    const uploadData = new FormData();
+    uploadData.append("coverImage", coverImage);
+    const uploadRes = await fetch("/api/upload", {
+      method: "POST",
+      body: uploadData,
+    });
+    const uploadJson = await uploadRes.json();
+    if (!uploadRes.ok || !uploadJson.coverImage) {
+      throw new Error(uploadJson.error || "Failed to upload image");
+    }
+    return typeof uploadJson.coverImage === "string"
+      ? uploadJson.coverImage
+      : uploadJson.coverImage.url;
+  }
+  return coverImage;
+}
+
+// Helper to construct the plan payload
+function constructPlanPayload(formData, coverImageUrl) {
+  return {
+    title: formData.title,
+    description: formData.description,
+    coverImage: coverImageUrl || null,
+    price:
+      formData.price !== "" && !isNaN(Number(formData.price))
+        ? Number(formData.price)
+        : null,
+    duration:
+      formData.duration !== "" && !isNaN(Number(formData.duration))
+        ? Number(formData.duration)
+        : null,
+    durationType: formData.durationType,
+    keyFeatures: formData.keyFeatures,
+    timeline: Array.isArray(formData.timeline)
+      ? formData.timeline.map((item) => ({
+          ...item,
+          week: item.week !== undefined && item.week !== "" ? item.week : null,
+        }))
+      : [],
+    features: formData.features,
+    schedule: formData.schedule,
+    sessionsPerWeek:
+      formData.sessionsPerWeek !== "" &&
+      !isNaN(Number(formData.sessionsPerWeek))
+        ? Number(formData.sessionsPerWeek)
+        : null,
+    sessionFormat: formData.sessionFormat,
+    trainingType: formData.trainingType,
+    difficultyLevel: formData.difficultyLevel || null,
+  };
+}
+
 export const useTrainingPlanForm = (initialData = null) => {
   const router = useRouter();
   const [formData, setFormData] = useState(initialData || initialFormData);
@@ -91,27 +146,64 @@ export const useTrainingPlanForm = (initialData = null) => {
 
   const validateBasicInfo = () => {
     const { title, description, price, duration } = formData;
+    // Price: must be a valid number (not NaN, not empty, >= 0)
+    const priceNum = Number(price);
+    const isPriceValid =
+      price !== "" && !isNaN(priceNum) && isFinite(priceNum) && priceNum >= 0;
+    // Duration: must be a positive integer
+    const durationNum = Number(duration);
+    const isDurationValid =
+      duration !== "" && Number.isInteger(durationNum) && durationNum > 0;
     return (
+      typeof title === "string" &&
       title.trim() !== "" &&
+      typeof description === "string" &&
       description.trim() !== "" &&
-      price !== "" &&
-      duration !== ""
+      isPriceValid &&
+      isDurationValid
     );
   };
 
-  const validateFeatures = () =>
-    formData.keyFeatures.length > 0 &&
-    formData.keyFeatures[0].trim() !== "" &&
-    formData.timeline.some(
-      (item) => item.week.trim() !== "" && item.title.trim() !== ""
-    );
+  // Helper for week format: allow positive integer, or YYYY-MM-DD, or YYYY-W##
+  const isValidWeekFormat = (week) => {
+    if (typeof week !== "string") return false;
+    // Numeric week (e.g., '1', '2')
+    if (/^\d+$/.test(week.trim())) return true;
+    // Date format YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}$/.test(week.trim())) return true;
+    // HTML5 week format YYYY-W##
+    if (/^\d{4}-W\d{2}$/.test(week.trim())) return true;
+    return false;
+  };
+
+  const validateFeatures = () => {
+    // keyFeatures: all must be non-empty strings
+    const keyFeaturesValid =
+      Array.isArray(formData.keyFeatures) &&
+      formData.keyFeatures.length > 0 &&
+      formData.keyFeatures.every(
+        (f) => typeof f === "string" && f.trim() !== ""
+      );
+    // timeline: at least one item with valid week and non-empty title
+    const timelineValid =
+      Array.isArray(formData.timeline) &&
+      formData.timeline.some(
+        (item) =>
+          item &&
+          typeof item.title === "string" &&
+          item.title.trim() !== "" &&
+          typeof item.week === "string" &&
+          isValidWeekFormat(item.week)
+      );
+    return keyFeaturesValid && timelineValid;
+  };
 
   const isValid = (step) => {
     switch (step) {
       case 0:
         return validateBasicInfo();
       case 1:
-        return true; // Uklonjena validacija za Schedule, uvijek dozvoljeno
+        return true; // Removed Schedule validation, always allowed
       case 2:
         return validateFeatures();
       case 3:
@@ -134,63 +226,13 @@ export const useTrainingPlanForm = (initialData = null) => {
           ? new URLSearchParams(window.location.search)
           : null;
       const isCopy = searchParams && searchParams.get("mode") === "copy";
-      let coverImageUrl = formData.coverImage;
 
-      // DEBUG: Log file info
+      // 1. Upload cover image if needed
+      const coverImageUrl = await uploadCoverImage(formData.coverImage);
 
-      // 1. Upload slike ako je File
-      if (formData.coverImage && typeof formData.coverImage !== "string") {
-        const uploadData = new FormData();
-        uploadData.append("coverImage", formData.coverImage);
+      // 2. Construct plan payload
+      const planPayload = constructPlanPayload(formData, coverImageUrl);
 
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          body: uploadData,
-        });
-        const uploadJson = await uploadRes.json();
-        // DEBUG: Log upload response
-        if (!uploadRes.ok || !uploadJson.coverImage) {
-          throw new Error(uploadJson.error || "Failed to upload image");
-        }
-        coverImageUrl =
-          typeof uploadJson.coverImage === "string"
-            ? uploadJson.coverImage
-            : uploadJson.coverImage.url;
-      }
-
-      // 2. Pošalji plan na backend
-      const planPayload = {
-        title: formData.title,
-        description: formData.description,
-        coverImage: coverImageUrl || null,
-        price:
-          formData.price !== "" && !isNaN(Number(formData.price))
-            ? Number(formData.price)
-            : null,
-        duration:
-          formData.duration !== "" && !isNaN(Number(formData.duration))
-            ? Number(formData.duration)
-            : null,
-        durationType: formData.durationType,
-        keyFeatures: formData.keyFeatures,
-        timeline: Array.isArray(formData.timeline)
-          ? formData.timeline.map((item) => ({
-              ...item,
-              week:
-                item.week !== undefined && item.week !== "" ? item.week : null,
-            }))
-          : [],
-        features: formData.features,
-        schedule: formData.schedule,
-        sessionsPerWeek:
-          formData.sessionsPerWeek !== "" &&
-          !isNaN(Number(formData.sessionsPerWeek))
-            ? Number(formData.sessionsPerWeek)
-            : null,
-        sessionFormat: formData.sessionFormat,
-        trainingType: formData.trainingType,
-        difficultyLevel: formData.difficultyLevel || null,
-      };
       if (formData.id && !isCopy) {
         // EDIT MODE: PATCH
         await updatePlan(formData.id, planPayload, "training");

@@ -3,7 +3,7 @@
 import { Icon } from "@iconify/react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -449,6 +449,8 @@ export const Schedule = ({ data, onChange }) => {
   const [expandedSession, setExpandedSession] = useState(null);
   const [activeFilter, setActiveFilter] = useState("All");
   const [errorMessage, setErrorMessage] = useState("");
+  const [subtitleExists, setSubtitleExists] = useState(false);
+  const [lastCheckedSubtitle, setLastCheckedSubtitle] = useState("");
 
   // Fetch exercises when modal opens
   useEffect(() => {
@@ -466,8 +468,12 @@ export const Schedule = ({ data, onChange }) => {
       if (data.success) {
         setExercises(data.exercises);
       }
-    } catch {
-      setErrorMessage("Failed to fetch exercises. Please try again later.");
+    } catch (error) {
+      setErrorMessage(
+        `Failed to fetch exercises. ${
+          error?.message ? "Error: " + error.message : ""
+        }`
+      );
     } finally {
       setIsLoading(false);
     }
@@ -535,7 +541,7 @@ export const Schedule = ({ data, onChange }) => {
     setShowExerciseLibrary(false);
   };
 
-  const toggleExerciseSelection = (exercise) => {
+  const toggleExerciseSelection = useCallback((exercise) => {
     setSelectedExercises((prev) => {
       const isSelected = prev.find((e) => e.id === exercise.id);
       if (isSelected) {
@@ -543,72 +549,87 @@ export const Schedule = ({ data, onChange }) => {
       }
       return [...prev, exercise];
     });
-  };
+  }, []);
 
-  const handleExerciseChange = (sessionIndex, exerciseIndex, field, value) => {
-    onChange((prev) => {
-      const newSchedule = [...prev.schedule];
-      newSchedule[sessionIndex] = {
-        ...newSchedule[sessionIndex],
-        exercises: [...newSchedule[sessionIndex].exercises],
+  const handleExerciseChange = useCallback(
+    (sessionIndex, exerciseIndex, field, value) => {
+      onChange((prev) => {
+        const newSchedule = [...prev.schedule];
+        newSchedule[sessionIndex] = {
+          ...newSchedule[sessionIndex],
+          exercises: [...newSchedule[sessionIndex].exercises],
+        };
+        newSchedule[sessionIndex].exercises[exerciseIndex] = {
+          ...newSchedule[sessionIndex].exercises[exerciseIndex],
+          [field]: value,
+        };
+        return { ...prev, schedule: newSchedule };
+      });
+    },
+    [onChange]
+  );
+
+  const handleAddSession = useCallback(
+    (isRestDay = false) => {
+      const defaultType = isRestDay
+        ? "rest"
+        : SESSION_TYPES.find((t) => t.id !== "rest")?.id || "strength";
+      const newSession = {
+        ...DEFAULT_SESSION,
+        id: crypto.randomUUID(),
+        day: `day${(data.schedule.length % 7) + 1}`,
+        isRestDay,
+        type: defaultType,
+        name: isRestDay ? "Rest Day" : "",
+        exercises: isRestDay ? [] : DEFAULT_SESSION.exercises,
       };
-      newSchedule[sessionIndex].exercises[exerciseIndex] = {
-        ...newSchedule[sessionIndex].exercises[exerciseIndex],
+
+      onChange({
+        schedule: [...data.schedule, newSession],
+      });
+    },
+    [data.schedule, onChange]
+  );
+
+  const handleRemoveSession = useCallback(
+    (index) => {
+      const newSchedule = data.schedule.filter((_, i) => i !== index);
+      onChange({
+        schedule: newSchedule,
+      });
+      if (activeSession >= newSchedule.length) {
+        setActiveSession(Math.max(0, newSchedule.length - 1));
+      }
+      if (expandedSession === index) {
+        setExpandedSession(null);
+      }
+    },
+    [data.schedule, onChange, activeSession, expandedSession]
+  );
+
+  const handleSessionChange = useCallback(
+    (index, field, value) => {
+      const newSchedule = [...data.schedule];
+      newSchedule[index] = {
+        ...newSchedule[index],
         [field]: value,
       };
-      return { ...prev, schedule: newSchedule };
-    });
-  };
+      onChange({
+        schedule: newSchedule,
+      });
+    },
+    [data.schedule, onChange]
+  );
 
-  const handleAddSession = (isRestDay = false) => {
-    const defaultType = isRestDay
-      ? "rest"
-      : SESSION_TYPES.find((t) => t.id !== "rest")?.id || "strength";
-    const newSession = {
-      ...DEFAULT_SESSION,
-      id: crypto.randomUUID(),
-      day: `day${(data.schedule.length % 7) + 1}`,
-      isRestDay,
-      type: defaultType,
-      name: isRestDay ? "Rest Day" : "",
-      exercises: isRestDay ? [] : DEFAULT_SESSION.exercises,
-    };
-
-    onChange({
-      schedule: [...data.schedule, newSession],
-    });
-  };
-
-  const handleRemoveSession = (index) => {
-    const newSchedule = data.schedule.filter((_, i) => i !== index);
-    onChange({
-      schedule: newSchedule,
-    });
-    if (activeSession >= newSchedule.length) {
-      setActiveSession(Math.max(0, newSchedule.length - 1));
-    }
-    if (expandedSession === index) {
-      setExpandedSession(null);
-    }
-  };
-
-  const handleSessionChange = (index, field, value) => {
-    const newSchedule = [...data.schedule];
-    newSchedule[index] = {
-      ...newSchedule[index],
-      [field]: value,
-    };
-    onChange({
-      schedule: newSchedule,
-    });
-  };
-
-  const moveSession = (from, to) => {
-    const updated = [...data.schedule];
-    const [removed] = updated.splice(from, 1);
-    updated.splice(to, 0, removed);
-    onChange({ schedule: updated });
-  };
+  const moveSession = useCallback(
+    (from, to) => {
+      const updated = [...data.schedule];
+      const [removed] = updated.splice(from, 1);
+      updated.splice(to, 0, removed);
+      onChange({ schedule: updated });
+    },
+    [data.schedule, onChange]
+  );
 
   // Memoize filtered exercises for efficiency
   const filteredExercises = useMemo(() => {
@@ -620,6 +641,23 @@ export const Schedule = ({ data, onChange }) => {
 
   // Fallback ako nema schedule
   const schedule = data.schedule || [];
+
+  useEffect(() => {
+    if (
+      showMediaPreview &&
+      showMediaPreview.type === "video" &&
+      showMediaPreview.url
+    ) {
+      const vttUrl = showMediaPreview.url.replace(/\.[^/.]+$/, ".vtt");
+      setLastCheckedSubtitle(vttUrl);
+      fetch(vttUrl, { method: "HEAD" })
+        .then((res) => setSubtitleExists(res.ok))
+        .catch(() => setSubtitleExists(false));
+    } else {
+      setSubtitleExists(false);
+      setLastCheckedSubtitle("");
+    }
+  }, [showMediaPreview]);
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -647,13 +685,17 @@ export const Schedule = ({ data, onChange }) => {
                 autoPlay
                 className="w-full h-auto rounded-lg"
               >
-                <track
-                  kind="captions"
-                  src={showMediaPreview.url.replace(/\.[^/.]+$/, ".vtt")}
-                  srcLang="en"
-                  label="English"
-                  default
-                />
+                {subtitleExists &&
+                  lastCheckedSubtitle ===
+                    showMediaPreview.url.replace(/\.[^/.]+$/, ".vtt") && (
+                    <track
+                      kind="captions"
+                      src={showMediaPreview.url.replace(/\.[^/.]+$/, ".vtt")}
+                      srcLang="en"
+                      label="English"
+                      default
+                    />
+                  )}
               </video>
             )}
           </Modal>
@@ -1165,7 +1207,7 @@ export const Schedule = ({ data, onChange }) => {
                           <div className="flex items-center gap-3 mb-1">
                             {/* Type Badge */}
                             <div className="flex items-center gap-1">
-                              <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                              <div className="w-2 h-2 rounded-full bg-blue-400" />
                               <span className="text-xs font-medium text-slate-200 capitalize">
                                 {exercise.type}
                               </span>

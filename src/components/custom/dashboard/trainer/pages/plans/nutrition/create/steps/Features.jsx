@@ -2,66 +2,91 @@
 
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
+import PropTypes from "prop-types";
+import { useCallback } from "react";
 
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 
 export const Features = ({ data, onChange }) => {
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    onChange({ [name]: value });
-  };
+  const handleChange = useCallback(
+    (e) => {
+      const { name, value } = e.target;
+      onChange({ [name]: value });
+    },
+    [onChange]
+  );
 
-  const handleArrayChange = (name, index, value) => {
-    if (!name || !(name in data)) return;
-    const array = Array.isArray(data[name]) ? data[name] : [""];
-    if (typeof index !== "number" || index < 0 || index >= array.length) return;
-    const newArray = [...array];
-    newArray[index] = value;
-    onChange({ [name]: newArray });
-  };
+  const handleArrayChange = useCallback(
+    (name, index, value) => {
+      if (!name || !(name in data)) return;
+      const array = Array.isArray(data[name]) ? data[name] : [""];
+      if (typeof index !== "number" || index < 0 || index >= array.length)
+        return;
+      const newArray = [...array];
+      newArray[index] = value;
+      onChange({ [name]: newArray });
+    },
+    [data, onChange]
+  );
 
-  const addArrayItem = (name) => {
-    if (!name || !(name in data)) return;
-    const array = Array.isArray(data[name]) ? data[name] : [""];
-    onChange({ [name]: [...array, ""] });
-  };
+  const addArrayItem = useCallback(
+    (name) => {
+      if (!name || !(name in data)) return;
+      const array = Array.isArray(data[name]) ? data[name] : [""];
+      onChange({ [name]: [...array, ""] });
+    },
+    [data, onChange]
+  );
 
-  const removeArrayItem = (name, index) => {
-    if (!name || !(name in data)) return;
-    const array = Array.isArray(data[name]) ? data[name] : [""];
-    if (array.length === 1) return;
-    if (typeof index !== "number" || index < 0 || index >= array.length) return;
-    const newArray = array.filter((_, i) => i !== index);
-    onChange({ [name]: newArray });
-  };
+  const removeArrayItem = useCallback(
+    (name, index) => {
+      if (!name || !(name in data)) return;
+      const array = Array.isArray(data[name]) ? data[name] : [""];
+      if (array.length === 1) return;
+      if (typeof index !== "number" || index < 0 || index >= array.length)
+        return;
+      const newArray = array.filter((_, i) => i !== index);
+      onChange({ [name]: newArray });
+    },
+    [data, onChange]
+  );
 
-  const handleTimelineChange = (index, field, value) => {
-    const timeline = data.timeline || [
-      { week: "", title: "", description: "" },
-    ];
-    const newTimeline = [...timeline];
-    newTimeline[index] = { ...newTimeline[index], [field]: value };
-    onChange({ timeline: newTimeline });
-  };
+  const handleTimelineChange = useCallback(
+    (index, field, value) => {
+      const timeline = data.timeline || [
+        { week: "", title: "", description: "" },
+      ];
+      if (typeof index !== "number" || index < 0 || index >= timeline.length) {
+        return;
+      }
+      const newTimeline = [...timeline];
+      newTimeline[index] = { ...newTimeline[index], [field]: value };
+      onChange({ timeline: newTimeline });
+    },
+    [data, onChange]
+  );
 
-  const addTimelineItem = () => {
+  const addTimelineItem = useCallback(() => {
     const timeline = data.timeline || [
       { week: "", title: "", description: "" },
     ];
     onChange({
       timeline: [...timeline, { week: "", title: "", description: "" }],
     });
-  };
+  }, [data, onChange]);
 
-  const removeTimelineItem = (index) => {
-    const timeline = data.timeline || [
-      { week: "", title: "", description: "" },
-    ];
-    if (timeline.length === 1) return;
-    const newTimeline = timeline.filter((_, i) => i !== index);
-    onChange({ timeline: newTimeline });
-  };
+  const removeTimelineItem = useCallback(
+    (index) => {
+      const timeline = data.timeline || [
+        { week: "", title: "", description: "" },
+      ];
+      if (timeline.length === 1) return;
+      const newTimeline = timeline.filter((_, i) => i !== index);
+      onChange({ timeline: newTimeline });
+    },
+    [data, onChange]
+  );
 
   return (
     <div className="space-y-4 sm:space-y-6 px-2 sm:px-4">
@@ -292,4 +317,22 @@ export const Features = ({ data, onChange }) => {
       </div>
     </div>
   );
+};
+
+Features.propTypes = {
+  data: PropTypes.shape({
+    keyFeatures: PropTypes.arrayOf(PropTypes.string),
+    recommendedFrequency: PropTypes.string,
+    adaptability: PropTypes.string,
+    cookingTime: PropTypes.string,
+    supplementRecommendations: PropTypes.string,
+    timeline: PropTypes.arrayOf(
+      PropTypes.shape({
+        week: PropTypes.string,
+        title: PropTypes.string,
+        description: PropTypes.string,
+      })
+    ),
+  }).isRequired,
+  onChange: PropTypes.func.isRequired,
 };

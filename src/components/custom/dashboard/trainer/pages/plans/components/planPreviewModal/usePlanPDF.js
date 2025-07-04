@@ -66,14 +66,8 @@ function buildWeeklySchedule(plan, days, isNutrition) {
 }
 
 // Helper to assemble pdfData
-function assemblePdfData(
-  plan,
-  days,
-  type,
-  overview,
-  weeklySchedule,
-  formattedDate
-) {
+function assemblePdfData(options) {
+  const { plan, days, type, overview, weeklySchedule, formattedDate } = options;
   const isNutrition = type === "nutrition";
   return {
     title: plan.title,
@@ -103,29 +97,32 @@ function assemblePdfData(
 
 export const usePlanPDF = () => {
   const [isDownloading, setIsDownloading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleDownloadPDF = async (plan, days, type) => {
     try {
       setIsDownloading(true);
+      setError(null);
       const isNutrition = type === "nutrition";
       const formattedDate = formatDate(plan.createdAt);
       const overview = buildOverview(plan);
       const weeklySchedule = buildWeeklySchedule(plan, days, isNutrition);
-      const pdfData = assemblePdfData(
+      const pdfData = assemblePdfData({
         plan,
         days,
         type,
         overview,
         weeklySchedule,
-        formattedDate
-      );
+        formattedDate,
+      });
       await generatePlanPDF(pdfData);
     } catch (error) {
       console.error("Error generating PDF:", error);
+      setError("Failed to generate PDF. Please try again.");
     } finally {
       setIsDownloading(false);
     }
   };
 
-  return { handleDownloadPDF, isDownloading };
+  return { handleDownloadPDF, isDownloading, error };
 };

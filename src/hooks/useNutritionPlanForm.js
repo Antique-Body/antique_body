@@ -51,13 +51,15 @@ export const useNutritionPlanForm = (initialData = null) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
+  // Helper to check if mode is 'copy'
+  const getIsCopyMode = () => {
+    if (typeof window === "undefined") return false;
+    const searchParams = new URLSearchParams(window.location.search);
+    return searchParams.get("mode") === "copy";
+  };
+
   useEffect(() => {
-    // Get searchParams only when running in the browser
-    const searchParams =
-      typeof window !== "undefined"
-        ? new URLSearchParams(window.location.search)
-        : null;
-    const isCopy = searchParams && searchParams.get("mode") === "copy";
+    const isCopy = getIsCopyMode();
     if (initialData) {
       let cleanData;
       if (isCopy) {
@@ -134,12 +136,7 @@ export const useNutritionPlanForm = (initialData = null) => {
     setIsSubmitting(true);
     setError(null);
     try {
-      // Get searchParams only when running in the browser
-      const searchParams =
-        typeof window !== "undefined"
-          ? new URLSearchParams(window.location.search)
-          : null;
-      const isCopy = searchParams && searchParams.get("mode") === "copy";
+      const isCopy = getIsCopyMode();
       let coverImageUrl = formData.coverImage;
 
       // 1. Upload image if it's a File object
