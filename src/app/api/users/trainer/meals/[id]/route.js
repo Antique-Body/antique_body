@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 import { mealService } from "../../../services";
 
 import { auth } from "#/auth";
-import prisma from "@/lib/prisma";
 import { validateMeal } from "@/middleware/validation";
 
 export async function GET(request, { params }) {
@@ -29,6 +28,8 @@ export async function GET(request, { params }) {
 }
 
 export async function PUT(request, { params }) {
+  const prisma = (await import("@/lib/prisma")).default;
+
   try {
     const { id } = await params;
     const body = await request.json();
@@ -92,6 +93,8 @@ export async function PUT(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
+  const prisma = (await import("@/lib/prisma")).default;
+
   try {
     const { id } = await params;
 

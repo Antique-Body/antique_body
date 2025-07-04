@@ -3,12 +3,27 @@
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { Button } from "@/components/common/Button";
 
 export const Preview = ({ data }) => {
   const [activeTab, setActiveTab] = useState("overview");
+
+  // Handle blob URL for coverImage
+  const [coverImageUrl, setCoverImageUrl] = useState(null);
+
+  useEffect(() => {
+    if (data.coverImage && typeof data.coverImage !== "string") {
+      const url = URL.createObjectURL(data.coverImage);
+      setCoverImageUrl(url);
+      return () => {
+        URL.revokeObjectURL(url);
+      };
+    } else {
+      setCoverImageUrl(null);
+    }
+  }, [data.coverImage]);
 
   const getTotalMeals = () =>
     data.days?.reduce((total, day) => total + (day.meals?.length || 0), 0) || 0;
@@ -34,7 +49,7 @@ export const Preview = ({ data }) => {
             src={
               typeof data.coverImage === "string"
                 ? data.coverImage
-                : URL.createObjectURL(data.coverImage)
+                : coverImageUrl
             }
             alt={data.title || "Plan cover"}
             fill
@@ -415,13 +430,13 @@ export const Preview = ({ data }) => {
                                             </span>
                                           </div>
                                         )}
-                                        {option.fat && (
+                                        {option.fats && (
                                           <div className="text-sm">
                                             <span className="text-gray-400">
                                               Fat:{" "}
                                             </span>
                                             <span className="text-yellow-400">
-                                              {option.fat}g
+                                              {option.fats}g
                                             </span>
                                           </div>
                                         )}

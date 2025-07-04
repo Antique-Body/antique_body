@@ -1,7 +1,8 @@
 import { Icon } from "@iconify/react";
+import * as Tooltip from "@radix-ui/react-tooltip";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState, useRef } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
 import { mapSpecialtyToLabel } from "@/utils/specialtyMapper";
@@ -16,9 +17,7 @@ export const TrainerCard = ({
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const [showGymsTooltip, setShowGymsTooltip] = useState(false);
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
-  const gymsTooltipRef = useRef(null);
 
   // Set theme colors based on colorVariant
   const themeColors = {
@@ -58,17 +57,6 @@ export const TrainerCard = ({
     id: specialty.id,
     name: mapSpecialtyToLabel(specialty.name),
   }));
-
-  // Handle showing/hiding gym tooltip
-  const handleGymsMouseEnter = (e) => {
-    e.stopPropagation();
-    setShowGymsTooltip(true);
-  };
-
-  const handleGymsMouseLeave = (e) => {
-    e.stopPropagation();
-    setShowGymsTooltip(false);
-  };
 
   // Handle card click to open profile modal
   const handleCardClick = (e) => {
@@ -316,70 +304,91 @@ export const TrainerCard = ({
             {/* Gym count */}
             {Array.isArray(trainer.trainerGyms) &&
               trainer.trainerGyms.length > 0 && (
-                <div
-                  className="relative flex items-center gap-1 bg-zinc-800/40 rounded-lg px-2 py-1 cursor-pointer hover:bg-zinc-800 flex-1"
-                  onMouseEnter={handleGymsMouseEnter}
-                  onMouseLeave={handleGymsMouseLeave}
-                  ref={gymsTooltipRef}
-                >
-                  <Icon
-                    icon="mdi:dumbbell"
-                    className={`w-2.5 h-2.5 sm:w-3 sm:h-3 text-[${themeColors.primary}]`}
-                    style={{ color: themeColors.primary }}
-                  />
-                  <span className="text-[10px] sm:text-xs text-white">
-                    {trainer.trainerGyms.length} gym
-                    {trainer.trainerGyms.length !== 1 ? "s" : ""}
-                  </span>
-
-                {/* Gyms tooltip - Only show on larger screens */}
-                {showGymsTooltip && (
-                  <div className="hidden sm:block absolute bottom-full left-0 mb-2 w-56 bg-zinc-800 rounded-lg shadow-lg p-2 z-50 border border-zinc-700">
-                    <div className="text-xs font-medium text-white mb-1">
-                      Training Locations:
-                    </div>
-                    <ul className="text-xs text-zinc-300 space-y-1 max-h-40 overflow-y-auto">
-                      {trainer.trainerGyms.map((gymData, idx) => (
-                        <li
-                          key={idx}
-                          className="flex items-start py-1 border-b border-zinc-700/50 last:border-0"
-                        >
-                          <Icon
-                            icon="mdi:map-marker"
-                            className={`w-3 h-3 text-[${themeColors.primary}] mr-1 mt-0.5 flex-shrink-0`}
-                            style={{ color: themeColors.primary }}
-                          />
-                          <div>
-                            <div className="font-medium">
-                              {gymData.gym?.name || "Unnamed Gym"}
-                            </div>
-                            {gymData.gym?.address && (
-                              <div className="text-zinc-400 text-[10px]">
-                                {gymData.gym.address}
-                              </div>
-                            )}
-                            {idx === 0 &&
-                              trainer.distanceSource === "gym" &&
-                              typeof trainer.distance === "number" && (
-                                <div
-                                  className={`mt-0.5 text-[10px] bg-[${themeColors.primary}]/20 text-[${themeColors.primary}] px-1.5 py-0.5 rounded-full inline-block`}
-                                  style={{
-                                    backgroundColor: `${themeColors.primary}20`,
-                                    color: themeColors.primary,
-                                  }}
-                                >
-                                  {formatDistance(trainer.distance)} away
+                <Tooltip.Root delayDuration={200}>
+                  <Tooltip.Trigger asChild>
+                    <button
+                      type="button"
+                      className="relative flex items-center gap-1 bg-zinc-800/40 rounded-lg px-2 py-1 cursor-pointer hover:bg-zinc-800 flex-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[${themeColors.primary}]"
+                      aria-label="Show training locations"
+                    >
+                      <Icon
+                        icon="mdi:dumbbell"
+                        className={`w-2.5 h-2.5 sm:w-3 sm:h-3 text-[${themeColors.primary}]`}
+                        style={{ color: themeColors.primary }}
+                      />
+                      <span className="text-[10px] sm:text-xs text-white">
+                        {trainer.trainerGyms.length} gym
+                        {trainer.trainerGyms.length !== 1 ? "s" : ""}
+                      </span>
+                    </button>
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content
+                      side="top"
+                      align="start"
+                      className="z-50 w-56 bg-zinc-800 rounded-lg shadow-lg p-2 border border-zinc-700 focus:outline-none"
+                    >
+                      <div className="text-xs font-medium text-white mb-1">
+                        Training Locations:
+                      </div>
+                      <ul className="text-xs text-zinc-300 space-y-1 max-h-40 overflow-y-auto">
+                        {trainer.trainerGyms.map((gymData, idx) => {
+                          let key = gymData.gym?.id;
+                          if (!key) {
+                            const str = `${gymData.gym?.name || ""}|${
+                              gymData.gym?.address || ""
+                            }|${gymData.gym?.lat || ""}|${
+                              gymData.gym?.lon || ""
+                            }`;
+                            let hash = 5381;
+                            for (let i = 0; i < str.length; i++) {
+                              hash = (hash << 5) + hash + str.charCodeAt(i);
+                            }
+                            key = `gym-${hash}`;
+                          }
+                          return (
+                            <li
+                              key={key}
+                              className="flex items-start py-1 border-b border-zinc-700/50 last:border-0"
+                            >
+                              <Icon
+                                icon="mdi:map-marker"
+                                className={`w-3 h-3 text-[${themeColors.primary}] mr-1 mt-0.5 flex-shrink-0`}
+                                style={{ color: themeColors.primary }}
+                              />
+                              <div>
+                                <div className="font-medium">
+                                  {gymData.gym?.name || "Unnamed Gym"}
                                 </div>
-                              )}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="absolute -bottom-1 left-4 w-2 h-2 bg-zinc-800 border-r border-b border-zinc-700 transform rotate-45" />
-                  </div>
-                )}
-              </div>
-            )}
+                                {gymData.gym?.address && (
+                                  <div className="text-zinc-400 text-[10px]">
+                                    {gymData.gym.address}
+                                  </div>
+                                )}
+                                {idx === 0 &&
+                                  trainer.distanceSource === "gym" &&
+                                  typeof trainer.distance === "number" && (
+                                    <div
+                                      className={`mt-0.5 text-[10px] bg-[${themeColors.primary}]/20 text-[${themeColors.primary}] px-1.5 py-0.5 rounded-full inline-block`}
+                                      style={{
+                                        backgroundColor: `${themeColors.primary}20`,
+                                        color: themeColors.primary,
+                                      }}
+                                    >
+                                      {formatDistance(trainer.distance)} away
+                                    </div>
+                                  )}
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                      <div className="absolute -bottom-1 left-4 w-2 h-2 bg-zinc-800 border-r border-b border-zinc-700 transform rotate-45" />
+                      <Tooltip.Arrow className="fill-zinc-800" />
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip.Root>
+              )}
 
             {/* Client count */}
             <div className="flex items-center gap-1 bg-zinc-800/40 rounded-lg px-2 py-1 flex-1">

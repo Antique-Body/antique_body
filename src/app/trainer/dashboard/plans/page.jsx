@@ -2,7 +2,7 @@
 
 import { Icon } from "@iconify/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 
 import { Card, Button } from "@/components/common";
@@ -14,8 +14,8 @@ import {
 } from "@/components/common/Icons";
 import {
   CreatePlanCard,
-  PlanCard,
   TabsComponent,
+  PlanSection,
 } from "@/components/custom/dashboard/trainer/pages/plans/components";
 
 const SORT_OPTIONS = [
@@ -29,8 +29,11 @@ const SORT_OPTIONS = [
   },
 ];
 
+const VALID_PLAN_TYPES = ["training", "nutrition"];
+
 const PlanManagementPage = () => {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const initialTab =
     searchParams.get("fromTab") === "nutrition" ||
     searchParams.get("fromTab") === "training"
@@ -48,7 +51,7 @@ const PlanManagementPage = () => {
     try {
       setLoading(true);
       // Only send type param if training or nutrition
-      const typeParam = ["training", "nutrition"].includes(activeTab)
+      const typeParam = VALID_PLAN_TYPES.includes(activeTab)
         ? `?type=${activeTab}`
         : "";
       const response = await fetch(`/api/users/trainer/plans${typeParam}`);
@@ -124,14 +127,12 @@ const PlanManagementPage = () => {
   useEffect(() => {
     if (searchParams.get("refresh") === "1") {
       fetchPlans();
-      // Očisti refresh param iz URL-a
+      // Clear refresh param from URL
       const params = new URLSearchParams(window.location.search);
       params.delete("refresh");
-      window.history.replaceState(
-        {},
-        "",
-        `${window.location.pathname}?${params}`
-      );
+      router.replace(`${window.location.pathname}?${params}`, {
+        scroll: false,
+      });
     }
   }, [searchParams, fetchPlans]);
 
@@ -302,15 +303,14 @@ const PlanManagementPage = () => {
           className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
         >
           {/* Static All Plans Label as Button */}
-          <button
+          <div
             className="flex items-center gap-2 px-4 py-2 rounded-xl transition-all bg-[#FF6B00] text-white shadow-lg shadow-[#FF6B00]/25"
-            type="button"
             tabIndex={-1}
-            disabled
+            aria-disabled="true"
           >
             <Icon icon="mdi:view-grid-outline" className="w-4 h-4" />
             <span className="text-sm font-medium">All Plans</span>
-          </button>
+          </div>
 
           {/* Sort Dropdown */}
           <div className="relative">
@@ -376,147 +376,35 @@ const PlanManagementPage = () => {
               </div>
             </motion.div>
           ) : activeTab === "nutrition" ? (
-            <motion.div
-              key="nutrition"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 rounded-lg bg-green-500/20">
-                  <NutritionPlanIcon size={20} className="text-green-400" />
-                </div>
-                <h2 className="text-xl font-bold text-white">
-                  Nutrition Plans ({filteredPlans.length})
-                </h2>
-              </div>
-
-              <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                className={`grid gap-6 ${
-                  viewMode === "grid"
-                    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                    : "grid-cols-1"
-                }`}
-              >
-                {filteredPlans.map((plan) => (
-                  <motion.div key={plan.id} variants={itemVariants}>
-                    <PlanCard
-                      id={plan.id}
-                      title={plan.title}
-                      description={plan.description}
-                      coverImage={plan.coverImage}
-                      createdAt={plan.createdAt}
-                      type={"nutrition"}
-                      duration={
-                        plan.duration
-                          ? `${plan.duration} ${plan.durationType || "weeks"}`
-                          : "Not specified"
-                      }
-                      clientCount={plan.clientCount || 0}
-                      price={plan.price}
-                      editUrl={`/trainer/dashboard/plans/${plan.type}/edit/${plan.id}`}
-                      weeklySchedule={plan.weeklySchedule}
-                      index={filteredPlans.indexOf(plan)}
-                      viewMode={viewMode}
-                      onDelete={fetchPlans}
-                    />
-                  </motion.div>
-                ))}
-
-                {filteredPlans.length === 0 && (
-                  <motion.div
-                    variants={itemVariants}
-                    className="col-span-full bg-gradient-to-r from-[#1a1a1a] to-[#222] rounded-2xl border border-[#333] p-8 text-center"
-                  >
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#222] flex items-center justify-center">
-                      <NutritionPlanIcon size={24} className="text-gray-400" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-white mb-2">
-                      No nutrition plans found
-                    </h3>
-                    <p className="text-gray-400 mb-6 max-w-md mx-auto">
-                      Start creating nutrition plans to help your clients
-                      achieve their dietary goals
-                    </p>
-                  </motion.div>
-                )}
-              </motion.div>
-            </motion.div>
+            <PlanSection
+              plans={filteredPlans}
+              type="nutrition"
+              icon={NutritionPlanIcon}
+              iconBgColor="bg-green-500/20"
+              emptyMessage={{
+                title: "No nutrition plans found",
+                body: "Start creating nutrition plans to help your clients achieve their dietary goals",
+              }}
+              viewMode={viewMode}
+              containerVariants={containerVariants}
+              itemVariants={itemVariants}
+              fetchPlans={fetchPlans}
+            />
           ) : (
-            <motion.div
-              key="training"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 rounded-lg bg-blue-500/20">
-                  <TrainingPlanIcon size={20} className="text-blue-400" />
-                </div>
-                <h2 className="text-xl font-bold text-white">
-                  Training Plans ({filteredPlans.length})
-                </h2>
-              </div>
-
-              <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                className={`grid gap-6 ${
-                  viewMode === "grid"
-                    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                    : "grid-cols-1"
-                }`}
-              >
-                {filteredPlans.map((plan) => (
-                  <motion.div key={plan.id} variants={itemVariants}>
-                    <PlanCard
-                      id={plan.id}
-                      title={plan.title}
-                      description={plan.description}
-                      coverImage={plan.coverImage}
-                      createdAt={plan.createdAt}
-                      type={"training"}
-                      duration={
-                        plan.duration
-                          ? `${plan.duration} ${plan.durationType || "weeks"}`
-                          : "Not specified"
-                      }
-                      clientCount={plan.clientCount || 0}
-                      price={plan.price}
-                      editUrl={`/trainer/dashboard/plans/${plan.type}/edit/${plan.id}`}
-                      weeklySchedule={plan.weeklySchedule}
-                      index={filteredPlans.indexOf(plan)}
-                      viewMode={viewMode}
-                      onDelete={fetchPlans}
-                    />
-                  </motion.div>
-                ))}
-
-                {filteredPlans.length === 0 && (
-                  <motion.div
-                    variants={itemVariants}
-                    className="col-span-full bg-gradient-to-r from-[#1a1a1a] to-[#222] rounded-2xl border border-[#333] p-8 text-center"
-                  >
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#222] flex items-center justify-center">
-                      <TrainingPlanIcon size={24} className="text-gray-400" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-white mb-2">
-                      No training plans found
-                    </h3>
-                    <p className="text-gray-400 mb-6 max-w-md mx-auto">
-                      Create your first training plan to help clients reach
-                      their fitness goals
-                    </p>
-                  </motion.div>
-                )}
-              </motion.div>
-            </motion.div>
+            <PlanSection
+              plans={filteredPlans}
+              type="training"
+              icon={TrainingPlanIcon}
+              iconBgColor="bg-blue-500/20"
+              emptyMessage={{
+                title: "No training plans found",
+                body: "Create your first training plan to help clients reach their fitness goals",
+              }}
+              viewMode={viewMode}
+              containerVariants={containerVariants}
+              itemVariants={itemVariants}
+              fetchPlans={fetchPlans}
+            />
           )}
         </AnimatePresence>
       </main>

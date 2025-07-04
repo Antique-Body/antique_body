@@ -2,6 +2,7 @@
 
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
+import PropTypes from "prop-types";
 
 import { Button } from "@/components/common/Button";
 
@@ -19,16 +20,32 @@ function getMainButtonText({ isEdit, isLoading, planType }) {
   }
 }
 
-// Mapping for next step labels based on planType and currentStep
-const nextStepLabels = {
+// Default mapping for next step labels
+const defaultStepLabels = {
   nutrition: ["Meal Planning", "Features", "Preview"],
   training: ["Schedule", "Features", "Preview"],
 };
 
-function getNextStepLabel(planType, currentStep) {
-  const labels = nextStepLabels[planType] || nextStepLabels["training"];
+function getNextStepLabel(planType, currentStep, stepLabels) {
+  const labels = stepLabels[planType] || stepLabels["training"];
   return labels[currentStep] || "Preview";
 }
+
+// Configuration object for step hints
+const stepHints = {
+  nutrition: [
+    "Add basic information about your nutrition plan",
+    "Create meal plans and daily nutrition schedules",
+    "Set special features and dietary information",
+    "Review everything before creating your plan",
+  ],
+  training: [
+    "Add basic information about your training plan",
+    "Create sessions and add exercises to build your plan",
+    "Set special features and target audience",
+    "Review everything before creating your plan",
+  ],
+};
 
 export const NavigationButtons = ({
   currentStep,
@@ -40,6 +57,7 @@ export const NavigationButtons = ({
   isLoading = false,
   planType = "training", // "training" or "nutrition"
   isEdit = false,
+  stepLabels = defaultStepLabels,
 }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -75,7 +93,7 @@ export const NavigationButtons = ({
             </>
           ) : (
             <>
-              Continue to {getNextStepLabel(planType, currentStep)}
+              Continue to {getNextStepLabel(planType, currentStep, stepLabels)}
               <Icon icon="mdi:arrow-right" className="w-5 h-5 ml-2" />
             </>
           )}
@@ -124,27 +142,21 @@ export const NavigationButtons = ({
     {/* Helpful hints */}
     <div className="mt-4 text-center">
       <div className="text-xs text-gray-500 max-w-md mx-auto">
-        {planType === "nutrition" ? (
-          <>
-            {currentStep === 0 &&
-              "Add basic information about your nutrition plan"}
-            {currentStep === 1 &&
-              "Create meal plans and daily nutrition schedules"}
-            {currentStep === 2 &&
-              "Set special features and dietary information"}
-            {currentStep === 3 && "Review everything before creating your plan"}
-          </>
-        ) : (
-          <>
-            {currentStep === 0 &&
-              "Add basic information about your training plan"}
-            {currentStep === 1 &&
-              "Create sessions and add exercises to build your plan"}
-            {currentStep === 2 && "Set special features and target audience"}
-            {currentStep === 3 && "Review everything before creating your plan"}
-          </>
-        )}
+        {stepHints[planType] && stepHints[planType][currentStep]}
       </div>
     </div>
   </motion.div>
 );
+
+NavigationButtons.propTypes = {
+  currentStep: PropTypes.number.isRequired,
+  totalSteps: PropTypes.number.isRequired,
+  onBack: PropTypes.func.isRequired,
+  onNext: PropTypes.func.isRequired,
+  isNextDisabled: PropTypes.bool,
+  isLastStep: PropTypes.bool.isRequired,
+  isLoading: PropTypes.bool,
+  planType: PropTypes.oneOf(["training", "nutrition"]),
+  isEdit: PropTypes.bool,
+  stepLabels: PropTypes.object,
+};

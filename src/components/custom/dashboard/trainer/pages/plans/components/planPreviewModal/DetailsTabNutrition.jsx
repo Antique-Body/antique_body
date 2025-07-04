@@ -10,7 +10,7 @@ export const DetailsTabNutrition = ({
   let averageCookingTime = null;
   if (plan.days && Array.isArray(plan.days) && plan.days.length > 0) {
     const times = plan.days
-      .map((d) => parseInt(d.cookingTime, 10))
+      .map((d) => Number.parseInt(d.cookingTime, 10))
       .filter((t) => !isNaN(t));
     if (times.length > 0) {
       averageCookingTime = Math.round(

@@ -241,13 +241,12 @@ export const Features = ({ data, onChange }) => {
                 onClick={() => handleFeatureToggle(feature.key)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className={`${`relative p-4 rounded-lg border w-full text-left transition-all duration-200 flex items-center gap-4 ${
+                className={`relative p-4 rounded-lg border w-full text-left transition-all duration-200 flex items-center gap-4 ${
                   checked
                     ? "bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/60 shadow-lg"
                     : "bg-[#222] border-[#333] hover:border-[#444]"
-                } focus:outline-none`}`}
+                } focus:outline-none`}
                 style={{ minHeight: 80 }}
-                role="button"
                 aria-pressed={checked}
                 aria-label={feature.label}
               >

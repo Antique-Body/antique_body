@@ -43,7 +43,36 @@ export const WeeklyScheduleTab = ({
         )}
       </div>
       <div>
-        {/* The day details rendering function should be passed as a prop or further modularized if needed */}
+        {(() => {
+          const dayList = isNutrition
+            ? days || plan.days || []
+            : schedule || plan.schedule || [];
+          const currentDay = dayList.find(
+            (d) => (d.day || d.name) === activeDay
+          );
+          if (!currentDay) {
+            return (
+              <div className="text-zinc-400">No details for this day.</div>
+            );
+          }
+          // Render details for the current day
+          return (
+            <div className="bg-zinc-900/40 rounded-lg p-4 border border-zinc-700/40 mt-2">
+              <h4 className="text-md font-semibold text-white mb-2">
+                {currentDay.name || currentDay.day}
+              </h4>
+              {currentDay.details ? (
+                <div className="text-zinc-200 text-sm whitespace-pre-line">
+                  {currentDay.details}
+                </div>
+              ) : (
+                <div className="text-zinc-400 text-sm">
+                  No details provided.
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </div>
     </div>
   </motion.div>

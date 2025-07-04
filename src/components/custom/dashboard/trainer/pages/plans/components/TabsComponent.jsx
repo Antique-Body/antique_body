@@ -1,8 +1,28 @@
 import { AnimatePresence, motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import PropTypes from "prop-types";
+import { useEffect, useState } from "react";
 
 import { NutritionPlanIcon, TrainingPlanIcon } from "@/components/common/Icons";
 
-export const TabsComponent = ({ activeTab, setActiveTab }) => {
+export const TabsComponent = ({
+  activeTab,
+  setActiveTab,
+  disableAnimations = false,
+}) => {
+  const router = useRouter();
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.matchMedia) {
+      const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+      setPrefersReducedMotion(mediaQuery.matches);
+      const handler = () => setPrefersReducedMotion(mediaQuery.matches);
+      mediaQuery.addEventListener("change", handler);
+      return () => mediaQuery.removeEventListener("change", handler);
+    }
+  }, []);
+
   const tabs = [
     {
       id: "training",
@@ -24,9 +44,10 @@ export const TabsComponent = ({ activeTab, setActiveTab }) => {
 
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
-
-    // If you want the URL to change when tabs change,
-    // you can use router.push(path) here
+    const tab = tabs.find((t) => t.id === tabId);
+    if (tab) {
+      router.push(tab.path);
+    }
   };
 
   return (
@@ -71,13 +92,16 @@ export const TabsComponent = ({ activeTab, setActiveTab }) => {
               >
                 <motion.div
                   animate={
-                    activeTab === tab.id
+                    activeTab === tab.id &&
+                    !prefersReducedMotion &&
+                    !disableAnimations
                       ? {
                           scale: [1, 1.1, 1],
                           transition: {
                             repeat: Infinity,
                             repeatType: "reverse",
                             duration: 2,
+                            repeatDelay: 1,
                           },
                         }
                       : {}
@@ -141,4 +165,10 @@ export const TabsComponent = ({ activeTab, setActiveTab }) => {
       </div>
     </div>
   );
+};
+
+TabsComponent.propTypes = {
+  activeTab: PropTypes.oneOf(["training", "nutrition"]).isRequired,
+  setActiveTab: PropTypes.func.isRequired,
+  disableAnimations: PropTypes.bool,
 };

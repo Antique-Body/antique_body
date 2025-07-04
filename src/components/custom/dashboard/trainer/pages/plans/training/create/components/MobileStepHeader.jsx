@@ -2,6 +2,7 @@
 
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
+import PropTypes from "prop-types";
 
 export const MobileStepHeader = ({ currentStep, steps, onBack }) => {
   const currentStepData = steps[currentStep];
@@ -17,6 +18,7 @@ export const MobileStepHeader = ({ currentStep, steps, onBack }) => {
           whileTap={{ scale: 0.95 }}
           onClick={onBack}
           className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#333] text-white hover:bg-[#444] transition-colors shadow-md"
+          aria-label="Go back"
         >
           <Icon icon="mdi:chevron-left" className="w-6 h-6" />
         </motion.button>
@@ -79,4 +81,10 @@ export const MobileStepHeader = ({ currentStep, steps, onBack }) => {
       </div>
     </motion.div>
   );
+};
+
+MobileStepHeader.propTypes = {
+  currentStep: PropTypes.number.isRequired,
+  steps: PropTypes.array.isRequired,
+  onBack: PropTypes.func.isRequired,
 };
