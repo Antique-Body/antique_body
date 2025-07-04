@@ -98,11 +98,13 @@ function assemblePdfData(options) {
 export const usePlanPDF = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
-  const handleDownloadPDF = async (plan, days, type) => {
+  const handleDownloadPDF = async (plan, days, type, onSuccess) => {
     try {
       setIsDownloading(true);
       setError(null);
+      setSuccess(null);
       const isNutrition = type === "nutrition";
       const formattedDate = formatDate(plan.createdAt);
       const overview = buildOverview(plan);
@@ -116,6 +118,8 @@ export const usePlanPDF = () => {
         formattedDate,
       });
       await generatePlanPDF(pdfData);
+      setSuccess("PDF download started!");
+      if (onSuccess) onSuccess();
     } catch (error) {
       console.error("Error generating PDF:", error);
       setError("Failed to generate PDF. Please try again.");
@@ -124,5 +128,5 @@ export const usePlanPDF = () => {
     }
   };
 
-  return { handleDownloadPDF, isDownloading, error };
+  return { handleDownloadPDF, isDownloading, error, success, setSuccess };
 };

@@ -3,8 +3,9 @@
 import { Icon } from "@iconify/react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
+import cloneDeep from "lodash/cloneDeep";
 
 import { MealLibrarySelector } from "../../../../meals/components";
 import { MealModal } from "../../../../meals/components/MealModal";
@@ -34,7 +35,10 @@ export const MealPlanning = ({ data, onChange }) => {
   const [error, setError] = useState(null);
 
   const days = data.days || [];
-  const selectedDay = days[selectedDayIndex];
+  const selectedDay = useMemo(
+    () => days[selectedDayIndex],
+    [days, selectedDayIndex]
+  );
 
   // Calculate popover position
   const calculatePopoverPosition = () => {
@@ -84,30 +88,33 @@ export const MealPlanning = ({ data, onChange }) => {
 
   const generateId = () => uuidv4();
 
-  const addDay = (copyFromIdx = null) => {
-    if (days.length >= 30) return;
+  const addDay = useCallback(
+    (copyFromIdx = null) => {
+      if (days.length >= 30) return;
 
-    let newMeals = [];
-    if (copyFromIdx !== null && days[copyFromIdx]) {
-      newMeals = JSON.parse(JSON.stringify(days[copyFromIdx].meals));
-    }
+      let newMeals = [];
+      if (copyFromIdx !== null && days[copyFromIdx]) {
+        newMeals = cloneDeep(days[copyFromIdx].meals);
+      }
 
-    const newDay = {
-      id: uuidv4(),
-      name: `Day ${days.length + 1}`,
-      isRestDay: false,
-      description: "",
-      meals: newMeals,
-    };
+      const newDay = {
+        id: uuidv4(),
+        name: `Day ${days.length + 1}`,
+        isRestDay: false,
+        description: "",
+        meals: newMeals,
+      };
 
-    const newDays = [...days, newDay];
-    onChange({ days: newDays });
-    setSelectedDayIndex(days.length);
-    setShowAddDayPopover(false);
-    setShowCopyDayModal(false);
-  };
+      const newDays = [...days, newDay];
+      onChange({ days: newDays });
+      setSelectedDayIndex(days.length);
+      setShowAddDayPopover(false);
+      setShowCopyDayModal(false);
+    },
+    [days, onChange]
+  );
 
-  const addCheatDay = () => {
+  const addCheatDay = useCallback(() => {
     if (days.length >= 30) return;
 
     const cheatDay = {
@@ -122,35 +129,41 @@ export const MealPlanning = ({ data, onChange }) => {
     onChange({ days: newDays });
     setSelectedDayIndex(days.length);
     setShowAddDayPopover(false);
-  };
+  }, [days, onChange]);
 
-  const deleteDay = (idx) => {
-    const newDays = days
-      .filter((_, i) => i !== idx)
-      .map((day, index) => ({
-        ...day,
-        name: `Day ${index + 1}`,
-      }));
+  const deleteDay = useCallback(
+    (idx) => {
+      const newDays = days
+        .filter((_, i) => i !== idx)
+        .map((day, index) => ({
+          ...day,
+          name: `Day ${index + 1}`,
+        }));
 
-    onChange({ days: newDays });
+      onChange({ days: newDays });
 
-    if (selectedDayIndex >= newDays.length) {
-      setSelectedDayIndex(Math.max(0, newDays.length - 1));
-    } else if (idx === selectedDayIndex) {
-      setSelectedDayIndex(Math.max(0, selectedDayIndex - 1));
-    }
-  };
+      if (selectedDayIndex >= newDays.length) {
+        setSelectedDayIndex(Math.max(0, newDays.length - 1));
+      } else if (idx === selectedDayIndex) {
+        setSelectedDayIndex(Math.max(0, selectedDayIndex - 1));
+      }
+    },
+    [days, onChange, selectedDayIndex]
+  );
 
-  const updateDay = (dayIndex, field, value) => {
-    const updatedDays = [...days];
-    updatedDays[dayIndex] = {
-      ...updatedDays[dayIndex],
-      [field]: value,
-    };
-    onChange({ days: updatedDays });
-  };
+  const updateDay = useCallback(
+    (dayIndex, field, value) => {
+      const updatedDays = [...days];
+      updatedDays[dayIndex] = {
+        ...updatedDays[dayIndex],
+        [field]: value,
+      };
+      onChange({ days: updatedDays });
+    },
+    [days, onChange]
+  );
 
-  const addMeal = () => {
+  const addMeal = useCallback(() => {
     if (!selectedDay) return;
 
     const newMeal = {
@@ -161,161 +174,184 @@ export const MealPlanning = ({ data, onChange }) => {
     };
 
     updateDay(selectedDayIndex, "meals", [...selectedDay.meals, newMeal]);
-  };
+  }, [selectedDay, selectedDayIndex, updateDay, generateId]);
 
-  const removeMeal = (mealIndex) => {
-    if (!selectedDay) return;
+  const removeMeal = useCallback(
+    (mealIndex) => {
+      if (!selectedDay) return;
 
-    const updatedMeals = [...selectedDay.meals];
-    updatedMeals.splice(mealIndex, 1);
-    updateDay(selectedDayIndex, "meals", updatedMeals);
-  };
+      const updatedMeals = [...selectedDay.meals];
+      updatedMeals.splice(mealIndex, 1);
+      updateDay(selectedDayIndex, "meals", updatedMeals);
+    },
+    [selectedDay, selectedDayIndex, updateDay]
+  );
 
-  const updateMeal = (mealIndex, field, value) => {
-    if (!selectedDay) return;
+  const updateMeal = useCallback(
+    (mealIndex, field, value) => {
+      if (!selectedDay) return;
 
-    const updatedMeals = [...selectedDay.meals];
-    updatedMeals[mealIndex] = {
-      ...updatedMeals[mealIndex],
-      [field]: value,
-    };
-    updateDay(selectedDayIndex, "meals", updatedMeals);
-  };
+      const updatedMeals = [...selectedDay.meals];
+      updatedMeals[mealIndex] = {
+        ...updatedMeals[mealIndex],
+        [field]: value,
+      };
+      updateDay(selectedDayIndex, "meals", updatedMeals);
+    },
+    [selectedDay, selectedDayIndex, updateDay]
+  );
 
-  const addMealFromLibrary = async (mealIndex) => {
-    if (!selectedDay) return;
-    setError(null);
-    try {
-      const response = await fetch("/api/users/trainer/meals");
-      if (!response.ok) throw new Error("Failed to fetch meals");
-      const data = await response.json();
-      if (data.success) {
-        setMeals(data.meals);
-        setShowMealLibraryModal(true);
-        setActiveMealIndex(mealIndex);
-      } else {
-        throw new Error(data.error || "Failed to load meals");
+  const addMealFromLibrary = useCallback(
+    async (mealIndex) => {
+      if (!selectedDay) return;
+      setError(null);
+      try {
+        const response = await fetch("/api/users/trainer/meals");
+        if (!response.ok) throw new Error("Failed to fetch meals");
+        const data = await response.json();
+        if (data.success) {
+          setMeals(data.meals);
+          setShowMealLibraryModal(true);
+          setActiveMealIndex(mealIndex);
+        } else {
+          throw new Error(data.error || "Failed to load meals");
+        }
+      } catch (error) {
+        setError("Failed to load meal library. Please try again.");
       }
-    } catch (error) {
-      console.error("Error fetching meals:", error);
-      setError("Failed to load meal library. Please try again.");
-    }
-  };
+    },
+    [selectedDay]
+  );
 
-  const handleCreateMeal = async (mealData) => {
-    setError(null);
-    try {
-      const response = await fetch("/api/users/trainer/meals", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(mealData),
-      });
-      if (!response.ok) throw new Error("Failed to create meal");
-      const result = await response.json();
-      if (result.success) {
-        const mealToAdd = {
-          id: generateId(),
-          name: mealData.name,
-          description: mealData.recipe,
-          ingredients: mealData.ingredients.split(",").map((i) => i.trim()),
-          calories: mealData.calories,
-          protein: mealData.protein,
-          carbs: mealData.carbs,
-          fat: mealData.fat,
-          imageUrl: mealData.imageUrl,
-          videoUrl: mealData.video,
-        };
-        const updatedMeals = [...selectedDay.meals];
-        updatedMeals[activeMealIndex].options.push(mealToAdd);
-        updateDay(selectedDayIndex, "meals", updatedMeals);
-        setShowCreateMeal(false);
-      } else {
-        throw new Error(result.error || "Failed to create meal");
+  const handleCreateMeal = useCallback(
+    async (mealData) => {
+      setError(null);
+      try {
+        const response = await fetch("/api/users/trainer/meals", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(mealData),
+        });
+        if (!response.ok) throw new Error("Failed to create meal");
+        const result = await response.json();
+        if (result.success) {
+          const mealToAdd = {
+            id: generateId(),
+            name: mealData.name,
+            description: mealData.recipe,
+            ingredients: mealData.ingredients.split(",").map((i) => i.trim()),
+            calories: mealData.calories,
+            protein: mealData.protein,
+            carbs: mealData.carbs,
+            fat: mealData.fat,
+            imageUrl: mealData.imageUrl,
+            videoUrl: mealData.video,
+          };
+          const updatedMeals = [...selectedDay.meals];
+          updatedMeals[activeMealIndex].options.push(mealToAdd);
+          updateDay(selectedDayIndex, "meals", updatedMeals);
+          setShowCreateMeal(false);
+        } else {
+          throw new Error(result.error || "Failed to create meal");
+        }
+      } catch (error) {
+        setError("Failed to create meal. Please try again.");
       }
-    } catch (error) {
-      console.error("Error creating meal:", error);
-      setError("Failed to create meal. Please try again.");
-    }
-  };
+    },
+    [selectedDay, activeMealIndex, updateDay, selectedDayIndex, generateId]
+  );
 
-  const removeMealOption = (mealIndex, optionIndex) => {
-    if (!selectedDay) return;
+  const removeMealOption = useCallback(
+    (mealIndex, optionIndex) => {
+      if (!selectedDay) return;
 
-    const updatedMeals = [...selectedDay.meals];
-    updatedMeals[mealIndex].options.splice(optionIndex, 1);
-    updateDay(selectedDayIndex, "meals", updatedMeals);
-  };
+      const updatedMeals = [...selectedDay.meals];
+      updatedMeals[mealIndex].options.splice(optionIndex, 1);
+      updateDay(selectedDayIndex, "meals", updatedMeals);
+    },
+    [selectedDay, selectedDayIndex, updateDay]
+  );
 
-  const handleSelectMealFromLibrary = async (libraryMeal) => {
-    if (!selectedDay || activeMealIndex === null) return;
+  const handleSelectMealFromLibrary = useCallback(
+    async (libraryMeal) => {
+      if (!selectedDay || activeMealIndex === null) return;
 
-    const newMealOption = {
-      id: generateId(),
-      name: libraryMeal.name,
-      description: libraryMeal.recipe,
-      ingredients: libraryMeal.ingredients.split(",").map((i) => i.trim()),
-      calories: libraryMeal.calories,
-      protein: libraryMeal.protein,
-      carbs: libraryMeal.carbs,
-      fat: libraryMeal.fat,
-      imageUrl: libraryMeal.imageUrl,
-      videoUrl: libraryMeal.videoUrl,
-    };
-
-    const updatedMeals = [...selectedDay.meals];
-    updatedMeals[activeMealIndex].options.push(newMealOption);
-    updateDay(selectedDayIndex, "meals", updatedMeals);
-
-    setShowMealLibraryModal(false);
-    setActiveMealIndex(null);
-  };
-
-  const copyDayFromAnother = (fromDayIdx) => {
-    if (!days[fromDayIdx]) return;
-
-    const dayToCopy = JSON.parse(JSON.stringify(days[fromDayIdx]));
-    dayToCopy.id = uuidv4();
-    dayToCopy.name = `Day ${days.length + 1}`;
-
-    // Regenerate IDs for meals and options
-    dayToCopy.meals = dayToCopy.meals.map((meal) => ({
-      ...meal,
-      id: generateId(),
-      options: meal.options.map((option) => ({
-        ...option,
+      const newMealOption = {
         id: generateId(),
-      })),
-    }));
+        name: libraryMeal.name,
+        description: libraryMeal.recipe,
+        ingredients: libraryMeal.ingredients.split(",").map((i) => i.trim()),
+        calories: libraryMeal.calories,
+        protein: libraryMeal.protein,
+        carbs: libraryMeal.carbs,
+        fat: libraryMeal.fat,
+        imageUrl: libraryMeal.imageUrl,
+        videoUrl: libraryMeal.videoUrl,
+      };
 
-    const newDays = [...days, dayToCopy];
-    onChange({ days: newDays });
-    setSelectedDayIndex(days.length);
-    setShowCopyDayModal(false);
-    setShowAddDayPopover(false);
-  };
+      const updatedMeals = [...selectedDay.meals];
+      updatedMeals[activeMealIndex].options.push(newMealOption);
+      updateDay(selectedDayIndex, "meals", updatedMeals);
 
-  const copyMealFromAnotherDay = (fromDayIdx, fromMealIdx) => {
-    if (!selectedDay || !days[fromDayIdx]?.meals?.[fromMealIdx]) return;
+      setShowMealLibraryModal(false);
+      setActiveMealIndex(null);
+    },
+    [selectedDay, activeMealIndex, updateDay, selectedDayIndex, generateId]
+  );
 
-    const mealToCopy = JSON.parse(
-      JSON.stringify(days[fromDayIdx].meals[fromMealIdx])
-    );
-    mealToCopy.id = generateId();
+  const copyDayFromAnother = useCallback(
+    (fromDayIdx) => {
+      if (!days[fromDayIdx]) return;
 
-    updateDay(selectedDayIndex, "meals", [...selectedDay.meals, mealToCopy]);
-    setShowCopyMealModal(false);
-  };
+      const dayToCopy = cloneDeep(days[fromDayIdx]);
+      dayToCopy.id = uuidv4();
+      dayToCopy.name = `Day ${days.length + 1}`;
 
-  const updateMealOption = (mealIndex, optionIndex, field, value) => {
-    if (!selectedDay) return;
+      // Regenerate IDs for meals and options
+      dayToCopy.meals = dayToCopy.meals.map((meal) => ({
+        ...meal,
+        id: generateId(),
+        options: meal.options.map((option) => ({
+          ...option,
+          id: generateId(),
+        })),
+      }));
 
-    const updatedMeals = [...selectedDay.meals];
-    updatedMeals[mealIndex].options[optionIndex] = {
-      ...updatedMeals[mealIndex].options[optionIndex],
-      [field]: value,
-    };
-    updateDay(selectedDayIndex, "meals", updatedMeals);
-  };
+      const newDays = [...days, dayToCopy];
+      onChange({ days: newDays });
+      setSelectedDayIndex(days.length);
+      setShowCopyDayModal(false);
+      setShowAddDayPopover(false);
+    },
+    [days, onChange, generateId]
+  );
+
+  const copyMealFromAnotherDay = useCallback(
+    (fromDayIdx, fromMealIdx) => {
+      if (!selectedDay || !days[fromDayIdx]?.meals?.[fromMealIdx]) return;
+
+      const mealToCopy = cloneDeep(days[fromDayIdx].meals[fromMealIdx]);
+      mealToCopy.id = generateId();
+
+      updateDay(selectedDayIndex, "meals", [...selectedDay.meals, mealToCopy]);
+      setShowCopyMealModal(false);
+    },
+    [selectedDay, days, updateDay, selectedDayIndex, generateId]
+  );
+
+  const updateMealOption = useCallback(
+    (mealIndex, optionIndex, field, value) => {
+      if (!selectedDay) return;
+
+      const updatedMeals = [...selectedDay.meals];
+      updatedMeals[mealIndex].options[optionIndex] = {
+        ...updatedMeals[mealIndex].options[optionIndex],
+        [field]: value,
+      };
+      updateDay(selectedDayIndex, "meals", updatedMeals);
+    },
+    [selectedDay, selectedDayIndex, updateDay]
+  );
 
   // Add logging for IDs at the top of the component
 

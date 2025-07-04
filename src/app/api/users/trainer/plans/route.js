@@ -69,7 +69,6 @@ export async function GET(req) {
     plans = plans.map((plan) => ({ ...plan, type: planType }));
     return NextResponse.json(plans);
   } catch (error) {
-    console.error("GET /api/users/trainer/plans error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -165,7 +164,6 @@ export async function POST(req) {
     }
     return NextResponse.json(plan);
   } catch (error) {
-    console.error("POST /api/users/trainer/plans error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -214,7 +212,6 @@ export async function GET_planId(req, { params }) {
     }
     return NextResponse.json(plan);
   } catch (error) {
-    console.error("GET_planId /api/users/trainer/plans error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
