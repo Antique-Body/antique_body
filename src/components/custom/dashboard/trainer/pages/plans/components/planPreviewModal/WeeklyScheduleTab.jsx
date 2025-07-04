@@ -2,6 +2,22 @@ import { motion } from "framer-motion";
 
 import { Button } from "@/components/common/Button";
 
+const renderDayButton = (day, index, activeDay, setActiveDay) => (
+  <Button
+    key={day.id ?? index}
+    type="button"
+    onClick={() => setActiveDay(day.day || day.name)}
+    className={`py-2 px-4 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
+      activeDay === (day.day || day.name)
+        ? "bg-[#FF6B00] text-white"
+        : "bg-[#1A1A1A] text-gray-400 hover:text-white"
+    }`}
+    variant="ghost"
+  >
+    {day.name || day.day}
+  </Button>
+);
+
 export const WeeklyScheduleTab = ({
   isNutrition,
   days,
@@ -19,47 +35,12 @@ export const WeeklyScheduleTab = ({
     <div>
       <h3 className="text-lg font-semibold text-white mb-4">Weekly Schedule</h3>
       <div className="flex space-x-2 overflow-x-auto mb-6">
-        {isNutrition
-          ? (days || plan.days || []).map((day) => (
-              <Button
-                key={
-                  day.id ??
-                  day.day ??
-                  day.name ??
-                  `daybtn-${day.id || day.day || day.name}`
-                }
-                type="button"
-                onClick={() => setActiveDay(day.day || day.name)}
-                className={`py-2 px-4 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
-                  activeDay === (day.day || day.name)
-                    ? "bg-[#FF6B00] text-white"
-                    : "bg-[#1A1A1A] text-gray-400 hover:text-white"
-                }`}
-                variant="ghost"
-              >
-                {day.name || day.day}
-              </Button>
-            ))
-          : (schedule || plan.schedule || []).map((day) => (
-              <Button
-                key={
-                  day.id ??
-                  day.day ??
-                  day.name ??
-                  `schedbtn-${day.id || day.day || day.name}`
-                }
-                type="button"
-                onClick={() => setActiveDay(day.day || day.name)}
-                className={`py-2 px-4 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
-                  activeDay === (day.day || day.name)
-                    ? "bg-[#FF6B00] text-white"
-                    : "bg-[#1A1A1A] text-gray-400 hover:text-white"
-                }`}
-                variant="ghost"
-              >
-                {day.name || day.day}
-              </Button>
-            ))}
+        {(isNutrition
+          ? days || plan.days || []
+          : schedule || plan.schedule || []
+        ).map((day, index) =>
+          renderDayButton(day, index, activeDay, setActiveDay)
+        )}
       </div>
       <div>
         {/* The day details rendering function should be passed as a prop or further modularized if needed */}
