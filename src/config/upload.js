@@ -56,6 +56,12 @@ export const UPLOAD_CONFIG = {
     maxSize: 50, // MB
     returnType: "single",
   },
+  coverImage: {
+    allowedTypes: ["image/jpeg", "image/png", "image/jpg", "image/gif"],
+    folder: "cover-images",
+    maxSize: 5, // MB
+    returnType: "single",
+  },
 };
 
 /**
@@ -63,4 +69,4 @@ export const UPLOAD_CONFIG = {
  * @param {keyof typeof UPLOAD_CONFIG} type
  * @returns {typeof UPLOAD_CONFIG[keyof typeof UPLOAD_CONFIG]}
  */
-export const getUploadConfig = (type) => UPLOAD_CONFIG[type]; 
+export const getUploadConfig = (type) => UPLOAD_CONFIG[type];

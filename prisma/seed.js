@@ -1,82 +1,92 @@
+/* eslint-disable */
+//ts-ignore
+
 const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcrypt");
 const prisma = new PrismaClient();
 
 async function main() {
   // Clean up existing data
-  console.log("Cleaning up existing data...");
-
   // Create password hash for test users
   const testPassword = await bcrypt.hash("password123", 10);
 
   // Wrap cleanup in try-catch to handle cases where tables don't exist yet
   try {
     await prisma.exercise.deleteMany();
-  } catch {
-    console.log("Exercise table doesn't exist yet, skipping cleanup");
+  } catch (err) {
+    // Safe to ignore: table may not exist yet during initial seed
+    console.debug("[seed] Failed to delete exercises:", err);
   }
 
   try {
     await prisma.trainerSettings.deleteMany();
-  } catch {
-    console.log("TrainerSettings table doesn't exist yet, skipping cleanup");
+  } catch (err) {
+    // Safe to ignore: table may not exist yet during initial seed
+    console.debug("[seed] Failed to delete trainerSettings:", err);
   }
 
   try {
     await prisma.clientSettings.deleteMany();
-  } catch {
-    console.log("ClientSettings table doesn't exist yet, skipping cleanup");
+  } catch (err) {
+    // Safe to ignore: table may not exist yet during initial seed
+    console.debug("[seed] Failed to delete clientSettings:", err);
   }
 
   try {
     await prisma.trainerProfile.deleteMany();
-  } catch {
-    console.log("TrainerProfile table doesn't exist yet, skipping cleanup");
+  } catch (err) {
+    // Safe to ignore: table may not exist yet during initial seed
+    console.debug("[seed] Failed to delete trainerProfile:", err);
   }
 
   try {
     await prisma.clientProfile.deleteMany();
-  } catch {
-    console.log("ClientProfile table doesn't exist yet, skipping cleanup");
+  } catch (err) {
+    // Safe to ignore: table may not exist yet during initial seed
+    console.debug("[seed] Failed to delete clientProfile:", err);
   }
 
   try {
     await prisma.trainerInfo.deleteMany();
-  } catch {
-    console.log("TrainerInfo table doesn't exist yet, skipping cleanup");
+  } catch (err) {
+    // Safe to ignore: table may not exist yet during initial seed
+    console.debug("[seed] Failed to delete trainerInfo:", err);
   }
 
   try {
     await prisma.clientInfo.deleteMany();
-  } catch {
-    console.log("ClientInfo table doesn't exist yet, skipping cleanup");
+  } catch (err) {
+    // Safe to ignore: table may not exist yet during initial seed
+    console.debug("[seed] Failed to delete clientInfo:", err);
   }
 
   try {
     await prisma.trainerGym.deleteMany();
-  } catch {
-    console.log("TrainerGym table doesn't exist yet, skipping cleanup");
+  } catch (err) {
+    // Safe to ignore: table may not exist yet during initial seed
+    console.debug("[seed] Failed to delete trainerGym:", err);
   }
 
   try {
     await prisma.user.deleteMany();
-  } catch {
-    console.log("User table doesn't exist yet, skipping cleanup");
+  } catch (err) {
+    // Safe to ignore: table may not exist yet during initial seed
+    console.debug("[seed] Failed to delete user:", err);
   }
 
   try {
     await prisma.gym.deleteMany();
-  } catch {
-    console.log("Gym table doesn't exist yet, skipping cleanup");
+  } catch (err) {
+    // Safe to ignore: table may not exist yet during initial seed
+    console.debug("[seed] Failed to delete gym:", err);
   }
 
   try {
     await prisma.location.deleteMany();
-  } catch {
-    console.log("Location table doesn't exist yet, skipping cleanup");
+  } catch (err) {
+    // Safe to ignore: table may not exist yet during initial seed
+    console.debug("[seed] Failed to delete location:", err);
   }
-
-  console.log("Cleanup completed.");
 
   // Create locations first
   const locations = await Promise.all([
@@ -1322,8 +1332,6 @@ async function main() {
       },
     });
   }
-
-  console.log("Seed data created successfully");
 }
 
 main()

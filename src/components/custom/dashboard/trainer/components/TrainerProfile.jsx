@@ -1,4 +1,5 @@
 import { Icon } from "@iconify/react";
+import Image from "next/image";
 import { useState } from "react";
 
 import { Modal } from "@/components/common/Modal";
@@ -10,7 +11,13 @@ export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const getOrNoData = (val) => val ?? "No data";
 
-  // Function to map training type names to proper labels
+  // Combine first and last name
+  const fullName =
+    (trainerData?.firstName || "") +
+      (trainerData?.lastName ? ` ${trainerData.lastName}` : "") ||
+    trainerData?.name ||
+    "No data";
+
   const mapTrainingTypeToLabel = (typeName) => {
     const type = TRAINING_TYPES.find(
       (t) =>
@@ -43,13 +50,6 @@ export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
       : environment.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
-  // Combine first and last name
-  const fullName =
-    (trainerData?.firstName || "") +
-      (trainerData?.lastName ? ` ${trainerData.lastName}` : "") ||
-    trainerData?.name ||
-    "No data";
-
   // Calculate age from dateOfBirth
   const calculateAge = (dateOfBirth) => {
     if (!dateOfBirth) return "N/A";
@@ -80,8 +80,6 @@ export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
 
   // Get trainer info with fallback
   const trainerInfo = trainerData?.trainerInfo || {};
-
-  console.log("trainerData", trainerData);
 
   // Calculate real stats from API data
   const exerciseCount = trainerInfo?.exercises?.length || 0;
@@ -484,12 +482,13 @@ export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
                   {trainerData.galleryImages.slice(0, 6).map((image, index) => (
                     <div
                       key={index}
-                      className="aspect-square rounded-lg overflow-hidden bg-zinc-700"
+                      className="relative aspect-square rounded-lg overflow-hidden bg-zinc-700"
                     >
-                      <img
+                      <Image
                         src={image.url || image}
                         alt={`Gallery ${index + 1}`}
                         className="w-full h-full object-cover"
+                        fill
                       />
                     </div>
                   ))}

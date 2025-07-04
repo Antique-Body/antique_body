@@ -1,14 +1,13 @@
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { NextResponse } from "next/server";
 
 import { convertToEUR } from "../../../utils/currency";
 import { trainerService, exerciseService } from "../services";
+import { createDefaultPlansForTrainer } from "../services/planService";
 
 import { auth } from "#/auth";
+import prisma from "@/lib/prisma";
 import { validateTrainerProfile } from "@/middleware/validation";
-
-const prisma = new PrismaClient();
 
 export async function POST(req) {
   try {
@@ -59,11 +58,17 @@ export async function POST(req) {
     }
 
     // Očekujemo contactEmail i contactPhone u payloadu
-    const trainer = await trainerService.createTrainerWithDetails(
-      body,
-      session.user.id
-    );
-    return new Response(JSON.stringify(trainer), { status: 201 });
+    const { trainerProfile, trainerInfoId } =
+      await trainerService.createTrainerWithDetails(body, session.user.id);
+    // After trainer is created, create default plans (non-blocking)
+    if (trainerInfoId) {
+      try {
+        await createDefaultPlansForTrainer(trainerInfoId);
+      } catch (err) {
+        console.error("Failed to create default plans:", err);
+      }
+    }
+    return new Response(JSON.stringify(trainerProfile), { status: 201 });
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {
       status: 400,

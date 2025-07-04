@@ -6,15 +6,12 @@ import { userService } from "@/app/api/users/services";
 export async function GET() {
   try {
     const session = await auth();
-    console.log("[users/me][GET] session:", session);
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const user = await userService.findUserById(session.user.id);
-
-    console.log("[users/me] user:", user);
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -33,7 +30,6 @@ export async function GET() {
 export async function PATCH(request) {
   try {
     const session = await auth();
-    console.log("[users/me][PATCH] session:", session);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }

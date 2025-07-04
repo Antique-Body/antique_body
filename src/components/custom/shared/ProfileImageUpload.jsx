@@ -70,7 +70,6 @@ export const ProfileImageUpload = ({
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    console.log("Selected file:", file);
     if (!file) return;
     const validationError = validateImageFile(file);
     if (validationError) {
@@ -81,9 +80,6 @@ export const ProfileImageUpload = ({
     setInternalError("");
     onImageChange(file);
     // Log previewUrl after state update (async, pa može biti staro)
-    setTimeout(() => {
-      console.log("Preview URL after file change:", previewUrl);
-    }, 100);
   };
 
   const triggerFileInput = () => {

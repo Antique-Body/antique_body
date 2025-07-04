@@ -110,6 +110,12 @@ function getOnboardingRedirect(role, token, pathname) {
         "/trainer/dashboard/upcoming-trainings",
         "/trainer/dashboard/messages",
         "/trainer/dashboard/plans",
+        "/trainer/dashboard/plans/training",
+        "/trainer/dashboard/plans/nutrition",
+        "/trainer/dashboard/plans/training/create",
+        "/trainer/dashboard/plans/training/edit/:id",
+        "/trainer/dashboard/plans/nutrition/create",
+        "/trainer/dashboard/plans/nutrition/edit/:id",
         "/trainer/dashboard/exercises",
         "/trainer/dashboard/meals",
         "/trainer/edit-profile",
@@ -120,7 +126,16 @@ function getOnboardingRedirect(role, token, pathname) {
   if (!config) return "/select-role";
   if (!config.profile)
     return pathname === config.personal ? null : config.personal;
-  return config.allowed.includes(pathname) ? null : config.fallback;
+  // Check if request path is allowed
+  const isAllowed = config.allowed.some((allowedPath) => {
+    if (allowedPath.includes(":id")) {
+      // Convert allowedPath to regex, e.g. "/trainer/dashboard/plans/edit/:id" => /^\/trainer\/dashboard\/plans\/edit\/[^\/]+$/
+      const regex = new RegExp(`^${allowedPath.replace(":id", "[^/]+")}$`, "i");
+      return regex.test(pathname);
+    }
+    return allowedPath === pathname;
+  });
+  return isAllowed ? null : config.fallback;
 }
 
 export async function middleware(request) {
@@ -188,7 +203,7 @@ export async function middleware(request) {
 
 export const config = {
   matcher: [
-    // Sve osim API ruta, statike, slika i favicon-a
+    // All except API routes, static files, images and favicon
     "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 };

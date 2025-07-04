@@ -1,5 +1,6 @@
 "use client";
 
+import * as Tooltip from "@radix-ui/react-tooltip";
 import { Inter } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
 import { createContext, useContext, useEffect, useState } from "react";
@@ -27,15 +28,12 @@ function UserLocationProvider({ children }) {
 
   useEffect(() => {
     if (typeof window !== "undefined" && navigator.geolocation) {
-      console.log("🌍 Attempting to get user location...");
-
       const fallbackTimeout = setTimeout(() => {
         console.warn("⚠️ Location request timed out. Proceeding without it.");
         setLocationResolved(true);
       }, 5000); // Fallback if no response in 5s
 
       navigator.geolocation.getCurrentPosition((position) => {
-        console.log("✅ User location obtained:", position.coords);
         clearTimeout(fallbackTimeout);
         setUserLocation({
           lat: position.coords.latitude,
@@ -63,7 +61,9 @@ export default function RootLayout({ children }) {
         <SessionProvider>
           <I18nProvider>
             <AuthProvider>
-              <UserLocationProvider>{children}</UserLocationProvider>
+              <Tooltip.Provider>
+                <UserLocationProvider>{children}</UserLocationProvider>
+              </Tooltip.Provider>
             </AuthProvider>
           </I18nProvider>
         </SessionProvider>

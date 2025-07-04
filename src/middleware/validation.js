@@ -308,6 +308,7 @@ export const validateMeal = (data) => {
     "french",
     "greek",
     "middle-eastern",
+    "international",
     "other",
   ];
   if (data.cuisine && !validCuisines.includes(data.cuisine)) {

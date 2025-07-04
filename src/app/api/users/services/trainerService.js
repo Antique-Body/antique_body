@@ -1,9 +1,7 @@
-import { PrismaClient } from "@prisma/client";
-
 import { exerciseService } from "./exerciseService";
 import { mealService } from "./mealService";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 // Helper za dinamički where za lokaciju
 function buildLocationWhere(location) {
@@ -182,7 +180,10 @@ async function createTrainerWithDetails(formData, userId) {
   await exerciseService.createDefaultExercises(trainerInfo.id);
   await mealService.createDefaultMeals(trainerInfo.id);
 
-  return trainerInfo.trainerProfile;
+  return {
+    trainerProfile: trainerInfo.trainerProfile,
+    trainerInfoId: trainerInfo.id,
+  };
 }
 
 async function createOrUpdateTrainerInfo(trainerProfileId, infoData) {
@@ -380,32 +381,60 @@ async function getTrainerSettings(userId) {
     return null;
   }
 
-  // Uvijek koristi upsert, bez if-a
-  const defaultSettings = await prisma.trainerSettings.upsert({
-    where: { trainerInfoId: trainerInfo.id },
-    update: {},
-    create: {
-      trainerInfoId: trainerInfo.id,
-      notifications: true,
-      emailNotifications: true,
-      smsNotifications: false,
-      autoAcceptBookings: false,
-      requireDeposit: false,
-      depositAmount: null,
-      timezone: "UTC",
-      workingHours: null,
-      blackoutDates: null,
-    },
-  });
-  // Ukloni password iz user objekta
-  const { password, ...userWithoutPassword } = trainerInfo.user;
-  return {
-    ...defaultSettings,
-    user: {
-      ...userWithoutPassword,
-      hasPassword: Boolean(password),
-    },
-  };
+  // Uvijek koristi upsert, bez if-a sa error handling
+  try {
+    const defaultSettings = await prisma.trainerSettings.upsert({
+      where: { trainerInfoId: trainerInfo.id },
+      update: {},
+      create: {
+        trainerInfoId: trainerInfo.id,
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false,
+        autoAcceptBookings: false,
+        requireDeposit: false,
+        depositAmount: null,
+        timezone: "UTC",
+        workingHours: null,
+        blackoutDates: null,
+      },
+    });
+
+    // Ukloni password iz user objekta
+    const { password, ...userWithoutPassword } = trainerInfo.user;
+    return {
+      ...defaultSettings,
+      user: {
+        ...userWithoutPassword,
+        hasPassword: Boolean(password),
+      },
+    };
+  } catch (error) {
+    // Ako je greška zbog unique constraint, pokušaj samo da preuzmeš postojeći zapis
+    if (
+      error.code === "P2002" &&
+      error.meta?.target?.includes("trainerInfoId")
+    ) {
+      console.log("TrainerSettings already exists, fetching existing record");
+      const existingSettings = await prisma.trainerSettings.findUnique({
+        where: { trainerInfoId: trainerInfo.id },
+      });
+
+      if (existingSettings) {
+        const { password, ...userWithoutPassword } = trainerInfo.user;
+        return {
+          ...existingSettings,
+          user: {
+            ...userWithoutPassword,
+            hasPassword: Boolean(password),
+          },
+        };
+      }
+    }
+
+    // Ako nije poznata greška, baci je dalje
+    throw error;
+  }
 }
 
 async function getTrainerProfileByUserId(userId) {

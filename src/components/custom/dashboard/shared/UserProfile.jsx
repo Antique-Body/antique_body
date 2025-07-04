@@ -42,7 +42,6 @@ export const UserProfile = ({
         await onProfileUpdate(profileData);
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
-      console.log("Profile data saved successfully:", profileData);
     } catch (error) {
       console.error("Error saving profile:", error);
       throw error;
