@@ -96,7 +96,8 @@ export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
               <button
                 key={meal.id}
                 type="button"
-                className="group relative rounded-xl border-2 transition-all duration-300 cursor-pointer overflow-hidden bg-gradient-to-r from-slate-700/80 to-slate-600/80 border-slate-500/60 hover:border-blue-400/60 hover:shadow-md hover:shadow-blue-400/10"
+                className="group relative rounded-xl border-2 transition-all duration-300 overflow-hidden bg-gradient-to-r from-slate-700/80 to-slate-600/80 border-slate-500/60 hover:border-blue-400/60 hover:shadow-md hover:shadow-blue-400/10"
+                aria-label={meal.name}
                 onClick={() => onSelectMeal(meal)}
               >
                 <div className="p-3 flex items-center gap-3 relative z-10">
@@ -137,7 +138,7 @@ export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
                     <div className="flex items-center gap-3 mb-1">
                       {/* Type Badge */}
                       <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 rounded-full bg-blue-400" />
+                        <span className="w-2 h-2 rounded-full bg-blue-400 inline-block" />
                         <span className="text-xs font-medium text-slate-200 capitalize">
                           {meal.mealType}
                         </span>

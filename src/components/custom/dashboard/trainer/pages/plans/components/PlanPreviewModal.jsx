@@ -14,10 +14,12 @@ import { WeeklyScheduleTab } from "./planPreviewModal/WeeklyScheduleTab";
 
 import { Button } from "@/components/common/Button";
 import { Modal } from "@/components/common/Modal";
+import { ErrorMessage } from "@/components/common/ErrorMessage";
 
 export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
   const [activeTab, setActiveTab] = useState("overview");
   const [activeDay, setActiveDay] = useState(null);
+  const [navError, setNavError] = useState("");
   const router = useRouter();
   const isNutrition = type === "nutrition";
   const {
@@ -155,6 +157,7 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
               </h1>
 
               {/* Action buttons */}
+              {navError && <ErrorMessage error={navError} />}
               <div className="flex flex-wrap gap-3">
                 {/* Download PDF Button */}
                 <Button
@@ -190,11 +193,17 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
                   className="whitespace-nowrap"
                   onClick={() => {
                     if (plan?.id && type) {
+                      setNavError("");
                       router.push(
                         `/trainer/dashboard/plans/${type}/clients/${plan.id}`
                       );
                     } else {
-                      // Optionally, handle error or fallback here
+                      console.error(
+                        "Missing or invalid navigation parameters: plan.id or type"
+                      );
+                      setNavError(
+                        "Unable to navigate: Missing or invalid plan information. Please try again or contact support."
+                      );
                     }
                   }}
                 >

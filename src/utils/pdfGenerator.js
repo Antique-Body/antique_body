@@ -26,7 +26,10 @@ export const generatePlanPDF = async (planData) => {
     requiredProps.some((prop) => !(prop in planData))
   ) {
     // TODO: Send error to error tracking service
-    return false;
+    throw new Error(
+      "Invalid planData: Missing required properties or not an object. Required: " +
+        requiredProps.join(", ")
+    );
   }
   try {
     const doc = createPDFDocument(planData);
@@ -35,9 +38,11 @@ export const generatePlanPDF = async (planData) => {
     addFootersToAllPages(doc, planData);
     savePDF(doc, planData);
     return true;
-  } catch {
+  } catch (err) {
     // TODO: Send error to error tracking service
-    return false;
+    throw new Error(
+      "PDF generation failed: " + (err && err.message ? err.message : err)
+    );
   }
 };
 
@@ -339,61 +344,69 @@ function addPageHeader(doc, title, pageWidth) {
 
 // Helper: Add plan overview section
 function addPlanOverview(doc, overview, pageWidth, yPos) {
+  let localYPos = yPos;
   doc.setTextColor(17, 17, 17);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
-  doc.text("Plan Summary", 15, yPos);
-  yPos += 8;
+  doc.text("Plan Summary", 15, localYPos);
+  localYPos += 8;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
   doc.setTextColor(60, 60, 60);
-  yPos =
-    addWrappedText(doc, overview.summary, 15, yPos, pageWidth - 30, 5) + 10;
+  localYPos =
+    addWrappedText(doc, overview.summary, 15, localYPos, pageWidth - 30, 5) +
+    10;
   doc.setTextColor(17, 17, 17);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
-  doc.text("Key Features", 15, yPos);
-  yPos += 8;
+  doc.text("Key Features", 15, localYPos);
+  localYPos += 8;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
   doc.setTextColor(60, 60, 60);
   overview.keyFeatures.forEach((feature, _index) => {
     doc.setFillColor(255, 107, 0);
-    doc.circle(20, yPos, 1.5, "F");
-    doc.text(feature, 25, yPos);
-    yPos += 8;
+    doc.circle(20, localYPos, 1.5, "F");
+    doc.text(feature, 25, localYPos);
+    localYPos += 8;
   });
-  yPos += 5;
+  localYPos += 5;
   doc.setTextColor(17, 17, 17);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
-  doc.text("Ideal For", 15, yPos);
-  yPos += 8;
+  doc.text("Ideal For", 15, localYPos);
+  localYPos += 8;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
   doc.setTextColor(60, 60, 60);
-  return yPos;
+  return localYPos;
 }
 
 // Helper: Add weekly schedule section
 function addWeeklySchedule(doc, planData, pageWidth, pageHeight, yPos) {
+  let localYPos = yPos;
   const isNutrition = planData.planType === "nutrition";
   const weeklySchedule = planData.weeklySchedule;
   doc.setTextColor(255, 107, 0);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
-  doc.text("WEEKLY SCHEDULE", pageWidth / 2, yPos, { align: "center" });
+  doc.text("WEEKLY SCHEDULE", pageWidth / 2, localYPos, { align: "center" });
   doc.setDrawColor(255, 107, 0);
   doc.setLineWidth(0.5);
-  doc.line(pageWidth / 2 - 50, yPos + 2, pageWidth / 2 + 50, yPos + 2);
-  yPos += 15;
+  doc.line(
+    pageWidth / 2 - 50,
+    localYPos + 2,
+    pageWidth / 2 + 50,
+    localYPos + 2
+  );
+  localYPos += 15;
   if (weeklySchedule && Object.keys(weeklySchedule).length > 0) {
     for (const dayKey of Object.keys(weeklySchedule)) {
       const daySchedule = weeklySchedule[dayKey];
-      if (yPos > pageHeight - 60) {
+      if (localYPos > pageHeight - 60) {
         doc.addPage();
         addPageHeader(doc, planData.title, pageWidth);
-        yPos = 30;
+        localYPos = 30;
       }
       const dayTitle = daySchedule.title || dayKey;
       if (isNutrition) {
@@ -403,7 +416,7 @@ function addWeeklySchedule(doc, planData, pageWidth, pageHeight, yPos) {
       }
       doc.setFont("helvetica", "bold");
       doc.setFontSize(12);
-      doc.text(dayTitle, 15, yPos);
+      doc.text(dayTitle, 15, localYPos);
       doc.setDrawColor(
         isNutrition ? 34 : 30,
         isNutrition ? 197 : 64,
@@ -411,8 +424,8 @@ function addWeeklySchedule(doc, planData, pageWidth, pageHeight, yPos) {
       );
       doc.setLineWidth(0.3);
       const titleWidth = doc.getTextWidth(dayTitle);
-      doc.line(15, yPos + 2, 15 + titleWidth, yPos + 2);
-      yPos += 10;
+      doc.line(15, localYPos + 2, 15 + titleWidth, localYPos + 2);
+      localYPos += 10;
       if (isNutrition) {
         if (daySchedule.meals && daySchedule.meals.length > 0) {
           const mealsData = daySchedule.meals.map((meal) => [
@@ -423,7 +436,7 @@ function addWeeklySchedule(doc, planData, pageWidth, pageHeight, yPos) {
             `P: ${meal.protein}g | C: ${meal.carbs}g | F: ${meal.fat}g`,
           ]);
           autoTable(doc, {
-            startY: yPos,
+            startY: localYPos,
             head: [["Meal", "Type", "Time", "Calories", "Macros"]],
             body: mealsData,
             theme: "grid",
@@ -452,13 +465,13 @@ function addWeeklySchedule(doc, planData, pageWidth, pageHeight, yPos) {
               4: { halign: "center" },
             },
           });
-          yPos = doc.lastAutoTable.finalY + 10;
+          localYPos = doc.lastAutoTable.finalY + 10;
         } else {
           doc.setFont("helvetica", "italic");
           doc.setFontSize(10);
           doc.setTextColor(100, 100, 100);
-          doc.text("No meals scheduled for this day.", 20, yPos);
-          yPos += 8;
+          doc.text("No meals scheduled for this day.", 20, localYPos);
+          localYPos += 8;
         }
       } else {
         if (daySchedule.exercises && daySchedule.exercises.length > 0) {
@@ -470,7 +483,7 @@ function addWeeklySchedule(doc, planData, pageWidth, pageHeight, yPos) {
             exercise.notes || "-",
           ]);
           autoTable(doc, {
-            startY: yPos,
+            startY: localYPos,
             head: [["Exercise", "Sets", "Reps", "Rest", "Notes"]],
             body: exercisesData,
             theme: "grid",
@@ -498,13 +511,13 @@ function addWeeklySchedule(doc, planData, pageWidth, pageHeight, yPos) {
             },
             margin: { left: 15, right: 15 },
           });
-          yPos = doc.lastAutoTable.finalY + 10;
+          localYPos = doc.lastAutoTable.finalY + 10;
         } else {
           doc.setFont("helvetica", "italic");
           doc.setFontSize(10);
           doc.setTextColor(100, 100, 100);
-          doc.text("No exercises scheduled for this day.", 20, yPos);
-          yPos += 8;
+          doc.text("No exercises scheduled for this day.", 20, localYPos);
+          localYPos += 8;
         }
       }
     }
@@ -512,9 +525,9 @@ function addWeeklySchedule(doc, planData, pageWidth, pageHeight, yPos) {
     doc.setFont("helvetica", "italic");
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
-    doc.text("No weekly schedule available for this plan.", 15, yPos);
+    doc.text("No weekly schedule available for this plan.", 15, localYPos);
   }
-  return yPos;
+  return localYPos;
 }
 
 // Helper: Add content pages

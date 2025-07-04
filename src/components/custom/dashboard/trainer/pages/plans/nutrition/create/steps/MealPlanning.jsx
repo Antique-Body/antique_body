@@ -219,7 +219,7 @@ export const MealPlanning = ({ data, onChange }) => {
       } catch (error) {
         setError(
           `Failed to load meal library. ${
-            error?.message ? "Error: " + error.message : ""
+            error?.message ? `Error: ${error.message}` : ""
           }`
         );
       }
@@ -261,7 +261,7 @@ export const MealPlanning = ({ data, onChange }) => {
       } catch (error) {
         setError(
           `Failed to create meal. ${
-            error?.message ? "Error: " + error.message : ""
+            error?.message ? `Error: ${error.message}` : ""
           }`
         );
       }
