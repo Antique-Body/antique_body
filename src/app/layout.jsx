@@ -4,8 +4,7 @@ import { Inter } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
 import { createContext, useContext, useEffect, useState } from "react";
 
-import I18nProvider from "../components/custom/shared/I18nProvider";
-
+import { I18nProvider } from "@/components/custom/shared";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 import "./globals.css";

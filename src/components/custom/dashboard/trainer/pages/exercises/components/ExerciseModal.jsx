@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
+import { AnatomicalViewer } from "./AnatomicalViewer";
 import { ExerciseLibrarySelector } from "./ExerciseLibrarySelector";
 
 import { Button } from "@/components/common/Button";
@@ -19,6 +20,7 @@ import {
   EQUIPMENT_OPTIONS,
   MUSCLE_GROUPS,
 } from "@/enums";
+import { formatMuscleDisplayName } from "@/utils/muscleMapper";
 
 // File upload validation
 const validateFile = (file, type) => {
@@ -432,116 +434,151 @@ export const ExerciseModal = ({
           </Button>
         </div>
 
-        {/* Tab content */}
-        {activeTab === "details" ? (
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Image */}
-            <div className="w-full md:w-1/3">
-              <div className="relative aspect-square w-full overflow-hidden rounded-lg">
-                <Image
-                  src={
-                    exercise.imageUrl ||
-                    "https://www.nrgfitness.ie/site/wp-content/plugins/bbpowerpack/modules/pp-content-grid/images/placeholder.jpg"
-                  }
-                  alt={exercise.name}
-                  fill
-                  className="object-cover"
-                />
+        {/* Tab Content */}
+        {activeTab === "details" && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Exercise Information */}
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-2">
+                  Exercise Information
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-zinc-300">
+                      Exercise Name
+                    </label>
+                    <p className="text-white">{exercise.name}</p>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-zinc-300">
+                      Type
+                    </label>
+                    <p className="text-white capitalize">{exercise.type}</p>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-zinc-300">
+                      Level
+                    </label>
+                    <p className="text-white capitalize">{exercise.level}</p>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-zinc-300">
+                      Location
+                    </label>
+                    <p className="text-white capitalize">{exercise.location}</p>
+                  </div>
+
+                  {exercise.equipment && exercise.equipment.length > 0 && (
+                    <div>
+                      <label className="text-sm font-medium text-zinc-300">
+                        Equipment
+                      </label>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {exercise.equipment.map((item, index) => (
+                          <span
+                            key={index}
+                            className="px-2 py-1 bg-zinc-700 text-zinc-300 rounded text-xs"
+                          >
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {exercise.muscleGroups &&
+                    exercise.muscleGroups.length > 0 && (
+                      <div>
+                        <label className="text-sm font-medium text-zinc-300">
+                          Muscle Groups
+                        </label>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {exercise.muscleGroups.map((muscle, index) => (
+                            <span
+                              key={index}
+                              className="px-2 py-1 bg-orange-900/30 text-orange-300 rounded text-xs"
+                            >
+                              {formatMuscleDisplayName(muscle)}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                </div>
               </div>
 
-              {/* Basic info badges */}
-              <div className="mt-4 flex flex-wrap gap-2">
-                <div className="flex items-center rounded-md bg-zinc-800 px-3 py-1.5 text-sm">
-                  <Icon
-                    icon="mdi:map-marker"
-                    className="mr-2 text-[#FF7800]"
-                    width={16}
-                    height={16}
-                  />
-                  <span>{exercise.location === "gym" ? "Gym" : "Home"}</span>
+              {exercise.description && (
+                <div>
+                  <h4 className="text-md font-semibold text-white mb-2">
+                    Description
+                  </h4>
+                  <p className="text-zinc-300 text-sm leading-relaxed">
+                    {exercise.description}
+                  </p>
                 </div>
-                <div className="flex items-center rounded-md bg-zinc-800 px-3 py-1.5 text-sm">
-                  <Icon
-                    icon={exercise.equipment ? "mdi:weight" : "mdi:account"}
-                    className="mr-2 text-[#FF7800]"
-                    width={16}
-                    height={16}
-                  />
-                  <span>
-                    {exercise.equipment ? "Equipment needed" : "No equipment"}
-                  </span>
+              )}
+
+              {exercise.instructions && (
+                <div>
+                  <h4 className="text-md font-semibold text-white mb-2">
+                    Instructions
+                  </h4>
+                  {Array.isArray(exercise.instructions) ? (
+                    <ol className="list-decimal list-inside space-y-1 text-zinc-300 text-sm">
+                      {exercise.instructions.map((instruction, index) => (
+                        <li key={index}>{instruction}</li>
+                      ))}
+                    </ol>
+                  ) : (
+                    <div className="text-zinc-300 text-sm leading-relaxed whitespace-pre-wrap">
+                      {exercise.instructions}
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
             </div>
 
-            {/* Details */}
-            <div className="w-full md:w-2/3">
-              <h2 className="mb-4 text-2xl font-bold">{exercise.name}</h2>
+            {/* Visual Reference */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white mb-2">
+                Visual Reference
+              </h3>
 
-              <div className="mb-4 flex flex-wrap gap-2">
-                <span
-                  className={`inline-block rounded-md px-2 py-1 text-sm font-semibold ${
-                    exercise.type === "strength"
-                      ? "bg-purple-900/60 text-purple-200"
-                      : exercise.type === "bodyweight"
-                      ? "bg-green-900/60 text-green-200"
-                      : "bg-blue-900/60 text-blue-200"
-                  }`}
-                >
-                  {exercise.type.charAt(0).toUpperCase() +
-                    exercise.type.slice(1)}
-                </span>
-
-                <span
-                  className={`inline-block rounded-md px-2 py-1 text-sm font-semibold ${
-                    exercise.level === "beginner"
-                      ? "bg-green-900/40 text-green-300"
-                      : exercise.level === "intermediate"
-                      ? "bg-orange-900/40 text-orange-300"
-                      : "bg-red-900/40 text-red-300"
-                  }`}
-                >
-                  {exercise.level.charAt(0).toUpperCase() +
-                    exercise.level.slice(1)}
-                </span>
-              </div>
-
-              {/* Description */}
-              <div className="mb-6">
-                <h3 className="mb-2 text-sm font-semibold text-gray-400">
-                  Description
-                </h3>
-                <p className="text-gray-200">{exercise.description}</p>
-              </div>
-
-              {/* Instructions */}
-              <div className="mb-6">
-                <h3 className="mb-2 text-sm font-semibold text-gray-400">
-                  Instructions
-                </h3>
-                <p className="text-gray-200">{exercise.instructions}</p>
-              </div>
-
-              {/* Muscle Groups */}
-              <div>
-                <h3 className="mb-2 text-sm font-semibold text-gray-400">
-                  Target Muscle Groups
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {exercise.muscleGroups.map((muscle, index) => (
-                    <div
-                      key={index}
-                      className="rounded-md bg-[rgba(255,107,0,0.15)] px-2 py-1 text-sm text-[#FF6B00]"
-                    >
-                      {(muscle.name || muscle).charAt(0).toUpperCase() +
-                        (muscle.name || muscle).slice(1)}
-                    </div>
-                  ))}
-                </div>
+              <div className="bg-]#1a1b1e] rounded-lg overflow-hidden">
+                {exercise.imageUrl ? (
+                  <Image
+                    src={exercise.imageUrl}
+                    alt={exercise.name}
+                    width={400}
+                    height={300}
+                    className="w-full h-64 object-cover"
+                  />
+                ) : (
+                  <div className="flex justify-center p-4">
+                    <AnatomicalViewer
+                      exerciseName={exercise.name}
+                      muscleGroups={exercise.muscleGroups || []}
+                      showBothViews={true}
+                      size="medium"
+                      interactive={false}
+                      showMuscleInfo={false}
+                      showExerciseInfo={false}
+                      darkMode={true}
+                      compact={false}
+                      className="w-full"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        ) : (
+        )}
+
+        {activeTab === "video" && (
           <div className="w-full">
             {exercise.video ? (
               <div className="aspect-w-16 aspect-h-9 overflow-hidden rounded-lg">
@@ -554,7 +591,7 @@ export const ExerciseModal = ({
                       )?.[1]
                     }`}
                     title={`${exercise.name} video`}
-                    className="h-[400px] w-full rounded-lg"
+                    className="h-[500px] w-full rounded-lg"
                     allowFullScreen
                   ></iframe>
                 ) : exercise.video.includes("vimeo.com") ? (
@@ -563,14 +600,14 @@ export const ExerciseModal = ({
                       exercise.video.match(/vimeo\.com\/(\d+)/)?.[1]
                     }`}
                     title={`${exercise.name} video`}
-                    className="h-[400px] w-full rounded-lg"
+                    className="h-[500px] w-full rounded-lg"
                     allowFullScreen
                   ></iframe>
                 ) : (
                   <video
                     src={exercise.video}
                     controls
-                    className="h-[400px] w-full rounded-lg"
+                    className="h-[500px] w-full rounded-lg object-cover"
                     preload="metadata"
                   >
                     <source src={exercise.video} type="video/mp4" />
@@ -579,7 +616,7 @@ export const ExerciseModal = ({
                 )}
               </div>
             ) : (
-              <div className="flex h-[400px] w-full flex-col items-center justify-center rounded-lg bg-zinc-800">
+              <div className="flex h-[500px] w-full flex-col items-center justify-center rounded-lg bg-zinc-800">
                 <Icon
                   icon="mdi:video-off"
                   className="text-zinc-500"
@@ -760,27 +797,117 @@ export const ExerciseModal = ({
           </div>
         </div>
 
-        {/* Media Upload Section */}
+        {/* Visual Reference Section */}
         <div className="md:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Image Upload */}
+          {/* Exercise Visual - Image or Anatomy */}
           <div className="h-full flex flex-col" style={{ minHeight: "450px" }}>
-            <FileUploadField
-              type="image"
-              label="Exercise Image"
-              preview={imagePreview}
-              onFileChange={handleFileChange}
-              onRemove={() => handleRemoveFile("image")}
-              error={errors.image}
-              uploadStatus={uploadStatus.image}
-              uploadProgress={uploadProgress.image}
-            />
+            <label className="mb-3 block text-sm font-medium text-gray-300">
+              Exercise Visual
+            </label>
+
+            <div className="flex-1 bg-zinc-800 rounded-lg overflow-hidden border border-zinc-700">
+              {imagePreview ? (
+                // Show uploaded/selected image
+                <div className="relative h-full min-h-[300px]">
+                  <Image
+                    src={imagePreview}
+                    alt="Exercise preview"
+                    fill
+                    className="object-cover"
+                  />
+                  <button
+                    onClick={() => {
+                      handleRemoveFile("image");
+                      // Reset the file input
+                      const imageInput =
+                        document.getElementById("image-upload");
+                      if (imageInput) imageInput.value = "";
+                    }}
+                    className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 transition-colors"
+                  >
+                    <Icon icon="mdi:close" width={16} height={16} />
+                  </button>
+                </div>
+              ) : selectedMuscles.length > 0 ? (
+                // Show anatomy when no image but muscle groups selected
+                <div className="flex flex-col h-full">
+                  <div className="flex-1 flex items-center justify-center p-4 bg-[#121211]">
+                    <AnatomicalViewer
+                      exerciseName={formData.name || "Exercise Preview"}
+                      muscleGroups={selectedMuscles}
+                      showBothViews={true}
+                      size="medium"
+                      interactive={false}
+                      showMuscleInfo={false}
+                      showExerciseInfo={false}
+                      darkMode={true}
+                      compact={false}
+                    />
+                  </div>
+                  <div className="border-t border-zinc-700 p-3">
+                    <label
+                      htmlFor="image-upload"
+                      className="flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg cursor-pointer transition-colors"
+                    >
+                      <Icon icon="mdi:camera-plus" width={18} height={18} />
+                      <span className="text-sm font-medium">
+                        Add Custom Image
+                      </span>
+                      <input
+                        id="image-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileChange(e, "image")}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+              ) : (
+                // Placeholder when no image and no muscle groups
+                <div className="flex flex-col items-center justify-center h-full min-h-[300px] p-6">
+                  <Icon
+                    icon="mdi:image-plus"
+                    className="text-4xl text-zinc-600 mb-3"
+                  />
+                  <p className="text-zinc-400 text-center mb-4">
+                    Select muscle groups to see anatomy preview or upload a
+                    custom image
+                  </p>
+                  <label
+                    htmlFor="image-upload"
+                    className="flex items-center gap-2 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 px-4 py-2 rounded-lg cursor-pointer transition-colors"
+                  >
+                    <Icon icon="mdi:camera-plus" width={18} height={18} />
+                    <span className="text-sm">Upload Image</span>
+                    <input
+                      id="image-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileChange(e, "image")}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              )}
+            </div>
+
+            {/* Upload status for image */}
+            {uploadStatus.image && (
+              <div className="mt-2 text-sm text-orange-400">
+                {uploadStatus.image}
+              </div>
+            )}
+            {errors.image && (
+              <div className="mt-2 text-sm text-red-400">{errors.image}</div>
+            )}
           </div>
 
           {/* Video Upload */}
           <div className="h-full flex flex-col" style={{ minHeight: "450px" }}>
             <FileUploadField
               type="video"
-              label="Exercise Video"
+              label="Exercise Video (Optional)"
               preview={videoPreview}
               onFileChange={handleFileChange}
               onRemove={() => handleRemoveFile("video")}

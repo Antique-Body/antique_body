@@ -242,24 +242,77 @@ async function getTrainerProfileBasic(userId) {
       firstName: true,
       lastName: true,
       profileImage: true,
+      description: true,
+      trainerSince: true,
+      gender: true,
+      dateOfBirth: true,
+      contactEmail: true,
+      contactPhone: true,
+      trainingEnvironment: true,
+      pricingType: true,
+      pricePerSession: true,
+      currency: true,
+      sessionDuration: true,
+      cancellationPolicy: true,
+      createdAt: true,
+      location: {
+        select: {
+          city: true,
+          country: true,
+          state: true,
+        },
+      },
       specialties: {
         select: { name: true },
       },
       trainingTypes: {
         select: { name: true },
       },
+      languages: {
+        select: { name: true },
+      },
+      certifications: {
+        select: {
+          name: true,
+          issuer: true,
+          expiryDate: true,
+          status: true,
+        },
+        where: {
+          hidden: false,
+        },
+      },
       trainerInfo: {
         select: {
           id: true,
-          // Add any stats fields that exist in your schema
-          // Note: These fields don't exist in the current schema, but are used in the component
-          // You may need to add them or calculate them differently
+          createdAt: true,
+          exercises: {
+            select: { id: true },
+          },
+          meals: {
+            select: { id: true },
+          },
         },
       },
-      // Empty certifications array for compatibility
-      certifications: {
-        select: { name: true },
-        take: 0, // We don't show certifications in basic view
+      availabilities: {
+        select: {
+          weekday: true,
+          timeSlot: true,
+        },
+      },
+      galleryImages: {
+        select: {
+          url: true,
+          description: true,
+          isHighlighted: true,
+        },
+        where: {
+          isHighlighted: true,
+        },
+        take: 3,
+        orderBy: {
+          order: "asc",
+        },
       },
     },
   });

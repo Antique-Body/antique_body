@@ -1,18 +1,18 @@
 "use client";
+
+import { Icon } from "@iconify/react";
+
 import { useTrainerRegistration } from "../../../hooks/useTrainerRegistration";
 
 import { EffectBackground } from "@/components/background";
-import { Button, Footer } from "@/components/common";
-import { BrandLogo } from "@/components/common/BrandLogo";
-import { Card } from "@/components/common/Card";
-import { ArrowRight } from "@/components/common/Icons";
-import { StepProgressBar } from "@/components/common/StepProgressBar";
+import { Button, Footer, BrandLogo } from "@/components/common";
+import { ArrowRight, ArrowLeft } from "@/components/common/Icons";
 import {
-  TipsSection,
   BasicInfoStep,
-  ProfessionalDetailsStep,
   ContactAndLocationStep,
+  ProfessionalDetailsStep,
   ProfileSetupStep,
+  StepProgressBar,
 } from "@/components/custom/personal-details/shared";
 
 const TrainerRegistration = () => {
@@ -22,102 +22,87 @@ const TrainerRegistration = () => {
     step,
     loading,
     handleChange,
-    handleCertChange,
-    addCertField,
-    removeCertField,
     handleSubmit,
     goToNextStep,
     goToPrevStep,
     handleProfileImageChange,
+    handleFileUpload,
+    handleRemoveFile,
+    certFields,
+    handleCertChange,
+    addCertField,
+    removeCertField,
   } = useTrainerRegistration();
 
+  const steps = [
+    {
+      id: 1,
+      title: "Basic Information",
+      icon: "mdi:account-circle",
+      component: BasicInfoStep,
+    },
+    {
+      id: 2,
+      title: "Professional Details",
+      icon: "mdi:certificate",
+      component: ProfessionalDetailsStep,
+    },
+    {
+      id: 3,
+      title: "Contact & Location",
+      icon: "mdi:map-marker",
+      component: ContactAndLocationStep,
+    },
+    {
+      id: 4,
+      title: "Profile & Bio",
+      icon: "mdi:account-edit",
+      component: ProfileSetupStep,
+    },
+  ];
+
+  const currentStepData = steps[step - 1];
+  const CurrentStepComponent = currentStepData.component;
+
   return (
-    <div className="relative min-h-screen  text-white">
+    <div className="min-h-screen bg-black text-white">
       <EffectBackground />
-      <div className="relative z-10 mx-auto max-w-4xl px-4 py-8">
-        {/* Header */}
-        <header className="mb-8 flex items-center justify-center py-4">
-          <BrandLogo />
-        </header>
 
-        {/* Progress Bar */}
-        <StepProgressBar currentStep={step} totalSteps={4} />
+      <div className="relative z-10 min-h-screen">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <BrandLogo />
+          </div>
 
-        <Card
-          variant="darkStrong"
-          hover={true}
-          width="100%"
-          maxWidth="none"
-          className="mb-12 md:p-8"
-        >
-          <h1 className="mb-6 text-2xl font-bold md:text-3xl">
-            {step === 1 && "Basic Information"}
-            {step === 2 && "Professional Details"}
-            {step === 3 && "Contact & Location"}
-            {step === 4 && "Profile Setup"}
-          </h1>
+          {/* Step Progress Bar */}
+          <StepProgressBar steps={steps} currentStep={step} />
 
-          <form onSubmit={handleSubmit}>
-            {/* Step 1: Basic Information */}
-            {step === 1 && (
-              <BasicInfoStep
-                formData={formData}
-                onChange={handleChange}
-                errors={errors}
-                userType="trainer"
-              />
-            )}
+          {/* Form content */}
+          <form onSubmit={handleSubmit} className="space-y-8 sm:space-y-12">
+            <CurrentStepComponent
+              formData={formData}
+              onChange={handleChange}
+              onProfileImageChange={handleProfileImageChange}
+              onFileUpload={handleFileUpload}
+              onRemoveFile={handleRemoveFile}
+              errors={errors}
+              userType="trainer"
+              certFields={certFields}
+              handleCertChange={handleCertChange}
+              addCertField={addCertField}
+              removeCertField={removeCertField}
+            />
 
-            {/* Step 2: Professional Details */}
-            {step === 2 && (
-              <ProfessionalDetailsStep
-                formData={formData}
-                onChange={handleChange}
-                certFields={formData.certifications}
-                handleCertChange={handleCertChange}
-                addCertField={addCertField}
-                removeCertField={removeCertField}
-                errors={errors}
-              />
-            )}
-
-            {/* Step 3: Contact & Location */}
-            {step === 3 && (
-              <ContactAndLocationStep
-                formData={formData}
-                onChange={handleChange}
-                errors={errors}
-                userType="trainer"
-              />
-            )}
-
-            {/* Step 4: Profile Setup */}
-            {step === 4 && (
-              <ProfileSetupStep
-                formData={formData}
-                onChange={handleChange}
-                onProfileImageChange={handleProfileImageChange}
-                errors={errors}
-                userType="trainer"
-                titleText="Profile Image"
-                descriptionText="Upload your professional photo that clients will see"
-                bioPlaceholder="Write a brief description about yourself, your training philosophy, and what makes you unique as a trainer..."
-                guidelines={[
-                  "Professional headshot with neutral background",
-                  "Clear, well-lit, and focused on your face",
-                  "JPG, PNG, or GIF format (max 1MB)",
-                ]}
-                guidelineHelpText="A professional profile photo helps build trust with potential clients."
-              />
-            )}
-
-            {/* Navigation buttons */}
-            <div className="mt-8 flex justify-between">
+            {/* Navigation */}
+            <div className="flex items-center justify-between gap-4 border-t border-zinc-800/50">
+              {/* Back button */}
               {step > 1 ? (
                 <Button
                   onClick={goToPrevStep}
                   variant="secondary"
-                  type="button"
+                  className="bg-zinc-800/50 hover:bg-zinc-700 border-zinc-700/50"
+                  leftIcon={<ArrowLeft size={18} />}
                 >
                   Back
                 </Button>
@@ -125,50 +110,61 @@ const TrainerRegistration = () => {
                 <div />
               )}
 
-              {step < 4 ? (
-                <Button onClick={goToNextStep} type="button">
+              {/* Next/Complete button */}
+              {step < steps.length ? (
+                <Button
+                  onClick={goToNextStep}
+                  variant="primary"
+                  className="bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] hover:from-[#E65A00] hover:to-[#FF6B00]"
+                  rightIcon={<ArrowRight size={18} />}
+                >
                   Continue
                 </Button>
               ) : (
                 <Button
                   type="submit"
+                  variant="primary"
+                  disabled={loading}
+                  className="bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] hover:from-[#E65A00] hover:to-[#FF6B00]"
                   rightIcon={
                     loading ? (
-                      <svg
-                        className="animate-spin h-5 w-5 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8v8z"
-                        ></path>
-                      </svg>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
-                      <ArrowRight size={20} />
+                      <Icon icon="mdi:check" className="w-4 h-4" />
                     )
                   }
-                  disabled={loading}
+                  onClick={handleSubmit}
                 >
                   {loading ? "Saving..." : "Complete Profile"}
                 </Button>
               )}
             </div>
           </form>
-        </Card>
-        <TipsSection step={step} userType="trainer" />
 
-        <Footer />
+          {/* Minimal tip */}
+          <div className="mt-10 sm:mt-12">
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-zinc-900/30 border border-zinc-800/50">
+              <div className="w-1 h-10 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full flex-shrink-0"></div>
+              <div>
+                <h3 className="font-medium text-blue-400 mb-1 text-sm">
+                  Quick Tip
+                </h3>
+                <p className="text-sm text-zinc-300 leading-relaxed">
+                  {step === 1 &&
+                    "Complete your profile to attract more clients and showcase your expertise."}
+                  {step === 2 &&
+                    "Adding certifications and specialties helps clients find the right trainer for their needs."}
+                  {step === 3 &&
+                    "Your location and availability information helps clients book sessions with you."}
+                  {step === 4 &&
+                    "A professional profile with photos and bio builds trust with potential clients."}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <Footer />
+        </div>
       </div>
     </div>
   );

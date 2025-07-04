@@ -15,7 +15,7 @@ const languages = [
   { code: "sl", name: "Slovenščina" },
 ];
 
-export default function LanguageSelector() {
+export const LanguageSelector = () => {
   const { i18n } = useTranslation();
   const { data: session, update } = useSession();
   const [isOpen, setIsOpen] = useState(false);
@@ -142,4 +142,4 @@ export default function LanguageSelector() {
       )}
     </div>
   );
-}
+};

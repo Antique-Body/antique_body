@@ -3,3 +3,4 @@ export { ExerciseCard } from "./ExerciseCard";
 
 export { ExerciseLibrarySelector } from "./ExerciseLibrarySelector";
 export { ExerciseFilters } from "./ExerciseFilters";
+export { AnatomicalViewer } from "./AnatomicalViewer";

@@ -3,7 +3,7 @@ import { Icon } from "@iconify/react";
 
 import { FormSection } from "./";
 
-import { FormField, InfoBanner } from "@/components/common";
+import { FormField } from "@/components/common";
 import { usePrefillFromSession } from "@/hooks";
 import {
   searchCities,
@@ -73,7 +73,7 @@ export const ContactAndLocationStep = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 sm:space-y-8">
       {/* Contact Information */}
       <FormSection
         title="Contact Information"
@@ -82,9 +82,10 @@ export const ContactAndLocationStep = ({
             ? "How clients can reach you"
             : "How trainers can reach you"
         }
-        icon={<Icon icon="mdi:contact-mail" width={20} height={20} />}
+        icon="mdi:contact-mail"
+        className="mb-4 sm:mb-6"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <FormField
             label="Email"
             name="contactEmail"
@@ -93,6 +94,7 @@ export const ContactAndLocationStep = ({
             onChange={onChange}
             placeholder="your.email@example.com"
             error={errors.contactEmail}
+            backgroundStyle="darker"
           />
 
           <FormField
@@ -103,6 +105,7 @@ export const ContactAndLocationStep = ({
             onChange={onChange}
             placeholder="+387 XX XXX XXX"
             error={errors.contactPhone}
+            backgroundStyle="darker"
           />
         </div>
       </FormSection>
@@ -115,67 +118,83 @@ export const ContactAndLocationStep = ({
             ? "Where you're based and available for training"
             : "Where you're based and looking for trainers"
         }
-        icon={<Icon icon="mdi:map-marker" width={20} height={20} />}
+        icon="mdi:map-marker"
+        className={userType === "trainer" ? "mb-6 sm:mb-8" : "mb-0"}
       >
-        <FormField
-          label="City"
-          name="location.city"
-          type="searchableSelect"
-          value={formData.location?.city || ""}
-          asyncSearch={searchCities}
-          onSelectOption={handleCitySelect}
-          onChange={onChange}
-          placeholder="Start typing your city..."
-          error={errors["location.city"]}
-        />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <div className="space-y-4 sm:space-y-5">
           <FormField
-            label="State/Province"
-            name="location.state"
+            label="City"
+            name="location.city"
             type="searchableSelect"
-            value={formData.location?.state || ""}
-            asyncSearch={searchStates}
-            onSelectOption={(option) => {
-              onChange({
-                target: { name: "location.state", value: option.value },
-              });
-            }}
+            value={formData.location?.city || ""}
+            asyncSearch={searchCities}
+            onSelectOption={handleCitySelect}
             onChange={onChange}
-            placeholder="Type to search state/province..."
-            error={errors["location.state"]}
+            placeholder="Start typing your city..."
+            error={errors["location.city"]}
+            backgroundStyle="darker"
           />
-          <FormField
-            label="Country"
-            name="location.country"
-            type="searchableSelect"
-            value={formData.location?.country || ""}
-            asyncSearch={searchCountries}
-            onSelectOption={(option) => {
-              onChange({
-                target: { name: "location.country", value: option.value },
-              });
-            }}
-            onChange={onChange}
-            placeholder="Type to search country..."
-            error={errors["location.country"]}
-          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <FormField
+              label="State/Province"
+              name="location.state"
+              type="searchableSelect"
+              value={formData.location?.state || ""}
+              asyncSearch={searchStates}
+              onSelectOption={(option) => {
+                onChange({
+                  target: { name: "location.state", value: option.value },
+                });
+              }}
+              onChange={onChange}
+              placeholder="Type to search state/province..."
+              error={errors["location.state"]}
+              backgroundStyle="darker"
+            />
+
+            <FormField
+              label="Country"
+              name="location.country"
+              type="searchableSelect"
+              value={formData.location?.country || ""}
+              asyncSearch={searchCountries}
+              onSelectOption={(option) => {
+                onChange({
+                  target: { name: "location.country", value: option.value },
+                });
+              }}
+              onChange={onChange}
+              placeholder="Type to search country..."
+              error={errors["location.country"]}
+              backgroundStyle="darker"
+            />
+          </div>
+
+          {/* Location preview */}
+          {formData.location?.city && formData.location?.country && (
+            <div className="p-4 rounded-xl border border-zinc-700 bg-zinc-900/50">
+              <div className="flex items-center gap-3">
+                <Icon
+                  icon="mdi:map-marker"
+                  className="w-14 h-14 text-green-400"
+                />
+                <div>
+                  <p className="font-medium text-white">Your Location</p>
+                  <p className="text-sm text-zinc-400">
+                    {formData.location.city}
+                    {formData.location.state
+                      ? `, ${formData.location.state}`
+                      : ""}
+                    {formData.location.country
+                      ? `, ${formData.location.country}`
+                      : ""}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-        {/* Location preview */}
-        {formData.location?.city && formData.location?.country && (
-          <InfoBanner
-            icon={"mdi:map-marker"}
-            title="Your Location:"
-            subtitle={
-              formData.location.city +
-              (formData.location.state ? `, ${formData.location.state}` : "") +
-              (formData.location.country
-                ? `, ${formData.location.country}`
-                : "")
-            }
-            variant="primary"
-            className="mt-4"
-          />
-        )}
       </FormSection>
 
       {/* Pricing - Only for trainers */}
@@ -183,15 +202,17 @@ export const ContactAndLocationStep = ({
         <FormSection
           title="Pricing"
           description="Set your session rates and pricing preferences"
-          icon={<Icon icon="mdi:currency-usd" width={20} height={20} />}
+          icon="mdi:currency-usd"
+          className="mb-0"
         >
-          <div className="space-y-4">
+          <div className="space-y-4 sm:space-y-5">
             <FormField
               label="Pricing Approach"
               name="pricingType"
               type="select"
               value={formData.pricingType}
               onChange={handleChange}
+              backgroundStyle="darker"
               options={[
                 { value: "", label: "Select pricing approach" },
                 { value: "fixed", label: "Fixed Rate - Set My Price" },
@@ -210,7 +231,7 @@ export const ContactAndLocationStep = ({
             {/* Show price field only for specific pricing types */}
             {(formData.pricingType === "fixed" ||
               formData.pricingType === "package_deals") && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <FormField
                   label={
                     formData.pricingType === "package_deals"
@@ -225,6 +246,7 @@ export const ContactAndLocationStep = ({
                   min="0"
                   step="5"
                   error={errors.pricePerSession}
+                  backgroundStyle="darker"
                 />
 
                 <FormField
@@ -233,6 +255,7 @@ export const ContactAndLocationStep = ({
                   type="select"
                   value={formData.currency || "EUR"}
                   onChange={handleChange}
+                  backgroundStyle="darker"
                   options={[
                     { value: "BAM", label: "BAM - Bosnian Mark" },
                     { value: "RSD", label: "RSD - Serbian Dinar" },
