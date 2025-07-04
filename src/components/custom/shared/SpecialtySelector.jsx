@@ -81,7 +81,7 @@ export const SpecialtySelector = ({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.2 }}
-          className="flex flex-wrap gap-3"
+          className="flex flex-wrap gap-2 sm:gap-3"
         >
           {filteredSpecialties.map((specialty) => {
             const isSelected = selectedSpecialties.includes(specialty.id);
@@ -97,7 +97,7 @@ export const SpecialtySelector = ({
                   variant={isSelected ? "orangeFilled" : "secondary"}
                   type="button"
                   onClick={() => handleSpecialtyToggle(specialty.id)}
-                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                     isSelected
                       ? "shadow-lg shadow-[#FF6B00]/25 scale-105"
                       : "border border-[#333] hover:border-[#FF6B00]/50 hover:text-white hover:bg-[#FF6B00]/10"
@@ -105,17 +105,21 @@ export const SpecialtySelector = ({
                 >
                   <Icon
                     icon={specialty.icon || "mdi:star"}
-                    width={16}
-                    height={16}
-                    className={isSelected ? "text-white" : "text-gray-400"}
+                    width={14}
+                    height={14}
+                    className={`flex-shrink-0 ${
+                      isSelected ? "text-white" : "text-gray-400"
+                    }`}
                   />
-                  <span>{specialty.label}</span>
+                  <span className="text-xs sm:text-sm leading-tight">
+                    {specialty.label}
+                  </span>
                   {isSelected && (
                     <Icon
                       icon="mdi:check"
-                      width={14}
-                      height={14}
-                      className="text-white ml-1"
+                      width={12}
+                      height={12}
+                      className="text-white flex-shrink-0"
                     />
                   )}
                 </Button>

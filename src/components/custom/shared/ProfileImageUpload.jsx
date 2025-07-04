@@ -107,7 +107,7 @@ export const ProfileImageUpload = ({
       {description && (
         <div className="text-sm text-gray-400 mb-2">{description}</div>
       )}
-      <div className="bg-[rgba(30,30,30,0.6)] rounded-lg border border-[#333] p-6">
+      <div className="p-4">
         <div className="flex flex-col md:flex-row gap-8">
           {/* Left side - Image and upload controls */}
           <div className="flex flex-col items-center">

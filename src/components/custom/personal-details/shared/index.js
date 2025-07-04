@@ -6,8 +6,8 @@ export { LanguageSelector } from "./LanguageSelector";
 export { LocationSelector } from "./LocationSelector";
 export { TrainingTypeSelector } from "../../shared/TrainingTypeSelector";
 export { SpecialtySelector } from "../../shared/SpecialtySelector";
+export { StepProgressBar } from "./StepProgressBar";
 
-// New reusable components
 export { BasicInfoStep } from "./BasicInfoStep";
 export { ContactAndLocationStep } from "./ContactAndLocationStep";
 export { GoalsAndPreferencesStep } from "./GoalsAndPreferencesStep";
