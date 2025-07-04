@@ -1,21 +1,19 @@
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+
+import { DetailsTabNutrition } from "./planPreviewModal/DetailsTabNutrition";
+import { DetailsTabTraining } from "./planPreviewModal/DetailsTabTraining";
+import { OverviewTab } from "./planPreviewModal/OverviewTab";
+import { ScheduleTab } from "./planPreviewModal/ScheduleTab";
+import { StatsTab } from "./planPreviewModal/StatsTab";
+import { usePlanPDF } from "./planPreviewModal/usePlanPDF";
+import { WeeklyScheduleTab } from "./planPreviewModal/WeeklyScheduleTab";
 
 import { Button } from "@/components/common/Button";
 import { Modal } from "@/components/common/Modal";
-import { SESSION_FORMATS } from "@/enums/sessionFormats";
-import { TRAINING_TYPES } from "@/enums/trainingTypes";
-import { generatePlanPDF } from "@/utils/pdfGenerator";
-import { OverviewTab } from "./planPreviewModal/OverviewTab";
-import { DetailsTabNutrition } from "./planPreviewModal/DetailsTabNutrition";
-import { DetailsTabTraining } from "./planPreviewModal/DetailsTabTraining";
-import { ScheduleTab } from "./planPreviewModal/ScheduleTab";
-import { WeeklyScheduleTab } from "./planPreviewModal/WeeklyScheduleTab";
-import { StatsTab } from "./planPreviewModal/StatsTab";
-import { usePlanPDF } from "./planPreviewModal/usePlanPDF";
 
 export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
   const [activeTab, setActiveTab] = useState("overview");

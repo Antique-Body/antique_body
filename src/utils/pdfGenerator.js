@@ -35,7 +35,7 @@ export const generatePlanPDF = async (planData) => {
     addFootersToAllPages(doc, planData);
     savePDF(doc, planData);
     return true;
-  } catch (error) {
+  } catch {
     // TODO: Send error to error tracking service
     return false;
   }
@@ -88,7 +88,7 @@ async function addCoverPage(doc, planData) {
         image.src = planData.image;
       });
       doc.addImage(img, "JPEG", 30, 50, pageWidth - 60, 40, undefined, "FAST");
-    } catch (e) {
+    } catch {
       // TODO: Send error to error tracking service
     }
   }
@@ -523,9 +523,9 @@ function addContentPages(doc, planData) {
   const pageHeight = doc.internal.pageSize.getHeight();
   const overview = planData.overview;
   addPageHeader(doc, planData.title, pageWidth);
-  let yPos = 30;
-  yPos = addPlanOverview(doc, overview, pageWidth, yPos);
-  yPos = addWeeklySchedule(doc, planData, pageWidth, pageHeight, yPos);
+  const yPos = 30;
+  addPlanOverview(doc, overview, pageWidth, yPos);
+  addWeeklySchedule(doc, planData, pageWidth, pageHeight, yPos);
 }
 
 // Helper: Add footers to all pages

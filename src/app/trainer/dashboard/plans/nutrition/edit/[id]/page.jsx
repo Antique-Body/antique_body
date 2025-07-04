@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 import { fetchPlanDetails } from "@/app/api/users/services/planService";
 import { NutritionPlanCreator } from "@/components/custom/dashboard/trainer/pages/plans/nutrition/create/NutritionPlanCreator";
@@ -58,7 +58,7 @@ export default function EditNutritionPlanPage() {
         setError("Failed to load nutrition plan data");
         setLoading(false);
       });
-  }, [id, searchParams]);
+  }, [id, searchParams, safeUUID]);
 
   // Fallback UUID generator
   const fallbackUUID = () =>
@@ -68,10 +68,13 @@ export default function EditNutritionPlanPage() {
       return v.toString(16);
     });
   // Safe UUID generator
-  const safeUUID = () =>
-    typeof crypto !== "undefined" && crypto.randomUUID
-      ? crypto.randomUUID()
-      : fallbackUUID();
+  const safeUUID = useCallback(
+    () =>
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : fallbackUUID(),
+    []
+  );
 
   if (loading) return <div className="text-white">Loading...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
