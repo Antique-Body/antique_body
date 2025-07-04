@@ -1,7 +1,7 @@
 "use client";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 
 import { FormField, Button } from "@/components/common";
 import { useCertificateFiles } from "@/hooks";
@@ -47,7 +47,10 @@ export const CertificationUpload = ({
   onDeleteCert: _onDeleteCert,
 }) => {
   // Ensure certFields is always an array
-  const safeCertFields = Array.isArray(certFields) ? certFields : [];
+  const safeCertFields = useMemo(
+    () => (Array.isArray(certFields) ? certFields : []),
+    [certFields]
+  );
 
   const {
     previews,

@@ -77,17 +77,11 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
         {filteredExercises.length > 0 ? (
           <div className="grid gap-3">
             {filteredExercises.map((exercise) => (
-              <div
+              <button
                 key={exercise.id}
+                type="button"
                 onClick={() => onSelectExercise(exercise)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    onSelectExercise(exercise);
-                  }
-                }}
-                tabIndex={0}
-                role="button"
+                className="w-full text-left bg-transparent border-none p-0 m-0 focus:outline-none"
               >
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="text-white font-semibold text-sm">
@@ -131,7 +125,7 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
                     </span>
                   ))}
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         ) : (

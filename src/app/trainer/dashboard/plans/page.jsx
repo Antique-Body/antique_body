@@ -201,8 +201,8 @@ const PlanManagementPage = () => {
           className="mb-8 bg-gradient-to-r from-[#1a1a1a] via-[#222] to-[#1a1a1a] rounded-2xl border border-[#333] p-6 shadow-xl backdrop-blur-sm relative overflow-hidden"
         >
           {/* Background Pattern */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#FF6B00]/5 to-purple-500/5 opacity-50"></div>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[#FF6B00]/10 to-transparent rounded-bl-full"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[#FF6B00]/5 to-purple-500/5 opacity-50" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[#FF6B00]/10 to-transparent rounded-bl-full" />
 
           <div className="relative">
             <div className="flex items-center gap-3 mb-6">

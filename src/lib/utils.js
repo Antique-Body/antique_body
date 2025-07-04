@@ -81,14 +81,22 @@ export function haversineDistance(lat1, lon1, lat2, lon2) {
 export function updateFormData(data, e) {
   const { name, value, type, checked } = e.target;
   if (name.includes(".")) {
-    const [parent, child] = name.split(".");
-    return {
-      ...data,
-      [parent]: {
-        ...data[parent],
-        [child]: type === "checkbox" ? checked : value,
-      },
+    const keys = name.split(".");
+    // Recursively/iteratively build the new object structure
+    const updateNested = (obj, keys, val) => {
+      if (keys.length === 1) {
+        return {
+          ...obj,
+          [keys[0]]: val,
+        };
+      }
+      const [first, ...rest] = keys;
+      return {
+        ...obj,
+        [first]: updateNested(obj?.[first] || {}, rest, val),
+      };
     };
+    return updateNested(data, keys, type === "checkbox" ? checked : value);
   } else {
     return {
       ...data,

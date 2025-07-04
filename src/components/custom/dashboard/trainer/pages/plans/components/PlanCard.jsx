@@ -45,8 +45,8 @@ export const PlanCard = ({
   const [loadingPlanDetails, setLoadingPlanDetails] = useState(false);
   const [detailedPlanData, setDetailedPlanData] = useState(null);
   const router = useRouter();
-  const { t } = useTranslation();
-  const formattedDate = new Date(createdAt).toLocaleDateString("en-US", {
+  const { t, i18n } = useTranslation();
+  const formattedDate = new Date(createdAt).toLocaleDateString(i18n.language, {
     year: "numeric",
     month: "short",
     day: "numeric",

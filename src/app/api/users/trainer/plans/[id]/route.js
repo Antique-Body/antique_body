@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 
 import { auth } from "#/auth";
 import prisma from "@/lib/prisma";
-import // ... other validators ...
-"@/middleware/validation";
 
 const ALLOWED_TRAINING_FIELDS = [
   "title",
@@ -130,7 +128,11 @@ export async function PATCH(req, { params }) {
     });
     return NextResponse.json(plan);
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("PATCH /api/users/trainer/plans/[id] error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
