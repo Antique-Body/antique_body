@@ -3,7 +3,7 @@
 import { Icon } from "@iconify/react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -155,6 +155,22 @@ function SessionDndWrapper({ id, index, moveSession, children }) {
   );
 }
 
+// Utility to normalize muscleGroups
+function normalizeMuscleGroups(muscleGroups) {
+  return (muscleGroups || []).map((muscle) => {
+    if (typeof muscle === "object" && (muscle.id || muscle.name)) {
+      return {
+        id: muscle.id || muscle.name,
+        name: muscle.name || muscle.id,
+      };
+    } else if (typeof muscle === "string") {
+      return { id: muscle, name: muscle };
+    } else {
+      return { id: JSON.stringify(muscle), name: String(muscle) };
+    }
+  });
+}
+
 const ExerciseCard = React.memo(function ExerciseCard({
   exercise,
   sessionIndex,
@@ -164,6 +180,8 @@ const ExerciseCard = React.memo(function ExerciseCard({
   setShowMediaPreview,
 }) {
   const [activeMedia, setActiveMedia] = useState("image"); // 'image' or 'video'
+  // Normalize muscleGroups for consistent rendering
+  const normalizedMuscleGroups = normalizeMuscleGroups(exercise.muscleGroups);
 
   return (
     <div className="bg-gradient-to-br from-[#3a3a3a] to-[#404040] rounded-xl border border-[#555] hover:border-[#666] transition-all duration-300 overflow-hidden shadow-lg">
@@ -279,7 +297,7 @@ const ExerciseCard = React.memo(function ExerciseCard({
           />
 
           {/* Muscle Groups */}
-          {exercise.muscleGroups && exercise.muscleGroups.length > 0 && (
+          {normalizedMuscleGroups.length > 0 && (
             <div className="space-y-2">
               <label
                 htmlFor={`target-muscles-${sessionIndex}-${exerciseIndex}`}
@@ -292,28 +310,14 @@ const ExerciseCard = React.memo(function ExerciseCard({
                 id={`target-muscles-${sessionIndex}-${exerciseIndex}`}
                 className="flex flex-wrap gap-2"
               >
-                {exercise.muscleGroups.map((muscle, index) => {
-                  // Generate a unique key based on available data
-                  const uniqueKey =
-                    typeof muscle === "object" && muscle.id
-                      ? muscle.id
-                      : typeof muscle === "object" && muscle.name
-                      ? muscle.name
-                      : typeof muscle === "string"
-                      ? muscle
-                      : `muscle-${index}`;
-
-                  return (
-                    <span
-                      key={uniqueKey}
-                      className="px-3 py-1 bg-gradient-to-r from-[#FF6B00]/20 to-[#FF8500]/20 border border-[#FF6B00]/40 rounded-full text-xs font-medium text-[#FF6B00] capitalize"
-                    >
-                      {typeof muscle === "string"
-                        ? muscle
-                        : muscle.name || muscle}
-                    </span>
-                  );
-                })}
+                {normalizedMuscleGroups.map((muscle) => (
+                  <span
+                    key={muscle.id}
+                    className="px-3 py-1 bg-gradient-to-r from-[#FF6B00]/20 to-[#FF8500]/20 border border-[#FF6B00]/40 rounded-full text-xs font-medium text-[#FF6B00] capitalize"
+                  >
+                    {muscle.name}
+                  </span>
+                ))}
               </div>
             </div>
           )}
@@ -365,6 +369,7 @@ const ExerciseCard = React.memo(function ExerciseCard({
                     })
                   }
                   className="w-full h-full p-0 relative rounded-lg overflow-hidden bg-black/40 hover:bg-black/50"
+                  aria-label={`Preview image of ${exercise.name}`}
                 >
                   <Image
                     src={exercise.imageUrl}
@@ -403,6 +408,7 @@ const ExerciseCard = React.memo(function ExerciseCard({
                   })
                 }
                 className="w-full h-full p-0 relative rounded-lg overflow-hidden bg-black/40 hover:bg-black/50"
+                aria-label={`Preview video of ${exercise.name}`}
               >
                 <div className="w-full h-full bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center">
                   <div className="w-16 h-16 rounded-full bg-[#FF6B00]/40 backdrop-blur-sm flex items-center justify-center hover:bg-[#FF6B00]/50 transition-colors">
@@ -600,6 +606,14 @@ export const Schedule = ({ data, onChange }) => {
     updated.splice(to, 0, removed);
     onChange({ schedule: updated });
   };
+
+  // Memoize filtered exercises for efficiency
+  const filteredExercises = useMemo(() => {
+    const lowerSearch = searchQuery.toLowerCase();
+    return exercises.filter((exercise) =>
+      exercise.name.toLowerCase().includes(lowerSearch)
+    );
+  }, [exercises, searchQuery]);
 
   // Fallback ako nema schedule
   const schedule = data.schedule || [];
@@ -1083,206 +1097,186 @@ export const Schedule = ({ data, onChange }) => {
               <div
                 className={`grid grid-cols-1 lg:grid-cols-2 gap-3 max-h-[65vh] overflow-y-auto pr-2 ${styles.customScrollbar}`}
               >
-                {exercises
-                  .filter((exercise) =>
-                    exercise.name
-                      .toLowerCase()
-                      .includes(searchQuery.toLowerCase())
-                  )
-                  .map((exercise, index) => {
-                    const isSelected = selectedExercises.some(
-                      (e) => e.id === exercise.id
-                    );
-                    return (
-                      <motion.div
-                        key={exercise.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className={[
-                          "group relative rounded-xl border-2 transition-all duration-300 cursor-pointer overflow-hidden",
-                          isSelected
-                            ? "bg-gradient-to-r from-blue-600/25 to-indigo-600/25 border-blue-500 shadow-lg shadow-blue-500/20"
-                            : "bg-gradient-to-r from-slate-700/80 to-slate-600/80 border-slate-500/60 hover:border-blue-400/60 hover:shadow-md hover:shadow-blue-400/10",
-                        ].join(" ")}
-                        onClick={() => toggleExerciseSelection(exercise)}
-                      >
-                        {/* Selection Overlay */}
-                        {isSelected && (
-                          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 pointer-events-none" />
-                        )}
+                {filteredExercises.map((exercise, index) => {
+                  const isSelected = selectedExercises.some(
+                    (e) => e.id === exercise.id
+                  );
+                  const normalizedMuscleGroups = normalizeMuscleGroups(
+                    exercise.muscleGroups
+                  );
+                  return (
+                    <motion.div
+                      key={exercise.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className={[
+                        "group relative rounded-xl border-2 transition-all duration-300 cursor-pointer overflow-hidden",
+                        isSelected
+                          ? "bg-gradient-to-r from-blue-600/25 to-indigo-600/25 border-blue-500 shadow-lg shadow-blue-500/20"
+                          : "bg-gradient-to-r from-slate-700/80 to-slate-600/80 border-slate-500/60 hover:border-blue-400/60 hover:shadow-md hover:shadow-blue-400/10",
+                      ].join(" ")}
+                      onClick={() => toggleExerciseSelection(exercise)}
+                    >
+                      {/* Selection Overlay */}
+                      {isSelected && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 pointer-events-none" />
+                      )}
 
-                        <div className="p-3 flex items-center gap-3 relative z-10">
-                          {/* Exercise Image with Overlay */}
-                          <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-slate-600 flex-shrink-0 shadow-md">
-                            {exercise.imageUrl ? (
-                              <>
-                                <Image
-                                  src={exercise.imageUrl}
-                                  alt={exercise.name}
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                  width={48}
-                                  height={48}
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                              </>
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-600 to-slate-700">
+                      <div className="p-3 flex items-center gap-3 relative z-10">
+                        {/* Exercise Image with Overlay */}
+                        <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-slate-600 flex-shrink-0 shadow-md">
+                          {exercise.imageUrl ? (
+                            <>
+                              <Image
+                                src={exercise.imageUrl}
+                                alt={exercise.name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                width={48}
+                                height={48}
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </>
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-600 to-slate-700">
+                              <Icon
+                                icon="mdi:dumbbell"
+                                className="w-5 h-5 text-slate-300 group-hover:text-blue-400 transition-colors"
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Exercise Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between mb-1">
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-bold text-base text-white truncate group-hover:text-blue-300 transition-colors">
+                                {exercise.name}
+                              </h4>
+                            </div>
+                          </div>
+
+                          {/* Exercise Details Row */}
+                          <div className="flex items-center gap-3 mb-1">
+                            {/* Type Badge */}
+                            <div className="flex items-center gap-1">
+                              <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                              <span className="text-xs font-medium text-slate-200 capitalize">
+                                {exercise.type}
+                              </span>
+                            </div>
+
+                            {/* Level Badge */}
+                            <div
+                              className={`px-1.5 py-0.5 rounded text-xs font-bold uppercase tracking-wide ${
+                                exercise.level === "beginner"
+                                  ? "bg-emerald-500/30 text-emerald-300"
+                                  : exercise.level === "intermediate"
+                                  ? "bg-amber-500/30 text-amber-300"
+                                  : "bg-red-500/30 text-red-300"
+                              }`}
+                            >
+                              {exercise.level.charAt(0).toUpperCase()}
+                            </div>
+
+                            {/* Equipment Badge */}
+                            <div className="flex items-center gap-0.5 text-xs text-slate-300">
+                              <Icon
+                                icon={
+                                  exercise.equipment
+                                    ? "mdi:dumbbell"
+                                    : "mdi:account"
+                                }
+                                className="w-3 h-3"
+                              />
+                            </div>
+
+                            {/* Location Badge */}
+                            <div className="flex items-center gap-0.5 text-xs text-slate-300">
+                              <Icon
+                                icon={
+                                  exercise.location === "gym"
+                                    ? "mdi:weight-lifter"
+                                    : exercise.location === "home"
+                                    ? "mdi:home"
+                                    : "mdi:pine-tree"
+                                }
+                                className="w-3 h-3"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Muscle Groups */}
+                          {normalizedMuscleGroups.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {normalizedMuscleGroups
+                                .slice(0, 2)
+                                .map((muscle) => (
+                                  <span
+                                    key={muscle.id}
+                                    className="px-1.5 py-0.5 bg-slate-600/60 rounded text-xs text-slate-300 font-medium"
+                                  >
+                                    {muscle.name}
+                                  </span>
+                                ))}
+                              {normalizedMuscleGroups.length > 2 && (
+                                <span className="px-1.5 py-0.5 bg-slate-600/60 rounded text-xs text-slate-300 font-medium">
+                                  +{normalizedMuscleGroups.length - 2}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Media Indicators and Selection */}
+                        <div className="flex items-center gap-2">
+                          {/* Media Indicators */}
+                          <div className="flex items-center gap-1">
+                            {exercise.imageUrl && (
+                              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-500/20">
                                 <Icon
-                                  icon="mdi:dumbbell"
-                                  className="w-5 h-5 text-slate-300 group-hover:text-blue-400 transition-colors"
+                                  icon="mdi:image"
+                                  className="w-2.5 h-2.5 text-blue-400"
+                                />
+                              </div>
+                            )}
+                            {exercise.videoUrl && (
+                              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-purple-500/20">
+                                <Icon
+                                  icon="mdi:video"
+                                  className="w-2.5 h-2.5 text-purple-400"
                                 />
                               </div>
                             )}
                           </div>
 
-                          {/* Exercise Info */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between mb-1">
-                              <div className="flex-1 min-w-0">
-                                <h4 className="font-bold text-base text-white truncate group-hover:text-blue-300 transition-colors">
-                                  {exercise.name}
-                                </h4>
-                              </div>
-                            </div>
-
-                            {/* Exercise Details Row */}
-                            <div className="flex items-center gap-3 mb-1">
-                              {/* Type Badge */}
-                              <div className="flex items-center gap-1">
-                                <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-                                <span className="text-xs font-medium text-slate-200 capitalize">
-                                  {exercise.type}
-                                </span>
-                              </div>
-
-                              {/* Level Badge */}
-                              <div
-                                className={`px-1.5 py-0.5 rounded text-xs font-bold uppercase tracking-wide ${
-                                  exercise.level === "beginner"
-                                    ? "bg-emerald-500/30 text-emerald-300"
-                                    : exercise.level === "intermediate"
-                                    ? "bg-amber-500/30 text-amber-300"
-                                    : "bg-red-500/30 text-red-300"
-                                }`}
-                              >
-                                {exercise.level.charAt(0).toUpperCase()}
-                              </div>
-
-                              {/* Equipment Badge */}
-                              <div className="flex items-center gap-0.5 text-xs text-slate-300">
-                                <Icon
-                                  icon={
-                                    exercise.equipment
-                                      ? "mdi:dumbbell"
-                                      : "mdi:account"
-                                  }
-                                  className="w-3 h-3"
-                                />
-                              </div>
-
-                              {/* Location Badge */}
-                              <div className="flex items-center gap-0.5 text-xs text-slate-300">
-                                <Icon
-                                  icon={
-                                    exercise.location === "gym"
-                                      ? "mdi:weight-lifter"
-                                      : exercise.location === "home"
-                                      ? "mdi:home"
-                                      : "mdi:pine-tree"
-                                  }
-                                  className="w-3 h-3"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Muscle Groups */}
-                            {exercise.muscleGroups &&
-                              exercise.muscleGroups.length > 0 && (
-                                <div className="flex flex-wrap gap-1">
-                                  {exercise.muscleGroups
-                                    .slice(0, 2)
-                                    .map((muscle) => (
-                                      <span
-                                        key={
-                                          typeof muscle === "object" &&
-                                          muscle.id
-                                            ? muscle.id
-                                            : typeof muscle === "object" &&
-                                              muscle.name
-                                            ? muscle.name
-                                            : typeof muscle === "string"
-                                            ? muscle
-                                            : JSON.stringify(muscle)
-                                        }
-                                        className="px-1.5 py-0.5 bg-slate-600/60 rounded text-xs text-slate-300 font-medium"
-                                      >
-                                        {typeof muscle === "string"
-                                          ? muscle
-                                          : muscle.name || muscle}
-                                      </span>
-                                    ))}
-                                  {exercise.muscleGroups.length > 2 && (
-                                    <span className="px-1.5 py-0.5 bg-slate-600/60 rounded text-xs text-slate-300 font-medium">
-                                      +{exercise.muscleGroups.length - 2}
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-                          </div>
-
-                          {/* Media Indicators and Selection */}
-                          <div className="flex items-center gap-2">
-                            {/* Media Indicators */}
-                            <div className="flex items-center gap-1">
-                              {exercise.imageUrl && (
-                                <div className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-500/20">
-                                  <Icon
-                                    icon="mdi:image"
-                                    className="w-2.5 h-2.5 text-blue-400"
-                                  />
-                                </div>
-                              )}
-                              {exercise.videoUrl && (
-                                <div className="flex items-center justify-center w-5 h-5 rounded-full bg-purple-500/20">
-                                  <Icon
-                                    icon="mdi:video"
-                                    className="w-2.5 h-2.5 text-purple-400"
-                                  />
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Selection Indicator */}
-                            <div
-                              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
-                                isSelected
-                                  ? "border-blue-400 bg-blue-500 scale-110"
-                                  : "border-slate-400 group-hover:border-blue-400 group-hover:scale-105"
-                              }`}
-                            >
-                              {isSelected && (
-                                <Icon
-                                  icon="mdi:check-bold"
-                                  className="w-3 h-3 text-white"
-                                />
-                              )}
-                            </div>
+                          {/* Selection Indicator */}
+                          <div
+                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
+                              isSelected
+                                ? "border-blue-400 bg-blue-500 scale-110"
+                                : "border-slate-400 group-hover:border-blue-400 group-hover:scale-105"
+                            }`}
+                          >
+                            {isSelected && (
+                              <Icon
+                                icon="mdi:check-bold"
+                                className="w-3 h-3 text-white"
+                              />
+                            )}
                           </div>
                         </div>
+                      </div>
 
-                        {/* Hover Effect Gradient */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                      </motion.div>
-                    );
-                  })}
+                      {/* Hover Effect Gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                    </motion.div>
+                  );
+                })}
 
                 {/* Empty State */}
-                {exercises.filter((exercise) =>
-                  exercise.name
-                    .toLowerCase()
-                    .includes(searchQuery.toLowerCase())
-                ).length === 0 && (
+                {filteredExercises.length === 0 && (
                   <div className="lg:col-span-2 flex flex-col items-center justify-center py-12">
                     <div className="w-16 h-16 rounded-full bg-slate-600 flex items-center justify-center mb-3" />
                     <h3 className="text-lg font-semibold text-slate-300 mb-2">
