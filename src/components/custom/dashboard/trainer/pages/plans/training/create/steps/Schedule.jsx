@@ -11,6 +11,7 @@ import { ExerciseModal } from "../../../../exercises/components/ExerciseModal";
 
 import styles from "./Schedule.module.css";
 
+import { ErrorMessage } from "@/components/common";
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { Modal } from "@/components/common/Modal";
@@ -147,7 +148,7 @@ function SessionDndWrapper({ id, index, moveSession, children }) {
   return (
     <div
       ref={ref}
-      style={{ opacity: isDragging ? 1 : 0.5 }}
+      style={{ opacity: isDragging ? 0.5 : 1 }}
       data-handler-id={handlerId}
     >
       {children}
@@ -447,6 +448,7 @@ export const Schedule = ({ data, onChange }) => {
   const [showMediaPreview, setShowMediaPreview] = useState(null);
   const [expandedSession, setExpandedSession] = useState(null);
   const [activeFilter, setActiveFilter] = useState("All");
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Fetch exercises when modal opens
   useEffect(() => {
@@ -458,13 +460,14 @@ export const Schedule = ({ data, onChange }) => {
   const fetchExercises = async () => {
     try {
       setIsLoading(true);
+      setErrorMessage("");
       const response = await fetch("/api/users/trainer/exercises");
       const data = await response.json();
       if (data.success) {
         setExercises(data.exercises);
       }
-    } catch (error) {
-      console.error("Error fetching exercises:", error);
+    } catch {
+      setErrorMessage("Failed to fetch exercises. Please try again later.");
     } finally {
       setIsLoading(false);
     }
@@ -992,6 +995,7 @@ export const Schedule = ({ data, onChange }) => {
           primaryButtonDisabled={selectedExercises.length === 0}
           secondaryButtonText="Cancel"
         >
+          <ErrorMessage error={errorMessage} />
           <div className="space-y-6">
             {/* Search and Filter Bar */}
             <div className="backdrop-blur-md bg-gradient-to-r from-[#232323]/80 to-[#323232]/80 rounded-3xl p-6 border border-[#FF7800]/20 shadow-xl">
