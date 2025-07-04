@@ -958,7 +958,9 @@ export const ExerciseModal = ({
         onClose={() => setShowLibrarySelector(false)}
         title="Exercise Templates"
         size="large"
-        footerButtons={false}
+        primaryButtonText="Cancel"
+        primaryButtonAction={() => setShowLibrarySelector(false)}
+        footerButtons={true}
         isNested={true}
       >
         <ExerciseLibrarySelector

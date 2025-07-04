@@ -173,7 +173,6 @@ export default function SelectRole() {
                 config={config}
                 isSelected={selectedRole === key}
                 onClick={handleRoleClick}
-                loading={loading}
                 t={t}
               />
             ))}
@@ -186,16 +185,25 @@ export default function SelectRole() {
         <ActionFooter
           selectedRole={selectedRole}
           config={ROLES_CONFIG[selectedRole]}
-          loading={loading}
           onContinue={handleConfirmRole}
           t={t}
         />
       )}
 
       {/* Loading overlay */}
-      {loading && selectedRole && (
-        <FullScreenLoader text="Preparing your Ancient Journey" />
-      )}
+
+      <FullScreenLoader
+        text={`Preparing your ${
+          ROLES_CONFIG[selectedRole]?.title
+            .replace("role.preparing.", "")
+            .charAt(0)
+            .toUpperCase() +
+          ROLES_CONFIG[selectedRole]?.title
+            .replace("role.preparing.", "")
+            .slice(1)
+        } Journey`}
+        isVisible={loading && selectedRole}
+      />
 
       {/* MDI Icons */}
       <link

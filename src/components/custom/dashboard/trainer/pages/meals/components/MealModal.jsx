@@ -888,7 +888,9 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
         onClose={() => setShowLibrarySelector(false)}
         title="Meal Templates"
         size="large"
-        footerButtons={false}
+        primaryButtonText="Cancel"
+        primaryButtonAction={() => setShowLibrarySelector(false)}
+        footerButtons={true}
         isNested={true}
       >
         <MealLibrarySelector

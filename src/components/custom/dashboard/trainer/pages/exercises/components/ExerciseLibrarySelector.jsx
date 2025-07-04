@@ -61,27 +61,26 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
 
       {/* Search */}
       <div className="mb-4">
-        <div className="relative">
-          <FormField
-            type="text"
-            placeholder="Search exercises by name, description, or muscle group..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-400 focus:outline-none focus:border-orange-500"
-          />
-        </div>
+        <FormField
+          type="text"
+          placeholder="Search exercises by name, description, or muscle group..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          prefixIcon="mdi:magnify"
+          className="mb-0"
+        />
       </div>
 
       {/* Exercise List */}
       <div className="flex-1 overflow-y-auto">
         {filteredExercises.length > 0 ? (
-          <div className="grid gap-3">
+          <div className="grid grid-cols-1 gap-3">
             {filteredExercises.map((exercise) => (
               <button
                 key={exercise.id}
                 type="button"
                 onClick={() => onSelectExercise(exercise)}
-                className="w-full text-left bg-transparent border-none p-0 m-0 focus:outline-none"
+                className="w-full text-left bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-600 rounded-lg p-4 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500/30"
               >
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="text-white font-semibold text-sm">
@@ -94,7 +93,9 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
                           ? "bg-purple-900/40 text-purple-300"
                           : exercise.type === "bodyweight"
                           ? "bg-green-900/40 text-green-300"
-                          : "bg-blue-900/40 text-blue-300"
+                          : exercise.type === "cardio"
+                          ? "bg-blue-900/40 text-blue-300"
+                          : "bg-gray-900/40 text-gray-300"
                       }`}
                     >
                       {exercise.type.charAt(0).toUpperCase() +
@@ -114,16 +115,25 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
                     </span>
                   </div>
                 </div>
+
                 <p className="text-zinc-400 text-xs mb-2 line-clamp-2">
                   {exercise.description}
                 </p>
-                <div className="mt-1 flex flex-wrap gap-1">
-                  {exercise.muscleGroups.map((muscle, idx) => (
-                    <span key={idx} className="text-xs text-zinc-400">
+
+                <div className="flex flex-wrap gap-1">
+                  {exercise.muscleGroups.slice(0, 3).map((muscle, idx) => (
+                    <span
+                      key={idx}
+                      className="text-xs px-2 py-1 bg-orange-900/20 text-orange-300 rounded"
+                    >
                       {formatMuscleDisplayName(muscle)}
-                      {idx < exercise.muscleGroups.length - 1 ? ", " : ""}
                     </span>
                   ))}
+                  {exercise.muscleGroups.length > 3 && (
+                    <span className="text-xs px-2 py-1 bg-zinc-700 text-zinc-400 rounded">
+                      +{exercise.muscleGroups.length - 3}
+                    </span>
+                  )}
                 </div>
               </button>
             ))}
@@ -147,22 +157,6 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
             </Button>
           </div>
         )}
-      </div>
-
-      {/* Footer */}
-      <div className="mt-4 pt-4 border-t border-zinc-700 flex justify-between">
-        <div className="text-sm text-zinc-400">
-          {filteredExercises.length} exercise
-          {filteredExercises.length !== 1 ? "s" : ""} found
-        </div>
-        <Button
-          variant="secondary"
-          size="small"
-          onClick={onClose}
-          className="h-8 w-[80px]"
-        >
-          Cancel
-        </Button>
       </div>
     </div>
   );
