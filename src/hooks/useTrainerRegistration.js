@@ -36,6 +36,12 @@ export function useTrainerRegistration() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
+  // Add certFields state for certification management
+  const [certFields, setCertFields] = useState([
+    { name: "", issuer: "", expiryDate: "", files: [] },
+  ]);
+  
+
   // Handle form input changes
   const handleChange = (e) => {
     if (!e.target || typeof e.target.name !== "string") return;
@@ -65,8 +71,16 @@ export function useTrainerRegistration() {
     }
   };
 
-  // Handle certification fields
+  // Handle certification fields - update both certFields and formData.certifications
   const handleCertChange = (index, field, value) => {
+    // Update certFields
+    setCertFields((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+
+    // Also update formData.certifications for backward compatibility
     setFormData((prev) => {
       const updated = [...prev.certifications];
       updated[index] = { ...updated[index], [field]: value };
@@ -76,17 +90,18 @@ export function useTrainerRegistration() {
 
   // Add new certification field
   const addCertField = () => {
+    const newCert = { name: "", issuer: "", expiryDate: "", files: [] };
+
+    setCertFields((prev) => [...prev, newCert]);
     setFormData((prev) => ({
       ...prev,
-      certifications: [
-        ...prev.certifications,
-        { name: "", issuer: "", expiryDate: "", files: [] },
-      ],
+      certifications: [...prev.certifications, newCert],
     }));
   };
 
   // Remove certification field
   const removeCertField = (index) => {
+    setCertFields((prev) => prev.filter((_, i) => i !== index));
     setFormData((prev) => ({
       ...prev,
       certifications: prev.certifications.filter((_, i) => i !== index),
@@ -167,8 +182,8 @@ export function useTrainerRegistration() {
     if (formData.profileImage && formData.profileImage instanceof File) {
       uploadData.append("profileImage", formData.profileImage);
     }
-    // Dodaj sve fajlove za svaki certifikat
-    formData.certifications.forEach((cert, i) => {
+    // Dodaj sve fajlove za svaki certifikat - use certFields instead of formData.certifications
+    certFields.forEach((cert, i) => {
       if (cert.files && Array.isArray(cert.files)) {
         cert.files.forEach((file) => {
           if (file instanceof File && file.size > 0) {
@@ -182,7 +197,7 @@ export function useTrainerRegistration() {
     let uploadedUrls = {};
     const hasFilesToUpload =
       (formData.profileImage && formData.profileImage instanceof File) ||
-      formData.certifications.some((c) => c.files && c.files.length > 0);
+      certFields.some((c) => c.files && c.files.length > 0);
     if (hasFilesToUpload) {
       const uploadRes = await fetch("/api/upload", {
         method: "POST",
@@ -280,5 +295,7 @@ export function useTrainerRegistration() {
     goToPrevStep,
     handleProfileImageChange,
     scrollToTop,
+    certFields, // Add certFields to the return object
+    setCertFields, // Also return setCertFields for completeness
   };
 }
