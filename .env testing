@@ -1,0 +1,35 @@
+DATABASE_URL="mysql://root:jEmvXBeVFbUPgkXzBURHaYsJicoYrDBZ@interchange.proxy.rlwy.net:18481/railway"
+AUTH_SECRET="aa97eZM0gvv151XhrTVKk80aOim7wmd3uX7zMlhB91A="
+AUTH_URL="https://antique-body.vercel.app"
+
+# Google OAuth
+AUTH_GOOGLE_ID="165331761538-pa81r7s5gb21iq9siufcm5fiqb27rln4.apps.googleusercontent.com"
+AUTH_GOOGLE_SECRET="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" 
+
+# For EMAIL
+EMAIL_USER="antique.body.app@gmail.com"
+EMAIL_PASSWORD="cdmb qkbj rpsn tylw"
+NEXT_PUBLIC_APP_URL="https://antique-body.vercel.app"
+
+# for FACEBOO
+AUTH_FACEBOOK_ID="681859391114624"
+AUTH_FACEBOOK_SECRET="16e28072b98c9c25431c48f833ca92ae"
+
+# for PHONE NUMBER / TWILIO
+TWILIO_ACCOUNT_SID="ACf9703b5df2f358e7fe17a7eb89ef4f54"
+TWILIO_AUTH_TOKEN="9b317947f86482a4c4646fb567760612"
+TWILIO_PHONE_NUMBER="+18317865592"
+
+# STORAGE 
+GCS_PROJECT=antique-body-app
+GCS_BUCKET=antique-body-app
+GCS_KEYFILE=./google-storage.json
+
+#CURRENCY
+CURRENCY_CHANGER="ccb481da2626e4ea9a262f7ffbfe1d25"
+
+#GOOGLE PLACES API
+NEXT_PUBLIC_GOOGLE_PLACES_API_KEY="AIzaSyAkYwr4335PITot9B9XBrPzc4ZmGnfpQO8"
+
+# RAILWAY
+DB_PASSWORD="antiqueBody!2025Fitness"
