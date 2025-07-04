@@ -164,6 +164,7 @@ const PlanManagementPage = () => {
             {/* Search and Filters */}
             <div className="flex bg-[#1a1a1a] border border-[#333] rounded-xl p-1">
               <button
+                type="button"
                 onClick={() => setViewMode("grid")}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
                   viewMode === "grid"
