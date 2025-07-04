@@ -7,12 +7,10 @@ import PropTypes from "prop-types";
 import { useState, useEffect } from "react";
 
 import { Button } from "@/components/common/Button";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 export const Preview = ({ data }) => {
   const [activeTab, setActiveTab] = useState("overview");
   const [coverImageUrl, setCoverImageUrl] = useState(null);
-  const { currentLanguage } = useLanguage();
 
   useEffect(() => {
     if (data.coverImage && typeof data.coverImage !== "string") {
@@ -90,14 +88,11 @@ export const Preview = ({ data }) => {
           {data.createdAt && (
             <div className="text-gray-400 text-xs mt-1">
               Created:{" "}
-              {new Date(data.createdAt).toLocaleDateString(
-                currentLanguage || "en",
-                {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                }
-              )}
+              {new Date(data.createdAt).toLocaleDateString("en", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              })}
             </div>
           )}
         </div>
