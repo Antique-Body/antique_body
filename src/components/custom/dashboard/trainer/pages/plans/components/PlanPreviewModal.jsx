@@ -13,8 +13,8 @@ import { usePlanPDF } from "./planPreviewModal/usePlanPDF";
 import { WeeklyScheduleTab } from "./planPreviewModal/WeeklyScheduleTab";
 
 import { Button } from "@/components/common/Button";
-import { Modal } from "@/components/common/Modal";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
+import { Modal } from "@/components/common/Modal";
 
 export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
   const [activeTab, setActiveTab] = useState("overview");

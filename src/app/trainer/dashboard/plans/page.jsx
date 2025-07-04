@@ -162,34 +162,29 @@ const PlanManagementPage = () => {
             </div>
 
             {/* Search and Filters */}
-            <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-              {/* View Mode Toggle */}
-              <div className="flex bg-[#1a1a1a] border border-[#333] rounded-xl p-1">
-                <Button
-                  onClick={() => setViewMode("grid")}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                    viewMode === "grid"
-                      ? "bg-[#FF6B00] text-white shadow-sm"
-                      : "text-gray-400 hover:text-white"
-                  }`}
-                  type="button"
-                >
-                  <Icon icon="mdi:view-grid-outline" className="w-4 h-4" />
-                  <span className="hidden sm:inline text-sm">Grid</span>
-                </Button>
-                <Button
-                  onClick={() => setViewMode("list")}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                    viewMode === "list"
-                      ? "bg-[#FF6B00] text-white shadow-sm"
-                      : "text-gray-400 hover:text-white"
-                  }`}
-                  type="button"
-                >
-                  <Icon icon="mdi:view-list-outline" className="w-4 h-4" />
-                  <span className="hidden sm:inline text-sm">List</span>
-                </Button>
-              </div>
+            <div className="flex bg-[#1a1a1a] border border-[#333] rounded-xl p-1">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
+                  viewMode === "grid"
+                    ? "bg-[#FF6B00] text-white shadow-sm"
+                    : "text-gray-400 hover:text-white"
+                }`}
+              >
+                <Icon icon="mdi:view-grid-outline" className="w-4 h-4" />
+                <span className="hidden sm:inline text-sm">Grid</span>
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
+                  viewMode === "list"
+                    ? "bg-[#FF6B00] text-white shadow-sm"
+                    : "text-gray-400 hover:text-white"
+                }`}
+              >
+                <Icon icon="mdi:view-list-outline" className="w-4 h-4" />
+                <span className="hidden sm:inline text-sm">List</span>
+              </button>
             </div>
           </div>
         </motion.div>

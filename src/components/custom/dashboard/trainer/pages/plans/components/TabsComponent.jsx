@@ -1,5 +1,4 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 
@@ -10,7 +9,6 @@ export const TabsComponent = ({
   setActiveTab,
   disableAnimations = false,
 }) => {
-  const router = useRouter();
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -30,7 +28,6 @@ export const TabsComponent = ({
       icon: <TrainingPlanIcon size={20} />,
       description:
         "Design workout programs, exercise routines, and training schedules to help your clients achieve their fitness goals.",
-      path: "/trainer/dashboard/plans/training",
     },
     {
       id: "nutrition",
@@ -38,16 +35,11 @@ export const TabsComponent = ({
       icon: <NutritionPlanIcon size={20} />,
       description:
         "Create and manage meal plans, recipes, macro targets and nutritional guidelines for your clients.",
-      path: "/trainer/dashboard/plans/nutrition",
     },
   ];
 
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
-    const tab = tabs.find((t) => t.id === tabId);
-    if (tab) {
-      router.push(tab.path);
-    }
   };
 
   return (

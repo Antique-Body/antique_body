@@ -640,7 +640,17 @@ export const Schedule = ({ data, onChange }) => {
   }, [exercises, searchQuery]);
 
   // Fallback ako nema schedule
-  const schedule = data.schedule || [];
+  let schedule = data.schedule || [];
+
+  // Ensure every session and every exercise in every session has a unique id
+  schedule = schedule.map((session) => ({
+    ...session,
+    id: session.id || crypto.randomUUID(),
+    exercises: (session.exercises || []).map((exercise) => ({
+      ...exercise,
+      id: exercise.id || crypto.randomUUID(),
+    })),
+  }));
 
   useEffect(() => {
     if (
