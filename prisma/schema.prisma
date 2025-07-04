@@ -494,7 +494,7 @@ model TrainingPlan {
   coverImage        String?
   price             Float?
   duration          Int?
-  durationType      String?  // "weeks", "days", itd.
+  durationType      String?  // "weeks", "days", etc.
   keyFeatures       Json?
   trainingType      String?
   timeline          Json?

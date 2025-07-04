@@ -455,33 +455,33 @@ export const TRAINING_PLAN_CONFIG = [
 
 export const NUTRITION_PLAN_CONFIG = [
   {
-    title: "Plan ishrane za mišićnu masu",
+    title: "Muscle Gain Nutrition Plan",
     description:
-      "Detaljan plan ishrane za izgradnju mišićne mase, s visokim unosom proteina i balansiranim obrocima.",
+      "A detailed nutrition plan for building muscle mass, with high protein intake and balanced meals.",
     coverImage:
       "https://storage.googleapis.com/antique-body-app/cover-images/b57ed1dd-08bd-4d02-8c4d-61472a77c99d.png",
     price: 100,
     duration: 8,
     durationType: "months",
     keyFeatures: [
-      "Plan po ishrani",
-      "Visok unos proteina",
-      "Prilagodljivo ciljevima",
-      "Uključene preporuke za suplemente",
+      "Meal-based plan",
+      "High protein intake",
+      "Customizable to goals",
+      "Supplement recommendations included",
     ],
     timeline: [
       {
-        week: "prva sedmica",
-        title: "Sedmica gojaznih",
+        week: "First week",
+        title: "Obese Week",
         description:
-          "Fokus na navikavanje na novi režim i povećanje unosa proteina.",
+          "Focus on adapting to the new regime and increasing protein intake.",
       },
     ],
     nutritionInfo: {
-      fats: "00",
-      carbs: "100",
-      protein: "200",
-      calories: "2000",
+      fats: 0,
+      carbs: 100,
+      protein: 200,
+      calories: 2000,
     },
     mealTypes: ["breakfast", "lunch", "dinner", "snack"],
     supplementRecommendations: "Whey protein",
@@ -492,7 +492,7 @@ export const NUTRITION_PLAN_CONFIG = [
         name: "Day 1",
         meals: [
           {
-            name: "Doručak",
+            name: "Breakfast",
             time: "08:00",
             options: [
               {
@@ -548,7 +548,7 @@ export const NUTRITION_PLAN_CONFIG = [
         name: "Day 2",
         meals: [
           {
-            name: "Doručak",
+            name: "Breakfast",
             time: "08:00",
             options: [
               {
@@ -604,39 +604,39 @@ export const NUTRITION_PLAN_CONFIG = [
         name: "Day 3",
         meals: [],
         isRestDay: true,
-        description: "Cheat day: slobodan obrok ili poslastica.",
+        description: "Cheat day: free meal or dessert.",
       },
     ],
-    recommendedFrequency: "svaki dan",
-    adaptability: "Može se prilagoditi individualnim potrebama",
+    recommendedFrequency: "every day",
+    adaptability: "Can be adapted to individual needs",
   },
   {
-    title: "Plan ishrane za definiciju",
+    title: "Definition Nutrition Plan",
     description:
-      "Plan za gubitak masnog tkiva i očuvanje mišićne mase, s niskim udjelom masti i optimalnim unosom proteina.",
+      "A plan for fat loss and muscle preservation, with low fat and optimal protein intake.",
     coverImage:
       "https://www.allrecipes.com/thmb/xPSphQUyrNBb_DIAVBS1NcvxtKY=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/69471-baby-spinach-omelet-hero-4x3-5e7db70704f141edb6aee119a1d750c6.jpg",
     price: 80,
     duration: 6,
     durationType: "weeks",
     keyFeatures: [
-      "Nizak unos masti",
-      "Jednostavni recepti",
-      "Prilagodba kalorija",
-      "Brza priprema",
+      "Low fat intake",
+      "Simple recipes",
+      "Calorie adjustment",
+      "Quick preparation",
     ],
     timeline: [
       {
         week: "1-2",
-        title: "Uvod u deficit",
-        description: "Postepeno smanjenje kalorija i povećanje povrća.",
+        title: "Introduction to Deficit",
+        description: "Gradual calorie reduction and increased vegetables.",
       },
     ],
     nutritionInfo: {
-      fats: "30",
-      carbs: "120",
-      protein: "150",
-      calories: "1600",
+      fats: 30,
+      carbs: 120,
+      protein: 150,
+      calories: 1600,
     },
     mealTypes: ["breakfast", "lunch", "dinner"],
     supplementRecommendations: "Multivitamin",
@@ -647,11 +647,11 @@ export const NUTRITION_PLAN_CONFIG = [
         name: "Day 1",
         meals: [
           {
-            name: "Proteinski omlet",
+            name: "Protein Omelette",
             time: "07:30",
             options: [
               {
-                name: "Omlet od bjelanjaka",
+                name: "Egg White Omelette",
                 fat: 5,
                 carbs: 8,
                 protein: 25,
@@ -659,8 +659,8 @@ export const NUTRITION_PLAN_CONFIG = [
                 imageUrl:
                   "https://www.allrecipes.com/thmb/xPSphQUyrNBb_DIAVBS1NcvxtKY=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/69471-baby-spinach-omelet-hero-4x3-5e7db70704f141edb6aee119a1d750c6.jpg",
                 description:
-                  "1. Umutiti bjelanjke, dodati povrće, peći na tavi bez ulja.",
-                ingredients: ["bjelanjci", "paprika", "špinat", "paradajz"],
+                  "1. Whisk egg whites, add vegetables, cook in a pan without oil.",
+                ingredients: ["egg whites", "bell pepper", "spinach", "tomato"],
               },
             ],
           },
@@ -672,39 +672,39 @@ export const NUTRITION_PLAN_CONFIG = [
         name: "Day 2",
         meals: [],
         isRestDay: true,
-        description: "Dan za odmor i regeneraciju.",
+        description: "Rest and recovery day.",
       },
     ],
-    recommendedFrequency: "svaki dan",
-    adaptability: "Prilagodljivo vegetarijancima i osobama s alergijama",
+    recommendedFrequency: "every day",
+    adaptability: "Adaptable for vegetarians and people with allergies",
   },
   {
-    title: "Balansirani plan ishrane",
+    title: "Balanced Nutrition Plan",
     description:
-      "Plan za održavanje zdravlja i energije, s uravnoteženim makronutrijentima i raznovrsnim obrocima.",
+      "A plan for maintaining health and energy, with balanced macronutrients and diverse meals.",
     coverImage:
       "https://images.pexels.com/photos/1640773/pexels-photo-1640773.jpeg",
     price: 60,
     duration: 4,
     durationType: "weeks",
     keyFeatures: [
-      "Balansirani makronutrijenti",
-      "Obroci za cijelu porodicu",
-      "Jednostavna priprema",
-      "Raznovrsni recepti",
+      "Balanced macronutrients",
+      "Family-friendly meals",
+      "Easy preparation",
+      "Diverse recipes",
     ],
     timeline: [
       {
         week: "1",
-        title: "Uvod u balansiranu prehranu",
-        description: "Upoznavanje s osnovama i planiranje obroka.",
+        title: "Introduction to Balanced Nutrition",
+        description: "Learning the basics and meal planning.",
       },
     ],
     nutritionInfo: {
-      fats: "40",
-      carbs: "180",
-      protein: "110",
-      calories: "2000",
+      fats: 40,
+      carbs: 180,
+      protein: 110,
+      calories: 2000,
     },
     mealTypes: ["breakfast", "lunch", "dinner", "snack"],
     supplementRecommendations: "Omega-3",
@@ -715,25 +715,19 @@ export const NUTRITION_PLAN_CONFIG = [
         name: "Day 1",
         meals: [
           {
-            name: "Zobena kaša",
+            name: "Oatmeal",
             time: "08:00",
             options: [
               {
-                name: "Zobena kaša s voćem",
+                name: "Oatmeal with Fruit",
                 fat: 7,
                 carbs: 40,
                 protein: 10,
                 calories: 220,
                 imageUrl:
                   "https://images.pexels.com/photos/461382/pexels-photo-461382.jpeg",
-                description:
-                  "Skuhati zobene pahuljice u mlijeku, dodati voće po izboru.",
-                ingredients: [
-                  "zobene pahuljice",
-                  "mlijeko",
-                  "banana",
-                  "borovnice",
-                ],
+                description: "Cook oats in milk, add fruit of choice.",
+                ingredients: ["oats", "milk", "banana", "blueberries"],
               },
             ],
           },
@@ -742,8 +736,8 @@ export const NUTRITION_PLAN_CONFIG = [
         description: "",
       },
     ],
-    recommendedFrequency: "svaki dan",
-    adaptability: "Pogodno za sve uzraste",
+    recommendedFrequency: "every day",
+    adaptability: "Suitable for all ages",
   },
 ];
 

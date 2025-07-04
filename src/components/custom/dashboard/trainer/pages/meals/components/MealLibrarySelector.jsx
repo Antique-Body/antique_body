@@ -93,19 +93,11 @@ export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
         {filteredMeals.length > 0 ? (
           <div className="grid grid-cols-1 gap-2">
             {filteredMeals.map((meal) => (
-              <div
+              <button
                 key={meal.id}
+                type="button"
                 className="group relative rounded-xl border-2 transition-all duration-300 cursor-pointer overflow-hidden bg-gradient-to-r from-slate-700/80 to-slate-600/80 border-slate-500/60 hover:border-blue-400/60 hover:shadow-md hover:shadow-blue-400/10"
                 onClick={() => onSelectMeal(meal)}
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    onSelectMeal(meal);
-                  }
-                }}
-                role="button"
-                aria-pressed="false"
               >
                 <div className="p-3 flex items-center gap-3 relative z-10">
                   {/* Meal Image with Overlay */}
@@ -145,7 +137,7 @@ export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
                     <div className="flex items-center gap-3 mb-1">
                       {/* Type Badge */}
                       <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                        <div className="w-2 h-2 rounded-full bg-blue-400" />
                         <span className="text-xs font-medium text-slate-200 capitalize">
                           {meal.mealType}
                         </span>
@@ -204,12 +196,11 @@ export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1">
                       {meal.imageUrl && (
-                        <div className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-500/20">
-                          <Icon
-                            icon="mdi:image"
-                            className="w-2.5 h-2.5 text-blue-400"
-                          />
-                        </div>
+                        <div className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-500/20" />
+                        <Icon
+                          icon="mdi:image"
+                          className="w-2.5 h-2.5 text-blue-400"
+                        />
                       )}
                       {meal.videoUrl && (
                         <div className="flex items-center justify-center w-5 h-5 rounded-full bg-purple-500/20">
@@ -222,7 +213,7 @@ export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </button>
             ))}
             {isLoading && (
               <div className="flex justify-center py-4">

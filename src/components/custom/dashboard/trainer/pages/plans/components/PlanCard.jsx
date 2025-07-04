@@ -12,7 +12,7 @@ import {
   fetchPlanDetails,
   deletePlan,
 } from "@/app/api/users/services/planService";
-import { Card } from "@/components/common";
+import { Card, ErrorMessage } from "@/components/common";
 import { Button } from "@/components/common/Button";
 import {
   ClockIcon,
@@ -24,7 +24,6 @@ import {
   ViewIcon,
 } from "@/components/common/Icons";
 import { Modal } from "@/components/common/Modal";
-import { ErrorMessage } from "@/components/common";
 
 export const PlanCard = ({
   id,
@@ -128,7 +127,7 @@ export const PlanCard = ({
       }
       setDetailedPlanData(transformedData);
       return transformedData;
-    } catch (error) {
+    } catch {
       return {
         id,
         title,
