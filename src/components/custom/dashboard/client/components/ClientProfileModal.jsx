@@ -1,4 +1,5 @@
 import { Icon } from "@iconify/react";
+import { useState, useEffect } from "react";
 
 import { Modal } from "@/components/common/Modal";
 import { ACTIVITY_TYPES } from "@/enums/activityTypes";
@@ -35,8 +36,9 @@ export const ClientProfileModal = ({ clientData, isOpen, onClose }) => {
   // Calculate age from dateOfBirth
   const calculateAge = (dateOfBirth) => {
     if (!dateOfBirth) return "N/A";
-    const today = new Date();
     const birthDate = new Date(dateOfBirth);
+    if (isNaN(birthDate.getTime())) return "N/A";
+    const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
     if (
@@ -51,13 +53,41 @@ export const ClientProfileModal = ({ clientData, isOpen, onClose }) => {
   // Get client info with fallback
   const clientInfo = clientData?.clientInfo || {};
 
-  // Real progress data from API
-  const progressData = {
-    goalsCompleted: 2, // You can calculate this based on goals
-    totalGoals: 3,
-    workoutsThisMonth: 12,
-    averageRating: 4.8,
-  };
+  // Progress data state
+  const [progressData, setProgressData] = useState({
+    goalsCompleted: 0,
+    totalGoals: 0,
+    workoutsThisMonth: 0,
+    averageRating: 0,
+  });
+  const [_progressLoading, setProgressLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isOpen || !clientData) return;
+    setProgressLoading(true);
+    // Example: fetch from /api/users/client?mode=basic (adjust if you have a dedicated endpoint)
+    fetch("/api/users/client?mode=basic")
+      .then((res) => res.json())
+      .then((data) => {
+        // You may need to adjust this mapping based on your API response
+        const d = data.data || {};
+        setProgressData({
+          goalsCompleted: d.goalsCompleted ?? 0,
+          totalGoals: d.totalGoals ?? 0,
+          workoutsThisMonth: d.workoutsThisMonth ?? 0,
+          averageRating: d.averageRating ?? 0,
+        });
+      })
+      .catch(() => {
+        setProgressData({
+          goalsCompleted: 0,
+          totalGoals: 0,
+          workoutsThisMonth: 0,
+          averageRating: 0,
+        });
+      })
+      .finally(() => setProgressLoading(false));
+  }, [isOpen, clientData]);
 
   if (!clientData) return null;
 

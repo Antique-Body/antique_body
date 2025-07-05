@@ -7,7 +7,7 @@ import { Button } from "@/components/common/Button";
 import { Card } from "@/components/common/Card";
 import { FormField } from "@/components/common/FormField";
 
-export const AccountSettings = ({ userData, onSave }) => {
+export const AccountSettings = ({ userData }) => {
   const [formData, setFormData] = useState({
     email: userData?.user?.email || "",
     phone: userData?.user?.phone || "",

@@ -145,11 +145,13 @@ export default function TrainerDashboardLayout({ children }) {
   }, []);
 
   // Update navigation items with real badge count
-  const navigationItemsWithBadges = useMemo(() => {
-    return updateNavigationBadges(navigationItems, {
-      messages: messageBadgeCount,
-    });
-  }, [navigationItems, messageBadgeCount]);
+  const navigationItemsWithBadges = useMemo(
+    () =>
+      updateNavigationBadges(navigationItems, {
+        messages: messageBadgeCount,
+      }),
+    [navigationItems, messageBadgeCount]
+  );
 
   return (
     <div className="min-h-screen text-white">
