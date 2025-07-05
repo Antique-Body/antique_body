@@ -1,5 +1,6 @@
 import twilio from "twilio";
 
+import { userService } from "@/app/api/users/services";
 import prisma from "@/lib/prisma";
 import { formatPhoneNumber } from "@/lib/utils";
 
@@ -91,5 +92,5 @@ export async function verifyPhoneCode(phone, code, isRegistration = false) {
   }
 }
 
-// Re-export findUserByPhone from user services
-export { findUserByPhone } from "@/app/api/users/services";
+// Re-export findUserByPhone from userService
+export const findUserByPhone = userService.findUserByPhone;
