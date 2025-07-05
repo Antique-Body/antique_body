@@ -61,6 +61,13 @@ const ProfileCapsule = ({
         isCollapsed ? "flex justify-center" : ""
       }`}
       onClick={onProfileClick}
+      tabIndex="0"
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onProfileClick?.();
+        }
+      }}
     >
       <div
         className={`flex items-center ${
@@ -106,6 +113,7 @@ const ProfileCapsule = ({
       {!isCollapsed && (
         <div className="flex gap-2 mt-3">
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               onEditClick?.();

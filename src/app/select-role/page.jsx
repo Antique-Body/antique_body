@@ -193,15 +193,15 @@ export default function SelectRole() {
       {/* Loading overlay */}
 
       <FullScreenLoader
-        text={`Preparing your ${
-          ROLES_CONFIG[selectedRole]?.title
-            .replace("role.preparing.", "")
-            .charAt(0)
-            .toUpperCase() +
-          ROLES_CONFIG[selectedRole]?.title
-            .replace("role.preparing.", "")
-            .slice(1)
-        } Journey`}
+        text={`Preparing your ${(() => {
+          const rawTitle = ROLES_CONFIG[selectedRole]?.title;
+          const fallback = "Role";
+          if (!rawTitle) return fallback;
+          // Extract the last part after the last dot, or use the whole string
+          const keyPart = rawTitle.split(".").pop() || fallback;
+          // Capitalize first letter
+          return keyPart.charAt(0).toUpperCase() + keyPart.slice(1);
+        })()} Journey`}
         isVisible={loading && selectedRole}
       />
 

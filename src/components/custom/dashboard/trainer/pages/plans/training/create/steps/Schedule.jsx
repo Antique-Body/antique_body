@@ -257,7 +257,7 @@ const ExerciseCard = React.memo(function ExerciseCard({
           <div className="space-y-2 mb-4">
             <label
               htmlFor={`instructions-${sessionIndex}-${exerciseIndex}`}
-              className="block text-sm font-medium text-gray-200 mb-1 items-center gap-2"
+              className="block text-sm font-medium text-gray-200 mb-1 flex items-center gap-2"
             >
               <Icon icon="mdi:information-outline" className="w-4 h-4" />
               Instructions
@@ -302,7 +302,7 @@ const ExerciseCard = React.memo(function ExerciseCard({
             <div className="space-y-2">
               <label
                 htmlFor={`target-muscles-${sessionIndex}-${exerciseIndex}`}
-                className="block text-sm font-medium text-gray-200 mb-1 items-center gap-2"
+                className="block text-sm font-medium text-gray-200 mb-1 flex items-center gap-2"
               >
                 <Icon icon="mdi:muscle" className="w-4 h-4" />
                 Target Muscles

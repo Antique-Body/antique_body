@@ -44,7 +44,7 @@ export const DashboardTabs = ({ activeTab, setActiveTab, tabs }) => {
 
   const handleTabClick = (tab) => {
     setActiveTab(tab.id);
-    if (tab.href) {
+    if (typeof tab.href === "string" && tab.href.trim().length > 0) {
       router.push(tab.href);
     }
   };
