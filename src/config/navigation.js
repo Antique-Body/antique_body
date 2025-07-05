@@ -60,58 +60,58 @@ export const CLIENT_NAVIGATION = Object.freeze([
 ]);
 
 // Trainer Dashboard Navigation Configuration
-export const TRAINER_NAVIGATION = [
-  {
+export const TRAINER_NAVIGATION = Object.freeze([
+  Object.freeze({
     id: "newClients",
     label: "New Clients",
     icon: "mdi:account-plus",
     route: "/trainer/dashboard/newclients",
     description: "Client requests and applications",
-  },
-  {
+  }),
+  Object.freeze({
     id: "clients",
     label: "Clients",
     icon: "mdi:account-group",
     route: "/trainer/dashboard/clients",
     description: "Manage your clients",
-  },
-  {
+  }),
+  Object.freeze({
     id: "upcomingTrainings",
     label: "Upcoming Trainings",
     icon: "mdi:calendar-clock",
     route: "/trainer/dashboard/upcoming-trainings",
     description: "Your scheduled sessions",
-  },
-  {
+  }),
+  Object.freeze({
     id: "messages",
     label: "Messages",
     icon: "mdi:message-text",
     route: "/trainer/dashboard/messages",
     description: "Chat with clients",
     badgeCount: 0, // Will be updated dynamically
-  },
-  {
+  }),
+  Object.freeze({
     id: "plans",
     label: "Plans",
     icon: "mdi:clipboard-text",
     route: "/trainer/dashboard/plans",
     description: "Training and nutrition plans",
-  },
-  {
+  }),
+  Object.freeze({
     id: "exercises",
     label: "Exercises",
     icon: "mdi:dumbbell",
     route: "/trainer/dashboard/exercises",
     description: "Exercise library",
-  },
-  {
+  }),
+  Object.freeze({
     id: "meals",
     label: "Meals",
     icon: "mdi:food",
     route: "/trainer/dashboard/meals",
     description: "Meal library",
-  },
-];
+  }),
+]);
 
 // Helper function to get navigation config by profile type
 export const getNavigationConfig = (profileType) =>

@@ -124,6 +124,7 @@ const ProfileCapsule = ({
             Edit
           </button>
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               onSettingsClick?.();
@@ -150,6 +151,7 @@ const ProfileCapsule = ({
 const NavItem = ({ item, isActive, onClick, isCollapsed, badgeCount }) => (
   <div className="relative">
     <button
+      type="button"
       onClick={onClick}
       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative ${
         isActive
