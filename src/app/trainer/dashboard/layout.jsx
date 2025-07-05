@@ -40,6 +40,9 @@ export default function TrainerDashboardLayout({ children }) {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
+  // State for message badge count
+  const [messageBadgeCount, setMessageBadgeCount] = useState(0);
+
   // Update active tab when pathname changes
   useEffect(() => {
     setActiveTab(getActiveTabFromPath(pathname));
@@ -59,6 +62,19 @@ export default function TrainerDashboardLayout({ children }) {
       }
     }
     fetchTrainer();
+  }, []);
+
+  useEffect(() => {
+    async function fetchUnreadMessages() {
+      try {
+        const res = await fetch("/api/messages/unread-count");
+        const data = await res.json();
+        setMessageBadgeCount(data.unreadCount || 0);
+      } catch {
+        setMessageBadgeCount(0);
+      }
+    }
+    fetchUnreadMessages();
   }, []);
 
   // Navigate to appropriate route when tab changes
@@ -125,11 +141,15 @@ export default function TrainerDashboardLayout({ children }) {
   // Get navigation items with updated badge counts
   const navigationItems = useMemo(() => {
     const baseNavigation = getNavigationConfig("trainer");
-    const badges = {
-      messages: 2, // Placeholder - would come from real data
-    };
-    return updateNavigationBadges(baseNavigation, badges);
+    return baseNavigation;
   }, []);
+
+  // Update navigation items with real badge count
+  const navigationItemsWithBadges = useMemo(() => {
+    return updateNavigationBadges(navigationItems, {
+      messages: messageBadgeCount,
+    });
+  }, [navigationItems, messageBadgeCount]);
 
   return (
     <div className="min-h-screen text-white">
@@ -140,7 +160,7 @@ export default function TrainerDashboardLayout({ children }) {
         profileType="trainer"
         userData={trainerData?.data}
         loading={loading}
-        navigationItems={navigationItems}
+        navigationItems={navigationItemsWithBadges}
         activeItem={activeTab}
         onNavigationChange={handleTabChange}
         onProfileClick={handleProfileClick}

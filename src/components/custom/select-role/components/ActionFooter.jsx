@@ -48,10 +48,10 @@ export function ActionFooter({ selectedRole, config, onContinue, t }) {
                         `}
           >
             {/* Button hover effect */}
-            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
             <span>{t("common.continue")}</span>
-            <span className="mdi mdi-arrow-right group-hover:translate-x-1 transition-transform duration-300"></span>
+            <span className="mdi mdi-arrow-right group-hover:translate-x-1 transition-transform duration-300" />
           </Button>
         </div>
       </div>

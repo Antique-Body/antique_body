@@ -1,63 +1,63 @@
 // Client Dashboard Navigation Configuration
-export const CLIENT_NAVIGATION = [
-  {
+export const CLIENT_NAVIGATION = Object.freeze([
+  Object.freeze({
     id: "trainwithcoach",
     label: "Train with Coach",
     icon: "mdi:account-supervisor",
     route: "/client/dashboard/trainwithcoach",
     description: "Find and connect with trainers",
-  },
-  {
+  }),
+  Object.freeze({
     id: "overview",
     label: "Overview",
     icon: "mdi:view-dashboard",
     route: "/client/dashboard/overview",
     description: "Your fitness dashboard",
-  },
-  {
+  }),
+  Object.freeze({
     id: "upcoming-trainings",
     label: "Upcoming Trainings",
     icon: "mdi:calendar-clock",
     route: "/client/dashboard/upcoming-trainings",
     description: "Your scheduled sessions",
-  },
-  {
+  }),
+  Object.freeze({
     id: "trainings",
     label: "Trainings",
     icon: "mdi:dumbbell",
     route: "/client/dashboard/trainings",
     description: "Your workout history",
-  },
-  {
+  }),
+  Object.freeze({
     id: "progress",
     label: "Progress",
     icon: "mdi:chart-line",
     route: "/client/dashboard/progress",
     description: "Track your fitness journey",
-  },
-  {
+  }),
+  Object.freeze({
     id: "messages",
     label: "Messages",
     icon: "mdi:message-text",
     route: "/client/dashboard/messages",
     description: "Chat with your trainer",
     badgeCount: 0, // Will be updated dynamically
-  },
-  {
+  }),
+  Object.freeze({
     id: "nutrition",
     label: "Nutrition",
     icon: "mdi:food-apple",
     route: "/client/dashboard/nutrition",
     description: "Your nutrition plan",
-  },
-  {
+  }),
+  Object.freeze({
     id: "health",
     label: "Health",
     icon: "mdi:heart-pulse",
     route: "/client/dashboard/health",
     description: "Health monitoring",
-  },
-];
+  }),
+]);
 
 // Trainer Dashboard Navigation Configuration
 export const TRAINER_NAVIGATION = [

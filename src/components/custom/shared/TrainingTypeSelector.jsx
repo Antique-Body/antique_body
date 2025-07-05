@@ -250,7 +250,7 @@ export const TrainingTypeSelector = ({
                         variant={isSelected ? "orangeOutline" : "secondary"}
                         type="button"
                         onClick={() => onTypeToggle(type.id)}
-                        className={`w-full justif-start flex p-3 rounded-lg text-left transition-colors ${
+                        className={`w-full justify-start flex p-3 rounded-lg text-left transition-colors ${
                           isSelected
                             ? "bg-[#FF6B00]/10 border-[#FF6B00]/40 text-[#FF6B00]"
                             : "bg-[rgba(30,30,30,0.5)] text-gray-300 hover:border-[#444] hover:bg-[rgba(40,40,40,0.7)]"

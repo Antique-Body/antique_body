@@ -87,7 +87,10 @@ export const ClientProfileModal = ({ clientData, isOpen, onClose }) => {
           <div className="bg-zinc-800/30 rounded-lg p-3 text-center border border-zinc-700/30">
             <div className="text-lg font-bold text-white">
               {Math.round(
-                (progressData.goalsCompleted / progressData.totalGoals) * 100
+                progressData.totalGoals > 0
+                  ? (progressData.goalsCompleted / progressData.totalGoals) *
+                      100
+                  : 0
               )}
               %
             </div>

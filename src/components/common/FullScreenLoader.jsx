@@ -55,7 +55,7 @@ export function FullScreenLoader({ text, isVisible = true }) {
               }}
               transition={{
                 duration: 8,
-                repeat: Infinity,
+                repeat: Number.POSITIVE_INFINITY,
                 ease: "easeInOut",
               }}
               className="absolute -top-1/2 -left-1/2 w-[150vw] h-[150vw] max-w-[1200px] max-h-[1200px] rounded-full"
@@ -74,7 +74,7 @@ export function FullScreenLoader({ text, isVisible = true }) {
               }}
               transition={{
                 duration: 12,
-                repeat: Infinity,
+                repeat: Number.POSITIVE_INFINITY,
                 ease: "easeInOut",
                 delay: 2,
               }}
@@ -98,7 +98,7 @@ export function FullScreenLoader({ text, isVisible = true }) {
                 }}
                 transition={{
                   duration: 4 + Math.random() * 4,
-                  repeat: Infinity,
+                  repeat: Number.POSITIVE_INFINITY,
                   delay: Math.random() * 2,
                   ease: "easeInOut",
                 }}
@@ -169,7 +169,11 @@ export function FullScreenLoader({ text, isVisible = true }) {
               {/* Outer ring */}
               <motion.div
                 animate={{ rotate: 360 }}
-                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                transition={{
+                  duration: 3,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "linear",
+                }}
                 className="absolute inset-0 w-24 h-24 rounded-full border-2 border-transparent"
                 style={{
                   background:
@@ -183,7 +187,11 @@ export function FullScreenLoader({ text, isVisible = true }) {
               {/* Inner ring */}
               <motion.div
                 animate={{ rotate: -360 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                transition={{
+                  duration: 2,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "linear",
+                }}
                 className="absolute inset-2 w-20 h-20 rounded-full border border-[#FF7800]/30"
                 style={{
                   background:
@@ -203,7 +211,7 @@ export function FullScreenLoader({ text, isVisible = true }) {
                   }}
                   transition={{
                     duration: 2,
-                    repeat: Infinity,
+                    repeat: Number.POSITIVE_INFINITY,
                     ease: "easeInOut",
                   }}
                   className="relative"
@@ -258,7 +266,7 @@ export function FullScreenLoader({ text, isVisible = true }) {
                     }}
                     transition={{
                       duration: 1.5,
-                      repeat: Infinity,
+                      repeat: Number.POSITIVE_INFINITY,
                       delay: i * 0.3,
                       ease: "easeInOut",
                     }}
