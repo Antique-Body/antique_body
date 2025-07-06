@@ -1,7 +1,6 @@
 "use client";
 import { Icon } from "@iconify/react";
 import { signIn } from "next-auth/react";
-import { useTranslation } from "react-i18next";
 
 import { PhoneInput } from "./PhoneInput";
 import { VerificationCodeInput } from "./VerificationCodeInput";
@@ -22,7 +21,6 @@ export const AuthForm = ({
   codeError: externalCodeError,
 }) => {
   const { isLoading: authLoading } = useAuth();
-  const { t } = useTranslation();
   const {
     showEmailForm,
     setShowEmailForm,
@@ -89,74 +87,99 @@ export const AuthForm = ({
     return (
       <div className="space-y-4 w-full">
         <ErrorMessage error={error || codeError} />
-        <Button
-          onClick={() => setShowEmailForm(true)}
-          className="w-full bg-gradient-to-r from-[#ff7800] to-[#ff5f00] py-2 rounded font-medium text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 disabled:opacity-50"
-        >
-          {isLogin
-            ? t("auth.login.continue_with_email_phone")
-            : t("auth.register.register_with_email_phone")}
-        </Button>
 
         <Button
-          onClick={handleGoogleSignIn}
-          variant="outline"
-          className="w-full bg-white text-[#1a1a1a] hover:bg-gray-100 hover:scale-[1.02] transition-all duration-200"
-          leftIcon={<Icon icon="flat-color-icons:google" className="w-5 h-5" />}
+          onClick={() => setShowEmailForm(true)}
+          className="w-full py-3 sm:py-4 bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] text-white font-medium rounded-lg hover:from-[#FF5f00] hover:to-[#FF7800] transition-all duration-300 disabled:opacity-50 shadow-lg hover:shadow-xl transform hover:scale-[1.02] text-sm sm:text-base"
         >
+          <Icon icon="mdi:email" className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
           {isLogin
-            ? t("auth.login.continue_with_google")
-            : t("auth.register.register_with_google")}
+            ? "Continue with Email or Phone"
+            : "Sign up with Email or Phone"}
         </Button>
-        <Button
-          onClick={handleFacebookSignIn}
-          variant="outline"
-          className="w-full bg-white text-[#1a1a1a] hover:bg-gray-100 hover:scale-[1.02] transition-all duration-200"
-          leftIcon={<Icon icon="logos:facebook" className="w-5 h-5" />}
-        >
-          {isLogin
-            ? t("auth.login.continue_with_facebook")
-            : t("auth.register.register_with_facebook")}
-        </Button>
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-600"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-4 bg-gradient-to-r from-white/5 to-white/[0.02] text-gray-400 lg:bg-gradient-to-b lg:from-white/5 lg:to-white/[0.02]">
+              Or continue with
+            </span>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <Button
+            onClick={handleGoogleSignIn}
+            className="w-full py-3 sm:py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white font-medium rounded-lg hover:bg-white/20 transition-all duration-300 transform hover:scale-[1.02] text-sm sm:text-base"
+            leftIcon={
+              <Icon
+                icon="flat-color-icons:google"
+                className="w-4 h-4 sm:w-5 sm:h-5"
+              />
+            }
+          >
+            {isLogin ? "Continue with Google" : "Sign up with Google"}
+          </Button>
+
+          <Button
+            onClick={handleFacebookSignIn}
+            className="w-full py-3 sm:py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white font-medium rounded-lg hover:bg-white/20 transition-all duration-300 transform hover:scale-[1.02] text-sm sm:text-base"
+            leftIcon={
+              <Icon icon="logos:facebook" className="w-4 h-4 sm:w-5 sm:h-5" />
+            }
+          >
+            {isLogin ? "Continue with Facebook" : "Sign up with Facebook"}
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleFormSubmit} className="space-y-6 w-full" noValidate>
+    <form onSubmit={handleFormSubmit} className="space-y-5 w-full" noValidate>
       <ErrorMessage error={error || codeError} />
 
-      <div className="flex space-x-3 mb-6">
+      {/* Method Selection Tabs */}
+      <div className="flex space-x-2 mb-6 p-1 bg-white/5 rounded-lg">
         <Button
           type="button"
-          variant={loginMethod === "email" ? "primary" : "outline"}
           onClick={() => {
             setLoginMethod("email");
             setCodeError("");
             setCodeSent(false);
           }}
-          className="flex-1 py-3 text-base font-medium"
-          leftIcon={<Icon icon="mdi:email" className="w-5 h-5" />}
+          className={`flex-1 py-2.5 sm:py-3 text-sm sm:text-base font-medium rounded-md transition-all duration-300 ${
+            loginMethod === "email"
+              ? "bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] text-white shadow-lg"
+              : "bg-transparent text-gray-300 hover:bg-white/10"
+          }`}
+          leftIcon={<Icon icon="mdi:email" className="w-4 h-4" />}
         >
-          {t("auth.login.use_email")}
+          Email
         </Button>
         <Button
           type="button"
-          variant={loginMethod === "phone" ? "primary" : "outline"}
           onClick={() => {
             setLoginMethod("phone");
             setCodeError("");
             setCodeSent(false);
           }}
-          className="flex-1 py-3 text-base font-medium"
-          leftIcon={<Icon icon="mdi:phone" className="w-5 h-5" />}
+          className={`flex-1 py-2.5 sm:py-3 text-sm sm:text-base font-medium rounded-md transition-all duration-300 ${
+            loginMethod === "phone"
+              ? "bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] text-white shadow-lg"
+              : "bg-transparent text-gray-300 hover:bg-white/10"
+          }`}
+          leftIcon={<Icon icon="mdi:phone" className="w-4 h-4" />}
         >
-          {t("auth.login.use_phone")}
+          Phone
         </Button>
       </div>
 
+      {/* Name Fields for Registration */}
       {!isLogin && (
-        <div className="flex gap-2 mb-2">
+        <div className="flex flex-col sm:flex-row gap-3 mb-5">
           <FormField
             name="firstName"
             type="text"
@@ -165,7 +188,9 @@ export const AuthForm = ({
             rules={{ required: "First name is required" }}
             error={errors.firstName?.message}
             required
-            className={`flex-1 ${getFieldClassName("firstName")}`}
+            className={`flex-1 bg-white/5 border-white/10 focus:border-[#FF6B00]/50 focus:bg-white/10 rounded-lg h-12 sm:h-[50px] ${getFieldClassName(
+              "firstName"
+            )}`}
             onChange={(e) => handleFieldChange(e, "firstName")}
           />
           <FormField
@@ -176,18 +201,21 @@ export const AuthForm = ({
             rules={{ required: "Last name is required" }}
             error={errors.lastName?.message}
             required
-            className={`flex-1 ${getFieldClassName("lastName")}`}
+            className={`flex-1 bg-white/5 border-white/10 focus:border-[#FF6B00]/50 focus:bg-white/10 rounded-lg h-12 sm:h-[50px] ${getFieldClassName(
+              "lastName"
+            )}`}
             onChange={(e) => handleFieldChange(e, "lastName")}
           />
         </div>
       )}
 
+      {/* Email or Phone Fields */}
       {loginMethod === "email" ? (
-        <>
+        <div className="space-y-4">
           <FormField
             name="email"
             type="email"
-            placeholder="Email"
+            placeholder="Email Address"
             register={register}
             rules={{
               required: "Email is required",
@@ -198,7 +226,9 @@ export const AuthForm = ({
             }}
             error={errors.email?.message}
             required
-            className={getFieldClassName("email")}
+            className={`bg-white/5 border-white/10 focus:border-[#FF6B00]/50 focus:bg-white/10 rounded-lg h-12 sm:h-[50px] ${getFieldClassName(
+              "email"
+            )}`}
             onChange={(e) => handleFieldChange(e, "email")}
           />
           <FormField
@@ -215,7 +245,9 @@ export const AuthForm = ({
             }}
             error={errors.password?.message}
             required
-            className={getFieldClassName("password")}
+            className={`bg-white/5 border-white/10 focus:border-[#FF6B00]/50 focus:bg-white/10 rounded-lg h-12 sm:h-[50px] ${getFieldClassName(
+              "password"
+            )}`}
             autoComplete={isLogin ? "current-password" : "new-password"}
             onChange={(e) => handleFieldChange(e, "password")}
           />
@@ -234,9 +266,9 @@ export const AuthForm = ({
               setValue={setValue}
             />
           )}
-        </>
+        </div>
       ) : (
-        <>
+        <div className="space-y-4">
           <PhoneInput
             register={register}
             errors={errors}
@@ -258,25 +290,27 @@ export const AuthForm = ({
             phone={watch("phone")}
             setValue={setValue}
           />
-        </>
+        </div>
       )}
 
+      {/* Submit Button */}
       <Button
         type="submit"
         loading={loading || authLoading}
         disabled={!isFormValid()}
-        className="w-full py-3 bg-gradient-to-r from-[#ff7800] to-[#ff5f00] rounded-lg font-medium text-white hover:from-[#ff5f00] hover:to-[#ff7800] transition-all duration-300 disabled:opacity-50"
+        className="w-full py-3 sm:py-4 bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] rounded-lg font-medium text-white hover:from-[#FF5f00] hover:to-[#FF7800] transition-all duration-300 disabled:opacity-50 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:transform-none text-sm sm:text-base mt-6"
       >
-        {isLogin ? "Sign In" : "Register"}
+        {isLogin ? "Sign In" : "Create Account"}
       </Button>
 
+      {/* Back Button */}
       <Button
         type="button"
-        variant="outline"
         onClick={() => setShowEmailForm(false)}
-        className="w-full py-3 text-gray-400 hover:text-[#ff7800] transition-colors"
+        className="w-full py-2.5 sm:py-3 text-gray-400 hover:text-white transition-colors bg-transparent border-0 text-sm sm:text-base"
       >
-        Back
+        <Icon icon="mdi:arrow-left" className="w-4 h-4 mr-2" />
+        Back to options
       </Button>
     </form>
   );
