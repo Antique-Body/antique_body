@@ -32,8 +32,30 @@ export const UserSettings = ({
   const [settingsData, setSettingsData] = useState(userData);
   const [fetchingSettings, setFetchingSettings] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  const { data: session } = useSession();
+  const { data: _session } = useSession();
   const router = useRouter();
+
+  // Handle ESC key press
+  useEffect(() => {
+    const handleEscKey = (event) => {
+      if (event.key === "Escape") {
+        handleClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscKey);
+    return () => {
+      document.removeEventListener("keydown", handleEscKey);
+    };
+  }, []);
+
+  // Handle click outside modal
+  const handleBackdropClick = (event) => {
+    // Only close if clicking the backdrop itself, not any child elements
+    if (event.target === event.currentTarget) {
+      handleClose();
+    }
+  };
 
   // Fetch settings data when component mounts for trainers
   useEffect(() => {
@@ -374,7 +396,10 @@ export const UserSettings = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-4">
+      <div
+        className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-4"
+        onClick={handleBackdropClick}
+      >
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 30 }}
           animate={{
@@ -385,6 +410,7 @@ export const UserSettings = ({
           exit={{ opacity: 0, scale: 0.9, y: 30 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
           className="bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-[#0a0a0a] rounded-3xl shadow-2xl w-full max-w-6xl h-[94vh] overflow-hidden border border-[rgba(255,107,0,0.15)] flex flex-col relative"
+          onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
         >
           {/* Enhanced ambient glow effect */}
           <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B00]/5 via-transparent to-[#FF9A00]/3 pointer-events-none" />
