@@ -1,6 +1,6 @@
 import { Icon } from "@iconify/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -45,6 +45,28 @@ const ProfileEditModal = ({
     setTimeout(onClose, 200);
   };
 
+  // Handle ESC key press
+  useEffect(() => {
+    const handleEscKey = (event) => {
+      if (event.key === "Escape") {
+        handleClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscKey);
+    return () => {
+      document.removeEventListener("keydown", handleEscKey);
+    };
+  }, []);
+
+  // Handle click outside modal
+  const handleBackdropClick = (event) => {
+    // Only close if clicking the backdrop itself, not any child elements
+    if (event.target === event.currentTarget) {
+      handleClose();
+    }
+  };
+
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
     visible: {
@@ -67,7 +89,10 @@ const ProfileEditModal = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-4">
+      <div
+        className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-4"
+        onClick={handleBackdropClick}
+      >
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 30 }}
           animate={{
@@ -78,6 +103,7 @@ const ProfileEditModal = ({
           exit={{ opacity: 0, scale: 0.9, y: 30 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
           className="bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-[#0a0a0a] rounded-3xl shadow-2xl w-full max-w-7xl h-[96vh] overflow-hidden border border-[rgba(255,107,0,0.15)] flex flex-col relative"
+          onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
         >
           {/* Enhanced ambient glow effect */}
           <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B00]/5 via-transparent to-[#FF9A00]/3 pointer-events-none" />
