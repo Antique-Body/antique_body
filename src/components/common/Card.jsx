@@ -6,7 +6,7 @@ import "../components.scss";
 export const Card = ({
   children,
   topBorderColor,
-  width = "90%",
+  width = "100%",
   maxWidth,
   padding = "30px 30px",
   bgGradientFrom = "#0f0f0f",
