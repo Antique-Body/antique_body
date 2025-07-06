@@ -86,7 +86,7 @@ export const Navigation = () => {
         className={`fixed top-0 z-50 w-full transition-all duration-500 ${
           scrolled
             ? "bg-black/90 backdrop-blur-xl shadow-lg shadow-black/30 py-3"
-            : "bg-transparent py-3 md:py-3"
+            : "bg-transparent py-3 md:py-4"
         }`}
       >
         {/* Glass effect border */}
@@ -104,8 +104,9 @@ export const Navigation = () => {
         ></div>
 
         <div className="container mx-auto flex items-center justify-between px-4">
+          {/* Logo - Left on desktop, Center on mobile */}
           <motion.div
-            className="flex items-center"
+            className="flex items-center md:flex-none absolute md:relative left-1/2 md:left-auto transform -translate-x-1/2 md:translate-x-0"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
@@ -139,7 +140,7 @@ export const Navigation = () => {
           </motion.div>
 
           {/* Desktop Navigation - Centered */}
-          <div className="flex items-center justify-center space-x-6 flex-1">
+          <div className="hidden md:flex items-center justify-center space-x-6 flex-1">
             {navItems.map((item) => (
               <Link
                 key={item.path}
@@ -165,8 +166,8 @@ export const Navigation = () => {
             ))}
           </div>
 
-          {/* Auth buttons - Desktop */}
-          <div className="flex items-center justify-end space-x-3 md:space-x-4 flex-shrink-0">
+          {/* Auth buttons - Desktop only */}
+          <div className="hidden md:flex items-center justify-end space-x-3 md:space-x-4 flex-shrink-0">
             <Link href="/auth/login">
               <Button
                 variant="orangeOutline"
@@ -197,40 +198,33 @@ export const Navigation = () => {
               </motion.div>
             </Link>
           </div>
-        </div>
 
-        {/* Mobile Menu Button */}
-        <div className="md:hidden flex items-center">
-          <Button
-            variant="ghost"
-            className="text-white focus:outline-none !focus-ring-0 !ring-0 relative z-50 w-10 h-10 flex items-center justify-center"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-          >
-            <div className="relative w-5 h-4 sm:w-6 sm:h-5">
-              <span
-                className={`absolute h-0.5 w-full bg-white transform transition-all duration-300 ease-in-out ${
-                  mobileMenuOpen
-                    ? "rotate-45 translate-y-1.5 sm:translate-y-2"
-                    : "-translate-y-1.5 sm:-translate-y-2"
-                }`}
-              />
-
-              <span
-                className={`absolute h-0.5 w-full bg-white transform transition-all duration-300 ease-in-out ${
-                  mobileMenuOpen ? "opacity-0" : "opacity-100"
-                }`}
-              />
-
-              <span
-                className={`absolute h-0.5 w-full bg-white transform transition-all duration-300 ease-in-out ${
-                  mobileMenuOpen
-                    ? "-rotate-45 translate-y-1.5 sm:translate-y-2"
-                    : "translate-y-1.5 sm:translate-y-2"
-                }`}
-              />
-            </div>
-          </Button>
+          {/* Mobile Menu Button - Right side */}
+          <div className="md:hidden flex items-center justify-end relative z-50 ml-auto">
+            <motion.button
+              className="p-3 text-white focus:outline-none focus:ring-0 outline-none border-none bg-transparent rounded-full transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <motion.div
+                className="relative flex items-center justify-center w-8 h-8"
+                animate={{ rotate: mobileMenuOpen ? 90 : 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <div
+                  className={`absolute flex flex-col justify-between w-6 h-5 ${
+                    !mobileMenuOpen ? "mb-2" : ""
+                  }`}
+                >
+                  <span className="block bg-white h-[2.5px] w-full"></span>
+                  <span className="block bg-white h-[2.5px] w-full"></span>
+                  <span className="block bg-white h-[2.5px] w-full"></span>
+                </div>
+              </motion.div>
+            </motion.button>
+          </div>
         </div>
       </motion.nav>
 
