@@ -35,6 +35,12 @@ export const UserSettings = ({
   const { data: _session } = useSession();
   const router = useRouter();
 
+  // Move handleClose above useEffect
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(onClose, 200);
+  }, [onClose]);
+
   // Handle ESC key press
   useEffect(() => {
     const handleEscKey = (event) => {
@@ -199,11 +205,6 @@ export const UserSettings = ({
       setLoading(false);
     }
   };
-
-  const handleClose = useCallback(() => {
-    setIsClosing(true);
-    setTimeout(onClose, 200);
-  }, [onClose]);
 
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
