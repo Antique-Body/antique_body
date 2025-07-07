@@ -1,6 +1,6 @@
 import { Icon } from "@iconify/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -40,10 +40,10 @@ const ProfileEditModal = ({
 }) => {
   const [isClosing, setIsClosing] = useState(false);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsClosing(true);
     setTimeout(onClose, 200);
-  };
+  }, [onClose]);
 
   // Handle ESC key press
   useEffect(() => {
@@ -57,7 +57,7 @@ const ProfileEditModal = ({
     return () => {
       document.removeEventListener("keydown", handleEscKey);
     };
-  }, []);
+  }, [handleClose]);
 
   // Handle click outside modal
   const handleBackdropClick = (event) => {
@@ -279,7 +279,7 @@ const ProfileEditModal = ({
                         variants={fadeIn}
                         initial="hidden"
                         animate="visible"
-                        className="relative z-10 "
+                        className="relative z-10"
                       >
                         <div className="mt-5">{children}</div>
                       </motion.div>

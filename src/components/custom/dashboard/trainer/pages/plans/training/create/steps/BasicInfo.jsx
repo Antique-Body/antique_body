@@ -4,17 +4,42 @@ import { Icon } from "@iconify/react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { SESSION_FORMATS } from "src/enums/sessionFormats";
 import { TRAINING_LEVELS } from "src/enums/trainingLevels";
+import dynamic from "next/dynamic";
 
 import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { FormField } from "@/components/common/FormField";
 import { updateFormData } from "@/lib/utils";
+import { CoverImageUpload } from "../components/CoverImageUpload";
+import { CoverImageUploadSkeleton } from "../components/CoverImageUpload";
+
+const CoverImageUploadDynamic = dynamic(
+  () => import("../components/CoverImageUpload"),
+  { loading: () => <CoverImageUploadSkeleton /> }
+);
 
 export const BasicInfo = ({ data, onChange }) => {
   const [previewImage, setPreviewImage] = useState(null);
   const [imageError, setImageError] = useState("");
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.matchMedia) {
+      const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+      setReducedMotion(mediaQuery.matches);
+      const handler = () => setReducedMotion(mediaQuery.matches);
+      mediaQuery.addEventListener
+        ? mediaQuery.addEventListener("change", handler)
+        : mediaQuery.addListener(handler);
+      return () => {
+        mediaQuery.removeEventListener
+          ? mediaQuery.removeEventListener("change", handler)
+          : mediaQuery.removeListener(handler);
+      };
+    }
+  }, []);
 
   // Handle edit mode - if coverImage is a string URL, set it as preview
   useEffect(() => {
@@ -76,9 +101,22 @@ export const BasicInfo = ({ data, onChange }) => {
     onChange({ sessionFormat: formatId });
   };
 
-  const handleLevelSelect = (difficultyLevel) => {
-    onChange({ difficultyLevel });
-  };
+  const handleLevelSelect = useCallback(
+    (difficultyLevel) => {
+      onChange({ difficultyLevel });
+    },
+    [onChange]
+  );
+
+  const handleLevelKeyDown = useCallback(
+    (e, id) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleLevelSelect(id);
+      }
+    },
+    [handleLevelSelect]
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0f0f0f] p-3 sm:p-4 lg:p-8">
@@ -117,82 +155,14 @@ export const BasicInfo = ({ data, onChange }) => {
         </motion.div>
 
         {/* Cover Image Upload */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="relative group max-w-5xl mx-auto mb-8 sm:mb-12"
-        >
-          {imageError && (
-            <div className="mb-3 sm:mb-4">
-              <ErrorMessage error={imageError} />
-            </div>
-          )}
-          <div className="relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] rounded-xl sm:rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-300" />
-            <div className="relative aspect-video w-full rounded-lg sm:rounded-xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#242424] border border-[#333] hover:border-[#FF6B00]/50 transition-all duration-500">
-              {previewImage ? (
-                <div className="relative w-full h-full group">
-                  <Image
-                    src={previewImage}
-                    alt="Cover preview"
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      name="coverImage"
-                      id="coverImage"
-                      onChange={handleImageChange}
-                      className="hidden"
-                    />
-                    <label
-                      htmlFor="coverImage"
-                      className="cursor-pointer px-4 sm:px-8 py-2 sm:py-4 bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] rounded-lg sm:rounded-xl text-white font-bold hover:from-[#FF7900] hover:to-[#FF9B00] transition-all duration-300 flex items-center gap-2 sm:gap-3 shadow-lg hover:shadow-xl hover:shadow-[#FF6B00]/25 transform hover:scale-105"
-                    >
-                      <Icon
-                        icon="mdi:camera-plus"
-                        className="w-4 h-4 sm:w-6 sm:h-6"
-                      />
-                      <span className="text-sm sm:text-base">Change Cover</span>
-                    </label>
-                  </div>
-                </div>
-              ) : (
-                <label
-                  htmlFor="coverImage"
-                  className="w-full h-full flex flex-col items-center justify-center cursor-pointer group-hover:bg-gradient-to-br group-hover:from-[#FF6B00]/5 group-hover:to-[#FF8A00]/5 transition-all duration-500 p-4"
-                >
-                  <div className="p-4 sm:p-8 rounded-full bg-gradient-to-r from-[#FF6B00]/10 to-[#FF8A00]/10 mb-3 sm:mb-6 group-hover:from-[#FF6B00]/20 group-hover:to-[#FF8A00]/20 transition-all duration-300">
-                    <Icon
-                      icon="mdi:image-plus"
-                      className="w-8 h-8 sm:w-12 sm:h-12 text-[#FF6B00]"
-                    />
-                  </div>
-                  <span className="text-white font-bold text-lg sm:text-2xl mb-2 sm:mb-3">
-                    Upload Cover Image
-                  </span>
-                  <span className="text-gray-400 text-sm sm:text-lg mb-2 sm:mb-4 text-center">
-                    Make your plan stand out with a stunning cover
-                  </span>
-                  <span className="text-[#FF6B00] text-xs sm:text-sm font-medium px-3 sm:px-4 py-1 sm:py-2 bg-[#FF6B00]/10 rounded-full">
-                    Recommended: 1920x1080px
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    name="coverImage"
-                    id="coverImage"
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
-                </label>
-              )}
-            </div>
-          </div>
-        </motion.div>
+        <CoverImageUpload
+          previewImage={previewImage}
+          imageError={imageError}
+          handleImageChange={handleImageChange}
+          setPreviewImage={setPreviewImage}
+          setImageError={setImageError}
+          onChange={onChange}
+        />
 
         {/* Main Form - Mobile Optimized Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-12">
@@ -346,7 +316,11 @@ export const BasicInfo = ({ data, onChange }) => {
                   </div>
                 </div>
 
-                <div className="space-y-3 sm:space-y-4">
+                <div
+                  className="space-y-3 sm:space-y-4"
+                  role="radiogroup"
+                  aria-label="Training Level"
+                >
                   {TRAINING_LEVELS.map((difficultyLevel, index) => {
                     const isSelected =
                       data.difficultyLevel === difficultyLevel.id;
@@ -354,14 +328,32 @@ export const BasicInfo = ({ data, onChange }) => {
                     return (
                       <motion.div
                         key={difficultyLevel.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 + index * 0.1 }}
-                        whileHover={{ scale: 1.02, y: -2 }}
-                        whileTap={{ scale: 0.98 }}
+                        initial={reducedMotion ? false : { opacity: 0, y: 20 }}
+                        animate={reducedMotion ? false : { opacity: 1, y: 0 }}
+                        transition={
+                          reducedMotion
+                            ? undefined
+                            : { delay: 0.4 + index * 0.1 }
+                        }
+                        whileHover={
+                          reducedMotion ? undefined : { scale: 1.02, y: -2 }
+                        }
+                        whileTap={reducedMotion ? undefined : { scale: 0.98 }}
                         onClick={() => handleLevelSelect(difficultyLevel.id)}
+                        onKeyDown={(e) =>
+                          handleLevelKeyDown(e, difficultyLevel.id)
+                        }
+                        tabIndex={0}
+                        role="radio"
+                        aria-checked={isSelected}
+                        aria-label={
+                          difficultyLevel.label +
+                          (difficultyLevel.description
+                            ? ": " + difficultyLevel.description
+                            : "")
+                        }
                         className={clsx(
-                          "relative p-4 sm:p-6 rounded-lg sm:rounded-xl border-2 cursor-pointer transition-all duration-300 group",
+                          "relative p-4 sm:p-6 rounded-lg sm:rounded-xl border-2 cursor-pointer transition-all duration-300 group focus:outline-none focus:ring-2 focus:ring-[#FF6B00] focus:border-[#FF6B00]",
                           isSelected
                             ? [
                                 "bg-gradient-to-r from-[#FF6B00]/10 to-[#FF8A00]/10",
@@ -397,8 +389,8 @@ export const BasicInfo = ({ data, onChange }) => {
                           {/* Check indicator */}
                           {isSelected && (
                             <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
+                              initial={reducedMotion ? false : { scale: 0 }}
+                              animate={reducedMotion ? false : { scale: 1 }}
                               className="absolute top-3 right-3 sm:top-4 sm:right-4 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] flex items-center justify-center shadow-lg"
                             >
                               <Icon

@@ -74,7 +74,7 @@ export const TrainerBasicInformation = ({
       variants={staggerItems}
       initial="hidden"
       animate="visible"
-      className="space-y-6 px"
+      className="space-y-6"
     >
       <div className="px-4">
         <SectionTitle title="Basic Information" />

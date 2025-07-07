@@ -2,7 +2,7 @@ import { Icon } from "@iconify/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import { AnimatedTabContent } from "./DashboardTabs";
 
@@ -47,7 +47,7 @@ export const UserSettings = ({
     return () => {
       document.removeEventListener("keydown", handleEscKey);
     };
-  }, []);
+  }, [handleClose]);
 
   // Handle click outside modal
   const handleBackdropClick = (event) => {
@@ -200,10 +200,10 @@ export const UserSettings = ({
     }
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsClosing(true);
     setTimeout(onClose, 200);
-  };
+  }, [onClose]);
 
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },

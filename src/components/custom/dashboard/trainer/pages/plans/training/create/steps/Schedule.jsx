@@ -173,7 +173,7 @@ function normalizeMuscleGroups(muscleGroups) {
   });
 }
 
-// Helper funkcija za detekciju YouTube linka
+// Helper function to check if a URL is a YouTube URL
 function isYouTubeUrl(url) {
   return (
     typeof url === "string" &&
@@ -181,18 +181,22 @@ function isYouTubeUrl(url) {
   );
 }
 
-// Helper funkcija za dobijanje YouTube embed URL-a
-function getYouTubeEmbedUrl(url) {
-  if (url.includes("youtube.com/watch?v=")) {
-    const id = url.split("v=")[1]?.split("&")[0];
-    return `https://www.youtube.com/embed/${id}`;
-  }
-  if (url.includes("youtu.be/")) {
-    const id = url.split("youtu.be/")[1]?.split("?")[0];
+// Helper function to extract YouTube video ID
+const getYouTubeVideoId = (url) => {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return match && match[2].length === 11 ? match[2] : null;
+};
+
+// Helper function to get YouTube embed URL
+const getYouTubeEmbedUrl = (url) => {
+  const id = getYouTubeVideoId(url);
+  if (id) {
     return `https://www.youtube.com/embed/${id}`;
   }
   return url;
-}
+};
 
 export const Schedule = ({ data, onChange }) => {
   const [activeSession, setActiveSession] = useState(0);
@@ -216,8 +220,6 @@ export const Schedule = ({ data, onChange }) => {
     const key = `${sessionIndex}-${exerciseIndex}`;
     return activeMedia[key] || "image";
   };
-
-  console.log(data, "data");
 
   // Helper function to set active media for a specific exercise
   const setActiveMediaForExercise = (
@@ -763,10 +765,6 @@ export const Schedule = ({ data, onChange }) => {
                                 <div className="space-y-3 sm:space-y-4">
                                   {session.exercises.map(
                                     (exercise, exerciseIndex) => {
-                                      console.log(
-                                        "Session Exercise:",
-                                        exercise
-                                      );
                                       const videoKey = `${sessionIndex}-${exerciseIndex}`;
                                       const videoUrl = exercise.videoUrl;
 
@@ -800,8 +798,9 @@ export const Schedule = ({ data, onChange }) => {
                                                   />
                                                 </div>
                                                 <span className="text-sm text-red-400">
-                                                  Video se ne može učitati.
-                                                  Provjeri CORS ili URL!
+                                                  The video could not be loaded.
+                                                  Please check the CORS settings
+                                                  or the video URL.
                                                 </span>
                                               </div>
                                             </div>
@@ -823,6 +822,16 @@ export const Schedule = ({ data, onChange }) => {
                                                 }))
                                               }
                                             >
+                                              <track
+                                                kind="captions"
+                                                src={videoUrl.replace(
+                                                  /\.[^/.]+$/,
+                                                  ".vtt"
+                                                )}
+                                                srcLang="en"
+                                                label="English"
+                                                default
+                                              />
                                               Your browser does not support the
                                               video tag.
                                             </video>
@@ -1411,7 +1420,6 @@ export const Schedule = ({ data, onChange }) => {
                   className={`grid grid-cols-1 lg:grid-cols-2 gap-3 max-h-[65vh] overflow-y-auto pr-2 ${styles.customScrollbar}`}
                 >
                   {filteredExercises.map((exercise, index) => {
-                    console.log("Library Exercise:", exercise);
                     const isSelected = selectedExercises.some(
                       (e) => e.id === exercise.id
                     );

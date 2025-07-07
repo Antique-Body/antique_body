@@ -1,5 +1,5 @@
 import { Icon } from "@iconify/react";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -20,7 +20,7 @@ const Gallery = ({ trainerData, setTrainerData }) => {
   const [error, setError] = useState("");
   const [isHovering, setIsHovering] = useState(false);
   const [activeTab, setActiveTab] = useState("all"); // "all" or "featured"
-  const { galleryImages = [] } = trainerData.trainerProfile;
+  const { galleryImages = [] } = trainerData.trainerProfile || {};
 
   const highlightedImages = galleryImages.filter((img) => img.isHighlighted);
   const highlightedCount = highlightedImages.length;
@@ -85,7 +85,6 @@ const Gallery = ({ trainerData, setTrainerData }) => {
         validFiles.push(file);
       }
     });
-
     let errorsToShow = [];
     if (validationErrors.length > 0) {
       errorsToShow = [...validationErrors];
@@ -100,6 +99,7 @@ const Gallery = ({ trainerData, setTrainerData }) => {
         const newImages = filesToUpload.map((file) => ({
           id: `new-${crypto.randomUUID()}`,
           file: file,
+          previewUrl: URL.createObjectURL(file),
           isHighlighted: false,
         }));
 
@@ -140,9 +140,9 @@ const Gallery = ({ trainerData, setTrainerData }) => {
     const newImages = [...galleryImages];
     const removedImage = newImages.splice(index, 1)[0];
 
-    // Clean up object URL if it's a file
-    if (removedImage.file) {
-      URL.revokeObjectURL(removedImage.file);
+    // Clean up object URL if it exists
+    if (removedImage && removedImage.previewUrl) {
+      URL.revokeObjectURL(removedImage.previewUrl);
     }
 
     onGalleryChange(newImages);
@@ -151,6 +151,18 @@ const Gallery = ({ trainerData, setTrainerData }) => {
   // Display images based on active tab
   const displayedImages =
     activeTab === "featured" ? highlightedImages : galleryImages;
+
+  useEffect(
+    () => () => {
+      // Cleanup all previewUrls on unmount
+      galleryImages.forEach((img) => {
+        if (img.previewUrl) {
+          URL.revokeObjectURL(img.previewUrl);
+        }
+      });
+    },
+    [galleryImages]
+  );
 
   return (
     <div className="space-y-6 p-4 mx-6">

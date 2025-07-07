@@ -41,7 +41,7 @@ export default function TrainerDashboardLayout({ children }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // State for message badge count
-  const [messageBadgeCount, setMessageBadgeCount] = useState(0);
+  const [messageBadgeCount, _setMessageBadgeCount] = useState(0);
 
   // Update active tab when pathname changes
   useEffect(() => {

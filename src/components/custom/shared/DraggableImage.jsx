@@ -24,29 +24,30 @@ const DraggableImage = ({
     accept: "image",
     hover(item, monitor) {
       if (!ref.current) return;
-      
+
       const dragIndex = item.index;
       const hoverIndex = index;
-      
+
       // Don't replace items with themselves
       if (dragIndex === hoverIndex) return;
-      
+
       // Determine rectangle on screen
       const hoverBoundingRect = ref.current?.getBoundingClientRect();
-      
+
       // Get vertical middle
-      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      
+      const hoverMiddleY =
+        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+
       // Determine mouse position
       const clientOffset = monitor.getClientOffset();
-      
+
       // Get pixels to the top
       const hoverClientY = clientOffset.y - hoverBoundingRect.top;
-      
+
       // Only perform the move when the mouse has crossed half of the item's height
       if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) return;
       if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
-      
+
       moveImage(dragIndex, hoverIndex);
       item.index = hoverIndex;
     },
@@ -55,9 +56,9 @@ const DraggableImage = ({
   // Configure dragging
   const [{ isDragging }, drag] = useDrag({
     type: "image",
-    item: () => ({ 
-      id: image.id || image.url, 
-      index 
+    item: () => ({
+      id: image.id || image.url,
+      index,
     }),
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
@@ -69,7 +70,7 @@ const DraggableImage = ({
 
   // Determine image properties
   const opacity = isDragging ? 0.4 : 1;
-  const imageUrl = image.file ? URL.createObjectURL(image.file) : image.url;
+  const imageUrl = image.previewUrl || image.url;
 
   return (
     <div className="flex flex-col gap-3">
@@ -86,7 +87,7 @@ const DraggableImage = ({
           height={300}
           className="h-full w-full object-cover"
         />
-        
+
         {/* Control buttons */}
         <div className="absolute top-2 right-2 flex gap-1.5 z-10">
           {showHighlightButton && (
@@ -97,19 +98,23 @@ const DraggableImage = ({
                 toggleHighlight(index);
               }}
               className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
-                image.isHighlighted 
-                  ? "bg-yellow-500 text-black shadow-lg" 
+                image.isHighlighted
+                  ? "bg-yellow-500 text-black shadow-lg"
                   : "bg-black/60 text-white backdrop-blur-sm hover:bg-yellow-500/80 hover:text-black"
               }`}
-              title={image.isHighlighted ? "Remove from featured" : "Feature this image"}
+              title={
+                image.isHighlighted
+                  ? "Remove from featured"
+                  : "Feature this image"
+              }
             >
-              <Icon 
-                icon={image.isHighlighted ? "mdi:star" : "mdi:star-outline"} 
-                width={16} 
+              <Icon
+                icon={image.isHighlighted ? "mdi:star" : "mdi:star-outline"}
+                width={16}
               />
             </button>
           )}
-          
+
           <button
             type="button"
             onClick={(e) => {
@@ -122,7 +127,7 @@ const DraggableImage = ({
             <Icon icon="mdi:trash" width={16} />
           </button>
         </div>
-        
+
         {/* Featured badge */}
         {image.isHighlighted && (
           <div className="absolute left-0 top-0 bg-yellow-500 text-black px-2 py-1 text-xs font-medium flex items-center gap-1">
@@ -130,7 +135,7 @@ const DraggableImage = ({
             Featured
           </div>
         )}
-        
+
         {/* Drag indicator on hover */}
         <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="bg-black/60 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
@@ -147,8 +152,8 @@ const DraggableImage = ({
             <button
               onClick={() => setIsEditingDescription(true)}
               className={`flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200 ${
-                image.description 
-                  ? "bg-blue-600 text-white hover:bg-blue-700" 
+                image.description
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
                   : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
               }`}
               title={image.description ? "Edit description" : "Add description"}
