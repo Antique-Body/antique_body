@@ -32,6 +32,7 @@ export const MealPlanning = ({ data, onChange }) => {
   const [meals, setMeals] = useState([]);
   const [subtitleExists, setSubtitleExists] = useState(false);
   const [lastCheckedSubtitleUrl, setLastCheckedSubtitleUrl] = useState("");
+  const [error, setError] = useState("");
 
   const days = data.days || [];
   const selectedDay = days[selectedDayIndex];
@@ -83,16 +84,16 @@ export const MealPlanning = ({ data, onChange }) => {
   };
 
   const generateId = () =>
-    window.crypto?.randomUUID
+    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
       ? crypto.randomUUID()
-      : Math.random().toString(36).substr(2, 9);
+      : uuidv4();
 
   const addDay = (copyFromIdx = null) => {
     if (days.length >= 30) return;
 
     let newMeals = [];
     if (copyFromIdx !== null && days[copyFromIdx]) {
-      newMeals = JSON.parse(JSON.stringify(days[copyFromIdx].meals));
+      newMeals = structuredClone(days[copyFromIdx].meals);
     }
 
     const newDay = {
@@ -195,9 +196,17 @@ export const MealPlanning = ({ data, onChange }) => {
         setMeals(data.meals);
         setShowMealLibraryModal(true);
         setActiveMealIndex(mealIndex);
+        setError("");
+      } else {
+        setError(
+          "Failed to fetch meals from the library. Please try again later."
+        );
       }
     } catch (error) {
       console.error("Error fetching meals:", error);
+      setError(
+        "An error occurred while fetching meals. Please try again later."
+      );
     }
   };
 
@@ -228,9 +237,15 @@ export const MealPlanning = ({ data, onChange }) => {
         updatedMeals[activeMealIndex].options.push(mealToAdd);
         updateDay(selectedDayIndex, "meals", updatedMeals);
         setShowCreateMeal(false);
+        setError("");
+      } else {
+        setError("Failed to create meal. Please try again later.");
       }
     } catch (error) {
       console.error("Error creating meal:", error);
+      setError(
+        "An error occurred while creating the meal. Please try again later."
+      );
     }
   };
 
@@ -269,7 +284,7 @@ export const MealPlanning = ({ data, onChange }) => {
   const copyDayFromAnother = (fromDayIdx) => {
     if (!days[fromDayIdx]) return;
 
-    const dayToCopy = JSON.parse(JSON.stringify(days[fromDayIdx]));
+    const dayToCopy = structuredClone(days[fromDayIdx]);
     dayToCopy.id = uuidv4();
     dayToCopy.name = `Day ${days.length + 1}`;
 
@@ -293,9 +308,7 @@ export const MealPlanning = ({ data, onChange }) => {
   const copyMealFromAnotherDay = (fromDayIdx, fromMealIdx) => {
     if (!selectedDay || !days[fromDayIdx]?.meals?.[fromMealIdx]) return;
 
-    const mealToCopy = JSON.parse(
-      JSON.stringify(days[fromDayIdx].meals[fromMealIdx])
-    );
+    const mealToCopy = structuredClone(days[fromDayIdx].meals[fromMealIdx]);
     mealToCopy.id = generateId();
 
     updateDay(selectedDayIndex, "meals", [...selectedDay.meals, mealToCopy]);
@@ -330,7 +343,7 @@ export const MealPlanning = ({ data, onChange }) => {
       setSubtitleExists(false);
       setLastCheckedSubtitleUrl("");
     }
-  }, [showMediaPreview]);
+  }, [showMediaPreview, lastCheckedSubtitleUrl]);
 
   if (!selectedDay) {
     return (
@@ -1199,12 +1212,6 @@ export const MealPlanning = ({ data, onChange }) => {
                   default
                 />
               )}
-              {!subtitleExists && (
-                <>
-                  {/* Optionally show a fallback UI for missing captions */}
-                  {/* <div className="text-xs text-gray-400 p-2">No captions available</div> */}
-                </>
-              )}
             </video>
           ) : (
             <div className="text-center py-8">
@@ -1216,6 +1223,13 @@ export const MealPlanning = ({ data, onChange }) => {
             </div>
           ))}
       </Modal>
+
+      {/* Error Message */}
+      {error && (
+        <div className="p-3 mb-2 bg-red-900/20 border border-red-500/30 rounded-lg text-red-400 text-sm">
+          {error}
+        </div>
+      )}
     </div>
   );
 };
