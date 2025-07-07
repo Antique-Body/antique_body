@@ -1,5 +1,5 @@
 import { Icon } from "@iconify/react";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useMemo, useRef } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -22,15 +22,26 @@ const Gallery = ({ trainerData, setTrainerData }) => {
   const [activeTab, setActiveTab] = useState("all"); // "all" or "featured"
   const { galleryImages = [] } = trainerData.trainerProfile || {};
 
-  const highlightedImages = galleryImages.filter((img) => img.isHighlighted);
-  const highlightedCount = highlightedImages.length;
+  const highlightedImages = useMemo(
+    () => galleryImages.filter((img) => img.isHighlighted),
+    [galleryImages]
+  );
+  const highlightedCount = useMemo(
+    () => highlightedImages.length,
+    [highlightedImages]
+  );
+
+  const galleryImagesRef = useRef(galleryImages);
+  useEffect(() => {
+    galleryImagesRef.current = galleryImages;
+  }, [galleryImages]);
 
   const onGalleryChange = useCallback(
     (newGalleryImages) => {
       setTrainerData((prev) => ({
         ...prev,
         trainerProfile: {
-          ...prev.trainerProfile,
+          ...(prev.trainerProfile || {}),
           galleryImages: newGalleryImages,
         },
       }));
@@ -152,17 +163,16 @@ const Gallery = ({ trainerData, setTrainerData }) => {
   const displayedImages =
     activeTab === "featured" ? highlightedImages : galleryImages;
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    return () => {
       // Cleanup all previewUrls on unmount
-      galleryImages.forEach((img) => {
+      galleryImagesRef.current.forEach((img) => {
         if (img.previewUrl) {
           URL.revokeObjectURL(img.previewUrl);
         }
       });
-    },
-    [galleryImages]
-  );
+    };
+  }, []);
 
   return (
     <div className="space-y-6 p-4 mx-6">

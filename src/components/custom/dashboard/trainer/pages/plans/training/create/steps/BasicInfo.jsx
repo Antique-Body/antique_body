@@ -158,9 +158,6 @@ export const BasicInfo = ({ data, onChange }) => {
           previewImage={previewImage}
           imageError={imageError}
           handleImageChange={handleImageChange}
-          setPreviewImage={setPreviewImage}
-          setImageError={setImageError}
-          onChange={onChange}
         />
 
         {/* Main Form - Mobile Optimized Grid */}
