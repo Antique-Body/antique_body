@@ -65,7 +65,7 @@ export const ExerciseModal = ({
     muscleGroups: [],
     description: "",
     instructions: "",
-    video: null,
+    videoUrl: null,
     imageUrl: null,
   });
 
@@ -102,11 +102,11 @@ export const ExerciseModal = ({
         exercise.muscleGroups?.map((mg) => mg.name || mg) || [];
       setSelectedMuscles(muscleGroupNames);
 
-      if (exercise.video) {
-        setVideoPreview(exercise.video);
-        setVideoUrl(exercise.video);
+      if (exercise.videoUrl) {
+        setVideoPreview(exercise.videoUrl);
+        setVideoUrl(exercise.videoUrl);
         // If it's a URL (not a file), show the URL input
-        if (!exercise.video.startsWith("blob:")) {
+        if (!exercise.videoUrl.startsWith("blob:")) {
           setShowVideoUrlInput(true);
         }
       }
@@ -130,7 +130,7 @@ export const ExerciseModal = ({
       muscleGroups: [],
       description: "",
       instructions: "",
-      video: null,
+      videoUrl: null,
       imageUrl: null,
     });
     setSelectedMuscles([]);
@@ -216,7 +216,7 @@ export const ExerciseModal = ({
 
     if (fileType === "video") {
       setVideoPreview(fileUrl);
-      setFormData((prev) => ({ ...prev, video: fileUrl }));
+      setFormData((prev) => ({ ...prev, videoUrl: fileUrl }));
       setVideoFile(file);
       setVideoUrl("");
       setShowVideoUrlInput(false);
@@ -232,7 +232,7 @@ export const ExerciseModal = ({
     if (fileType === "video") {
       setVideoPreview(null);
       setVideoUrl("");
-      setFormData((prev) => ({ ...prev, video: null }));
+      setFormData((prev) => ({ ...prev, videoUrl: null }));
       setVideoFile(null);
       // Reset file input
       const videoInput = document.getElementById("video-upload");
@@ -344,12 +344,15 @@ export const ExerciseModal = ({
         ...formData,
         id: formData.id || undefined,
         imageUrl: uploadedUrls.exerciseImage || formData.imageUrl,
-        video: uploadedUrls.exerciseVideo || formData.video,
+        videoUrl: uploadedUrls.exerciseVideo || formData.videoUrl,
       };
 
       // Ako je video bio blob, ali nije uploadovan (npr. greška), nemoj slati blob
-      if (finalFormData.video && finalFormData.video.startsWith("blob:")) {
-        finalFormData.video = "";
+      if (
+        finalFormData.videoUrl &&
+        finalFormData.videoUrl.startsWith("blob:")
+      ) {
+        finalFormData.videoUrl = "";
       }
       if (
         finalFormData.imageUrl &&
@@ -382,7 +385,7 @@ export const ExerciseModal = ({
       level: libraryExercise.level,
       description: libraryExercise.description,
       instructions: libraryExercise.instructions,
-      video: libraryExercise.video,
+      videoUrl: libraryExercise.videoUrl,
       imageUrl: libraryExercise.imageUrl,
     });
 
@@ -395,11 +398,11 @@ export const ExerciseModal = ({
     }
 
     // Set video preview if available
-    if (libraryExercise.video) {
-      setVideoPreview(libraryExercise.video);
-      setVideoUrl(libraryExercise.video);
+    if (libraryExercise.videoUrl) {
+      setVideoPreview(libraryExercise.videoUrl);
+      setVideoUrl(libraryExercise.videoUrl);
       // If it's a URL (not a file), show the URL input
-      if (!libraryExercise.video.startsWith("blob:")) {
+      if (!libraryExercise.videoUrl.startsWith("blob:")) {
         setShowVideoUrlInput(true);
       }
     }
@@ -580,13 +583,13 @@ export const ExerciseModal = ({
 
         {activeTab === "video" && (
           <div className="w-full">
-            {exercise.video ? (
+            {exercise.videoUrl ? (
               <div className="aspect-w-16 aspect-h-9 overflow-hidden rounded-lg">
-                {exercise.video.includes("youtube.com") ||
-                exercise.video.includes("youtu.be") ? (
+                {exercise.videoUrl.includes("youtube.com") ||
+                exercise.videoUrl.includes("youtu.be") ? (
                   <iframe
                     src={`https://www.youtube.com/embed/${
-                      exercise.video.match(
+                      exercise.videoUrl.match(
                         /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
                       )?.[1]
                     }`}
@@ -594,10 +597,10 @@ export const ExerciseModal = ({
                     className="h-[500px] w-full rounded-lg"
                     allowFullScreen
                   ></iframe>
-                ) : exercise.video.includes("vimeo.com") ? (
+                ) : exercise.videoUrl.includes("vimeo.com") ? (
                   <iframe
                     src={`https://player.vimeo.com/video/${
-                      exercise.video.match(/vimeo\.com\/(\d+)/)?.[1]
+                      exercise.videoUrl.match(/vimeo\.com\/(\d+)/)?.[1]
                     }`}
                     title={`${exercise.name} video`}
                     className="h-[500px] w-full rounded-lg"
@@ -605,12 +608,12 @@ export const ExerciseModal = ({
                   ></iframe>
                 ) : (
                   <video
-                    src={exercise.video}
+                    src={exercise.videoUrl}
                     controls
                     className="h-[500px] w-full rounded-lg object-cover"
                     preload="metadata"
                   >
-                    <source src={exercise.video} type="video/mp4" />
+                    <source src={exercise.videoUrl} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
                 )}

@@ -203,9 +203,9 @@ export const PlanCard = ({
         <Card
           variant="darkStrong"
           width="100%"
-          className="flex h-full flex-col overflow-hidden hover:border-[#FF6B00] transition-all duration-300"
+          className="flex h-full flex-col overflow-hidden hover:border-[#FF6B00] transition-all duration-300 !p-0"
         >
-          <div className="relative h-40 overflow-hidden">
+          <div className="relative h-32 sm:h-40 overflow-hidden">
             {coverImage && (
               <div className="absolute inset-0 transition-transform duration-300 group-hover:scale-105">
                 <Image
@@ -238,16 +238,16 @@ export const PlanCard = ({
             </div>
           </div>
 
-          <div className="flex flex-1 flex-col p-4">
-            <h3 className="mb-2 text-xl font-bold text-white line-clamp-1">
+          <div className="flex flex-1 flex-col p-2 sm:p-4">
+            <h3 className="mb-1 sm:mb-2 text-lg sm:text-xl font-bold text-white line-clamp-1">
               {title}
             </h3>
-            <p className="mb-3 text-sm text-gray-400 line-clamp-2">
+            <p className="mb-2 sm:mb-3 text-sm text-gray-400 line-clamp-2">
               {description}
             </p>
 
-            <div className="mt-auto space-y-4">
-              <div className="flex flex-wrap items-center gap-3 text-sm text-gray-400">
+            <div className="mt-auto space-y-2 sm:space-y-4">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-400">
                 <div className="flex items-center gap-1">
                   <ClockIcon size={16} className="text-gray-500" />
                   <span>{duration || "Not specified"}</span>
@@ -266,45 +266,53 @@ export const PlanCard = ({
               </div>
 
               <div
-                className="flex items-center justify-center gap-2 w-full"
+                className="grid grid-cols-2 sm:flex sm:items-center sm:justify-center gap-1 sm:gap-2 w-full"
                 onClick={(e) => e.stopPropagation()}
               >
                 <Button
                   variant="darkOutline"
                   size="small"
-                  leftIcon={<CopyIcon size={16} />}
+                  leftIcon={<CopyIcon size={14} />}
                   onClick={handleCopyClick}
-                  className="hover:border-[#FF6B00] hover:text-[#FF6B00] hover:scale-105 hover:shadow-md transition-all duration-200"
+                  className="hover:border-[#FF6B00] hover:text-[#FF6B00] hover:scale-105 hover:shadow-md transition-all duration-200 text-xs sm:text-sm px-1 sm:px-3 py-1 sm:py-2"
                 >
-                  Copy
+                  <span className="hidden sm:inline">Copy</span>
+                  <span className="sm:hidden">Copy</span>
                 </Button>
                 <Button
                   variant="darkOutline"
                   size="small"
-                  leftIcon={<ViewIcon size={16} />}
+                  leftIcon={<ViewIcon size={14} />}
                   onClick={handleViewClick}
                   loading={loadingPlanDetails}
-                  className="hover:border-blue-400 hover:text-blue-300 hover:scale-105 hover:shadow-md transition-all duration-200"
+                  className="hover:border-blue-400 hover:text-blue-300 hover:scale-105 hover:shadow-md transition-all duration-200 text-xs sm:text-sm px-1 sm:px-3 py-1 sm:py-2"
                 >
-                  {loadingPlanDetails ? "Loading..." : "View"}
+                  <span className="hidden sm:inline">
+                    {loadingPlanDetails ? "Loading..." : "View"}
+                  </span>
+                  <span className="sm:hidden">
+                    {loadingPlanDetails ? "..." : "View"}
+                  </span>
                 </Button>
                 <Button
                   variant="dangerOutline"
                   size="small"
-                  leftIcon={<TrashIcon size={16} />}
+                  leftIcon={<TrashIcon size={14} />}
                   onClick={handleDeleteClick}
-                  className="hover:border-red-500 hover:text-red-400 hover:scale-105 hover:shadow-md transition-all duration-200"
+                  className="hover:border-red-500 hover:text-red-400 hover:scale-105 hover:shadow-md transition-all duration-200 text-xs sm:text-sm px-1 sm:px-3 py-1 sm:py-2"
                 >
-                  Delete
+                  <span className="hidden sm:inline">Delete</span>
+                  <span className="sm:hidden">Delete</span>
                 </Button>
                 <Button
                   onClick={handleEditClick}
                   variant="orangeOutline"
                   size="small"
-                  leftIcon={<EditIcon size={16} />}
-                  className="hover:border-orange-400 hover:text-orange-300 hover:scale-105 hover:shadow-md transition-all duration-200"
+                  leftIcon={<EditIcon size={14} />}
+                  className="hover:border-orange-400 hover:text-orange-300 hover:scale-105 hover:shadow-md transition-all duration-200 text-xs sm:text-sm px-1 sm:px-3 py-1 sm:py-2"
                 >
-                  Edit
+                  <span className="hidden sm:inline">Edit</span>
+                  <span className="sm:hidden">Edit</span>
                 </Button>
               </div>
             </div>

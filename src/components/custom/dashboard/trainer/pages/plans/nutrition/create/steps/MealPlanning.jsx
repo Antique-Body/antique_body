@@ -2,16 +2,14 @@
 
 import { Icon } from "@iconify/react";
 import { motion, AnimatePresence } from "framer-motion";
-import cloneDeep from "lodash/cloneDeep";
 import Image from "next/image";
-import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { MealLibrarySelector } from "../../../../meals/components";
 import { MealModal } from "../../../../meals/components/MealModal";
 
 import { Button } from "@/components/common/Button";
-import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { FormField } from "@/components/common/FormField";
 import { Modal } from "@/components/common/Modal";
 
@@ -32,13 +30,9 @@ export const MealPlanning = ({ data, onChange }) => {
   const buttonRef = useRef(null);
   const [showCreateMeal, setShowCreateMeal] = useState(false);
   const [meals, setMeals] = useState([]);
-  const [error, setError] = useState(null);
 
-  const days = useMemo(() => data.days || [], [data.days]);
-  const selectedDay = useMemo(
-    () => days[selectedDayIndex],
-    [days, selectedDayIndex]
-  );
+  const days = data.days || [];
+  const selectedDay = days[selectedDayIndex];
 
   // Calculate popover position
   const calculatePopoverPosition = () => {
@@ -86,35 +80,35 @@ export const MealPlanning = ({ data, onChange }) => {
     setShowAddDayPopover(!showAddDayPopover);
   };
 
-  const generateId = useCallback(() => uuidv4(), []);
+  const generateId = () =>
+    window.crypto?.randomUUID
+      ? crypto.randomUUID()
+      : Math.random().toString(36).substr(2, 9);
 
-  const addDay = useCallback(
-    (copyFromIdx = null) => {
-      if (days.length >= 30) return;
+  const addDay = (copyFromIdx = null) => {
+    if (days.length >= 30) return;
 
-      let newMeals = [];
-      if (copyFromIdx !== null && days[copyFromIdx]) {
-        newMeals = cloneDeep(days[copyFromIdx].meals);
-      }
+    let newMeals = [];
+    if (copyFromIdx !== null && days[copyFromIdx]) {
+      newMeals = JSON.parse(JSON.stringify(days[copyFromIdx].meals));
+    }
 
-      const newDay = {
-        id: uuidv4(),
-        name: `Day ${days.length + 1}`,
-        isRestDay: false,
-        description: "",
-        meals: newMeals,
-      };
+    const newDay = {
+      id: uuidv4(),
+      name: `Day ${days.length + 1}`,
+      isRestDay: false,
+      description: "",
+      meals: newMeals,
+    };
 
-      const newDays = [...days, newDay];
-      onChange({ days: newDays });
-      setSelectedDayIndex(days.length);
-      setShowAddDayPopover(false);
-      setShowCopyDayModal(false);
-    },
-    [days, onChange]
-  );
+    const newDays = [...days, newDay];
+    onChange({ days: newDays });
+    setSelectedDayIndex(days.length);
+    setShowAddDayPopover(false);
+    setShowCopyDayModal(false);
+  };
 
-  const addCheatDay = useCallback(() => {
+  const addCheatDay = () => {
     if (days.length >= 30) return;
 
     const cheatDay = {
@@ -129,41 +123,35 @@ export const MealPlanning = ({ data, onChange }) => {
     onChange({ days: newDays });
     setSelectedDayIndex(days.length);
     setShowAddDayPopover(false);
-  }, [days, onChange]);
+  };
 
-  const deleteDay = useCallback(
-    (idx) => {
-      const newDays = days
-        .filter((_, i) => i !== idx)
-        .map((day, index) => ({
-          ...day,
-          name: `Day ${index + 1}`,
-        }));
+  const deleteDay = (idx) => {
+    const newDays = days
+      .filter((_, i) => i !== idx)
+      .map((day, index) => ({
+        ...day,
+        name: `Day ${index + 1}`,
+      }));
 
-      onChange({ days: newDays });
+    onChange({ days: newDays });
 
-      if (selectedDayIndex >= newDays.length) {
-        setSelectedDayIndex(Math.max(0, newDays.length - 1));
-      } else if (idx === selectedDayIndex) {
-        setSelectedDayIndex(Math.max(0, selectedDayIndex - 1));
-      }
-    },
-    [days, onChange, selectedDayIndex]
-  );
+    if (selectedDayIndex >= newDays.length) {
+      setSelectedDayIndex(Math.max(0, newDays.length - 1));
+    } else if (idx === selectedDayIndex) {
+      setSelectedDayIndex(Math.max(0, selectedDayIndex - 1));
+    }
+  };
 
-  const updateDay = useCallback(
-    (dayIndex, field, value) => {
-      const updatedDays = [...days];
-      updatedDays[dayIndex] = {
-        ...updatedDays[dayIndex],
-        [field]: value,
-      };
-      onChange({ days: updatedDays });
-    },
-    [days, onChange]
-  );
+  const updateDay = (dayIndex, field, value) => {
+    const updatedDays = [...days];
+    updatedDays[dayIndex] = {
+      ...updatedDays[dayIndex],
+      [field]: value,
+    };
+    onChange({ days: updatedDays });
+  };
 
-  const addMeal = useCallback(() => {
+  const addMeal = () => {
     if (!selectedDay) return;
 
     const newMeal = {
@@ -174,194 +162,154 @@ export const MealPlanning = ({ data, onChange }) => {
     };
 
     updateDay(selectedDayIndex, "meals", [...selectedDay.meals, newMeal]);
-  }, [selectedDay, selectedDayIndex, updateDay, generateId]);
+  };
 
-  const removeMeal = useCallback(
-    (mealIndex) => {
-      if (!selectedDay) return;
+  const removeMeal = (mealIndex) => {
+    if (!selectedDay) return;
 
-      const updatedMeals = [...selectedDay.meals];
-      updatedMeals.splice(mealIndex, 1);
-      updateDay(selectedDayIndex, "meals", updatedMeals);
-    },
-    [selectedDay, selectedDayIndex, updateDay]
-  );
+    const updatedMeals = [...selectedDay.meals];
+    updatedMeals.splice(mealIndex, 1);
+    updateDay(selectedDayIndex, "meals", updatedMeals);
+  };
 
-  const updateMeal = useCallback(
-    (mealIndex, field, value) => {
-      if (!selectedDay) return;
+  const updateMeal = (mealIndex, field, value) => {
+    if (!selectedDay) return;
 
-      const updatedMeals = [...selectedDay.meals];
-      updatedMeals[mealIndex] = {
-        ...updatedMeals[mealIndex],
-        [field]: value,
-      };
-      updateDay(selectedDayIndex, "meals", updatedMeals);
-    },
-    [selectedDay, selectedDayIndex, updateDay]
-  );
+    const updatedMeals = [...selectedDay.meals];
+    updatedMeals[mealIndex] = {
+      ...updatedMeals[mealIndex],
+      [field]: value,
+    };
+    updateDay(selectedDayIndex, "meals", updatedMeals);
+  };
 
-  const addMealFromLibrary = useCallback(
-    async (mealIndex) => {
-      if (!selectedDay) return;
-      setError(null);
-      try {
-        const response = await fetch("/api/users/trainer/meals");
-        if (!response.ok) throw new Error("Failed to fetch meals");
-        const data = await response.json();
-        if (data.success) {
-          setMeals(data.meals);
-          setShowMealLibraryModal(true);
-          setActiveMealIndex(mealIndex);
-        } else {
-          throw new Error(data.error || "Failed to load meals");
-        }
-      } catch (error) {
-        setError(
-          `Failed to load meal library. ${
-            error?.message ? `Error: ${error.message}` : ""
-          }`
-        );
+  const addMealFromLibrary = async (mealIndex) => {
+    if (!selectedDay) return;
+
+    try {
+      const response = await fetch("/api/users/trainer/meals");
+      const data = await response.json();
+      if (data.success) {
+        setMeals(data.meals);
+        setShowMealLibraryModal(true);
+        setActiveMealIndex(mealIndex);
       }
-    },
-    [selectedDay]
-  );
+    } catch (error) {
+      console.error("Error fetching meals:", error);
+    }
+  };
 
-  const handleCreateMeal = useCallback(
-    async (mealData) => {
-      setError(null);
-      try {
-        const response = await fetch("/api/users/trainer/meals", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(mealData),
-        });
-        if (!response.ok) throw new Error("Failed to create meal");
-        const result = await response.json();
-        if (result.success) {
-          const mealToAdd = {
-            id: generateId(),
-            name: mealData.name,
-            description: mealData.recipe,
-            ingredients: mealData.ingredients.split(",").map((i) => i.trim()),
-            calories: mealData.calories,
-            protein: mealData.protein,
-            carbs: mealData.carbs,
-            fat: mealData.fat,
-            imageUrl: mealData.imageUrl,
-            videoUrl: mealData.video,
-          };
-          const updatedMeals = [...selectedDay.meals];
-          updatedMeals[activeMealIndex].options.push(mealToAdd);
-          updateDay(selectedDayIndex, "meals", updatedMeals);
-          setShowCreateMeal(false);
-        } else {
-          throw new Error(result.error || "Failed to create meal");
-        }
-      } catch (error) {
-        setError(
-          `Failed to create meal. ${
-            error?.message ? `Error: ${error.message}` : ""
-          }`
-        );
-      }
-    },
-    [selectedDay, activeMealIndex, updateDay, selectedDayIndex, generateId]
-  );
+  const handleCreateMeal = async (mealData) => {
+    try {
+      const response = await fetch("/api/users/trainer/meals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(mealData),
+      });
 
-  const removeMealOption = useCallback(
-    (mealIndex, optionIndex) => {
-      if (!selectedDay) return;
-
-      const updatedMeals = [...selectedDay.meals];
-      updatedMeals[mealIndex].options.splice(optionIndex, 1);
-      updateDay(selectedDayIndex, "meals", updatedMeals);
-    },
-    [selectedDay, selectedDayIndex, updateDay]
-  );
-
-  const handleSelectMealFromLibrary = useCallback(
-    async (libraryMeal) => {
-      if (!selectedDay || activeMealIndex === null) return;
-
-      const newMealOption = {
-        id: generateId(),
-        name: libraryMeal.name,
-        description: libraryMeal.recipe,
-        ingredients: libraryMeal.ingredients.split(",").map((i) => i.trim()),
-        calories: libraryMeal.calories,
-        protein: libraryMeal.protein,
-        carbs: libraryMeal.carbs,
-        fat: libraryMeal.fat,
-        imageUrl: libraryMeal.imageUrl,
-        videoUrl: libraryMeal.videoUrl,
-      };
-
-      const updatedMeals = [...selectedDay.meals];
-      updatedMeals[activeMealIndex].options.push(newMealOption);
-      updateDay(selectedDayIndex, "meals", updatedMeals);
-
-      setShowMealLibraryModal(false);
-      setActiveMealIndex(null);
-    },
-    [selectedDay, activeMealIndex, updateDay, selectedDayIndex, generateId]
-  );
-
-  const copyDayFromAnother = useCallback(
-    (fromDayIdx) => {
-      if (!days[fromDayIdx]) return;
-
-      const dayToCopy = cloneDeep(days[fromDayIdx]);
-      dayToCopy.id = uuidv4();
-      dayToCopy.name = `Day ${days.length + 1}`;
-
-      // Regenerate IDs for meals and options
-      dayToCopy.meals = dayToCopy.meals.map((meal) => ({
-        ...meal,
-        id: generateId(),
-        options: meal.options.map((option) => ({
-          ...option,
+      const result = await response.json();
+      if (result.success) {
+        const mealToAdd = {
           id: generateId(),
-        })),
-      }));
+          name: mealData.name,
+          description: mealData.recipe,
+          ingredients: mealData.ingredients.split(",").map((i) => i.trim()),
+          calories: mealData.calories,
+          protein: mealData.protein,
+          carbs: mealData.carbs,
+          fat: mealData.fat,
+          imageUrl: mealData.imageUrl,
+          videoUrl: mealData.video,
+        };
 
-      const newDays = [...days, dayToCopy];
-      onChange({ days: newDays });
-      setSelectedDayIndex(days.length);
-      setShowCopyDayModal(false);
-      setShowAddDayPopover(false);
-    },
-    [days, onChange, generateId]
-  );
+        const updatedMeals = [...selectedDay.meals];
+        updatedMeals[activeMealIndex].options.push(mealToAdd);
+        updateDay(selectedDayIndex, "meals", updatedMeals);
+        setShowCreateMeal(false);
+      }
+    } catch (error) {
+      console.error("Error creating meal:", error);
+    }
+  };
 
-  const copyMealFromAnotherDay = useCallback(
-    (fromDayIdx, fromMealIdx) => {
-      if (!selectedDay || !days[fromDayIdx]?.meals?.[fromMealIdx]) return;
+  const removeMealOption = (mealIndex, optionIndex) => {
+    if (!selectedDay) return;
 
-      const mealToCopy = cloneDeep(days[fromDayIdx].meals[fromMealIdx]);
-      mealToCopy.id = generateId();
+    const updatedMeals = [...selectedDay.meals];
+    updatedMeals[mealIndex].options.splice(optionIndex, 1);
+    updateDay(selectedDayIndex, "meals", updatedMeals);
+  };
 
-      updateDay(selectedDayIndex, "meals", [...selectedDay.meals, mealToCopy]);
-      setShowCopyMealModal(false);
-    },
-    [selectedDay, days, updateDay, selectedDayIndex, generateId]
-  );
+  const handleSelectMealFromLibrary = async (libraryMeal) => {
+    if (!selectedDay || activeMealIndex === null) return;
 
-  const updateMealOption = useCallback(
-    (mealIndex, optionIndex, field, value) => {
-      if (!selectedDay) return;
+    const newMealOption = {
+      id: generateId(),
+      name: libraryMeal.name,
+      description: libraryMeal.recipe,
+      ingredients: libraryMeal.ingredients.split(",").map((i) => i.trim()),
+      calories: libraryMeal.calories,
+      protein: libraryMeal.protein,
+      carbs: libraryMeal.carbs,
+      fat: libraryMeal.fat,
+      imageUrl: libraryMeal.imageUrl,
+      videoUrl: libraryMeal.videoUrl,
+    };
 
-      const updatedMeals = [...selectedDay.meals];
-      updatedMeals[mealIndex].options[optionIndex] = {
-        ...updatedMeals[mealIndex].options[optionIndex],
-        [field]: value,
-      };
-      updateDay(selectedDayIndex, "meals", updatedMeals);
-    },
-    [selectedDay, selectedDayIndex, updateDay]
-  );
+    const updatedMeals = [...selectedDay.meals];
+    updatedMeals[activeMealIndex].options.push(newMealOption);
+    updateDay(selectedDayIndex, "meals", updatedMeals);
 
-  // Add logging for IDs at the top of the component
+    setShowMealLibraryModal(false);
+    setActiveMealIndex(null);
+  };
+
+  const copyDayFromAnother = (fromDayIdx) => {
+    if (!days[fromDayIdx]) return;
+
+    const dayToCopy = JSON.parse(JSON.stringify(days[fromDayIdx]));
+    dayToCopy.id = uuidv4();
+    dayToCopy.name = `Day ${days.length + 1}`;
+
+    // Regenerate IDs for meals and options
+    dayToCopy.meals = dayToCopy.meals.map((meal) => ({
+      ...meal,
+      id: generateId(),
+      options: meal.options.map((option) => ({
+        ...option,
+        id: generateId(),
+      })),
+    }));
+
+    const newDays = [...days, dayToCopy];
+    onChange({ days: newDays });
+    setSelectedDayIndex(days.length);
+    setShowCopyDayModal(false);
+    setShowAddDayPopover(false);
+  };
+
+  const copyMealFromAnotherDay = (fromDayIdx, fromMealIdx) => {
+    if (!selectedDay || !days[fromDayIdx]?.meals?.[fromMealIdx]) return;
+
+    const mealToCopy = JSON.parse(
+      JSON.stringify(days[fromDayIdx].meals[fromMealIdx])
+    );
+    mealToCopy.id = generateId();
+
+    updateDay(selectedDayIndex, "meals", [...selectedDay.meals, mealToCopy]);
+    setShowCopyMealModal(false);
+  };
+
+  const updateMealOption = (mealIndex, optionIndex, field, value) => {
+    if (!selectedDay) return;
+
+    const updatedMeals = [...selectedDay.meals];
+    updatedMeals[mealIndex].options[optionIndex] = {
+      ...updatedMeals[mealIndex].options[optionIndex],
+      [field]: value,
+    };
+    updateDay(selectedDayIndex, "meals", updatedMeals);
+  };
 
   if (!selectedDay) {
     return (
@@ -406,7 +354,6 @@ export const MealPlanning = ({ data, onChange }) => {
           Create daily meal plans for your nutrition program
         </p>
       </motion.div>
-      {error && <ErrorMessage error={error} />}
 
       {/* Day Selector */}
       <motion.div
@@ -428,8 +375,8 @@ export const MealPlanning = ({ data, onChange }) => {
         {/* Days Grid - Mobile Optimized */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 sm:gap-3">
           {days.map((day, idx) => (
-            <div key={day.id || idx} className="relative group">
-              <Button
+            <div key={day.id} className="relative group">
+              <button
                 onClick={() => setSelectedDayIndex(idx)}
                 className={`w-full px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg font-medium transition-all duration-200 text-xs sm:text-sm relative overflow-hidden ${
                   selectedDayIndex === idx
@@ -439,14 +386,14 @@ export const MealPlanning = ({ data, onChange }) => {
               >
                 <div className="truncate">{day.name}</div>
                 {day.isRestDay && (
-                  <div className="absolute top-0 right-0 w-2 h-2 bg-green-400 rounded-full" />
+                  <div className="absolute top-0 right-0 w-2 h-2 bg-green-400 rounded-full"></div>
                 )}
                 {day.meals && day.meals.length > 0 && !day.isRestDay && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#FF6B00] opacity-60" />
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#FF6B00] opacity-60"></div>
                 )}
-              </Button>
+              </button>
               {days.length > 1 && (
-                <Button
+                <button
                   onClick={(e) => {
                     e.stopPropagation();
                     deleteDay(idx);
@@ -455,7 +402,7 @@ export const MealPlanning = ({ data, onChange }) => {
                   title="Delete day"
                 >
                   <Icon icon="mdi:close" className="w-3 h-3" />
-                </Button>
+                </button>
               )}
             </div>
           ))}
@@ -463,7 +410,7 @@ export const MealPlanning = ({ data, onChange }) => {
           {/* Add Day Quick Button with Popover */}
           {days.length < 30 && (
             <div className="relative">
-              <Button
+              <button
                 ref={buttonRef}
                 onClick={handleOpenPopover}
                 className="w-full px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg border-2 border-dashed border-[#444] text-gray-500 hover:border-[#FF6B00] hover:text-[#FF6B00] transition-all duration-200 text-xs sm:text-sm flex items-center justify-center group"
@@ -473,7 +420,7 @@ export const MealPlanning = ({ data, onChange }) => {
                   icon="mdi:plus"
                   className="w-4 h-4 group-hover:scale-110 transition-transform"
                 />
-              </Button>
+              </button>
 
               {/* Add Day Popover */}
               <AnimatePresence>
@@ -503,7 +450,7 @@ export const MealPlanning = ({ data, onChange }) => {
                     }}
                   >
                     <div className="p-2">
-                      <Button
+                      <button
                         onClick={() => addDay()}
                         className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white hover:bg-[#FF6B00] rounded-lg transition-all duration-200 group"
                       >
@@ -519,10 +466,10 @@ export const MealPlanning = ({ data, onChange }) => {
                             Create a blank day
                           </div>
                         </div>
-                      </Button>
+                      </button>
 
                       {days.length > 0 && (
-                        <Button
+                        <button
                           onClick={() => {
                             setShowCopyDayModal(true);
                             setShowAddDayPopover(false);
@@ -543,11 +490,11 @@ export const MealPlanning = ({ data, onChange }) => {
                               Duplicate existing day
                             </div>
                           </div>
-                        </Button>
+                        </button>
                       )}
 
                       <div className="border-t border-[#444] mt-2 pt-2">
-                        <Button
+                        <button
                           onClick={addCheatDay}
                           className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white hover:bg-[#FF6B00] rounded-lg transition-all duration-200 group"
                         >
@@ -565,7 +512,7 @@ export const MealPlanning = ({ data, onChange }) => {
                               Free meal day
                             </div>
                           </div>
-                        </Button>
+                        </button>
                       </div>
                     </div>
                   </motion.div>
@@ -642,7 +589,7 @@ export const MealPlanning = ({ data, onChange }) => {
             ) : (
               selectedDay.meals.map((meal, mealIndex) => (
                 <div
-                  key={meal.id || mealIndex}
+                  key={meal.id}
                   className="bg-[#242424] rounded-lg border border-[#444] p-4 space-y-4"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-end gap-3">
@@ -666,13 +613,13 @@ export const MealPlanning = ({ data, onChange }) => {
                       placeholder="e.g., 8:00 AM"
                       className="w-full sm:w-32"
                     />
-                    <Button
+                    <button
                       onClick={() => removeMeal(mealIndex)}
                       className="self-end p-2 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors"
                       title="Remove meal"
                     >
                       <Icon icon="mdi:delete" className="w-5 h-5" />
-                    </Button>
+                    </button>
                   </div>
 
                   {/* Meal Options */}
@@ -704,7 +651,7 @@ export const MealPlanning = ({ data, onChange }) => {
 
                           return (
                             <div
-                              key={option.id || optionIndex}
+                              key={option.id}
                               className="bg-[#2a2a2a] rounded-lg border border-[#555] overflow-hidden"
                             >
                               <div className="flex">
@@ -726,7 +673,7 @@ export const MealPlanning = ({ data, onChange }) => {
                                       placeholder="Enter meal name"
                                       className="flex-1 mr-2"
                                     />
-                                    <Button
+                                    <button
                                       onClick={() =>
                                         removeMealOption(mealIndex, optionIndex)
                                       }
@@ -737,7 +684,7 @@ export const MealPlanning = ({ data, onChange }) => {
                                         icon="mdi:trash"
                                         className="w-5 h-5"
                                       />
-                                    </Button>
+                                    </button>
                                   </div>
 
                                   {/* Nutritional Info */}
@@ -1048,8 +995,8 @@ export const MealPlanning = ({ data, onChange }) => {
           ) : (
             <div className="space-y-2 max-h-80 overflow-y-auto">
               {days.map((day, idx) => (
-                <Button
-                  key={day.id || idx}
+                <button
+                  key={day.id}
                   onClick={() => copyDayFromAnother(idx)}
                   className="w-full text-left p-4 rounded-lg bg-[#222] hover:bg-[#FF6B00] transition-all duration-200 group border border-[#333] hover:border-[#FF6B00]"
                 >
@@ -1081,7 +1028,7 @@ export const MealPlanning = ({ data, onChange }) => {
                       className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors"
                     />
                   </div>
-                </Button>
+                </button>
               ))}
             </div>
           )}
@@ -1116,13 +1063,13 @@ export const MealPlanning = ({ data, onChange }) => {
             <div className="space-y-4 max-h-80 overflow-y-auto">
               {days.map((d, dIdx) =>
                 dIdx !== selectedDayIndex && d.meals && d.meals.length > 0 ? (
-                  <div key={d.id || dIdx} className="space-y-2">
+                  <div key={d.id} className="space-y-2">
                     <h4 className="font-medium text-white text-sm bg-[#333] px-3 py-2 rounded-lg">
                       {d.name}
                     </h4>
                     {d.meals.map((meal, mIdx) => (
-                      <Button
-                        key={meal.id || mIdx}
+                      <button
+                        key={meal.id}
                         className="w-full text-left px-4 py-3 rounded-lg bg-[#222] text-white hover:bg-[#FF6B00] transition-all duration-200 border border-[#333] hover:border-[#FF6B00] group"
                         onClick={() => copyMealFromAnotherDay(dIdx, mIdx)}
                       >
@@ -1148,7 +1095,7 @@ export const MealPlanning = ({ data, onChange }) => {
                             className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors"
                           />
                         </div>
-                      </Button>
+                      </button>
                     ))}
                   </div>
                 ) : null
@@ -1176,13 +1123,7 @@ export const MealPlanning = ({ data, onChange }) => {
         }}
         title="Add Meal from Library"
         size="large"
-        secondaryButtonText="Cancel"
-        secondaryButtonAction={() => {
-          setShowMealLibraryModal(false);
-          setActiveMealIndex(null);
-          setMeals([]);
-        }}
-        footerButtons={true}
+        footerButtons={false}
       >
         <MealLibrarySelector
           meals={meals}
@@ -1202,39 +1143,34 @@ export const MealPlanning = ({ data, onChange }) => {
         title={showMediaPreview?.name || "Media Preview"}
         size="large"
       >
-        {showMediaPreview &&
-          (showMediaPreview.type === "image" ? (
-            <Image
-              src={showMediaPreview.url}
-              alt={showMediaPreview.name || "Preview"}
-              className="w-full h-auto rounded-lg"
-              width={1000}
-              height={1000}
-            />
-          ) : showMediaPreview.type === "video" && showMediaPreview.url ? (
-            <video
-              src={showMediaPreview.url}
-              controls
-              autoPlay
-              className="w-full h-auto rounded-lg"
-            >
-              <track
-                kind="captions"
-                src="/captions/sample-captions.vtt"
-                srcLang="en"
-                label="English captions"
-                default
+        {showMediaPreview && (
+          <>
+            {showMediaPreview.type === "image" ? (
+              <Image
+                src={showMediaPreview.url}
+                alt={showMediaPreview.name || "Preview"}
+                className="w-full h-auto rounded-lg"
+                width={1000}
+                height={1000}
               />
-            </video>
-          ) : (
-            <div className="text-center py-8">
-              <Icon
-                icon="mdi:file-question"
-                className="w-12 h-12 text-gray-500 mx-auto mb-3"
+            ) : showMediaPreview.type === "video" && showMediaPreview.url ? (
+              <video
+                src={showMediaPreview.url}
+                controls
+                autoPlay
+                className="w-full h-auto rounded-lg"
               />
-              <p className="text-gray-400">Media not available</p>
-            </div>
-          ))}
+            ) : (
+              <div className="text-center py-8">
+                <Icon
+                  icon="mdi:file-question"
+                  className="w-12 h-12 text-gray-500 mx-auto mb-3"
+                />
+                <p className="text-gray-400">Media not available</p>
+              </div>
+            )}
+          </>
+        )}
       </Modal>
     </div>
   );

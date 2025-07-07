@@ -4,6 +4,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 
 import { fetchPlanDetails } from "@/app/api/users/services/planService";
+import { FullScreenLoader } from "@/components";
 import { NutritionPlanCreator } from "@/components/custom/dashboard/trainer/pages/plans/nutrition/create/NutritionPlanCreator";
 
 export default function EditNutritionPlanPage() {
@@ -76,7 +77,7 @@ export default function EditNutritionPlanPage() {
       });
   }, [id, searchParams, safeUUID]);
 
-  if (loading) return <div className="text-white">Loading...</div>;
+  if (loading) return <FullScreenLoader text="Loading Nutrition Plan" />;
   if (error) return <div className="text-red-500">{error}</div>;
   if (!initialData) return null;
 

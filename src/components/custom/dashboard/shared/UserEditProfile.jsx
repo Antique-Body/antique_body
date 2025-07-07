@@ -279,9 +279,9 @@ const ProfileEditModal = ({
                         variants={fadeIn}
                         initial="hidden"
                         animate="visible"
-                        className="relative z-10"
+                        className="relative z-10 "
                       >
-                        {children}
+                        <div className="mt-5">{children}</div>
                       </motion.div>
                     </Card>
                   </motion.div>

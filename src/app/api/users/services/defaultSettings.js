@@ -772,7 +772,7 @@ export const DEFAULT_EXERCISES = [
     muscleGroups: ["quadriceps", "hamstrings", "glutes", "core"],
     imageUrl:
       "https://images.pexels.com/photos/2261482/pexels-photo-2261482.jpeg",
-    video: "https://www.youtube.com/watch?v=ultWZbUMPL8",
+    videoUrl: "https://www.youtube.com/watch?v=ultWZbUMPL8",
   },
   {
     name: "Push-ups",
@@ -787,7 +787,7 @@ export const DEFAULT_EXERCISES = [
     muscleGroups: ["chest", "shoulders", "triceps", "core"],
     imageUrl:
       "https://images.pexels.com/photos/416778/pexels-photo-416778.jpeg",
-    video: "https://www.youtube.com/watch?v=IODxDxX7oi4",
+    videoUrl: "https://www.youtube.com/watch?v=IODxDxX7oi4",
   },
   {
     name: "Plank",
@@ -802,7 +802,7 @@ export const DEFAULT_EXERCISES = [
     muscleGroups: ["core", "shoulders", "back"],
     imageUrl:
       "https://images.pexels.com/photos/4056723/pexels-photo-4056723.jpeg",
-    video: "https://www.youtube.com/watch?v=ASdvN_XEl_c",
+    videoUrl: "https://www.youtube.com/watch?v=ASdvN_XEl_c",
   },
 ];
 
@@ -850,7 +850,7 @@ export const DEFAULT_MEALS = [
       "1. Place Greek yogurt in a bowl. 2. Top with granola and mixed berries. 3. Drizzle with honey. 4. Sprinkle chia seeds on top. 5. Serve immediately.",
     imageUrl:
       "https://images.pexels.com/photos/1092730/pexels-photo-1092730.jpeg",
-    video: null,
+    videoUrl: null,
   },
   {
     name: "Grilled Chicken Salad",
@@ -869,7 +869,7 @@ export const DEFAULT_MEALS = [
       "1. Season and grill chicken breast for 6-8 minutes per side. 2. Let rest and slice. 3. Combine mixed greens, tomatoes, cucumber in a bowl. 4. Top with sliced chicken and avocado. 5. Drizzle with olive oil and lemon juice.",
     imageUrl:
       "https://images.pexels.com/photos/1059905/pexels-photo-1059905.jpeg",
-    video: null,
+    videoUrl: null,
   },
   {
     name: "Salmon Teriyaki Bowl",
@@ -888,6 +888,6 @@ export const DEFAULT_MEALS = [
       "1. Cook brown rice according to package instructions. 2. Steam broccoli and carrots until tender. 3. Pan-sear salmon with teriyaki sauce for 4-5 minutes per side. 4. Serve salmon over rice with vegetables. 5. Garnish with sesame seeds.",
     imageUrl:
       "https://images.pexels.com/photos/1109197/pexels-photo-1109197.jpeg",
-    video: null,
+    videoUrl: null,
   },
 ];

@@ -74,7 +74,7 @@ export const Availability = ({ trainerData, setTrainerData }) => {
         variants={fadeInUp}
         className="overflow-hidden rounded-xl bg-[rgba(30,30,30,0.6)] p-0.5 backdrop-blur-md"
       >
-        <div className="rounded-lg border border-[rgba(255,120,0,0.3)] bg-[rgba(255,120,0,0.1)] p-5">
+        <div className="rounded-lg border border-[rgba(255,120,0,0.3)] bg-[rgba(255,120,0,0.1)] p-4 sm:p-5">
           <div className="mb-4 flex items-center">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(255,120,0,0.15)] text-[#FF7800]">
               <Icon icon="lucide:calendar" width={18} />
@@ -84,28 +84,27 @@ export const Availability = ({ trainerData, setTrainerData }) => {
             </h3>
           </div>
 
-          <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-7">
+          {/* Mobile Layout (< lg) */}
+          <div className="space-y-4 lg:hidden">
             {weekdays.map((day) => (
-              <div key={day} className="flex flex-col items-center">
-                <span className="mb-2 text-sm font-medium text-white">
-                  {day.substring(0, 3)}
-                </span>
-                <div className="flex flex-col gap-2">
+              <div key={day} className="rounded-lg bg-[rgba(0,0,0,0.2)] p-4">
+                <h4 className="mb-3 text-base font-medium text-white">{day}</h4>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {timeSlots.map((slot) => (
                     <label
                       key={slot}
-                      className="flex items-center gap-2 cursor-pointer"
+                      className="flex cursor-pointer items-center gap-3 rounded-lg bg-[rgba(255,255,255,0.05)] p-3 transition-all duration-200 hover:bg-[rgba(255,120,0,0.1)] active:scale-95"
                     >
                       <input
                         type="checkbox"
                         checked={isSelected(day, slot)}
                         onChange={() => toggleAvailability(day, slot)}
-                        className="accent-[#FF7800]"
+                        className="h-4 w-4 accent-[#FF7800]"
                       />
                       <span
-                        className={`text-xs ${
+                        className={`text-sm font-medium transition-colors ${
                           isSelected(day, slot)
-                            ? "text-[#FF7800] font-semibold"
+                            ? "text-[#FF7800]"
                             : "text-white"
                         }`}
                       >
@@ -114,6 +113,43 @@ export const Availability = ({ trainerData, setTrainerData }) => {
                     </label>
                   ))}
                 </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Layout (>= lg) - Compact Grid */}
+          <div className="hidden lg:block">
+            <div className="mb-4 grid grid-cols-8 gap-4">
+              {/* Header row */}
+              <div></div>
+              {weekdays.map((day) => (
+                <div key={day} className="text-center">
+                  <span className="text-sm font-medium text-white">
+                    {day.substring(0, 3)}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Time slots rows */}
+            {timeSlots.map((slot) => (
+              <div
+                key={slot}
+                className="mb-3 grid grid-cols-8 gap-4 items-center"
+              >
+                <div className="text-sm font-medium text-[#FF9A00]">{slot}</div>
+                {weekdays.map((day) => (
+                  <div key={day} className="flex justify-center">
+                    <label className="flex cursor-pointer items-center justify-center rounded-lg bg-[rgba(255,255,255,0.05)] p-2 transition-all duration-200 hover:bg-[rgba(255,120,0,0.1)] active:scale-95">
+                      <input
+                        type="checkbox"
+                        checked={isSelected(day, slot)}
+                        onChange={() => toggleAvailability(day, slot)}
+                        className="h-4 w-4 accent-[#FF7800]"
+                      />
+                    </label>
+                  </div>
+                ))}
               </div>
             ))}
           </div>
@@ -131,7 +167,7 @@ export const Availability = ({ trainerData, setTrainerData }) => {
         variants={fadeInUp}
         className="overflow-hidden rounded-xl bg-[rgba(30,30,30,0.6)] p-0.5 backdrop-blur-md"
       >
-        <div className="w-full rounded-lg border border-[rgba(255,120,0,0.3)] bg-[rgba(255,120,0,0.1)] p-5">
+        <div className="w-full rounded-lg border border-[rgba(255,120,0,0.3)] bg-[rgba(255,120,0,0.1)] p-4 sm:p-5">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
               <FormField

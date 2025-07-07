@@ -28,7 +28,7 @@ export const Specialties = ({ trainerData, handleChange, setTrainerData }) => (
     variants={staggerItems}
     initial="hidden"
     animate="visible"
-    className="space-y-8"
+    className="space-y-8 p-4 mx-6"
   >
     <SectionTitle title="Specialties & Training Types" />
 
