@@ -80,7 +80,7 @@ export const UserProfile = ({
                   }`}
                   sizes="(max-width: 640px) 80px, (max-width: 1024px) 96px, 128px"
                   onError={() => setImageError(true)}
-                  onLoadingComplete={() => setIsImageLoaded(true)}
+                  onLoad={() => setIsImageLoaded(true)}
                   loading="eager"
                 />
               )}

@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 
 import { Button } from "@/components/common/Button";
 
@@ -87,7 +88,7 @@ const ProfileCapsule = ({
                 }`}
                 sizes="40px"
                 onError={() => setImageError(true)}
-                onLoadingComplete={() => setIsImageLoaded(true)}
+                onLoad={() => setIsImageLoaded(true)}
               />
             )}
             {(!userData?.profileImage || imageError || !isImageLoaded) && (
@@ -148,16 +149,16 @@ const ProfileCapsule = ({
 };
 
 // Navigation Item Component
-const NavItem = ({ item, isActive, onClick, isCollapsed, badgeCount }) => (
+const NavItem = ({ item, isActive, isCollapsed, badgeCount }) => (
   <div className="relative">
-    <button
-      type="button"
-      onClick={onClick}
-      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative ${
+    <Link
+      href={item.route}
+      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative no-underline focus:outline-none focus:ring-2 focus:ring-[#FF6B00] ${
         isActive
           ? "bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] text-white shadow-lg shadow-orange-500/20"
           : "text-zinc-400 hover:text-white hover:bg-white/[0.05]"
       } ${isCollapsed ? "justify-center" : ""}`}
+      tabIndex={0}
     >
       {/* Icon */}
       <Icon
@@ -201,7 +202,7 @@ const NavItem = ({ item, isActive, onClick, isCollapsed, badgeCount }) => (
           {badgeCount}
         </div>
       )}
-    </button>
+    </Link>
   </div>
 );
 
@@ -212,7 +213,6 @@ export const SidebarDashboard = ({
   loading,
   navigationItems = [],
   activeItem,
-  onNavigationChange,
   onProfileClick,
   onEditClick,
   onSettingsClick,
@@ -240,14 +240,6 @@ export const SidebarDashboard = ({
   useEffect(() => {
     setIsMobileOpen(false);
   }, [pathname]);
-
-  const handleNavItemClick = useCallback(
-    (item) => {
-      onNavigationChange?.(item.id);
-      setIsMobileOpen(false); // Close mobile sidebar
-    },
-    [onNavigationChange]
-  );
 
   const toggleCollapse = useCallback(() => {
     setIsCollapsed((prev) => !prev);
@@ -346,7 +338,6 @@ export const SidebarDashboard = ({
                 key={item.id}
                 item={item}
                 isActive={activeItem === item.id}
-                onClick={() => handleNavItemClick(item)}
                 isCollapsed={isCollapsed}
                 badgeCount={item.badgeCount || 0}
               />
