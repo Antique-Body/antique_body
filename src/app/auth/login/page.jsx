@@ -9,9 +9,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { EffectBackground } from "@/components/background";
-import { Button } from "@/components/common";
-import { BrandLogo } from "@/components/common";
-import { FormField } from "@/components/common/FormField";
+import { BrandLogo, FormField, Button } from "@/components/common";
 import { AuthForm } from "@/components/custom/auth/components/AuthForm";
 
 export default function LoginPage() {
