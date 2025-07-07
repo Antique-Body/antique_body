@@ -1,15 +1,13 @@
 import { Icon } from "@iconify/react";
 import Image from "next/image";
-import { ErrorMessage } from "@/components/common/ErrorMessage";
 import React from "react";
+
+import { ErrorMessage } from "@/components/common/ErrorMessage";
 
 export default function CoverImageUpload({
   previewImage,
   imageError,
-  handleImageChange,
-  setPreviewImage,
-  setImageError,
-  onChange,
+  handleImageChange
 }) {
   return (
     <div className="relative group max-w-5xl mx-auto mb-8 sm:mb-12">
@@ -52,7 +50,7 @@ export default function CoverImageUpload({
             </div>
           ) : (
             <label
-              htmlFor="coverImage"
+              htmlFor="coverImage2"
               className="w-full h-full flex flex-col items-center justify-center cursor-pointer group-hover:bg-gradient-to-br group-hover:from-[#FF6B00]/5 group-hover:to-[#FF8A00]/5 transition-all duration-500 p-4"
             >
               <div className="p-4 sm:p-8 rounded-full bg-gradient-to-r from-[#FF6B00]/10 to-[#FF8A00]/10 mb-3 sm:mb-6 group-hover:from-[#FF6B00]/20 group-hover:to-[#FF8A00]/20 transition-all duration-300">
@@ -74,7 +72,7 @@ export default function CoverImageUpload({
                 type="file"
                 accept="image/*"
                 name="coverImage"
-                id="coverImage"
+                id="coverImage2"
                 onChange={handleImageChange}
                 className="hidden"
               />

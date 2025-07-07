@@ -141,7 +141,7 @@ const Gallery = ({ trainerData, setTrainerData }) => {
     const removedImage = newImages.splice(index, 1)[0];
 
     // Clean up object URL if it exists
-    if (removedImage && removedImage.previewUrl) {
+    if (removedImage?.previewUrl) {
       URL.revokeObjectURL(removedImage.previewUrl);
     }
 
