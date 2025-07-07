@@ -51,7 +51,7 @@ function processExerciseData(data) {
     level: data.level,
     description: data.description,
     instructions: data.instructions,
-    video: data.video || null,
+    videoUrl: data.videoUrl || null,
     imageUrl: data.imageUrl || null,
   };
 }

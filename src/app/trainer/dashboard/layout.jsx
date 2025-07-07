@@ -64,18 +64,18 @@ export default function TrainerDashboardLayout({ children }) {
     fetchTrainer();
   }, []);
 
-  useEffect(() => {
-    async function fetchUnreadMessages() {
-      try {
-        const res = await fetch("/api/messages/unread-count");
-        const data = await res.json();
-        setMessageBadgeCount(data.unreadCount || 0);
-      } catch {
-        setMessageBadgeCount(0);
-      }
-    }
-    fetchUnreadMessages();
-  }, []);
+  // useEffect(() => {
+  //   async function fetchUnreadMessages() {
+  //     try {
+  //       const res = await fetch("/api/messages/unread-count");
+  //       const data = await res.json();
+  //       setMessageBadgeCount(data.unreadCount || 0);
+  //     } catch {
+  //       setMessageBadgeCount(0);
+  //     }
+  //   }
+  //   fetchUnreadMessages();
+  // }, []);
 
   // Navigate to appropriate route when tab changes
   const handleTabChange = (tabId) => {

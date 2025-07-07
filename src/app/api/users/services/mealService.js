@@ -78,7 +78,7 @@ function processMealData(data) {
     ingredients: data.ingredients.trim(),
     recipe: data.recipe.trim(),
     imageUrl: data.imageUrl || null,
-    video: data.video || null,
+    videoUrl: data.videoUrl || null,
   };
 }
 

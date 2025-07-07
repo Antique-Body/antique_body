@@ -386,7 +386,7 @@ model Exercise {
   level             String   // "beginner", "intermediate", "advanced"
   description       String   @db.Text
   instructions      String   @db.Text
-  video             String?  // URL to video
+  videoUrl          String?  // URL to video
   imageUrl          String?  // URL to image
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -467,7 +467,7 @@ model Meal {
   ingredients     String   @db.Text
   recipe          String   @db.Text
   imageUrl        String?
-  video           String?  // URL to video
+  videoUrl        String?  // URL to video
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   

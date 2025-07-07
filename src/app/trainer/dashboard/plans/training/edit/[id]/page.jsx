@@ -4,6 +4,7 @@ import { useSearchParams, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { fetchPlanDetails } from "@/app/api/users/services/planService";
+import { FullScreenLoader } from "@/components";
 import { TrainingPlanCreator } from "@/components/custom/dashboard/trainer/pages/plans/training/create/TrainingPlanCreator";
 
 export default function EditTrainingPlanPage() {
@@ -57,7 +58,7 @@ export default function EditTrainingPlanPage() {
       });
   }, [id, searchParams]);
 
-  if (loading) return <div className="text-white">Loading...</div>;
+  if (loading) return <FullScreenLoader text="Loading Training Plan" />;
   if (error) return <div className="text-red-500">{error}</div>;
   if (!initialData) return null;
 

@@ -122,6 +122,49 @@ export const FormField = ({
     error ? "focus:ring-red-500/30" : "focus:ring-[#FF6B00]/30"
   } transition ${getInputPadding()} ${className}`;
 
+  // Handler to restrict input to only numbers (and optionally a single decimal point)
+  const handleNumberKeyDown = (e) => {
+    // Allow: backspace, delete, tab, escape, enter, arrows
+    if (
+      [
+        "Backspace",
+        "Delete",
+        "Tab",
+        "Escape",
+        "Enter",
+        "ArrowLeft",
+        "ArrowRight",
+        "Home",
+        "End",
+      ].includes(e.key)
+    ) {
+      return;
+    }
+    // Allow: Ctrl/cmd+A, Ctrl/cmd+C, Ctrl/cmd+V, Ctrl/cmd+X
+    if (
+      (e.ctrlKey || e.metaKey) &&
+      ["a", "c", "v", "x"].includes(e.key.toLowerCase())
+    ) {
+      return;
+    }
+    // Allow one decimal point (if not already present)
+    if (e.key === ".") {
+      if (e.target.value.includes(".")) {
+        e.preventDefault();
+      }
+      return;
+    }
+    // Block: e, +, - (forbids scientific notation and negative numbers)
+    if (["e", "E", "+", "-"].includes(e.key)) {
+      e.preventDefault();
+      return;
+    }
+    // Allow only digits
+    if (!/\d/.test(e.key)) {
+      e.preventDefault();
+    }
+  };
+
   // Consistent label component
   const LabelComponent = ({ htmlFor }) =>
     label && (
@@ -755,6 +798,7 @@ export const FormField = ({
               inputProps.onChange(e);
             }
           }}
+          {...(type === "number" ? { onKeyDown: handleNumberKeyDown } : {})}
         />
 
         {suffixIcon && (

@@ -61,7 +61,7 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
     ingredients: "",
     recipe: "",
     imageUrl: null,
-    video: null,
+    videoUrl: null,
   });
 
   // UI state
@@ -94,11 +94,11 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
       const dietaryPreferences = meal.dietary || [];
       setSelectedDietary(dietaryPreferences);
 
-      if (meal.video) {
-        setVideoPreview(meal.video);
-        setVideoUrl(meal.video);
+      if (meal.videoUrl) {
+        setVideoPreview(meal.videoUrl);
+        setVideoUrl(meal.videoUrl);
         // If it's a URL (not a file), show the URL input
-        if (!meal.video.startsWith("blob:")) {
+        if (!meal.videoUrl.startsWith("blob:")) {
           setShowVideoUrlInput(true);
         }
       }
@@ -127,7 +127,7 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
       ingredients: "",
       recipe: "",
       imageUrl: null,
-      video: null,
+      videoUrl: null,
     });
     setSelectedDietary([]);
     setImagePreview(null);
@@ -212,7 +212,7 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
 
     if (fileType === "video") {
       setVideoPreview(fileUrl);
-      setFormData((prev) => ({ ...prev, video: fileUrl }));
+      setFormData((prev) => ({ ...prev, videoUrl: fileUrl }));
       setVideoFile(file);
       setVideoUrl("");
       setShowVideoUrlInput(false);
@@ -228,7 +228,7 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
     if (fileType === "video") {
       setVideoPreview(null);
       setVideoUrl("");
-      setFormData((prev) => ({ ...prev, video: null }));
+      setFormData((prev) => ({ ...prev, videoUrl: null }));
       setVideoFile(null);
       // Reset file input
       const videoInput = document.getElementById("video-upload");
@@ -338,7 +338,7 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
         ...formData,
         id: formData.id || undefined, // Remove ID for new meals
         imageUrl: uploadedUrls.exerciseImage || formData.imageUrl,
-        video: uploadedUrls.exerciseVideo || formData.video, // Video URL will be preserved if it's not a blob
+        videoUrl: uploadedUrls.exerciseVideo || formData.videoUrl, // Video URL will be preserved if it's not a blob
       };
 
       // Call the save function
@@ -370,7 +370,7 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
       cuisine: libraryMeal.cuisine,
       ingredients: libraryMeal.ingredients,
       recipe: libraryMeal.recipe,
-      video: libraryMeal.video,
+      videoUrl: libraryMeal.videoUrl,
       imageUrl: libraryMeal.imageUrl,
     });
 
@@ -383,11 +383,11 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
     }
 
     // Set video preview if available
-    if (libraryMeal.video) {
-      setVideoPreview(libraryMeal.video);
-      setVideoUrl(libraryMeal.video);
+    if (libraryMeal.videoUrl) {
+      setVideoPreview(libraryMeal.videoUrl);
+      setVideoUrl(libraryMeal.videoUrl);
       // If it's a URL (not a file), show the URL input
-      if (!libraryMeal.video.startsWith("blob:")) {
+      if (!libraryMeal.videoUrl.startsWith("blob:")) {
         setShowVideoUrlInput(true);
       }
     }

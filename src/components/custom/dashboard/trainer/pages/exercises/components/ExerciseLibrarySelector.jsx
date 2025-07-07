@@ -3,6 +3,7 @@
 import { Icon } from "@iconify/react";
 import { useState, useEffect } from "react";
 
+import { AnatomicalViewer } from "./AnatomicalViewer";
 import exerciseLibrary from "./exerciseLibrary.json";
 
 import { Button } from "@/components/common/Button";
@@ -80,60 +81,79 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
                 key={exercise.id}
                 type="button"
                 onClick={() => onSelectExercise(exercise)}
-                className="w-full text-left bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-600 rounded-lg p-4 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500/30"
+                className="w-full text-left bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-600 rounded-lg p-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500/30"
               >
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-white font-semibold text-sm">
-                    {exercise.name}
-                  </h3>
-                  <div className="flex gap-1">
-                    <span
-                      className={`text-xs px-2 py-1 rounded ${
-                        exercise.type === "strength"
-                          ? "bg-purple-900/40 text-purple-300"
-                          : exercise.type === "bodyweight"
-                          ? "bg-green-900/40 text-green-300"
-                          : exercise.type === "cardio"
-                          ? "bg-blue-900/40 text-blue-300"
-                          : "bg-gray-900/40 text-gray-300"
-                      }`}
-                    >
-                      {exercise.type.charAt(0).toUpperCase() +
-                        exercise.type.slice(1)}
-                    </span>
-                    <span
-                      className={`text-xs px-2 py-1 rounded ${
-                        exercise.level === "beginner"
-                          ? "bg-green-900/40 text-green-300"
-                          : exercise.level === "intermediate"
-                          ? "bg-orange-900/40 text-orange-300"
-                          : "bg-red-900/40 text-red-300"
-                      }`}
-                    >
-                      {exercise.level.charAt(0).toUpperCase() +
-                        exercise.level.slice(1)}
-                    </span>
+                <div className="flex flex-row gap-4 items-center">
+                  {/* AnatomicalViewer on the left */}
+                  <div className="h-auto w-15">
+                    <AnatomicalViewer
+                      exerciseName={exercise.name}
+                      muscleGroups={exercise.muscleGroups || []}
+                      showBothViews={false}
+                      size="small"
+                      interactive={false}
+                      showMuscleInfo={false}
+                      showExerciseInfo={false}
+                      darkMode={true}
+                      compact={true}
+                    />
                   </div>
-                </div>
+                  {/* Textual info on the right */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-white font-semibold text-sm">
+                        {exercise.name}
+                      </h3>
+                      <div className="flex gap-1">
+                        <span
+                          className={`text-xs px-2 py-1 rounded ${
+                            exercise.type === "strength"
+                              ? "bg-purple-900/40 text-purple-300"
+                              : exercise.type === "bodyweight"
+                              ? "bg-green-900/40 text-green-300"
+                              : exercise.type === "cardio"
+                              ? "bg-blue-900/40 text-blue-300"
+                              : "bg-gray-900/40 text-gray-300"
+                          }`}
+                        >
+                          {exercise.type.charAt(0).toUpperCase() +
+                            exercise.type.slice(1)}
+                        </span>
+                        <span
+                          className={`text-xs px-2 py-1 rounded ${
+                            exercise.level === "beginner"
+                              ? "bg-green-900/40 text-green-300"
+                              : exercise.level === "intermediate"
+                              ? "bg-orange-900/40 text-orange-300"
+                              : "bg-red-900/40 text-red-300"
+                          }`}
+                        >
+                          {exercise.level.charAt(0).toUpperCase() +
+                            exercise.level.slice(1)}
+                        </span>
+                      </div>
+                    </div>
 
-                <p className="text-zinc-400 text-xs mb-2 line-clamp-2">
-                  {exercise.description}
-                </p>
+                    <p className="text-zinc-400 text-xs mb-2 line-clamp-2">
+                      {exercise.description}
+                    </p>
 
-                <div className="flex flex-wrap gap-1">
-                  {exercise.muscleGroups.slice(0, 3).map((muscle, idx) => (
-                    <span
-                      key={idx}
-                      className="text-xs px-2 py-1 bg-orange-900/20 text-orange-300 rounded"
-                    >
-                      {formatMuscleDisplayName(muscle)}
-                    </span>
-                  ))}
-                  {exercise.muscleGroups.length > 3 && (
-                    <span className="text-xs px-2 py-1 bg-zinc-700 text-zinc-400 rounded">
-                      +{exercise.muscleGroups.length - 3}
-                    </span>
-                  )}
+                    <div className="flex flex-wrap gap-1">
+                      {exercise.muscleGroups.slice(0, 3).map((muscle, idx) => (
+                        <span
+                          key={idx}
+                          className="text-xs px-2 py-1 bg-orange-900/20 text-orange-300 rounded"
+                        >
+                          {formatMuscleDisplayName(muscle)}
+                        </span>
+                      ))}
+                      {exercise.muscleGroups.length > 3 && (
+                        <span className="text-xs px-2 py-1 bg-zinc-700 text-zinc-400 rounded">
+                          +{exercise.muscleGroups.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </button>
             ))}
