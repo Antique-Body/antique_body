@@ -85,7 +85,7 @@ export const ExerciseLibrarySelector = ({ onSelectExercise, onClose }) => {
               >
                 <div className="flex flex-row gap-4 items-center">
                   {/* AnatomicalViewer on the left */}
-                  <div className="h-auto w-15">
+                  <div className="h-auto w-12 sm:w-16 md:w-20 lg:w-24">
                     <AnatomicalViewer
                       exerciseName={exercise.name}
                       muscleGroups={exercise.muscleGroups || []}

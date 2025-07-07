@@ -121,7 +121,6 @@ export const Availability = ({ trainerData, setTrainerData }) => {
           <div className="hidden lg:block">
             <div className="mb-4 grid grid-cols-8 gap-4">
               {/* Header row */}
-              <div></div>
               {weekdays.map((day) => (
                 <div key={day} className="text-center">
                   <span className="text-sm font-medium text-white">

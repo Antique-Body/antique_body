@@ -377,6 +377,7 @@ export const MealPlanning = ({ data, onChange }) => {
           {days.map((day, idx) => (
             <div key={day.id} className="relative group">
               <button
+                type="button"
                 onClick={() => setSelectedDayIndex(idx)}
                 className={`w-full px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg font-medium transition-all duration-200 text-xs sm:text-sm relative overflow-hidden ${
                   selectedDayIndex === idx
@@ -386,14 +387,15 @@ export const MealPlanning = ({ data, onChange }) => {
               >
                 <div className="truncate">{day.name}</div>
                 {day.isRestDay && (
-                  <div className="absolute top-0 right-0 w-2 h-2 bg-green-400 rounded-full"></div>
+                  <div className="absolute top-0 right-0 w-2 h-2 bg-green-400 rounded-full" />
                 )}
                 {day.meals && day.meals.length > 0 && !day.isRestDay && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#FF6B00] opacity-60"></div>
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#FF6B00] opacity-60" />
                 )}
               </button>
               {days.length > 1 && (
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     deleteDay(idx);
@@ -411,6 +413,7 @@ export const MealPlanning = ({ data, onChange }) => {
           {days.length < 30 && (
             <div className="relative">
               <button
+                type="button"
                 ref={buttonRef}
                 onClick={handleOpenPopover}
                 className="w-full px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg border-2 border-dashed border-[#444] text-gray-500 hover:border-[#FF6B00] hover:text-[#FF6B00] transition-all duration-200 text-xs sm:text-sm flex items-center justify-center group"
@@ -451,6 +454,7 @@ export const MealPlanning = ({ data, onChange }) => {
                   >
                     <div className="p-2">
                       <button
+                        type="button"
                         onClick={() => addDay()}
                         className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white hover:bg-[#FF6B00] rounded-lg transition-all duration-200 group"
                       >
@@ -470,6 +474,7 @@ export const MealPlanning = ({ data, onChange }) => {
 
                       {days.length > 0 && (
                         <button
+                          type="button"
                           onClick={() => {
                             setShowCopyDayModal(true);
                             setShowAddDayPopover(false);
@@ -495,6 +500,7 @@ export const MealPlanning = ({ data, onChange }) => {
 
                       <div className="border-t border-[#444] mt-2 pt-2">
                         <button
+                          type="button"
                           onClick={addCheatDay}
                           className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white hover:bg-[#FF6B00] rounded-lg transition-all duration-200 group"
                         >
@@ -614,6 +620,7 @@ export const MealPlanning = ({ data, onChange }) => {
                       className="w-full sm:w-32"
                     />
                     <button
+                      type="button"
                       onClick={() => removeMeal(mealIndex)}
                       className="self-end p-2 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors"
                       title="Remove meal"
@@ -674,6 +681,7 @@ export const MealPlanning = ({ data, onChange }) => {
                                       className="flex-1 mr-2"
                                     />
                                     <button
+                                      type="button"
                                       onClick={() =>
                                         removeMealOption(mealIndex, optionIndex)
                                       }
@@ -996,6 +1004,7 @@ export const MealPlanning = ({ data, onChange }) => {
             <div className="space-y-2 max-h-80 overflow-y-auto">
               {days.map((day, idx) => (
                 <button
+                  type="button"
                   key={day.id}
                   onClick={() => copyDayFromAnother(idx)}
                   className="w-full text-left p-4 rounded-lg bg-[#222] hover:bg-[#FF6B00] transition-all duration-200 group border border-[#333] hover:border-[#FF6B00]"
@@ -1069,6 +1078,7 @@ export const MealPlanning = ({ data, onChange }) => {
                     </h4>
                     {d.meals.map((meal, mIdx) => (
                       <button
+                        type="button"
                         key={meal.id}
                         className="w-full text-left px-4 py-3 rounded-lg bg-[#222] text-white hover:bg-[#FF6B00] transition-all duration-200 border border-[#333] hover:border-[#FF6B00] group"
                         onClick={() => copyMealFromAnotherDay(dIdx, mIdx)}
@@ -1143,34 +1153,39 @@ export const MealPlanning = ({ data, onChange }) => {
         title={showMediaPreview?.name || "Media Preview"}
         size="large"
       >
-        {showMediaPreview && (
-          <>
-            {showMediaPreview.type === "image" ? (
-              <Image
-                src={showMediaPreview.url}
-                alt={showMediaPreview.name || "Preview"}
-                className="w-full h-auto rounded-lg"
-                width={1000}
-                height={1000}
+        {showMediaPreview &&
+          (showMediaPreview.type === "image" ? (
+            <Image
+              src={showMediaPreview.url}
+              alt={showMediaPreview.name || "Preview"}
+              className="w-full h-auto rounded-lg"
+              width={1000}
+              height={1000}
+            />
+          ) : showMediaPreview.type === "video" && showMediaPreview.url ? (
+            <video
+              src={showMediaPreview.url}
+              controls
+              autoPlay
+              className="w-full h-auto rounded-lg"
+            >
+              <track
+                kind="captions"
+                src={showMediaPreview.url.replace(/\.[^/.]+$/, ".vtt")}
+                srcLang="en"
+                label="English"
+                default
               />
-            ) : showMediaPreview.type === "video" && showMediaPreview.url ? (
-              <video
-                src={showMediaPreview.url}
-                controls
-                autoPlay
-                className="w-full h-auto rounded-lg"
+            </video>
+          ) : (
+            <div className="text-center py-8">
+              <Icon
+                icon="mdi:file-question"
+                className="w-12 h-12 text-gray-500 mx-auto mb-3"
               />
-            ) : (
-              <div className="text-center py-8">
-                <Icon
-                  icon="mdi:file-question"
-                  className="w-12 h-12 text-gray-500 mx-auto mb-3"
-                />
-                <p className="text-gray-400">Media not available</p>
-              </div>
-            )}
-          </>
-        )}
+              <p className="text-gray-400">Media not available</p>
+            </div>
+          ))}
       </Modal>
     </div>
   );

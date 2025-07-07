@@ -348,10 +348,7 @@ export const ExerciseModal = ({
       };
 
       // Ako je video bio blob, ali nije uploadovan (npr. greška), nemoj slati blob
-      if (
-        finalFormData.videoUrl &&
-        finalFormData.videoUrl.startsWith("blob:")
-      ) {
+      if (finalFormData.videoUrl?.startsWith("blob:")) {
         finalFormData.videoUrl = "";
       }
       if (
@@ -590,13 +587,13 @@ export const ExerciseModal = ({
                   <iframe
                     src={`https://www.youtube.com/embed/${
                       exercise.videoUrl.match(
-                        /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
+                        /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/
                       )?.[1]
                     }`}
                     title={`${exercise.name} video`}
                     className="h-[500px] w-full rounded-lg"
                     allowFullScreen
-                  ></iframe>
+                  />
                 ) : exercise.videoUrl.includes("vimeo.com") ? (
                   <iframe
                     src={`https://player.vimeo.com/video/${
@@ -605,7 +602,7 @@ export const ExerciseModal = ({
                     title={`${exercise.name} video`}
                     className="h-[500px] w-full rounded-lg"
                     allowFullScreen
-                  ></iframe>
+                  />
                 ) : (
                   <video
                     src={exercise.videoUrl}
