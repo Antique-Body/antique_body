@@ -30,6 +30,8 @@ export const MealPlanning = ({ data, onChange }) => {
   const buttonRef = useRef(null);
   const [showCreateMeal, setShowCreateMeal] = useState(false);
   const [meals, setMeals] = useState([]);
+  const [subtitleExists, setSubtitleExists] = useState(false);
+  const [lastCheckedSubtitleUrl, setLastCheckedSubtitleUrl] = useState("");
 
   const days = data.days || [];
   const selectedDay = days[selectedDayIndex];
@@ -310,6 +312,25 @@ export const MealPlanning = ({ data, onChange }) => {
     };
     updateDay(selectedDayIndex, "meals", updatedMeals);
   };
+
+  useEffect(() => {
+    if (
+      showMediaPreview &&
+      showMediaPreview.type === "video" &&
+      showMediaPreview.url
+    ) {
+      const vttUrl = showMediaPreview.url.replace(/\.[^/.]+$/, ".vtt");
+      if (vttUrl !== lastCheckedSubtitleUrl) {
+        setLastCheckedSubtitleUrl(vttUrl);
+        fetch(vttUrl, { method: "HEAD" })
+          .then((res) => setSubtitleExists(res.ok))
+          .catch(() => setSubtitleExists(false));
+      }
+    } else {
+      setSubtitleExists(false);
+      setLastCheckedSubtitleUrl("");
+    }
+  }, [showMediaPreview]);
 
   if (!selectedDay) {
     return (
@@ -1169,13 +1190,21 @@ export const MealPlanning = ({ data, onChange }) => {
               autoPlay
               className="w-full h-auto rounded-lg"
             >
-              <track
-                kind="captions"
-                src={showMediaPreview.url.replace(/\.[^/.]+$/, ".vtt")}
-                srcLang="en"
-                label="English"
-                default
-              />
+              {subtitleExists && (
+                <track
+                  kind="captions"
+                  src={showMediaPreview.url.replace(/\.[^/.]+$/, ".vtt")}
+                  srcLang="en"
+                  label="English"
+                  default
+                />
+              )}
+              {!subtitleExists && (
+                <>
+                  {/* Optionally show a fallback UI for missing captions */}
+                  {/* <div className="text-xs text-gray-400 p-2">No captions available</div> */}
+                </>
+              )}
             </video>
           ) : (
             <div className="text-center py-8">

@@ -255,6 +255,8 @@ export const TrainerBasicInformation = ({
                   onChange={handleChange}
                   placeholder="50"
                   min={0}
+                  step="0.01"
+                  inputMode="decimal"
                   backgroundStyle="semi-transparent"
                 />
 

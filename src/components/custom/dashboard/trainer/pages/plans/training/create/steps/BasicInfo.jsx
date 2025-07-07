@@ -12,7 +12,6 @@ import dynamic from "next/dynamic";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { FormField } from "@/components/common/FormField";
 import { updateFormData } from "@/lib/utils";
-import { CoverImageUpload } from "../components/CoverImageUpload";
 import { CoverImageUploadSkeleton } from "../components/CoverImageUpload";
 
 const CoverImageUploadDynamic = dynamic(
@@ -155,7 +154,7 @@ export const BasicInfo = ({ data, onChange }) => {
         </motion.div>
 
         {/* Cover Image Upload */}
-        <CoverImageUpload
+        <CoverImageUploadDynamic
           previewImage={previewImage}
           imageError={imageError}
           handleImageChange={handleImageChange}
@@ -346,12 +345,11 @@ export const BasicInfo = ({ data, onChange }) => {
                         tabIndex={0}
                         role="radio"
                         aria-checked={isSelected}
-                        aria-label={
-                          difficultyLevel.label +
-                          (difficultyLevel.description
-                            ? ": " + difficultyLevel.description
-                            : "")
-                        }
+                        aria-label={`${difficultyLevel.label}${
+                          difficultyLevel.description
+                            ? `: ${difficultyLevel.description}`
+                            : ""
+                        }`}
                         className={clsx(
                           "relative p-4 sm:p-6 rounded-lg sm:rounded-xl border-2 cursor-pointer transition-all duration-300 group focus:outline-none focus:ring-2 focus:ring-[#FF6B00] focus:border-[#FF6B00]",
                           isSelected
@@ -452,6 +450,15 @@ export const BasicInfo = ({ data, onChange }) => {
                         whileHover={{ scale: 1.02, y: -2 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => handleFormatSelect(format.id)}
+                        tabIndex={0}
+                        role="button"
+                        aria-pressed={isSelected}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            handleFormatSelect(format.id);
+                          }
+                        }}
                         className={clsx(
                           "relative p-4 sm:p-6 rounded-lg sm:rounded-xl border-2 cursor-pointer transition-all duration-300 group",
                           isSelected
@@ -489,8 +496,8 @@ export const BasicInfo = ({ data, onChange }) => {
                           {/* Check indicator */}
                           {isSelected && (
                             <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
+                              initial={reducedMotion ? false : { scale: 0 }}
+                              animate={reducedMotion ? false : { scale: 1 }}
                               className="absolute top-3 right-3 sm:top-4 sm:right-4 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] flex items-center justify-center shadow-lg"
                             >
                               <Icon
