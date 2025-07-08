@@ -120,9 +120,13 @@ export const TrainerCard = ({
         disabled: false,
         icon: "mdi:close-circle",
         style: {
-          backgroundColor: "#dc2626",
-          borderColor: "#dc2626",
+          backgroundColor: "#7c1d1d", // tamno crvena (bordo)
+          borderColor: "#7c1d1d",
           color: "#fff",
+        },
+        hoverStyle: {
+          backgroundColor: "#a83232", // svjetlija bordo za hover
+          borderColor: "#a83232",
         },
       };
     }
@@ -669,7 +673,7 @@ export const TrainerCard = ({
                 e.stopPropagation();
                 onViewProfile(trainer);
               }}
-              className="w-full transition-transform duration-300 group-hover:-translate-y-1 bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-xs sm:text-sm py-1.5 sm:py-2"
+              className="w-full transition-transform duration-300 bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-xs sm:text-sm py-1.5 sm:py-2"
               leftIcon={
                 <Icon
                   icon="mdi:eye"
@@ -690,12 +694,24 @@ export const TrainerCard = ({
                   size="small"
                   onClick={handleRequestAction}
                   disabled={buttonConfig.disabled}
+                  className={`w-full transition-transform duration-300 bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-xs sm:text-sm py-1.5 sm:py-2 ${
+                    hasRequested
+                      ? "remove-request-btn"
+                      : buttonConfig.text === "Request Coaching"
+                      ? "request-coaching-btn"
+                      : ""
+                  }`}
                   leftIcon={
-                    <Icon icon={buttonConfig.icon} width={16} height={16} />
+                    <Icon
+                      icon={buttonConfig.icon}
+                      width={16}
+                      height={16}
+                      className="sm:w-[14px] sm:h-[14px]"
+                    />
                   }
                   style={buttonConfig.style}
                 >
-                  {buttonConfig.text}
+                  <span className="hidden sm:inline"> {buttonConfig.text}</span>
                 </Button>
               );
             })()}
