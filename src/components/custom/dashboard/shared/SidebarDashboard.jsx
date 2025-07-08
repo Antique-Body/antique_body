@@ -58,7 +58,7 @@ const ProfileCapsule = ({
 
   return (
     <div
-      className={`p-3 mb-6 cursor-pointer group transition-all duration-200 hover:bg-white/[0.02] rounded-xl ${
+      className={`p-3 mb-3 cursor-pointer group transition-all duration-200 hover:bg-white/[0.02] rounded-xl ${
         isCollapsed ? "flex justify-center" : ""
       }`}
       onClick={onProfileClick}
@@ -331,7 +331,7 @@ export const SidebarDashboard = ({
         />
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 pb-4 overflow-y-auto">
+        <nav className="flex-1 px-3 py-4 overflow-y-auto">
           <div className="space-y-1">
             {navigationItems.map((item) => (
               <NavItem
