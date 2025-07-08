@@ -1,5 +1,6 @@
 import { Icon } from "@iconify/react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSession } from "next-auth/react";
 import { useState, useEffect, useCallback } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -749,14 +750,20 @@ const TRAINER_SECTIONS = [
 
 // Hook for shared profile edit logic
 const useProfileEdit = (hookHandleSubmit, data, onSave, onClose, setError) => {
+  const { update: updateSession } = useSession();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
-      await hookHandleSubmit(e);
+      const updatedData = await hookHandleSubmit(e);
+
+      // Update session to refresh user data
+      await updateSession();
+
       if (onSave) {
-        await onSave(data);
+        await onSave(updatedData || data);
       }
       onClose();
     } catch (err) {

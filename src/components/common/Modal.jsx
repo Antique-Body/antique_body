@@ -145,7 +145,9 @@ export const Modal = memo(
 
               <Button
                 variant="orangeFilled"
-                onClick={primaryButtonAction || onConfirm}
+                onClick={() => {
+                  (primaryButtonAction || onConfirm)();
+                }}
                 disabled={primaryButtonDisabled}
                 className={`cursor-pointer rounded-lg px-4 sm:px-6 py-3 sm:py-2.5 text-sm sm:text-base font-medium transition-all duration-300 w-full sm:w-auto order-1 sm:order-2 ${
                   primaryButtonDisabled

@@ -21,7 +21,8 @@ async function checkUserExistsInDB(request) {
         Cookie: request.headers.get("cookie") || "",
       },
     });
-    return response.status === 200;
+    const exists = response.status === 200;
+    return exists;
   } catch {
     return false;
   }
@@ -30,58 +31,35 @@ async function checkUserExistsInDB(request) {
 // Check if request is part of OAuth callback flow
 function isOAuthCallback(request) {
   const { pathname, searchParams } = request.nextUrl;
-  return (
+  const isCallback =
     pathname.includes("/api/auth/callback/") ||
     searchParams.has("code") ||
-    searchParams.has("state")
-  );
-}
-
-// Check if request might be coming right after OAuth callback
-function isPostOAuthRedirect(request) {
-  const referer = request.headers.get("referer");
-  return (
-    (referer && referer.includes("/api/auth/callback/")) ||
-    (referer &&
-      (referer.includes("accounts.google.com") ||
-        referer.includes("facebook.com") ||
-        referer.includes("oauth")))
-  );
-}
-
-// Check if user has NextAuth session cookies (even if JWT token is not ready yet)
-function hasSessionCookies(request) {
-  const cookies = request.headers.get("cookie") || "";
-  return (
-    cookies.includes("next-auth.session-token") ||
-    cookies.includes("__Secure-next-auth.session-token") ||
-    cookies.includes("authjs.session-token") ||
-    cookies.includes("__Secure-authjs.session-token") ||
-    cookies.includes("next-auth.callback-url") ||
-    cookies.includes("__Secure-next-auth.callback-url") ||
-    cookies.includes("authjs.callback-url") ||
-    cookies.includes("__Secure-authjs.callback-url") ||
-    cookies.includes("authjs.pkce.code_verifier") ||
-    cookies.includes("__Secure-authjs.pkce.code_verifier")
-  );
+    searchParams.has("state");
+  return isCallback;
 }
 
 function getDashboardRedirect(token) {
+  let redirect;
   if (token.role === "client") {
-    return token.clientProfile
+    redirect = token.clientProfile
       ? "/client/dashboard"
       : "/client/personal-details";
-  }
-  if (token.role === "trainer") {
-    return token.trainerProfile
+  } else if (token.role === "trainer") {
+    redirect = token.trainerProfile
       ? "/trainer/dashboard"
       : "/trainer/personal-details";
+  } else {
+    redirect = "/select-role";
   }
-  return "/select-role";
+  return redirect;
 }
 
 function getOnboardingRedirect(role, token, pathname) {
-  if (!role) return pathname === "/select-role" ? null : "/select-role";
+  if (!role) {
+    const redirect = pathname === "/select-role" ? null : "/select-role";
+    return redirect;
+  }
+
   const config = {
     client: {
       profile: token.clientProfile,
@@ -123,19 +101,30 @@ function getOnboardingRedirect(role, token, pathname) {
       fallback: "/trainer/dashboard",
     },
   }[role];
-  if (!config) return "/select-role";
-  if (!config.profile)
-    return pathname === config.personal ? null : config.personal;
+
+  if (!config) {
+    return "/select-role";
+  }
+
+  if (!config.profile) {
+    const redirect = pathname === config.personal ? null : config.personal;
+    return redirect;
+  }
+
   // Check if request path is allowed
   const isAllowed = config.allowed.some((allowedPath) => {
     if (allowedPath.includes(":id")) {
       // Convert allowedPath to regex, e.g. "/trainer/dashboard/plans/edit/:id" => /^\/trainer\/dashboard\/plans\/edit\/[^\/]+$/
       const regex = new RegExp(`^${allowedPath.replace(":id", "[^/]+")}$`, "i");
-      return regex.test(pathname);
+      const matches = regex.test(pathname);
+      return matches;
     }
-    return allowedPath === pathname;
+    const matches = allowedPath === pathname;
+    return matches;
   });
-  return isAllowed ? null : config.fallback;
+
+  const redirect = isAllowed ? null : config.fallback;
+  return redirect;
 }
 
 export async function middleware(request) {
@@ -144,31 +133,33 @@ export async function middleware(request) {
   }
 
   const { pathname } = request.nextUrl;
+
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
   });
+
   const isOAuthFlow = isOAuthCallback(request);
-  const isPostOAuth = isPostOAuthRedirect(request);
 
   // 1. Public paths
-  if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
+  if (PUBLIC_PATHS.includes(pathname)) {
+    return NextResponse.next();
+  }
 
   // 2. /select-role
   if (pathname === "/select-role") {
     if (!token) {
-      if (isPostOAuth || hasSessionCookies(request)) return NextResponse.next();
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
     if (token.sub && token.email && !isOAuthFlow) {
       const userExists = await checkUserExistsInDB(request);
-      if (!userExists)
+      if (!userExists) {
         return NextResponse.redirect(new URL("/auth/login", request.url));
+      }
     }
     if (token.role) {
-      return NextResponse.redirect(
-        new URL(getDashboardRedirect(token), request.url)
-      );
+      const redirect = getDashboardRedirect(token);
+      return NextResponse.redirect(new URL(redirect, request.url));
     }
     return NextResponse.next();
   }
@@ -181,15 +172,15 @@ export async function middleware(request) {
   // 4. User must exist in DB
   if (token.sub && token.email && !isOAuthFlow) {
     const userExists = await checkUserExistsInDB(request);
-    if (!userExists)
+    if (!userExists) {
       return NextResponse.redirect(new URL("/auth/login", request.url));
+    }
   }
 
   // 5. Auth pages
   if (["/auth/login", "/auth/register", ...AUTH_PATHS].includes(pathname)) {
-    return NextResponse.redirect(
-      new URL(getDashboardRedirect(token), request.url)
-    );
+    const redirect = getDashboardRedirect(token);
+    return NextResponse.redirect(new URL(redirect, request.url));
   }
 
   // 6. Onboarding/dashboard redirect

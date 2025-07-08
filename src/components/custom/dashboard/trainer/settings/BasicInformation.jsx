@@ -182,7 +182,7 @@ export const TrainerBasicInformation = ({
 
         {/* Languages Section */}
         <motion.div variants={fadeInUp}>
-          <div className="mb-2 font-medium text-gray-300">
+          <div className="mb-2 font-medium text-gray-300 mt-4">
             Languages you speak
           </div>
           <LanguageSelector
@@ -193,9 +193,9 @@ export const TrainerBasicInformation = ({
 
         {/* Contact Info */}
         <motion.div variants={fadeInUp}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
             <FormField
-              label="Email"
+              label="Contact Email"
               name="contactEmail"
               type="email"
               value={trainerData.contactEmail || ""}
@@ -205,7 +205,7 @@ export const TrainerBasicInformation = ({
               backgroundStyle="semi-transparent"
             />
             <FormField
-              label="Phone"
+              label="Contact Phone"
               name="contactPhone"
               value={trainerData.contactPhone || ""}
               onChange={handleChange}

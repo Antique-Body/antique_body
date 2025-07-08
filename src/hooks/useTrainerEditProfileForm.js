@@ -375,12 +375,27 @@ export function useTrainerEditProfileForm() {
           body: JSON.stringify(body),
         });
         if (!res.ok) throw new Error("Failed to update profile");
+
+        // Return the updated data for the onSave callback
+        const updatedData = {
+          ...trainerData.trainerProfile,
+          profileImage: profileImageUrl,
+          certifications: certificationsForSave,
+          availabilities: trainerData.trainerProfile.availabilities,
+          galleryImages: finalGalleryImages,
+          specialties,
+          languages,
+          trainingTypes,
+        };
+
         setLoading(false);
+        return updatedData;
         // Don't navigate away since this is used in a modal now
         // router.push("/trainer/dashboard");
       } catch (err) {
         setError(err.message || "Error updating profile");
         setLoading(false);
+        throw err;
       }
     },
     [trainerData, certFields]

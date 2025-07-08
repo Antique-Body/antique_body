@@ -1,8 +1,9 @@
 import { Icon } from "@iconify/react";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+
+import UnrequestConfirmationModal from "./UnrequestConfirmationModal";
 
 import { Button } from "@/components/common/Button";
 import { mapSpecialtyToLabel } from "@/utils/specialtyMapper";
@@ -11,13 +12,17 @@ export const TrainerCard = ({
   trainer,
   onRequestCoaching,
   onViewProfile,
+  onUnrequestTrainer,
   hasRequested,
+  canRequestMore = true,
   colorVariant = "blue",
+  cooldownInfo = null,
+  isAccepted = false,
 }) => {
-  const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
+  const [showUnrequestModal, setShowUnrequestModal] = useState(false);
 
   // Set theme colors based on colorVariant
   const themeColors = {
@@ -71,6 +76,81 @@ export const TrainerCard = ({
   const toggleAccordion = (e) => {
     e.stopPropagation();
     setIsAccordionOpen(!isAccordionOpen);
+  };
+
+  // Handle request/unrequest action
+  const handleRequestAction = (e) => {
+    e.stopPropagation();
+    if (hasRequested) {
+      setShowUnrequestModal(true);
+    } else if (cooldownInfo) {
+      // Do nothing - button is disabled
+      return;
+    } else {
+      onRequestCoaching(trainer);
+    }
+  };
+
+  // Handle unrequest confirmation
+  const handleUnrequestConfirm = async () => {
+    await onUnrequestTrainer(trainer.id);
+    setShowUnrequestModal(false);
+  };
+
+  // Get button text and state
+  const getButtonConfig = () => {
+    if (isAccepted) {
+      return {
+        text: "Active Trainer",
+        variant: "secondary",
+        disabled: true,
+        icon: "mdi:check-circle",
+        className: `bg-green-600 hover:bg-green-700 border-green-600 text-white`,
+      };
+    }
+
+    if (hasRequested) {
+      return {
+        text: "Remove Request",
+        variant: "secondary",
+        disabled: false,
+        icon: "mdi:close-circle",
+        className: "bg-red-600 hover:bg-red-700 border-red-600 text-white",
+      };
+    }
+
+    if (cooldownInfo) {
+      const timeRemaining = Math.ceil(
+        (new Date(cooldownInfo.expiresAt) - new Date()) / (1000 * 60 * 60)
+      );
+      return {
+        text: `Cooldown (${timeRemaining}h)`,
+        variant: "secondary",
+        disabled: true,
+        icon: "mdi:clock-outline",
+        className:
+          "bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-400",
+      };
+    }
+
+    if (!canRequestMore) {
+      return {
+        text: "Limit Reached",
+        variant: "secondary",
+        disabled: true,
+        icon: "mdi:alert-circle",
+        className:
+          "bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-400",
+      };
+    }
+
+    return {
+      text: "Request Coaching",
+      variant: "primary",
+      disabled: false,
+      icon: "mdi:account-multiple",
+      className: `bg-[${themeColors.primary}] hover:bg-[${themeColors.secondary}] border-[${themeColors.primary}]`,
+    };
   };
 
   // Format pricing display based on pricing type
@@ -139,7 +219,9 @@ export const TrainerCard = ({
   return (
     <div
       className={`group flex flex-col h-full overflow-hidden rounded-xl border transition-all duration-300 bg-gradient-to-b from-zinc-900 to-black cursor-pointer ${
-        hasRequested
+        isAccepted
+          ? "border-green-600"
+          : hasRequested
           ? `border-[${themeColors.primary}]`
           : isFeatured
           ? "border-[#FFD700]"
@@ -232,15 +314,34 @@ export const TrainerCard = ({
                 <span className="line-clamp-1">{trainer.location.city}</span>
               </p>
 
-              {/* Pending status badge - small dot style */}
-              {hasRequested && (
+              {/* Status badge */}
+              {(hasRequested || isAccepted) && (
                 <div
-                  className={`flex items-center gap-1 bg-[${themeColors.primary}] rounded-full px-1.5 py-0.5 sm:px-2 sm:py-0.5 text-[10px] sm:text-xs font-medium text-white`}
-                  style={{ backgroundColor: themeColors.primary }}
+                  className={`flex items-center gap-1 ${
+                    isAccepted ? "bg-green-600" : `bg-[${themeColors.primary}]`
+                  } rounded-full px-1.5 py-0.5 sm:px-2 sm:py-0.5 text-[10px] sm:text-xs font-medium text-white`}
+                  style={
+                    !isAccepted
+                      ? { backgroundColor: themeColors.primary }
+                      : undefined
+                  }
                 >
-                  <span className="h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full bg-white animate-pulse"></span>
-                  <span className="hidden sm:inline">Pending</span>
-                  <span className="sm:hidden">•</span>
+                  {isAccepted ? (
+                    <>
+                      <Icon
+                        icon="mdi:check-circle"
+                        className="h-1.5 w-1.5 sm:h-2 sm:w-2"
+                      />
+                      <span className="hidden sm:inline">Active</span>
+                      <span className="sm:hidden">✓</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full bg-white animate-pulse"></span>
+                      <span className="hidden sm:inline">Pending</span>
+                      <span className="sm:hidden">•</span>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -533,8 +634,8 @@ export const TrainerCard = ({
             </div>
           </div>
 
-          {/* Action buttons - Simplified for mobile */}
-          <div className="grid grid-cols-2 gap-1 sm:gap-2 mt-auto">
+          {/* Action buttons - Vertical layout */}
+          <div className="flex flex-col gap-1 sm:gap-2 mt-auto">
             <Button
               variant="secondary"
               size="small"
@@ -552,78 +653,40 @@ export const TrainerCard = ({
                 />
               }
             >
-              <span className="hidden sm:inline">Profile</span>
-              <span className="sm:hidden">View</span>
+              <span className="hidden sm:inline">View Profile</span>
+              <span className="sm:hidden">Profile</span>
             </Button>
-            <Button
-              variant={hasRequested ? "secondary" : "primary"}
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                onRequestCoaching(trainer);
-              }}
-              disabled={hasRequested}
-              className={`w-full transition-transform duration-300 group-hover:-translate-y-1 group-hover:scale-105 text-xs sm:text-sm py-1.5 sm:py-2 ${
-                hasRequested
-                  ? "bg-zinc-800 hover:bg-zinc-700 border-zinc-700"
-                  : `bg-[${themeColors.primary}] hover:bg-[${themeColors.secondary}] border-[${themeColors.primary}]`
-              }`}
-              style={
-                !hasRequested
-                  ? {
-                      backgroundColor: themeColors.primary,
-                      borderColor: themeColors.primary,
-                      "--hover-bg": themeColors.secondary,
-                    }
-                  : {}
-              }
-              leftIcon={
-                hasRequested ? (
-                  <Icon
-                    icon="mdi:check-circle"
-                    width={12}
-                    height={12}
-                    className="sm:w-[14px] sm:h-[14px]"
-                  />
-                ) : (
-                  <Icon
-                    icon="mdi:account-multiple"
-                    width={12}
-                    height={12}
-                    className="sm:w-[14px] sm:h-[14px]"
-                  />
-                )
-              }
-            >
-              {hasRequested ? "Requested" : "Request"}
-            </Button>
-            <div className="col-span-2">
-              <Button
-                variant="outline"
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  router.push(
-                    `/client/dashboard/messages?trainer=${trainer.id}`
-                  );
-                }}
-                leftIcon={
-                  <Icon
-                    icon="mdi:message-outline"
-                    width={12}
-                    height={12}
-                    className="sm:w-[14px] sm:h-[14px]"
-                  />
-                }
-                className={`w-full text-[${themeColors.primary}] mt-1 sm:mt-2 transition-transform duration-300 group-hover:-translate-y-1 border-zinc-700 hover:border-[${themeColors.primary}] text-xs sm:text-sm py-1.5 sm:py-2`}
-                style={{
-                  color: themeColors.primary,
-                  "--hover-border": themeColors.primary,
-                }}
-              >
-                Message
-              </Button>
-            </div>
+            {(() => {
+              const buttonConfig = getButtonConfig();
+              return (
+                <Button
+                  variant={buttonConfig.variant}
+                  size="small"
+                  onClick={handleRequestAction}
+                  disabled={buttonConfig.disabled}
+                  className={`w-full transition-transform duration-300 group-hover:-translate-y-1 text-xs sm:text-sm py-1.5 sm:py-2 ${buttonConfig.className}`}
+                  style={
+                    !buttonConfig.disabled && !hasRequested
+                      ? {
+                          backgroundColor: themeColors.primary,
+                          borderColor: themeColors.primary,
+                          "--hover-bg": themeColors.secondary,
+                        }
+                      : {}
+                  }
+                  leftIcon={
+                    <Icon
+                      icon={buttonConfig.icon}
+                      width={12}
+                      height={12}
+                      className="sm:w-[14px] sm:h-[14px]"
+                    />
+                  }
+                >
+                  {buttonConfig.text}
+                </Button>
+              );
+            })()}
           </div>
         </div>
 
@@ -639,6 +702,15 @@ export const TrainerCard = ({
           }}
         />
       </div>
+
+      {showUnrequestModal && (
+        <UnrequestConfirmationModal
+          isOpen={showUnrequestModal}
+          trainer={trainer}
+          onClose={() => setShowUnrequestModal(false)}
+          onConfirm={handleUnrequestConfirm}
+        />
+      )}
     </div>
   );
 };

@@ -6,6 +6,7 @@ export const CLIENT_NAVIGATION = Object.freeze([
     icon: "mdi:account-supervisor",
     route: "/client/dashboard/trainwithcoach",
     description: "Find and connect with trainers",
+    badgeCount: 0, // Will be updated dynamically
   }),
   Object.freeze({
     id: "overview",
@@ -67,6 +68,7 @@ export const TRAINER_NAVIGATION = Object.freeze([
     icon: "mdi:account-plus",
     route: "/trainer/dashboard/newclients",
     description: "Client requests and applications",
+    badgeCount: 0, // Will be updated dynamically
   }),
   Object.freeze({
     id: "clients",
@@ -74,6 +76,7 @@ export const TRAINER_NAVIGATION = Object.freeze([
     icon: "mdi:account-group",
     route: "/trainer/dashboard/clients",
     description: "Manage your clients",
+    badgeCount: 0, // Will be updated dynamically
   }),
   Object.freeze({
     id: "upcomingTrainings",
