@@ -14,7 +14,7 @@ export async function GET(request) {
     }
 
     const { searchParams } = new URL(request.url);
-    let role = session?.user?.role || searchParams.get("role");
+    const role = session?.user?.role || searchParams.get("role");
     let cooldowns = [];
 
     if (role === "client") {
