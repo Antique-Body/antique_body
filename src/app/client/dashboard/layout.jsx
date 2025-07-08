@@ -2,6 +2,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState, useMemo } from "react";
+import React, { createContext, useContext } from "react";
 
 import { EffectBackground } from "@/components/background";
 import { ClientProfileModal } from "@/components/custom/dashboard/client/components";
@@ -14,6 +15,11 @@ import {
   getNavigationConfig,
   updateNavigationBadges,
 } from "@/config/navigation";
+
+// Context to provide badge refresh function
+export const BadgeRefreshContext = createContext({
+  refreshBadgeCounts: () => {},
+});
 
 export default function ClientDashboardLayout({ children }) {
   const router = useRouter();
@@ -201,72 +207,66 @@ export default function ClientDashboardLayout({ children }) {
     }
   };
 
-  // Expose refresh function globally for child components
-  useEffect(() => {
-    window.refreshClientBadges = refreshBadgeCounts;
-    return () => {
-      delete window.refreshClientBadges;
-    };
-  }, []);
-
   return (
-    <div className="min-h-screen text-white">
-      <EffectBackground />
+    <BadgeRefreshContext.Provider value={{ refreshBadgeCounts }}>
+      <div className="min-h-screen text-white">
+        <EffectBackground />
 
-      {/* Sidebar */}
-      <SidebarDashboard
-        profileType="client"
-        userData={clientData?.data}
-        loading={loading}
-        navigationItems={navigationItems}
-        activeItem={activeTab}
-        onNavigationChange={handleTabChange}
-        onProfileClick={handleProfileClick}
-        onEditClick={handleEditClick}
-        onSettingsClick={handleSettingsClick}
-        onCollapseChange={setSidebarCollapsed}
-      />
+        {/* Sidebar */}
+        <SidebarDashboard
+          profileType="client"
+          userData={clientData?.data}
+          loading={loading}
+          navigationItems={navigationItems}
+          activeItem={activeTab}
+          onNavigationChange={handleTabChange}
+          onProfileClick={handleProfileClick}
+          onEditClick={handleEditClick}
+          onSettingsClick={handleSettingsClick}
+          onCollapseChange={setSidebarCollapsed}
+        />
 
-      {/* Main Content */}
-      <div
-        className={`transition-all duration-300 ease-in-out ${
-          sidebarCollapsed ? "lg:ml-20" : "lg:ml-80"
-        }`}
-      >
-        <div className="relative z-10 min-h-screen">
-          <div className="pt-16 lg:pt-6 px-4 lg:px-6">
-            {/* Page Content */}
-            <div className="max-w-7xl mx-auto">{children}</div>
+        {/* Main Content */}
+        <div
+          className={`transition-all duration-300 ease-in-out ${
+            sidebarCollapsed ? "lg:ml-20" : "lg:ml-80"
+          }`}
+        >
+          <div className="relative z-10 min-h-screen">
+            <div className="pt-16 lg:pt-6 px-4 lg:px-6">
+              {/* Page Content */}
+              <div className="max-w-7xl mx-auto">{children}</div>
+            </div>
           </div>
         </div>
+
+        {/* Profile Detail Modal */}
+        <ClientProfileModal
+          clientData={clientData?.data}
+          isOpen={showDetailModal}
+          onClose={() => setShowDetailModal(false)}
+        />
+
+        {/* Edit Profile Modal */}
+        {showEditModal && (
+          <UserEditProfile
+            profileType="client"
+            userData={clientData?.data}
+            onClose={() => setShowEditModal(false)}
+            onSave={handleProfileSave}
+          />
+        )}
+
+        {/* Settings Modal */}
+        {showSettingsModal && (
+          <UserSettings
+            profileType="client"
+            userData={clientData?.data}
+            onClose={() => setShowSettingsModal(false)}
+            onSave={handleProfileSave}
+          />
+        )}
       </div>
-
-      {/* Profile Detail Modal */}
-      <ClientProfileModal
-        clientData={clientData?.data}
-        isOpen={showDetailModal}
-        onClose={() => setShowDetailModal(false)}
-      />
-
-      {/* Edit Profile Modal */}
-      {showEditModal && (
-        <UserEditProfile
-          profileType="client"
-          userData={clientData?.data}
-          onClose={() => setShowEditModal(false)}
-          onSave={handleProfileSave}
-        />
-      )}
-
-      {/* Settings Modal */}
-      {showSettingsModal && (
-        <UserSettings
-          profileType="client"
-          userData={clientData?.data}
-          onClose={() => setShowSettingsModal(false)}
-          onSave={handleProfileSave}
-        />
-      )}
-    </div>
+    </BadgeRefreshContext.Provider>
   );
 }

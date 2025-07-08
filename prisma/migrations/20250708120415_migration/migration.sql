@@ -7,14 +7,13 @@ CREATE TABLE `CoachingRequest` (
     `status` ENUM('pending', 'accepted', 'rejected', 'cancelled') NOT NULL DEFAULT 'pending',
     `rejectionReason` TEXT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
     `respondedAt` DATETIME(3) NULL,
 
     INDEX `CoachingRequest_clientId_idx`(`clientId`),
     INDEX `CoachingRequest_trainerId_idx`(`trainerId`),
     INDEX `CoachingRequest_status_idx`(`status`),
     INDEX `CoachingRequest_createdAt_idx`(`createdAt`),
-    UNIQUE INDEX `CoachingRequest_clientId_trainerId_key`(`clientId`, `trainerId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

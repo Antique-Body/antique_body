@@ -60,17 +60,17 @@ export const PlanCard = ({
   const isNutrition = type === "nutrition";
 
   // Cleanup timeouts on unmount
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    function cleanup() {
       if (copyTimeoutRef.current) {
         clearTimeout(copyTimeoutRef.current);
       }
       if (editTimeoutRef.current) {
         clearTimeout(editTimeoutRef.current);
       }
-    },
-    []
-  );
+    }
+    return cleanup;
+  }, []);
 
   // Animation variants
   const cardVariants = {

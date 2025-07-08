@@ -185,14 +185,11 @@ export function useClientEditProfileForm() {
         });
         if (!res.ok) throw new Error("Failed to update profile");
 
-        // Return the updated data for the onSave callback
-        const updatedData = {
-          ...clientData,
-          profileImage: profileImageUrl,
-        };
-
+        // Parse and return the server-authoritative data
+        const { data: responseData } = await res.json();
+        const processedData = processClientData(responseData);
         setLoading(false);
-        return updatedData;
+        return processedData;
         // Don't navigate away since this is used in a modal now
         // router.push("/client/dashboard");
       } catch (err) {

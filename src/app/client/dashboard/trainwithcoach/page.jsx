@@ -244,7 +244,7 @@ export default function TrainWithCoachPage() {
   };
 
   // Function to submit coaching request
-  const handleSubmitRequest = async (trainer, _note) => {
+  const handleSubmitRequest = async (trainer) => {
     try {
       // Add trainer to requested list immediately for UI feedback
       setRequestedTrainers((prev) => [...prev, trainer.id]);
@@ -291,7 +291,10 @@ export default function TrainWithCoachPage() {
               );
 
               // Refresh badge counts
-              if (window.refreshClientBadges) {
+              if (
+                typeof window !== "undefined" &&
+                typeof window.refreshClientBadges === "function"
+              ) {
                 window.refreshClientBadges();
               }
 
@@ -312,7 +315,7 @@ export default function TrainWithCoachPage() {
   };
 
   // Function to submit message
-  const handleSubmitMessage = async (_trainer, _message) => {
+  const handleSubmitMessage = async () => {
     // No action for now
   };
 
@@ -596,7 +599,9 @@ export default function TrainWithCoachPage() {
         />
       )}
       {unrequestError && (
-        <div className="text-center text-red-400 py-2">{unrequestError}</div>
+        <div className="text-center text-red-400 py-2 absolute left-0 right-0 bottom-0 z-20 bg-black/80">
+          {unrequestError}
+        </div>
       )}
     </div>
   );

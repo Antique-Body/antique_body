@@ -5,6 +5,7 @@ import { Modal } from "@/components/common/Modal";
 import { UserProfile } from "@/components/custom/dashboard/shared";
 import { ACTIVITY_TYPES } from "@/enums/activityTypes";
 import { FITNESS_GOALS } from "@/enums/fitnessGoals";
+import { calculateAge } from "@/utils/dateUtils";
 
 export const ClientProfile = ({ clientData, onProfileUpdate }) => {
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -45,22 +46,6 @@ export const ClientProfile = ({ clientData, onProfileUpdate }) => {
       (clientData?.lastName ? ` ${clientData.lastName}` : "") ||
     clientData?.name ||
     "No data";
-
-  // Calculate age from dateOfBirth
-  const calculateAge = (dateOfBirth) => {
-    if (!dateOfBirth) return "N/A";
-    const today = new Date();
-    const birthDate = new Date(dateOfBirth);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
-    return age;
-  };
 
   // Calculate membership duration
   const calculateMembershipDuration = (createdAt) => {

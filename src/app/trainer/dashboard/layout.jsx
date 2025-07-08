@@ -1,7 +1,7 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, createContext } from "react";
 
 import { EffectBackground } from "@/components/background";
 import {
@@ -15,7 +15,7 @@ import {
   updateNavigationBadges,
 } from "@/config/navigation";
 
-// Prebacujem funkciju van komponente
+// Move function outside of component
 function getActiveTabFromPath(path) {
   if (path.includes("/newclients")) return "newClients";
   if (path.includes("/clients")) return "clients";
@@ -26,6 +26,9 @@ function getActiveTabFromPath(path) {
   if (path.includes("/meals")) return "meals";
   return "newClients"; // Default tab
 }
+
+// Context to provide badge refresh function
+export const BadgeContext = createContext({ refreshBadgeCounts: () => {} });
 
 export default function TrainerDashboardLayout({ children }) {
   const router = useRouter();
@@ -150,7 +153,7 @@ export default function TrainerDashboardLayout({ children }) {
   };
 
   // Handle profile save
-  const handleProfileSave = async (_updatedData) => {
+  const handleProfileSave = async () => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
       setLoading(true);
@@ -202,90 +205,85 @@ export default function TrainerDashboardLayout({ children }) {
     }
   };
 
-  // Expose refresh function globally for child components
-  useEffect(() => {
-    // Nije preporučeno koristiti window za ovo, bolje koristiti context
-    window.refreshTrainerBadges = refreshBadgeCounts;
-    return () => {
-      delete window.refreshTrainerBadges;
-    };
-  }, []);
-
   return (
-    <div className="min-h-screen text-white">
-      <EffectBackground />
-      {/* Sidebar */}
-      <SidebarDashboard
-        profileType="trainer"
-        userData={trainerData?.data || {}} // fallback
-        loading={loading}
-        navigationItems={navigationItemsWithBadges}
-        activeItem={activeTab}
-        onNavigationChange={handleTabChange}
-        onProfileClick={handleProfileClick}
-        onEditClick={handleEditClick}
-        onSettingsClick={handleSettingsClick}
-        onCollapseChange={setSidebarCollapsed}
-      />
-      {/* Main Content */}
-      <div
-        className={`transition-all duration-300 ease-in-out ${
-          sidebarCollapsed ? "lg:ml-20" : "lg:ml-80"
-        }`}
-      >
-        <div className="relative z-10 min-h-screen">
-          <div className="pt-16 lg:pt-6 px-4 lg:px-6">
-            {/* Page Content */}
-            <div className="max-w-7xl mx-auto">
-              {loading && <div className="text-center py-4">Učitavanje...</div>}
-              {!loading && !trainerData && (
-                <div className="text-center text-red-400 py-4">
-                  Greška pri učitavanju podataka.
-                </div>
-              )}
-              {children}
+    <BadgeContext.Provider value={{ refreshBadgeCounts }}>
+      <div className="min-h-screen text-white">
+        <EffectBackground />
+        {/* Sidebar */}
+        <SidebarDashboard
+          profileType="trainer"
+          userData={trainerData?.data || {}} // fallback
+          loading={loading}
+          navigationItems={navigationItemsWithBadges}
+          activeItem={activeTab}
+          onNavigationChange={handleTabChange}
+          onProfileClick={handleProfileClick}
+          onEditClick={handleEditClick}
+          onSettingsClick={handleSettingsClick}
+          onCollapseChange={setSidebarCollapsed}
+        />
+        {/* Main Content */}
+        <div
+          className={`transition-all duration-300 ease-in-out ${
+            sidebarCollapsed ? "lg:ml-20" : "lg:ml-80"
+          }`}
+        >
+          <div className="relative z-10 min-h-screen">
+            <div className="pt-16 lg:pt-6 px-4 lg:px-6">
+              {/* Page Content */}
+              <div className="max-w-7xl mx-auto">
+                {loading && (
+                  <div className="text-center py-4">Učitavanje...</div>
+                )}
+                {!loading && !trainerData && (
+                  <div className="text-center text-red-400 py-4">
+                    Greška pri učitavanju podataka.
+                  </div>
+                )}
+                {children}
+              </div>
             </div>
           </div>
         </div>
+        {/* Profile Detail Modal */}
+        <TrainerProfileModal
+          trainerData={trainerData?.data || {}}
+          isOpen={showDetailModal}
+          onClose={() => setShowDetailModal(false)}
+        />
+        {/* Edit Profile Modal */}
+        {showEditModal && trainerData && (
+          <>
+            <UserEditProfile
+              profileType="trainer"
+              userData={trainerData?.data || {}}
+              onClose={() => setShowEditModal(false)}
+              onSave={handleProfileSave}
+            />
+            {profileSaveError && (
+              <div className="text-center text-red-400 py-2">
+                {profileSaveError}
+              </div>
+            )}
+          </>
+        )}
+        {/* Settings Modal */}
+        {showSettingsModal && trainerData && (
+          <>
+            <UserSettings
+              profileType="trainer"
+              userData={trainerData?.data || {}}
+              onClose={() => setShowSettingsModal(false)}
+              onSave={handleProfileSave}
+            />
+            {profileSaveError && (
+              <div className="text-center text-red-400 py-2">
+                {profileSaveError}
+              </div>
+            )}
+          </>
+        )}
       </div>
-      {/* Profile Detail Modal */}
-      <TrainerProfileModal
-        trainerData={trainerData?.data || {}}
-        isOpen={showDetailModal}
-        onClose={() => setShowDetailModal(false)}
-      />
-      {/* Edit Profile Modal */}
-      {showEditModal && trainerData && (
-        <>
-          <UserEditProfile
-            profileType="trainer"
-            userData={trainerData?.data || {}}
-            onClose={() => setShowEditModal(false)}
-            onSave={handleProfileSave}
-          />
-          {profileSaveError && (
-            <div className="text-center text-red-400 py-2">
-              {profileSaveError}
-            </div>
-          )}
-        </>
-      )}
-      {/* Settings Modal */}
-      {showSettingsModal && trainerData && (
-        <>
-          <UserSettings
-            profileType="trainer"
-            userData={trainerData?.data || {}}
-            onClose={() => setShowSettingsModal(false)}
-            onSave={handleProfileSave}
-          />
-          {profileSaveError && (
-            <div className="text-center text-red-400 py-2">
-              {profileSaveError}
-            </div>
-          )}
-        </>
-      )}
-    </div>
+    </BadgeContext.Provider>
   );
 }

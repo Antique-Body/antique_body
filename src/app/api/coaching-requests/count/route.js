@@ -16,6 +16,17 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const role = searchParams.get("role"); // 'client' or 'trainer'
 
+    // Early validation of role parameter
+    if (role !== "client" && role !== "trainer") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Role parameter is required (client or trainer)",
+        },
+        { status: 400 }
+      );
+    }
+
     let counts = {};
 
     if (role === "trainer") {
@@ -74,14 +85,6 @@ export async function GET(request) {
       counts = {
         trainwithcoach: pendingCount,
       };
-    } else {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Role parameter is required (client or trainer)",
-        },
-        { status: 400 }
-      );
     }
 
     return NextResponse.json({

@@ -10,6 +10,7 @@ import { Modal } from "@/components/common/Modal";
 import { ACTIVITY_TYPES } from "@/enums/activityTypes";
 import { EXPERIENCE_LEVELS } from "@/enums/experienceLevels";
 import { FITNESS_GOALS } from "@/enums/fitnessGoals";
+import { calculateAge } from "@/utils/dateUtils";
 
 export default function ClientsPage() {
   const [clients, setClients] = useState([]);
@@ -104,28 +105,12 @@ export default function ClientsPage() {
           .replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
-  const calculateAge = (dateOfBirth) => {
-    const today = new Date();
-    const birthDate = new Date(dateOfBirth);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
-
-    return age;
-  };
-
   if (loading) {
     return (
       <div className="px-4 py-5">
         <div className="flex h-64 w-full items-center justify-center">
           <div className="flex flex-col items-center">
-            <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#3E92CC] border-t-transparent"></div>
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#3E92CC] border-t-transparent" />
             <p className="mt-4 text-zinc-400">Loading clients...</p>
           </div>
         </div>
@@ -350,22 +335,22 @@ export default function ClientsPage() {
                       >
                         View Details
                       </Button>
-                      <Button
-                        variant="success"
-                        size="small"
-                        onClick={handleShowMessageInfo}
-                        leftIcon={
-                          <Icon icon="mdi:message" width={16} height={16} />
-                        }
-                      >
-                        Message
-                      </Button>
-                    </div>
-                    {showMessageInfo && (
-                      <div className="mt-2 text-green-400 text-xs">
-                        Messaging feature coming soon!
+                      <div className="group relative">
+                        <Button
+                          variant="success"
+                          size="small"
+                          disabled
+                          leftIcon={
+                            <Icon icon="mdi:message" width={16} height={16} />
+                          }
+                        >
+                          Message
+                        </Button>
+                        <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-max bg-zinc-800 text-xs text-green-400 rounded px-2 py-1 opacity-0 group-hover:opacity-100 pointer-events-none z-10 shadow-lg border border-zinc-700">
+                          Messaging feature coming soon!
+                        </div>
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               </Card>
