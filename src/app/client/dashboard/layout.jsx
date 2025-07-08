@@ -1,8 +1,7 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useEffect, useState, useMemo } from "react";
-import React, { createContext, useContext } from "react";
+import React, { useEffect, useState, useMemo, createContext } from "react";
 
 import { EffectBackground } from "@/components/background";
 import { ClientProfileModal } from "@/components/custom/dashboard/client/components";

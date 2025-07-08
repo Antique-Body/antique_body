@@ -198,7 +198,7 @@ export function useClientEditProfileForm() {
         throw err;
       }
     },
-    [clientData]
+    [clientData, processClientData]
   );
 
   const goBack = useCallback(() => {

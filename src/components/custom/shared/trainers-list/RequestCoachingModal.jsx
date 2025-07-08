@@ -3,9 +3,9 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useState } from "react";
 
+import { FormField } from "@/components/common/FormField";
 import { InfoBanner } from "@/components/common/InfoBanner";
 import { Modal } from "@/components/common/Modal";
-import { FormField } from "@/components/common/FormField";
 
 export default function RequestCoachingModal({
   isOpen,
