@@ -567,15 +567,13 @@ model CoachingRequest {
   status            CoachingRequestStatus @default(pending)
   rejectionReason   String?  @db.Text
   createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  updatedAt         DateTime @updatedAt @default(now())
   respondedAt       DateTime?
   
   // Relations
   client            ClientInfo @relation(fields: [clientId], references: [id], onDelete: Cascade)
   trainer           TrainerInfo @relation(fields: [trainerId], references: [id], onDelete: Cascade)
   
-  // Ensure unique request per client-trainer pair
-  @@unique([clientId, trainerId])
   @@index([clientId])
   @@index([trainerId])
   @@index([status])

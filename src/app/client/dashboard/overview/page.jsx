@@ -11,25 +11,38 @@ export default function OverviewPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const controller = new AbortController();
+    let mounted = true;
+
     const fetchCurrentTrainer = async () => {
       try {
         const response = await fetch(
-          "/api/coaching-requests?role=client&status=accepted"
+          "/api/coaching-requests?role=client&status=accepted",
+          { signal: controller.signal }
         );
+        if (!mounted) return;
         if (response.ok) {
           const data = await response.json();
+          if (!mounted) return;
           if (data.success && data.data.length > 0) {
             setCurrentTrainer(data.data[0]);
           }
         }
       } catch (err) {
-        console.error("Error fetching current trainer:", err);
+        if (err.name !== "AbortError") {
+          console.error("Error fetching current trainer:", err);
+        }
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
 
     fetchCurrentTrainer();
+
+    return () => {
+      mounted = false;
+      controller.abort();
+    };
   }, []);
 
   if (loading) {
@@ -81,7 +94,14 @@ export default function OverviewPage() {
             {trainer.trainerProfile.profileImage ? (
               <Image
                 src={trainer.trainerProfile.profileImage}
-                alt={`${trainer.trainerProfile.firstName} profile`}
+                alt={
+                  trainer.trainerProfile.firstName &&
+                  trainer.trainerProfile.lastName
+                    ? `${trainer.trainerProfile.firstName} ${trainer.trainerProfile.lastName} profile`
+                    : trainer.trainerProfile.firstName
+                    ? `${trainer.trainerProfile.firstName} profile`
+                    : "Trainer profile image"
+                }
                 className="object-cover w-full h-full"
                 width={96}
                 height={96}

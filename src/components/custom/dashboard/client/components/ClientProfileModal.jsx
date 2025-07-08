@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Modal } from "@/components/common/Modal";
 import { ACTIVITY_TYPES } from "@/enums/activityTypes";
 import { FITNESS_GOALS } from "@/enums/fitnessGoals";
+import { calculateAge } from "@/utils/dateUtils";
 
 export const ClientProfileModal = ({ clientData, isOpen, onClose }) => {
   const getOrNoData = (val) => val ?? "No data";
@@ -35,23 +36,6 @@ export const ClientProfileModal = ({ clientData, isOpen, onClose }) => {
     return goal
       ? goal.label
       : goalName.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
-  };
-
-  // Calculate age from dateOfBirth
-  const calculateAge = (dateOfBirth) => {
-    if (!dateOfBirth) return "N/A";
-    const birthDate = new Date(dateOfBirth);
-    if (isNaN(birthDate.getTime())) return "N/A";
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
-    return age;
   };
 
   // Get client info with fallback

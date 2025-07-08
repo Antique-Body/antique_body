@@ -79,7 +79,10 @@ export async function PATCH(request, { params }) {
       where: { id },
       data: {
         status: status,
-        rejectionReason: status === "rejected" ? rejectionReason : null,
+        rejectionReason:
+          status === "rejected"
+            ? rejectionReason
+            : coachingRequest.rejectionReason,
         respondedAt: new Date(),
       },
       include: {
@@ -182,8 +185,10 @@ export async function DELETE(request, { params }) {
       });
 
       // Create a cooldown record (24 hours from now)
+      const COOLDOWN_HOURS =
+        parseInt(process.env.COACHING_REQUEST_COOLDOWN_HOURS, 10) || 24;
       const expiresAt = new Date();
-      expiresAt.setHours(expiresAt.getHours() + 24);
+      expiresAt.setHours(expiresAt.getHours() + COOLDOWN_HOURS);
 
       await tx.coachingRequestCooldown.create({
         data: {

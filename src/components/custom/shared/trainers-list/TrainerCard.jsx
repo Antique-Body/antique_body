@@ -105,7 +105,11 @@ export const TrainerCard = ({
         variant: "secondary",
         disabled: true,
         icon: "mdi:check-circle",
-        className: `bg-green-600 hover:bg-green-700 border-green-600 text-white`,
+        style: {
+          backgroundColor: "#16a34a",
+          borderColor: "#16a34a",
+          color: "#fff",
+        },
       };
     }
 
@@ -115,7 +119,11 @@ export const TrainerCard = ({
         variant: "secondary",
         disabled: false,
         icon: "mdi:close-circle",
-        className: "bg-red-600 hover:bg-red-700 border-red-600 text-white",
+        style: {
+          backgroundColor: "#dc2626",
+          borderColor: "#dc2626",
+          color: "#fff",
+        },
       };
     }
 
@@ -128,8 +136,11 @@ export const TrainerCard = ({
         variant: "secondary",
         disabled: true,
         icon: "mdi:clock-outline",
-        className:
-          "bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-400",
+        style: {
+          backgroundColor: "#27272a",
+          borderColor: "#27272a",
+          color: "#a1a1aa",
+        },
       };
     }
 
@@ -139,8 +150,11 @@ export const TrainerCard = ({
         variant: "secondary",
         disabled: true,
         icon: "mdi:alert-circle",
-        className:
-          "bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-400",
+        style: {
+          backgroundColor: "#27272a",
+          borderColor: "#27272a",
+          color: "#a1a1aa",
+        },
       };
     }
 
@@ -149,7 +163,11 @@ export const TrainerCard = ({
       variant: "primary",
       disabled: false,
       icon: "mdi:account-multiple",
-      className: `bg-[${themeColors.primary}] hover:bg-[${themeColors.secondary}] border-[${themeColors.primary}]`,
+      style: {
+        backgroundColor: themeColors.primary,
+        borderColor: themeColors.primary,
+        color: "#fff",
+      },
     };
   };
 
@@ -191,7 +209,8 @@ export const TrainerCard = ({
           <Icon
             key={i}
             icon="mdi:star"
-            className={`text-[${themeColors.primary}] w-3 h-3 sm:w-4 sm:h-4`}
+            style={{ color: themeColors.primary }}
+            className={`w-3 h-3 sm:w-4 sm:h-4`}
           />
         );
       } else if (i === fullStars + 1 && hasHalfStar) {
@@ -199,7 +218,8 @@ export const TrainerCard = ({
           <Icon
             key={i}
             icon="mdi:star-half"
-            className={`text-[${themeColors.primary}] w-3 h-3 sm:w-4 sm:h-4`}
+            style={{ color: themeColors.primary }}
+            className={`w-3 h-3 sm:w-4 sm:h-4`}
           />
         );
       } else {
@@ -207,7 +227,8 @@ export const TrainerCard = ({
           <Icon
             key={i}
             icon="mdi:star-outline"
-            className="text-zinc-600 w-3 h-3 sm:w-4 sm:h-4"
+            style={{ color: "#a1a1aa" }}
+            className="w-3 h-3 sm:w-4 sm:h-4"
           />
         );
       }
@@ -222,13 +243,20 @@ export const TrainerCard = ({
         isAccepted
           ? "border-green-600"
           : hasRequested
-          ? `border-[${themeColors.primary}]`
+          ? "border-zinc-800"
           : isFeatured
           ? "border-[#FFD700]"
           : "border-zinc-800"
-      } hover:border-[${themeColors.primary}] hover:shadow-lg hover:shadow-[${
-        themeColors.primary
-      }]/10 hover:translate-y-[-2px] sm:hover:translate-y-[-4px]`}
+      } hover:shadow-lg hover:translate-y-[-2px] sm:hover:translate-y-[-4px]`}
+      style={
+        isAccepted
+          ? { borderColor: "#16a34a" }
+          : hasRequested
+          ? { borderColor: themeColors.primary }
+          : isFeatured
+          ? { borderColor: "#FFD700" }
+          : { borderColor: "#27272a" }
+      }
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleCardClick}
@@ -236,9 +264,7 @@ export const TrainerCard = ({
       <div className="relative flex h-full flex-col">
         {/* Top accent */}
         <div
-          className={`absolute top-0 left-0 right-0 h-[2px] sm:h-[3px] ${
-            isFeatured ? "bg-[#FFD700]" : `bg-[${themeColors.primary}]`
-          } scale-x-[0.6] transform transition-transform duration-300 ease-in-out group-hover:scale-x-100`}
+          className={`absolute top-0 left-0 right-0 h-[2px] sm:h-[3px] scale-x-[0.6] transform transition-transform duration-300 ease-in-out group-hover:scale-x-100`}
           style={{
             backgroundColor: isFeatured ? "#FFD700" : themeColors.primary,
           }}
@@ -337,7 +363,7 @@ export const TrainerCard = ({
                     </>
                   ) : (
                     <>
-                      <span className="h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full bg-white animate-pulse"></span>
+                      <span className="h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full bg-white animate-pulse" />
                       <span className="hidden sm:inline">Pending</span>
                       <span className="sm:hidden">•</span>
                     </>
@@ -664,24 +690,10 @@ export const TrainerCard = ({
                   size="small"
                   onClick={handleRequestAction}
                   disabled={buttonConfig.disabled}
-                  className={`w-full transition-transform duration-300 group-hover:-translate-y-1 text-xs sm:text-sm py-1.5 sm:py-2 ${buttonConfig.className}`}
-                  style={
-                    !buttonConfig.disabled && !hasRequested
-                      ? {
-                          backgroundColor: themeColors.primary,
-                          borderColor: themeColors.primary,
-                          "--hover-bg": themeColors.secondary,
-                        }
-                      : {}
-                  }
                   leftIcon={
-                    <Icon
-                      icon={buttonConfig.icon}
-                      width={12}
-                      height={12}
-                      className="sm:w-[14px] sm:h-[14px]"
-                    />
+                    <Icon icon={buttonConfig.icon} width={16} height={16} />
                   }
+                  style={buttonConfig.style}
                 >
                   {buttonConfig.text}
                 </Button>
@@ -709,6 +721,7 @@ export const TrainerCard = ({
           trainer={trainer}
           onClose={() => setShowUnrequestModal(false)}
           onConfirm={handleUnrequestConfirm}
+          cooldownHours={24}
         />
       )}
     </div>

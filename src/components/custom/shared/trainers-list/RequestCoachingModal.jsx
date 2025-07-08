@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { InfoBanner } from "@/components/common/InfoBanner";
 import { Modal } from "@/components/common/Modal";
+import { FormField } from "@/components/common/FormField";
 
 export default function RequestCoachingModal({
   isOpen,
@@ -203,6 +204,7 @@ export default function RequestCoachingModal({
       <div className="mb-6">
         <div className="flex space-x-1 rounded-lg bg-zinc-800/50 p-1">
           <button
+            type="button"
             onClick={() => setActiveTab("request")}
             className={`flex-1 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 ${
               activeTab === "request"
@@ -219,6 +221,7 @@ export default function RequestCoachingModal({
             Request Coaching
           </button>
           <button
+            type="button"
             onClick={() => {}} // Completely disable click
             disabled={true}
             className="flex-1 rounded-md px-4 py-3 text-sm font-medium opacity-40 cursor-not-allowed bg-zinc-800/50 text-zinc-500"
@@ -331,27 +334,24 @@ export default function RequestCoachingModal({
               </div>
 
               {/* Note Section */}
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Tell {trainer.firstName} about yourself (optional)
-                </label>
-                <textarea
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="Share your fitness goals, experience level, any injuries or limitations, preferred workout style, or what you hope to achieve..."
-                  className="w-full rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-3 text-white placeholder-zinc-400 focus:border-[#3E92CC] focus:outline-none focus:ring-1 focus:ring-[#3E92CC] resize-none transition-colors"
-                  rows="5"
-                  maxLength={500}
-                  disabled={isSubmitting}
-                />
-                <div className="flex justify-between items-center mt-2">
-                  <p className="text-xs text-zinc-500">
-                    {note.length}/500 characters
-                  </p>
-                  <p className="text-xs text-zinc-400">
-                    This helps {trainer.firstName} understand your needs better
-                  </p>
-                </div>
+              <FormField
+                type="textarea"
+                id="coaching-request-note"
+                name="note"
+                label={`Tell ${trainer.firstName} about yourself (optional)`}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Share your fitness goals, experience level, any injuries or limitations, preferred workout style, or what you hope to achieve..."
+                rows={5}
+                maxLength={500}
+                disabled={isSubmitting}
+                subLabel={`This helps ${trainer.firstName} understand your needs better`}
+                className="mb-0"
+              />
+              <div className="flex justify-between items-center mt-2">
+                <p className="text-xs text-zinc-500">
+                  {note.length}/500 characters
+                </p>
               </div>
             </>
           )}

@@ -14,51 +14,74 @@ export async function GET(request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const role = searchParams.get("role"); // 'client' or 'trainer'
+    let role = session?.user?.role || searchParams.get("role");
+    let cooldowns = [];
 
-    if (role !== "client") {
+    if (role === "client") {
+      // Get client info
+      const clientInfo = await prisma.clientInfo.findUnique({
+        where: { userId: session.user.id },
+      });
+      if (!clientInfo) {
+        return NextResponse.json(
+          { success: false, error: "Client profile not found" },
+          { status: 404 }
+        );
+      }
+      // Get active cooldowns (not expired) for client
+      cooldowns = await prisma.coachingRequestCooldown.findMany({
+        where: {
+          clientId: clientInfo.id,
+          expiresAt: {
+            gt: new Date(),
+          },
+        },
+        include: {
+          trainer: {
+            include: {
+              trainerProfile: true,
+            },
+          },
+        },
+        orderBy: { expiresAt: "asc" },
+      });
+    } else if (role === "trainer") {
+      // Get trainer info
+      const trainerInfo = await prisma.trainerInfo.findUnique({
+        where: { userId: session.user.id },
+      });
+      if (!trainerInfo) {
+        return NextResponse.json(
+          { success: false, error: "Trainer profile not found" },
+          { status: 404 }
+        );
+      }
+      // Get active cooldowns (not expired) for trainer
+      cooldowns = await prisma.coachingRequestCooldown.findMany({
+        where: {
+          trainerId: trainerInfo.id,
+          expiresAt: {
+            gt: new Date(),
+          },
+        },
+        include: {
+          client: true,
+        },
+        orderBy: { expiresAt: "asc" },
+      });
+    } else {
       return NextResponse.json(
         {
           success: false,
-          error: "Role parameter must be 'client'",
+          error: "Role parameter must be 'client' or 'trainer'",
         },
         { status: 400 }
       );
     }
 
-    // Get client info
-    const clientInfo = await prisma.clientInfo.findUnique({
-      where: { userId: session.user.id },
-    });
-
-    if (!clientInfo) {
-      return NextResponse.json(
-        { success: false, error: "Client profile not found" },
-        { status: 404 }
-      );
-    }
-
-    // Get active cooldowns (not expired)
-    const activeCooldowns = await prisma.coachingRequestCooldown.findMany({
-      where: {
-        clientId: clientInfo.id,
-        expiresAt: {
-          gt: new Date(),
-        },
-      },
-      include: {
-        trainer: {
-          include: {
-            trainerProfile: true,
-          },
-        },
-      },
-      orderBy: { expiresAt: "asc" },
-    });
-
     return NextResponse.json({
       success: true,
-      data: activeCooldowns,
+      data: cooldowns,
     });
   } catch (error) {
     console.error("Error fetching cooldowns:", error);

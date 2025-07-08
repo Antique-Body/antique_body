@@ -3,6 +3,7 @@ import { Icon } from "@iconify/react";
 import { Modal } from "@/components/common/Modal";
 import { SPECIALTIES, TRAINING_ENVIRONMENTS } from "@/enums/specialties";
 import { TRAINING_TYPES } from "@/enums/trainingTypes";
+import { calculateAge } from "@/utils/dateUtils";
 
 export const TrainerProfileModal = ({ trainerData, isOpen, onClose }) => {
   const getOrNoData = (val) => val ?? "No data";
@@ -38,22 +39,6 @@ export const TrainerProfileModal = ({ trainerData, isOpen, onClose }) => {
     return env
       ? env.label
       : environment.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
-  };
-
-  // Calculate age from dateOfBirth
-  const calculateAge = (dateOfBirth) => {
-    if (!dateOfBirth) return "N/A";
-    const today = new Date();
-    const birthDate = new Date(dateOfBirth);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
-    return age;
   };
 
   // Calculate experience in years from trainerSince

@@ -1,17 +1,21 @@
 "use client";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 
 import { Button } from "@/components/common/Button";
+import { FormField } from "@/components/common/FormField";
 import { Card } from "@/components/common/Card";
 import { InfoBanner } from "@/components/common/InfoBanner";
 import { Modal } from "@/components/common/Modal";
 import { ACTIVITY_TYPES } from "@/enums/activityTypes";
 import { EXPERIENCE_LEVELS } from "@/enums/experienceLevels";
 import { FITNESS_GOALS } from "@/enums/fitnessGoals";
+import { calculateAge } from "@/utils/dateUtils";
+import { BadgeContext } from "../layout";
 
 export default function NewClientsPage() {
+  const { refreshBadgeCounts } = useContext(BadgeContext);
   const [coachingRequests, setCoachingRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -97,9 +101,9 @@ export default function NewClientsPage() {
         prev.filter((req) => req.id !== selectedRequest.id)
       );
 
-      // Refresh badge counts
-      if (window.refreshTrainerBadges) {
-        window.refreshTrainerBadges();
+      // Refresh badge counts using context
+      if (refreshBadgeCounts) {
+        refreshBadgeCounts();
       }
 
       // Close modal and reset state
@@ -175,7 +179,7 @@ export default function NewClientsPage() {
       <div className="px-4 py-5">
         <div className="flex h-64 w-full items-center justify-center">
           <div className="flex flex-col items-center">
-            <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#3E92CC] border-t-transparent"></div>
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#3E92CC] border-t-transparent" />
             <p className="mt-4 text-zinc-400">Loading coaching requests...</p>
           </div>
         </div>
@@ -198,12 +202,14 @@ export default function NewClientsPage() {
               Failed to load coaching requests
             </p>
             <p className="mt-2 text-zinc-400">{error}</p>
-            <button
-              className="mt-4 rounded-lg bg-[#3E92CC] px-4 py-2 text-white hover:bg-[#2D7EB8] transition-colors"
+            <Button
+              type="button"
+              className="mt-4"
+              variant="primary"
               onClick={fetchCoachingRequests}
             >
               Try Again
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -292,10 +298,7 @@ export default function NewClientsPage() {
                       )}
                     </span>
                     <span className="px-2 py-0.5 bg-purple-900/30 text-purple-400 text-xs rounded-full">
-                      {new Date().getFullYear() -
-                        new Date(
-                          request.client.clientProfile.dateOfBirth
-                        ).getFullYear()}{" "}
+                      {calculateAge(request.client.clientProfile.dateOfBirth)}{" "}
                       years
                     </span>
                   </div>
@@ -468,10 +471,9 @@ export default function NewClientsPage() {
                       )}
                     </span>
                     <span className="px-3 py-1 bg-purple-900/30 text-purple-400 text-sm rounded-full">
-                      {new Date().getFullYear() -
-                        new Date(
-                          selectedClientDetails.client.clientProfile.dateOfBirth
-                        ).getFullYear()}{" "}
+                      {calculateAge(
+                        selectedClientDetails.client.clientProfile.dateOfBirth
+                      )}{" "}
                       years
                     </span>
                   </div>
@@ -767,10 +769,9 @@ export default function NewClientsPage() {
                     )}
                   </span>
                   <span className="px-2 py-1 bg-purple-900/30 text-purple-400 text-xs rounded-full">
-                    {new Date().getFullYear() -
-                      new Date(
-                        selectedRequest.client.clientProfile.dateOfBirth
-                      ).getFullYear()}{" "}
+                    {calculateAge(
+                      selectedRequest.client.clientProfile.dateOfBirth
+                    )}{" "}
                     years
                   </span>
                   {selectedRequest.client.clientProfile.location?.city && (
@@ -940,23 +941,22 @@ export default function NewClientsPage() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-white mb-2">
-                    Reason for rejection (optional)
-                  </label>
-                  <textarea
-                    value={rejectionReason}
-                    onChange={(e) => setRejectionReason(e.target.value)}
-                    placeholder="e.g., Currently at capacity, not a good fit for specialization, etc."
-                    className="w-full rounded-xl bg-zinc-800 border border-zinc-700 px-3 py-3 text-white placeholder-zinc-400 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 resize-none transition-colors"
-                    rows="3"
-                    maxLength={200}
-                    disabled={isSubmitting}
-                  />
-                  <p className="text-xs text-zinc-500 mt-1">
-                    {rejectionReason.length}/200 characters
-                  </p>
-                </div>
+                <FormField
+                  type="textarea"
+                  id="rejection-reason"
+                  name="rejectionReason"
+                  label="Reason for rejection (optional)"
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="e.g., Currently at capacity, not a good fit for specialization, etc."
+                  rows={3}
+                  maxLength={200}
+                  disabled={isSubmitting}
+                  className="mb-0"
+                />
+                <p className="text-xs text-zinc-500 mt-1">
+                  {rejectionReason.length}/200 characters
+                </p>
               </div>
             )}
             {responseError && (

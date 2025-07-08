@@ -9,16 +9,20 @@ export default function UnrequestConfirmationModal({
   onClose,
   onConfirm,
   trainer,
+  cooldownHours = 24,
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const handleConfirm = async () => {
     setIsSubmitting(true);
+    setError("");
     try {
       await onConfirm();
       onClose();
     } catch (error) {
       console.error("Error unrequesting trainer:", error);
+      setError("Failed to remove request. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -39,6 +43,17 @@ export default function UnrequestConfirmationModal({
       size="small"
     >
       <div className="space-y-4">
+        {error && (
+          <div className="rounded-lg bg-red-900/20 border border-red-700/30 p-3 flex items-center gap-2">
+            <Icon
+              icon="mdi:alert-circle"
+              className="text-red-400"
+              width={18}
+              height={18}
+            />
+            <span className="text-red-300 text-sm">{error}</span>
+          </div>
+        )}
         <div className="flex items-center gap-3 p-4 bg-red-900/20 border border-red-700/30 rounded-lg">
           <Icon
             icon="mdi:alert-circle"
@@ -50,7 +65,8 @@ export default function UnrequestConfirmationModal({
             <p className="text-red-400 font-medium mb-1">Important Notice</p>
             <p className="text-sm text-red-300">
               After removing this request, you won't be able to request this
-              trainer again for the next 24 hours.
+              trainer again for the next {cooldownHours} hour
+              {cooldownHours === 1 ? "" : "s"}.
             </p>
           </div>
         </div>
@@ -76,7 +92,7 @@ export default function UnrequestConfirmationModal({
                   width={14}
                   height={14}
                 />
-                <span>24-hour cooldown period begins</span>
+                <span>{cooldownHours}-hour cooldown period begins</span>
               </li>
               <li className="flex items-start gap-2">
                 <Icon
