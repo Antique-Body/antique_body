@@ -1287,7 +1287,7 @@ export const Schedule = ({ data, onChange }) => {
                                       />
                                     }
                                   >
-                                    Create New Meal Option
+                                    Create New Exercise
                                   </Button>
                                 </div>
                               </div>

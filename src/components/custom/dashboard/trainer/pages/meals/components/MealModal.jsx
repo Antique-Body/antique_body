@@ -188,10 +188,7 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
     if (fileType === "videoUrl") {
       const url = e.target.value;
       setVideoPreview(url);
-      setFormData((prev) => {
-        const newData = { ...prev, videoUrl: url };
-        return newData;
-      });
+      setFormData((prev) => ({ ...prev, videoUrl: url }));
       return;
     }
 
@@ -215,10 +212,7 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
 
     if (fileType === "video") {
       setVideoPreview(fileUrl);
-      setFormData((prev) => {
-        const newData = { ...prev, videoUrl: fileUrl };
-        return newData;
-      });
+      setFormData((prev) => ({ ...prev, videoUrl: fileUrl }));
       setVideoFile(file);
       setVideoUrl("");
       setShowVideoUrlInput(false);
@@ -234,10 +228,7 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
     if (fileType === "video") {
       setVideoPreview(null);
       setVideoUrl("");
-      setFormData((prev) => {
-        const newData = { ...prev, videoUrl: null };
-        return newData;
-      });
+      setFormData((prev) => ({ ...prev, videoUrl: null }));
       setVideoFile(null);
       // Reset file input
       const videoInput = document.getElementById("video-upload");

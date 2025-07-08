@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { PlanPreviewModal } from "./PlanPreviewModal";
@@ -47,6 +47,8 @@ export const PlanCard = ({
   const [deleteError, setDeleteError] = useState("");
   const [isCopyRotating, setIsCopyRotating] = useState(false);
   const [isEditRotating, setIsEditRotating] = useState(false);
+  const copyTimeoutRef = useRef(null);
+  const editTimeoutRef = useRef(null);
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const formattedDate = new Date(createdAt).toLocaleDateString(i18n.language, {
@@ -56,6 +58,34 @@ export const PlanCard = ({
   });
 
   const isNutrition = type === "nutrition";
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+      if (editTimeoutRef.current) {
+        clearTimeout(editTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Cleanup copy timeout when isCopyRotating changes
+  useEffect(() => {
+    if (!isCopyRotating && copyTimeoutRef.current) {
+      clearTimeout(copyTimeoutRef.current);
+      copyTimeoutRef.current = null;
+    }
+  }, [isCopyRotating]);
+
+  // Cleanup edit timeout when isEditRotating changes
+  useEffect(() => {
+    if (!isEditRotating && editTimeoutRef.current) {
+      clearTimeout(editTimeoutRef.current);
+      editTimeoutRef.current = null;
+    }
+  }, [isEditRotating]);
 
   // Animation variants
   const cardVariants = {
@@ -160,8 +190,8 @@ export const PlanCard = ({
     router.push(
       `${editUrl}?mode=copy&title=${encodeURIComponent(`Copy of ${title}`)}`
     );
-    // Reset rotation after a short delay
-    setTimeout(() => setIsCopyRotating(false), 1000);
+    // Reset rotation after a short delay and store timeout ID for cleanup
+    copyTimeoutRef.current = setTimeout(() => setIsCopyRotating(false), 1000);
   };
 
   const handleEditClick = () => {
@@ -172,8 +202,8 @@ export const PlanCard = ({
     } else {
       router.push(`/trainer/dashboard/plans/training/edit/${id}`);
     }
-    // Reset rotation after a short delay
-    setTimeout(() => setIsEditRotating(false), 1000);
+    // Reset rotation after a short delay and store timeout ID for cleanup
+    editTimeoutRef.current = setTimeout(() => setIsEditRotating(false), 1000);
   };
 
   const handleDeleteClick = () => {
@@ -284,15 +314,14 @@ export const PlanCard = ({
                     <CopyIcon
                       size={14}
                       className={`transition-transform duration-300 ${
-                        isCopyRotating ? "animate-spin" : ""
+                        isCopyRotating ? "animate-rotate-once" : ""
                       }`}
                     />
                   }
                   onClick={handleCopyClick}
                   className="hover:border-[#FF6B00] hover:text-[#FF6B00] hover:scale-105 hover:shadow-md transition-all duration-200 text-xs px-2 py-1.5 h-8 sm:h-9"
                 >
-                  <span className="hidden lg:inline">Copy</span>
-                  <span className="lg:hidden">Copy</span>
+                  Copy
                 </Button>
                 <Button
                   variant="darkOutline"
@@ -302,12 +331,7 @@ export const PlanCard = ({
                   loading={loadingPlanDetails}
                   className="hover:border-blue-400 hover:text-blue-300 hover:scale-105 hover:shadow-md transition-all duration-200 text-xs px-2 py-1.5 h-8 sm:h-9"
                 >
-                  <span className="hidden lg:inline">
-                    {loadingPlanDetails ? "Loading..." : "View"}
-                  </span>
-                  <span className="lg:hidden">
-                    {loadingPlanDetails ? "..." : "View"}
-                  </span>
+                  {loadingPlanDetails ? "Loading..." : "View"}
                 </Button>
                 <Button
                   variant="dangerOutline"
@@ -316,8 +340,7 @@ export const PlanCard = ({
                   onClick={handleDeleteClick}
                   className="hover:border-red-500 hover:text-red-400 hover:scale-105 hover:shadow-md transition-all duration-200 text-xs px-2 py-1.5 h-8 sm:h-9"
                 >
-                  <span className="hidden lg:inline">Delete</span>
-                  <span className="lg:hidden">Delete</span>
+                  Delete
                 </Button>
                 <Button
                   onClick={handleEditClick}
@@ -327,14 +350,13 @@ export const PlanCard = ({
                     <EditIcon
                       size={14}
                       className={`transition-transform duration-300 ${
-                        isEditRotating ? "animate-spin" : ""
+                        isEditRotating ? "animate-rotate-once" : ""
                       }`}
                     />
                   }
                   className="hover:border-orange-400 hover:text-orange-300 hover:scale-105 hover:shadow-md transition-all duration-200 text-xs px-2 py-1.5 h-8 sm:h-9"
                 >
-                  <span className="hidden lg:inline">Edit</span>
-                  <span className="lg:hidden">Edit</span>
+                  Edit
                 </Button>
               </div>
             </div>
