@@ -163,16 +163,17 @@ const Gallery = ({ trainerData, setTrainerData }) => {
   const displayedImages =
     activeTab === "featured" ? highlightedImages : galleryImages;
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       // Cleanup all previewUrls on unmount
       galleryImagesRef.current.forEach((img) => {
         if (img.previewUrl) {
           URL.revokeObjectURL(img.previewUrl);
         }
       });
-    };
-  }, []);
+    },
+    []
+  );
 
   return (
     <div className="space-y-6 p-4 mx-6">

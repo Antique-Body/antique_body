@@ -227,7 +227,7 @@ export const FileUploadField = ({
           {/* File Upload Area */}
           {!(type === "video" && showVideoUrlInput) && (
             <div className="absolute inset-0">
-              {preview ? (
+              {preview && preview !== "" ? (
                 // Preview Mode
                 <div className="flex flex-col h-full">
                   {/* Preview Content */}
@@ -379,7 +379,7 @@ export const FileUploadField = ({
           {/* URL Video Preview */}
           {type === "video" && showVideoUrlInput && (
             <div className="absolute inset-0">
-              {preview ? (
+              {preview && preview !== "" ? (
                 <div className="flex flex-col h-full">
                   <div className="flex-grow relative bg-zinc-900 flex items-center justify-center overflow-hidden">
                     <div className="relative w-full h-full">

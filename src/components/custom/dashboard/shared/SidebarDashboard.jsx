@@ -2,9 +2,9 @@
 
 import { Icon } from "@iconify/react";
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
 
 import { Button } from "@/components/common/Button";
 

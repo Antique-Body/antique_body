@@ -21,26 +21,61 @@ const formatDietaryDisplayName = (dietaryValue) => {
     : dietaryValue.charAt(0).toUpperCase() + dietaryValue.slice(1);
 };
 
-export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredMeals, setFilteredMeals] = useState(mealLibrary);
-  const [isLoading, setIsLoading] = useState(false);
+export const MealLibrarySelector = ({
+  meals = [],
+  loading = false,
+  searchLoading = false,
+  searchTerm = "",
+  onSearch = () => {},
+  onSelectMeal,
+  onClose,
+  onScroll = () => {},
+  hasMore = false,
+  useStaticData = false, // New prop to control data source
+}) => {
   const listRef = useRef(null);
+  const [staticSearchTerm, setStaticSearchTerm] = useState("");
+  const [filteredStaticMeals, setFilteredStaticMeals] = useState(mealLibrary);
 
-  // Filter meals on search
+  // Determine which meals to display
+  const displayMeals = useStaticData ? filteredStaticMeals : meals;
+  const displaySearchTerm = useStaticData ? staticSearchTerm : searchTerm;
+  const displayLoading = useStaticData ? false : loading;
+  const displaySearchLoading = useStaticData ? false : searchLoading;
+  const displayHasMore = useStaticData ? false : hasMore;
+
+  // Handle static search
   useEffect(() => {
-    setIsLoading(true);
-    const timeout = setTimeout(() => {
-      const filtered = mealLibrary.filter(
-        (meal) =>
-          meal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          meal.ingredients?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredMeals(filtered);
-      setIsLoading(false);
-    }, 200);
-    return () => clearTimeout(timeout);
-  }, [searchTerm]);
+    if (!useStaticData) return;
+
+    if (!staticSearchTerm.trim()) {
+      setFilteredStaticMeals(mealLibrary);
+      return;
+    }
+
+    const lowerCaseSearch = staticSearchTerm.toLowerCase();
+    const filtered = mealLibrary.filter(
+      (meal) =>
+        meal.name.toLowerCase().includes(lowerCaseSearch) ||
+        meal.ingredients.toLowerCase().includes(lowerCaseSearch) ||
+        meal.recipe.toLowerCase().includes(lowerCaseSearch) ||
+        meal.mealType.toLowerCase().includes(lowerCaseSearch) ||
+        meal.dietary?.some((diet) =>
+          diet.toLowerCase().includes(lowerCaseSearch)
+        )
+    );
+
+    setFilteredStaticMeals(filtered);
+  }, [staticSearchTerm, useStaticData]);
+
+  // Handle search input change
+  const handleSearchChange = (value) => {
+    if (useStaticData) {
+      setStaticSearchTerm(value);
+    } else {
+      onSearch(value);
+    }
+  };
 
   // ESC key close
   useEffect(() => {
@@ -54,28 +89,61 @@ export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
     return () => window.removeEventListener("keydown", handleEscKey);
   }, [onClose]);
 
+  // Infinite scroll handler
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!listRef.current || displayLoading || !displayHasMore) return;
+      const { scrollTop, scrollHeight, clientHeight } = listRef.current;
+      if (scrollTop + clientHeight >= scrollHeight - 40) {
+        onScroll();
+      }
+    };
+    const ref = listRef.current;
+    if (ref) {
+      ref.addEventListener("scroll", handleScroll);
+    }
+    return () => {
+      if (ref) ref.removeEventListener("scroll", handleScroll);
+    };
+  }, [displayLoading, displayHasMore, onScroll]);
+
   return (
     <div className="flex flex-col h-full">
-      {/* Info message about templates */}
-      <div className="mb-4">
-        <InfoBanner
-          icon="mdi:information-outline"
-          title="Templates with placeholder content"
-          subtitle="Some meals may have generic images or videos. Customize with your own media as needed."
-          variant="info"
-        />
+      {/* Header with toggle */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex-1">
+          <InfoBanner
+            icon="mdi:information-outline"
+            title={useStaticData ? "Pre-built meal templates" : "Meal library"}
+            subtitle={
+              useStaticData
+                ? "These are template meals with placeholder content. Customize with your own media as needed."
+                : "Browse and select meals from your library."
+            }
+            variant="info"
+          />
+        </div>
       </div>
 
       {/* Search input */}
       <div className="mb-4">
-        <FormField
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search meal library..."
-          prefixIcon="mdi:magnify"
-          className="mb-0"
-        />
+        <div className="relative">
+          <FormField
+            type="text"
+            value={displaySearchTerm}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder={
+              useStaticData ? "Search templates..." : "Search meal library..."
+            }
+            prefixIcon="mdi:magnify"
+            className="mb-0"
+          />
+          {displaySearchLoading && (
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#FF6B00]/30 border-t-[#FF6B00]"></div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Meal list */}
@@ -84,9 +152,9 @@ export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
         ref={listRef}
         style={{ minHeight: 200, maxHeight: 400 }}
       >
-        {filteredMeals.length > 0 ? (
+        {displayMeals.length > 0 || displaySearchLoading ? (
           <div className="grid grid-cols-1 gap-3">
-            {filteredMeals.map((meal) => (
+            {displayMeals.map((meal) => (
               <button
                 key={meal.id}
                 type="button"
@@ -113,7 +181,6 @@ export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
                       </div>
                     )}
                   </div>
-
                   {/* Meal Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start mb-1">
@@ -135,7 +202,6 @@ export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
                         </span>
                       </div>
                     </div>
-
                     {/* Meal Details */}
                     <div className="flex items-center gap-3 mb-2">
                       <span className="text-xs text-zinc-400 capitalize">
@@ -153,7 +219,6 @@ export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
                         {meal.calories}
                       </div>
                     </div>
-
                     {/* Dietary Tags */}
                     {meal.dietary && meal.dietary.length > 0 && (
                       <div className="flex flex-wrap gap-1">
@@ -176,8 +241,28 @@ export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
                 </div>
               </button>
             ))}
+            {displayLoading && (
+              <div className="flex flex-col items-center justify-center py-4 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#FF6B00]/30 border-t-[#FF6B00] mb-2"></div>
+                <p className="text-gray-400 text-sm">Loading more meals...</p>
+              </div>
+            )}
+            {!displayHasMore && !displayLoading && displayMeals.length > 0 && (
+              <div className="flex flex-col items-center justify-center py-4 text-center">
+                <Icon
+                  icon="mdi:check-circle-outline"
+                  className="w-8 h-8 text-green-400 mb-2"
+                />
+                <p className="text-green-300 text-sm">No more results</p>
+              </div>
+            )}
           </div>
-        ) : isLoading ? (
+        ) : displaySearchLoading ? (
+          <div className="flex flex-col items-center justify-center h-48 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#FF6B00]/30 border-t-[#FF6B00] mb-4"></div>
+            <p className="text-gray-400 text-lg">Searching meals...</p>
+          </div>
+        ) : displayLoading ? (
           <div className="flex flex-col items-center justify-center h-48 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#FF6B00]/30 border-t-[#FF6B00] mb-4"></div>
             <p className="text-gray-400 text-lg">Loading meals...</p>
@@ -189,12 +274,13 @@ export const MealLibrarySelector = ({ onSelectMeal, onClose }) => {
               className="w-12 h-12 text-zinc-600 mb-2"
             />
             <p className="text-zinc-400">
-              No meals found{searchTerm ? ` matching "${searchTerm}"` : ""}
+              No meals found
+              {displaySearchTerm ? ` matching "${displaySearchTerm}"` : ""}
             </p>
             <Button
               variant="secondary"
               size="small"
-              onClick={() => setSearchTerm("")}
+              onClick={() => handleSearchChange("")}
               className="mt-2 h-8 px-3"
             >
               Clear search

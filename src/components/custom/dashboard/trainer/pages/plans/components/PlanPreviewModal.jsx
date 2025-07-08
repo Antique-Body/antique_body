@@ -101,7 +101,7 @@ export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
       <div className="flex flex-col -mt-6 -mx-4 sm:-mx-5">
         {/* Banner image with gradient overlay */}
         <div className="relative h-48 sm:h-64 w-full overflow-hidden">
-          {image && (
+          {image && image !== "" && (
             <Image
               src={image}
               alt={title}

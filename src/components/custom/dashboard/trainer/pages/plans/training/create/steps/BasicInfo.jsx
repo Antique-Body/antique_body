@@ -3,16 +3,15 @@
 import { Icon } from "@iconify/react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import Image from "next/image";
+import dynamic from "next/dynamic";
 import { useState, useEffect, useCallback } from "react";
 import { SESSION_FORMATS } from "src/enums/sessionFormats";
 import { TRAINING_LEVELS } from "src/enums/trainingLevels";
-import dynamic from "next/dynamic";
 
-import { ErrorMessage } from "@/components/common/ErrorMessage";
+import { CoverImageUploadSkeleton } from "../components/CoverImageUpload";
+
 import { FormField } from "@/components/common/FormField";
 import { updateFormData } from "@/lib/utils";
-import { CoverImageUploadSkeleton } from "../components/CoverImageUpload";
 
 const CoverImageUploadDynamic = dynamic(
   () => import("../components/CoverImageUpload"),
