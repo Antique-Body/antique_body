@@ -65,6 +65,34 @@ body {
     animation: pulse-slow 4s ease-in-out infinite;
   }
 
+  /* Custom short-duration rotation animation for user feedback */
+  @keyframes rotate-once {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-rotate-once {
+    animation: rotate-once 0.6s ease-in-out;
+  }
+
+  /* Custom smooth rotation animation */
+  @keyframes smooth-rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-smooth-rotate {
+    animation: smooth-rotate 1s linear infinite;
+  }
+
   /* Gradient animations for loading */
   @keyframes gradient-shift {
     0% {

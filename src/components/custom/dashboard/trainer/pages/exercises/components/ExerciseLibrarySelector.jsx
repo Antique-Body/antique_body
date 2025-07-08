@@ -131,7 +131,7 @@ export const ExerciseLibrarySelector = ({
           />
           {displaySearchLoading && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#FF6B00]/30 border-t-[#FF6B00]"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#FF6B00]/30 border-t-[#FF6B00]" />
             </div>
           )}
         </div>
@@ -268,7 +268,7 @@ export const ExerciseLibrarySelector = ({
             })}
             {displayLoading && (
               <div className="flex flex-col items-center justify-center py-4 text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#FF6B00]/30 border-t-[#FF6B00] mb-2"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#FF6B00]/30 border-t-[#FF6B00] mb-2" />
                 <p className="text-gray-400 text-sm">
                   Loading more exercises...
                 </p>
@@ -288,12 +288,12 @@ export const ExerciseLibrarySelector = ({
           </div>
         ) : displaySearchLoading ? (
           <div className="flex flex-col items-center justify-center h-48 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#FF6B00]/30 border-t-[#FF6B00] mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#FF6B00]/30 border-t-[#FF6B00] mb-4" />
             <p className="text-gray-400 text-lg">Searching exercises...</p>
           </div>
         ) : displayLoading ? (
           <div className="flex flex-col items-center justify-center h-48 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#FF6B00]/30 border-t-[#FF6B00] mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#FF6B00]/30 border-t-[#FF6B00] mb-4" />
             <p className="text-gray-400 text-lg">Loading exercises...</p>
           </div>
         ) : (
