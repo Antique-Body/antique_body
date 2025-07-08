@@ -4,6 +4,7 @@ import React from "react";
 import { FormField } from "@/components/common";
 import { SectionTitle } from "@/components/custom/dashboard/shared";
 import { ProfileImageUpload } from "@/components/custom/shared";
+import { EXPERIENCE_LEVELS } from "@/enums";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -138,6 +139,64 @@ export const ClientBasicInformation = ({
       <p className="mt-1 text-xs text-gray-400">
         Help trainers understand your background, goals, and what you're looking
         for in a coach.
+      </p>
+    </motion.div>
+
+    {/* Contact Information */}
+    <motion.div variants={fadeInUp}>
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            label="Contact Email"
+            name="email"
+            type="email"
+            value={clientData.email || ""}
+            onChange={handleChange}
+            placeholder="your.email@example.com"
+            backgroundStyle="semi-transparent"
+          />
+          <FormField
+            label="Contact Phone"
+            name="phone"
+            type="tel"
+            value={clientData.phone || ""}
+            onChange={handleChange}
+            placeholder="+1234567890"
+            backgroundStyle="semi-transparent"
+          />
+        </div>
+      </div>
+    </motion.div>
+
+    {/* Fitness Experience */}
+    <motion.div variants={fadeInUp}>
+      <div className="space-y-4">
+        <FormField
+          label="Experience Level"
+          name="experienceLevel"
+          type="select"
+          value={clientData.experienceLevel || ""}
+          onChange={handleChange}
+          options={[
+            { value: "", label: "Select your experience level" },
+            ...EXPERIENCE_LEVELS,
+          ]}
+          backgroundStyle="semi-transparent"
+        />
+        <FormField
+          label="Previous Activities"
+          name="previousActivities"
+          type="textarea"
+          value={clientData.previousActivities || ""}
+          onChange={handleChange}
+          placeholder="Describe any previous fitness activities or sports you've participated in..."
+          rows={3}
+          backgroundStyle="semi-transparent"
+        />
+      </div>
+      <p className="mt-1 text-xs text-gray-400">
+        This information helps trainers understand your fitness background and
+        tailor workouts accordingly.
       </p>
     </motion.div>
   </motion.div>

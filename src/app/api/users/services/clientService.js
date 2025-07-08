@@ -64,6 +64,7 @@ async function createClientWithDetails(formData, userId) {
           goalDescription: formData.goalDescription?.trim() || null,
           locationId: dbLocation.id,
           profileImage: formData.profileImage?.trim() || null,
+          description: formData.description?.trim() || null,
           medicalConditions: formData.medicalConditions?.trim() || null,
           allergies: formData.allergies?.trim() || null,
           languages: {

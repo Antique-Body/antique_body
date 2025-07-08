@@ -253,6 +253,7 @@ export async function GET(request) {
 
           return {
             ...trainer,
+            id: trainer.trainerInfo.id, // Use TrainerInfo.id instead of TrainerProfile.id
             location: trainer.location ? { ...trainer.location, gyms } : null,
             distance,
             distanceSource,
@@ -292,6 +293,7 @@ export async function GET(request) {
           }
           return {
             ...trainer,
+            id: trainer.trainerInfo.id, // Use TrainerInfo.id instead of TrainerProfile.id
             location: trainer.location ? { ...trainer.location, gyms } : null,
           };
         });

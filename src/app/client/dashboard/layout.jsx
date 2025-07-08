@@ -41,18 +41,29 @@ export default function ClientDashboardLayout({ children }) {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
+  // State for badge counts
+  const [badgeCounts, setBadgeCounts] = useState({
+    trainwithcoach: 0,
+    messages: 0,
+  });
+
   // Update active tab when pathname changes
   useEffect(() => {
     setActiveTab(getActiveTabFromPath(pathname));
   }, [pathname]);
 
+  // Fetch client data
   useEffect(() => {
     async function fetchClient() {
       setLoading(true);
       try {
         const res = await fetch("/api/users/client?mode=basic");
-        const data = await res.json();
-        setClientData(data);
+        if (res.ok) {
+          const data = await res.json();
+          setClientData(data);
+        } else if (res.status === 401) {
+          // Silently handle unauthorized errors - session might not be updated yet
+        }
       } catch {
         setClientData(null);
       } finally {
@@ -60,6 +71,35 @@ export default function ClientDashboardLayout({ children }) {
       }
     }
     fetchClient();
+  }, []);
+
+  // Fetch coaching request counts for badges
+  useEffect(() => {
+    async function fetchBadgeCounts() {
+      try {
+        const res = await fetch("/api/coaching-requests/count?role=client");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) {
+            setBadgeCounts((prev) => ({
+              ...prev,
+              trainwithcoach: data.data.trainwithcoach || 0,
+            }));
+          }
+        } else if (res.status === 401) {
+          // Silently handle unauthorized errors - session might not be updated yet
+        }
+      } catch (error) {
+        console.error("Error fetching badge counts:", error);
+      }
+    }
+
+    fetchBadgeCounts();
+
+    // Set up polling for real-time updates
+    const interval = setInterval(fetchBadgeCounts, 30000); // Poll every 30 seconds
+
+    return () => clearInterval(interval);
   }, []);
 
   // Navigate to appropriate route when tab changes
@@ -111,28 +151,62 @@ export default function ClientDashboardLayout({ children }) {
   };
 
   // Handle profile save
-  const handleProfileSave = async (profileData) => {
+  const handleProfileSave = async (_profileData) => {
     try {
-      // Update the client data
-      setClientData((prev) => ({
-        ...prev,
-        data: { ...prev.data, ...profileData },
-      }));
+      // Add a small delay to ensure session is updated
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // Refresh the client data from the server to get the latest information
+      setLoading(true);
+      const res = await fetch("/api/users/client?mode=basic");
+      if (res.ok) {
+        const data = await res.json();
+        setClientData(data);
+      } else if (res.status === 401) {
+        // Silently handle unauthorized errors - session might not be updated yet
+      }
       setShowEditModal(false);
       return { success: true };
     } catch (error) {
       console.error("Error saving profile:", error);
       return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
     }
   };
 
   // Get navigation items with updated badge counts
   const navigationItems = useMemo(() => {
     const baseNavigation = getNavigationConfig("client");
-    const badges = {
-      messages: 2, // Placeholder - would come from real data
+    return updateNavigationBadges(baseNavigation, badgeCounts);
+  }, [badgeCounts]);
+
+  // Function to refresh badge counts (can be called from child components)
+  const refreshBadgeCounts = async () => {
+    try {
+      const res = await fetch("/api/coaching-requests/count?role=client");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setBadgeCounts((prev) => ({
+            ...prev,
+            trainwithcoach: data.data.trainwithcoach || 0,
+          }));
+        }
+      } else if (res.status === 401) {
+        // Silently handle unauthorized errors - session might not be updated yet
+      }
+    } catch (error) {
+      console.error("Error refreshing badge counts:", error);
+    }
+  };
+
+  // Expose refresh function globally for child components
+  useEffect(() => {
+    window.refreshClientBadges = refreshBadgeCounts;
+    return () => {
+      delete window.refreshClientBadges;
     };
-    return updateNavigationBadges(baseNavigation, badges);
   }, []);
 
   return (

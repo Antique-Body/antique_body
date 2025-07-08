@@ -12,6 +12,8 @@ export const ClientProfile = ({ clientData, onProfileUpdate }) => {
 
   // Function to map activity names to proper labels
   const mapActivityToLabel = (activityName) => {
+    if (!activityName) return "Unknown Activity";
+
     const activity = ACTIVITY_TYPES.find(
       (a) =>
         a.id === activityName ||
@@ -26,6 +28,8 @@ export const ClientProfile = ({ clientData, onProfileUpdate }) => {
 
   // Function to map goal names to proper labels
   const mapGoalToLabel = (goalName) => {
+    if (!goalName) return "Unknown Goal";
+
     const goal = FITNESS_GOALS.find(
       (g) =>
         g.id === goalName || g.label.toLowerCase() === goalName.toLowerCase()

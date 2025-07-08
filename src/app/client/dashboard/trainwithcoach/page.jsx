@@ -1,10 +1,9 @@
 "use client";
 import { Icon } from "@iconify/react";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import { useUserLocation } from "@/app/layout";
-import { Modal } from "@/components/common/Modal";
+import { InfoBanner } from "@/components/common/InfoBanner";
 import {
   NoResults,
   Pagination,
@@ -13,6 +12,7 @@ import {
 import {
   TrainerCard,
   TrainerProfileModal,
+  RequestCoachingModal,
 } from "@/components/custom/shared/trainers-list";
 
 export default function TrainWithCoachPage() {
@@ -23,13 +23,20 @@ export default function TrainWithCoachPage() {
   const [allTrainers, setAllTrainers] = useState([]);
   const [filteredTrainers, setFilteredTrainers] = useState([]);
   const [selectedTrainer, setSelectedTrainer] = useState(null);
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [showRequestModal, setShowRequestModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [requestedTrainers, setRequestedTrainers] = useState([]);
+  const [activeCooldowns, setActiveCooldowns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sortOption, setSortOption] = useState("rating");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [hasAcceptedRequest, setHasAcceptedRequest] = useState(false);
+  const [acceptedTrainer, setAcceptedTrainer] = useState(null);
+  const [unrequestError, setUnrequestError] = useState("");
+
+  // Constants
+  const MAX_TRAINER_REQUESTS = 5;
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -51,6 +58,49 @@ export default function TrainWithCoachPage() {
       setSortOrder("asc");
     }
   }, [userLocation]);
+
+  // Fetch coaching requests
+  const fetchCoachingRequests = async () => {
+    try {
+      const response = await fetch("/api/coaching-requests?role=client");
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          const requests = data.data;
+          const requestedTrainerIds = requests.map((req) => req.trainerId);
+          setRequestedTrainers(requestedTrainerIds);
+
+          // Check for accepted request
+          const acceptedRequest = requests.find(
+            (req) => req.status === "accepted"
+          );
+          setHasAcceptedRequest(!!acceptedRequest);
+          if (acceptedRequest) {
+            setAcceptedTrainer(acceptedRequest.trainer);
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching coaching requests:", err);
+    }
+  };
+
+  // Fetch active cooldowns
+  const fetchActiveCooldowns = async () => {
+    try {
+      const response = await fetch(
+        "/api/coaching-requests/cooldowns?role=client"
+      );
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setActiveCooldowns(data.data);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching cooldowns:", err);
+    }
+  };
 
   // Initial fetch of trainers sorted by location
   useEffect(() => {
@@ -86,6 +136,10 @@ export default function TrainWithCoachPage() {
 
         setAllTrainers(sorted);
         setFilteredTrainers(sorted);
+
+        // Also fetch coaching requests and cooldowns
+        await Promise.all([fetchCoachingRequests(), fetchActiveCooldowns()]);
+
         setLoading(false);
       } catch (err) {
         console.error("Error fetching trainers:", err);
@@ -166,10 +220,10 @@ export default function TrainWithCoachPage() {
     sortOrder,
   ]);
 
-  // Function to open the coaching request confirmation
+  // Function to open the coaching request modal
   const handleRequestCoaching = (trainer) => {
     setSelectedTrainer(trainer);
-    setShowConfirmationModal(true);
+    setShowRequestModal(true);
   };
 
   // Function to handle viewing a trainer's profile
@@ -178,9 +232,10 @@ export default function TrainWithCoachPage() {
     setShowProfileModal(true);
   };
 
-  // Function to close the confirmation modal
-  const closeConfirmationModal = () => {
-    setShowConfirmationModal(false);
+  // Function to close the request modal
+  const closeRequestModal = () => {
+    setShowRequestModal(false);
+    setSelectedTrainer(null);
   };
 
   // Function to close the profile modal
@@ -189,22 +244,93 @@ export default function TrainWithCoachPage() {
   };
 
   // Function to submit coaching request
-  const submitCoachingRequest = () => {
-    if (!selectedTrainer) return;
+  const handleSubmitRequest = async (trainer, _note) => {
+    try {
+      // Add trainer to requested list immediately for UI feedback
+      setRequestedTrainers((prev) => [...prev, trainer.id]);
 
-    // In a real app, you would send this to your backend
+      // The API call is now handled in the RequestCoachingModal
+      // This is just for UI updates
+    } catch (error) {
+      console.error("Error submitting coaching request:", error);
+      // Remove from requested list if there was an error
+      setRequestedTrainers((prev) => prev.filter((id) => id !== trainer.id));
+    }
+  };
 
-    // Add trainer to requested list
-    setRequestedTrainers((prev) => [...prev, selectedTrainer.id]);
+  // Function to unrequest a trainer
+  const handleUnrequestTrainer = async (trainerId) => {
+    try {
+      // Find the coaching request to delete
+      const response = await fetch("/api/coaching-requests?role=client");
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          const request = data.data.find((req) => req.trainerId === trainerId);
+          if (request) {
+            // Don't allow unrequesting if the request is accepted
+            if (request.status === "accepted") {
+              setUnrequestError(
+                "You cannot remove an active trainer. Please contact support if you need to change trainers."
+              );
+              setTimeout(() => setUnrequestError(""), 3000);
+              return;
+            }
 
-    // Close the modal
-    setShowConfirmationModal(false);
-    setSelectedTrainer(null);
+            const deleteResponse = await fetch(
+              `/api/coaching-requests/${request.id}`,
+              {
+                method: "DELETE",
+              }
+            );
+
+            if (deleteResponse.ok) {
+              // Remove trainer from requested list
+              setRequestedTrainers((prev) =>
+                prev.filter((id) => id !== trainerId)
+              );
+
+              // Refresh badge counts
+              if (window.refreshClientBadges) {
+                window.refreshClientBadges();
+              }
+
+              // No alert - the confirmation modal already handled the user interaction
+            } else {
+              const errorData = await deleteResponse.json();
+              throw new Error(errorData.error || "Failed to remove request");
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error unrequesting trainer:", error);
+      // Show error message to user
+      setUnrequestError("Failed to remove trainer request. Please try again.");
+      setTimeout(() => setUnrequestError(""), 3000);
+    }
+  };
+
+  // Function to submit message
+  const handleSubmitMessage = async (_trainer, _message) => {
+    // No action for now
   };
 
   // Check if user has already requested a trainer
   const hasRequestedTrainer = (trainerId) =>
     requestedTrainers.includes(trainerId);
+
+  // Check if user can request more trainers
+  const canRequestMoreTrainers = () =>
+    requestedTrainers.length < MAX_TRAINER_REQUESTS;
+
+  // Check if trainer is in cooldown
+  const isTrainerInCooldown = (trainerId) =>
+    activeCooldowns.some((cooldown) => cooldown.trainerId === trainerId);
+
+  // Get cooldown info for a trainer
+  const getCooldownInfo = (trainerId) =>
+    activeCooldowns.find((cooldown) => cooldown.trainerId === trainerId);
 
   // Function to sort trainers
   const sortTrainers = (trainersToSort, option, order) =>
@@ -314,6 +440,38 @@ export default function TrainWithCoachPage() {
   return (
     <div className="relative min-h-screen overflow-x-hidden text-white">
       <div className="relative z-10">
+        {/* Trainer Request Status Banner */}
+        <div className="mb-6">
+          <InfoBanner
+            icon="mdi:account-multiple"
+            title={
+              hasAcceptedRequest
+                ? "You Have an Active Trainer"
+                : `Trainer Requests (${requestedTrainers.length}/${MAX_TRAINER_REQUESTS})`
+            }
+            subtitle={
+              hasAcceptedRequest
+                ? `You are currently training with ${acceptedTrainer?.trainerProfile?.firstName} ${acceptedTrainer?.trainerProfile?.lastName}. You cannot request other trainers at this time.`
+                : requestedTrainers.length === 0
+                ? "You haven't requested any trainers yet. You can request up to 5 trainers."
+                : requestedTrainers.length >= MAX_TRAINER_REQUESTS
+                ? "You've reached the maximum number of trainer requests. Remove a request to add a new one."
+                : `You have ${
+                    requestedTrainers.length
+                  } active requests. You can request ${
+                    MAX_TRAINER_REQUESTS - requestedTrainers.length
+                  } more trainers.`
+            }
+            variant={
+              hasAcceptedRequest
+                ? "success"
+                : requestedTrainers.length >= MAX_TRAINER_REQUESTS
+                ? "primary"
+                : "info"
+            }
+          />
+        </div>
+
         {/* Enhanced SortControls with integrated search and location filters */}
         <SortControls
           sortOption={sortOption}
@@ -341,8 +499,18 @@ export default function TrainWithCoachPage() {
                 trainer={trainer}
                 onRequestCoaching={handleRequestCoaching}
                 onViewProfile={handleViewProfile}
+                onUnrequestTrainer={handleUnrequestTrainer}
                 hasRequested={hasRequestedTrainer(trainer.id)}
+                canRequestMore={
+                  !hasAcceptedRequest &&
+                  canRequestMoreTrainers() &&
+                  !isTrainerInCooldown(trainer.id)
+                }
                 colorVariant="blue"
+                cooldownInfo={getCooldownInfo(trainer.id)}
+                isAccepted={
+                  hasAcceptedRequest && acceptedTrainer?.id === trainer.id
+                }
               />
             ))}
           </div>
@@ -365,84 +533,20 @@ export default function TrainWithCoachPage() {
         )}
       </div>
 
-      {/* Confirmation Modal */}
-      {showConfirmationModal && selectedTrainer && (
-        <Modal
-          isOpen={showConfirmationModal}
-          onClose={closeConfirmationModal}
-          title={
-            <div className="flex items-center gap-2">
-              <Icon
-                icon="mdi:account-multiple"
-                width={18}
-                height={18}
-                className="text-[#3E92CC]"
-              />
-              Request Coaching
-            </div>
-          }
-          message={`You're about to request ${selectedTrainer.firstName} ${
-            selectedTrainer.lastName || ""
-          } as your coach`}
-          confirmButtonText="Confirm Request"
-          cancelButtonText="Cancel"
-          onConfirm={submitCoachingRequest}
-          primaryButtonAction={submitCoachingRequest}
-          secondaryButtonAction={closeConfirmationModal}
-        >
-          <div className="mb-6 flex items-center gap-4">
-            <div className="h-16 w-16 overflow-hidden rounded-full">
-              {selectedTrainer.profileImage ? (
-                <Image
-                  src={selectedTrainer.profileImage}
-                  alt={`${selectedTrainer.firstName} profile`}
-                  className="object-cover"
-                  width={64}
-                  height={64}
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#3E92CC] to-[#2D7EB8]">
-                  <Icon
-                    icon="mdi:account"
-                    width={32}
-                    height={32}
-                    color="white"
-                  />
-                </div>
-              )}
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-white">
-                {selectedTrainer.firstName} {selectedTrainer.lastName || ""}
-              </h3>
-              <p className="text-sm text-zinc-400">
-                {selectedTrainer.specialties.map((s) => s.name).join(", ")}
-              </p>
-            </div>
-          </div>
-
-          <p className="mb-6 text-zinc-300">
-            If they accept your request, they will be able to create workout
-            plans for you and provide guidance on your fitness journey.
-          </p>
-
-          <p className="mb-2 text-sm text-zinc-400">
-            Note: The standard rate shown below is a starting point. You can
-            discuss and negotiate the final price directly with the trainer
-            based on your specific needs and training schedule.
-          </p>
-
-          <p className="mb-6 text-sm text-zinc-400">
-            Standard rate:{" "}
-            <span className="text-base font-bold text-[#3E92CC]">
-              ${selectedTrainer.pricePerSession}/
-              {selectedTrainer.pricingType === "per_session"
-                ? "session"
-                : "package"}
-            </span>
-          </p>
-        </Modal>
-      )}
+      {/* Request Coaching Modal */}
+      <RequestCoachingModal
+        isOpen={showRequestModal}
+        onClose={closeRequestModal}
+        trainer={selectedTrainer}
+        onSubmitRequest={handleSubmitRequest}
+        onSubmitMessage={handleSubmitMessage}
+        hasRequested={
+          selectedTrainer ? hasRequestedTrainer(selectedTrainer.id) : false
+        }
+        canRequestMore={canRequestMoreTrainers()}
+        requestedCount={requestedTrainers.length}
+        maxRequests={MAX_TRAINER_REQUESTS}
+      />
 
       {/* Profile Modal */}
       {showProfileModal && selectedTrainer && (
@@ -490,6 +594,9 @@ export default function TrainWithCoachPage() {
           }}
           onClose={closeProfileModal}
         />
+      )}
+      {unrequestError && (
+        <div className="text-center text-red-400 py-2">{unrequestError}</div>
       )}
     </div>
   );

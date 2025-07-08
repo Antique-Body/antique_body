@@ -146,7 +146,8 @@ model TrainerInfo {
   meals             Meal[]
   trainingPlans     TrainingPlan[]
   nutritionPlans    NutritionPlan[]
-
+  coachingRequests  CoachingRequest[]
+  coachingRequestCooldowns CoachingRequestCooldown[]
 }
 
 // TrainerProfile now belongs to TrainerInfo
@@ -275,6 +276,8 @@ model ClientInfo {
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   clientProfile     ClientProfile?
   clientSettings    ClientSettings?
+  coachingRequests  CoachingRequest[]
+  coachingRequestCooldowns CoachingRequestCooldown[]
 }
 
 // ClientProfile now belongs to ClientInfo
@@ -546,4 +549,55 @@ model NutritionPlan {
   @@index([trainerInfoId])
   @@index([isActive])
   @@index([isPublished])
+}
+
+// Coaching Request System
+enum CoachingRequestStatus {
+  pending
+  accepted
+  rejected
+  cancelled
+}
+
+model CoachingRequest {
+  id                String   @id @default(cuid())
+  clientId          String
+  trainerId         String
+  note              String?  @db.Text
+  status            CoachingRequestStatus @default(pending)
+  rejectionReason   String?  @db.Text
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  respondedAt       DateTime?
+  
+  // Relations
+  client            ClientInfo @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  trainer           TrainerInfo @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  
+  // Ensure unique request per client-trainer pair
+  @@unique([clientId, trainerId])
+  @@index([clientId])
+  @@index([trainerId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// Coaching Request Cooldown System
+model CoachingRequestCooldown {
+  id                String   @id @default(cuid())
+  clientId          String
+  trainerId         String
+  removedAt         DateTime @default(now())
+  expiresAt         DateTime // 24 hours after removal
+  
+  // Relations
+  client            ClientInfo @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  trainer           TrainerInfo @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  
+  // Ensure unique cooldown per client-trainer pair
+  @@unique([clientId, trainerId])
+  @@index([clientId])
+  @@index([trainerId])
+  @@index([expiresAt])
+  @@index([removedAt])
 }

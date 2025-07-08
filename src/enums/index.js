@@ -3,6 +3,7 @@ export * from "./contactOptions";
 export * from "./daysOfWeek";
 export * from "./durationTypes";
 export * from "./exerciseTypes";
+export * from "./experienceLevels";
 export * from "./fitnessGoals";
 export * from "./mealTypes";
 export * from "./planFeatures";

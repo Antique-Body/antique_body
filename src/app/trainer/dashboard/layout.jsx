@@ -15,22 +15,22 @@ import {
   updateNavigationBadges,
 } from "@/config/navigation";
 
+// Prebacujem funkciju van komponente
+function getActiveTabFromPath(path) {
+  if (path.includes("/newclients")) return "newClients";
+  if (path.includes("/clients")) return "clients";
+  if (path.includes("/upcoming-trainings")) return "upcomingTrainings";
+  if (path.includes("/messages")) return "messages";
+  if (path.includes("/plans")) return "plans";
+  if (path.includes("/exercises")) return "exercises";
+  if (path.includes("/meals")) return "meals";
+  return "newClients"; // Default tab
+}
+
 export default function TrainerDashboardLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const { data: _session } = useSession();
-
-  // Map pathname to tab ID
-  const getActiveTabFromPath = (path) => {
-    if (path.includes("/newclients")) return "newClients";
-    if (path.includes("/clients")) return "clients";
-    if (path.includes("/upcoming-trainings")) return "upcomingTrainings";
-    if (path.includes("/messages")) return "messages";
-    if (path.includes("/plans")) return "plans";
-    if (path.includes("/exercises")) return "exercises";
-    if (path.includes("/meals")) return "meals";
-    return "newClients"; // Default tab
-  };
 
   const [activeTab, setActiveTab] = useState(getActiveTabFromPath(pathname));
   const [trainerData, setTrainerData] = useState(null);
@@ -39,22 +39,34 @@ export default function TrainerDashboardLayout({ children }) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [profileSaveError, setProfileSaveError] = useState("");
 
-  // State for message badge count
-  const [messageBadgeCount, _setMessageBadgeCount] = useState(0);
+  // State for badge counts
+  const [badgeCounts, setBadgeCounts] = useState({
+    newClients: 0,
+    clients: 0,
+    messages: 0,
+  });
 
   // Update active tab when pathname changes
   useEffect(() => {
     setActiveTab(getActiveTabFromPath(pathname));
   }, [pathname]);
 
+  // Fetch trainer data
   useEffect(() => {
     async function fetchTrainer() {
       setLoading(true);
       try {
         const res = await fetch("/api/users/trainer?mode=basic");
-        const data = await res.json();
-        setTrainerData(data);
+        if (res.ok) {
+          const data = await res.json();
+          setTrainerData(data);
+        } else if (res.status === 401) {
+          // Silently handle unauthorized errors - session might not be updated yet
+        } else {
+          setTrainerData(null);
+        }
       } catch {
         setTrainerData(null);
       } finally {
@@ -64,24 +76,37 @@ export default function TrainerDashboardLayout({ children }) {
     fetchTrainer();
   }, []);
 
-  // useEffect(() => {
-  //   async function fetchUnreadMessages() {
-  //     try {
-  //       const res = await fetch("/api/messages/unread-count");
-  //       const data = await res.json();
-  //       setMessageBadgeCount(data.unreadCount || 0);
-  //     } catch {
-  //       setMessageBadgeCount(0);
-  //     }
-  //   }
-  //   fetchUnreadMessages();
-  // }, []);
+  // Fetch coaching request counts for badges
+  useEffect(() => {
+    async function fetchBadgeCounts() {
+      try {
+        const res = await fetch("/api/coaching-requests/count?role=trainer");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) {
+            setBadgeCounts((prev) => ({
+              ...prev,
+              newClients: data.data.newClients || 0,
+              clients: data.data.clients || 0,
+            }));
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching badge counts:", error);
+      }
+    }
+
+    fetchBadgeCounts();
+
+    // Set up polling for real-time updates
+    const interval = setInterval(fetchBadgeCounts, 30000); // Poll every 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Navigate to appropriate route when tab changes
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
-
-    // Navigate to corresponding route
     switch (tabId) {
       case "newClients":
         router.push("/trainer/dashboard/newclients");
@@ -104,6 +129,8 @@ export default function TrainerDashboardLayout({ children }) {
       case "meals":
         router.push("/trainer/dashboard/meals");
         break;
+      default:
+        router.push("/trainer/dashboard/newclients");
     }
   };
 
@@ -123,44 +150,74 @@ export default function TrainerDashboardLayout({ children }) {
   };
 
   // Handle profile save
-  const handleProfileSave = async (profileData) => {
+  const handleProfileSave = async (_updatedData) => {
     try {
-      // Update the trainer data
-      setTrainerData((prev) => ({
-        ...prev,
-        data: { ...prev.data, ...profileData },
-      }));
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      setLoading(true);
+      const res = await fetch("/api/users/trainer?mode=basic");
+      if (res.ok) {
+        const data = await res.json();
+        setTrainerData(data);
+      } else if (res.status === 401) {
+        // Silently handle unauthorized errors - session might not be updated yet
+      }
+      // Osvježi badge counts nakon save-a
+      await refreshBadgeCounts();
       setShowEditModal(false);
-      return { success: true };
-    } catch (error) {
-      console.error("Error saving profile:", error);
-      return { success: false, error: error.message };
+      setShowSettingsModal(false);
+      setShowDetailModal(false);
+      setProfileSaveError("");
+    } catch {
+      // Minimalan error UI
+      setProfileSaveError("Greška pri spremanju profila. Pokušajte ponovo.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Get navigation items with updated badge counts
-  const navigationItems = useMemo(() => {
-    const baseNavigation = getNavigationConfig("trainer");
-    return baseNavigation;
-  }, []);
+  // Get navigation items with updated badges
+  const navigationItemsWithBadges = useMemo(() => {
+    const navigation = getNavigationConfig("trainer");
+    return updateNavigationBadges(navigation, badgeCounts);
+  }, [badgeCounts]);
 
-  // Update navigation items with real badge count
-  const navigationItemsWithBadges = useMemo(
-    () =>
-      updateNavigationBadges(navigationItems, {
-        messages: messageBadgeCount,
-      }),
-    [navigationItems, messageBadgeCount]
-  );
+  // Function to refresh badge counts (can be called from child components)
+  const refreshBadgeCounts = async () => {
+    try {
+      const res = await fetch("/api/coaching-requests/count?role=trainer");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setBadgeCounts((prev) => ({
+            ...prev,
+            newClients: data.data.newClients || 0,
+            clients: data.data.clients || 0,
+          }));
+        }
+      } else if (res.status === 401) {
+        // Silently handle unauthorized errors - session might not be updated yet
+      }
+    } catch (error) {
+      console.error("Error refreshing badge counts:", error);
+    }
+  };
+
+  // Expose refresh function globally for child components
+  useEffect(() => {
+    // Nije preporučeno koristiti window za ovo, bolje koristiti context
+    window.refreshTrainerBadges = refreshBadgeCounts;
+    return () => {
+      delete window.refreshTrainerBadges;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen text-white">
       <EffectBackground />
-
       {/* Sidebar */}
       <SidebarDashboard
         profileType="trainer"
-        userData={trainerData?.data}
+        userData={trainerData?.data || {}} // fallback
         loading={loading}
         navigationItems={navigationItemsWithBadges}
         activeItem={activeTab}
@@ -170,7 +227,6 @@ export default function TrainerDashboardLayout({ children }) {
         onSettingsClick={handleSettingsClick}
         onCollapseChange={setSidebarCollapsed}
       />
-
       {/* Main Content */}
       <div
         className={`transition-all duration-300 ease-in-out ${
@@ -180,36 +236,55 @@ export default function TrainerDashboardLayout({ children }) {
         <div className="relative z-10 min-h-screen">
           <div className="pt-16 lg:pt-6 px-4 lg:px-6">
             {/* Page Content */}
-            <div className="max-w-7xl mx-auto">{children}</div>
+            <div className="max-w-7xl mx-auto">
+              {loading && <div className="text-center py-4">Učitavanje...</div>}
+              {!loading && !trainerData && (
+                <div className="text-center text-red-400 py-4">
+                  Greška pri učitavanju podataka.
+                </div>
+              )}
+              {children}
+            </div>
           </div>
         </div>
       </div>
-
       {/* Profile Detail Modal */}
       <TrainerProfileModal
-        trainerData={trainerData?.data}
+        trainerData={trainerData?.data || {}}
         isOpen={showDetailModal}
         onClose={() => setShowDetailModal(false)}
       />
-
       {/* Edit Profile Modal */}
-      {showEditModal && (
-        <UserEditProfile
-          profileType="trainer"
-          userData={trainerData?.data}
-          onClose={() => setShowEditModal(false)}
-          onSave={handleProfileSave}
-        />
+      {showEditModal && trainerData && (
+        <>
+          <UserEditProfile
+            profileType="trainer"
+            userData={trainerData?.data || {}}
+            onClose={() => setShowEditModal(false)}
+            onSave={handleProfileSave}
+          />
+          {profileSaveError && (
+            <div className="text-center text-red-400 py-2">
+              {profileSaveError}
+            </div>
+          )}
+        </>
       )}
-
       {/* Settings Modal */}
-      {showSettingsModal && (
-        <UserSettings
-          profileType="trainer"
-          userData={trainerData?.data}
-          onClose={() => setShowSettingsModal(false)}
-          onSave={handleProfileSave}
-        />
+      {showSettingsModal && trainerData && (
+        <>
+          <UserSettings
+            profileType="trainer"
+            userData={trainerData?.data || {}}
+            onClose={() => setShowSettingsModal(false)}
+            onSave={handleProfileSave}
+          />
+          {profileSaveError && (
+            <div className="text-center text-red-400 py-2">
+              {profileSaveError}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
