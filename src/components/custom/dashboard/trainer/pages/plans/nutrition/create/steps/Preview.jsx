@@ -44,7 +44,8 @@ export const Preview = ({ data }) => {
     <div className="flex flex-col -mx-4 sm:-mx-5">
       {/* Banner image with gradient overlay */}
       <div className="relative h-48 sm:h-64 w-full overflow-hidden rounded-2xl mb-6">
-        {data.coverImage ? (
+        {(typeof data.coverImage === "string" && data.coverImage) ||
+        (typeof data.coverImage !== "string" && coverImageUrl) ? (
           <Image
             src={
               typeof data.coverImage === "string"

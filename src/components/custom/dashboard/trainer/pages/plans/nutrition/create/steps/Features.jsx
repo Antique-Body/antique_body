@@ -88,6 +88,13 @@ export const Features = ({ data, onChange }) => {
     [data, onChange]
   );
 
+  const handleRemoveKeyFeature = useCallback(
+    (index) => {
+      removeArrayItem("keyFeatures", index);
+    },
+    [removeArrayItem]
+  );
+
   return (
     <div className="space-y-4 sm:space-y-6 px-2 sm:px-4">
       {/* Header */}
@@ -105,34 +112,36 @@ export const Features = ({ data, onChange }) => {
       </motion.div>
 
       {/* Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Left Column */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1 }}
-          className="space-y-4 sm:space-y-5"
-        >
-          {/* Key Features */}
-          <div className="bg-gradient-to-br from-[#1a1a1a] via-[#1e1e1e] to-[#222] rounded-xl border border-[#333] p-4 sm:p-6 shadow-lg">
-            <h3 className="text-base sm:text-lg font-semibold text-white mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-              <div className="p-2 sm:p-2.5 rounded-lg bg-gradient-to-r from-[#FF6B00] to-[#FF8533] shadow-md">
-                <Icon
-                  icon="mdi:star"
-                  className="w-4 sm:w-5 h-4 sm:h-5 text-white"
-                />
-              </div>
-              <span className="text-sm sm:text-base">Key Features</span>
+      <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex-1">
+          {/* Key Benefits */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-[#1a1a1a] rounded-lg border border-[#333] p-6 h-full"
+          >
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <Icon icon="mdi:star" className="w-5 h-5 text-[#FF6B00]" />
+              Key Benefits
             </h3>
-
             <div className="space-y-3">
-              {(data.keyFeatures || [""]).map((feature, idx) => (
-                <div key={idx} className="flex items-center gap-3">
+              {data.keyFeatures.map((feature, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="flex gap-3 items-center"
+                >
+                  <div className="w-6 h-6 rounded-full bg-[#FF6B00]/20 flex items-center justify-center flex-shrink-0">
+                    <Icon icon="mdi:check" className="w-3 h-3 text-[#FF6B00]" />
+                  </div>
                   <FormField
-                    name={`keyFeature-${idx}`}
+                    name={`keyFeature-${index}`}
                     value={feature}
                     onChange={(e) =>
-                      handleArrayChange("keyFeatures", idx, e.target.value)
+                      handleArrayChange("keyFeatures", index, e.target.value)
                     }
                     placeholder={
                       [
@@ -140,181 +149,205 @@ export const Features = ({ data, onChange }) => {
                         "Flexible food choices",
                         "Progress tracking",
                         "Educational resources",
-                      ][idx] || `Feature #${idx + 1}`
+                      ][index] || `Feature #${index + 1}`
                     }
-                    className="flex-1"
+                    className="flex-1 h-full !mb-0"
                   />
-                  <Button
-                    type="button"
-                    onClick={() => removeArrayItem("keyFeatures", idx)}
-                    className="p-2 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors"
-                    disabled={(data.keyFeatures || [""]).length === 1}
-                    title="Remove feature"
-                    variant="ghost"
-                  >
-                    <Icon icon="mdi:close" className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))}
-              <Button
-                type="button"
-                onClick={() => addArrayItem("keyFeatures")}
-                className="w-full py-2 px-4 bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-lg text-[#FF6B00] hover:bg-[#FF6B00]/20 transition-colors flex items-center justify-center gap-2"
-                variant="orangeOutline"
-              >
-                <Icon icon="mdi:plus" className="w-4 h-4" />
-                Add Feature
-              </Button>
-            </div>
-          </div>
-
-          {/* Additional Info */}
-          <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4 sm:p-5">
-            <h3 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
-              <Icon icon="mdi:information" className="w-4 h-4 text-[#FF6B00]" />
-              Additional Information
-            </h3>
-
-            <div className="space-y-3 sm:space-y-4">
-              <FormField
-                label="Recommended Frequency"
-                name="recommendedFrequency"
-                value={data.recommendedFrequency || ""}
-                onChange={handleChange}
-                placeholder="Daily meal plans"
-              />
-
-              <FormField
-                label="Adaptability"
-                name="adaptability"
-                type="textarea"
-                value={data.adaptability || ""}
-                onChange={handleChange}
-                placeholder="Highly customizable based on client progress and feedback"
-                rows={2}
-              />
-
-              <FormField
-                label="Cooking Time"
-                name="cookingTime"
-                value={data.cookingTime || ""}
-                onChange={handleChange}
-                placeholder="e.g., 15-30 minutes per meal"
-              />
-
-              <FormField
-                label="Supplement Recommendations"
-                name="supplementRecommendations"
-                type="textarea"
-                value={data.supplementRecommendations || ""}
-                onChange={handleChange}
-                placeholder="Optional supplements that complement this nutrition plan..."
-                rows={2}
-              />
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Right Column */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-          className="space-y-4 sm:space-y-5"
-        >
-          {/* Timeline */}
-          <div className="bg-gradient-to-br from-[#1a1a1a] via-[#1e1e1e] to-[#222] rounded-xl border border-[#333] p-4 sm:p-6 shadow-lg">
-            <h3 className="text-base sm:text-lg font-semibold text-white mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-              <div className="p-2 sm:p-2.5 rounded-lg bg-gradient-to-r from-[#FF6B00] to-[#FF8533] shadow-md">
-                <Icon
-                  icon="mdi:timeline-clock"
-                  className="w-4 sm:w-5 h-4 sm:h-5 text-white"
-                />
-              </div>
-              <span className="text-sm sm:text-base">Timeline Structure</span>
-            </h3>
-
-            <div className="space-y-4">
-              {(
-                data.timeline || [{ week: "", title: "", description: "" }]
-              ).map((item, idx) => (
-                <div
-                  key={idx}
-                  className="bg-[#242424] rounded-lg border border-[#444] p-4 space-y-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <FormField
-                      label="Week(s)"
-                      name={`timeline-week-${idx}`}
-                      value={item.week}
-                      onChange={(e) =>
-                        handleTimelineChange(idx, "week", e.target.value)
-                      }
-                      placeholder={
-                        ["Week 1-2", "Week 3-4", "Week 5-8"][idx] || "Week(s)"
-                      }
-                      className="flex-1"
-                    />
+                  {data.keyFeatures.length > 1 && (
                     <Button
                       type="button"
-                      onClick={() => removeTimelineItem(idx)}
-                      className="p-2 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors"
-                      disabled={
-                        (
-                          data.timeline || [
-                            { week: "", title: "", description: "" },
-                          ]
-                        ).length === 1
-                      }
-                      title="Remove timeline block"
+                      onClick={() => handleRemoveKeyFeature(index)}
+                      className="flex items-center justify-center self-center p-2 text-gray-400 hover:text-red-500 hover:bg-red-500/20 transition-colors rounded-full focus:outline-none focus:ring-2 focus:ring-red-500"
                       variant="ghost"
+                      aria-label="Remove benefit"
                     >
-                      <Icon icon="mdi:close" className="w-4 h-4" />
+                      <Icon icon="mdi:close" className="w-5 h-5" />
                     </Button>
-                  </div>
-
-                  <FormField
-                    label="Title"
-                    name={`timeline-title-${idx}`}
-                    value={item.title}
-                    onChange={(e) =>
-                      handleTimelineChange(idx, "title", e.target.value)
-                    }
-                    placeholder={
-                      [
-                        "Baseline establishment",
-                        "Habit formation",
-                        "Progressive implementation",
-                      ][idx] || "Phase title"
-                    }
-                  />
-
-                  <FormField
-                    label="Description"
-                    name={`timeline-description-${idx}`}
-                    type="textarea"
-                    value={item.description}
-                    onChange={(e) =>
-                      handleTimelineChange(idx, "description", e.target.value)
-                    }
-                    placeholder="Focus on building consistent eating patterns and introducing key nutritional concepts."
-                    rows={2}
-                  />
-                </div>
+                  )}
+                </motion.div>
               ))}
-              <Button
-                type="button"
-                onClick={addTimelineItem}
-                className="w-full py-2 px-4 bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-lg text-[#FF6B00] hover:bg-[#FF6B00]/20 transition-colors flex items-center justify-center gap-2"
-                variant="orangeOutline"
-              >
-                <Icon icon="mdi:plus" className="w-4 h-4" />
-                Add Timeline Block
-              </Button>
+              {data.keyFeatures.length < 5 && (
+                <Button
+                  type="button"
+                  onClick={() => addArrayItem("keyFeatures")}
+                  className="flex items-center gap-2 text-sm text-gray-400 hover:text-[#FF6B00] transition-colors p-2 rounded-lg hover:bg-[#FF6B00]/10"
+                  variant="ghost"
+                >
+                  <Icon icon="mdi:plus" className="w-4 h-4" />
+                  Add benefit
+                </Button>
+              )}
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
+        <div className="flex-1">
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-[#1a1a1a] rounded-lg border border-[#333] p-6 h-full"
+          >
+            {/* Timeline */}
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <Icon
+                icon="mdi:timeline-clock"
+                className="w-5 h-5 text-purple-400"
+              />
+              Nutrition Phases
+            </h3>
+
+            <div className="space-y-6">
+              {data.timeline.map((item, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="relative flex flex-col items-center w-full"
+                >
+                  {/* Broj faze iznad kartice */}
+                  <div className="-mb-4 z-10">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#FF6B00] to-purple-500 flex items-center justify-center font-bold text-white text-lg shadow-lg border-4 border-[#1a1a1a]">
+                      {index + 1}
+                    </div>
+                  </div>
+                  {/* Kartica faze */}
+                  <div className="bg-[#222] rounded-lg border border-[#333] p-4 mt-0 w-full max-w-full sm:max-w-2xl relative">
+                    {data.timeline.length > 1 && (
+                      <Button
+                        type="button"
+                        onClick={() => removeTimelineItem(index)}
+                        className="absolute top-3 right-3 z-20 p-2 text-gray-400 hover:text-red-500 hover:bg-red-500/20 transition-colors rounded-full focus:outline-none focus:ring-2 focus:ring-red-500"
+                        disabled={
+                          (
+                            data.timeline || [
+                              { week: "", title: "", description: "" },
+                            ]
+                          ).length === 1
+                        }
+                        title="Remove timeline block"
+                        variant="ghost"
+                      >
+                        <Icon icon="mdi:close" className="w-4 h-4" />
+                      </Button>
+                    )}
+                    <div className="flex-1 space-y-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <FormField
+                          label="Week(s)"
+                          name={`timeline-week-${index}`}
+                          value={item.week}
+                          onChange={(e) =>
+                            handleTimelineChange(index, "week", e.target.value)
+                          }
+                          placeholder={
+                            ["Week 1-2", "Week 3-4", "Week 5-8"][index] ||
+                            "Week(s)"
+                          }
+                          className="flex-1"
+                        />
+
+                        <FormField
+                          label="Title"
+                          name={`timeline-title-${index}`}
+                          value={item.title}
+                          onChange={(e) =>
+                            handleTimelineChange(index, "title", e.target.value)
+                          }
+                          placeholder={
+                            [
+                              "Baseline establishment",
+                              "Habit formation",
+                              "Progressive implementation",
+                            ][index] || "Phase title"
+                          }
+                        />
+                      </div>
+                      <FormField
+                        label="Description"
+                        name={`timeline-description-${index}`}
+                        type="textarea"
+                        value={item.description}
+                        onChange={(e) =>
+                          handleTimelineChange(
+                            index,
+                            "description",
+                            e.target.value
+                          )
+                        }
+                        placeholder="Focus on building consistent eating patterns and introducing key nutritional concepts."
+                        rows={2}
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+              {data.timeline.length < 4 && (
+                <Button
+                  type="button"
+                  onClick={addTimelineItem}
+                  className="w-full py-3 border border-dashed border-[#333] rounded-lg text-gray-400 hover:text-purple-400 hover:border-purple-500/50 transition-all flex items-center justify-center gap-2"
+                  variant="ghost"
+                >
+                  <Icon icon="mdi:plus" className="w-4 h-4" />
+                  Add Timeline Block
+                </Button>
+              )}
+            </div>
+          </motion.div>
+        </div>
       </div>
+
+      {/* Additional Info */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4 sm:p-5"
+      >
+        <h3 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
+          <Icon icon="mdi:information" className="w-4 h-4 text-[#FF6B00]" />
+          Additional Information
+        </h3>
+
+        <div className="space-y-3 sm:space-y-4">
+          <FormField
+            label="Recommended Frequency"
+            name="recommendedFrequency"
+            value={data.recommendedFrequency || ""}
+            onChange={handleChange}
+            placeholder="Daily meal plans"
+          />
+
+          <FormField
+            label="Adaptability"
+            name="adaptability"
+            type="textarea"
+            value={data.adaptability || ""}
+            onChange={handleChange}
+            placeholder="Highly customizable based on client progress and feedback"
+            rows={2}
+          />
+
+          <FormField
+            label="Cooking Time"
+            name="cookingTime"
+            value={data.cookingTime || ""}
+            onChange={handleChange}
+            placeholder="e.g., 15-30 minutes per meal"
+          />
+
+          <FormField
+            label="Supplement Recommendations"
+            name="supplementRecommendations"
+            type="textarea"
+            value={data.supplementRecommendations || ""}
+            onChange={handleChange}
+            placeholder="Optional supplements that complement this nutrition plan..."
+            rows={2}
+          />
+        </div>
+      </motion.div>
     </div>
   );
 };

@@ -188,7 +188,10 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
     if (fileType === "videoUrl") {
       const url = e.target.value;
       setVideoPreview(url);
-      setFormData((prev) => ({ ...prev, video: url }));
+      setFormData((prev) => {
+        const newData = { ...prev, videoUrl: url };
+        return newData;
+      });
       return;
     }
 
@@ -212,7 +215,10 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
 
     if (fileType === "video") {
       setVideoPreview(fileUrl);
-      setFormData((prev) => ({ ...prev, videoUrl: fileUrl }));
+      setFormData((prev) => {
+        const newData = { ...prev, videoUrl: fileUrl };
+        return newData;
+      });
       setVideoFile(file);
       setVideoUrl("");
       setShowVideoUrlInput(false);
@@ -228,7 +234,10 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
     if (fileType === "video") {
       setVideoPreview(null);
       setVideoUrl("");
-      setFormData((prev) => ({ ...prev, videoUrl: null }));
+      setFormData((prev) => {
+        const newData = { ...prev, videoUrl: null };
+        return newData;
+      });
       setVideoFile(null);
       // Reset file input
       const videoInput = document.getElementById("video-upload");
@@ -273,11 +282,13 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
         throw new Error(errorData.error || "Upload failed");
       }
 
+      const result = await response.json();
+
       // Clear upload status
       setUploadStatus({ image: "", video: "" });
       setUploadProgress({ image: 0, video: 0 });
 
-      return await response.json();
+      return result;
     } catch (error) {
       // Clear upload status on error
       setUploadStatus({ image: "", video: "" });
@@ -344,7 +355,6 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
       // Call the save function
       await onSave(finalFormData);
     } catch (error) {
-      console.error("Error saving meal:", error);
       setErrors((prev) => ({ ...prev, upload: error.message }));
     } finally {
       setIsSubmitting(false);
@@ -894,6 +904,7 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
         isNested={true}
       >
         <MealLibrarySelector
+          useStaticData={true}
           onSelectMeal={handleSelectMealFromLibrary}
           onClose={() => setShowLibrarySelector(false)}
         />

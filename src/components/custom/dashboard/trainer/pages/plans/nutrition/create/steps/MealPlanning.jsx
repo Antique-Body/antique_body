@@ -9,9 +9,13 @@ import { v4 as uuidv4 } from "uuid";
 import { MealLibrarySelector } from "../../../../meals/components";
 import { MealModal } from "../../../../meals/components/MealModal";
 
-import { Button } from "@/components/common/Button";
-import { FormField } from "@/components/common/FormField";
-import { Modal } from "@/components/common/Modal";
+import { Card, Modal, FormField, Button } from "@/components/common";
+
+// Helper to check if a URL is a YouTube link
+const isYouTubeUrl = (url) => {
+  if (!url) return false;
+  return /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//.test(url);
+};
 
 export const MealPlanning = ({ data, onChange }) => {
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
@@ -29,10 +33,21 @@ export const MealPlanning = ({ data, onChange }) => {
   const popoverRef = useRef(null);
   const buttonRef = useRef(null);
   const [showCreateMeal, setShowCreateMeal] = useState(false);
-  const [meals, setMeals] = useState([]);
   const [subtitleExists, setSubtitleExists] = useState(false);
   const [lastCheckedSubtitleUrl, setLastCheckedSubtitleUrl] = useState("");
   const [error, setError] = useState("");
+  const [expandedMeals, setExpandedMeals] = useState(new Set());
+  const [expandedDays, setExpandedDays] = useState(new Set());
+
+  // --- STATE for meal library pagination/search ---
+  const [libraryMeals, setLibraryMeals] = useState([]);
+  const [libraryLoading, setLibraryLoading] = useState(false);
+  const [libraryHasMore, setLibraryHasMore] = useState(true);
+  const [libraryPage, setLibraryPage] = useState(1);
+  const [librarySearch, setLibrarySearch] = useState("");
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [useStaticLibrary, setUseStaticLibrary] = useState(false); // Toggle between static and backend
+  const searchTimeoutRef = useRef(null);
 
   const days = data.days || [];
   const selectedDay = days[selectedDayIndex];
@@ -106,7 +121,9 @@ export const MealPlanning = ({ data, onChange }) => {
 
     const newDays = [...days, newDay];
     onChange({ days: newDays });
-    setSelectedDayIndex(days.length);
+    const newDayIndex = days.length;
+    setSelectedDayIndex(newDayIndex);
+    setExpandedDays((prev) => new Set([...prev, newDayIndex]));
     setShowAddDayPopover(false);
     setShowCopyDayModal(false);
   };
@@ -124,7 +141,9 @@ export const MealPlanning = ({ data, onChange }) => {
 
     const newDays = [...days, cheatDay];
     onChange({ days: newDays });
-    setSelectedDayIndex(days.length);
+    const newDayIndex = days.length;
+    setSelectedDayIndex(newDayIndex);
+    setExpandedDays((prev) => new Set([...prev, newDayIndex]));
     setShowAddDayPopover(false);
   };
 
@@ -137,6 +156,33 @@ export const MealPlanning = ({ data, onChange }) => {
       }));
 
     onChange({ days: newDays });
+
+    // Clean up expanded days state
+    setExpandedDays((prev) => {
+      const newSet = new Set();
+      prev.forEach((dayIndex) => {
+        if (dayIndex < idx) {
+          newSet.add(dayIndex);
+        } else if (dayIndex > idx) {
+          newSet.add(dayIndex - 1);
+        }
+      });
+      return newSet;
+    });
+
+    // Clean up expanded meals state
+    setExpandedMeals((prev) => {
+      const newSet = new Set();
+      prev.forEach((mealKey) => {
+        const [dayIdx, mealIdx] = mealKey.split("-").map(Number);
+        if (dayIdx < idx) {
+          newSet.add(mealKey);
+        } else if (dayIdx > idx) {
+          newSet.add(`${dayIdx - 1}-${mealIdx}`);
+        }
+      });
+      return newSet;
+    });
 
     if (selectedDayIndex >= newDays.length) {
       setSelectedDayIndex(Math.max(0, newDays.length - 1));
@@ -151,6 +197,7 @@ export const MealPlanning = ({ data, onChange }) => {
       ...updatedDays[dayIndex],
       [field]: value,
     };
+
     onChange({ days: updatedDays });
   };
 
@@ -165,6 +212,13 @@ export const MealPlanning = ({ data, onChange }) => {
     };
 
     updateDay(selectedDayIndex, "meals", [...selectedDay.meals, newMeal]);
+
+    // Auto-expand the new meal and the day
+    const newMealIndex = selectedDay.meals.length;
+    setExpandedMeals(
+      (prev) => new Set([...prev, `${selectedDayIndex}-${newMealIndex}`])
+    );
+    setExpandedDays((prev) => new Set([...prev, selectedDayIndex]));
   };
 
   const removeMeal = (mealIndex) => {
@@ -173,6 +227,22 @@ export const MealPlanning = ({ data, onChange }) => {
     const updatedMeals = [...selectedDay.meals];
     updatedMeals.splice(mealIndex, 1);
     updateDay(selectedDayIndex, "meals", updatedMeals);
+
+    // Remove from expanded meals and clean up
+    setExpandedMeals((prev) => {
+      const newSet = new Set();
+      prev.forEach((mealKey) => {
+        const [dayIdx, mealIdx] = mealKey.split("-").map(Number);
+        if (dayIdx !== selectedDayIndex) {
+          newSet.add(mealKey);
+        } else if (mealIdx < mealIndex) {
+          newSet.add(mealKey);
+        } else if (mealIdx > mealIndex) {
+          newSet.add(`${dayIdx}-${mealIdx - 1}`);
+        }
+      });
+      return newSet;
+    });
   };
 
   const updateMeal = (mealIndex, field, value) => {
@@ -183,32 +253,138 @@ export const MealPlanning = ({ data, onChange }) => {
       ...updatedMeals[mealIndex],
       [field]: value,
     };
+
     updateDay(selectedDayIndex, "meals", updatedMeals);
   };
 
-  const addMealFromLibrary = async (mealIndex) => {
-    if (!selectedDay) return;
+  const toggleMealExpansion = (mealIndex) => {
+    const mealKey = `${selectedDayIndex}-${mealIndex}`;
+    setExpandedMeals((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(mealKey)) {
+        newSet.delete(mealKey);
+      } else {
+        newSet.add(mealKey);
+      }
+      return newSet;
+    });
+  };
+
+  const isMealExpanded = (mealIndex) =>
+    expandedMeals.has(`${selectedDayIndex}-${mealIndex}`);
+
+  const toggleDayExpansion = (dayIndex) => {
+    setExpandedDays((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(dayIndex)) {
+        newSet.delete(dayIndex);
+      } else {
+        newSet.add(dayIndex);
+      }
+      return newSet;
+    });
+  };
+
+  const isDayExpanded = (dayIndex) => expandedDays.has(dayIndex);
+
+  const handleVideoError = (videoUrl, _optionId) => {
+    setError(
+      `Failed to load video for meal option. Please check the video URL: ${videoUrl}`
+    );
+  };
+
+  // Fetch meals from backend with pagination and search
+  const fetchLibraryMeals = async ({
+    page = 1,
+    search = "",
+    append = false,
+  } = {}) => {
+    if (append) {
+      setLibraryLoading(true);
+    } else {
+      setSearchLoading(true);
+    }
 
     try {
-      const response = await fetch("/api/users/trainer/meals");
+      const response = await fetch(
+        `/api/users/trainer/meals?search=${encodeURIComponent(
+          search
+        )}&page=${page}&limit=10`
+      );
       const data = await response.json();
       if (data.success) {
-        setMeals(data.meals);
-        setShowMealLibraryModal(true);
-        setActiveMealIndex(mealIndex);
-        setError("");
-      } else {
-        setError(
-          "Failed to fetch meals from the library. Please try again later."
+        setLibraryMeals((prev) =>
+          append ? [...prev, ...data.meals] : data.meals
         );
+        setLibraryHasMore(data.pagination?.hasNextPage ?? false);
+        setLibraryPage(page);
+      } else {
+        setLibraryHasMore(false);
+        setLibraryMeals(append ? (prev) => prev : []);
       }
     } catch (error) {
       console.error("Error fetching meals:", error);
-      setError(
-        "An error occurred while fetching meals. Please try again later."
-      );
+      setLibraryHasMore(false);
+      setLibraryMeals(append ? (prev) => prev : []);
+    } finally {
+      if (append) {
+        setLibraryLoading(false);
+      } else {
+        setSearchLoading(false);
+      }
     }
   };
+
+  // Open modal and load first page
+  const addMealFromLibrary = (mealIndex) => {
+    setShowMealLibraryModal(true);
+    setActiveMealIndex(mealIndex);
+    setLibraryMeals([]);
+    setLibraryPage(1);
+    setLibrarySearch("");
+    setLibraryHasMore(true);
+    setSearchLoading(false);
+    setLibraryLoading(false);
+    fetchLibraryMeals({ page: 1, search: "", append: false });
+  };
+
+  // Handle search in modal with debounce
+  const handleLibrarySearch = (value) => {
+    setLibrarySearch(value);
+
+    // Clear existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Set new timeout for debounced search
+    searchTimeoutRef.current = setTimeout(() => {
+      setLibraryPage(1);
+      setLibraryHasMore(true);
+      fetchLibraryMeals({ page: 1, search: value, append: false });
+    }, 300); // 300ms debounce
+  };
+
+  // Handle scroll in modal
+  const handleLibraryScroll = () => {
+    if (!libraryLoading && libraryHasMore) {
+      fetchLibraryMeals({
+        page: libraryPage + 1,
+        search: librarySearch,
+        append: true,
+      });
+    }
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(
+    () => () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    },
+    []
+  );
 
   const handleCreateMeal = async (mealData) => {
     try {
@@ -219,6 +395,7 @@ export const MealPlanning = ({ data, onChange }) => {
       });
 
       const result = await response.json();
+
       if (result.success) {
         const mealToAdd = {
           id: generateId(),
@@ -230,12 +407,19 @@ export const MealPlanning = ({ data, onChange }) => {
           carbs: mealData.carbs,
           fat: mealData.fat,
           imageUrl: mealData.imageUrl,
-          videoUrl: mealData.video,
+          videoUrl: mealData.videoUrl, // Fixed: was mealData.video
         };
 
         const updatedMeals = [...selectedDay.meals];
         updatedMeals[activeMealIndex].options.push(mealToAdd);
         updateDay(selectedDayIndex, "meals", updatedMeals);
+
+        // Auto-expand the day and meal
+        setExpandedDays((prev) => new Set([...prev, selectedDayIndex]));
+        setExpandedMeals(
+          (prev) => new Set([...prev, `${selectedDayIndex}-${activeMealIndex}`])
+        );
+
         setShowCreateMeal(false);
         setError("");
       } else {
@@ -277,6 +461,12 @@ export const MealPlanning = ({ data, onChange }) => {
     updatedMeals[activeMealIndex].options.push(newMealOption);
     updateDay(selectedDayIndex, "meals", updatedMeals);
 
+    // Auto-expand the day and meal
+    setExpandedDays((prev) => new Set([...prev, selectedDayIndex]));
+    setExpandedMeals(
+      (prev) => new Set([...prev, `${selectedDayIndex}-${activeMealIndex}`])
+    );
+
     setShowMealLibraryModal(false);
     setActiveMealIndex(null);
   };
@@ -300,7 +490,16 @@ export const MealPlanning = ({ data, onChange }) => {
 
     const newDays = [...days, dayToCopy];
     onChange({ days: newDays });
-    setSelectedDayIndex(days.length);
+    const newDayIndex = days.length;
+    setSelectedDayIndex(newDayIndex);
+    setExpandedDays((prev) => new Set([...prev, newDayIndex]));
+
+    // Auto-expand all meals in the copied day
+    const newMealKeys = dayToCopy.meals.map(
+      (_, mealIndex) => `${newDayIndex}-${mealIndex}`
+    );
+    setExpandedMeals((prev) => new Set([...prev, ...newMealKeys]));
+
     setShowCopyDayModal(false);
     setShowAddDayPopover(false);
   };
@@ -312,6 +511,14 @@ export const MealPlanning = ({ data, onChange }) => {
     mealToCopy.id = generateId();
 
     updateDay(selectedDayIndex, "meals", [...selectedDay.meals, mealToCopy]);
+    setExpandedDays((prev) => new Set([...prev, selectedDayIndex]));
+
+    // Auto-expand the copied meal
+    const newMealIndex = selectedDay.meals.length;
+    setExpandedMeals(
+      (prev) => new Set([...prev, `${selectedDayIndex}-${newMealIndex}`])
+    );
+
     setShowCopyMealModal(false);
   };
 
@@ -323,6 +530,7 @@ export const MealPlanning = ({ data, onChange }) => {
       ...updatedMeals[mealIndex].options[optionIndex],
       [field]: value,
     };
+
     updateDay(selectedDayIndex, "meals", updatedMeals);
   };
 
@@ -344,6 +552,19 @@ export const MealPlanning = ({ data, onChange }) => {
       setLastCheckedSubtitleUrl("");
     }
   }, [showMediaPreview, lastCheckedSubtitleUrl]);
+
+  // Auto-expand selected day
+  useEffect(() => {
+    if (selectedDayIndex !== null) {
+      setExpandedDays((prev) => new Set([...prev, selectedDayIndex]));
+    }
+  }, [selectedDayIndex]);
+
+  useEffect(() => {
+    if (selectedDay && selectedDay.meals) {
+      // Removed debug logs for meals and options
+    }
+  }, [selectedDay]);
 
   if (!selectedDay) {
     return (
@@ -568,449 +789,1025 @@ export const MealPlanning = ({ data, onChange }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="bg-gradient-to-br from-[#1a1a1a] via-[#1e1e1e] to-[#222] rounded-xl border border-[#333] p-4 sm:p-6 shadow-lg"
+        className="bg-gradient-to-br from-[#1a1a1a] via-[#1e1e1e] to-[#222] rounded-xl border border-[#333] overflow-hidden"
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-          <h3 className="text-base sm:text-lg font-semibold text-white flex items-center gap-2">
-            <Icon icon="mdi:food" className="w-5 h-5 text-[#FF6B00]" />
-            {selectedDay.name} - Meal Plan
-          </h3>
+        {/* Day Header - Always Visible */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 bg-[#2a2a2a] border-b border-[#444] gap-3">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <button
+              type="button"
+              onClick={() => toggleDayExpansion(selectedDayIndex)}
+              className="flex items-center gap-2 text-white hover:text-[#FF6B00] transition-colors w-full text-left py-2 -my-2 px-2 -mx-2 rounded-lg hover:bg-[#FF6B00]/10"
+            >
+              <Icon
+                icon={
+                  isDayExpanded(selectedDayIndex)
+                    ? "mdi:chevron-down"
+                    : "mdi:chevron-right"
+                }
+                className="w-6 h-6 transition-transform duration-200 flex-shrink-0"
+              />
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <Icon
+                  icon="mdi:food"
+                  className="w-5 h-5 text-[#FF6B00] flex-shrink-0"
+                />
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base sm:text-lg font-semibold truncate">
+                    {selectedDay.name} - Meal Plan
+                  </h3>
+                  {selectedDay.isRestDay && (
+                    <span className="text-xs px-2 py-1 bg-green-500/20 text-green-400 rounded-full inline-block mt-1">
+                      Cheat Day
+                    </span>
+                  )}
+                </div>
+              </div>
+            </button>
+          </div>
           {!selectedDay.isRestDay && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex gap-2 w-full sm:w-auto">
               <Button
                 variant="orangeOutline"
                 size="small"
                 onClick={addMeal}
                 leftIcon={<Icon icon="mdi:plus" className="w-4 h-4" />}
-                className="flex-1 sm:flex-initial"
+                className="flex-1 sm:flex-initial text-xs sm:text-sm"
               >
-                Add Meal
+                <span className="hidden sm:inline">Add Meal</span>
+                <span className="sm:hidden">Add Meal</span>
               </Button>
               <Button
                 variant="secondary"
                 size="small"
                 onClick={() => setShowCopyMealModal(true)}
                 leftIcon={<Icon icon="mdi:content-copy" className="w-4 h-4" />}
-                className="flex-1 sm:flex-initial"
+                className="flex-1 sm:flex-initial text-xs sm:text-sm"
               >
-                Copy Meal
+                <span className="hidden sm:inline">Copy Meal</span>
+                <span className="sm:hidden">Copy Meal</span>
               </Button>
             </div>
           )}
         </div>
 
-        {selectedDay.isRestDay ? (
-          <div className="space-y-4">
-            <FormField
-              label="Cheat Day Description"
-              name="description"
-              type="textarea"
-              value={selectedDay.description}
-              onChange={(e) =>
-                updateDay(selectedDayIndex, "description", e.target.value)
-              }
-              placeholder="Describe this cheat day (e.g. free meal, treat, etc.)"
-              rows={3}
-            />
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {selectedDay.meals.length === 0 ? (
-              <div className="text-center py-8">
-                <Icon
-                  icon="mdi:food-off"
-                  className="w-12 h-12 text-gray-500 mx-auto mb-4"
-                />
-                <p className="text-gray-400 mb-4">No meals added yet</p>
-                <Button variant="orangeFilled" onClick={addMeal}>
-                  Add First Meal
-                </Button>
-              </div>
-            ) : (
-              selectedDay.meals.map((meal, mealIndex) => (
-                <div
-                  key={meal.id}
-                  className="bg-[#242424] rounded-lg border border-[#444] p-4 space-y-4"
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-end gap-3">
-                    <FormField
-                      label="Meal Name"
-                      name="name"
-                      value={meal.name}
-                      onChange={(e) =>
-                        updateMeal(mealIndex, "name", e.target.value)
-                      }
-                      placeholder="e.g., Breakfast, Lunch, Dinner"
-                      className="flex-1"
-                    />
-                    <FormField
-                      label="Time"
-                      name="time"
-                      value={meal.time}
-                      onChange={(e) =>
-                        updateMeal(mealIndex, "time", e.target.value)
-                      }
-                      placeholder="e.g., 8:00 AM"
-                      className="w-full sm:w-32"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeMeal(mealIndex)}
-                      className="self-end p-2 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors"
-                      title="Remove meal"
-                    >
-                      <Icon icon="mdi:delete" className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  {/* Meal Options */}
+        {/* Day Content - Collapsible */}
+        <AnimatePresence>
+          {isDayExpanded(selectedDayIndex) && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="overflow-hidden"
+            >
+              <div className="p-4 sm:p-6">
+                {selectedDay.isRestDay ? (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-medium text-white">
-                        Options
-                      </h4>
-                    </div>
-
-                    {meal.options.length === 0 ? (
-                      <div className="text-center py-8 bg-[#2a2a2a] rounded-lg border border-[#444]">
+                    <FormField
+                      label="Cheat Day Description"
+                      name="description"
+                      type="textarea"
+                      value={selectedDay.description}
+                      onChange={(e) =>
+                        updateDay(
+                          selectedDayIndex,
+                          "description",
+                          e.target.value
+                        )
+                      }
+                      placeholder="Describe this cheat day (e.g. free meal, treat, etc.)"
+                      rows={3}
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {selectedDay.meals.length === 0 ? (
+                      <div className="text-center py-8">
                         <Icon
                           icon="mdi:food-off"
                           className="w-12 h-12 text-gray-500 mx-auto mb-4"
                         />
-                        <p className="text-gray-400 mb-2">
-                          No meal options added yet
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Add options from the library or create new ones
-                        </p>
+                        <p className="text-gray-400 mb-4">No meals added yet</p>
+                        <Button variant="orangeFilled" onClick={addMeal}>
+                          Add First Meal
+                        </Button>
                       </div>
                     ) : (
-                      <div className="grid gap-4">
-                        {meal.options.map((option, optionIndex) => {
-                          const activeMedia =
-                            activeMediaType[option.id] || "image";
+                      selectedDay.meals.map((meal, mealIndex) => (
+                        <div
+                          key={meal.id}
+                          className="bg-[#242424] rounded-lg border border-[#444] overflow-hidden"
+                        >
+                          {/* Meal Header - Always Visible */}
+                          <div className="flex items-center justify-between p-4 bg-[#2a2a2a] border-b border-[#444]">
+                            <div className="flex items-center gap-3 flex-1">
+                              <button
+                                type="button"
+                                onClick={() => toggleMealExpansion(mealIndex)}
+                                className="flex items-center gap-2 text-white hover:text-[#FF6B00] transition-colors w-full text-left py-2 -my-2 px-2 -mx-2 rounded-lg hover:bg-[#FF6B00]/10"
+                              >
+                                <Icon
+                                  icon={
+                                    isMealExpanded(mealIndex)
+                                      ? "mdi:chevron-down"
+                                      : "mdi:chevron-right"
+                                  }
+                                  className="w-5 h-5 transition-transform duration-200 flex-shrink-0"
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="font-medium truncate">
+                                      {meal.name || "New Meal"}
+                                    </span>
+                                    {meal.time && (
+                                      <span className="text-sm text-gray-400 flex-shrink-0">
+                                        ({meal.time})
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </button>
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              {meal.options && meal.options.length > 0 && (
+                                <span className="text-xs bg-[#FF6B00]/20 text-[#FF6B00] px-2 py-1 rounded-full flex-shrink-0">
+                                  {meal.options.length} option
+                                  {meal.options.length !== 1 ? "s" : ""}
+                                </span>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => removeMeal(mealIndex)}
+                                className="p-2 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors flex-shrink-0"
+                                title="Remove meal"
+                              >
+                                <Icon
+                                  icon="mdi:trash-can-outline"
+                                  className="w-4 h-4 sm:w-5 sm:h-5"
+                                />
+                              </button>
+                            </div>
+                          </div>
 
-                          return (
-                            <div
-                              key={option.id}
-                              className="bg-[#2a2a2a] rounded-lg border border-[#555] overflow-hidden"
-                            >
-                              <div className="flex">
-                                {/* Left side - Meal details */}
-                                <div className="flex-1 p-4">
-                                  <div className="flex items-start justify-between mb-4">
+                          {/* Meal Content - Collapsible */}
+                          <AnimatePresence>
+                            {isMealExpanded(mealIndex) && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{
+                                  duration: 0.3,
+                                  ease: "easeInOut",
+                                }}
+                                className="overflow-hidden"
+                              >
+                                <div className="p-4 space-y-4">
+                                  {/* Meal Details */}
+                                  <div className="flex flex-col sm:flex-row sm:items-end gap-3">
                                     <FormField
-                                      label="Name"
+                                      label="Meal Name"
                                       name="name"
-                                      value={option.name}
+                                      value={meal.name}
                                       onChange={(e) =>
-                                        updateMealOption(
+                                        updateMeal(
                                           mealIndex,
-                                          optionIndex,
                                           "name",
                                           e.target.value
                                         )
                                       }
-                                      placeholder="Enter meal name"
-                                      className="flex-1 mr-2"
+                                      placeholder="e.g., Breakfast, Lunch, Dinner"
+                                      className="flex-1"
                                     />
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        removeMealOption(mealIndex, optionIndex)
-                                      }
-                                      className="p-2 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors"
-                                      title="Remove option"
-                                    >
-                                      <Icon
-                                        icon="mdi:trash"
-                                        className="w-5 h-5"
-                                      />
-                                    </button>
-                                  </div>
-
-                                  {/* Nutritional Info */}
-                                  <div className="grid grid-cols-4 gap-2 mb-4">
                                     <FormField
-                                      label="Calories"
-                                      name="calories"
-                                      type="number"
-                                      value={option.calories}
+                                      label="Time"
+                                      name="time"
+                                      value={meal.time}
                                       onChange={(e) =>
-                                        updateMealOption(
+                                        updateMeal(
                                           mealIndex,
-                                          optionIndex,
-                                          "calories",
+                                          "time",
                                           e.target.value
                                         )
                                       }
-                                      placeholder="kcal"
-                                      className="text-center"
-                                    />
-                                    <FormField
-                                      label="Protein"
-                                      name="protein"
-                                      type="number"
-                                      value={option.protein}
-                                      onChange={(e) =>
-                                        updateMealOption(
-                                          mealIndex,
-                                          optionIndex,
-                                          "protein",
-                                          e.target.value
-                                        )
-                                      }
-                                      placeholder="g"
-                                      className="text-center"
-                                    />
-                                    <FormField
-                                      label="Carbs"
-                                      name="carbs"
-                                      type="number"
-                                      value={option.carbs}
-                                      onChange={(e) =>
-                                        updateMealOption(
-                                          mealIndex,
-                                          optionIndex,
-                                          "carbs",
-                                          e.target.value
-                                        )
-                                      }
-                                      placeholder="g"
-                                      className="text-center"
-                                    />
-                                    <FormField
-                                      label="Fat"
-                                      name="fat"
-                                      type="number"
-                                      value={option.fat}
-                                      onChange={(e) =>
-                                        updateMealOption(
-                                          mealIndex,
-                                          optionIndex,
-                                          "fat",
-                                          e.target.value
-                                        )
-                                      }
-                                      placeholder="g"
-                                      className="text-center"
+                                      placeholder="e.g., 8:00 AM"
+                                      className="w-full sm:w-32"
                                     />
                                   </div>
 
-                                  {/* Ingredients and Instructions */}
-                                  <div className="space-y-3">
-                                    <FormField
-                                      label="Ingredients"
-                                      name="ingredients"
-                                      type="textarea"
-                                      value={
-                                        Array.isArray(option.ingredients)
-                                          ? option.ingredients.join(", ")
-                                          : option.ingredients
-                                      }
-                                      onChange={(e) =>
-                                        updateMealOption(
-                                          mealIndex,
-                                          optionIndex,
-                                          "ingredients",
-                                          e.target.value
-                                            .split(",")
-                                            .map((i) => i.trim())
-                                        )
-                                      }
-                                      placeholder="Enter ingredients, separated by commas"
-                                      rows={2}
-                                    />
-                                    <FormField
-                                      label="Instructions"
-                                      name="description"
-                                      type="textarea"
-                                      value={option.description}
-                                      onChange={(e) =>
-                                        updateMealOption(
-                                          mealIndex,
-                                          optionIndex,
-                                          "description",
-                                          e.target.value
-                                        )
-                                      }
-                                      placeholder="Enter meal preparation instructions"
-                                      rows={2}
-                                    />
-                                  </div>
-                                </div>
+                                  {/* Meal Options */}
+                                  <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                      <h4 className="text-sm font-medium text-white">
+                                        Options
+                                      </h4>
+                                    </div>
 
-                                {/* Right side - Media preview */}
-                                <div className="w-72 border-l border-[#555] flex flex-col bg-[#3a3a3a]/90">
-                                  {/* Media type selector */}
-                                  <div className="flex border-b border-[#555]">
-                                    <Button
-                                      variant="ghost"
-                                      size="small"
-                                      onClick={() =>
-                                        setActiveMediaType((prev) => ({
-                                          ...prev,
-                                          [option.id]: "image",
-                                        }))
-                                      }
-                                      className={`flex-1 rounded-none border-r border-[#555] ${
-                                        activeMedia === "image"
-                                          ? "bg-[#FF6B00]/30 text-[#FF6B00] border-[#FF6B00]/60"
-                                          : "text-gray-300 hover:text-white hover:bg-[#555]/70"
-                                      }`}
-                                      leftIcon={
+                                    {meal.options.length === 0 ? (
+                                      <div className="text-center py-8 bg-[#2a2a2a] rounded-lg border border-[#444]">
                                         <Icon
-                                          icon="mdi:image"
-                                          className="w-4 h-4"
+                                          icon="mdi:food-off"
+                                          className="w-12 h-12 text-gray-500 mx-auto mb-4"
                                         />
-                                      }
-                                    >
-                                      Image
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="small"
-                                      onClick={() =>
-                                        setActiveMediaType((prev) => ({
-                                          ...prev,
-                                          [option.id]: "video",
-                                        }))
-                                      }
-                                      className={`flex-1 rounded-none ${
-                                        activeMedia === "video"
-                                          ? "bg-[#FF6B00]/30 text-[#FF6B00] border-[#FF6B00]/60"
-                                          : "text-gray-300 hover:text-white hover:bg-[#555]/70"
-                                      }`}
-                                      leftIcon={
-                                        <Icon
-                                          icon="mdi:video"
-                                          className="w-4 h-4"
-                                        />
-                                      }
-                                    >
-                                      Video
-                                    </Button>
-                                  </div>
-
-                                  {/* Media preview area */}
-                                  <div className="flex-1 p-4">
-                                    {activeMedia === "image" ? (
-                                      option.imageUrl ? (
-                                        <Button
-                                          variant="ghost"
-                                          onClick={() =>
-                                            setShowMediaPreview({
-                                              type: "image",
-                                              url: option.imageUrl,
-                                              name: option.name,
-                                            })
-                                          }
-                                          className="w-full h-full p-0 relative rounded-lg overflow-hidden bg-black/40 hover:bg-black/50"
-                                        >
-                                          <Image
-                                            src={option.imageUrl}
-                                            alt={option.name}
-                                            className="object-cover"
-                                            width={1000}
-                                            height={1000}
-                                          />
-                                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity">
-                                            <div className="bg-white/40 backdrop-blur-sm rounded-full p-3">
-                                              <Icon
-                                                icon="mdi:magnify"
-                                                className="w-6 h-6 text-white"
-                                              />
-                                            </div>
-                                          </div>
-                                        </Button>
-                                      ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-400 bg-[#4a4a4a] rounded-lg border-2 border-dashed border-[#666]">
-                                          <div className="text-center py-8">
-                                            <Icon
-                                              icon="mdi:image-off"
-                                              className="w-12 h-12 mx-auto mb-3 text-gray-500"
-                                            />
-                                            <span className="text-sm text-gray-400">
-                                              No image available
-                                            </span>
-                                          </div>
-                                        </div>
-                                      )
-                                    ) : option.videoUrl ? (
-                                      <Button
-                                        variant="ghost"
-                                        onClick={() =>
-                                          setShowMediaPreview({
-                                            type: "video",
-                                            url: option.videoUrl,
-                                            name: option.name,
-                                          })
-                                        }
-                                        className="w-full h-full p-0 relative rounded-lg overflow-hidden bg-black/40 hover:bg-black/50"
-                                      >
-                                        <div className="w-full h-full bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center">
-                                          <div className="w-16 h-16 rounded-full bg-[#FF6B00]/40 backdrop-blur-sm flex items-center justify-center hover:bg-[#FF6B00]/50 transition-colors">
-                                            <Icon
-                                              icon="mdi:play"
-                                              className="w-8 h-8 text-[#FF6B00]"
-                                            />
-                                          </div>
-                                        </div>
-                                      </Button>
+                                        <p className="text-gray-400 mb-2">
+                                          No meal options added yet
+                                        </p>
+                                        <p className="text-sm text-gray-500">
+                                          Add options from the library or create
+                                          new ones
+                                        </p>
+                                      </div>
                                     ) : (
-                                      <div className="w-full h-full flex items-center justify-center text-gray-400 bg-[#4a4a4a] rounded-lg border-2 border-dashed border-[#666]">
-                                        <div className="text-center py-8">
-                                          <Icon
-                                            icon="mdi:video-off"
-                                            className="w-12 h-12 mx-auto mb-3 text-gray-500"
-                                          />
-                                          <span className="text-sm text-gray-400">
-                                            No video available
-                                          </span>
-                                        </div>
+                                      <div className="grid gap-4">
+                                        {meal.options.map(
+                                          (option, optionIndex) => {
+                                            const activeMedia =
+                                              activeMediaType[option.id] ||
+                                              "image";
+
+                                            return (
+                                              <Card
+                                                key={option.id || optionIndex}
+                                                variant="dark"
+                                                hover={true}
+                                                hoverBorderColor="#666"
+                                                borderColor="#555"
+                                                padding="0"
+                                                className="shadow-lg !p-0"
+                                              >
+                                                {/* Mobile Layout - Stacked */}
+                                                <div className="block sm:hidden">
+                                                  {/* Meal details on top */}
+                                                  <div className="p-4">
+                                                    <div className="flex items-start justify-between mb-4">
+                                                      <FormField
+                                                        label="Name"
+                                                        name="name"
+                                                        value={option.name}
+                                                        onChange={(e) =>
+                                                          updateMealOption(
+                                                            mealIndex,
+                                                            optionIndex,
+                                                            "name",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        placeholder="Enter meal name"
+                                                        className="flex-1 mr-2"
+                                                      />
+                                                      <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                          removeMealOption(
+                                                            mealIndex,
+                                                            optionIndex
+                                                          )
+                                                        }
+                                                        className="p-2 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors"
+                                                        title="Remove option"
+                                                      >
+                                                        <Icon
+                                                          icon="mdi:trash-can-outline"
+                                                          className="w-4 h-4 sm:w-5 sm:h-5"
+                                                        />
+                                                      </button>
+                                                    </div>
+
+                                                    {/* Nutritional Info */}
+                                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+                                                      <FormField
+                                                        label="Calories"
+                                                        name="calories"
+                                                        type="number"
+                                                        value={option.calories}
+                                                        onChange={(e) =>
+                                                          updateMealOption(
+                                                            mealIndex,
+                                                            optionIndex,
+                                                            "calories",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        placeholder="kcal"
+                                                        className="text-center"
+                                                      />
+                                                      <FormField
+                                                        label="Protein"
+                                                        name="protein"
+                                                        type="number"
+                                                        value={option.protein}
+                                                        onChange={(e) =>
+                                                          updateMealOption(
+                                                            mealIndex,
+                                                            optionIndex,
+                                                            "protein",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        placeholder="g"
+                                                        className="text-center"
+                                                      />
+                                                      <FormField
+                                                        label="Carbs"
+                                                        name="carbs"
+                                                        type="number"
+                                                        value={option.carbs}
+                                                        onChange={(e) =>
+                                                          updateMealOption(
+                                                            mealIndex,
+                                                            optionIndex,
+                                                            "carbs",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        placeholder="g"
+                                                        className="text-center"
+                                                      />
+                                                      <FormField
+                                                        label="Fat"
+                                                        name="fat"
+                                                        type="number"
+                                                        value={option.fat}
+                                                        onChange={(e) =>
+                                                          updateMealOption(
+                                                            mealIndex,
+                                                            optionIndex,
+                                                            "fat",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        placeholder="g"
+                                                        className="text-center"
+                                                      />
+                                                    </div>
+
+                                                    {/* Ingredients and Instructions */}
+                                                    <div className="space-y-3">
+                                                      <FormField
+                                                        label="Ingredients"
+                                                        name="ingredients"
+                                                        type="textarea"
+                                                        value={
+                                                          Array.isArray(
+                                                            option.ingredients
+                                                          )
+                                                            ? option.ingredients.join(
+                                                                ", "
+                                                              )
+                                                            : option.ingredients
+                                                        }
+                                                        onChange={(e) =>
+                                                          updateMealOption(
+                                                            mealIndex,
+                                                            optionIndex,
+                                                            "ingredients",
+                                                            e.target.value
+                                                              .split(",")
+                                                              .map((i) =>
+                                                                i.trim()
+                                                              )
+                                                          )
+                                                        }
+                                                        placeholder="Enter ingredients, separated by commas"
+                                                        rows={2}
+                                                      />
+                                                      <FormField
+                                                        label="Instructions"
+                                                        name="description"
+                                                        type="textarea"
+                                                        value={
+                                                          option.description
+                                                        }
+                                                        onChange={(e) =>
+                                                          updateMealOption(
+                                                            mealIndex,
+                                                            optionIndex,
+                                                            "description",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        placeholder="Enter meal preparation instructions"
+                                                        rows={2}
+                                                      />
+                                                    </div>
+                                                  </div>
+
+                                                  {/* Media preview below */}
+                                                  <div className="border-t border-[#555] bg-[#3a3a3a]/90">
+                                                    {/* Media type selector */}
+                                                    <div className="flex border-b border-[#555]">
+                                                      <Button
+                                                        variant="ghost"
+                                                        size="small"
+                                                        onClick={() =>
+                                                          setActiveMediaType(
+                                                            (prev) => ({
+                                                              ...prev,
+                                                              [option.id]:
+                                                                "image",
+                                                            })
+                                                          )
+                                                        }
+                                                        className={`flex-1 rounded-none border-r border-[#555] ${
+                                                          activeMedia ===
+                                                          "image"
+                                                            ? "bg-[#FF6B00]/30 text-[#FF6B00] border-[#FF6B00]/60"
+                                                            : "text-gray-300 hover:text-white hover:bg-[#555]/70"
+                                                        }`}
+                                                        leftIcon={
+                                                          <Icon
+                                                            icon="mdi:image"
+                                                            className="w-4 h-4"
+                                                          />
+                                                        }
+                                                      >
+                                                        Image
+                                                      </Button>
+                                                      <Button
+                                                        variant="ghost"
+                                                        size="small"
+                                                        onClick={() =>
+                                                          setActiveMediaType(
+                                                            (prev) => ({
+                                                              ...prev,
+                                                              [option.id]:
+                                                                "video",
+                                                            })
+                                                          )
+                                                        }
+                                                        className={`flex-1 rounded-none ${
+                                                          activeMedia ===
+                                                          "video"
+                                                            ? "bg-[#FF6B00]/30 text-[#FF6B00] border-[#FF6B00]/60"
+                                                            : "text-gray-300 hover:text-white hover:bg-[#555]/70"
+                                                        }`}
+                                                        leftIcon={
+                                                          <Icon
+                                                            icon="mdi:video"
+                                                            className="w-4 h-4"
+                                                          />
+                                                        }
+                                                      >
+                                                        Video
+                                                      </Button>
+                                                    </div>
+
+                                                    {/* Media preview area */}
+                                                    <div className="p-4">
+                                                      {activeMedia ===
+                                                      "image" ? (
+                                                        option.imageUrl ? (
+                                                          <Button
+                                                            variant="ghost"
+                                                            onClick={() =>
+                                                              setShowMediaPreview(
+                                                                {
+                                                                  type: "image",
+                                                                  url: option.imageUrl,
+                                                                  name: option.name,
+                                                                }
+                                                              )
+                                                            }
+                                                            className="w-full h-48 p-0 relative rounded-lg overflow-hidden bg-black/40 hover:bg-black/50"
+                                                          >
+                                                            <Image
+                                                              src={
+                                                                option.imageUrl
+                                                              }
+                                                              alt={option.name}
+                                                              className="object-cover w-full h-full"
+                                                              width={1000}
+                                                              height={1000}
+                                                            />
+                                                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity">
+                                                              <div className="bg-white/40 backdrop-blur-sm rounded-full p-3">
+                                                                <Icon
+                                                                  icon="mdi:magnify"
+                                                                  className="w-6 h-6 text-white"
+                                                                />
+                                                              </div>
+                                                            </div>
+                                                          </Button>
+                                                        ) : (
+                                                          <div className="w-full h-48 flex items-center justify-center text-gray-400 bg-[#4a4a4a] rounded-lg border-2 border-dashed border-[#666]">
+                                                            <div className="text-center py-8">
+                                                              <Icon
+                                                                icon="mdi:image-off"
+                                                                className="w-12 h-12 mx-auto mb-3 text-gray-500"
+                                                              />
+                                                              <span className="text-sm text-gray-400">
+                                                                No image
+                                                                available
+                                                              </span>
+                                                            </div>
+                                                          </div>
+                                                        )
+                                                      ) : option.videoUrl ? (
+                                                        isYouTubeUrl(
+                                                          option.videoUrl
+                                                        ) ? (
+                                                          <div className="relative w-full h-48 aspect-video">
+                                                            <iframe
+                                                              width="100%"
+                                                              height="100%"
+                                                              src={`https://www.youtube.com/embed/${
+                                                                option.videoUrl
+                                                                  .split(
+                                                                    "v="
+                                                                  )[1]
+                                                                  ?.split(
+                                                                    "&"
+                                                                  )[0] ||
+                                                                option.videoUrl.split(
+                                                                  "youtu.be/"
+                                                                )[1]
+                                                              }`}
+                                                              title={
+                                                                option.name ||
+                                                                "YouTube video player"
+                                                              }
+                                                              frameBorder="0"
+                                                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                              allowFullScreen
+                                                              className="w-full h-full rounded-lg"
+                                                            ></iframe>
+                                                          </div>
+                                                        ) : (
+                                                          <div className="relative w-full h-48">
+                                                            <video
+                                                              src={
+                                                                option.videoUrl
+                                                              }
+                                                              controls
+                                                              autoPlay
+                                                              className="w-full h-full rounded-lg"
+                                                              onError={() => {
+                                                                handleVideoError(
+                                                                  option.videoUrl,
+                                                                  option.id
+                                                                );
+                                                              }}
+                                                              onLoadStart={() => {
+                                                                // Video load started
+                                                              }}
+                                                              onLoadedData={() => {
+                                                                // Video data loaded
+                                                              }}
+                                                              onPlay={() => {
+                                                                // Video started playing
+                                                              }}
+                                                            >
+                                                              {subtitleExists && (
+                                                                <track
+                                                                  kind="captions"
+                                                                  src={option.videoUrl.replace(
+                                                                    /\.[^/.]+$/,
+                                                                    ".vtt"
+                                                                  )}
+                                                                  srcLang="en"
+                                                                  label="English"
+                                                                  default
+                                                                />
+                                                              )}
+                                                              Your browser does
+                                                              not support the
+                                                              video tag.
+                                                            </video>
+                                                          </div>
+                                                        )
+                                                      ) : (
+                                                        <div className="w-full h-48 flex items-center justify-center text-gray-400 bg-[#4a4a4a] rounded-lg border-2 border-dashed border-[#666]">
+                                                          <div className="text-center py-8">
+                                                            <Icon
+                                                              icon="mdi:video-off"
+                                                              className="w-12 h-12 mx-auto mb-3 text-gray-500"
+                                                            />
+                                                            <span className="text-sm text-gray-400">
+                                                              No video available
+                                                            </span>
+                                                          </div>
+                                                        </div>
+                                                      )}
+                                                    </div>
+                                                  </div>
+                                                </div>
+
+                                                {/* Desktop Layout - Side by side */}
+                                                <div className="hidden sm:flex">
+                                                  {/* Left side - Meal details */}
+                                                  <div className="flex-1 p-4">
+                                                    <div className="flex items-start justify-between mb-4">
+                                                      <FormField
+                                                        label="Name"
+                                                        name="name"
+                                                        value={option.name}
+                                                        onChange={(e) =>
+                                                          updateMealOption(
+                                                            mealIndex,
+                                                            optionIndex,
+                                                            "name",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        placeholder="Enter meal name"
+                                                        className="flex-1 mr-2"
+                                                      />
+                                                      <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                          removeMealOption(
+                                                            mealIndex,
+                                                            optionIndex
+                                                          )
+                                                        }
+                                                        className="p-2 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors"
+                                                        title="Remove option"
+                                                      >
+                                                        <Icon
+                                                          icon="mdi:trash-can-outline"
+                                                          className="w-4 h-4 sm:w-5 sm:h-5"
+                                                        />
+                                                      </button>
+                                                    </div>
+
+                                                    {/* Nutritional Info */}
+                                                    <div className="grid grid-cols-4 gap-2 mb-4">
+                                                      <FormField
+                                                        label="Calories"
+                                                        name="calories"
+                                                        type="number"
+                                                        value={option.calories}
+                                                        onChange={(e) =>
+                                                          updateMealOption(
+                                                            mealIndex,
+                                                            optionIndex,
+                                                            "calories",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        placeholder="kcal"
+                                                        className="text-center"
+                                                      />
+                                                      <FormField
+                                                        label="Protein"
+                                                        name="protein"
+                                                        type="number"
+                                                        value={option.protein}
+                                                        onChange={(e) =>
+                                                          updateMealOption(
+                                                            mealIndex,
+                                                            optionIndex,
+                                                            "protein",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        placeholder="g"
+                                                        className="text-center"
+                                                      />
+                                                      <FormField
+                                                        label="Carbs"
+                                                        name="carbs"
+                                                        type="number"
+                                                        value={option.carbs}
+                                                        onChange={(e) =>
+                                                          updateMealOption(
+                                                            mealIndex,
+                                                            optionIndex,
+                                                            "carbs",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        placeholder="g"
+                                                        className="text-center"
+                                                      />
+                                                      <FormField
+                                                        label="Fat"
+                                                        name="fat"
+                                                        type="number"
+                                                        value={option.fat}
+                                                        onChange={(e) =>
+                                                          updateMealOption(
+                                                            mealIndex,
+                                                            optionIndex,
+                                                            "fat",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        placeholder="g"
+                                                        className="text-center"
+                                                      />
+                                                    </div>
+
+                                                    {/* Ingredients and Instructions */}
+                                                    <div className="space-y-3">
+                                                      <FormField
+                                                        label="Ingredients"
+                                                        name="ingredients"
+                                                        type="textarea"
+                                                        value={
+                                                          Array.isArray(
+                                                            option.ingredients
+                                                          )
+                                                            ? option.ingredients.join(
+                                                                ", "
+                                                              )
+                                                            : option.ingredients
+                                                        }
+                                                        onChange={(e) =>
+                                                          updateMealOption(
+                                                            mealIndex,
+                                                            optionIndex,
+                                                            "ingredients",
+                                                            e.target.value
+                                                              .split(",")
+                                                              .map((i) =>
+                                                                i.trim()
+                                                              )
+                                                          )
+                                                        }
+                                                        placeholder="Enter ingredients, separated by commas"
+                                                        rows={2}
+                                                      />
+                                                      <FormField
+                                                        label="Instructions"
+                                                        name="description"
+                                                        type="textarea"
+                                                        value={
+                                                          option.description
+                                                        }
+                                                        onChange={(e) =>
+                                                          updateMealOption(
+                                                            mealIndex,
+                                                            optionIndex,
+                                                            "description",
+                                                            e.target.value
+                                                          )
+                                                        }
+                                                        placeholder="Enter meal preparation instructions"
+                                                        rows={2}
+                                                      />
+                                                    </div>
+                                                  </div>
+
+                                                  {/* Right side - Media preview */}
+                                                  <div className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-[#555]/50 flex flex-col backdrop-blur-sm">
+                                                    {/* Media type selector */}
+                                                    <div className="flex p-2 gap-2 border-b border-[#555]/50">
+                                                      <Button
+                                                        variant="ghost"
+                                                        size="small"
+                                                        onClick={() =>
+                                                          setActiveMediaType(
+                                                            (prev) => ({
+                                                              ...prev,
+                                                              [option.id]:
+                                                                "image",
+                                                            })
+                                                          )
+                                                        }
+                                                        className={`flex-1 rounded-xl py-2.5 px-4 transition-all duration-300 ${
+                                                          activeMedia ===
+                                                          "image"
+                                                            ? "bg-[#FF6B00] text-white shadow-lg shadow-[#FF6B00]/20"
+                                                            : "text-gray-300 hover:text-white hover:bg-white/5"
+                                                        }`}
+                                                        leftIcon={
+                                                          <Icon
+                                                            icon="mdi:image"
+                                                            className="w-4 h-4 sm:w-5 sm:h-5"
+                                                          />
+                                                        }
+                                                      >
+                                                        <span className="text-sm font-medium">
+                                                          Image
+                                                        </span>
+                                                      </Button>
+                                                      <Button
+                                                        variant="ghost"
+                                                        size="small"
+                                                        onClick={() =>
+                                                          setActiveMediaType(
+                                                            (prev) => ({
+                                                              ...prev,
+                                                              [option.id]:
+                                                                "video",
+                                                            })
+                                                          )
+                                                        }
+                                                        className={`flex-1 rounded-xl py-2.5 px-4 transition-all duration-300 ${
+                                                          activeMedia ===
+                                                          "video"
+                                                            ? "bg-[#FF6B00] text-white shadow-lg shadow-[#FF6B00]/20"
+                                                            : "text-gray-300 hover:text-white hover:bg-white/5"
+                                                        }`}
+                                                        leftIcon={
+                                                          <Icon
+                                                            icon="mdi:video"
+                                                            className="w-4 h-4"
+                                                          />
+                                                        }
+                                                      >
+                                                        <span className="flex items-center justify-center gap-2">
+                                                          Video
+                                                        </span>
+                                                      </Button>
+                                                    </div>
+
+                                                    {/* Media preview area */}
+                                                    <div className="flex-1 p-4">
+                                                      {activeMedia ===
+                                                      "image" ? (
+                                                        option.imageUrl ? (
+                                                          <Button
+                                                            variant="ghost"
+                                                            onClick={() =>
+                                                              setShowMediaPreview(
+                                                                {
+                                                                  type: "image",
+                                                                  url: option.imageUrl,
+                                                                  name: option.name,
+                                                                }
+                                                              )
+                                                            }
+                                                            className="w-full h-full p-0 relative rounded-lg overflow-hidden bg-black/40 hover:bg-black/50"
+                                                          >
+                                                            <Image
+                                                              src={
+                                                                option.imageUrl
+                                                              }
+                                                              alt={option.name}
+                                                              className="object-cover"
+                                                              width={1000}
+                                                              height={1000}
+                                                            />
+                                                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity">
+                                                              <div className="bg-white/40 backdrop-blur-sm rounded-full p-3">
+                                                                <Icon
+                                                                  icon="mdi:magnify"
+                                                                  className="w-6 h-6 text-white"
+                                                                />
+                                                              </div>
+                                                            </div>
+                                                          </Button>
+                                                        ) : (
+                                                          <div className="w-full h-full flex items-center justify-center text-gray-400 bg-[#4a4a4a] rounded-lg border-2 border-dashed border-[#666]">
+                                                            <div className="text-center py-8">
+                                                              <Icon
+                                                                icon="mdi:image-off"
+                                                                className="w-12 h-12 mx-auto mb-3 text-gray-500"
+                                                              />
+                                                              <span className="text-sm text-gray-400">
+                                                                No image
+                                                                available
+                                                              </span>
+                                                            </div>
+                                                          </div>
+                                                        )
+                                                      ) : option.videoUrl ? (
+                                                        isYouTubeUrl(
+                                                          option.videoUrl
+                                                        ) ? (
+                                                          <div className="relative w-full h-full aspect-video">
+                                                            <iframe
+                                                              width="100%"
+                                                              height="100%"
+                                                              src={`https://www.youtube.com/embed/${
+                                                                option.videoUrl
+                                                                  .split(
+                                                                    "v="
+                                                                  )[1]
+                                                                  ?.split(
+                                                                    "&"
+                                                                  )[0] ||
+                                                                option.videoUrl.split(
+                                                                  "youtu.be/"
+                                                                )[1]
+                                                              }`}
+                                                              title={
+                                                                option.name ||
+                                                                "YouTube video player"
+                                                              }
+                                                              frameBorder="0"
+                                                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                              allowFullScreen
+                                                              className="w-full h-full rounded-lg"
+                                                            ></iframe>
+                                                          </div>
+                                                        ) : (
+                                                          <div className="relative w-full h-full">
+                                                            <video
+                                                              src={
+                                                                option.videoUrl
+                                                              }
+                                                              controls
+                                                              autoPlay
+                                                              className="w-full h-full rounded-lg"
+                                                              onError={() => {
+                                                                handleVideoError(
+                                                                  option.videoUrl,
+                                                                  option.id
+                                                                );
+                                                              }}
+                                                              onLoadStart={() => {
+                                                                // Video load started
+                                                              }}
+                                                              onLoadedData={() => {
+                                                                // Video data loaded
+                                                              }}
+                                                              onPlay={() => {
+                                                                // Video started playing
+                                                              }}
+                                                            >
+                                                              {subtitleExists && (
+                                                                <track
+                                                                  kind="captions"
+                                                                  src={option.videoUrl.replace(
+                                                                    /\.[^/.]+$/,
+                                                                    ".vtt"
+                                                                  )}
+                                                                  srcLang="en"
+                                                                  label="English"
+                                                                  default
+                                                                />
+                                                              )}
+                                                              Your browser does
+                                                              not support the
+                                                              video tag.
+                                                            </video>
+                                                          </div>
+                                                        )
+                                                      ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-gray-400 bg-[#4a4a4a] rounded-lg border-2 border-dashed border-[#666]">
+                                                          <div className="text-center py-8">
+                                                            <Icon
+                                                              icon="mdi:video-off"
+                                                              className="w-12 h-12 mx-auto mb-3 text-gray-500"
+                                                            />
+                                                            <span className="text-sm text-gray-400">
+                                                              No video available
+                                                            </span>
+                                                          </div>
+                                                        </div>
+                                                      )}
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </Card>
+                                            );
+                                          }
+                                        )}
                                       </div>
                                     )}
+
+                                    {/* Novi gumbi ispod kartica */}
+                                    <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                                      <Button
+                                        variant="primary"
+                                        onClick={() =>
+                                          addMealFromLibrary(mealIndex)
+                                        }
+                                        className="w-full py-3 text-base font-semibold bg-[#FF6B00] hover:bg-[#FF6B00]/90 border-0"
+                                        leftIcon={
+                                          <Icon
+                                            icon="mdi:library"
+                                            className="w-5 h-5"
+                                          />
+                                        }
+                                      >
+                                        Add Option from Library
+                                      </Button>
+                                      <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                          setActiveMealIndex(mealIndex);
+                                          setShowCreateMeal(true);
+                                        }}
+                                        className="w-full py-3 text-base font-semibold border-2 border-green-400/60 text-green-300 hover:bg-green-500/20 hover:border-green-400/80 hover:text-green-200 backdrop-blur-sm"
+                                        leftIcon={
+                                          <Icon
+                                            icon="mdi:plus-circle"
+                                            className="w-5 h-5"
+                                          />
+                                        }
+                                      >
+                                        Create New Meal Option
+                                      </Button>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      ))
                     )}
-
-                    {/* Novi gumbi ispod kartica */}
-                    <div className="flex flex-col sm:flex-row gap-3 mt-4">
-                      <Button
-                        variant="primary"
-                        onClick={() => addMealFromLibrary(mealIndex)}
-                        className="w-full py-3 text-base font-semibold bg-[#FF6B00] hover:bg-[#FF6B00]/90 border-0"
-                        leftIcon={
-                          <Icon icon="mdi:library" className="w-5 h-5" />
-                        }
-                      >
-                        Add Option from Library
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          setActiveMealIndex(mealIndex);
-                          setShowCreateMeal(true);
-                        }}
-                        className="w-full py-3 text-base font-semibold border-2 border-green-400/60 text-green-300 hover:bg-green-500/20 hover:border-green-400/80 hover:text-green-200 backdrop-blur-sm"
-                        leftIcon={
-                          <Icon icon="mdi:plus-circle" className="w-5 h-5" />
-                        }
-                      >
-                        Create New Meal Option
-                      </Button>
-                    </div>
                   </div>
-                </div>
-              ))
-            )}
-          </div>
-        )}
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
       {/* Copy Day Modal */}
@@ -1163,21 +1960,41 @@ export const MealPlanning = ({ data, onChange }) => {
         onClose={() => {
           setShowMealLibraryModal(false);
           setActiveMealIndex(null);
-          setMeals([]);
+          setLibraryMeals([]);
+          setLibrarySearch("");
+          setLibraryPage(1);
+          setLibraryHasMore(true);
+          setSearchLoading(false);
+          setUseStaticLibrary(false);
         }}
         title="Add Meal from Library"
         size="large"
         footerButtons={false}
+        className="sm:max-w-4xl lg:max-w-6xl" // Increased width for laptops
       >
-        <MealLibrarySelector
-          meals={meals}
-          onSelectMeal={handleSelectMealFromLibrary}
-          onClose={() => {
-            setShowMealLibraryModal(false);
-            setActiveMealIndex(null);
-            setMeals([]);
-          }}
-        />
+        <div className="w-full sm:w-[600px]">
+          <MealLibrarySelector
+            meals={libraryMeals}
+            loading={libraryLoading}
+            searchLoading={searchLoading}
+            searchTerm={librarySearch}
+            onSearch={handleLibrarySearch}
+            onSelectMeal={handleSelectMealFromLibrary}
+            onClose={() => {
+              setShowMealLibraryModal(false);
+              setActiveMealIndex(null);
+              setLibraryMeals([]);
+              setLibrarySearch("");
+              setLibraryPage(1);
+              setLibraryHasMore(true);
+              setSearchLoading(false);
+              setUseStaticLibrary(false);
+            }}
+            onScroll={handleLibraryScroll}
+            hasMore={libraryHasMore}
+            useStaticData={useStaticLibrary} // Use static data based on state
+          />
+        </div>
       </Modal>
 
       {/* Add Media Preview Modal */}
@@ -1196,7 +2013,9 @@ export const MealPlanning = ({ data, onChange }) => {
               width={1000}
               height={1000}
             />
-          ) : showMediaPreview.type === "video" && showMediaPreview.url ? (
+          ) : showMediaPreview.type === "video" &&
+            showMediaPreview.url &&
+            showMediaPreview.url !== "" ? (
             <video
               src={showMediaPreview.url}
               controls

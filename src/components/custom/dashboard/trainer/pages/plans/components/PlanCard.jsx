@@ -45,6 +45,8 @@ export const PlanCard = ({
   const [loadingPlanDetails, setLoadingPlanDetails] = useState(false);
   const [detailedPlanData, setDetailedPlanData] = useState(null);
   const [deleteError, setDeleteError] = useState("");
+  const [isCopyRotating, setIsCopyRotating] = useState(false);
+  const [isEditRotating, setIsEditRotating] = useState(false);
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const formattedDate = new Date(createdAt).toLocaleDateString(i18n.language, {
@@ -153,19 +155,25 @@ export const PlanCard = ({
   };
 
   const handleCopyClick = () => {
+    setIsCopyRotating(true);
     // Navigate to the same edit page but with a query param to indicate it's a copy operation
     router.push(
       `${editUrl}?mode=copy&title=${encodeURIComponent(`Copy of ${title}`)}`
     );
+    // Reset rotation after a short delay
+    setTimeout(() => setIsCopyRotating(false), 1000);
   };
 
   const handleEditClick = () => {
+    setIsEditRotating(true);
     // Use the correct edit URL based on plan type
     if (isNutrition) {
       router.push(`/trainer/dashboard/plans/nutrition/edit/${id}`);
     } else {
       router.push(`/trainer/dashboard/plans/training/edit/${id}`);
     }
+    // Reset rotation after a short delay
+    setTimeout(() => setIsEditRotating(false), 1000);
   };
 
   const handleDeleteClick = () => {
@@ -266,18 +274,25 @@ export const PlanCard = ({
               </div>
 
               <div
-                className="grid grid-cols-2 sm:flex sm:items-center sm:justify-center gap-1 sm:gap-2 w-full"
+                className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 sm:gap-2 w-full"
                 onClick={(e) => e.stopPropagation()}
               >
                 <Button
                   variant="darkOutline"
                   size="small"
-                  leftIcon={<CopyIcon size={14} />}
+                  leftIcon={
+                    <CopyIcon
+                      size={14}
+                      className={`transition-transform duration-300 ${
+                        isCopyRotating ? "animate-spin" : ""
+                      }`}
+                    />
+                  }
                   onClick={handleCopyClick}
-                  className="hover:border-[#FF6B00] hover:text-[#FF6B00] hover:scale-105 hover:shadow-md transition-all duration-200 text-xs sm:text-sm px-1 sm:px-3 py-1 sm:py-2"
+                  className="hover:border-[#FF6B00] hover:text-[#FF6B00] hover:scale-105 hover:shadow-md transition-all duration-200 text-xs px-2 py-1.5 h-8 sm:h-9"
                 >
-                  <span className="hidden sm:inline">Copy</span>
-                  <span className="sm:hidden">Copy</span>
+                  <span className="hidden lg:inline">Copy</span>
+                  <span className="lg:hidden">Copy</span>
                 </Button>
                 <Button
                   variant="darkOutline"
@@ -285,12 +300,12 @@ export const PlanCard = ({
                   leftIcon={<ViewIcon size={14} />}
                   onClick={handleViewClick}
                   loading={loadingPlanDetails}
-                  className="hover:border-blue-400 hover:text-blue-300 hover:scale-105 hover:shadow-md transition-all duration-200 text-xs sm:text-sm px-1 sm:px-3 py-1 sm:py-2"
+                  className="hover:border-blue-400 hover:text-blue-300 hover:scale-105 hover:shadow-md transition-all duration-200 text-xs px-2 py-1.5 h-8 sm:h-9"
                 >
-                  <span className="hidden sm:inline">
+                  <span className="hidden lg:inline">
                     {loadingPlanDetails ? "Loading..." : "View"}
                   </span>
-                  <span className="sm:hidden">
+                  <span className="lg:hidden">
                     {loadingPlanDetails ? "..." : "View"}
                   </span>
                 </Button>
@@ -299,20 +314,27 @@ export const PlanCard = ({
                   size="small"
                   leftIcon={<TrashIcon size={14} />}
                   onClick={handleDeleteClick}
-                  className="hover:border-red-500 hover:text-red-400 hover:scale-105 hover:shadow-md transition-all duration-200 text-xs sm:text-sm px-1 sm:px-3 py-1 sm:py-2"
+                  className="hover:border-red-500 hover:text-red-400 hover:scale-105 hover:shadow-md transition-all duration-200 text-xs px-2 py-1.5 h-8 sm:h-9"
                 >
-                  <span className="hidden sm:inline">Delete</span>
-                  <span className="sm:hidden">Delete</span>
+                  <span className="hidden lg:inline">Delete</span>
+                  <span className="lg:hidden">Delete</span>
                 </Button>
                 <Button
                   onClick={handleEditClick}
                   variant="orangeOutline"
                   size="small"
-                  leftIcon={<EditIcon size={14} />}
-                  className="hover:border-orange-400 hover:text-orange-300 hover:scale-105 hover:shadow-md transition-all duration-200 text-xs sm:text-sm px-1 sm:px-3 py-1 sm:py-2"
+                  leftIcon={
+                    <EditIcon
+                      size={14}
+                      className={`transition-transform duration-300 ${
+                        isEditRotating ? "animate-spin" : ""
+                      }`}
+                    />
+                  }
+                  className="hover:border-orange-400 hover:text-orange-300 hover:scale-105 hover:shadow-md transition-all duration-200 text-xs px-2 py-1.5 h-8 sm:h-9"
                 >
-                  <span className="hidden sm:inline">Edit</span>
-                  <span className="sm:hidden">Edit</span>
+                  <span className="hidden lg:inline">Edit</span>
+                  <span className="lg:hidden">Edit</span>
                 </Button>
               </div>
             </div>

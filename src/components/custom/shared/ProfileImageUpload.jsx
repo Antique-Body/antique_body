@@ -115,7 +115,7 @@ export const ProfileImageUpload = ({
               onMouseLeave={() => setIsHovering(false)}
             >
               <div className="w-40 h-40 rounded-full overflow-hidden border-2 border-[#444] hover:border-[#FF6B00]/50 transition-all duration-300">
-                {previewUrl ? (
+                {previewUrl && previewUrl !== "" ? (
                   <Image
                     src={previewUrl}
                     alt="Profile"
