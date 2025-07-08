@@ -84,12 +84,10 @@ export async function POST(request) {
       }
 
       // Check if request already exists
-      const existingRequest = await prisma.coachingRequest.findUnique({
+      const existingRequest = await prisma.coachingRequest.findFirst({
         where: {
-          clientId_trainerId: {
-            clientId: clientInfo.id,
-            trainerId: trainerId,
-          },
+          clientId: clientInfo.id,
+          trainerId: trainerId,
         },
       });
       if (existingRequest) {
