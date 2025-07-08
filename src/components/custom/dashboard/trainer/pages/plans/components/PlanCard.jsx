@@ -71,22 +71,6 @@ export const PlanCard = ({
     };
   }, []);
 
-  // Cleanup copy timeout when isCopyRotating changes
-  useEffect(() => {
-    if (!isCopyRotating && copyTimeoutRef.current) {
-      clearTimeout(copyTimeoutRef.current);
-      copyTimeoutRef.current = null;
-    }
-  }, [isCopyRotating]);
-
-  // Cleanup edit timeout when isEditRotating changes
-  useEffect(() => {
-    if (!isEditRotating && editTimeoutRef.current) {
-      clearTimeout(editTimeoutRef.current);
-      editTimeoutRef.current = null;
-    }
-  }, [isEditRotating]);
-
   // Animation variants
   const cardVariants = {
     hidden: {
