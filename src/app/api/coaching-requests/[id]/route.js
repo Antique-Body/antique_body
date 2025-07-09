@@ -68,6 +68,9 @@ export async function GET(request, { params }) {
     }
 
     // Only return accepted coaching requests for the client dashboard
+    // This endpoint is designed specifically for the client dashboard, which requires
+    // active accepted requests. Other statuses (pending, rejected, cancelled) are
+    // excluded as they are not relevant for the client's active coaching sessions.
     if (coachingRequest.status !== "accepted") {
       return NextResponse.json(
         { success: false, error: "Client not found or not active" },

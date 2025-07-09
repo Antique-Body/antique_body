@@ -561,6 +561,7 @@ export const TrainerCard = ({
           {/* Collapsible Details Accordion */}
           <div className="mb-1.5 sm:mb-3">
             <button
+              type="button"
               onClick={toggleAccordion}
               className={`w-full flex items-center justify-between p-1.5 sm:p-3 bg-zinc-800/30 hover:bg-zinc-800/50 rounded-lg border border-zinc-700/30 transition-all duration-200 ${
                 isAccordionOpen ? "rounded-b-none border-b-0" : ""

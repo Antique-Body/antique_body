@@ -178,8 +178,6 @@ export function useClientRegistration() {
     // 3. Prepare client data for the API
     const clientData = {
       ...formData,
-      contactEmail: formData.contactEmail,
-      contactPhone: formData.contactPhone,
       profileImage: uploadedUrls.profileImage || formData.profileImage,
     };
 
