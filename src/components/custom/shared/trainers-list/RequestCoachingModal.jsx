@@ -436,11 +436,15 @@ export default function RequestCoachingModal({
           </div>
 
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-zinc-400">
+            <label
+              htmlFor="coaching-message"
+              className="block text-sm font-medium text-zinc-400"
+            >
               Your message to {trainer.firstName}
               <span className="ml-2 text-xs text-zinc-500">(Coming Soon)</span>
             </label>
             <textarea
+              id="coaching-message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="This feature will be available soon. For now, please use the Request Coaching tab to get started."

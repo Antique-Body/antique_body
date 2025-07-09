@@ -33,14 +33,17 @@ export const ClientBasicInformation = ({
   const validate = () => {
     const newErrors = {};
     // Email validation
-    if (!clientData.email) {
-      newErrors.email = "Email is required.";
-    } else if (!/^\S+@\S+\.\S+$/.test(clientData.email)) {
-      newErrors.email = "Please enter a valid email address.";
+    if (!clientData.contactEmail) {
+      newErrors.contactEmail = "Email is required.";
+    } else if (!/^\S+@\S+\.\S+$/.test(clientData.contactEmail)) {
+      newErrors.contactEmail = "Please enter a valid email address.";
     }
     // Phone validation (basic, can be improved)
-    if (clientData.phone && !/^\+?\d{7,15}$/.test(clientData.phone)) {
-      newErrors.phone = "Please enter a valid phone number.";
+    if (
+      clientData.contactPhone &&
+      !/^\+?\d{7,15}$/.test(clientData.contactPhone)
+    ) {
+      newErrors.contactPhone = "Please enter a valid phone number.";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -176,24 +179,24 @@ export const ClientBasicInformation = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 label="Contact Email"
-                name="email"
+                name="contactEmail"
                 type="email"
-                value={clientData.email || ""}
+                value={clientData.contactEmail || ""}
                 onChange={handleChange}
                 placeholder="your.email@example.com"
                 backgroundStyle="semi-transparent"
                 required
-                error={errors.email}
+                error={errors.contactEmail}
               />
               <FormField
                 label="Contact Phone"
-                name="phone"
+                name="contactPhone"
                 type="tel"
-                value={clientData.phone || ""}
+                value={clientData.contactPhone || ""}
                 onChange={handleChange}
                 placeholder="+1234567890"
                 backgroundStyle="semi-transparent"
-                error={errors.phone}
+                error={errors.contactPhone}
               />
             </div>
           </div>

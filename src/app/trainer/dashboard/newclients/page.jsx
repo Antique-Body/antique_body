@@ -257,12 +257,22 @@ export default function NewClientsPage() {
                   {/* Profile Image */}
                   <div
                     className="relative cursor-pointer group/image flex-shrink-0"
+                    tabIndex="0"
                     onClick={() =>
                       handleProfileImageClick(
                         request.client.clientProfile.profileImage,
                         `${request.client.clientProfile.firstName} ${request.client.clientProfile.lastName}`
                       )
                     }
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleProfileImageClick(
+                          request.client.clientProfile.profileImage,
+                          `${request.client.clientProfile.firstName} ${request.client.clientProfile.lastName}`
+                        );
+                      }
+                    }}
                   >
                     <div className="relative h-12 w-12 sm:h-14 sm:w-14 overflow-hidden rounded-xl ring-2 ring-white/10 group-hover/image:ring-blue-400/60 shadow-md transition-all duration-300">
                       {request.client.clientProfile.profileImage ? (

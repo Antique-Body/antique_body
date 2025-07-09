@@ -264,12 +264,14 @@ export const ClientProfile = ({ clientData, onProfileUpdate }) => {
               <div>
                 <span className="text-zinc-400">Email</span>
                 <p className="text-white break-all">
-                  {getOrNoData(clientData?.email)}
+                  {getOrNoData(clientData?.contactEmail)}
                 </p>
               </div>
               <div>
                 <span className="text-zinc-400">Phone</span>
-                <p className="text-white">{getOrNoData(clientData?.phone)}</p>
+                <p className="text-white">
+                  {getOrNoData(clientData?.contactPhone)}
+                </p>
               </div>
               <div className="md:col-span-2">
                 <span className="text-zinc-400">Location</span>
