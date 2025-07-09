@@ -22,8 +22,8 @@ export function useClientEditProfileForm() {
     secondaryGoal: "",
     goalDescription: "",
     preferredActivities: [],
-    email: "",
-    phone: "",
+    contactEmail: "",
+    contactPhone: "",
     location: { city: "", state: "", country: "" },
     profileImage: null,
     description: "",
@@ -51,8 +51,8 @@ export function useClientEditProfileForm() {
         data.preferredActivities?.map((a) =>
           typeof a === "object" ? a.name : a
         ) || [],
-      email: data.email || data.contactEmail || "",
-      phone: data.phone || data.contactPhone || "",
+      contactEmail: data.contactEmail || "",
+      contactPhone: data.contactPhone || "",
       location: data.location || { city: "", state: "", country: "" },
       profileImage: data.profileImage || null,
       description: data.description || "",

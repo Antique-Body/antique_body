@@ -62,7 +62,9 @@ async function createClientWithDetails(formData, userId) {
           primaryGoal: formData.primaryGoal,
           secondaryGoal: formData.secondaryGoal?.trim() || null,
           goalDescription: formData.goalDescription?.trim() || null,
-          locationId: dbLocation.id,
+          location: {
+            connect: { id: dbLocation.id },
+          },
           profileImage: formData.profileImage?.trim() || null,
           description: formData.description?.trim() || null,
           medicalConditions: formData.medicalConditions?.trim() || null,
@@ -73,13 +75,13 @@ async function createClientWithDetails(formData, userId) {
           preferredActivities: {
             create: formData.preferredActivities.map((name) => ({ name })),
           },
-          email:
-            formData.email && formData.email.trim() !== ""
-              ? formData.email
+          contactEmail:
+            formData.contactEmail && formData.contactEmail.trim() !== ""
+              ? formData.contactEmail
               : undefined,
-          phone:
-            formData.phone && formData.phone.trim() !== ""
-              ? formData.phone
+          contactPhone:
+            formData.contactPhone && formData.contactPhone.trim() !== ""
+              ? formData.contactPhone
               : undefined,
         },
       },
@@ -227,18 +229,37 @@ export async function updateClientProfile(userId, data) {
       location: _location,
       userId: _userId,
       locationId: _locationId,
+      contactEmail: _contactEmail,
+      contactPhone: _contactPhone,
       ...allowedProfileData
     } = data;
 
+    // Map contactEmail to email and contactPhone to phone
+    const updateData = {
+      ...allowedProfileData,
+      locationId,
+      dateOfBirth: allowedProfileData.dateOfBirth
+        ? new Date(allowedProfileData.dateOfBirth)
+        : profile.dateOfBirth,
+    };
+
+    // Handle contactEmail and contactPhone mapping
+    if (data.contactEmail !== undefined) {
+      updateData.email =
+        data.contactEmail && data.contactEmail.trim() !== ""
+          ? data.contactEmail
+          : null;
+    }
+    if (data.contactPhone !== undefined) {
+      updateData.phone =
+        data.contactPhone && data.contactPhone.trim() !== ""
+          ? data.contactPhone
+          : null;
+    }
+
     const updated = await tx.clientProfile.update({
       where: { id: profile.id },
-      data: {
-        ...allowedProfileData,
-        locationId,
-        dateOfBirth: allowedProfileData.dateOfBirth
-          ? new Date(allowedProfileData.dateOfBirth)
-          : profile.dateOfBirth,
-      },
+      data: updateData,
       include: {
         location: true,
         languages: true,
@@ -270,8 +291,8 @@ async function getClientProfileBasic(userId) {
       weight: true,
       gender: true,
       dateOfBirth: true,
-      email: true,
-      phone: true,
+      contactEmail: true,
+      contactPhone: true,
       description: true,
       medicalConditions: true,
       allergies: true,

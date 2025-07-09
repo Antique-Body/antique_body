@@ -40,30 +40,32 @@ export default function UnrequestConfirmationModal({
       primaryButtonAction={handleConfirm}
       secondaryButtonAction={onClose}
       primaryButtonDisabled={isSubmitting}
-      size="small"
+      size="medium"
     >
-      <div className="space-y-4">
+      <div className="space-y-6 py-2">
         {error && (
-          <div className="rounded-lg bg-red-900/20 border border-red-700/30 p-3 flex items-center gap-2">
+          <div className="rounded-xl bg-red-900/20 border border-red-700/30 p-4 flex items-center gap-3">
             <Icon
               icon="mdi:alert-circle"
               className="text-red-400"
-              width={18}
-              height={18}
+              width={22}
+              height={22}
             />
-            <span className="text-red-300 text-sm">{error}</span>
+            <span className="text-red-300 text-sm font-medium">{error}</span>
           </div>
         )}
-        <div className="flex items-center gap-3 p-4 bg-red-900/20 border border-red-700/30 rounded-lg">
+        <div className="flex items-start gap-4 p-5 bg-red-900/20 border border-red-700/30 rounded-xl">
           <Icon
             icon="mdi:alert-circle"
             className="text-red-400 flex-shrink-0"
-            width={24}
-            height={24}
+            width={28}
+            height={28}
           />
           <div>
-            <p className="text-red-400 font-medium mb-1">Important Notice</p>
-            <p className="text-sm text-red-300">
+            <p className="text-red-400 font-semibold text-lg mb-2">
+              Important Notice
+            </p>
+            <p className="text-sm text-red-300 leading-relaxed">
               After removing this request, you won't be able to request this
               trainer again for the next {cooldownHours} hour
               {cooldownHours === 1 ? "" : "s"}.
@@ -71,46 +73,56 @@ export default function UnrequestConfirmationModal({
           </div>
         </div>
 
-        <div className="space-y-3">
-          <p className="text-white font-medium">
+        <div className="space-y-4">
+          <p className="text-white text-lg font-medium">
             Are you sure you want to remove your coaching request from{" "}
-            <span className="text-[#3E92CC]">
+            <span className="text-[#3E92CC] font-semibold">
               {trainer.firstName} {trainer.lastName || ""}
             </span>
             ?
           </p>
 
-          <div className="bg-zinc-800/30 rounded-lg p-3 border border-zinc-700/30">
-            <p className="text-sm text-zinc-300">
-              <strong>What happens next:</strong>
+          <div className="bg-zinc-800/50 rounded-xl p-5 border border-zinc-700/50">
+            <p className="text-white font-medium text-base mb-4">
+              What happens next:
             </p>
-            <ul className="text-sm text-zinc-400 mt-2 space-y-1">
-              <li className="flex items-start gap-2">
-                <Icon
-                  icon="mdi:clock-outline"
-                  className="text-zinc-500 mt-0.5 flex-shrink-0"
-                  width={14}
-                  height={14}
-                />
-                <span>{cooldownHours}-hour cooldown period begins</span>
+            <ul className="space-y-3">
+              <li className="flex items-center gap-3 p-3 bg-zinc-800/30 rounded-lg border border-zinc-700/30">
+                <div className="bg-zinc-700/50 p-2 rounded-lg">
+                  <Icon
+                    icon="mdi:clock-outline"
+                    className="text-zinc-300"
+                    width={20}
+                    height={20}
+                  />
+                </div>
+                <span className="text-zinc-300 font-medium">
+                  {cooldownHours}-hour cooldown period begins
+                </span>
               </li>
-              <li className="flex items-start gap-2">
-                <Icon
-                  icon="mdi:account-remove"
-                  className="text-zinc-500 mt-0.5 flex-shrink-0"
-                  width={14}
-                  height={14}
-                />
-                <span>Request will be permanently removed</span>
+              <li className="flex items-center gap-3 p-3 bg-zinc-800/30 rounded-lg border border-zinc-700/30">
+                <div className="bg-zinc-700/50 p-2 rounded-lg">
+                  <Icon
+                    icon="mdi:account-remove"
+                    className="text-zinc-300"
+                    width={20}
+                    height={20}
+                  />
+                </div>
+                <span className="text-zinc-300 font-medium">
+                  Request will be permanently removed
+                </span>
               </li>
-              <li className="flex items-start gap-2">
-                <Icon
-                  icon="mdi:lock"
-                  className="text-zinc-500 mt-0.5 flex-shrink-0"
-                  width={14}
-                  height={14}
-                />
-                <span>
+              <li className="flex items-center gap-3 p-3 bg-zinc-800/30 rounded-lg border border-zinc-700/30">
+                <div className="bg-zinc-700/50 p-2 rounded-lg">
+                  <Icon
+                    icon="mdi:lock"
+                    className="text-zinc-300"
+                    width={20}
+                    height={20}
+                  />
+                </div>
+                <span className="text-zinc-300 font-medium">
                   You cannot request this trainer again until cooldown expires
                 </span>
               </li>

@@ -1,24 +1,21 @@
 "use client";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/common/Button";
 import { Card } from "@/components/common/Card";
 import { InfoBanner } from "@/components/common/InfoBanner";
-import { Modal } from "@/components/common/Modal";
 import { ACTIVITY_TYPES } from "@/enums/activityTypes";
 import { EXPERIENCE_LEVELS } from "@/enums/experienceLevels";
 import { FITNESS_GOALS } from "@/enums/fitnessGoals";
-import { calculateAge } from "@/utils/dateUtils";
 
 export default function ClientsPage() {
+  const router = useRouter();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [showClientModal, setShowClientModal] = useState(false);
-  const [showMessageInfo, setShowMessageInfo] = useState(false);
 
   // Fetch accepted clients
   const fetchAcceptedClients = async () => {
@@ -50,19 +47,8 @@ export default function ClientsPage() {
     fetchAcceptedClients();
   }, []);
 
-  const handleViewClient = (client) => {
-    setSelectedClient(client);
-    setShowClientModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowClientModal(false);
-    setSelectedClient(null);
-  };
-
-  const handleShowMessageInfo = () => {
-    setShowMessageInfo(true);
-    setTimeout(() => setShowMessageInfo(false), 3000);
+  const handleViewClient = (clientRequest) => {
+    router.push(`/trainer/dashboard/clients/${clientRequest.id}`);
   };
 
   const formatDate = (dateString) => {
@@ -184,7 +170,8 @@ export default function ClientsPage() {
                 key={clientRequest.id}
                 variant="clientCard"
                 hover={true}
-                className="overflow-visible"
+                className="overflow-visible cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:shadow-[#3E92CC]/10"
+                onClick={() => handleViewClient(clientRequest)}
               >
                 <div className="flex items-start gap-4">
                   {/* Profile Image */}
@@ -217,6 +204,12 @@ export default function ClientsPage() {
                       <h3 className="text-xl font-semibold text-white">
                         {profile.firstName} {profile.lastName}
                       </h3>
+                      <Icon
+                        icon="mdi:arrow-right"
+                        className="text-[#3E92CC] opacity-0 group-hover:opacity-100 transition-opacity"
+                        width={20}
+                        height={20}
+                      />
                     </div>
                     <div className="flex flex-wrap gap-2 mb-3">
                       <span className="px-2 py-1 bg-green-900/30 text-green-400 text-xs rounded-full">
@@ -328,12 +321,15 @@ export default function ClientsPage() {
                       <Button
                         variant="primary"
                         size="small"
-                        onClick={() => handleViewClient(clientRequest)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewClient(clientRequest);
+                        }}
                         leftIcon={
                           <Icon icon="mdi:eye" width={16} height={16} />
                         }
                       >
-                        View Details
+                        View Dashboard
                       </Button>
                       <div className="group relative">
                         <Button
@@ -372,258 +368,6 @@ export default function ClientsPage() {
             Accept client requests from the "New Clients" tab to start coaching!
           </p>
         </div>
-      )}
-
-      {/* Client Detail Modal */}
-      {showClientModal && selectedClient && (
-        <Modal
-          isOpen={showClientModal}
-          onClose={handleCloseModal}
-          title={
-            <div className="flex items-center gap-2">
-              <Icon
-                icon="mdi:account-details"
-                width={24}
-                height={24}
-                className="text-[#3E92CC]"
-              />
-              Client Details
-            </div>
-          }
-          hideButtons={true}
-        >
-          <div className="space-y-6 max-h-[80vh] overflow-y-auto">
-            {/* Profile Header */}
-            <Card variant="dark" className="overflow-visible">
-              <div className="flex items-center gap-4">
-                <div className="h-24 w-24 overflow-hidden rounded-xl ring-4 ring-[#3E92CC]/20">
-                  {selectedClient.client.clientProfile.profileImage ? (
-                    <Image
-                      src={selectedClient.client.clientProfile.profileImage}
-                      alt={`${selectedClient.client.clientProfile.firstName} profile`}
-                      className="object-cover w-full h-full"
-                      width={96}
-                      height={96}
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#3E92CC] to-[#2D7EB8]">
-                      <Icon
-                        icon="mdi:account"
-                        width={48}
-                        height={48}
-                        color="white"
-                      />
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-white">
-                    {selectedClient.client.clientProfile.firstName}{" "}
-                    {selectedClient.client.clientProfile.lastName}
-                  </h3>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <span className="px-3 py-1 bg-blue-900/30 text-blue-400 text-sm rounded-full">
-                      {getExperienceText(
-                        selectedClient.client.clientProfile.experienceLevel
-                      )}
-                    </span>
-                    <span className="px-3 py-1 bg-purple-900/30 text-purple-400 text-sm rounded-full">
-                      {calculateAge(
-                        selectedClient.client.clientProfile.dateOfBirth
-                      )}{" "}
-                      years
-                    </span>
-                    <span className="px-3 py-1 bg-green-900/30 text-green-400 text-sm rounded-full">
-                      Active since {formatDate(selectedClient.respondedAt)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* Basic Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card variant="dark" className="overflow-visible">
-                <div className="flex items-center gap-2 mb-2">
-                  <Icon
-                    icon="mdi:map-marker"
-                    className="text-[#3E92CC]"
-                    width={20}
-                    height={20}
-                  />
-                  <span className="text-zinc-400 text-sm">Location</span>
-                </div>
-                <p className="text-white font-medium">
-                  {selectedClient.client.clientProfile.location?.city ||
-                    "Not specified"}
-                </p>
-              </Card>
-              <Card variant="dark" className="overflow-visible">
-                <div className="flex items-center gap-2 mb-2">
-                  <Icon
-                    icon="mdi:target"
-                    className="text-[#3E92CC]"
-                    width={20}
-                    height={20}
-                  />
-                  <span className="text-zinc-400 text-sm">Primary Goal</span>
-                </div>
-                <p className="text-white font-medium">
-                  {getFitnessGoalText(
-                    selectedClient.client.clientProfile.primaryGoal
-                  )}
-                </p>
-              </Card>
-              <Card variant="dark" className="overflow-visible">
-                <div className="flex items-center gap-2 mb-2">
-                  <Icon
-                    icon="mdi:human-male-height"
-                    className="text-[#3E92CC]"
-                    width={20}
-                    height={20}
-                  />
-                  <span className="text-zinc-400 text-sm">Physical Stats</span>
-                </div>
-                <p className="text-white font-medium">
-                  {selectedClient.client.clientProfile.height}cm •{" "}
-                  {selectedClient.client.clientProfile.weight}kg
-                </p>
-              </Card>
-            </div>
-
-            {/* Preferred Activities */}
-            {selectedClient.client.clientProfile.preferredActivities.length >
-              0 && (
-              <Card variant="dark" className="overflow-visible">
-                <div className="flex items-center gap-2 mb-3">
-                  <Icon
-                    icon="mdi:dumbbell"
-                    className="text-[#3E92CC]"
-                    width={20}
-                    height={20}
-                  />
-                  <h4 className="text-white font-medium">
-                    Preferred Activities
-                  </h4>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {selectedClient.client.clientProfile.preferredActivities.map(
-                    (activity) => (
-                      <span
-                        key={activity.id}
-                        className="px-3 py-1.5 bg-green-900/30 text-green-400 text-sm rounded-full border border-green-800/30"
-                      >
-                        {mapActivityToLabel(activity.name)}
-                      </span>
-                    )
-                  )}
-                </div>
-              </Card>
-            )}
-
-            {/* Medical Information */}
-            {(selectedClient.client.clientProfile.medicalConditions ||
-              selectedClient.client.clientProfile.allergies) && (
-              <Card variant="dark" className="overflow-visible">
-                <div className="flex items-center gap-2 mb-3">
-                  <Icon
-                    icon="mdi:medical-bag"
-                    className="text-[#3E92CC]"
-                    width={20}
-                    height={20}
-                  />
-                  <h4 className="text-white font-medium">
-                    Medical Information
-                  </h4>
-                </div>
-                <div className="space-y-3">
-                  {selectedClient.client.clientProfile.medicalConditions && (
-                    <div className="flex items-start gap-2 bg-amber-900/20 rounded-lg p-3 border border-amber-700/30">
-                      <Icon
-                        icon="mdi:medical-bag"
-                        className="text-amber-400 mt-1"
-                        width={16}
-                        height={16}
-                      />
-                      <div>
-                        <p className="text-amber-400 font-medium text-sm mb-1">
-                          Medical Conditions
-                        </p>
-                        <p className="text-amber-300/90 text-sm">
-                          {
-                            selectedClient.client.clientProfile
-                              .medicalConditions
-                          }
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  {selectedClient.client.clientProfile.allergies && (
-                    <div className="flex items-start gap-2 bg-red-900/20 rounded-lg p-3 border border-red-700/30">
-                      <Icon
-                        icon="mdi:alert"
-                        className="text-red-400 mt-1"
-                        width={16}
-                        height={16}
-                      />
-                      <div>
-                        <p className="text-red-400 font-medium text-sm mb-1">
-                          Allergies
-                        </p>
-                        <p className="text-red-300/90 text-sm">
-                          {selectedClient.client.clientProfile.allergies}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </Card>
-            )}
-
-            {/* Initial Request Note */}
-            {selectedClient.note && (
-              <Card variant="dark" className="overflow-visible">
-                <div className="flex items-center gap-2 mb-3">
-                  <Icon
-                    icon="mdi:message-text"
-                    className="text-[#3E92CC]"
-                    width={20}
-                    height={20}
-                  />
-                  <h4 className="text-white font-medium">Initial Request</h4>
-                </div>
-                <p className="text-zinc-300 text-sm italic bg-zinc-900/50 rounded-lg p-4 border border-zinc-800/50">
-                  "{selectedClient.note}"
-                </p>
-              </Card>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex gap-3 pt-4 sticky bottom-0 bg-zinc-900 p-4 -mx-6 -mb-6 border-t border-zinc-800">
-              <Button
-                variant="primary"
-                onClick={handleCloseModal}
-                leftIcon={<Icon icon="mdi:check" width={20} height={20} />}
-                fullWidth
-              >
-                Close
-              </Button>
-              <Button
-                variant="success"
-                onClick={handleShowMessageInfo}
-                leftIcon={<Icon icon="mdi:message" width={20} height={20} />}
-                fullWidth
-              >
-                Message Client
-              </Button>
-            </div>
-            {showMessageInfo && (
-              <div className="mt-2 text-green-400 text-xs text-center">
-                Messaging feature coming soon!
-              </div>
-            )}
-          </div>
-        </Modal>
       )}
     </div>
   );

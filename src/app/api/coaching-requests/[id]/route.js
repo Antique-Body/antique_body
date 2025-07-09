@@ -3,6 +3,91 @@ import { NextResponse } from "next/server";
 import { auth } from "#/auth";
 import prisma from "@/lib/prisma";
 
+export async function GET(request, { params }) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const { id } = params;
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: "Request ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Get the coaching request with all related data
+    const coachingRequest = await prisma.coachingRequest.findUnique({
+      where: { id },
+      include: {
+        client: {
+          include: {
+            clientProfile: {
+              include: {
+                location: true,
+                languages: true,
+                preferredActivities: true,
+              },
+            },
+            user: true,
+          },
+        },
+        trainer: {
+          include: {
+            trainerProfile: {
+              include: {
+                location: true,
+                specialties: true,
+              },
+            },
+            user: true,
+          },
+        },
+      },
+    });
+
+    if (!coachingRequest) {
+      return NextResponse.json(
+        { success: false, error: "Coaching request not found" },
+        { status: 404 }
+      );
+    }
+
+    // Verify that the current user is the trainer for this request
+    if (coachingRequest.trainer.userId !== session.user.id) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized to view this request" },
+        { status: 403 }
+      );
+    }
+
+    // Only return accepted coaching requests for the client dashboard
+    if (coachingRequest.status !== "accepted") {
+      return NextResponse.json(
+        { success: false, error: "Client not found or not active" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: coachingRequest,
+    });
+  } catch (error) {
+    console.error("Error fetching coaching request:", error);
+    return NextResponse.json(
+      { success: false, error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PATCH(request, { params }) {
   try {
     const session = await auth();

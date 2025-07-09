@@ -85,6 +85,7 @@ function getOnboardingRedirect(role, token, pathname) {
         "/trainer/dashboard",
         "/trainer/dashboard/newclients",
         "/trainer/dashboard/clients",
+        "/trainer/dashboard/clients/:id",
         "/trainer/dashboard/upcoming-trainings",
         "/trainer/dashboard/messages",
         "/trainer/dashboard/plans",
