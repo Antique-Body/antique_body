@@ -3,8 +3,6 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useState } from "react";
 
-import { FormField } from "@/components/common/FormField";
-import { InfoBanner } from "@/components/common/InfoBanner";
 import { Modal } from "@/components/common/Modal";
 
 export default function RequestCoachingModal({
@@ -57,7 +55,7 @@ export default function RequestCoachingModal({
       }
 
       // Call the parent callback for UI updates
-      onSubmitRequest(trainer, note);
+      onSubmitRequest(trainer);
 
       // Refresh badge counts
       if (window.refreshClientBadges) {
@@ -137,62 +135,60 @@ export default function RequestCoachingModal({
       confirmButtonDisabled={isSubmitDisabled()}
     >
       {/* Enhanced Trainer Info Card */}
-      <div className="mb-6 rounded-lg bg-gradient-to-r from-zinc-800 to-zinc-700 p-4">
-        <div className="flex items-center gap-4">
-          <div className="h-20 w-20 overflow-hidden rounded-full ring-2 ring-[#3E92CC]/20">
+      <div className="mb-6 rounded-lg bg-gradient-to-br from-zinc-800/90 via-zinc-900/95 to-black p-6 shadow-xl ring-1 ring-white/10 backdrop-blur-sm transition-all duration-300 hover:ring-[#3E92CC]/20">
+        <div className="flex items-center gap-6">
+          <div className="relative h-24 w-24 transform overflow-hidden rounded-2xl ring-2 ring-[#3E92CC]/30 transition-all duration-300 hover:scale-105 hover:ring-[#3E92CC]/50">
             {trainer.profileImage ? (
               <Image
                 src={trainer.profileImage}
                 alt={`${trainer.firstName} profile`}
-                className="object-cover"
-                width={80}
-                height={80}
+                className="h-full w-full object-cover transition-transform duration-300 hover:scale-110"
+                width={96}
+                height={96}
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#3E92CC] to-[#2D7EB8]">
-                <Icon icon="mdi:account" width={40} height={40} color="white" />
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#3E92CC] via-[#2D7EB8] to-[#1A4B6D]">
+                <Icon
+                  icon="mdi:account"
+                  width={48}
+                  height={48}
+                  className="text-white/90"
+                />
               </div>
             )}
           </div>
-          <div className="flex-1">
-            <h3 className="text-xl font-semibold text-white mb-1">
+          <div className="flex-1 space-y-2">
+            <h3 className="text-2xl font-bold text-white">
               {trainer.firstName} {trainer.lastName || ""}
             </h3>
-            <p className="text-[#3E92CC] font-medium mb-2">
+            <p className="inline-flex items-center rounded-full bg-[#3E92CC]/10 px-3 py-1 text-sm font-medium text-[#3E92CC]">
               {trainer.specialties?.map((s) => s.name).join(", ")}
             </p>
-            <div className="flex items-center gap-4 text-sm text-zinc-400">
+            <div className="flex items-center gap-4 text-sm">
               {trainer.trainerInfo?.rating && (
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2 rounded-full bg-yellow-400/10 px-3 py-1">
                   <Icon
                     icon="mdi:star"
                     className="text-yellow-400"
                     width={16}
                     height={16}
                   />
-                  <span>{trainer.trainerInfo.rating.toFixed(1)}</span>
+                  <span className="font-medium text-yellow-400">
+                    {trainer.trainerInfo.rating.toFixed(1)}
+                  </span>
                 </div>
               )}
               {trainer.location && (
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2 rounded-full bg-zinc-700/30 px-3 py-1">
                   <Icon
                     icon="mdi:map-marker"
                     className="text-zinc-400"
                     width={16}
                     height={16}
                   />
-                  <span>{trainer.location.city}</span>
-                </div>
-              )}
-              {trainer.pricePerSession && (
-                <div className="flex items-center gap-1">
-                  <Icon
-                    icon="mdi:currency-usd"
-                    className="text-green-400"
-                    width={16}
-                    height={16}
-                  />
-                  <span>${trainer.pricePerSession}/session</span>
+                  <span className="font-medium text-zinc-400">
+                    {trainer.location.city}
+                  </span>
                 </div>
               )}
             </div>
@@ -202,36 +198,31 @@ export default function RequestCoachingModal({
 
       {/* Tab Navigation */}
       <div className="mb-6">
-        <div className="flex space-x-1 rounded-lg bg-zinc-800/50 p-1">
+        <div className="flex space-x-2 rounded-xl bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 p-1.5 ring-1 ring-white/10">
           <button
             type="button"
             onClick={() => setActiveTab("request")}
-            className={`flex-1 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200 ${
+            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-300 ${
               activeTab === "request"
-                ? "bg-[#3E92CC] text-white shadow-lg"
-                : "text-zinc-400 hover:text-white hover:bg-zinc-700"
+                ? "bg-gradient-to-br from-[#3E92CC] to-[#2D7EB8] text-white shadow-lg shadow-[#3E92CC]/20"
+                : "text-zinc-400 hover:bg-zinc-700/50 hover:text-white"
             }`}
           >
             <Icon
               icon="mdi:account-multiple"
-              className="mr-2 inline"
-              width={16}
-              height={16}
+              className="transition-transform duration-300 group-hover:scale-110"
+              width={18}
+              height={18}
             />
             Request Coaching
           </button>
           <button
             type="button"
-            onClick={() => {}} // Completely disable click
+            onClick={() => {}}
             disabled={true}
-            className="flex-1 rounded-md px-4 py-3 text-sm font-medium opacity-40 cursor-not-allowed bg-zinc-800/50 text-zinc-500"
+            className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-zinc-800/30 px-4 py-3 text-sm font-medium text-zinc-500 opacity-40 transition-all duration-300 cursor-not-allowed"
           >
-            <Icon
-              icon="mdi:message-text-off"
-              className="mr-2 inline"
-              width={16}
-              height={16}
-            />
+            <Icon icon="mdi:message-text-off" width={18} height={18} />
             Send Message
             <span className="ml-1 text-xs">(Disabled)</span>
           </button>
@@ -240,13 +231,13 @@ export default function RequestCoachingModal({
 
       {/* Error Message */}
       {submitError && (
-        <div className="mb-4 rounded-lg bg-red-900/20 border border-red-700 p-3">
-          <div className="flex items-center gap-2">
+        <div className="mb-4 animate-fadeIn rounded-lg bg-gradient-to-br from-red-900/20 to-red-950/30 p-4 ring-1 ring-red-500/30">
+          <div className="flex items-center gap-3">
             <Icon
               icon="mdi:alert-circle"
               className="text-red-400"
-              width={16}
-              height={16}
+              width={20}
+              height={20}
             />
             <p className="text-red-400 text-sm font-medium">{submitError}</p>
           </div>
@@ -255,75 +246,126 @@ export default function RequestCoachingModal({
 
       {/* Request Tab Content */}
       {activeTab === "request" && (
-        <div className="space-y-4">
+        <div className="space-y-5">
           {/* Request Limit Banner */}
-          <InfoBanner
-            icon="mdi:account-multiple"
-            title={`Requests: ${requestedCount}/${maxRequests}`}
-            subtitle={
+          <div
+            className={`rounded-xl bg-gradient-to-br p-4 ring-1 transition-all duration-300 ${
               !canRequestMore
-                ? "You've reached the maximum number of trainer requests. You can remove existing requests to add new ones."
+                ? "from-orange-900/20 to-orange-950/30 ring-orange-500/30"
                 : hasRequested
-                ? "You have already requested this trainer. They will respond soon."
-                : `You can request ${
-                    maxRequests - requestedCount
-                  } more trainers.`
-            }
-            variant={
-              !canRequestMore ? "primary" : hasRequested ? "success" : "info"
-            }
-          />
+                ? "from-green-900/20 to-green-950/30 ring-green-500/30"
+                : "from-blue-900/20 to-blue-950/30 ring-blue-500/30"
+            }`}
+          >
+            <div className="flex items-start gap-4">
+              <div
+                className={`rounded-full p-2 ${
+                  !canRequestMore
+                    ? "bg-orange-500/10"
+                    : hasRequested
+                    ? "bg-green-500/10"
+                    : "bg-blue-500/10"
+                }`}
+              >
+                <Icon
+                  icon="mdi:account-multiple"
+                  className={
+                    !canRequestMore
+                      ? "text-orange-400"
+                      : hasRequested
+                      ? "text-green-400"
+                      : "text-blue-400"
+                  }
+                  width={24}
+                  height={24}
+                />
+              </div>
+              <div>
+                <h4
+                  className={`text-lg font-semibold ${
+                    !canRequestMore
+                      ? "text-orange-400"
+                      : hasRequested
+                      ? "text-green-400"
+                      : "text-blue-400"
+                  }`}
+                >
+                  Requests: {requestedCount}/{maxRequests}
+                </h4>
+                <p className="mt-1 text-sm text-zinc-300">
+                  {!canRequestMore
+                    ? "You've reached the maximum number of trainer requests. You can remove existing requests to add new ones."
+                    : hasRequested
+                    ? "You have already requested this trainer. They will respond soon."
+                    : `You can request ${
+                        maxRequests - requestedCount
+                      } more trainers.`}
+                </p>
+              </div>
+            </div>
+          </div>
 
           {hasRequested ? (
-            <div className="rounded-lg bg-green-900/20 border border-green-700 p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Icon
-                  icon="mdi:check-circle"
-                  className="text-green-400"
-                  width={20}
-                  height={20}
-                />
-                <p className="text-green-400 font-medium">
-                  Request Already Sent
-                </p>
+            <div className="rounded-xl bg-gradient-to-br from-green-900/20 to-green-950/30 p-5 ring-1 ring-green-500/30">
+              <div className="flex items-start gap-4">
+                <div className="rounded-full bg-green-500/10 p-2">
+                  <Icon
+                    icon="mdi:check-circle"
+                    className="text-green-400"
+                    width={24}
+                    height={24}
+                  />
+                </div>
+                <div>
+                  <p className="text-lg font-semibold text-green-400">
+                    Request Already Sent
+                  </p>
+                  <p className="mt-1 text-sm text-green-300">
+                    You have already requested this trainer. They will respond
+                    soon.
+                  </p>
+                </div>
               </div>
-              <p className="text-sm text-green-300">
-                You have already requested this trainer. They will respond soon.
-              </p>
             </div>
           ) : !canRequestMore ? (
-            <div className="rounded-lg bg-orange-900/20 border border-orange-700 p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Icon
-                  icon="mdi:alert-circle"
-                  className="text-orange-400"
-                  width={20}
-                  height={20}
-                />
-                <p className="text-orange-400 font-medium">
-                  Request Limit Reached
-                </p>
+            <div className="rounded-xl bg-gradient-to-br from-orange-900/20 to-orange-950/30 p-5 ring-1 ring-orange-500/30">
+              <div className="flex items-start gap-4">
+                <div className="rounded-full bg-orange-500/10 p-2">
+                  <Icon
+                    icon="mdi:alert-circle"
+                    className="text-orange-400"
+                    width={24}
+                    height={24}
+                  />
+                </div>
+                <div>
+                  <p className="text-lg font-semibold text-orange-400">
+                    Request Limit Reached
+                  </p>
+                  <p className="mt-1 text-sm text-orange-300">
+                    You've reached the maximum of {maxRequests} trainer
+                    requests. Remove some existing requests to add new ones.
+                  </p>
+                </div>
               </div>
-              <p className="text-sm text-orange-300">
-                You've reached the maximum of {maxRequests} trainer requests.
-                Remove some existing requests to add new ones.
-              </p>
             </div>
           ) : (
             <>
-              <div className="rounded-lg bg-blue-900/20 border border-blue-700 p-4">
-                <div className="flex items-start gap-3">
-                  <Icon
-                    icon="mdi:information"
-                    className="text-[#3E92CC] mt-0.5"
-                    width={20}
-                    height={20}
-                  />
+              <div className="rounded-xl bg-gradient-to-br from-[#3E92CC]/10 to-[#2D7EB8]/5 p-5 ring-1 ring-[#3E92CC]/20">
+                <div className="flex items-start gap-4">
+                  <div className="rounded-full bg-[#3E92CC]/10 p-2">
+                    <Icon
+                      icon="mdi:information"
+                      className="text-[#3E92CC]"
+                      width={24}
+                      height={24}
+                    />
+                  </div>
                   <div>
-                    <p className="text-white font-medium mb-1">
+                    <p className="text-lg font-semibold text-white">
                       What happens next?
                     </p>
-                    <p className="text-sm text-zinc-300">
+                    <p className="mt-2 text-sm leading-relaxed text-zinc-300">
                       {trainer.firstName} will receive your request and can
                       accept or decline. If accepted, they'll be able to create
                       personalized workout plans and provide ongoing guidance
@@ -334,24 +376,33 @@ export default function RequestCoachingModal({
               </div>
 
               {/* Note Section */}
-              <FormField
-                type="textarea"
-                id="coaching-request-note"
-                name="note"
-                label={`Tell ${trainer.firstName} about yourself (optional)`}
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Share your fitness goals, experience level, any injuries or limitations, preferred workout style, or what you hope to achieve..."
-                rows={5}
-                maxLength={500}
-                disabled={isSubmitting}
-                subLabel={`This helps ${trainer.firstName} understand your needs better`}
-                className="mb-0"
-              />
-              <div className="flex justify-between items-center mt-2">
-                <p className="text-xs text-zinc-500">
-                  {note.length}/500 characters
+              <div className="space-y-3">
+                <label
+                  htmlFor="coaching-request-note"
+                  className="block text-sm font-medium text-zinc-300"
+                >
+                  Tell {trainer.firstName} about yourself
+                  <span className="ml-1 text-zinc-500">(optional)</span>
+                </label>
+                <textarea
+                  id="coaching-request-note"
+                  name="note"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Share your fitness goals, experience level, any injuries or limitations, preferred workout style, or what you hope to achieve..."
+                  rows={5}
+                  maxLength={500}
+                  disabled={isSubmitting}
+                  className="w-full rounded-xl bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 px-4 py-3 text-zinc-200 placeholder-zinc-500 ring-1 ring-white/10 transition-all duration-300 focus:outline-none focus:ring-[#3E92CC]/30 disabled:opacity-50"
+                />
+                <p className="text-sm text-zinc-500">
+                  This helps {trainer.firstName} understand your needs better
                 </p>
+                <div className="flex justify-end">
+                  <span className="text-xs text-zinc-500">
+                    {note.length}/500 characters
+                  </span>
+                </div>
               </div>
             </>
           )}
@@ -360,27 +411,22 @@ export default function RequestCoachingModal({
 
       {/* Message Tab Content */}
       {activeTab === "message" && (
-        <div className="space-y-4">
-          <InfoBanner
-            icon="mdi:message-text-outline"
-            title="Messaging Feature Coming Soon"
-            subtitle="Direct messaging with trainers will be available in a future update. For now, you can request coaching to get started with your fitness journey."
-            variant="success"
-          />
-
-          <div className="rounded-lg bg-zinc-800/50 border border-zinc-700 p-4">
-            <div className="flex items-start gap-3">
-              <Icon
-                icon="mdi:chat-outline"
-                className="text-zinc-400 mt-0.5"
-                width={20}
-                height={20}
-              />
+        <div className="space-y-5">
+          <div className="rounded-xl bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 p-5 ring-1 ring-white/10">
+            <div className="flex items-start gap-4">
+              <div className="rounded-full bg-zinc-700/30 p-2">
+                <Icon
+                  icon="mdi:chat-outline"
+                  className="text-zinc-400"
+                  width={24}
+                  height={24}
+                />
+              </div>
               <div>
-                <p className="text-white font-medium mb-1">
+                <p className="text-lg font-semibold text-white">
                   Feature in Development
                 </p>
-                <p className="text-sm text-zinc-300">
+                <p className="mt-2 text-sm leading-relaxed text-zinc-300">
                   We're working on adding direct messaging capabilities. In the
                   meantime, you can request coaching from {trainer.firstName} to
                   start your fitness journey together.
@@ -389,24 +435,25 @@ export default function RequestCoachingModal({
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-2">
-              Your message to {trainer.firstName} (Coming Soon)
+          <div className="space-y-3">
+            <label className="block text-sm font-medium text-zinc-400">
+              Your message to {trainer.firstName}
+              <span className="ml-2 text-xs text-zinc-500">(Coming Soon)</span>
             </label>
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="This feature will be available soon. For now, please use the Request Coaching tab to get started."
-              className="w-full rounded-lg bg-zinc-800/50 border border-zinc-600 px-3 py-3 text-zinc-400 placeholder-zinc-500 resize-none transition-colors cursor-not-allowed"
+              className="w-full cursor-not-allowed rounded-xl bg-gradient-to-br from-zinc-800/30 to-zinc-900/30 px-4 py-3 text-zinc-400 placeholder-zinc-500 ring-1 ring-white/5 transition-all duration-300"
               rows="6"
               maxLength={1000}
               disabled={true}
             />
-            <div className="flex justify-between items-center mt-2">
-              <p className="text-xs text-zinc-500">Feature coming soon</p>
-              <p className="text-xs text-zinc-400">
+            <div className="flex justify-between text-xs">
+              <span className="text-zinc-500">Feature coming soon</span>
+              <span className="text-zinc-400">
                 Use Request Coaching instead
-              </p>
+              </span>
             </div>
           </div>
         </div>

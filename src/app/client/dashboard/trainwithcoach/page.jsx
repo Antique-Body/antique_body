@@ -251,6 +251,9 @@ export default function TrainWithCoachPage() {
 
       // The API call is now handled in the RequestCoachingModal
       // This is just for UI updates
+
+      // Immediately fetch updated cooldowns and coaching requests after request
+      await Promise.all([fetchActiveCooldowns(), fetchCoachingRequests()]);
     } catch (error) {
       console.error("Error submitting coaching request:", error);
       // Remove from requested list if there was an error
@@ -289,6 +292,12 @@ export default function TrainWithCoachPage() {
               setRequestedTrainers((prev) =>
                 prev.filter((id) => id !== trainerId)
               );
+
+              // Immediately fetch updated cooldowns and coaching requests after removal
+              await Promise.all([
+                fetchActiveCooldowns(),
+                fetchCoachingRequests(),
+              ]);
 
               // Refresh badge counts
               if (

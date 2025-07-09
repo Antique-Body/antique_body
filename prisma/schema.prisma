@@ -295,8 +295,8 @@ model ClientProfile {
   primaryGoal          String
   secondaryGoal        String?
   goalDescription      String?  @db.Text
-  email                String?
-  phone                String?
+  contactEmail         String?
+  contactPhone         String?
   locationId           String?
   location             Location? @relation(fields: [locationId], references: [id])
   profileImage         String?

@@ -199,13 +199,13 @@ export const SortControls = forwardRef(
       });
 
     return (
-      <div className={`relative z-10 mb-6 ${className || ""}`}>
-        <div className="flex flex-col gap-3 bg-zinc-900 backdrop-blur-md p-3 sm:p-4 rounded-xl border border-zinc-800 shadow-lg">
+      <div className={`relative z-10 mb-3 sm:mb-6 ${className || ""}`}>
+        <div className="flex flex-col gap-2 sm:gap-3 bg-zinc-900 backdrop-blur-md p-2 sm:p-4 rounded-xl border border-zinc-800 shadow-lg">
           {/* Search row */}
           <div
             className={`grid grid-cols-1 ${
               enableLocation ? "md:grid-cols-2" : ""
-            } gap-3`}
+            } gap-2 sm:gap-3`}
           >
             {/* Search */}
             <div className="relative">
@@ -215,7 +215,7 @@ export const SortControls = forwardRef(
                 value={searchQuery}
                 onChange={handleSearchChange}
                 placeholder={searchPlaceholder}
-                className={`w-full bg-zinc-800 border-zinc-700 text-white rounded-lg ${colors.focusRing}`}
+                className={`w-full bg-zinc-800 border-zinc-700 text-white rounded-lg text-sm sm:text-base h-9 sm:h-10 ${colors.focusRing}`}
                 prefixIcon="mdi:magnify"
               />
               {searchQuery && (
@@ -226,7 +226,7 @@ export const SortControls = forwardRef(
                 >
                   <Icon
                     icon="mdi:close"
-                    className="w-5 h-5 text-zinc-400 hover:text-white"
+                    className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-400 hover:text-white"
                   />
                 </button>
               )}
@@ -244,7 +244,7 @@ export const SortControls = forwardRef(
                   }}
                   onFocus={() => setShowLocationSuggestions(true)}
                   placeholder="Search by location..."
-                  className={`w-full bg-zinc-800 border-zinc-700 text-white rounded-lg ${colors.focusRing}`}
+                  className={`w-full bg-zinc-800 border-zinc-700 text-white rounded-lg text-sm sm:text-base h-9 sm:h-10 ${colors.focusRing}`}
                   prefixIcon="mdi:map-marker"
                 />
                 {locationSearch && (
@@ -258,7 +258,7 @@ export const SortControls = forwardRef(
                   >
                     <Icon
                       icon="mdi:close"
-                      className="w-5 h-5 text-zinc-400 hover:text-white"
+                      className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-400 hover:text-white"
                     />
                   </button>
                 )}
@@ -272,24 +272,24 @@ export const SortControls = forwardRef(
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
-                        className="absolute z-[60] w-full mt-1 bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                        className="absolute z-[60] w-full mt-1 bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg max-h-48 sm:max-h-60 overflow-y-auto"
                       >
                         {isLoadingLocations ? (
-                          <div className="p-3 text-center text-zinc-400">
+                          <div className="p-2 sm:p-3 text-center text-zinc-400 text-sm">
                             Loading locations...
                           </div>
                         ) : (
                           locationSuggestions.map((location) => (
                             <button
                               key={location.value}
-                              className="w-full px-4 py-2 text-left hover:bg-zinc-700 focus:bg-zinc-700 focus:outline-none"
+                              className="w-full px-3 py-2 text-left hover:bg-zinc-700 focus:bg-zinc-700 focus:outline-none text-sm"
                               onClick={() => handleLocationSelect(location)}
                               type="button"
                             >
                               <div className="flex items-center">
                                 <Icon
                                   icon="mdi:map-marker"
-                                  className={`w-5 h-5 mr-2 ${colors.accentClass}`}
+                                  className={`w-4 h-4 sm:w-5 sm:h-5 mr-2 ${colors.accentClass}`}
                                 />
                                 <span>{location.label}</span>
                               </div>
@@ -304,16 +304,16 @@ export const SortControls = forwardRef(
           </div>
 
           {/* Active filters and sort controls row */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="text-zinc-300 text-sm">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <div className="text-zinc-300 text-xs sm:text-sm">
                 Found{" "}
                 <span className="font-semibold text-white">{itemCount}</span>{" "}
                 {itemLabel}
               </div>
 
               {/* Active Filters */}
-              <div className="flex flex-wrap gap-2 ml-2">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2 ml-1 sm:ml-2">
                 <AnimatePresence>
                   {searchQuery && (
                     <motion.div
@@ -322,23 +322,27 @@ export const SortControls = forwardRef(
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
-                      className={`flex items-center ${colors.accentBg} px-3 py-1 rounded-full text-sm text-white`}
+                      className={`flex items-center ${colors.accentBg} px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm text-white`}
                     >
-                      <span>Search: {searchQuery}</span>
+                      <span className="truncate max-w-[100px] sm:max-w-none">
+                        Search: {searchQuery}
+                      </span>
                       <button
                         onClick={() => {
                           setSearchQuery("");
-                          // Maintain focus after clearing
                           setTimeout(() => {
                             if (finalSearchRef.current) {
                               finalSearchRef.current.focus();
                             }
                           }, 0);
                         }}
-                        className="ml-2 hover:text-zinc-200"
+                        className="ml-1.5 sm:ml-2 hover:text-zinc-200"
                         type="button"
                       >
-                        <Icon icon="mdi:close" className="w-4 h-4" />
+                        <Icon
+                          icon="mdi:close"
+                          className="w-3 h-3 sm:w-4 sm:h-4"
+                        />
                       </button>
                     </motion.div>
                   )}
@@ -349,19 +353,27 @@ export const SortControls = forwardRef(
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
-                      className={`flex items-center ${colors.accentBg} px-3 py-1 rounded-full text-sm text-white`}
+                      className={`flex items-center ${colors.accentBg} px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm text-white`}
                     >
-                      <Icon icon="mdi:map-marker" className="w-4 h-4 mr-1" />
-                      <span>{selectedLocation.label}</span>
+                      <Icon
+                        icon="mdi:map-marker"
+                        className="w-3 h-3 sm:w-4 sm:h-4 mr-1"
+                      />
+                      <span className="truncate max-w-[100px] sm:max-w-none">
+                        {selectedLocation.label}
+                      </span>
                       <button
                         onClick={() => {
                           setSelectedLocation(null);
                           setLocationSearch("");
                         }}
-                        className="ml-2 hover:text-zinc-200"
+                        className="ml-1.5 sm:ml-2 hover:text-zinc-200"
                         type="button"
                       >
-                        <Icon icon="mdi:close" className="w-4 h-4" />
+                        <Icon
+                          icon="mdi:close"
+                          className="w-3 h-3 sm:w-4 sm:h-4"
+                        />
                       </button>
                     </motion.div>
                   )}
@@ -374,20 +386,26 @@ export const SortControls = forwardRef(
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
-                      className={`flex items-center ${colors.accentBg} px-3 py-1 rounded-full text-sm text-white`}
+                      className={`flex items-center ${colors.accentBg} px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm text-white`}
                     >
-                      <Icon icon="mdi:dumbbell" className="w-4 h-4 mr-1" />
-                      <span>
+                      <Icon
+                        icon="mdi:dumbbell"
+                        className="w-3 h-3 sm:w-4 sm:h-4 mr-1"
+                      />
+                      <span className="truncate max-w-[100px] sm:max-w-none">
                         Type:{" "}
                         {EXERCISE_TYPES.find((t) => t.value === filters.type)
                           ?.label || filters.type}
                       </span>
                       <button
                         onClick={() => handleExerciseFilterChange("type", "")}
-                        className="ml-2 hover:text-zinc-200"
+                        className="ml-1.5 sm:ml-2 hover:text-zinc-200"
                         type="button"
                       >
-                        <Icon icon="mdi:close" className="w-4 h-4" />
+                        <Icon
+                          icon="mdi:close"
+                          className="w-3 h-3 sm:w-4 sm:h-4"
+                        />
                       </button>
                     </motion.div>
                   )}
@@ -400,20 +418,26 @@ export const SortControls = forwardRef(
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
-                      className={`flex items-center ${colors.accentBg} px-3 py-1 rounded-full text-sm text-white`}
+                      className={`flex items-center ${colors.accentBg} px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm text-white`}
                     >
-                      <Icon icon="mdi:signal" className="w-4 h-4 mr-1" />
-                      <span>
+                      <Icon
+                        icon="mdi:signal"
+                        className="w-3 h-3 sm:w-4 sm:h-4 mr-1"
+                      />
+                      <span className="truncate max-w-[100px] sm:max-w-none">
                         Level:{" "}
                         {EXERCISE_LEVELS.find((l) => l.value === filters.level)
                           ?.label || filters.level}
                       </span>
                       <button
                         onClick={() => handleExerciseFilterChange("level", "")}
-                        className="ml-2 hover:text-zinc-200"
+                        className="ml-1.5 sm:ml-2 hover:text-zinc-200"
                         type="button"
                       >
-                        <Icon icon="mdi:close" className="w-4 h-4" />
+                        <Icon
+                          icon="mdi:close"
+                          className="w-3 h-3 sm:w-4 sm:h-4"
+                        />
                       </button>
                     </motion.div>
                   )}
@@ -426,10 +450,13 @@ export const SortControls = forwardRef(
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
-                      className={`flex items-center ${colors.accentBg} px-3 py-1 rounded-full text-sm text-white`}
+                      className={`flex items-center ${colors.accentBg} px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm text-white`}
                     >
-                      <Icon icon="mdi:map" className="w-4 h-4 mr-1" />
-                      <span>
+                      <Icon
+                        icon="mdi:map"
+                        className="w-3 h-3 sm:w-4 sm:h-4 mr-1"
+                      />
+                      <span className="truncate max-w-[100px] sm:max-w-none">
                         Location:{" "}
                         {EXERCISE_LOCATIONS.find(
                           (l) => l.value === filters.location
@@ -439,10 +466,13 @@ export const SortControls = forwardRef(
                         onClick={() =>
                           handleExerciseFilterChange("location", "")
                         }
-                        className="ml-2 hover:text-zinc-200"
+                        className="ml-1.5 sm:ml-2 hover:text-zinc-200"
                         type="button"
                       >
-                        <Icon icon="mdi:close" className="w-4 h-4" />
+                        <Icon
+                          icon="mdi:close"
+                          className="w-3 h-3 sm:w-4 sm:h-4"
+                        />
                       </button>
                     </motion.div>
                   )}
@@ -456,10 +486,13 @@ export const SortControls = forwardRef(
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
-                        className={`flex items-center ${colors.accentBg} px-3 py-1 rounded-full text-sm text-white`}
+                        className={`flex items-center ${colors.accentBg} px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm text-white`}
                       >
-                        <Icon icon="mdi:weight" className="w-4 h-4 mr-1" />
-                        <span>
+                        <Icon
+                          icon="mdi:weight"
+                          className="w-3 h-3 sm:w-4 sm:h-4 mr-1"
+                        />
+                        <span className="truncate max-w-[100px] sm:max-w-none">
                           Equipment:{" "}
                           {filters.equipment === "true" ? "Yes" : "No"}
                         </span>
@@ -467,10 +500,13 @@ export const SortControls = forwardRef(
                           onClick={() =>
                             handleExerciseFilterChange("equipment", "")
                           }
-                          className="ml-2 hover:text-zinc-200"
+                          className="ml-1.5 sm:ml-2 hover:text-zinc-200"
                           type="button"
                         >
-                          <Icon icon="mdi:close" className="w-4 h-4" />
+                          <Icon
+                            icon="mdi:close"
+                            className="w-3 h-3 sm:w-4 sm:h-4"
+                          />
                         </button>
                       </motion.div>
                     )}
@@ -485,7 +521,7 @@ export const SortControls = forwardRef(
                     >
                       <button
                         onClick={onClearFilters}
-                        className={`text-sm ${colors.accentClass} hover:underline flex items-center`}
+                        className={`text-xs sm:text-sm ${colors.accentClass} hover:underline flex items-center`}
                         type="button"
                       >
                         Clear all
@@ -496,17 +532,23 @@ export const SortControls = forwardRef(
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
               {/* Exercise Filters Button - Only if isExerciseFilter is true */}
               {isExerciseFilter && (
-                <div className="relative" ref={exerciseFiltersRef}>
+                <div
+                  className="relative flex-1 sm:flex-none"
+                  ref={exerciseFiltersRef}
+                >
                   <Button
                     variant="secondary"
                     size="small"
-                    className="flex items-center gap-2 bg-zinc-800 border border-zinc-700"
+                    className="flex items-center gap-2 bg-zinc-800 border border-zinc-700 w-full sm:w-auto h-8 sm:h-9 text-xs sm:text-sm"
                     onClick={() => setShowExerciseFilters(!showExerciseFilters)}
                   >
-                    <Icon icon="mdi:filter-variant" className="w-4 h-4" />
+                    <Icon
+                      icon="mdi:filter-variant"
+                      className="w-3 h-3 sm:w-4 sm:h-4"
+                    />
                     <span>Filters</span>
                     {(filters.type ||
                       filters.level ||
@@ -514,7 +556,7 @@ export const SortControls = forwardRef(
                       (filters.equipment !== undefined &&
                         filters.equipment !== "")) && (
                       <span
-                        className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs text-white ${colors.accentBg}`}
+                        className={`inline-flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full text-[10px] sm:text-xs text-white ${colors.accentBg}`}
                       >
                         {
                           [
@@ -577,7 +619,10 @@ export const SortControls = forwardRef(
                             className="w-full bg-zinc-700 border border-zinc-600 rounded text-white p-2 text-sm"
                             value={filters.level || ""}
                             onChange={(e) =>
-                              handleExerciseFilterChange("level", e.target.value)
+                              handleExerciseFilterChange(
+                                "level",
+                                e.target.value
+                              )
                             }
                           >
                             <option value="">All Levels</option>
@@ -606,7 +651,10 @@ export const SortControls = forwardRef(
                           >
                             <option value="">All Locations</option>
                             {EXERCISE_LOCATIONS.map((location) => (
-                              <option key={location.value} value={location.value}>
+                              <option
+                                key={location.value}
+                                value={location.value}
+                              >
                                 {location.label}
                               </option>
                             ))}
@@ -632,7 +680,9 @@ export const SortControls = forwardRef(
                             {EQUIPMENT_OPTIONS.map((option) => (
                               <option
                                 key={option.value}
-                                value={option.value === "yes" ? "true" : "false"}
+                                value={
+                                  option.value === "yes" ? "true" : "false"
+                                }
                               >
                                 {option.label}
                               </option>
@@ -709,16 +759,16 @@ export const SortControls = forwardRef(
               </div>
 
               {/* Mobile sort dropdown */}
-              <div className="relative w-full sm:hidden" ref={dropdownRef}>
+              <div className="relative flex-1 sm:hidden" ref={dropdownRef}>
                 <Button
                   variant="secondary"
                   size="small"
-                  className="flex items-center justify-between w-full bg-zinc-800 border border-zinc-700 rounded-lg py-1.5 px-3"
+                  className="flex items-center justify-between w-full bg-zinc-800 border border-zinc-700 rounded-lg py-1 px-2 h-8 text-xs"
                   onClick={() => setShowSortOptions(!showSortOptions)}
                 >
-                  <span className="flex items-center gap-2">
-                    <Icon icon="mdi:sort" className="w-5 h-5" />
-                    <span>
+                  <span className="flex items-center gap-1.5">
+                    <Icon icon="mdi:sort" className="w-4 h-4" />
+                    <span className="truncate">
                       Sort:{" "}
                       {
                         sortOptions.find((opt) => opt.value === sortOption)
@@ -730,7 +780,7 @@ export const SortControls = forwardRef(
                     icon={
                       showSortOptions ? "mdi:chevron-up" : "mdi:chevron-down"
                     }
-                    className="w-5 h-5"
+                    className="w-4 h-4 flex-shrink-0"
                   />
                 </Button>
 
@@ -751,7 +801,7 @@ export const SortControls = forwardRef(
                             setSortOption(option.value);
                             setShowSortOptions(false);
                           }}
-                          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-zinc-700 transition-colors flex items-center justify-between ${
+                          className={`w-full text-left px-3 py-2 text-xs hover:bg-zinc-700 transition-colors flex items-center justify-between ${
                             sortOption === option.value
                               ? `${colors.accentClass} bg-zinc-700/50`
                               : "text-zinc-300"
@@ -760,17 +810,17 @@ export const SortControls = forwardRef(
                         >
                           {option.label}
                           {sortOption === option.value && (
-                            <Icon icon="mdi:check" className="w-4 h-4 ml-2" />
+                            <Icon icon="mdi:check" className="w-3 h-3 ml-2" />
                           )}
                         </button>
                       ))}
-                      <div className="border-t border-zinc-700 px-4 py-2.5">
+                      <div className="border-t border-zinc-700 px-3 py-2">
                         <button
                           onClick={() => {
                             toggleSortOrder();
                             setShowSortOptions(false);
                           }}
-                          className="flex items-center text-sm text-zinc-300 hover:text-white transition-colors"
+                          className="flex items-center text-xs text-zinc-300 hover:text-white transition-colors"
                           type="button"
                         >
                           <Icon
@@ -779,7 +829,7 @@ export const SortControls = forwardRef(
                                 ? "mdi:sort-ascending"
                                 : "mdi:sort-descending"
                             }
-                            className="w-4 h-4 mr-2"
+                            className="w-3 h-3 mr-2"
                           />
                           {sortOrder === "asc" ? "Ascending" : "Descending"}
                         </button>

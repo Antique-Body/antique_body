@@ -291,7 +291,7 @@ export const TrainerCard = ({
         )}
 
         {/* Image section */}
-        <div className="relative aspect-[3/2] overflow-hidden">
+        <div className="relative aspect-[3/2] sm:aspect-[3/2] overflow-hidden">
           {trainer.profileImage ? (
             <>
               <div
@@ -302,7 +302,7 @@ export const TrainerCard = ({
                 <div className="w-full h-full flex items-center justify-center">
                   <Icon
                     icon="mdi:account"
-                    className="w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 text-zinc-700"
+                    className="w-5 h-5 sm:w-8 sm:h-8 md:w-12 md:h-12 text-zinc-700"
                   />
                 </div>
               </div>
@@ -321,7 +321,7 @@ export const TrainerCard = ({
             <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
               <Icon
                 icon="mdi:account"
-                className="w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 text-zinc-700"
+                className="w-5 h-5 sm:w-8 sm:h-8 md:w-12 md:h-12 text-zinc-700"
               />
             </div>
           )}
@@ -330,15 +330,15 @@ export const TrainerCard = ({
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
 
           {/* Trainer name and location - bottom of image */}
-          <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-3">
-            <h3 className="text-xs sm:text-sm md:text-lg font-bold text-white mb-1 line-clamp-1">
+          <div className="absolute bottom-0 left-0 right-0 p-1.5 sm:p-3">
+            <h3 className="text-xs sm:text-sm md:text-lg font-bold text-white mb-0.5 sm:mb-1 line-clamp-1">
               {trainer.firstName} {trainer.lastName || ""}
             </h3>
             <div className="flex items-center justify-between">
-              <p className="text-[10px] sm:text-xs text-zinc-300 flex items-center">
+              <p className="text-[9px] sm:text-xs text-zinc-300 flex items-center">
                 <Icon
                   icon="mdi:map-marker"
-                  className={`w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 text-[${themeColors.primary}] mr-1 flex-shrink-0`}
+                  className={`w-2 h-2 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 text-[${themeColors.primary}] mr-0.5 sm:mr-1 flex-shrink-0`}
                   style={{ color: themeColors.primary }}
                 />
                 <span className="line-clamp-1">{trainer.location.city}</span>
@@ -347,9 +347,9 @@ export const TrainerCard = ({
               {/* Status badge */}
               {(hasRequested || isAccepted) && (
                 <div
-                  className={`flex items-center gap-1 ${
+                  className={`flex items-center gap-0.5 sm:gap-1 ${
                     isAccepted ? "bg-green-600" : `bg-[${themeColors.primary}]`
-                  } rounded-full px-1.5 py-0.5 sm:px-2 sm:py-0.5 text-[10px] sm:text-xs font-medium text-white`}
+                  } rounded-full px-1 sm:px-2 py-0.5 text-[8px] sm:text-xs font-medium text-white`}
                   style={
                     !isAccepted
                       ? { backgroundColor: themeColors.primary }
@@ -379,26 +379,26 @@ export const TrainerCard = ({
         </div>
 
         {/* Card content section */}
-        <div className="p-2 sm:p-3 md:p-4 flex-1 flex flex-col">
+        <div className="p-1.5 sm:p-3 md:p-4 flex-1 flex flex-col">
           {/* Rating and experience in single row */}
-          <div className="flex items-center justify-between mb-2 sm:mb-2.5">
+          <div className="flex items-center justify-between mb-1.5 sm:mb-2.5">
             <div className="flex items-center">
               <div className="flex gap-0.5">
                 {renderStars(trainer.trainerInfo?.rating || 0)}
               </div>
-              <span className="ml-1 sm:ml-1.5 text-white text-[10px] sm:text-xs font-medium">
+              <span className="ml-1 sm:ml-1.5 text-white text-[9px] sm:text-xs font-medium">
                 {trainer.trainerInfo?.rating
                   ? trainer.trainerInfo.rating.toFixed(1)
                   : "N/A"}
               </span>
-              <span className="text-zinc-400 text-[10px] sm:text-xs ml-0.5">
+              <span className="text-zinc-400 text-[9px] sm:text-xs ml-0.5">
                 ({trainer.trainerInfo?.reviewCount || 0})
               </span>
             </div>
 
             {/* Experience badge - only if experienceYears is not null */}
             {experienceYears && (
-              <div className="text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-0.5 bg-zinc-800/70 rounded-full text-zinc-300">
+              <div className="text-[9px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-0.5 bg-zinc-800/70 rounded-full text-zinc-300">
                 {experienceYears.length > 12
                   ? experienceYears
                       .replace("+ years", "+y")
@@ -410,18 +410,18 @@ export const TrainerCard = ({
 
           {/* Distance to gym - Compact version */}
           {typeof trainer.distance == "number" && (
-            <div className="mb-2 bg-zinc-800/30 rounded-lg p-2 border border-zinc-700/30">
+            <div className="mb-1.5 sm:mb-2 bg-zinc-800/30 rounded-lg p-1.5 sm:p-2 border border-zinc-700/30">
               <div className="flex items-center gap-1.5">
                 <Icon
                   icon="mdi:directions"
-                  className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-[${themeColors.primary}] flex-shrink-0`}
+                  className={`w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-[${themeColors.primary}] flex-shrink-0`}
                   style={{ color: themeColors.primary }}
                 />
-                <span className="text-[10px] sm:text-xs font-medium text-white">
+                <span className="text-[9px] sm:text-xs font-medium text-white">
                   {trainer.distanceSource === "gym" ? "To gym:" : "Distance:"}
                 </span>
                 <span
-                  className={`text-[10px] sm:text-xs font-bold text-[${themeColors.primary}]`}
+                  className={`text-[9px] sm:text-xs font-bold text-[${themeColors.primary}]`}
                   style={{ color: themeColors.primary }}
                 >
                   {formatDistance(trainer.distance)}
@@ -431,7 +431,7 @@ export const TrainerCard = ({
           )}
 
           {/* Compact stats row */}
-          <div className="flex items-center gap-2 mb-2 sm:mb-3">
+          <div className="flex items-center gap-1.5 mb-2 sm:mb-3">
             {/* Gym count */}
             {Array.isArray(trainer.trainerGyms) &&
               trainer.trainerGyms.length > 0 && (
@@ -439,7 +439,7 @@ export const TrainerCard = ({
                   <Tooltip.Trigger asChild>
                     <button
                       type="button"
-                      className="relative flex items-center gap-1 bg-zinc-800/40 rounded-lg px-2 py-1 cursor-pointer hover:bg-zinc-800 flex-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[${themeColors.primary}]"
+                      className="relative flex items-center gap-1 bg-zinc-800/40 rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 cursor-pointer hover:bg-zinc-800 flex-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[${themeColors.primary}]"
                       aria-label="Show training locations"
                     >
                       <Icon
@@ -447,9 +447,12 @@ export const TrainerCard = ({
                         className={`w-2.5 h-2.5 sm:w-3 sm:h-3 text-[${themeColors.primary}]`}
                         style={{ color: themeColors.primary }}
                       />
-                      <span className="text-[10px] sm:text-xs text-white">
-                        {trainer.trainerGyms.length} gym
-                        {trainer.trainerGyms.length !== 1 ? "s" : ""}
+                      <span className="text-[9px] sm:text-xs text-white whitespace-nowrap">
+                        {trainer.trainerGyms.length}
+                        <span className="hidden sm:inline">
+                          {" "}
+                          {trainer.trainerGyms.length === 1 ? "gym" : "gyms"}
+                        </span>
                       </span>
                     </button>
                   </Tooltip.Trigger>
@@ -522,22 +525,26 @@ export const TrainerCard = ({
               )}
 
             {/* Client count */}
-            <div className="flex items-center gap-1 bg-zinc-800/40 rounded-lg px-2 py-1 flex-1">
+            <div className="flex items-center gap-1 bg-zinc-800/40 rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 flex-1">
               <Icon
                 icon="mdi:account-group"
                 className={`w-2.5 h-2.5 sm:w-3 sm:h-3 text-[${themeColors.primary}]`}
                 style={{ color: themeColors.primary }}
               />
-              <span className="text-[10px] sm:text-xs text-white">
-                {trainer.clientCount || 0} clients
+              <span className="text-[9px] sm:text-xs text-white whitespace-nowrap">
+                {trainer.clientCount || 0}
+                <span className="hidden sm:inline">
+                  {" "}
+                  {trainer.clientCount === 1 ? "client" : "clients"}
+                </span>
               </span>
             </div>
           </div>
 
           {/* Price */}
-          <div className="mb-2 sm:mb-3 flex items-center justify-between">
+          <div className="mb-1.5 sm:mb-3 flex items-center justify-between">
             <p
-              className={`text-sm sm:text-lg font-bold text-[${themeColors.primary}]`}
+              className={`text-xs sm:text-lg font-bold text-[${themeColors.primary}]`}
               style={{ color: themeColors.primary }}
             >
               {getPricingDisplay()}
@@ -545,33 +552,33 @@ export const TrainerCard = ({
 
             {/* Session duration badge */}
             {trainer.sessionDuration && (
-              <span className="text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-0.5 bg-zinc-800 rounded-full text-zinc-400">
+              <span className="text-[9px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-0.5 bg-zinc-800 rounded-full text-zinc-400">
                 {trainer.sessionDuration}min
               </span>
             )}
           </div>
 
           {/* Collapsible Details Accordion */}
-          <div className="mb-2 sm:mb-3">
+          <div className="mb-1.5 sm:mb-3">
             <button
               onClick={toggleAccordion}
-              className={`w-full flex items-center justify-between p-2 sm:p-3 bg-zinc-800/30 hover:bg-zinc-800/50 rounded-lg border border-zinc-700/30 transition-all duration-200 ${
+              className={`w-full flex items-center justify-between p-1.5 sm:p-3 bg-zinc-800/30 hover:bg-zinc-800/50 rounded-lg border border-zinc-700/30 transition-all duration-200 ${
                 isAccordionOpen ? "rounded-b-none border-b-0" : ""
               }`}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 <Icon
                   icon="mdi:information-outline"
-                  className={`w-3 h-3 sm:w-4 sm:h-4 text-[${themeColors.primary}]`}
+                  className={`w-2.5 h-2.5 sm:w-4 sm:h-4 text-[${themeColors.primary}]`}
                   style={{ color: themeColors.primary }}
                 />
-                <span className="text-[10px] sm:text-xs font-medium text-white">
+                <span className="text-[9px] sm:text-xs font-medium text-white">
                   Details & Specialties
                 </span>
               </div>
               <Icon
                 icon="mdi:chevron-down"
-                className={`w-4 h-4 text-zinc-400 transition-transform duration-200 ${
+                className={`w-3 h-3 sm:w-4 sm:h-4 text-zinc-400 transition-transform duration-200 ${
                   isAccordionOpen ? "rotate-180" : ""
                 }`}
               />
@@ -673,12 +680,12 @@ export const TrainerCard = ({
                 e.stopPropagation();
                 onViewProfile(trainer);
               }}
-              className="w-full transition-transform duration-300 bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-xs sm:text-sm py-1.5 sm:py-2"
+              className="w-full transition-transform duration-300 bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-[10px] sm:text-sm py-1 sm:py-2"
               leftIcon={
                 <Icon
                   icon="mdi:eye"
-                  width={12}
-                  height={12}
+                  width={10}
+                  height={10}
                   className="sm:w-[14px] sm:h-[14px]"
                 />
               }
