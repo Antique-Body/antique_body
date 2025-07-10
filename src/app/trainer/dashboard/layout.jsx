@@ -3,6 +3,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import React, { useEffect, useState, useMemo, createContext } from "react";
 
+import { FullScreenLoader } from "@/components";
 import { EffectBackground } from "@/components/background";
 import {
   SidebarDashboard,
@@ -232,9 +233,7 @@ export default function TrainerDashboardLayout({ children }) {
             <div className="pt-16 lg:pt-6 px-4 lg:px-6">
               {/* Page Content */}
               <div className="max-w-7xl mx-auto">
-                {loading && (
-                  <div className="text-center py-4">Učitavanje...</div>
-                )}
+                {loading && <FullScreenLoader text="Loading..." />}
                 {!loading && !trainerData && (
                   <div className="text-center text-red-400 py-4">
                     Greška pri učitavanju podataka.

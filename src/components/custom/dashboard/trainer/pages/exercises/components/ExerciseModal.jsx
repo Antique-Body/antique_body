@@ -964,6 +964,7 @@ export const ExerciseModal = ({
         isNested={true}
       >
         <ExerciseLibrarySelector
+          useStaticData={true}
           onSelectExercise={handleSelectExerciseFromLibrary}
           onClose={() => setShowLibrarySelector(false)}
         />
