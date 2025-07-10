@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 import { MobileStepHeader } from "./components/MobileStepHeader";
 import { NavigationButtons } from "./components/NavigationButtons";
@@ -26,10 +26,31 @@ export const TrainingPlanCreator = ({ initialData }) => {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const { formData, updateFormData, handleSubmit, isValid } =
+  const [validationErrors, setValidationErrors] = useState([]);
+  const topRef = useRef(null);
+
+  const { formData, updateFormData, handleSubmit, getValidationErrors } =
     useTrainingPlanForm(initialData);
 
+  const scrollToTop = () => {
+    if (topRef.current) {
+      topRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const handleNext = async () => {
+    // Check validation for current step
+    const errors = getValidationErrors(currentStep);
+
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      scrollToTop();
+      return;
+    }
+
+    // Clear any previous errors
+    setValidationErrors([]);
+
     if (currentStep < STEPS.length - 1) {
       setCurrentStep((prev) => prev + 1);
     } else {
@@ -43,6 +64,9 @@ export const TrainingPlanCreator = ({ initialData }) => {
   };
 
   const handleBack = () => {
+    // Clear errors when going back
+    setValidationErrors([]);
+
     if (currentStep > 0) {
       setCurrentStep((prev) => prev - 1);
     } else {
@@ -68,6 +92,9 @@ export const TrainingPlanCreator = ({ initialData }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a] px-4 py-6 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
+        {/* Scroll to top reference */}
+        <div ref={topRef} />
+
         {/* Mobile Step Header - Only visible on mobile */}
         <div className="lg:hidden mb-6">
           <MobileStepHeader
@@ -90,6 +117,29 @@ export const TrainingPlanCreator = ({ initialData }) => {
           <StepIndicator steps={STEPS} currentStep={currentStep} />
         </div>
 
+        {/* Validation Errors */}
+        {validationErrors.length > 0 && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+            <h3 className="text-red-400 font-semibold mb-2 flex items-center gap-2">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Please fix the following errors:
+            </h3>
+            <ul className="list-disc list-inside space-y-1">
+              {validationErrors.map((error, index) => (
+                <li key={index} className="text-red-300 text-sm">
+                  {error}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Main Content Card */}
         <Card
           variant="dark"
@@ -105,7 +155,7 @@ export const TrainingPlanCreator = ({ initialData }) => {
               totalSteps={STEPS.length}
               onBack={handleBack}
               onNext={handleNext}
-              isNextDisabled={!isValid(currentStep)}
+              isNextDisabled={false} // Always allow next, validation happens in handleNext
               isLastStep={currentStep === STEPS.length - 1}
               isEdit={!!initialData?.id}
               isLoading={isLoading}

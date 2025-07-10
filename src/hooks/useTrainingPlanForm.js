@@ -154,6 +154,7 @@ export const useTrainingPlanForm = (initialData = null) => {
     const durationNum = Number(duration);
     const isDurationValid =
       duration !== "" && Number.isInteger(durationNum) && durationNum > 0;
+
     return (
       typeof title === "string" &&
       title.trim() !== "" &&
@@ -164,15 +165,15 @@ export const useTrainingPlanForm = (initialData = null) => {
     );
   };
 
-  // Helper for week format: allow positive integer, or YYYY-MM-DD, or YYYY-W##
+  // Helper for week format: allow any non-empty string
   const isValidWeekFormat = (week) => {
-    if (typeof week !== "string") return false;
-    // Numeric week (e.g., '1', '2')
-    if (/^\d+$/.test(week.trim())) return true;
-    // Date format YYYY-MM-DD
-    if (/^\d{4}-\d{2}-\d{2}$/.test(week.trim())) return true;
-    // HTML5 week format YYYY-W##
-    if (/^\d{4}-W\d{2}$/.test(week.trim())) return true;
+    if (typeof week !== "string") {
+      return false;
+    }
+    // Accept any non-empty string
+    if (week.trim() !== "") {
+      return true;
+    }
     return false;
   };
 
@@ -184,6 +185,7 @@ export const useTrainingPlanForm = (initialData = null) => {
       formData.keyFeatures.every(
         (f) => typeof f === "string" && f.trim() !== ""
       );
+
     // timeline: at least one item with valid week and non-empty title
     const timelineValid =
       Array.isArray(formData.timeline) &&
@@ -195,22 +197,101 @@ export const useTrainingPlanForm = (initialData = null) => {
           typeof item.week === "string" &&
           isValidWeekFormat(item.week)
       );
+
     return keyFeaturesValid && timelineValid;
   };
 
   const isValid = (step) => {
+    let result;
     switch (step) {
       case 0:
-        return validateBasicInfo();
+        result = validateBasicInfo();
+        break;
       case 1:
-        return true; // Removed Schedule validation, always allowed
+        result = true; // Removed Schedule validation, always allowed
+        break;
       case 2:
-        return validateFeatures();
+        result = validateFeatures();
+        break;
       case 3:
-        return true; // Preview step is always valid
+        result = true; // Preview step is always valid
+        break;
       default:
-        return false;
+        result = false;
     }
+    return result;
+  };
+
+  // Add function to get validation errors
+  const getValidationErrors = (step) => {
+    const errors = [];
+
+    switch (step) {
+      case 0:
+        const { title, description, price, duration } = formData;
+        if (!title || title.trim() === "") {
+          errors.push("Title is required");
+        }
+        if (!description || description.trim() === "") {
+          errors.push("Description is required");
+        }
+        if (
+          !price ||
+          price.toString().trim() === "" ||
+          isNaN(Number(price)) ||
+          Number(price) < 0
+        ) {
+          errors.push("Valid price is required");
+        }
+        if (
+          !duration ||
+          duration.toString().trim() === "" ||
+          !Number.isInteger(Number(duration)) ||
+          Number(duration) <= 0
+        ) {
+          errors.push("Valid duration is required");
+        }
+        break;
+
+      case 2:
+        // Check key features
+        if (
+          !Array.isArray(formData.keyFeatures) ||
+          formData.keyFeatures.length === 0
+        ) {
+          errors.push("At least one key feature is required");
+        } else {
+          const emptyFeatures = formData.keyFeatures.filter(
+            (f) => !f || f.trim() === ""
+          );
+          if (emptyFeatures.length > 0) {
+            errors.push("All key features must be filled");
+          }
+        }
+
+        // Check timeline
+        if (
+          !Array.isArray(formData.timeline) ||
+          formData.timeline.length === 0
+        ) {
+          errors.push("At least one timeline item is required");
+        } else {
+          const invalidTimeline = formData.timeline.filter(
+            (item) =>
+              !item ||
+              !item.title ||
+              item.title.trim() === "" ||
+              !item.week ||
+              item.week.trim() === ""
+          );
+          if (invalidTimeline.length > 0) {
+            errors.push("All timeline items must have title and week filled");
+          }
+        }
+        break;
+    }
+
+    return errors;
   };
 
   const handleSubmit = async () => {
@@ -256,5 +337,6 @@ export const useTrainingPlanForm = (initialData = null) => {
     isValid,
     handleSubmit,
     error,
+    getValidationErrors,
   };
 };
