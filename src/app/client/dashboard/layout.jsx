@@ -33,7 +33,7 @@ export default function ClientDashboardLayout({ children }) {
     if (path.includes("/trainings")) return "trainings";
     if (path.includes("/progress")) return "progress";
     if (path.includes("/messages")) return "messages";
-    if (path.includes("/nutrition")) return "nutrition";
+    if (path.includes("/diet-tracker")) return "diet-tracker";
     if (path.includes("/health")) return "health";
     return "trainwithcoach"; // Default tab
   };
@@ -129,8 +129,8 @@ export default function ClientDashboardLayout({ children }) {
       case "messages":
         router.push("/client/dashboard/messages");
         break;
-      case "nutrition":
-        router.push("/client/dashboard/nutrition");
+      case "diet-tracker":
+        router.push("/client/dashboard/diet-tracker");
         break;
       case "health":
         router.push("/client/dashboard/health");
