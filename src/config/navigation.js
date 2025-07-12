@@ -45,10 +45,10 @@ export const CLIENT_NAVIGATION = Object.freeze([
     badgeCount: 0, // Will be updated dynamically
   }),
   Object.freeze({
-    id: "nutrition",
-    label: "Nutrition",
+    id: "diet-tracker",
+    label: "Diet Tracker",
     icon: "mdi:food-apple",
-    route: "/client/dashboard/nutrition",
+    route: "/client/dashboard/diet-tracker",
     description: "Your nutrition plan",
   }),
   Object.freeze({

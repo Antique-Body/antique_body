@@ -72,7 +72,7 @@ function getOnboardingRedirect(role, token, pathname) {
         "/client/dashboard/trainings",
         "/client/dashboard/progress",
         "/client/dashboard/messages",
-        "/client/dashboard/nutrition",
+        "/client/dashboard/diet-tracker",
         "/client/dashboard/health",
         "/client/edit-profile",
       ],
