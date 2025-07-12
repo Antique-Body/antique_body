@@ -1,3 +1,4 @@
+export { AIFoodScanner } from "./AIFoodScanner";
 export { mockNutritionPlan } from "./mockNutritionPlan";
-export { WeeklyProgressChart } from "./WeeklyProgressChart";
-export { NutritionInsights } from "./NutritionInsights";
+export { MacroDistribution } from "./MacroDistribution";
+export { FoodImageAnalyzer } from "./FoodImageAnalyzer";
