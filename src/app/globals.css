@@ -136,3 +136,13 @@ body {
   border-color: #aee2ff !important;
   box-shadow: 0 4px 16px 0 #5bb3f770;
 }
+
+/* Hide scrollbar for horizontal scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
