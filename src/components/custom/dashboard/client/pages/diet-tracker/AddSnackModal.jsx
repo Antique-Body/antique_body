@@ -194,14 +194,13 @@ export const AddSnackModal = ({ isOpen, onClose, onSave, selectedDate }) => {
   const enteredCalories = parseFloat(formData.calories) || 0;
   const caloriesDifference = Math.abs(enteredCalories - macroCalories.total);
 
-  const formatDate = (date) => {
-    return new Date(date).toLocaleDateString("en-US", {
+  const formatDate = (date) =>
+    new Date(date).toLocaleDateString("en-US", {
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
     });
-  };
 
   const snackTypes = [
     { value: "snack", label: "Snack", icon: "mdi:food-apple" },
