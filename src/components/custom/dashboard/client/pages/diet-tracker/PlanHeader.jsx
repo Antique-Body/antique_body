@@ -5,21 +5,11 @@ import Image from "next/image";
 
 export const PlanHeader = ({
   activePlan,
-  nextMeal,
   currentDay,
   completionRate,
   validationError,
   onClearValidationError,
 }) => {
-  const formatTime = (time) => {
-    if (!time) return "";
-    const [hours, minutes] = time.split(":");
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? "PM" : "AM";
-    const displayHour = hour % 12 || 12;
-    return `${displayHour}:${minutes} ${ampm}`;
-  };
-
   const getTrainerName = () => {
     const trainer = activePlan?.assignedBy?.trainerProfile;
     if (!trainer) return "Your Trainer";

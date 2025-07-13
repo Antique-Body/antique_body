@@ -4,7 +4,6 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useState } from "react";
 
-import { Button } from "@/components/common/Button";
 import { Modal } from "@/components/common/Modal";
 
 export const MealOptionModal = ({

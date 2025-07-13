@@ -72,6 +72,11 @@ export const NutritionSummary = ({
   };
 
   const getStatusMessage = (percentage, nutrient, label) => {
+    // Don't show messages if intake is below 50% of target
+    if (percentage < 50) {
+      return null;
+    }
+
     if (nutrient === "calories") {
       if (percentage > 120)
         return {
@@ -97,11 +102,12 @@ export const NutritionSummary = ({
           message: `On track with ${label.toLowerCase()}`,
           color: "text-[#FF6B00]",
         };
-      return {
-        icon: "mdi:chart-line-variant",
-        message: `Need more ${label.toLowerCase()}`,
-        color: "text-yellow-400",
-      };
+      if (percentage >= 50)
+        return {
+          icon: "mdi:chart-line-variant",
+          message: `Halfway to ${label.toLowerCase()} goal`,
+          color: "text-yellow-400",
+        };
     }
 
     if (nutrient === "fat") {
@@ -123,11 +129,12 @@ export const NutritionSummary = ({
           message: "Optimal fat intake",
           color: "text-green-400",
         };
-      return {
-        icon: "mdi:chart-line-variant",
-        message: "Need more healthy fats",
-        color: "text-yellow-400",
-      };
+      if (percentage >= 50)
+        return {
+          icon: "mdi:chart-line-variant",
+          message: "Good progress on healthy fats",
+          color: "text-yellow-400",
+        };
     }
 
     if (nutrient === "protein") {
@@ -143,17 +150,24 @@ export const NutritionSummary = ({
           message: "Excellent protein for muscle building!",
           color: "text-blue-400",
         };
-      if (percentage >= 90)
+      if (percentage >= 95)
         return {
           icon: "mdi:check-circle",
           message: "Perfect protein intake",
           color: "text-green-400",
         };
-      return {
-        icon: "mdi:food-steak",
-        message: "Need more protein sources",
-        color: "text-yellow-400",
-      };
+      if (percentage >= 80)
+        return {
+          icon: "mdi:trending-up",
+          message: "Great protein progress",
+          color: "text-[#FF6B00]",
+        };
+      if (percentage >= 50)
+        return {
+          icon: "mdi:food-steak",
+          message: "Halfway to protein goal",
+          color: "text-yellow-400",
+        };
     }
 
     if (nutrient === "carbs") {
@@ -169,17 +183,24 @@ export const NutritionSummary = ({
           message: "Great energy levels!",
           color: "text-blue-400",
         };
-      if (percentage >= 90)
+      if (percentage >= 95)
         return {
           icon: "mdi:check-circle",
           message: "Excellent carb intake",
           color: "text-green-400",
         };
-      return {
-        icon: "mdi:fruit-grapes",
-        message: "Need more carbohydrates",
-        color: "text-yellow-400",
-      };
+      if (percentage >= 80)
+        return {
+          icon: "mdi:trending-up",
+          message: "Good energy balance",
+          color: "text-[#FF6B00]",
+        };
+      if (percentage >= 50)
+        return {
+          icon: "mdi:fruit-grapes",
+          message: "Halfway to carb goal",
+          color: "text-yellow-400",
+        };
     }
 
     return null;
@@ -436,32 +457,6 @@ export const NutritionSummary = ({
           </div>
         </div>
       </div>
-
-      {/* Quick Actions */}
-      {selectedDay === currentDay && (
-        <div className="bg-zinc-800/40 rounded-lg border border-zinc-700/50 p-4">
-          <h3 className="text-lg font-semibold text-white mb-4">
-            Quick Actions
-          </h3>
-
-          <div className="space-y-2">
-            <button className="w-full flex items-center gap-3 p-3 bg-zinc-700/30 hover:bg-zinc-700/50 rounded-lg transition-colors">
-              <Icon icon="mdi:camera" className="w-5 h-5 text-[#FF6B00]" />
-              <span className="text-white text-sm">Log meal with photo</span>
-            </button>
-
-            <button className="w-full flex items-center gap-3 p-3 bg-zinc-700/30 hover:bg-zinc-700/50 rounded-lg transition-colors">
-              <Icon icon="mdi:note-plus" className="w-5 h-5 text-[#FF6B00]" />
-              <span className="text-white text-sm">Add custom meal</span>
-            </button>
-
-            <button className="w-full flex items-center gap-3 p-3 bg-zinc-700/30 hover:bg-zinc-700/50 rounded-lg transition-colors">
-              <Icon icon="mdi:chart-line" className="w-5 h-5 text-[#FF6B00]" />
-              <span className="text-white text-sm">View weekly progress</span>
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
