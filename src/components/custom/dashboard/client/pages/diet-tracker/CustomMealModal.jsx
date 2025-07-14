@@ -1,7 +1,9 @@
 "use client";
 
 import { Icon } from "@iconify/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+
+import { FoodImageAnalyzer } from "./FoodImageAnalyzer";
 
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
@@ -14,7 +16,7 @@ export const CustomMealModal = ({
   mealName,
   mealTime,
 }) => {
-  const [activeTab, setActiveTab] = useState("create"); // "create" or "history"
+  const [activeTab, setActiveTab] = useState("create"); // "create", "history", or "ai-scanner"
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -28,6 +30,13 @@ export const CustomMealModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [customMealHistory, setCustomMealHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+
+  // AI Scanner states
+  const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [aiError, setAiError] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [aiGetAnalysisData, setAiGetAnalysisData] = useState(null);
+  const [aiSetManualInput, setAiSetManualInput] = useState(null);
 
   // Fetch custom meal history when modal opens
   useEffect(() => {
@@ -189,6 +198,113 @@ export const CustomMealModal = ({
     }
   };
 
+  // AI Scanner functions
+  const handleAiAnalyze = async () => {
+    if (!aiGetAnalysisData) return;
+
+    const analysisData = aiGetAnalysisData();
+    if (!analysisData) {
+      setAiError("Please upload an image or enter food details manually");
+      return;
+    }
+
+    setIsAnalyzing(true);
+    setAiError(null);
+
+    try {
+      const response = await fetch("/api/nutrition/analyze-food", {
+        method: "POST",
+        body: analysisData.formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.error?.includes("manual input")) {
+          if (aiSetManualInput) aiSetManualInput(true);
+          throw new Error(data.error);
+        }
+        throw new Error(data.error || "Failed to analyze image");
+      }
+
+      setAiAnalysis(data);
+    } catch (err) {
+      setAiError(
+        err.message || "Failed to analyze the image. Please try again."
+      );
+      console.error(err);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const handleAiSave = async () => {
+    if (!aiAnalysis) return;
+
+    try {
+      const customMealData = {
+        name: aiAnalysis.foodName,
+        description:
+          aiAnalysis.description || `AI detected ${aiAnalysis.foodName}`,
+        calories: aiAnalysis.calories,
+        protein: aiAnalysis.proteins,
+        carbs: aiAnalysis.carbs,
+        fat: aiAnalysis.fats,
+        ingredients: aiAnalysis.ingredients || [],
+      };
+
+      // Save to history with additional fields
+      await saveToHistory({
+        ...customMealData,
+        mealType: mealName?.toLowerCase(),
+      });
+
+      // Call the original onSave callback with the correct format
+      await onSave(customMealData);
+      handleClose();
+    } catch (error) {
+      console.error("Error saving AI analyzed meal:", error);
+      setAiError("Failed to save meal. Please try again.");
+    }
+  };
+
+  const getModalButtons = () => {
+    if (activeTab === "ai-scanner") {
+      if (!aiAnalysis) {
+        return {
+          primaryText: isAnalyzing ? "Analyzing..." : "Analyze Food",
+          primaryAction: handleAiAnalyze,
+          primaryDisabled: isAnalyzing,
+        };
+      } else {
+        return {
+          primaryText: "Save Meal",
+          primaryAction: handleAiSave,
+          primaryDisabled: false,
+        };
+      }
+    } else if (activeTab === "create") {
+      return {
+        primaryText: isSubmitting ? "Saving..." : "Save Meal",
+        primaryAction: handleSave,
+        primaryDisabled: isSubmitting,
+      };
+    }
+    return {
+      primaryText: null,
+      primaryAction: null,
+      primaryDisabled: false,
+    };
+  };
+
+  const modalButtons = getModalButtons();
+
+  // Memoize the onAnalyze callback to prevent infinite re-renders
+  const handleOnAnalyze = useCallback((getDataFn, setManualInputFn) => {
+    setAiGetAnalysisData(() => getDataFn);
+    setAiSetManualInput(() => setManualInputFn);
+  }, []);
+
   const handleClose = () => {
     setFormData({
       name: "",
@@ -201,6 +317,9 @@ export const CustomMealModal = ({
     });
     setErrors({});
     setActiveTab("create");
+    setAiAnalysis(null);
+    setAiError(null);
+    setIsAnalyzing(false);
     onClose();
   };
 
@@ -244,15 +363,9 @@ export const CustomMealModal = ({
         </div>
       }
       size="large"
-      primaryButtonText={
-        activeTab === "create"
-          ? isSubmitting
-            ? "Saving..."
-            : "Save Meal"
-          : null
-      }
-      primaryButtonAction={activeTab === "create" ? handleSave : null}
-      primaryButtonDisabled={isSubmitting}
+      primaryButtonText={modalButtons.primaryText}
+      primaryButtonAction={modalButtons.primaryAction}
+      primaryButtonDisabled={modalButtons.primaryDisabled}
       secondaryButtonText="Cancel"
       secondaryButtonAction={handleClose}
     >
@@ -261,7 +374,7 @@ export const CustomMealModal = ({
         <div className="flex gap-1 p-1 bg-zinc-800/40 rounded-lg border border-zinc-700/50">
           <button
             onClick={() => setActiveTab("create")}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
+            className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
               activeTab === "create"
                 ? "bg-[#FF6B00] text-white shadow-lg"
                 : "text-zinc-400 hover:text-white hover:bg-zinc-700/50"
@@ -271,8 +384,19 @@ export const CustomMealModal = ({
             Create New
           </button>
           <button
+            onClick={() => setActiveTab("ai-scanner")}
+            className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
+              activeTab === "ai-scanner"
+                ? "bg-[#FF6B00] text-white shadow-lg"
+                : "text-zinc-400 hover:text-white hover:bg-zinc-700/50"
+            }`}
+          >
+            <Icon icon="mdi:brain" className="w-4 h-4" />
+            AI Scanner
+          </button>
+          <button
             onClick={() => setActiveTab("history")}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
+            className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
               activeTab === "history"
                 ? "bg-[#FF6B00] text-white shadow-lg"
                 : "text-zinc-400 hover:text-white hover:bg-zinc-700/50"
@@ -479,6 +603,36 @@ export const CustomMealModal = ({
                   <span className="text-green-400 text-sm">
                     Saving your custom meal...
                   </span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* AI Scanner Tab */}
+        {activeTab === "ai-scanner" && (
+          <div className="space-y-4">
+            <FoodImageAnalyzer
+              mealName={mealName}
+              mealTime={mealTime}
+              onAnalyze={handleOnAnalyze}
+              isAnalyzing={isAnalyzing}
+              analysis={aiAnalysis}
+              error={aiError}
+              setError={setAiError}
+            />
+
+            {/* Error Display */}
+            {aiError && (
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <Icon
+                    icon="mdi:alert"
+                    className="w-5 h-5 text-red-400 mt-0.5"
+                  />
+                  <div className="flex-1">
+                    <p className="text-red-400 text-sm">{aiError}</p>
+                  </div>
                 </div>
               </div>
             )}
