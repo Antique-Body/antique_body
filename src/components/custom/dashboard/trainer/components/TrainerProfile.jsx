@@ -201,24 +201,6 @@ export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
                 </p>
               </div>
               <div>
-                <span className="text-zinc-400">Pricing Type</span>
-                <p className="text-white capitalize">
-                  {trainerData?.pricingType
-                    ? trainerData.pricingType.replace(/_/g, " ")
-                    : "N/A"}
-                </p>
-              </div>
-              <div>
-                <span className="text-zinc-400">Price Per Session</span>
-                <p className="text-white">
-                  {trainerData?.pricePerSession
-                    ? `${trainerData.currency || "EUR"} ${
-                        trainerData.pricePerSession
-                      }`
-                    : "Free consultation"}
-                </p>
-              </div>
-              <div>
                 <span className="text-zinc-400">Cancellation Policy</span>
                 <p className="text-white">
                   {trainerData?.cancellationPolicy || "N/A"} hours

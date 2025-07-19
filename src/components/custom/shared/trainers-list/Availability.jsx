@@ -251,27 +251,6 @@ export const Availability = ({ trainer }) => {
             <span>{trainer?.sessionDuration || 60} minutes</span>
           </li>
           <li className="flex justify-between">
-            <span>Price:</span>
-            <span className="font-medium text-[#FF6B00]">
-              {trainer?.pricePerSession ? (
-                <>
-                  ${trainer.pricePerSession}/
-                  {trainer?.pricingType === "per_session"
-                    ? "session"
-                    : "package"}
-                </>
-              ) : (
-                <>
-                  {trainer?.pricingType === "contact_for_pricing"
-                    ? "Contact for pricing"
-                    : trainer?.pricingType === "free_consultation"
-                    ? "Free consultation"
-                    : "Price not specified"}
-                </>
-              )}
-            </span>
-          </li>
-          <li className="flex justify-between">
             <span>Location:</span>
             <span>
               {closestGym

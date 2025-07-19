@@ -132,32 +132,24 @@ export function useTrainerRegistration() {
       if (!formData.gender) newErrors.gender = "Gender is required";
       if (!formData.trainerSince)
         newErrors.trainerSince = "Training since is required";
-      if (!formData.specialties || formData.specialties.length === 0)
-        newErrors.specialties = "At least one specialty is required";
+      // if (!formData.specialties || formData.specialties.length === 0)
+      //   newErrors.specialties = "At least one specialty is required";
     }
-    if (currentStep === 2) {
-      if (!formData.languages || formData.languages.length === 0)
-        newErrors.languages = "At least one language is required";
-      if (!formData.trainingEnvironment)
-        newErrors.trainingEnvironment = "Training environment is required";
-      if (!formData.trainingTypes || formData.trainingTypes.length === 0)
-        newErrors.trainingTypes = "At least one training type is required";
-    }
-    if (currentStep === 3) {
-      if (!formData.location || !formData.location.city)
-        newErrors["location.city"] = "City is required";
-      if (!formData.location || !formData.location.country)
-        newErrors["location.country"] = "Country is required";
-      if (!formData.pricingType || formData.pricingType === "")
-        newErrors.pricingType = "Pricing approach is required";
-      if (
-        (formData.pricingType === "fixed" ||
-          formData.pricingType === "package_deals") &&
-        (!formData.pricePerSession || Number(formData.pricePerSession) <= 0)
-      ) {
-        newErrors.pricePerSession = "Price per session is required";
-      }
-    }
+    // if (currentStep === 2) {
+    //   if (!formData.languages || formData.languages.length === 0)
+    //     newErrors.languages = "At least one language is required";
+    //   if (!formData.trainingEnvironment)
+    //     newErrors.trainingEnvironment = "Training environment is required";
+    //   if (!formData.trainingTypes || formData.trainingTypes.length === 0)
+    //     newErrors.trainingTypes = "At least one training type is required";
+    // }
+
+    // if (currentStep === 3) {
+    //   if (!formData.location || !formData.location.city)
+    //     newErrors["location.city"] = "City is required";
+    //   if (!formData.location || !formData.location.country)
+    //     newErrors["location.country"] = "Country is required";
+    // }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
