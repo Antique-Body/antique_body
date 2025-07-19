@@ -175,32 +175,6 @@ export const TrainerCard = ({
     };
   };
 
-  // Format pricing display based on pricing type
-  const getPricingDisplay = () => {
-    if (trainer.pricePerSession) {
-      return (
-        <>
-          ${trainer.pricePerSession}
-          <span className="text-xs font-normal text-zinc-400">
-            /{trainer.pricingType === "per_session" ? "session" : "package"}
-          </span>
-        </>
-      );
-    } else {
-      // Handle different pricing types
-      switch (trainer.pricingType) {
-        case "contact_for_pricing":
-          return "Contact for pricing";
-        case "free_consultation":
-          return "Free consultation";
-        case "variable":
-          return "Variable pricing";
-        default:
-          return "Price not specified";
-      }
-    }
-  };
-
   // Render rating stars
   const renderStars = (rating) => {
     const stars = [];
@@ -543,13 +517,6 @@ export const TrainerCard = ({
 
           {/* Price */}
           <div className="mb-1.5 sm:mb-3 flex items-center justify-between">
-            <p
-              className={`text-xs sm:text-lg font-bold text-[${themeColors.primary}]`}
-              style={{ color: themeColors.primary }}
-            >
-              {getPricingDisplay()}
-            </p>
-
             {/* Session duration badge */}
             {trainer.sessionDuration && (
               <span className="text-[9px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-0.5 bg-zinc-800 rounded-full text-zinc-400">

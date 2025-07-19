@@ -169,9 +169,6 @@ model TrainerProfile {
   certifications    Certification[]
   locationId        String?
   location          Location? @relation(fields: [locationId], references: [id])
-  pricingType       String?
-  pricePerSession   Int?
-  currency          String?
   contactEmail      String?
   contactPhone      String?
   sessionDuration   Int?

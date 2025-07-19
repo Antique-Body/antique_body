@@ -21,9 +21,7 @@ export function useTrainerEditProfileForm() {
       trainingTypes: [],
       certifications: [],
       description: "",
-      pricingType: "",
-      pricePerSession: "",
-      currency: "EUR",
+
       contactEmail: "",
       contactPhone: "",
       profileImage: "",
@@ -65,9 +63,6 @@ export function useTrainerEditProfileForm() {
         trainingTypes: data.trainingTypes?.map((t) => t.name || t) || [],
         certifications: data.certifications || [],
         description: data.description || "",
-        pricingType: data.pricingType || "",
-        pricePerSession: data.pricePerSession || "",
-        currency: data.currency || "EUR",
         contactEmail: data.contactEmail || "",
         contactPhone: data.contactPhone || "",
         profileImage: data.profileImage || "",
@@ -134,9 +129,6 @@ export function useTrainerEditProfileForm() {
     if (trainerData.trainerProfile.city) filledFields++;
     if (trainerData.trainerProfile.state) filledFields++;
     if (trainerData.trainerProfile.country) filledFields++;
-    if (trainerData.trainerProfile.pricingType) filledFields++;
-    if (trainerData.trainerProfile.pricePerSession) filledFields++;
-    if (trainerData.trainerProfile.currency) filledFields++;
     if (trainerData.trainerProfile.contactEmail) filledFields++;
     if (trainerData.trainerProfile.contactPhone) filledFields++;
     if (trainerData.trainerProfile.profileImage) filledFields++;

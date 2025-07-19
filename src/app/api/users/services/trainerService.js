@@ -19,7 +19,7 @@ function buildLocationWhere(location) {
  * formData: {
  *   firstName, lastName, dateOfBirth, gender, trainerSince, specialties, languages, trainingEnvironment, trainingTypes,
  *   email, phone,  profileImage, location: { city, state, country },
- *   pricingType, pricePerSession, currency, certifications: [{ name, issuer, expiryDate, description, documentUrl }]
+ *   certifications: [{ name, issuer, expiryDate, description, documentUrl }]
  * }
  */
 async function createTrainerWithDetails(formData, userId) {
@@ -29,13 +29,11 @@ async function createTrainerWithDetails(formData, userId) {
     "dateOfBirth",
     "gender",
     "trainerSince",
-    "specialties",
-    "languages",
-    "trainingEnvironment",
-    "trainingTypes",
-    "location",
-    "pricingType",
-    "currency",
+    // "specialties",
+    // "languages",
+    // "trainingEnvironment",
+    // "trainingTypes",
+    // "location",
   ];
   for (const field of requiredFields) {
     if (
@@ -45,20 +43,11 @@ async function createTrainerWithDetails(formData, userId) {
       throw new Error(`Field '${field}' is required.`);
     }
   }
-  if (
-    formData.pricingType === "fixed" ||
-    formData.pricingType === "package_deals"
-  ) {
-    if (!formData.pricePerSession || Number(formData.pricePerSession) <= 0) {
-      throw new Error(
-        "Field 'pricePerSession' is required for selected pricing type."
-      );
-    }
-  }
+
   const { location } = formData;
-  if (!location.city || !location.country) {
-    throw new Error("City and country are required.");
-  }
+  // if (!location.city || !location.country) {
+  //   throw new Error("City and country are required.");
+  // }
 
   // Find or create location (with lat/lon)
   let dbLocation = null;
@@ -119,13 +108,6 @@ async function createTrainerWithDetails(formData, userId) {
           profileImage: formData.profileImage,
           description: formData.description || null,
           locationId: dbLocation.id,
-          pricingType: formData.pricingType,
-          pricePerSession:
-            formData.pricingType === "fixed" ||
-            formData.pricingType === "package_deals"
-              ? Number(formData.pricePerSession)
-              : null,
-          currency: formData.currency,
           contactEmail: formData.contactEmail || null,
           contactPhone: formData.contactPhone || null,
           trainingEnvironment: formData.trainingEnvironment,
@@ -249,9 +231,6 @@ async function getTrainerProfileBasic(userId) {
       contactEmail: true,
       contactPhone: true,
       trainingEnvironment: true,
-      pricingType: true,
-      pricePerSession: true,
-      currency: true,
       sessionDuration: true,
       cancellationPolicy: true,
       createdAt: true,

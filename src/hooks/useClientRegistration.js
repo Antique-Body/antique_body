@@ -94,34 +94,34 @@ export function useClientRegistration() {
         }
       }
       if (!formData.gender) newErrors.gender = "Gender is required";
-      if (!formData.height) newErrors.height = "Height is required";
-      if (!formData.weight) newErrors.weight = "Weight is required";
-      if (!formData.experienceLevel)
-        newErrors.experienceLevel = "Experience level is required";
+      // if (!formData.height) newErrors.height = "Height is required";
+      // if (!formData.weight) newErrors.weight = "Weight is required";
+      // if (!formData.experienceLevel)
+      //   newErrors.experienceLevel = "Experience level is required";
     }
 
-    if (currentStep === 2) {
-      // Goals and Preferences Step validation
-      if (!formData.languages || formData.languages.length === 0)
-        newErrors.languages = "At least one language is required";
-      if (!formData.primaryGoal)
-        newErrors.primaryGoal = "Primary goal is required";
-      if (
-        !formData.preferredActivities ||
-        formData.preferredActivities.length === 0
-      )
-        newErrors.preferredActivities =
-          "Select at least one activity you're interested in";
-    }
+    // if (currentStep === 2) {
+    //   // Goals and Preferences Step validation
+    //   if (!formData.languages || formData.languages.length === 0)
+    //     newErrors.languages = "At least one language is required";
+    //   if (!formData.primaryGoal)
+    //     newErrors.primaryGoal = "Primary goal is required";
+    //   if (
+    //     !formData.preferredActivities ||
+    //     formData.preferredActivities.length === 0
+    //   )
+    //     newErrors.preferredActivities =
+    //       "Select at least one activity you're interested in";
+    // }
 
-    if (currentStep === 3) {
-      // Contact and Location Step validation
+    // if (currentStep === 3) {
+    //   // Contact and Location Step validation
 
-      if (!formData.location.city)
-        newErrors["location.city"] = "City is required";
-      if (!formData.location.country)
-        newErrors["location.country"] = "Country is required";
-    }
+    //   if (!formData.location.city)
+    //     newErrors["location.city"] = "City is required";
+    //   if (!formData.location.country)
+    //     newErrors["location.country"] = "Country is required";
+    // }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

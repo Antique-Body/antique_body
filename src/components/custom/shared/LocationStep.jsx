@@ -1,10 +1,7 @@
 "use client";
 import { Icon } from "@iconify/react";
 
-import { FormSection } from "./";
-
-import { FormField } from "@/components/common";
-import { usePrefillFromSession } from "@/hooks";
+import { FormField, InfoBanner } from "@/components/common";
 import {
   searchCities,
   searchStates,
@@ -12,21 +9,12 @@ import {
   geocodePlaceId,
 } from "@/lib/googlePlaces";
 
-export const ContactAndLocationStep = ({
+export const LocationStep = ({
   formData,
   onChange,
   errors,
   userType = "client", // "client" or "trainer"
 }) => {
-  usePrefillFromSession({
-    formData,
-    onChange,
-    fields: [
-      { formKey: "contactEmail", sessionKey: "email" },
-      { formKey: "contactPhone", sessionKey: "phone" },
-    ],
-  });
-
   // Custom handler for city select (Google Places)
   const handleCitySelect = async (option) => {
     onChange({
@@ -53,56 +41,45 @@ export const ContactAndLocationStep = ({
     }
   };
 
+  // Determine banner content based on user type
+  const getBannerContent = () => {
+    if (userType === "trainer") {
+      return {
+        title: "Increase your visibility",
+        subtitle:
+          "Adding your location helps clients find you and boosts your profile in local searches",
+      };
+    }
+
+    return {
+      title: "Find trainers near you",
+      subtitle:
+        "Sharing your location helps us match you with local trainers and personalize your fitness journey",
+    };
+  };
+
+  const bannerContent = getBannerContent();
+
   return (
-    <div className="space-y-6 sm:space-y-8">
-      {/* Contact Information */}
-      <FormSection
-        title="Contact Information"
-        description={
-          userType === "trainer"
-            ? "How clients can reach you"
-            : "How trainers can reach you"
-        }
-        icon="mdi:contact-mail"
-        className="mb-4 sm:mb-6"
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          <FormField
-            label="Email"
-            name="contactEmail"
-            type="email"
-            value={formData.contactEmail}
-            onChange={onChange}
-            placeholder="your.email@example.com"
-            error={errors.contactEmail}
-            backgroundStyle="darker"
-          />
-
-          <FormField
-            label="Phone Number"
-            name="contactPhone"
-            type="tel"
-            value={formData.contactPhone}
-            onChange={onChange}
-            placeholder="+387 XX XXX XXX"
-            error={errors.contactPhone}
-            backgroundStyle="darker"
-          />
-        </div>
-      </FormSection>
-
+    <div className="space-y-6">
       {/* Location Information */}
-      <FormSection
-        title="Location"
-        description={
-          userType === "trainer"
-            ? "Where you're based and available for training"
-            : "Where you're based and looking for trainers"
-        }
-        icon="mdi:map-marker"
-        className={userType === "trainer" ? "mb-6 sm:mb-8" : "mb-0"}
-      >
+      <div className="p-6 rounded-xl border border-zinc-800 bg-zinc-900/50">
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+          <Icon icon="mdi:map-marker" className="w-5 h-5 text-[#FF6B00]" />
+          Location
+          <span className="text-sm font-normal text-gray-400 ml-2">
+            (Optional)
+          </span>
+        </h2>
+
         <div className="space-y-4 sm:space-y-5">
+          {/* Optional Info Banner */}
+          <InfoBanner
+            icon="mdi:map-marker-radius"
+            title={bannerContent.title}
+            subtitle={bannerContent.subtitle}
+            variant="info"
+          />
           <FormField
             label="City"
             name="location.city"
@@ -176,7 +153,7 @@ export const ContactAndLocationStep = ({
             </div>
           )}
         </div>
-      </FormSection>
+      </div>
     </div>
   );
 };

@@ -10,19 +10,7 @@ import prisma from "@/lib/prisma";
  * }
  */
 async function createClientWithDetails(formData, userId) {
-  const requiredFields = [
-    "firstName",
-    "lastName",
-    "dateOfBirth",
-    "gender",
-    "height",
-    "weight",
-    "experienceLevel",
-    "languages",
-    "primaryGoal",
-    "preferredActivities",
-    "location",
-  ];
+  const requiredFields = ["firstName", "lastName", "dateOfBirth", "gender"];
   for (const field of requiredFields) {
     if (
       !formData[field] ||
