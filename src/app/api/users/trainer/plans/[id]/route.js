@@ -161,7 +161,6 @@ export async function DELETE(req, { params }) {
     }
     await model.update({
       where: { id: id, trainerInfoId: trainerInfo.id },
-      data: { isActive: false },
     });
     return NextResponse.json({ success: true });
   } catch (error) {

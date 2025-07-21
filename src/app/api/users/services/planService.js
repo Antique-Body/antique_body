@@ -141,7 +141,7 @@ export const softDeletePlan = async (planId, type = "training") => {
   const res = await fetchWithTimeout(url, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ isActive: false, type }),
+    body: JSON.stringify({ type }),
   });
   if (!res.ok) {
     let errorMsg = `Failed to soft delete plan at ${url} (status: ${res.status})`;

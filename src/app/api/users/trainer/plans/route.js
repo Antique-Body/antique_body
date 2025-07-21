@@ -59,7 +59,7 @@ export async function GET(req) {
     const planType = type === "nutrition" ? "nutrition" : "training";
     const { model, select } = modelMap[planType];
     let plans = await model.findMany({
-      where: { trainerInfoId: trainerInfo.id, isActive: true },
+      where: { trainerInfoId: trainerInfo.id },
       orderBy: { createdAt: "desc" },
       select,
     });
