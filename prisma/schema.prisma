@@ -503,8 +503,7 @@ model TrainingPlan {
   sessionFormat     Json?
   difficultyLevel   String?
   schedule          Json?    // Dodano polje za raspored sesija
-  isActive          Boolean  @default(true)
-  isPublished       Boolean  @default(false)
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   deletedAt         DateTime?
@@ -512,8 +511,6 @@ model TrainingPlan {
   trainerInfo       TrainerInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
 
   @@index([trainerInfoId])
-  @@index([isActive])
-  @@index([isPublished])
 }
 
 model NutritionPlan {
@@ -535,8 +532,7 @@ model NutritionPlan {
   days              Json?
   recommendedFrequency String?
   adaptability      String?
-  isActive          Boolean  @default(true)
-  isPublished       Boolean  @default(false)
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   deletedAt         DateTime?
@@ -544,8 +540,7 @@ model NutritionPlan {
   trainerInfo       TrainerInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
 
   @@index([trainerInfoId])
-  @@index([isActive])
-  @@index([isPublished])
+
 }
 
 // Coaching Request System

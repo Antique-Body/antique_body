@@ -14,12 +14,12 @@ export async function createDefaultPlansForTrainer(trainerInfoId) {
     await Promise.all([
       ...TRAINING_PLAN_CONFIG.map((plan) =>
         tx.trainingPlan.create({
-          data: { ...plan, trainerInfoId, isActive: true, isPublished: false },
+          data: { ...plan, trainerInfoId },
         })
       ),
       ...NUTRITION_PLAN_CONFIG.map((plan) =>
         tx.nutritionPlan.create({
-          data: { ...plan, trainerInfoId, isActive: true, isPublished: false },
+          data: { ...plan, trainerInfoId },
         })
       ),
     ]);

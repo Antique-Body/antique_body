@@ -29,8 +29,7 @@ const initialFormData = {
       id: crypto.randomUUID(),
       name: "Full Body Workout",
       duration: 60,
-      day: "Monday",
-      description: "",
+      day: 1, // broj, ne string
       exercises: [],
       type: "strength",
     },

@@ -249,8 +249,8 @@ CREATE TABLE `ClientProfile` (
     `primaryGoal` VARCHAR(191) NOT NULL,
     `secondaryGoal` VARCHAR(191) NULL,
     `goalDescription` TEXT NULL,
-    `email` VARCHAR(191) NULL,
-    `phone` VARCHAR(191) NULL,
+    `contactEmail` VARCHAR(191) NULL,
+    `contactPhone` VARCHAR(191) NULL,
     `locationId` VARCHAR(191) NULL,
     `profileImage` VARCHAR(191) NULL,
     `description` TEXT NULL,
@@ -342,7 +342,7 @@ CREATE TABLE `Exercise` (
     `level` VARCHAR(191) NOT NULL,
     `description` TEXT NOT NULL,
     `instructions` TEXT NOT NULL,
-    `video` VARCHAR(191) NULL,
+    `videoUrl` VARCHAR(191) NULL,
     `imageUrl` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -422,7 +422,7 @@ CREATE TABLE `Meal` (
     `ingredients` TEXT NOT NULL,
     `recipe` TEXT NOT NULL,
     `imageUrl` VARCHAR(191) NULL,
-    `video` VARCHAR(191) NULL,
+    `videoUrl` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -500,6 +500,157 @@ CREATE TABLE `NutritionPlan` (
     INDEX `NutritionPlan_trainerInfoId_idx`(`trainerInfoId`),
     INDEX `NutritionPlan_isActive_idx`(`isActive`),
     INDEX `NutritionPlan_isPublished_idx`(`isPublished`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `CoachingRequest` (
+    `id` VARCHAR(191) NOT NULL,
+    `clientId` VARCHAR(191) NOT NULL,
+    `trainerId` VARCHAR(191) NOT NULL,
+    `note` TEXT NULL,
+    `status` ENUM('pending', 'accepted', 'rejected', 'cancelled') NOT NULL DEFAULT 'pending',
+    `rejectionReason` TEXT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `respondedAt` DATETIME(3) NULL,
+
+    INDEX `CoachingRequest_clientId_idx`(`clientId`),
+    INDEX `CoachingRequest_trainerId_idx`(`trainerId`),
+    INDEX `CoachingRequest_status_idx`(`status`),
+    INDEX `CoachingRequest_createdAt_idx`(`createdAt`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `CoachingRequestCooldown` (
+    `id` VARCHAR(191) NOT NULL,
+    `clientId` VARCHAR(191) NOT NULL,
+    `trainerId` VARCHAR(191) NOT NULL,
+    `removedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `expiresAt` DATETIME(3) NOT NULL,
+
+    INDEX `CoachingRequestCooldown_clientId_idx`(`clientId`),
+    INDEX `CoachingRequestCooldown_trainerId_idx`(`trainerId`),
+    INDEX `CoachingRequestCooldown_expiresAt_idx`(`expiresAt`),
+    INDEX `CoachingRequestCooldown_removedAt_idx`(`removedAt`),
+    UNIQUE INDEX `CoachingRequestCooldown_clientId_trainerId_key`(`clientId`, `trainerId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `DietPlanAssignment` (
+    `id` VARCHAR(191) NOT NULL,
+    `clientId` VARCHAR(191) NOT NULL,
+    `nutritionPlanId` VARCHAR(191) NOT NULL,
+    `assignedById` VARCHAR(191) NOT NULL,
+    `startDate` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `isActive` BOOLEAN NOT NULL DEFAULT true,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    INDEX `DietPlanAssignment_clientId_idx`(`clientId`),
+    INDEX `DietPlanAssignment_nutritionPlanId_idx`(`nutritionPlanId`),
+    INDEX `DietPlanAssignment_assignedById_idx`(`assignedById`),
+    INDEX `DietPlanAssignment_isActive_idx`(`isActive`),
+    INDEX `DietPlanAssignment_startDate_idx`(`startDate`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `DailyDietLog` (
+    `id` VARCHAR(191) NOT NULL,
+    `dietPlanAssignmentId` VARCHAR(191) NOT NULL,
+    `date` DATE NOT NULL,
+    `dayNumber` INTEGER NOT NULL,
+    `totalCalories` DOUBLE NOT NULL DEFAULT 0,
+    `totalProtein` DOUBLE NOT NULL DEFAULT 0,
+    `totalCarbs` DOUBLE NOT NULL DEFAULT 0,
+    `totalFat` DOUBLE NOT NULL DEFAULT 0,
+    `completedMeals` INTEGER NOT NULL DEFAULT 0,
+    `totalMeals` INTEGER NOT NULL DEFAULT 0,
+    `isCompleted` BOOLEAN NOT NULL DEFAULT false,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    INDEX `DailyDietLog_dietPlanAssignmentId_idx`(`dietPlanAssignmentId`),
+    INDEX `DailyDietLog_date_idx`(`date`),
+    INDEX `DailyDietLog_dayNumber_idx`(`dayNumber`),
+    INDEX `DailyDietLog_isCompleted_idx`(`isCompleted`),
+    UNIQUE INDEX `DailyDietLog_dietPlanAssignmentId_date_key`(`dietPlanAssignmentId`, `date`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `MealLog` (
+    `id` VARCHAR(191) NOT NULL,
+    `dailyDietLogId` VARCHAR(191) NOT NULL,
+    `mealName` VARCHAR(191) NOT NULL,
+    `mealTime` VARCHAR(191) NOT NULL,
+    `selectedOption` JSON NOT NULL,
+    `isCompleted` BOOLEAN NOT NULL DEFAULT false,
+    `completedAt` DATETIME(3) NULL,
+    `calories` DOUBLE NOT NULL DEFAULT 0,
+    `protein` DOUBLE NOT NULL DEFAULT 0,
+    `carbs` DOUBLE NOT NULL DEFAULT 0,
+    `fat` DOUBLE NOT NULL DEFAULT 0,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    INDEX `MealLog_dailyDietLogId_idx`(`dailyDietLogId`),
+    INDEX `MealLog_mealName_idx`(`mealName`),
+    INDEX `MealLog_isCompleted_idx`(`isCompleted`),
+    INDEX `MealLog_completedAt_idx`(`completedAt`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `SnackLog` (
+    `id` VARCHAR(191) NOT NULL,
+    `dailyDietLogId` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `description` VARCHAR(191) NULL,
+    `mealType` VARCHAR(191) NOT NULL,
+    `calories` DOUBLE NOT NULL DEFAULT 0,
+    `protein` DOUBLE NOT NULL DEFAULT 0,
+    `carbs` DOUBLE NOT NULL DEFAULT 0,
+    `fat` DOUBLE NOT NULL DEFAULT 0,
+    `ingredients` JSON NOT NULL,
+    `loggedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `loggedTime` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    INDEX `SnackLog_dailyDietLogId_idx`(`dailyDietLogId`),
+    INDEX `SnackLog_mealType_idx`(`mealType`),
+    INDEX `SnackLog_loggedAt_idx`(`loggedAt`),
+    INDEX `SnackLog_loggedTime_idx`(`loggedTime`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `CustomMeal` (
+    `id` VARCHAR(191) NOT NULL,
+    `clientId` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `description` VARCHAR(191) NULL,
+    `mealType` VARCHAR(191) NOT NULL,
+    `calories` DOUBLE NOT NULL DEFAULT 0,
+    `protein` DOUBLE NOT NULL DEFAULT 0,
+    `carbs` DOUBLE NOT NULL DEFAULT 0,
+    `fat` DOUBLE NOT NULL DEFAULT 0,
+    `ingredients` JSON NOT NULL,
+    `usageCount` INTEGER NOT NULL DEFAULT 1,
+    `lastUsed` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    INDEX `CustomMeal_clientId_idx`(`clientId`),
+    INDEX `CustomMeal_mealType_idx`(`mealType`),
+    INDEX `CustomMeal_lastUsed_idx`(`lastUsed`),
+    INDEX `CustomMeal_usageCount_idx`(`usageCount`),
+    INDEX `CustomMeal_clientId_mealType_idx`(`clientId`, `mealType`),
+    INDEX `CustomMeal_clientId_lastUsed_idx`(`clientId`, `lastUsed`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -589,3 +740,36 @@ ALTER TABLE `TrainingPlan` ADD CONSTRAINT `TrainingPlan_trainerInfoId_fkey` FORE
 
 -- AddForeignKey
 ALTER TABLE `NutritionPlan` ADD CONSTRAINT `NutritionPlan_trainerInfoId_fkey` FOREIGN KEY (`trainerInfoId`) REFERENCES `TrainerInfo`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `CoachingRequest` ADD CONSTRAINT `CoachingRequest_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `ClientInfo`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `CoachingRequest` ADD CONSTRAINT `CoachingRequest_trainerId_fkey` FOREIGN KEY (`trainerId`) REFERENCES `TrainerInfo`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `CoachingRequestCooldown` ADD CONSTRAINT `CoachingRequestCooldown_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `ClientInfo`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `CoachingRequestCooldown` ADD CONSTRAINT `CoachingRequestCooldown_trainerId_fkey` FOREIGN KEY (`trainerId`) REFERENCES `TrainerInfo`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `DietPlanAssignment` ADD CONSTRAINT `DietPlanAssignment_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `ClientInfo`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `DietPlanAssignment` ADD CONSTRAINT `DietPlanAssignment_nutritionPlanId_fkey` FOREIGN KEY (`nutritionPlanId`) REFERENCES `NutritionPlan`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `DietPlanAssignment` ADD CONSTRAINT `DietPlanAssignment_assignedById_fkey` FOREIGN KEY (`assignedById`) REFERENCES `TrainerInfo`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `DailyDietLog` ADD CONSTRAINT `DailyDietLog_dietPlanAssignmentId_fkey` FOREIGN KEY (`dietPlanAssignmentId`) REFERENCES `DietPlanAssignment`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `MealLog` ADD CONSTRAINT `MealLog_dailyDietLogId_fkey` FOREIGN KEY (`dailyDietLogId`) REFERENCES `DailyDietLog`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `SnackLog` ADD CONSTRAINT `SnackLog_dailyDietLogId_fkey` FOREIGN KEY (`dailyDietLogId`) REFERENCES `DailyDietLog`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `CustomMeal` ADD CONSTRAINT `CustomMeal_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `ClientInfo`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

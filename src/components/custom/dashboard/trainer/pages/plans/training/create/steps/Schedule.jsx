@@ -94,8 +94,7 @@ const DEFAULT_SESSION = {
   id: "",
   name: "",
   duration: 60,
-  day: "day1",
-  description: "",
+  day: 1, // promijenjeno iz stringa u broj
   type: "strength",
   exercises: [],
   isRestDay: false,
@@ -214,6 +213,8 @@ export const Schedule = ({ data, onChange }) => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [useStaticLibrary, setUseStaticLibrary] = useState(false); // Toggle between static and backend
   const searchTimeoutRef = useRef(null);
+
+  console.log(data, "data");
 
   // Helper function to get active media for a specific exercise
   const getActiveMedia = (sessionIndex, exerciseIndex) => {
@@ -425,7 +426,7 @@ export const Schedule = ({ data, onChange }) => {
       const newSession = {
         ...DEFAULT_SESSION,
         id: crypto.randomUUID(),
-        day: `day${(data.schedule.length % 7) + 1}`,
+        day: data.schedule.length + 1, // uvijek broj, npr. 1, 2, 3...
         isRestDay,
         type: defaultType,
         name: isRestDay ? "Rest Day" : "",
@@ -1206,6 +1207,7 @@ export const Schedule = ({ data, onChange }) => {
                                                           darkMode={true}
                                                           compact={false}
                                                           className="mx-auto"
+                                                          bodyColor="white"
                                                         />
                                                       </div>
                                                     </div>

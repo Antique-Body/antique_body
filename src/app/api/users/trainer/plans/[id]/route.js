@@ -18,8 +18,6 @@ const ALLOWED_TRAINING_FIELDS = [
   "sessionFormat",
   "difficultyLevel",
   "schedule",
-  "isActive",
-  "isPublished",
 ];
 const ALLOWED_NUTRITION_FIELDS = [
   "title",
@@ -38,8 +36,6 @@ const ALLOWED_NUTRITION_FIELDS = [
   "days",
   "recommendedFrequency",
   "adaptability",
-  "isActive",
-  "isPublished",
 ];
 
 function filterAllowedFields(data, allowedFields) {

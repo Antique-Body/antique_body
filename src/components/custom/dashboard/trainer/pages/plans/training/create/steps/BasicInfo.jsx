@@ -11,6 +11,7 @@ import { TRAINING_LEVELS } from "src/enums/trainingLevels";
 import { CoverImageUploadSkeleton } from "../components/CoverImageUpload";
 
 import { FormField } from "@/components/common/FormField";
+import { UPLOAD_CONFIG } from "@/config/upload";
 import { updateFormData } from "@/lib/utils";
 
 const CoverImageUploadDynamic = dynamic(
@@ -52,18 +53,22 @@ export const BasicInfo = ({ data, onChange }) => {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
+    const allowedTypes = UPLOAD_CONFIG.coverImage.allowedTypes;
+    const maxSize = UPLOAD_CONFIG.coverImage.maxSize;
     if (file) {
-      // Validate file type
-      if (!file.type.startsWith("image/")) {
-        setImageError("File must be an image (JPG, PNG, GIF, etc.).");
+      if (!allowedTypes.includes(file.type)) {
+        setImageError(
+          `File type not allowed. Allowed types: ${allowedTypes
+            .map((t) => t.split("/")[1])
+            .join(", ")}`
+        );
         setPreviewImage(null);
         onChange({ coverImage: null });
         return;
       }
-      // Validate file size (5MB limit)
-      if (file.size > 5 * 1024 * 1024) {
+      if (file.size > maxSize * 1024 * 1024) {
         setImageError(
-          "File size exceeds 5MB limit. Please choose a smaller image."
+          `File size exceeds ${maxSize}MB limit. Please choose a smaller image.`
         );
         setPreviewImage(null);
         onChange({ coverImage: null });
