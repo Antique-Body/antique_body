@@ -106,7 +106,7 @@ const TrainerRegistration = () => {
 
                 {/* Trainer Since */}
                 <FormField
-                  label="Training Since (Year)"
+                  label="Trainer Since (Year)"
                   name="trainerSince"
                   type="select"
                   value={formData.trainerSince}
@@ -138,7 +138,7 @@ const TrainerRegistration = () => {
                           years of experience
                         </p>
                         <p className="text-sm text-zinc-400">
-                          Training since {formData.trainerSince}
+                          Trainer since {formData.trainerSince}
                         </p>
                       </div>
                     </div>

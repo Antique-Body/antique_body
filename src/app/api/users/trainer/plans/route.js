@@ -37,8 +37,7 @@ export async function GET(req) {
           durationType: true,
           clientCount: true,
           createdAt: true,
-          isActive: true,
-          isPublished: true,
+
           days: true,
         },
       },
@@ -54,8 +53,6 @@ export async function GET(req) {
           durationType: true,
           clientCount: true,
           createdAt: true,
-          isActive: true,
-          isPublished: true,
         },
       },
     };
@@ -131,8 +128,7 @@ export async function POST(req) {
           days: body.days || null,
           recommendedFrequency: body.recommendedFrequency || null,
           adaptability: body.adaptability || null,
-          isActive: true,
-          isPublished: false,
+
           trainerInfoId: trainerInfo.id,
         },
       });
@@ -153,8 +149,7 @@ export async function POST(req) {
           sessionFormat: body.sessionFormat,
           trainingType: body.trainingType,
           difficultyLevel: body.difficultyLevel,
-          isActive: true,
-          isPublished: false,
+
           trainerInfoId: trainerInfo.id,
         },
       });

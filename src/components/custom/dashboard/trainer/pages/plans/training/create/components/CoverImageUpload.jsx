@@ -3,11 +3,12 @@ import Image from "next/image";
 import React from "react";
 
 import { ErrorMessage } from "@/components/common/ErrorMessage";
+import { UPLOAD_CONFIG } from "@/config/upload";
 
 export default function CoverImageUpload({
   previewImage,
   imageError,
-  handleImageChange
+  handleImageChange,
 }) {
   return (
     <div className="relative group max-w-5xl mx-auto mb-8 sm:mb-12">
@@ -30,7 +31,7 @@ export default function CoverImageUpload({
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
                 <input
                   type="file"
-                  accept="image/*"
+                  accept={UPLOAD_CONFIG.coverImage.allowedTypes.join(",")} // Only allow allowed types
                   name="coverImage"
                   id="coverImage"
                   onChange={handleImageChange}
@@ -70,7 +71,7 @@ export default function CoverImageUpload({
               </span>
               <input
                 type="file"
-                accept="image/*"
+                accept={UPLOAD_CONFIG.coverImage.allowedTypes.join(",")}
                 name="coverImage"
                 id="coverImage2"
                 onChange={handleImageChange}

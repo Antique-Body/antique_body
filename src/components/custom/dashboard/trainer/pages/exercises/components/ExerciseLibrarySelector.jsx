@@ -144,7 +144,7 @@ export const ExerciseLibrarySelector = ({
         style={{ minHeight: 200, maxHeight: 400 }}
       >
         {displayExercises.length > 0 || displaySearchLoading ? (
-          <div className="grid grid-cols-1 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {displayExercises.map((exercise) => {
               const isSelected = selectedExercises.find(
                 (e) => e.id === exercise.id
@@ -155,114 +155,105 @@ export const ExerciseLibrarySelector = ({
                   key={exercise.id}
                   type="button"
                   onClick={() => onSelectExercise(exercise)}
-                  className={`w-full text-left bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-600 rounded-lg p-4 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500/30 ${
+                  className={`w-full text-left bg-gradient-to-br from-zinc-800/80 to-zinc-900/80 hover:from-zinc-700/80 hover:to-zinc-800/80 border border-zinc-700/50 hover:border-orange-500/40 rounded-2xl p-2 md:p-3 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500/40 shadow-md hover:shadow-2xl backdrop-blur-md flex flex-row items-stretch ${
                     isSelected
                       ? "ring-2 ring-orange-500 bg-orange-500/10 border-orange-500/50"
                       : ""
                   }`}
                 >
-                  <div className="flex flex-row gap-4 items-center">
-                    {/* AnatomicalViewer on the left - larger size */}
-                    <div className="h-auto w-16 sm:w-20 md:w-24 lg:w-28 flex-shrink-0">
-                      {exercise.imageUrl ? (
-                        <div className="w-full h-full rounded-lg overflow-hidden bg-zinc-600">
-                          <Image
-                            src={exercise.imageUrl}
-                            alt={exercise.name}
-                            className="w-full h-full object-cover"
-                            width={100}
-                            height={100}
-                          />
-                        </div>
-                      ) : (
-                        <AnatomicalViewer
-                          exerciseName={exercise.name}
-                          muscleGroups={exercise.muscleGroups || []}
-                          showBothViews={false}
-                          size="medium"
-                          interactive={false}
-                          showMuscleInfo={false}
-                          showExerciseInfo={false}
-                          darkMode={true}
-                          compact={false}
-                        />
-                      )}
-                    </div>
-                    {/* Textual info on the right */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="text-white font-semibold text-sm sm:text-base">
-                          {exercise.name}
-                        </h3>
-                        <div className="flex gap-1">
-                          <span
-                            className={`text-xs px-2 py-1 rounded ${
-                              exercise.type === "strength"
-                                ? "bg-purple-900/40 text-purple-300"
-                                : exercise.type === "bodyweight"
-                                ? "bg-green-900/40 text-green-300"
-                                : exercise.type === "cardio"
-                                ? "bg-blue-900/40 text-blue-300"
-                                : exercise.type === "flexibility"
-                                ? "bg-violet-900/40 text-violet-300"
-                                : exercise.type === "balance"
-                                ? "bg-pink-900/40 text-pink-300"
-                                : "bg-gray-900/40 text-gray-300"
-                            }`}
-                          >
-                            {exercise.type.charAt(0).toUpperCase() +
-                              exercise.type.slice(1)}
-                          </span>
-                          <span
-                            className={`text-xs px-2 py-1 rounded ${
-                              exercise.level === "beginner"
-                                ? "bg-green-900/40 text-green-300"
-                                : exercise.level === "intermediate"
-                                ? "bg-orange-900/40 text-orange-300"
-                                : "bg-red-900/40 text-red-300"
-                            }`}
-                          >
-                            {exercise.level.charAt(0).toUpperCase() +
-                              exercise.level.slice(1)}
-                          </span>
-                        </div>
-                      </div>
-
-                      <p className="text-zinc-400 text-xs sm:text-sm mb-2 line-clamp-2">
-                        {exercise.description}
-                      </p>
-
-                      <div className="flex flex-wrap gap-1">
-                        {exercise.muscleGroups
-                          .slice(0, 3)
-                          .map((muscle, idx) => (
-                            <span
-                              key={idx}
-                              className="text-xs px-2 py-1 bg-orange-900/20 text-orange-300 rounded"
-                            >
-                              {formatMuscleDisplayName(muscle)}
-                            </span>
-                          ))}
-                        {exercise.muscleGroups.length > 3 && (
-                          <span className="text-xs px-2 py-1 bg-zinc-700 text-zinc-400 rounded">
-                            +{exercise.muscleGroups.length - 3}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Selection indicator */}
-                    {isSelected && (
-                      <div className="flex-shrink-0 ml-2">
-                        <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
-                          <Icon
-                            icon="mdi:check"
-                            className="w-4 h-4 text-white"
-                          />
-                        </div>
-                      </div>
+                  {/* Slika/AnatomicalViewer lijevo, full height */}
+                  <div className="h-full w-20 md:w-24 flex-shrink-0 rounded-xl overflow-hidden bg-zinc-700 border border-zinc-600 shadow-inner flex items-center justify-center">
+                    {exercise.imageUrl ? (
+                      <Image
+                        src={exercise.imageUrl}
+                        alt={exercise.name}
+                        className="w-full h-full object-cover"
+                        width={96}
+                        height={144}
+                      />
+                    ) : (
+                      <AnatomicalViewer
+                        exerciseName={exercise.name}
+                        muscleGroups={exercise.muscleGroups || []}
+                        showBothViews={false}
+                        size="small"
+                        interactive={false}
+                        showMuscleInfo={false}
+                        showExerciseInfo={false}
+                        darkMode={false}
+                        compact={true}
+                        bodyColor="white"
+                        className="w-full h-full"
+                      />
                     )}
                   </div>
+                  {/* Tekstualni sadržaj desno, kompaktan i rastezljiv */}
+                  <div className="flex-1 min-w-0 flex flex-col justify-between pl-3 py-1">
+                    <div>
+                      {/* Naslov iznad badge-ova */}
+                      <h3 className="text-white font-semibold text-base mb-1">
+                        {exercise.name}
+                      </h3>
+                      <div className="flex gap-1 mb-1">
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full shadow-sm border-2 font-semibold ${
+                            exercise.type === "strength"
+                              ? "bg-purple-900/60 text-purple-200 border-purple-700/40"
+                              : exercise.type === "bodyweight"
+                              ? "bg-green-900/60 text-green-200 border-green-700/40"
+                              : exercise.type === "cardio"
+                              ? "bg-blue-900/60 text-blue-200 border-blue-700/40"
+                              : exercise.type === "flexibility"
+                              ? "bg-violet-900/60 text-violet-200 border-violet-700/40"
+                              : exercise.type === "balance"
+                              ? "bg-pink-900/60 text-pink-200 border-pink-700/40"
+                              : "bg-gray-900/60 text-gray-200 border-gray-700/40"
+                          }`}
+                        >
+                          {exercise.type.charAt(0).toUpperCase() +
+                            exercise.type.slice(1)}
+                        </span>
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full shadow-sm border-2 font-semibold ${
+                            exercise.level === "beginner"
+                              ? "bg-green-900/60 text-green-200 border-green-700/40"
+                              : exercise.level === "intermediate"
+                              ? "bg-orange-900/60 text-orange-200 border-orange-700/40"
+                              : "bg-red-900/60 text-red-200 border-red-700/40"
+                          }`}
+                        >
+                          {exercise.level.charAt(0).toUpperCase() +
+                            exercise.level.slice(1)}
+                        </span>
+                      </div>
+                      <p className="text-zinc-400 text-xs mb-2 line-clamp-2">
+                        {exercise.description}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      {exercise.muscleGroups.slice(0, 3).map((muscle, idx) => (
+                        <span
+                          key={idx}
+                          className="text-[10px] px-2 py-0.5 bg-orange-900/40 text-orange-200 rounded-full border border-orange-700/40 shadow-sm hover:shadow-md transition-shadow duration-200"
+                        >
+                          {formatMuscleDisplayName(muscle)}
+                        </span>
+                      ))}
+                      {exercise.muscleGroups.length > 3 && (
+                        <span className="text-[10px] px-2 py-0.5 bg-zinc-700 text-zinc-400 rounded-full border border-zinc-600/30 shadow-sm">
+                          +{exercise.muscleGroups.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {/* Selection indicator */}
+                  {isSelected && (
+                    <div className="flex-shrink-0 ml-2 flex items-center">
+                      <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                        <Icon icon="mdi:check" className="w-4 h-4 text-white" />
+                      </div>
+                    </div>
+                  )}
                 </button>
               );
             })}

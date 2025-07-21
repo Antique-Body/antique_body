@@ -78,7 +78,8 @@ export const ExerciseCard = ({ exercise, onView, onEdit, onDelete }) => {
                   darkMode={true}
                   compact={true}
                   initialView={getPrimaryAnatomicalView(safeMuscleGroups)}
-                  className="w-full h-full"
+                  className="w-[40%] h-full"
+                  bodyColor="white"
                 />
               </div>
             ) : (
