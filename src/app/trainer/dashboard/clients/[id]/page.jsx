@@ -304,11 +304,11 @@ export default function ClientDashboard({ params }) {
             onClick={() => router.push("/trainer/dashboard/clients")}
             className="group flex items-center gap-2 text-zinc-400 hover:text-white transition-colors duration-200"
           >
-            <Icon 
-              icon="mdi:arrow-left" 
-              width={20} 
-              height={20} 
-              className="group-hover:-translate-x-1 transition-transform duration-200" 
+            <Icon
+              icon="mdi:arrow-left"
+              width={20}
+              height={20}
+              className="group-hover:-translate-x-1 transition-transform duration-200"
             />
             <span className="text-sm font-medium">Back to Clients</span>
           </button>
@@ -738,6 +738,28 @@ export default function ClientDashboard({ params }) {
         days={planPreviewData?.days}
         type="training"
       />
+      <style jsx>{`
+        .animate-fade-in {
+          animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .scrollbar-thin::-webkit-scrollbar {
+          width: 6px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+          background: #27272a;
+          border-radius: 6px;
+        }
+      `}</style>
     </div>
   );
 }
@@ -2218,431 +2240,251 @@ function NutritionTab({}) {
 
 // Messages Tab Component
 function MessagesTab({}) {
+  const [messages, setMessages] = React.useState([
+    {
+      id: 1,
+      sender: "client",
+      text: "Hey! Just finished today's workout. The bench press felt much easier than last week!",
+      time: "2:30 PM",
+      date: "Today",
+    },
+    {
+      id: 2,
+      sender: "trainer",
+      text: "That's fantastic! Your form has improved significantly. Keep up the great work! 💪",
+      time: "2:32 PM",
+      date: "Today",
+    },
+    {
+      id: 3,
+      sender: "client",
+      text: "Quick question about tomorrow's leg day - should I increase the weight on squats?",
+      time: "3:15 PM",
+      date: "Today",
+    },
+    {
+      id: 4,
+      sender: "trainer",
+      text: "Here's your updated meal plan for this week. Focus on hitting your protein targets!",
+      time: "10:30 AM",
+      date: "Yesterday",
+      file: "meal-plan-week3.pdf",
+    },
+    {
+      id: 5,
+      sender: "client",
+      text: "Perfect! Thanks for the meal plan. I'll start implementing it today.",
+      time: "11:45 AM",
+      date: "Yesterday",
+    },
+  ]);
+  const [newMessage, setNewMessage] = React.useState("");
+  const [showVideoModal, setShowVideoModal] = React.useState(false);
+  const messagesEndRef = React.useRef(null);
+
+  // Auto-scroll to bottom on new message
+  React.useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, showVideoModal]);
+
+  // Group messages by date
+  const groupedMessages = messages.reduce((acc, msg) => {
+    if (!acc[msg.date]) acc[msg.date] = [];
+    acc[msg.date].push(msg);
+    return acc;
+  }, {});
+
+  const handleSend = () => {
+    if (!newMessage.trim()) return;
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: prev.length + 1,
+        sender: "trainer",
+        text: newMessage,
+        time: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        date: "Today",
+      },
+    ]);
+    setNewMessage("");
+  };
+
+  // Helper for avatar (initials)
+  const getAvatar = (sender) => (
+    <div
+      className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-white shadow-md border-2 select-none ${
+        sender === "trainer"
+          ? "bg-gradient-to-br from-blue-600 to-blue-400 border-blue-400"
+          : "bg-gradient-to-br from-zinc-700 to-zinc-500 border-zinc-400"
+      }`}
+    >
+      {sender === "trainer" ? "T" : "C"}
+    </div>
+  );
+
   return (
-    <div className="space-y-6">
-      {/* Header Actions */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-white">Communication</h2>
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            leftIcon={<Icon icon="mdi:video" width={20} height={20} />}
-          >
-            Video Call
-          </Button>
-          <Button
-            variant="primary"
-            leftIcon={<Icon icon="mdi:plus" width={20} height={20} />}
-          >
-            New Message
-          </Button>
-        </div>
+    <div className="max-w-2xl mx-auto flex flex-col h-[calc(100vh-180px)] sm:h-[600px]">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-10 bg-zinc-900/90 backdrop-blur border-b border-zinc-800 px-6 py-4 flex items-center justify-between rounded-t-2xl shadow-lg">
+        <h2 className="text-xl font-bold text-white tracking-tight">
+          Messages
+        </h2>
+        <button
+          onClick={() => setShowVideoModal(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-lg font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+        >
+          <Icon icon="mdi:video" width={20} height={20} />
+          Video Call
+        </button>
       </div>
 
-      {/* Communication Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card variant="dark" className="overflow-visible">
-          <div className="flex items-center gap-2 mb-2">
+      {/* Message History */}
+      <div className="flex-1 overflow-y-auto bg-zinc-900/80 px-4 py-6 rounded-b-2xl rounded-t-none border-x border-b border-zinc-700/50 shadow-xl scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+        {messages.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-full text-zinc-500">
             <Icon
-              icon="mdi:message-text"
-              className="text-[#3E92CC]"
-              width={20}
-              height={20}
+              icon="mdi:chat-outline"
+              width={48}
+              height={48}
+              className="mb-2"
             />
-            <span className="text-zinc-400 text-sm">Total Messages</span>
+            <p className="text-lg">No messages yet</p>
+            <p className="text-sm">Start the conversation below!</p>
           </div>
-          <p className="text-2xl font-bold text-white">127</p>
-          <p className="text-green-400 text-sm mt-1">+5 this week</p>
-        </Card>
-        <Card variant="dark" className="overflow-visible">
-          <div className="flex items-center gap-2 mb-2">
-            <Icon
-              icon="mdi:clock"
-              className="text-[#3E92CC]"
-              width={20}
-              height={20}
-            />
-            <span className="text-zinc-400 text-sm">Response Time</span>
-          </div>
-          <p className="text-2xl font-bold text-white">2.5h</p>
-          <p className="text-blue-400 text-sm mt-1">Average</p>
-        </Card>
-        <Card variant="dark" className="overflow-visible">
-          <div className="flex items-center gap-2 mb-2">
-            <Icon
-              icon="mdi:video"
-              className="text-[#3E92CC]"
-              width={20}
-              height={20}
-            />
-            <span className="text-zinc-400 text-sm">Video Calls</span>
-          </div>
-          <p className="text-2xl font-bold text-white">8</p>
-          <p className="text-orange-400 text-sm mt-1">This month</p>
-        </Card>
-        <Card variant="dark" className="overflow-visible">
-          <div className="flex items-center gap-2 mb-2">
-            <Icon
-              icon="mdi:file-document"
-              className="text-[#3E92CC]"
-              width={20}
-              height={20}
-            />
-            <span className="text-zinc-400 text-sm">Files Shared</span>
-          </div>
-          <p className="text-2xl font-bold text-white">23</p>
-          <p className="text-purple-400 text-sm mt-1">Documents</p>
-        </Card>
+        )}
+        {Object.entries(groupedMessages).map(([date, msgs]) => (
+          <React.Fragment key={date}>
+            <div className="text-center my-4">
+              <span className="text-zinc-500 text-xs bg-zinc-800 px-3 py-1 rounded-full shadow">
+                {date}
+              </span>
+            </div>
+            {msgs.map((msg, idx) => (
+              <div
+                key={msg.id}
+                className={`flex items-end gap-2 mb-2 group ${
+                  msg.sender === "trainer" ? "justify-end" : "justify-start"
+                }`}
+              >
+                {msg.sender === "client" && getAvatar("client")}
+                <div
+                  className={`max-w-[70%] flex flex-col ${
+                    msg.sender === "trainer" ? "items-end" : "items-start"
+                  }`}
+                >
+                  <div
+                    className={`relative px-4 py-2 rounded-2xl shadow-md transition-all duration-200 text-base whitespace-pre-line break-words ${
+                      msg.sender === "trainer"
+                        ? "bg-gradient-to-br from-blue-600 to-blue-500 text-white rounded-br-md"
+                        : "bg-zinc-800/80 text-zinc-100 rounded-bl-md"
+                    } ${idx === msgs.length - 1 ? "animate-fade-in" : ""}`}
+                  >
+                    {msg.text}
+                    {msg.file && (
+                      <div className="mt-2 p-2 bg-blue-900/30 rounded border border-blue-700/30 flex items-center gap-2">
+                        <Icon
+                          icon="mdi:file-document"
+                          className="text-blue-400"
+                          width={16}
+                          height={16}
+                        />
+                        <span className="text-blue-400 text-xs">
+                          {msg.file}
+                        </span>
+                      </div>
+                    )}
+                    {/* Timestamp on hover */}
+                    <span
+                      className={`absolute -bottom-5 right-2 text-xs text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 select-none`}
+                    >
+                      {msg.time}
+                    </span>
+                  </div>
+                  {/* Always show timestamp below bubble, smaller on mobile */}
+                  <span className="mt-1 text-xs text-zinc-500/80 select-none sm:hidden block">
+                    {msg.time}
+                  </span>
+                </div>
+                {msg.sender === "trainer" && getAvatar("trainer")}
+              </div>
+            ))}
+          </React.Fragment>
+        ))}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Message Composer */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center gap-2 mb-4">
-          <Icon
-            icon="mdi:pencil"
-            className="text-[#3E92CC]"
-            width={24}
-            height={24}
-          />
-          <h3 className="text-xl font-semibold text-white">Send Message</h3>
-        </div>
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Icon
-              icon="mdi:tag"
-              className="text-zinc-400"
-              width={16}
-              height={16}
-            />
-            <span className="text-zinc-400 text-sm">Subject</span>
-          </div>
-          <input
-            type="text"
-            placeholder="Message subject..."
-            className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3 text-white placeholder-zinc-500 focus:border-[#3E92CC] focus:outline-none transition-colors"
-          />
-          <div className="flex items-center gap-2 mb-2">
-            <Icon
-              icon="mdi:message-text"
-              className="text-zinc-400"
-              width={16}
-              height={16}
-            />
-            <span className="text-zinc-400 text-sm">Message</span>
-          </div>
-          <textarea
-            placeholder="Type your message here..."
-            rows={4}
-            className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3 text-white placeholder-zinc-500 focus:border-[#3E92CC] focus:outline-none transition-colors resize-none"
-          />
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Button variant="secondary" size="small">
-                <Icon icon="mdi:attachment" width={16} height={16} />
-                Attach File
-              </Button>
-              <Button variant="secondary" size="small">
-                <Icon icon="mdi:emoticon" width={16} height={16} />
-                Emoji
-              </Button>
-            </div>
-            <Button variant="primary">
-              <Icon icon="mdi:send" width={16} height={16} />
-              Send Message
-            </Button>
-          </div>
-        </div>
-      </Card>
+      <div className="bg-zinc-900/90 border-t border-zinc-800 px-4 py-3 flex items-center gap-3 rounded-b-2xl shadow-lg">
+        <textarea
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          placeholder="Type your message..."
+          rows={1}
+          className="flex-1 bg-zinc-800/70 border border-zinc-700 rounded-full px-5 py-3 text-white placeholder-zinc-500 focus:border-blue-500 focus:outline-none resize-none shadow-sm transition-all"
+          style={{ minHeight: 44, maxHeight: 120 }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          }}
+        />
+        <button
+          onClick={handleSend}
+          className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-6 py-3 rounded-full font-semibold shadow-md transition-all disabled:opacity-50"
+          disabled={!newMessage.trim()}
+        >
+          <Icon icon="mdi:send" width={22} height={22} />
+        </button>
+      </div>
 
-      {/* Quick Responses */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center gap-2 mb-4">
-          <Icon
-            icon="mdi:lightning-bolt"
-            className="text-[#3E92CC]"
-            width={24}
-            height={24}
-          />
-          <h3 className="text-xl font-semibold text-white">Quick Responses</h3>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <button className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors text-left">
-            <p className="text-white font-medium text-sm">
-              Great job on today's workout!
-            </p>
-            <p className="text-zinc-400 text-xs mt-1">Workout encouragement</p>
-          </button>
-          <button className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors text-left">
-            <p className="text-white font-medium text-sm">
-              Don't forget to log your meals
-            </p>
-            <p className="text-zinc-400 text-xs mt-1">Nutrition reminder</p>
-          </button>
-          <button className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors text-left">
-            <p className="text-white font-medium text-sm">
-              How are you feeling today?
-            </p>
-            <p className="text-zinc-400 text-xs mt-1">Check-in question</p>
-          </button>
-          <button className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors text-left">
-            <p className="text-white font-medium text-sm">
-              Let's schedule your next session
-            </p>
-            <p className="text-zinc-400 text-xs mt-1">Scheduling</p>
-          </button>
-        </div>
-      </Card>
-
-      {/* Message History */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Icon
-              icon="mdi:history"
-              className="text-[#3E92CC]"
-              width={24}
-              height={24}
-            />
-            <h3 className="text-xl font-semibold text-white">
-              Message History
-            </h3>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="secondary" size="small">
-              <Icon icon="mdi:filter" width={16} height={16} />
-              Filter
-            </Button>
-            <Button variant="secondary" size="small">
-              <Icon icon="mdi:download" width={16} height={16} />
-              Export
-            </Button>
-          </div>
-        </div>
-        <div className="space-y-4 max-h-96 overflow-y-auto">
-          {/* Today's Messages */}
-          <div className="text-center">
-            <span className="text-zinc-500 text-sm bg-zinc-800 px-3 py-1 rounded-full">
-              Today
-            </span>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 bg-[#3E92CC] rounded-full flex items-center justify-center flex-shrink-0">
-              <Icon icon="mdi:account" width={16} height={16} color="white" />
-            </div>
-            <div className="flex-1">
-              <div className="bg-zinc-800/50 rounded-lg p-3 border border-zinc-700">
-                <p className="text-white text-sm">
-                  Hey! Just finished today's workout. The bench press felt much
-                  easier than last week!
-                </p>
-                <p className="text-zinc-400 text-xs mt-2">2:30 PM</p>
+      {/* Video Call Modal */}
+      {showVideoModal && (
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-zinc-900 rounded-2xl border border-zinc-700 shadow-2xl max-w-3xl w-full overflow-hidden relative">
+            <div className="flex items-center justify-between p-6 border-b border-zinc-700 bg-zinc-900/95">
+              <div className="flex items-center gap-2">
+                <Icon
+                  icon="mdi:video"
+                  width={28}
+                  height={28}
+                  className="text-blue-400"
+                />
+                <h3 className="text-2xl font-bold text-white">Video Call</h3>
               </div>
+              <button
+                onClick={() => setShowVideoModal(false)}
+                className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+                aria-label="Close video call"
+              >
+                <Icon
+                  icon="mdi:close"
+                  width={28}
+                  height={28}
+                  className="text-zinc-400"
+                />
+              </button>
             </div>
-          </div>
-
-          <div className="flex items-start gap-3 justify-end">
-            <div className="flex-1 max-w-md">
-              <div className="bg-[#3E92CC] rounded-lg p-3 ml-auto">
-                <p className="text-white text-sm">
-                  That's fantastic! Your form has improved significantly. Keep
-                  up the great work! 💪
-                </p>
-                <p className="text-blue-100 text-xs mt-2">2:32 PM</p>
-              </div>
-            </div>
-            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-              <Icon icon="mdi:account" width={16} height={16} color="white" />
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 bg-[#3E92CC] rounded-full flex items-center justify-center flex-shrink-0">
-              <Icon icon="mdi:account" width={16} height={16} color="white" />
-            </div>
-            <div className="flex-1">
-              <div className="bg-zinc-800/50 rounded-lg p-3 border border-zinc-700">
-                <p className="text-white text-sm">
-                  Quick question about tomorrow's leg day - should I increase
-                  the weight on squats?
-                </p>
-                <p className="text-zinc-400 text-xs mt-2">3:15 PM</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Yesterday's Messages */}
-          <div className="text-center">
-            <span className="text-zinc-500 text-sm bg-zinc-800 px-3 py-1 rounded-full">
-              Yesterday
-            </span>
-          </div>
-
-          <div className="flex items-start gap-3 justify-end">
-            <div className="flex-1 max-w-md">
-              <div className="bg-[#3E92CC] rounded-lg p-3 ml-auto">
-                <p className="text-white text-sm">
-                  Here's your updated meal plan for this week. Focus on hitting
-                  your protein targets!
-                </p>
-                <div className="mt-2 p-2 bg-blue-900/30 rounded border border-blue-700/30">
-                  <div className="flex items-center gap-2">
-                    <Icon
-                      icon="mdi:file-document"
-                      className="text-blue-400"
-                      width={16}
-                      height={16}
-                    />
-                    <span className="text-blue-400 text-sm">
-                      meal-plan-week3.pdf
-                    </span>
-                  </div>
-                </div>
-                <p className="text-blue-100 text-xs mt-2">10:30 AM</p>
-              </div>
-            </div>
-            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-              <Icon icon="mdi:account" width={16} height={16} color="white" />
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 bg-[#3E92CC] rounded-full flex items-center justify-center flex-shrink-0">
-              <Icon icon="mdi:account" width={16} height={16} color="white" />
-            </div>
-            <div className="flex-1">
-              <div className="bg-zinc-800/50 rounded-lg p-3 border border-zinc-700">
-                <p className="text-white text-sm">
-                  Perfect! Thanks for the meal plan. I'll start implementing it
-                  today.
-                </p>
-                <p className="text-zinc-400 text-xs mt-2">11:45 AM</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Scheduled Messages */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Icon
-              icon="mdi:calendar-clock"
-              className="text-[#3E92CC]"
-              width={24}
-              height={24}
-            />
-            <h3 className="text-xl font-semibold text-white">
-              Scheduled Messages
-            </h3>
-          </div>
-          <Button variant="primary" size="small">
-            <Icon icon="mdi:plus" width={16} height={16} />
-            Schedule Message
-          </Button>
-        </div>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center gap-3">
-              <Icon
-                icon="mdi:clock"
-                className="text-orange-400"
-                width={20}
-                height={20}
+            <div className="p-4 bg-black">
+              <iframe
+                src="https://meet.jit.si/AntiqueBodyDemoRoom"
+                allow="camera; microphone; fullscreen; display-capture"
+                className="w-full h-[500px] rounded-xl border-none bg-black"
+                title="Video Call"
               />
-              <div>
-                <p className="text-white font-medium text-sm">
-                  Weekly check-in reminder
-                </p>
-                <p className="text-zinc-400 text-xs">Every Monday at 9:00 AM</p>
+              <div className="mt-4 text-center text-zinc-400 text-base">
+                Video poziv je pokrenut. Pošaljite link klijentu ako je
+                potrebno.
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="secondary" size="small">
-                <Icon icon="mdi:pencil" width={16} height={16} />
-              </Button>
-              <Button variant="danger" size="small">
-                <Icon icon="mdi:delete" width={16} height={16} />
-              </Button>
-            </div>
-          </div>
-          <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center gap-3">
-              <Icon
-                icon="mdi:clock"
-                className="text-blue-400"
-                width={20}
-                height={20}
-              />
-              <div>
-                <p className="text-white font-medium text-sm">
-                  Meal prep reminder
-                </p>
-                <p className="text-zinc-400 text-xs">Every Sunday at 6:00 PM</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="secondary" size="small">
-                <Icon icon="mdi:pencil" width={16} height={16} />
-              </Button>
-              <Button variant="danger" size="small">
-                <Icon icon="mdi:delete" width={16} height={16} />
-              </Button>
-            </div>
           </div>
         </div>
-      </Card>
-
-      {/* Communication Settings */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center gap-2 mb-4">
-          <Icon
-            icon="mdi:cog"
-            className="text-[#3E92CC]"
-            width={24}
-            height={24}
-          />
-          <h3 className="text-xl font-semibold text-white">
-            Communication Settings
-          </h3>
-        </div>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-white font-medium">Email Notifications</p>
-              <p className="text-zinc-400 text-sm">
-                Receive email alerts for new messages
-              </p>
-            </div>
-            <button className="w-12 h-6 bg-[#3E92CC] rounded-full relative">
-              <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 right-0.5 transition-transform"></div>
-            </button>
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-white font-medium">Push Notifications</p>
-              <p className="text-zinc-400 text-sm">
-                Get instant notifications on your device
-              </p>
-            </div>
-            <button className="w-12 h-6 bg-[#3E92CC] rounded-full relative">
-              <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 right-0.5 transition-transform"></div>
-            </button>
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-white font-medium">Auto-Reply</p>
-              <p className="text-zinc-400 text-sm">
-                Send automatic responses when offline
-              </p>
-            </div>
-            <button className="w-12 h-6 bg-zinc-700 rounded-full relative">
-              <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform"></div>
-            </button>
-          </div>
-        </div>
-      </Card>
+      )}
     </div>
   );
 }
