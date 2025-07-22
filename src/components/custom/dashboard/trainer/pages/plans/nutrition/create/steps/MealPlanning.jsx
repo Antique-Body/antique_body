@@ -630,7 +630,7 @@ export const MealPlanning = ({ data, onChange }) => {
         {/* Days Grid - Mobile Optimized */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 sm:gap-3">
           {days.map((day, idx) => (
-            <div key={day.id} className="relative group">
+            <div key={day.id || idx} className="relative group">
               <button
                 type="button"
                 onClick={() => setSelectedDayIndex(idx)}
@@ -896,7 +896,7 @@ export const MealPlanning = ({ data, onChange }) => {
                     ) : (
                       selectedDay.meals.map((meal, mealIndex) => (
                         <div
-                          key={meal.id}
+                          key={meal.id || mealIndex}
                           className="bg-[#242424] rounded-lg border border-[#444] overflow-hidden"
                         >
                           {/* Meal Header - Always Visible */}
@@ -1836,7 +1836,7 @@ export const MealPlanning = ({ data, onChange }) => {
               {days.map((day, idx) => (
                 <button
                   type="button"
-                  key={day.id}
+                  key={day.id || idx}
                   onClick={() => copyDayFromAnother(idx)}
                   className="w-full text-left p-4 rounded-lg bg-[#222] hover:bg-[#FF6B00] transition-all duration-200 group border border-[#333] hover:border-[#FF6B00]"
                 >
@@ -1903,14 +1903,14 @@ export const MealPlanning = ({ data, onChange }) => {
             <div className="space-y-4 max-h-80 overflow-y-auto">
               {days.map((d, dIdx) =>
                 dIdx !== selectedDayIndex && d.meals && d.meals.length > 0 ? (
-                  <div key={d.id} className="space-y-2">
+                  <div key={d.id || dIdx} className="space-y-2">
                     <h4 className="font-medium text-white text-sm bg-[#333] px-3 py-2 rounded-lg">
                       {d.name}
                     </h4>
                     {d.meals.map((meal, mIdx) => (
                       <button
                         type="button"
-                        key={meal.id}
+                        key={meal.id || mIdx}
                         className="w-full text-left px-4 py-3 rounded-lg bg-[#222] text-white hover:bg-[#FF6B00] transition-all duration-200 border border-[#333] hover:border-[#FF6B00] group"
                         onClick={() => copyMealFromAnotherDay(dIdx, mIdx)}
                       >

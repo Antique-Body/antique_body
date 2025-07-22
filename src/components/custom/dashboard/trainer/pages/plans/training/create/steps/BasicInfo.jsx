@@ -227,57 +227,58 @@ export const BasicInfo = ({ data, onChange, prefillForm, templates }) => {
                       .map((tpl, _) => (
                         <div
                           key={tpl.title}
-                          className="flex flex-col bg-[#232323] border border-[#333] shadow hover:border-[#FF6B00]/60 transition-all rounded-lg p-3 gap-2"
+                          className="relative flex flex-col bg-[#232323] border border-[#333] shadow hover:border-[#FF6B00]/60 transition-all rounded-lg p-3 gap-2"
                         >
-                          <div className="flex flex-row gap-4 items-center">
-                            <Image
-                              src={tpl.coverImage}
-                              alt={tpl.title}
-                              className="w-24 h-24 object-cover rounded-lg flex-shrink-0 border border-[#222]"
-                              width={96}
-                              height={96}
-                            />
-                            <div className="flex flex-col flex-1 min-w-0 gap-1">
-                              <div className="flex items-center gap-2">
-                                <Icon
-                                  icon="mdi:dumbbell"
-                                  className="w-4 h-4 text-[#FF6B00]"
-                                />
-                                <span className="font-bold text-2xl text-white truncate">
-                                  {tpl.title}
-                                </span>
-                                <span
-                                  className="ml-2 bg-[#FF6B00] text-white text-xs px-2 py-0.5 rounded-full shadow flex items-center justify-center min-w-[60px] max-w-[90px] h-6 text-center whitespace-nowrap overflow-hidden text-ellipsis"
-                                  style={{ lineHeight: "1.2" }}
-                                >
-                                  {tpl.duration} {tpl.durationType}
-                                </span>
-                              </div>
-                              <p className="text-gray-300 text-xs truncate">
-                                {tpl.description}
-                              </p>
-                              <div className="flex flex-wrap gap-1">
-                                {tpl.keyFeatures.map((f, i) => (
-                                  <span
-                                    key={i}
-                                    className="bg-[#FF6B00]/10 text-[#FF6B00] text-[10px] px-2 py-0.5 rounded-full font-medium"
-                                  >
-                                    {f}
+                          <span
+                            className="absolute top-2 right-2 z-10 bg-[#FF6B00] text-white text-xs px-2 py-1 rounded-full shadow font-medium whitespace-nowrap"
+                          >
+                            {tpl.duration} {tpl.durationType}
+                          </span>
+                          <div className="flex flex-col gap-3">
+                            <div className="flex gap-3">
+                              <Image
+                                src={tpl.coverImage}
+                                alt={tpl.title}
+                                className="w-16 h-16 object-cover rounded-lg flex-shrink-0 border border-[#222]"
+                                width={64}
+                                height={64}
+                              />
+                              <div className="flex flex-col flex-1 min-w-0 gap-2 pr-16">
+                                <div className="flex items-center gap-2">
+                                  <Icon
+                                    icon="mdi:dumbbell"
+                                    className="w-4 h-4 text-[#FF6B00] flex-shrink-0"
+                                  />
+                                  <span className="font-bold text-sm text-white line-clamp-2">
+                                    {tpl.title}
                                   </span>
-                                ))}
+                                </div>
+                                <p className="text-gray-300 text-xs line-clamp-2">
+                                  {tpl.description}
+                                </p>
                               </div>
                             </div>
+                            <div className="flex flex-wrap gap-1">
+                              {tpl.keyFeatures.map((f, i) => (
+                                <span
+                                  key={i}
+                                  className="bg-[#FF6B00]/10 text-[#FF6B00] text-[10px] px-2 py-0.5 rounded-full font-medium"
+                                >
+                                  {f}
+                                </span>
+                              ))}
+                            </div>
+                            <button
+                              className="bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] hover:from-[#FF8A00] hover:to-[#FF6B00] text-white font-bold py-2 px-3 rounded-lg shadow text-xs transition-all duration-200 hover:scale-105 active:scale-95 w-full"
+                              onClick={() => {
+                                prefillForm(tpl);
+                                setShowAllPlans(false);
+                              }}
+                              type="button"
+                            >
+                              Prefill this plan
+                            </button>
                           </div>
-                          <button
-                            className="mt-2 bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] hover:from-[#FF8A00] hover:to-[#FF6B00] text-white font-bold py-1.5 px-3 rounded-lg shadow text-xs transition-all duration-200 hover:scale-105 active:scale-95 w-full"
-                            onClick={() => {
-                              prefillForm(tpl);
-                              setShowAllPlans(false);
-                            }}
-                            type="button"
-                          >
-                            Prefill this plan
-                          </button>
                         </div>
                       ))}
                     {templates.filter(
