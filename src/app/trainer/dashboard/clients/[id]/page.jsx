@@ -1,12 +1,16 @@
 "use client";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
 
 import { Button } from "@/components/common/Button";
 import { Card } from "@/components/common/Card";
+import { ErrorMessage } from "@/components/common/ErrorMessage";
+import { InfoBanner } from "@/components/common/InfoBanner";
 import { Modal } from "@/components/common/Modal";
+import { PlanPreviewModal } from "@/components/custom/dashboard/trainer/pages/plans/components";
 import { ACTIVITY_TYPES } from "@/enums/activityTypes";
 import { EXPERIENCE_LEVELS } from "@/enums/experienceLevels";
 import { FITNESS_GOALS } from "@/enums/fitnessGoals";
@@ -24,6 +28,11 @@ export default function ClientDashboard({ params }) {
   const [plansLoading, setPlansLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [assigning, setAssigning] = useState(false);
+  const [assignError, setAssignError] = useState(null);
+  const [planPreviewOpen, setPlanPreviewOpen] = useState(false);
+  const [planPreviewData, setPlanPreviewData] = useState(null);
+  const [startingPlanId, setStartingPlanId] = useState(null);
+  const [startPlanError, setStartPlanError] = useState(null);
   // Unwrap params using React.use() for Next.js 15 compatibility
   const unwrappedParams = React.use(params);
   const clientId = unwrappedParams.id;
@@ -40,7 +49,16 @@ export default function ClientDashboard({ params }) {
 
       const data = await response.json();
       if (data.success) {
-        setClient(data.data);
+        // Dohvati i assigned planove
+        const assignedPlansRes = await fetch(
+          `/api/coaching-requests/${clientId}/assigned-training-plans`
+        );
+        let assignedPlans = [];
+        if (assignedPlansRes.ok) {
+          const assignedData = await assignedPlansRes.json();
+          assignedPlans = assignedData.data || [];
+        }
+        setClient({ ...data.data, assignedTrainingPlans: assignedPlans });
       } else {
         throw new Error(data.error || "Failed to fetch client data");
       }
@@ -85,30 +103,37 @@ export default function ClientDashboard({ params }) {
 
     try {
       setAssigning(true);
-      // TODO: Implement API endpoint for assigning plans to clients
-      // const response = await fetch(`/api/clients/${clientId}/assign-plan`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     planId: selectedPlan.id,
-      //     planType: assignType
-      //   })
-      // });
-
-      // For now, just close the modal
+      setAssignError(null);
+      // Novi API poziv za assignanje plana
+      const response = await fetch(
+        `/api/coaching-requests/${client.id}/assign-training-plan`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ planId: selectedPlan.id }),
+        }
+      );
+      const data = await response.json();
+      if (
+        data.error ===
+        "Client already has an active training plan. Complete it before assigning a new one."
+      ) {
+        setAssignError(
+          "Assigning a new plan will end the current plan for this client. " +
+            "Click 'End Current & Assign New Plan' to proceed."
+        );
+        return;
+      }
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to assign plan");
+      }
       setShowAssignModal(false);
       setSelectedPlan(null);
       setAssignType(null);
-
-      // Show success message
-      alert(
-        `${
-          assignType === "training" ? "Training" : "Nutrition"
-        } plan assigned successfully!`
-      );
+      fetchClientData();
     } catch (err) {
       console.error("Error assigning plan:", err);
-      alert("Failed to assign plan. Please try again.");
+      setAssignError(err.message || "Failed to assign plan. Please try again.");
     } finally {
       setAssigning(false);
     }
@@ -121,6 +146,8 @@ export default function ClientDashboard({ params }) {
     setAssignType(null);
     setPlans([]);
   };
+
+  // State za prikaz gumba End & Assign
 
   useEffect(() => {
     fetchClientData();
@@ -241,39 +268,75 @@ export default function ClientDashboard({ params }) {
 
   const profile = client.client.clientProfile;
 
+  // Handler for starting a plan
+  const handleStartPlan = async (planId) => {
+    if (!client?.id || !planId) return;
+    setStartingPlanId(planId);
+    setStartPlanError(null);
+    try {
+      const res = await fetch(
+        `/api/coaching-requests/${client.id}/assigned-training-plan/${planId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "active" }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to start plan");
+      }
+      fetchClientData();
+    } catch (err) {
+      setStartPlanError(err.message || "Failed to start plan");
+    } finally {
+      setStartingPlanId(null);
+    }
+  };
+
   return (
     <div className="px-4 py-5">
-      {/* Header with Back Button */}
-      <div className="mb-6">
-        <Button
-          variant="secondary"
-          onClick={() => router.push("/trainer/dashboard/clients")}
-          leftIcon={<Icon icon="mdi:arrow-left" width={20} height={20} />}
-          className="mb-4"
-        >
-          Back to Clients
-        </Button>
-        <div className="flex items-center gap-4">
-          <div className="h-16 w-16 overflow-hidden rounded-xl ring-2 ring-[#3E92CC]/20">
+      {/* Header */}
+      <div className="mb-8">
+        {/* Back Navigation */}
+        <div className="mb-6">
+          <button
+            onClick={() => router.push("/trainer/dashboard/clients")}
+            className="group flex items-center gap-2 text-zinc-400 hover:text-white transition-colors duration-200"
+          >
+            <Icon 
+              icon="mdi:arrow-left" 
+              width={20} 
+              height={20} 
+              className="group-hover:-translate-x-1 transition-transform duration-200" 
+            />
+            <span className="text-sm font-medium">Back to Clients</span>
+          </button>
+        </div>
+
+        {/* Client Profile Header */}
+        <div className="flex items-center gap-6">
+          <div className="h-20 w-20 overflow-hidden rounded-2xl ring-2 ring-[#3E92CC]/30 shadow-lg">
             {profile.profileImage ? (
               <Image
                 src={profile.profileImage}
                 alt={`${profile.firstName} profile`}
                 className="object-cover w-full h-full"
-                width={64}
-                height={64}
+                width={80}
+                height={80}
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#3E92CC] to-[#2D7EB8]">
-                <Icon icon="mdi:account" width={24} height={24} color="white" />
+                <Icon icon="mdi:account" width={32} height={32} color="white" />
               </div>
             )}
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">
+            <h1 className="text-3xl font-bold text-white mb-1">
               {profile.firstName} {profile.lastName}
             </h1>
-            <p className="text-zinc-400">
+            <p className="text-zinc-400 flex items-center gap-2">
+              <Icon icon="mdi:calendar" width={16} height={16} />
               Client since {formatDate(client.respondedAt)}
             </p>
           </div>
@@ -309,10 +372,24 @@ export default function ClientDashboard({ params }) {
             client={client}
             profile={profile}
             onAssignPlan={handleAssignPlan}
+            assignedTrainingPlans={client.assignedTrainingPlans || []}
+            setActiveTab={setActiveTab}
           />
         )}
         {activeTab === "progress" && <ProgressTab client={client} />}
-        {activeTab === "workouts" && <WorkoutsTab client={client} />}
+        {activeTab === "workouts" && (
+          <WorkoutsTab
+            assignedTrainingPlans={client.assignedTrainingPlans || []}
+            client={client}
+            onViewPlan={(plan) => {
+              setPlanPreviewData(plan.planData);
+              setPlanPreviewOpen(true);
+            }}
+            onStartPlan={handleStartPlan}
+            startingPlanId={startingPlanId}
+            startPlanError={startPlanError}
+          />
+        )}
         {activeTab === "nutrition" && <NutritionTab client={client} />}
         {activeTab === "messages" && <MessagesTab client={client} />}
       </div>
@@ -337,7 +414,33 @@ export default function ClientDashboard({ params }) {
           }
           hideButtons={true}
           className="max-w-4xl"
+          footerButtons={false}
         >
+          {/* Prikaži info/error poruku odmah ako postoji aktivni plan */}
+          {assignType === "training" &&
+            client.assignedTrainingPlans?.some(
+              (plan) => plan.status === "active"
+            ) && (
+              <>
+                <InfoBanner
+                  icon="mdi:alert"
+                  title="Current Active Plan"
+                  subtitle={(() => {
+                    const activePlan = client.assignedTrainingPlans.find(
+                      (plan) => plan.status === "active"
+                    );
+                    if (!activePlan) return null;
+                    return `${activePlan.planData.title} • ${activePlan.planData.duration} ${activePlan.planData.durationType}`;
+                  })()}
+                  variant="warning"
+                  className="mb-4"
+                />
+                <ErrorMessage
+                  error={"Client already has an active training plan."}
+                />
+              </>
+            )}
+          {assignError && <ErrorMessage error={assignError} />}
           <div className="space-y-6">
             <div className="text-center">
               <p className="text-zinc-400 mb-4">
@@ -554,33 +657,99 @@ export default function ClientDashboard({ params }) {
                   >
                     Cancel
                   </Button>
-                  <Button
-                    variant="primary"
-                    onClick={handleAssignPlanToClient}
-                    disabled={!selectedPlan || assigning}
-                    leftIcon={
-                      assigning ? (
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                      ) : (
-                        <Icon icon="mdi:check" width={20} height={20} />
-                      )
-                    }
-                    fullWidth
-                  >
-                    {assigning ? "Assigning..." : "Assign Plan"}
-                  </Button>
+                  {/* Ako postoji aktivni plan, prikazi Replace Current Plan dugme */}
+                  {assignType === "training" &&
+                  client.assignedTrainingPlans?.some(
+                    (plan) => plan.status === "active"
+                  ) ? (
+                    <Button
+                      className="bg-orange-500 hover:bg-orange-600 text-white border-none"
+                      onClick={async () => {
+                        setAssigning(true);
+                        setAssignError(null);
+                        try {
+                          const response = await fetch(
+                            `/api/coaching-requests/${client.id}/replace-training-plan`,
+                            {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ planId: selectedPlan.id }),
+                            }
+                          );
+                          const data = await response.json();
+                          if (!response.ok || !data.success) {
+                            throw new Error(
+                              data.error || "Failed to replace plan"
+                            );
+                          }
+                          setShowAssignModal(false);
+                          setSelectedPlan(null);
+                          setAssignType(null);
+                          fetchClientData();
+                        } catch (err) {
+                          setAssignError(
+                            err.message ||
+                              "Failed to replace plan. Please try again."
+                          );
+                        } finally {
+                          setAssigning(false);
+                        }
+                      }}
+                      disabled={!selectedPlan || assigning}
+                      leftIcon={
+                        assigning ? (
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        ) : (
+                          <Icon icon="mdi:check" width={20} height={20} />
+                        )
+                      }
+                      fullWidth
+                    >
+                      {assigning ? "Replacing..." : "Replace Current Plan"}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="primary"
+                      onClick={handleAssignPlanToClient}
+                      disabled={!selectedPlan || assigning}
+                      leftIcon={
+                        assigning ? (
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        ) : (
+                          <Icon icon="mdi:check" width={20} height={20} />
+                        )
+                      }
+                      fullWidth
+                    >
+                      {assigning ? "Assigning..." : "Assign Plan"}
+                    </Button>
+                  )}
                 </div>
               </div>
             )}
           </div>
         </Modal>
       )}
+      {/* Plan Preview Modal */}
+      <PlanPreviewModal
+        plan={planPreviewData}
+        isOpen={planPreviewOpen}
+        onClose={() => setPlanPreviewOpen(false)}
+        days={planPreviewData?.days}
+        type="training"
+      />
     </div>
   );
 }
 
 // Overview Tab Component
-function OverviewTab({ client, profile, onAssignPlan }) {
+function OverviewTab({
+  client,
+  profile,
+  onAssignPlan,
+  assignedTrainingPlans,
+  setActiveTab,
+}) {
   const getExperienceText = (level) => {
     if (!level) return "Unknown";
     const experienceLevel = EXPERIENCE_LEVELS.find(
@@ -608,6 +777,11 @@ function OverviewTab({ client, profile, onAssignPlan }) {
           .replace(/_/g, " ")
           .replace(/\b\w/g, (l) => l.toUpperCase());
   };
+
+  // Pronađi aktivni plan
+  const activePlan = assignedTrainingPlans?.find(
+    (plan) => plan.status === "active"
+  );
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -706,7 +880,7 @@ function OverviewTab({ client, profile, onAssignPlan }) {
           </div>
         </Card>
 
-        {/* Current Plans */}
+        {/* Current Plan */}
         <Card variant="dark" className="overflow-visible">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -716,83 +890,48 @@ function OverviewTab({ client, profile, onAssignPlan }) {
                 width={24}
                 height={24}
               />
-              <h3 className="text-xl font-semibold text-white">
-                Current Plans
-              </h3>
+              <h3 className="text-xl font-semibold text-white">Current Plan</h3>
             </div>
             <Button
               variant="primary"
               size="small"
               leftIcon={<Icon icon="mdi:plus" width={16} height={16} />}
+              onClick={() => onAssignPlan("training")}
             >
-              Assign Plan
+              {activePlan ? "Replace Plan" : "Assign Plan"}
             </Button>
           </div>
           <div className="space-y-3">
-            {/* Training Plan */}
-            <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg border border-zinc-700">
-              <div className="flex items-center gap-3">
-                <Icon
-                  icon="mdi:dumbbell"
-                  className="text-orange-400"
-                  width={20}
-                  height={20}
-                />
-                <div>
-                  <p className="text-white font-medium">
-                    Full Body Transformation
-                  </p>
-                  <p className="text-zinc-400 text-sm">
-                    Week 3 of 8 • 75% complete
-                  </p>
+            {activePlan ? (
+              <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg border border-zinc-700">
+                <div className="flex items-center gap-3">
+                  <Icon
+                    icon="mdi:dumbbell"
+                    className="text-orange-400"
+                    width={20}
+                    height={20}
+                  />
+                  <div>
+                    <p className="text-white font-medium">
+                      {activePlan.planData.title}
+                    </p>
+                    <p className="text-zinc-400 text-sm">
+                      {activePlan.planData.duration}{" "}
+                      {activePlan.planData.durationType} • Active
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    onClick={() => setActiveTab("workouts")}
+                  >
+                    <Icon icon="mdi:eye" width={16} height={16} />
+                  </Button>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-20 bg-zinc-700 rounded-full h-2">
-                  <div
-                    className="bg-orange-400 h-2 rounded-full"
-                    style={{ width: "75%" }}
-                  ></div>
-                </div>
-                <Button variant="secondary" size="small">
-                  <Icon icon="mdi:eye" width={16} height={16} />
-                </Button>
-              </div>
-            </div>
-
-            {/* Nutrition Plan */}
-            <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg border border-zinc-700">
-              <div className="flex items-center gap-3">
-                <Icon
-                  icon="mdi:food-apple"
-                  className="text-green-400"
-                  width={20}
-                  height={20}
-                />
-                <div>
-                  <p className="text-white font-medium">
-                    Muscle Gain Nutrition
-                  </p>
-                  <p className="text-zinc-400 text-sm">
-                    Week 2 of 8 • 25% complete
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-20 bg-zinc-700 rounded-full h-2">
-                  <div
-                    className="bg-green-400 h-2 rounded-full"
-                    style={{ width: "25%" }}
-                  ></div>
-                </div>
-                <Button variant="secondary" size="small">
-                  <Icon icon="mdi:eye" width={16} height={16} />
-                </Button>
-              </div>
-            </div>
-
-            {/* No Plans State */}
-            {false && (
+            ) : (
               <div className="text-center py-6">
                 <Icon
                   icon="mdi:clipboard-outline"
@@ -1423,440 +1562,138 @@ function ProgressTab({ client }) {
 }
 
 // Workouts Tab Component
-function WorkoutsTab({}) {
+function WorkoutsTab({
+  assignedTrainingPlans,
+  client,
+  onViewPlan,
+  onStartPlan,
+  startingPlanId,
+  startPlanError,
+}) {
+  console.log("Assigned Training Plans History:", assignedTrainingPlans);
   return (
     <div className="space-y-6">
       {/* Header Actions */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-white">Workout Management</h2>
         <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            leftIcon={<Icon icon="mdi:eye" width={20} height={20} />}
-          >
-            View Library
-          </Button>
-          <Button
-            variant="primary"
-            leftIcon={<Icon icon="mdi:plus" width={20} height={20} />}
-          >
-            Create Workout
-          </Button>
+          <Link href="/trainer/dashboard/plans">
+            <Button
+              variant="primary"
+              leftIcon={<Icon icon="mdi:plus" width={20} height={20} />}
+            >
+              Create Plan
+            </Button>
+          </Link>
         </div>
       </div>
 
-      {/* Current Plan Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card variant="dark" className="overflow-visible">
-          <div className="flex items-center gap-2 mb-4">
-            <Icon
-              icon="mdi:dumbbell"
-              className="text-[#3E92CC]"
-              width={24}
-              height={24}
-            />
-            <h3 className="text-lg font-semibold text-white">
-              Current Training Plan
-            </h3>
-          </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-400">Plan Name</span>
-              <span className="text-white font-medium">
-                Full Body Transformation
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-400">Duration</span>
-              <span className="text-white">8 weeks</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-400">Frequency</span>
-              <span className="text-white">4x per week</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-400">Progress</span>
-              <span className="text-green-400">Week 3/8 (75%)</span>
-            </div>
-            <div className="w-full bg-zinc-700 rounded-full h-2">
-              <div
-                className="bg-green-400 h-2 rounded-full"
-                style={{ width: "75%" }}
-              ></div>
-            </div>
-          </div>
-          <div className="mt-4 pt-4 border-t border-zinc-700">
-            <div className="flex gap-2">
-              <Button variant="primary" size="small" fullWidth>
-                <Icon icon="mdi:eye" width={16} height={16} />
-                View Plan
-              </Button>
-              <Button variant="secondary" size="small" fullWidth>
-                <Icon icon="mdi:pencil" width={16} height={16} />
-                Edit
-              </Button>
-            </div>
-          </div>
-        </Card>
-
-        <Card variant="dark" className="overflow-visible">
-          <div className="flex items-center gap-2 mb-4">
-            <Icon
-              icon="mdi:calendar-check"
-              className="text-[#3E92CC]"
-              width={24}
-              height={24}
-            />
-            <h3 className="text-lg font-semibold text-white">
-              This Week's Schedule
-            </h3>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <Icon
-                  icon="mdi:check-circle"
-                  className="text-green-400"
-                  width={16}
-                  height={16}
-                />
-                <span className="text-zinc-300">Mon - Upper Body</span>
-              </div>
-              <span className="text-zinc-500 text-sm">Completed</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <Icon
-                  icon="mdi:check-circle"
-                  className="text-green-400"
-                  width={16}
-                  height={16}
-                />
-                <span className="text-zinc-300">Wed - Lower Body</span>
-              </div>
-              <span className="text-zinc-500 text-sm">Completed</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-orange-900/20 rounded-lg border border-orange-700/30">
-              <div className="flex items-center gap-2">
-                <Icon
-                  icon="mdi:clock"
-                  className="text-orange-400"
-                  width={16}
-                  height={16}
-                />
-                <span className="text-white">Fri - Full Body</span>
-              </div>
-              <span className="text-orange-400 text-sm">Today</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <Icon
-                  icon="mdi:circle-outline"
-                  className="text-zinc-500"
-                  width={16}
-                  height={16}
-                />
-                <span className="text-zinc-300">Sun - Cardio</span>
-              </div>
-              <span className="text-zinc-500 text-sm">Pending</span>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Workout Performance */}
+      {/* Historija svih dodijeljenih planova */}
       <Card variant="dark" className="overflow-visible">
         <div className="flex items-center gap-2 mb-4">
           <Icon
-            icon="mdi:chart-line"
+            icon="mdi:history"
             className="text-[#3E92CC]"
             width={24}
             height={24}
           />
           <h3 className="text-xl font-semibold text-white">
-            Performance Tracking
+            Assigned Training Plans History
           </h3>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
-            <Icon
-              icon="mdi:weight-lifter"
-              className="text-blue-400 mx-auto mb-2"
-              width={24}
-              height={24}
-            />
-            <p className="text-2xl font-bold text-white">2,450kg</p>
-            <p className="text-zinc-400 text-sm">Total Volume</p>
-          </div>
-          <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
-            <Icon
-              icon="mdi:timer"
-              className="text-green-400 mx-auto mb-2"
-              width={24}
-              height={24}
-            />
-            <p className="text-2xl font-bold text-white">45min</p>
-            <p className="text-zinc-400 text-sm">Avg Duration</p>
-          </div>
-          <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
-            <Icon
-              icon="mdi:trending-up"
-              className="text-orange-400 mx-auto mb-2"
-              width={24}
-              height={24}
-            />
-            <p className="text-2xl font-bold text-white">+12%</p>
-            <p className="text-zinc-400 text-sm">Strength Gain</p>
-          </div>
-          <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
-            <Icon
-              icon="mdi:heart-pulse"
-              className="text-red-400 mx-auto mb-2"
-              width={24}
-              height={24}
-            />
-            <p className="text-2xl font-bold text-white">142</p>
-            <p className="text-zinc-400 text-sm">Avg Heart Rate</p>
-          </div>
-        </div>
-      </Card>
-
-      {/* Exercise Library */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Icon
-              icon="mdi:library"
-              className="text-[#3E92CC]"
-              width={24}
-              height={24}
-            />
-            <h3 className="text-xl font-semibold text-white">
-              Exercise Library
-            </h3>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="secondary" size="small">
-              <Icon icon="mdi:filter" width={16} height={16} />
-              Filter
-            </Button>
-            <Button variant="primary" size="small">
-              <Icon icon="mdi:plus" width={16} height={16} />
-              Add Exercise
-            </Button>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors">
-            <div className="flex items-center gap-2 mb-2">
-              <Icon
-                icon="mdi:dumbbell"
-                className="text-blue-400"
-                width={20}
-                height={20}
-              />
-              <h4 className="text-white font-medium">Bench Press</h4>
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">
-              Chest, Shoulders, Triceps
-            </p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>Intermediate</span>
-              <span>Equipment: Barbell</span>
-            </div>
-          </div>
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors">
-            <div className="flex items-center gap-2 mb-2">
-              <Icon
-                icon="mdi:run"
-                className="text-green-400"
-                width={20}
-                height={20}
-              />
-              <h4 className="text-white font-medium">Squats</h4>
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">Legs, Glutes, Core</p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>Beginner</span>
-              <span>Equipment: Bodyweight</span>
-            </div>
-          </div>
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors">
-            <div className="flex items-center gap-2 mb-2">
-              <Icon
-                icon="mdi:arm-flex"
-                className="text-orange-400"
-                width={20}
-                height={20}
-              />
-              <h4 className="text-white font-medium">Pull-ups</h4>
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">Back, Biceps, Core</p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>Advanced</span>
-              <span>Equipment: Pull-up Bar</span>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Workout History */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Icon
-              icon="mdi:history"
-              className="text-[#3E92CC]"
-              width={24}
-              height={24}
-            />
-            <h3 className="text-xl font-semibold text-white">
-              Recent Workouts
-            </h3>
-          </div>
-          <Button variant="secondary" size="small">
-            <Icon icon="mdi:eye" width={16} height={16} />
-            View All
-          </Button>
-        </div>
+        {startPlanError && (
+          <div className="text-red-500 text-sm mb-2">{startPlanError}</div>
+        )}
         <div className="space-y-3">
-          <div className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center gap-3">
-              <Icon
-                icon="mdi:check-circle"
-                className="text-green-400"
-                width={20}
-                height={20}
-              />
-              <div>
-                <h4 className="text-white font-medium">Upper Body Strength</h4>
-                <p className="text-zinc-400 text-sm">Jan 15, 2024 • 45 min</p>
+          {assignedTrainingPlans && assignedTrainingPlans.length > 0 ? (
+            assignedTrainingPlans.map((plan) => (
+              <div
+                key={plan.id}
+                className={`flex items-center justify-between p-3 rounded-lg border ${
+                  plan.status === "active"
+                    ? "bg-blue-900/30 border-blue-500/70 shadow-lg"
+                    : "bg-zinc-800/50 border-zinc-700"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Icon
+                    icon="mdi:dumbbell"
+                    className={
+                      plan.status === "completed"
+                        ? "text-green-400"
+                        : plan.status === "active"
+                        ? "text-blue-400"
+                        : "text-orange-400"
+                    }
+                    width={20}
+                    height={20}
+                  />
+                  <div>
+                    <p className="text-white font-medium flex items-center gap-2">
+                      {plan.planData.title}
+                      {plan.status === "active" && (
+                        <span className="ml-2 px-2 py-0.5 bg-blue-700/60 text-blue-200 text-xs rounded-full">
+                          Active
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-zinc-400 text-sm">
+                      {plan.planData.duration} {plan.planData.durationType} •{" "}
+                      {plan.status.charAt(0).toUpperCase() +
+                        plan.status.slice(1)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    onClick={() => onViewPlan(plan)}
+                  >
+                    <Icon icon="mdi:eye" width={16} height={16} />
+                  </Button>
+                  {plan.status !== "completed" && plan.status !== "active" && (
+                    <Button
+                      variant="primary"
+                      size="small"
+                      onClick={() => onStartPlan(plan.id)}
+                      loading={startingPlanId === plan.id}
+                    >
+                      Start Plan
+                    </Button>
+                  )}
+                  {plan.status === "active" && (
+                    <Link
+                      href={`/trainer/dashboard/clients/${client.id}/plans/${plan.id}`}
+                      passHref
+                    >
+                      <Button
+                        as="a"
+                        variant="info"
+                        size="small"
+                        className="ml-2"
+                      >
+                        <Icon icon="mdi:open-in-new" width={16} height={16} />
+                        Open & Track Plan
+                      </Button>
+                    </Link>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="text-right">
-              <p className="text-white font-medium">8 exercises</p>
-              <p className="text-zinc-400 text-sm">2,450kg total</p>
-            </div>
-          </div>
-          <div className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center gap-3">
+            ))
+          ) : (
+            <div className="text-center py-6">
               <Icon
-                icon="mdi:check-circle"
-                className="text-green-400"
-                width={20}
-                height={20}
+                icon="mdi:clipboard-outline"
+                className="text-zinc-600 mx-auto mb-2"
+                width={32}
+                height={32}
               />
-              <div>
-                <h4 className="text-white font-medium">Lower Body Power</h4>
-                <p className="text-zinc-400 text-sm">Jan 13, 2024 • 50 min</p>
-              </div>
+              <p className="text-zinc-400 text-sm">
+                No assigned training plans
+              </p>
             </div>
-            <div className="text-right">
-              <p className="text-white font-medium">6 exercises</p>
-              <p className="text-zinc-400 text-sm">1,890kg total</p>
-            </div>
-          </div>
-          <div className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center gap-3">
-              <Icon
-                icon="mdi:check-circle"
-                className="text-green-400"
-                width={20}
-                height={20}
-              />
-              <div>
-                <h4 className="text-white font-medium">Full Body Circuit</h4>
-                <p className="text-zinc-400 text-sm">Jan 11, 2024 • 35 min</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-white font-medium">10 exercises</p>
-              <p className="text-zinc-400 text-sm">1,200kg total</p>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Workout Templates */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Icon
-              icon="mdi:content-copy"
-              className="text-[#3E92CC]"
-              width={24}
-              height={24}
-            />
-            <h3 className="text-xl font-semibold text-white">
-              Workout Templates
-            </h3>
-          </div>
-          <Button variant="primary" size="small">
-            <Icon icon="mdi:plus" width={16} height={16} />
-            Create Template
-          </Button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-white font-medium">Push Day</h4>
-              <Button variant="secondary" size="small">
-                <Icon icon="mdi:play" width={16} height={16} />
-              </Button>
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">
-              Chest, Shoulders, Triceps
-            </p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>6 exercises</span>
-              <span>45-60 min</span>
-            </div>
-          </div>
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-white font-medium">Pull Day</h4>
-              <Button variant="secondary" size="small">
-                <Icon icon="mdi:play" width={16} height={16} />
-              </Button>
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">
-              Back, Biceps, Rear Delts
-            </p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>7 exercises</span>
-              <span>50-65 min</span>
-            </div>
-          </div>
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-white font-medium">Leg Day</h4>
-              <Button variant="secondary" size="small">
-                <Icon icon="mdi:play" width={16} height={16} />
-              </Button>
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">
-              Quads, Hamstrings, Glutes
-            </p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>8 exercises</span>
-              <span>60-75 min</span>
-            </div>
-          </div>
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-white font-medium">HIIT Cardio</h4>
-              <Button variant="secondary" size="small">
-                <Icon icon="mdi:play" width={16} height={16} />
-              </Button>
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">
-              High Intensity Intervals
-            </p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>5 exercises</span>
-              <span>20-30 min</span>
-            </div>
-          </div>
+          )}
         </div>
       </Card>
     </div>

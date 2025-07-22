@@ -411,6 +411,7 @@ export const ExerciseModal = ({
       }
 
       await onSave(finalFormData);
+      onClose();
     } catch (error) {
       console.error("Error saving exercise:", error);
       setErrors((prev) => ({ ...prev, upload: error.message }));

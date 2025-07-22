@@ -61,7 +61,7 @@ export default function ClientsPage() {
   };
 
   const getExperienceText = (level) => {
-    if (!level) return "Unknown";
+    if (!level) return "Experience Not Specified";
 
     const experienceLevel = EXPERIENCE_LEVELS.find(
       (exp) => exp.value === level
@@ -70,14 +70,14 @@ export default function ClientsPage() {
   };
 
   const getFitnessGoalText = (goalId) => {
-    if (!goalId) return "Unknown Goal";
+    if (!goalId) return "Goal Not Specified";
 
     const fitnessGoal = FITNESS_GOALS.find((goal) => goal.id === goalId);
     return fitnessGoal ? fitnessGoal.label : goalId;
   };
 
   const mapActivityToLabel = (activityName) => {
-    if (!activityName) return "Unknown Activity";
+    if (!activityName) return "Activity Not Specified";
 
     const activity = ACTIVITY_TYPES.find(
       (a) =>
@@ -164,15 +164,42 @@ export default function ClientsPage() {
           {clients.map((clientRequest) => {
             const client = clientRequest.client;
             const profile = client.clientProfile;
+            const clientGender = profile?.gender?.toLowerCase();
+            const isMale = clientGender === 'male';
+            const isFemale = clientGender === 'female';
+            
+            // Gender-based styling
+            const genderStyles = {
+              background: isMale 
+                ? 'bg-gradient-to-r from-slate-900/95 via-blue-900/10 to-slate-900/95'
+                : isFemale 
+                ? 'bg-gradient-to-r from-slate-900/95 via-pink-900/20 to-slate-900/95'
+                : 'bg-gradient-to-r from-slate-900/95 via-slate-800/90 to-slate-900/95',
+              border: isMale
+                ? 'border-cyan-600/30 hover:border-cyan-400/50'
+                : isFemale
+                ? 'border-pink-600/40 hover:border-pink-400/60'
+                : 'border-slate-700/50 hover:border-blue-400/70',
+              shadow: isMale
+                ? 'hover:shadow-cyan-500/10'
+                : isFemale
+                ? 'hover:shadow-pink-500/15'
+                : 'hover:shadow-blue-500/20',
+              accent: isMale ? 'from-cyan-500/10 to-blue-500/10' : isFemale ? 'from-pink-500/15 to-rose-500/15' : 'from-blue-500/10 to-blue-500/10'
+            };
 
             return (
-              <Card
+              <div
                 key={clientRequest.id}
-                variant="clientCard"
-                hover={true}
-                className="overflow-visible cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:shadow-[#3E92CC]/10"
+                className={`relative group w-full ${genderStyles.background} border ${genderStyles.border} rounded-xl shadow-lg ${genderStyles.shadow} transition-all duration-300 hover:-translate-y-0.5 backdrop-blur-sm overflow-hidden cursor-pointer`}
                 onClick={() => handleViewClient(clientRequest)}
               >
+                {/* Gender Accent Strip */}
+                {(isMale || isFemale) && (
+                  <div className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${genderStyles.accent} opacity-70`} />
+                )}
+                
+                <div className="p-4">
                 <div className="flex items-start gap-4">
                   {/* Profile Image */}
                   <div className="relative group">
@@ -196,6 +223,29 @@ export default function ClientsPage() {
                         </div>
                       )}
                     </div>
+                    {/* Gender Badge */}
+                    {profile.gender && (
+                      <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border border-slate-800 shadow-lg ${
+                        profile.gender.toLowerCase() === 'male' 
+                          ? 'bg-gradient-to-br from-blue-500 to-blue-600' 
+                          : profile.gender.toLowerCase() === 'female'
+                          ? 'bg-gradient-to-br from-pink-500 to-pink-600'
+                          : 'bg-gradient-to-br from-slate-500 to-slate-600'
+                      }`}>
+                        <Icon 
+                          icon={
+                            profile.gender.toLowerCase() === 'male' 
+                              ? "mdi:gender-male" 
+                              : profile.gender.toLowerCase() === 'female'
+                              ? "mdi:gender-female"
+                              : "mdi:help"
+                          } 
+                          width={12} 
+                          height={12} 
+                          className="text-white" 
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Client Info */}
@@ -222,6 +272,29 @@ export default function ClientsPage() {
                         <span className="px-2 py-1 bg-emerald-900/30 text-emerald-400 text-xs rounded-full flex items-center gap-1">
                           <Icon icon="mdi:map-marker" width={12} height={12} />
                           {profile.location.city}
+                        </span>
+                      )}
+                      {/* Gender Pill */}
+                      {profile.gender && (
+                        <span className={`px-2 py-1 text-xs rounded-full flex items-center gap-1 ${
+                          profile.gender.toLowerCase() === 'male' 
+                            ? 'bg-blue-900/30 text-blue-400' 
+                            : profile.gender.toLowerCase() === 'female'
+                            ? 'bg-pink-900/30 text-pink-400'
+                            : 'bg-slate-900/30 text-slate-400'
+                        }`}>
+                          <Icon 
+                            icon={
+                              profile.gender.toLowerCase() === 'male' 
+                                ? "mdi:gender-male" 
+                                : profile.gender.toLowerCase() === 'female'
+                                ? "mdi:gender-female"
+                                : "mdi:help"
+                            } 
+                            width={12} 
+                            height={12} 
+                          />
+                          {profile.gender}
                         </span>
                       )}
                     </div>
@@ -349,7 +422,8 @@ export default function ClientsPage() {
                     </div>
                   </div>
                 </div>
-              </Card>
+                </div>
+              </div>
             );
           })}
         </div>

@@ -148,6 +148,7 @@ model TrainerInfo {
   nutritionPlans    NutritionPlan[]
   coachingRequests  CoachingRequest[]
   coachingRequestCooldowns CoachingRequestCooldown[]
+  assignedTrainingPlans AssignedTrainingPlan[]
 }
 
 // TrainerProfile now belongs to TrainerInfo
@@ -275,6 +276,7 @@ model ClientInfo {
   clientSettings    ClientSettings?
   coachingRequests  CoachingRequest[]
   coachingRequestCooldowns CoachingRequestCooldown[]
+  assignedTrainingPlans AssignedTrainingPlan[]
 }
 
 // ClientProfile now belongs to ClientInfo
@@ -509,6 +511,7 @@ model TrainingPlan {
   deletedAt         DateTime?
   clientCount       Int?     // Dodano polje za broj klijenata
   trainerInfo       TrainerInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  assignedTrainingPlans AssignedTrainingPlan[]
 
   @@index([trainerInfoId])
 }
@@ -590,4 +593,23 @@ model CoachingRequestCooldown {
   @@index([trainerId])
   @@index([expiresAt])
   @@index([removedAt])
+}
+
+model AssignedTrainingPlan {
+  id             String   @id @default(cuid())
+  clientId       String
+  trainerId      String
+  originalPlanId String
+  planData       Json
+  status         String   @default("active") // active, completed, cancelled
+  assignedAt     DateTime @default(now())
+  completedAt    DateTime?
+
+  client         ClientInfo   @relation(fields: [clientId], references: [id])
+  trainer        TrainerInfo  @relation(fields: [trainerId], references: [id])
+  originalPlan   TrainingPlan @relation(fields: [originalPlanId], references: [id])
+
+  @@index([clientId])
+  @@index([trainerId])
+  @@index([status])
 }
