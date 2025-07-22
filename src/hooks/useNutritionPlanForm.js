@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { createPlan, updatePlan } from "@/app/api/users/services/planService";
+import { NUTRITION_PLAN_TEMPLATES } from "@/components/custom/dashboard/trainer/pages/plans/nutrition/create/prefillNutritionPlan";
 
 const initialFormData = {
   // Step 1: Basic Info
@@ -208,6 +209,19 @@ export const useNutritionPlanForm = (initialData = null) => {
     }
   };
 
+  // Prefill function (deep copy template, add _prefillKey for force update)
+  const prefillForm = (template) => {
+    const newData = JSON.parse(JSON.stringify(template));
+    const finalData = {
+      ...newData,
+      ...Object.fromEntries(
+        Object.entries(initialFormData).filter(([k]) => !(k in newData))
+      ),
+      _prefillKey: Date.now() + Math.random(),
+    };
+    setFormData(finalData);
+  };
+
   // Helper functions for managing days
   const addDay = (copyFromIdx = null) => {
     if (formData.days.length >= 30) return;
@@ -265,5 +279,7 @@ export const useNutritionPlanForm = (initialData = null) => {
     updateDay,
     deleteDay,
     error,
+    prefillForm,
+    templates: NUTRITION_PLAN_TEMPLATES,
   };
 };
