@@ -285,11 +285,11 @@ model ClientProfile {
   lastName             String
   dateOfBirth          DateTime
   gender               String
-  height               Int
-  weight               Int
+  height               Int?
+  weight               Int?
   experienceLevel      String
   previousActivities   String?  @db.Text
-  primaryGoal          String
+  primaryGoal          String?
   secondaryGoal        String?
   goalDescription      String?  @db.Text
   contactEmail         String?

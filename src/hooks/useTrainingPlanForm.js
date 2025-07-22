@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 import { createPlan, updatePlan } from "@/app/api/users/services/planService";
+import { TRAINING_PLAN_TEMPLATES } from "@/components/custom/dashboard/trainer/pages/plans/training/create/prefillTrainingPlan";
 
 const initialFormData = {
   // Basic Info
@@ -105,6 +106,23 @@ function constructPlanPayload(formData, coverImageUrl) {
   };
 }
 
+// Helper to deep copy a plan template and generate new IDs for schedule and exercises
+function deepCopyPlanTemplate(template) {
+  const copy = JSON.parse(JSON.stringify(template));
+  if (Array.isArray(copy.schedule)) {
+    copy.schedule = copy.schedule.map((session) => ({
+      ...session,
+      id: crypto.randomUUID(),
+      exercises: Array.isArray(session.exercises)
+        ? session.exercises.map((ex) => ({ ...ex, id: crypto.randomUUID() }))
+        : [],
+    }));
+  }
+  return copy;
+}
+
+// Plan templates for prefill
+
 export const useTrainingPlanForm = (initialData = null) => {
   const router = useRouter();
   const [formData, setFormData] = useState(initialData || initialFormData);
@@ -133,13 +151,23 @@ export const useTrainingPlanForm = (initialData = null) => {
   }, [initialData]);
 
   const updateFormData = (updates) => {
+    console.log("[UPDATE_FORM_DATA] updates:", updates);
     if (typeof updates === "function") {
-      setFormData((prev) => updates(prev));
+      setFormData((prev) => {
+        const result = updates(prev);
+        console.log("[UPDATE_FORM_DATA] function result:", result);
+        return result;
+      });
+    } else if (updates && updates._prefillKey) {
+      // Hard replace for prefill
+      console.log("[UPDATE_FORM_DATA] Hard replace with:", updates);
+      setFormData(updates);
     } else {
-      setFormData((prev) => ({
-        ...prev,
-        ...updates,
-      }));
+      setFormData((prev) => {
+        const merged = { ...prev, ...updates };
+        console.log("[UPDATE_FORM_DATA] Merged:", merged);
+        return merged;
+      });
     }
   };
 
@@ -330,6 +358,22 @@ export const useTrainingPlanForm = (initialData = null) => {
     }
   };
 
+  // Prefill function
+  const prefillForm = (template) => {
+    const newData = deepCopyPlanTemplate(template);
+    const finalData = {
+      ...newData,
+      ...Object.fromEntries(
+        Object.entries(initialFormData).filter(([k]) => !(k in newData))
+      ),
+      _prefillKey: Date.now() + Math.random(), // force unique object
+    };
+    console.log("[PREFILL] Template:", template);
+    console.log("[PREFILL] NewData:", newData);
+    console.log("[PREFILL] FinalData sent to setFormData:", finalData);
+    setFormData(finalData);
+  };
+
   return {
     formData,
     updateFormData,
@@ -337,5 +381,7 @@ export const useTrainingPlanForm = (initialData = null) => {
     handleSubmit,
     error,
     getValidationErrors,
+    prefillForm,
+    templates: TRAINING_PLAN_TEMPLATES,
   };
 };

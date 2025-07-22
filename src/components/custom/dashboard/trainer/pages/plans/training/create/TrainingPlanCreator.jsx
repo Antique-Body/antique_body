@@ -29,8 +29,14 @@ export const TrainingPlanCreator = ({ initialData }) => {
   const [validationErrors, setValidationErrors] = useState([]);
   const topRef = useRef(null);
 
-  const { formData, updateFormData, handleSubmit, getValidationErrors } =
-    useTrainingPlanForm(initialData);
+  const {
+    formData,
+    updateFormData,
+    handleSubmit,
+    getValidationErrors,
+    prefillForm,
+    templates,
+  } = useTrainingPlanForm(initialData);
 
   const scrollToTop = () => {
     if (topRef.current) {
@@ -77,7 +83,15 @@ export const TrainingPlanCreator = ({ initialData }) => {
   const renderStep = () => {
     switch (currentStep) {
       case 0:
-        return <BasicInfo data={formData} onChange={updateFormData} />;
+        // Pass prefillForm and templates to BasicInfo
+        return (
+          <BasicInfo
+            data={formData}
+            onChange={updateFormData}
+            prefillForm={prefillForm}
+            templates={templates}
+          />
+        );
       case 1:
         return <Schedule data={formData} onChange={updateFormData} />;
       case 2:

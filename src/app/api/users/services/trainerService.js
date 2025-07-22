@@ -587,16 +587,6 @@ export async function updateTrainerProfile(userId, data) {
       ...allowedProfileData
     } = data;
 
-    let pricePerSession = null;
-    if (
-      allowedProfileData.pricePerSession !== undefined &&
-      allowedProfileData.pricePerSession !== null &&
-      allowedProfileData.pricePerSession !== ""
-    ) {
-      pricePerSession = Number(allowedProfileData.pricePerSession);
-      if (isNaN(pricePerSession)) pricePerSession = null;
-    }
-
     // Osiguraj da je trainerSince broj
     let trainerSince = data.trainerSince;
     if (typeof trainerSince === "string" && trainerSince !== "") {
@@ -677,7 +667,6 @@ export async function updateTrainerProfile(userId, data) {
       where: { id: profile.id },
       data: {
         ...allowedProfileData,
-        pricePerSession,
         trainerSince,
         dateOfBirth: allowedProfileData.dateOfBirth
           ? new Date(allowedProfileData.dateOfBirth)

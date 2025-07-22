@@ -8,7 +8,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { AnimatedTabContent } from "./DashboardTabs";
 
 import { Button } from "@/components/common/Button";
-import { Card } from "@/components/common/Card";
+import { InfoBanner } from "@/components/common/InfoBanner";
 import {
   ClientBasicInformation,
   ActivitiesAndLanguages,
@@ -128,14 +128,14 @@ const ProfileEditModal = ({
 
           {/* Enhanced Header with sophisticated design */}
           <motion.div
-            className="relative flex items-center justify-between p-6 sm:p-8 border-b border-[rgba(255,107,0,0.1)] bg-gradient-to-r from-[rgba(255,107,0,0.08)] via-[rgba(255,107,0,0.04)] to-transparent flex-shrink-0"
+            className="relative flex items-center justify-between p-3 sm:p-4 lg:p-6 border-b border-[rgba(255,107,0,0.1)] bg-gradient-to-r from-[rgba(255,107,0,0.08)] via-[rgba(255,107,0,0.04)] to-transparent flex-shrink-0"
             variants={staggerChildren}
             initial="hidden"
             animate="visible"
           >
-            <div className="flex items-center gap-4 sm:gap-6">
+            <div className="flex items-center gap-3 sm:gap-4 lg:gap-6">
               <motion.div
-                className="p-3 sm:p-4 bg-gradient-to-br from-[#FF6B00] to-[#FF9A00] rounded-2xl shadow-lg relative overflow-hidden"
+                className="p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-[#FF6B00] to-[#FF9A00] rounded-xl sm:rounded-2xl shadow-lg relative overflow-hidden"
                 variants={fadeIn}
                 whileHover={{
                   scale: 1.05,
@@ -176,11 +176,42 @@ const ProfileEditModal = ({
               </div>
             </div>
             <motion.div
+              className="flex items-center gap-2 ml-auto"
               variants={fadeIn}
-              whileHover={{ scale: 1.1, rotate: 90 }}
-              whileTap={{ scale: 0.9 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
+              <Button
+                variant="outline"
+                onClick={onClose}
+                disabled={loading}
+                className="border-[rgba(255,107,0,0.4)] text-gray-300 hover:text-white hover:border-[#FF6B00] hover:bg-[rgba(255,107,0,0.15)] transition-all duration-300 px-4 py-2 text-sm font-medium rounded-xl"
+                style={{ minWidth: 80 }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={onSubmit}
+                disabled={loading}
+                className="bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] hover:from-[#FF5500] hover:to-[#FF8500] text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 px-4 py-2 text-sm font-semibold rounded-xl relative overflow-hidden"
+                style={{ minWidth: 80 }}
+              >
+                {loading ? (
+                  <Icon
+                    icon="eos-icons:loading"
+                    width={16}
+                    height={16}
+                    className="animate-spin mr-2"
+                  />
+                ) : (
+                  <Icon
+                    icon="mdi:content-save"
+                    width={16}
+                    height={16}
+                    className="mr-2"
+                  />
+                )}
+                Save
+              </Button>
               <Button
                 variant="ghost"
                 onClick={handleClose}
@@ -199,39 +230,13 @@ const ProfileEditModal = ({
           {/* Enhanced Error Banner with sophisticated animations */}
           <AnimatePresence>
             {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -20, height: 0 }}
-                animate={{ opacity: 1, y: 0, height: "auto" }}
-                exit={{ opacity: 0, y: -20, height: 0 }}
-                className="mx-6 sm:mx-8 mt-4 p-4 sm:p-5 bg-gradient-to-r from-red-500/15 to-red-600/15 border border-red-500/30 rounded-2xl backdrop-blur-sm flex-shrink-0 relative overflow-hidden"
-              >
-                {/* Enhanced animated background with pulse */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-red-600/5"
-                  animate={{ opacity: [0.3, 0.6, 0.3] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
-                <div className="flex items-center gap-4 relative z-10">
-                  <motion.div
-                    className="p-2 bg-red-500/25 rounded-xl"
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <Icon
-                      icon="mdi:alert-circle"
-                      width={20}
-                      height={20}
-                      className="text-red-400"
-                    />
-                  </motion.div>
-                  <div>
-                    <span className="text-red-400 font-semibold text-base">
-                      Error
-                    </span>
-                    <p className="text-red-300 text-sm mt-1">{error}</p>
-                  </div>
-                </div>
-              </motion.div>
+              <InfoBanner
+                icon="mdi:alert-circle"
+                title="Error"
+                subtitle={error}
+                variant="primary" // Change to 'error' if you add such a variant
+                className="mx-6 sm:mx-8 mt-4 mb-4"
+              />
             )}
           </AnimatePresence>
 
@@ -245,7 +250,7 @@ const ProfileEditModal = ({
 
             {/* Enhanced Content Area */}
             <div className="flex-1 overflow-y-auto min-h-0 relative">
-              <div className="p-6 sm:p-8 lg:p-10">
+              <div className="p-3 sm:p-4 lg:p-6 pb-20 lg:pb-6">
                 <motion.div
                   key={activeSection}
                   initial={{ opacity: 0, y: 30, scale: 0.98 }}
@@ -265,41 +270,26 @@ const ProfileEditModal = ({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1, duration: 0.4 }}
                   >
-                    <Card
-                      variant="formSection"
-                      className="backdrop-blur-xl border-[rgba(255,107,0,0.15)] bg-gradient-to-br from-[rgba(255,107,0,0.03)] via-[rgba(30,30,30,0.8)] to-[rgba(255,107,0,0.02)] !w-full relative overflow-hidden"
-                    >
-                      {/* Enhanced subtle animated background */}
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-br from-[#FF6B00]/2 via-transparent to-[#FF9A00]/2"
-                        animate={{ opacity: [0.3, 0.5, 0.3] }}
-                        transition={{ duration: 4, repeat: Infinity }}
-                      />
+                    {/* Enhanced subtle animated background */}
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-br from-[#FF6B00]/2 via-transparent to-[#FF9A00]/2"
+                      animate={{ opacity: [0.3, 0.5, 0.3] }}
+                      transition={{ duration: 4, repeat: Infinity }}
+                    />
 
-                      <motion.div
-                        variants={fadeIn}
-                        initial="hidden"
-                        animate="visible"
-                        className="relative z-10"
-                      >
-                        <div className="mt-5">{children}</div>
-                      </motion.div>
-                    </Card>
+                    <motion.div
+                      variants={fadeIn}
+                      initial="hidden"
+                      animate="visible"
+                      className="relative z-10"
+                    >
+                      <div className="mt-2 sm:mt-3">{children}</div>
+                    </motion.div>
                   </motion.div>
                 </motion.div>
               </div>
             </div>
           </div>
-
-          {/* Enhanced Footer */}
-          <ProfileFooter
-            sections={sections}
-            activeSection={activeSection}
-            setActiveSection={setActiveSection}
-            loading={loading}
-            onClose={handleClose}
-            onSubmit={onSubmit}
-          />
         </motion.div>
       </div>
     </AnimatePresence>
@@ -316,30 +306,45 @@ const ProfileSidebar = ({ sections, activeSection, setActiveSection }) => (
       transition={{ duration: 3, repeat: Infinity }}
     />
 
-    {/* Mobile: Enhanced Horizontal scroll with better design */}
-    <div className="lg:hidden p-5 overflow-x-auto">
-      <div className="flex gap-3 min-w-max">
-        {sections.map((section, index) => (
-          <SidebarButton
+    {/* Mobile: Sticky Bottom Tab Bar */}
+    <div className="lg:hidden">
+      <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around bg-gradient-to-br from-[#0a0a0a]/95 via-[#1a1a1a]/95 to-[#050505]/95 border-t border-[rgba(255,107,0,0.12)] shadow-2xl py-2">
+        {sections.map((section) => (
+          <button
             key={section.id}
-            section={section}
-            index={index}
-            isActive={activeSection === section.id}
             onClick={() => setActiveSection(section.id)}
-            isMobile
-          />
+            className={`flex flex-col items-center flex-1 px-1 py-1 transition-all duration-200 ${
+              activeSection === section.id
+                ? "text-[#FF6B00] font-bold"
+                : "text-gray-400 hover:text-[#FF6B00]"
+            }`}
+            style={{ minWidth: 0 }}
+          >
+            <Icon
+              icon={section.icon}
+              width={28}
+              height={28}
+              className={`mb-0 ${
+                activeSection === section.id
+                  ? "text-[#FF6B00]"
+                  : "text-gray-400"
+              }`}
+            />
+            {/* Label maknut za mobile sticky tab bar */}
+          </button>
         ))}
-      </div>
+      </nav>
+      {/* Spacer for bottom nav */}
     </div>
 
     {/* Desktop: Enhanced Vertical sidebar with sophisticated animations */}
-    <div className="hidden lg:block p-8 h-full overflow-y-auto">
+    <div className="hidden lg:block p-4 lg:p-6 h-full overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <h3 className="text-xl font-bold text-white mb-8 flex items-center gap-3">
+        <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-3">
           <div className="p-2 bg-gradient-to-br from-[#FF6B00] to-[#FF9A00] rounded-lg">
             <Icon
               icon="mdi:format-list-bulleted"
@@ -546,118 +551,6 @@ const SectionHeader = ({ sections, activeSection }) => {
     </motion.div>
   );
 };
-
-// Enhanced Footer Component with sophisticated design
-const ProfileFooter = ({
-  sections,
-  activeSection,
-  setActiveSection,
-  loading,
-  onClose,
-  onSubmit,
-}) => (
-  <motion.div
-    className="flex flex-col sm:flex-row items-center justify-between p-6 sm:p-8 border-t border-[rgba(255,107,0,0.12)] bg-gradient-to-r from-[rgba(255,107,0,0.05)] via-transparent to-[rgba(255,107,0,0.03)] flex-shrink-0 gap-6 sm:gap-0 relative"
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.3 }}
-  >
-    {/* Enhanced ambient glow */}
-    <motion.div
-      className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#FF6B00]/40 to-transparent"
-      animate={{ opacity: [0.3, 0.8, 0.3] }}
-      transition={{ duration: 3, repeat: Infinity }}
-    />
-
-    {/* Enhanced Progress Dots with sophisticated animations */}
-    <div className="flex items-center gap-3 order-2 sm:order-1">
-      {sections.map((section, index) => {
-        const isActive = activeSection === section.id;
-        const isCompleted =
-          sections.findIndex((s) => s.id === activeSection) > index;
-        return (
-          <motion.button
-            key={section.id}
-            onClick={() => setActiveSection(section.id)}
-            whileHover={{ scale: 1.3 }}
-            whileTap={{ scale: 0.9 }}
-            className={`relative w-3 h-3 sm:w-4 sm:h-4 rounded-full transition-all duration-300 ${
-              isActive
-                ? "bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] shadow-lg shadow-orange-500/40 scale-125"
-                : isCompleted
-                ? "bg-[#FF6B00]/70 hover:bg-[#FF6B00]/90 shadow-md"
-                : "bg-[#333] hover:bg-[#555] hover:scale-110"
-            }`}
-            aria-label={`Go to ${section.label}`}
-          >
-            {isActive && (
-              <motion.div
-                className="absolute inset-0 rounded-full bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] opacity-50"
-                animate={{ scale: [1, 1.5, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
-            )}
-          </motion.button>
-        );
-      })}
-    </div>
-
-    {/* Enhanced Action Buttons with sophisticated styling */}
-    <div className="flex gap-4 order-1 sm:order-2 w-full sm:w-auto">
-      <motion.div
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className="flex-1 sm:flex-none"
-      >
-        <Button
-          variant="outline"
-          onClick={onClose}
-          disabled={loading}
-          className="w-full sm:w-auto border-[rgba(255,107,0,0.4)] text-gray-300 hover:text-white hover:border-[#FF6B00] hover:bg-[rgba(255,107,0,0.15)] transition-all duration-300 px-6 py-3 text-base font-medium rounded-xl"
-        >
-          Cancel
-        </Button>
-      </motion.div>
-      <motion.div
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className="flex-1 sm:flex-none"
-      >
-        <Button
-          onClick={onSubmit}
-          disabled={loading}
-          className="w-full sm:w-auto bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] hover:from-[#FF5500] hover:to-[#FF8500] text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 px-6 py-3 text-base font-semibold rounded-xl relative overflow-hidden"
-        >
-          {/* Enhanced button glow effect */}
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-white/10 to-white/5"
-            initial={{ opacity: 0 }}
-            whileHover={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          />
-          <div className="relative z-10 flex items-center gap-2">
-            {loading ? (
-              <>
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                >
-                  <Icon icon="eos-icons:loading" width={18} height={18} />
-                </motion.div>
-                Saving...
-              </>
-            ) : (
-              <>
-                <Icon icon="mdi:content-save" width={18} height={18} />
-                Save Profile
-              </>
-            )}
-          </div>
-        </Button>
-      </motion.div>
-    </div>
-  </motion.div>
-);
 
 // Form Content Renderer with enhanced animations
 const FormContentRenderer = ({ sections, activeSection, children }) => (

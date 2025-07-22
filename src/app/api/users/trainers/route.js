@@ -14,12 +14,7 @@ export async function GET(request) {
     const search = searchParams.get("search") || null;
     const locations = searchParams.getAll("location"); // can be multiple
     const availabilities = searchParams.getAll("availability"); // can be multiple
-    const priceMin = searchParams.get("priceMin")
-      ? parseFloat(searchParams.get("priceMin"))
-      : null;
-    const priceMax = searchParams.get("priceMax")
-      ? parseFloat(searchParams.get("priceMax"))
-      : null;
+
     const tags = searchParams.getAll("tag"); // can be multiple
     const sortBy =
       searchParams.get("sortBy") ||
@@ -113,17 +108,7 @@ export async function GET(request) {
     }
 
     // Price filter
-    if (priceMin !== null || priceMax !== null) {
-      queryOptions.where.AND = [
-        ...(queryOptions.where.AND || []),
-        {
-          pricePerSession: {
-            gte: priceMin !== null ? priceMin : undefined,
-            lte: priceMax !== null ? priceMax : undefined,
-          },
-        },
-      ];
-    }
+
     // Tags filter (specialties)
     if (tags && tags.length > 0) {
       queryOptions.where.AND = [
@@ -153,9 +138,7 @@ export async function GET(request) {
 
     // Add default Prisma orderBy for rating/paidAds if not sorting by distance
     if (sortBy !== "location") {
-      if (sortBy === "price") {
-        queryOptions.orderBy = [{ pricePerSession: sortOrder }];
-      } else if (sortBy === "experience") {
+      if (sortBy === "experience") {
         queryOptions.orderBy = [{ trainerSince: sortOrder }];
       } else if (sortBy === "name") {
         queryOptions.orderBy = [
