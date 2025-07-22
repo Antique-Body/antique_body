@@ -151,21 +151,17 @@ export const useTrainingPlanForm = (initialData = null) => {
   }, [initialData]);
 
   const updateFormData = (updates) => {
-    console.log("[UPDATE_FORM_DATA] updates:", updates);
     if (typeof updates === "function") {
       setFormData((prev) => {
         const result = updates(prev);
-        console.log("[UPDATE_FORM_DATA] function result:", result);
         return result;
       });
     } else if (updates && updates._prefillKey) {
       // Hard replace for prefill
-      console.log("[UPDATE_FORM_DATA] Hard replace with:", updates);
       setFormData(updates);
     } else {
       setFormData((prev) => {
         const merged = { ...prev, ...updates };
-        console.log("[UPDATE_FORM_DATA] Merged:", merged);
         return merged;
       });
     }
@@ -368,9 +364,7 @@ export const useTrainingPlanForm = (initialData = null) => {
       ),
       _prefillKey: Date.now() + Math.random(), // force unique object
     };
-    console.log("[PREFILL] Template:", template);
-    console.log("[PREFILL] NewData:", newData);
-    console.log("[PREFILL] FinalData sent to setFormData:", finalData);
+
     setFormData(finalData);
   };
 

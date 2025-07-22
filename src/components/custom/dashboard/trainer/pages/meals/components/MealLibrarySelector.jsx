@@ -108,7 +108,6 @@ export const MealLibrarySelector = ({
   }, [displayLoading, displayHasMore, onScroll]);
 
   // Console log prikazanih meals
-  console.log("Prikazani meals:", displayMeals);
 
   return (
     <div className="flex flex-col h-full">

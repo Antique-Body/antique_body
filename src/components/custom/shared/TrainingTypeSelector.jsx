@@ -44,10 +44,9 @@ export const TrainingTypeSelector = ({
               <div className="w-0.5 h-4 sm:w-1 sm:h-5 lg:h-6 bg-gradient-to-b from-[#FF6B00] to-[#FF8A00] rounded-full"></div>
               <Icon
                 icon="mdi:home-variant"
-                className="text-[#FF6B00]"
+                className="text-[#FF6B00] sm:w-[20px] sm:h-[20px]"
                 width={18}
                 height={18}
-                className="sm:w-[20px] sm:h-[20px]"
               />
               Training Environment
             </h3>
@@ -135,10 +134,9 @@ export const TrainingTypeSelector = ({
                       >
                         <Icon
                           icon="mdi:check-circle"
-                          className="text-[#FF6B00]"
+                          className="text-[#FF6B00] sm:w-[24px] sm:h-[24px]"
                           width={20}
                           height={20}
-                          className="sm:w-[24px] sm:h-[24px]"
                         />
                       </motion.div>
                     )}
