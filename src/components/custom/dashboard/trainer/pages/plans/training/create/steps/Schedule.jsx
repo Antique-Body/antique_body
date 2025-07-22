@@ -337,6 +337,7 @@ export const Schedule = ({ data, onChange }) => {
   );
 
   const handleCreateExercise = async (exerciseData) => {
+    console.log("[DEBUG] handleCreateExercise called with:", exerciseData);
     try {
       const response = await fetch("/api/users/trainer/exercises", {
         method: "POST",
@@ -345,22 +346,47 @@ export const Schedule = ({ data, onChange }) => {
       });
 
       const result = await response.json();
-      if (result.success) {
-        const exerciseToAdd = {
-          ...DEFAULT_EXERCISE,
-          id: crypto.randomUUID(),
-          ...exerciseData,
-          ...result.exercise,
+      const exerciseFromDb =
+        result.exercise || result.data?.exercise || result.data;
+      if (result.success && exerciseFromDb) {
+        // Add the exercise as returned from the backend (with backend id, normalized fields, etc)
+        const normalizedExercise = {
+          ...exerciseFromDb,
+          muscleGroups: Array.isArray(exerciseFromDb.muscleGroups)
+            ? exerciseFromDb.muscleGroups
+            : [],
         };
 
-        const newSchedule = [...data.schedule];
-        newSchedule[activeSession].exercises = [
-          ...newSchedule[activeSession].exercises,
-          exerciseToAdd,
-        ];
+        // Provjera duplikata po id-u
+        const alreadyExists = data.schedule[activeSession].exercises.some(
+          (ex) => ex.id === normalizedExercise.id
+        );
+        if (alreadyExists) {
+          console.warn(
+            "[DEBUG] Exercise with this id already exists, skipping add:",
+            normalizedExercise.id
+          );
+          return normalizedExercise;
+        }
 
+        const newSchedule = data.schedule.map((session, idx) =>
+          idx === activeSession
+            ? {
+                ...session,
+                exercises: [...session.exercises, normalizedExercise],
+              }
+            : session
+        );
         onChange({ schedule: newSchedule });
-        setShowCreateExercise(false);
+        console.log("[DEBUG] Backend exercise:", normalizedExercise);
+        console.log("[DEBUG] New schedule:", newSchedule);
+        console.log("[DEBUG] data.schedule BEFORE update:", data.schedule);
+        return normalizedExercise;
+      } else {
+        console.log(
+          "[DEBUG] Backend response error or missing exercise:",
+          result
+        );
       }
     } catch (error) {
       console.error("Error creating exercise:", error);
@@ -480,16 +506,6 @@ export const Schedule = ({ data, onChange }) => {
 
   // Fallback ako nema schedule
   let schedule = data.schedule || [];
-
-  // Ensure every session and every exercise in every session has a unique id
-  schedule = schedule.map((session) => ({
-    ...session,
-    id: session.id || crypto.randomUUID(),
-    exercises: (session.exercises || []).map((exercise) => ({
-      ...exercise,
-      id: exercise.id || crypto.randomUUID(),
-    })),
-  }));
 
   // Reset video error when videoUrl changes
   useEffect(() => {
@@ -895,9 +911,8 @@ export const Schedule = ({ data, onChange }) => {
 
                                       return (
                                         <Card
-                                          key={`${session.id}-${
-                                            exercise.id || exerciseIndex
-                                          }`}
+                                          // Ispravljeno: koristimo samo exercise.id kao key
+                                          key={exercise.id}
                                           variant="dark"
                                           hover={true}
                                           hoverBorderColor="#666"
@@ -1073,12 +1088,9 @@ export const Schedule = ({ data, onChange }) => {
                                                     {normalizeMuscleGroups(
                                                       exercise.muscleGroups
                                                     ).map((muscle, idx) => (
+                                                      // Ispravljeno: koristimo muscle.id kao key
                                                       <span
-                                                        key={
-                                                          muscle.id ||
-                                                          muscle.name ||
-                                                          idx
-                                                        }
+                                                        key={muscle.id}
                                                         className="px-3 py-1.5 bg-gradient-to-r from-[#FF6B00]/20 to-[#FF8500]/20 border border-[#FF6B00]/40 rounded-full text-xs sm:text-sm font-medium text-[#FF6B00] capitalize"
                                                       >
                                                         {muscle.name}
