@@ -55,10 +55,9 @@ export const SpecialtySelector = ({
           <h3 className="text-sm sm:text-base font-medium text-gray-300 flex items-center">
             <Icon
               icon="mdi:star-circle"
-              className="mr-2 text-[#FF6B00]"
+              className="mr-2 text-[#FF6B00] sm:w-[18px] sm:h-[18px]"
               width={16}
               height={16}
-              className="sm:w-[18px] sm:h-[18px]"
             />
             Choose Your Expertise Areas
           </h3>

@@ -214,8 +214,6 @@ export const Schedule = ({ data, onChange }) => {
   const [useStaticLibrary, setUseStaticLibrary] = useState(false); // Toggle between static and backend
   const searchTimeoutRef = useRef(null);
 
-  console.log(data, "data");
-
   // Helper function to get active media for a specific exercise
   const getActiveMedia = (sessionIndex, exerciseIndex) => {
     const key = `${sessionIndex}-${exerciseIndex}`;

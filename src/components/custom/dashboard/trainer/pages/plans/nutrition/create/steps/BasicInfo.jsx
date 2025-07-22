@@ -2,11 +2,11 @@
 
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import PropTypes from "prop-types";
 import { useState, useEffect } from "react";
 
-import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { FormField } from "@/components/common/FormField";
 
 const GOAL_TYPES = [
@@ -52,9 +52,18 @@ const GOAL_TYPES = [
   },
 ];
 
-export const BasicInfo = ({ data, onChange }) => {
+// Add dynamic import for CoverImageUpload
+const CoverImageUploadDynamic = dynamic(
+  () => import("../../../training/create/components/CoverImageUpload.jsx"),
+  { ssr: false }
+);
+
+export const BasicInfo = ({ data, onChange, prefillForm, templates }) => {
   const [previewImage, setPreviewImage] = useState(null);
   const [imageError, setImageError] = useState("");
+  const [showPrefillInfo, setShowPrefillInfo] = useState(false);
+  const [showAllPlans, setShowAllPlans] = useState(false);
+  const [search, setSearch] = useState("");
 
   // Handle edit mode - if coverImage is a string URL, set it as preview
   useEffect(() => {
@@ -165,83 +174,151 @@ export const BasicInfo = ({ data, onChange }) => {
           </p>
         </motion.div>
 
-        {/* Cover Image Upload */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="relative group max-w-5xl mx-auto mb-8 sm:mb-12"
-        >
-          {imageError && (
-            <div className="mb-3 sm:mb-4">
-              <ErrorMessage error={imageError} />
-            </div>
-          )}
-          <div className="relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] rounded-xl sm:rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-300" />
-            <div className="relative aspect-video w-full rounded-lg sm:rounded-xl overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#242424] border border-[#333] hover:border-[#FF6B00]/50 transition-all duration-500">
-              {previewImage && previewImage !== "" ? (
-                <div className="relative w-full h-full group">
-                  <Image
-                    src={previewImage}
-                    alt="Cover preview"
-                    fill
-                    className="object-cover"
+        {/* Cover Image + Prefill Options Row (NEW) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-12 items-start mb-8">
+          {/* Cover Image Upload (left) */}
+          <div>
+            <CoverImageUploadDynamic
+              previewImage={previewImage}
+              imageError={imageError}
+              handleImageChange={handleImageChange}
+            />
+          </div>
+          {/* Prefill Plan Selector (right) */}
+          {templates && templates.length > 0 && (
+            <div className="relative z-10 w-full">
+              <div className="flex items-center gap-3 mb-4">
+                <Icon
+                  icon="mdi:lightbulb-on-outline"
+                  className="w-6 h-6 text-[#FF6B00]"
+                />
+                <span className="text-lg font-semibold text-white">
+                  Want to prefill a plan? Choose a template:
+                </span>
+                <button
+                  className="ml-auto text-xs text-gray-400 underline hover:text-[#FF6B00]"
+                  onClick={() => setShowPrefillInfo((v) => !v)}
+                  type="button"
+                >
+                  {showPrefillInfo ? "Hide info" : "What is prefill?"}
+                </button>
+              </div>
+              {showPrefillInfo && (
+                <div className="mb-4 p-3 bg-[#181818] border border-[#FF6B00]/30 rounded text-gray-300 text-sm">
+                  Prefill lets you automatically fill in all data for popular
+                  nutrition plan types. After selection, you can further edit
+                  all details.
+                </div>
+              )}
+              {showAllPlans ? (
+                <div>
+                  <button
+                    className="mb-4 w-full bg-[#232323] hover:bg-[#FF6B00]/10 text-[#FF6B00] font-semibold py-2 rounded-lg border border-[#FF6B00]/30 shadow"
+                    onClick={() => setShowAllPlans(false)}
+                    type="button"
+                  >
+                    Back to prefill cards
+                  </button>
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search plans..."
+                    className="mb-3 w-full px-3 py-2 rounded-lg border border-[#333] bg-[#232323] text-white placeholder-gray-400 focus:outline-none focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/10 transition-all"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      name="coverImage"
-                      id="coverImage"
-                      onChange={handleImageChange}
-                      className="hidden"
-                    />
-                    <label
-                      htmlFor="coverImage"
-                      className="cursor-pointer px-4 sm:px-8 py-2 sm:py-4 bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] rounded-lg sm:rounded-xl text-white font-bold hover:from-[#FF7900] hover:to-[#FF9B00] transition-all duration-300 flex items-center gap-2 sm:gap-3 shadow-lg hover:shadow-xl hover:shadow-[#FF6B00]/25 transform hover:scale-105"
-                    >
-                      <Icon
-                        icon="mdi:camera-plus"
-                        className="w-4 h-4 sm:w-6 sm:h-6"
-                      />
-                      <span className="text-sm sm:text-base">Change Cover</span>
-                    </label>
+                  <div className="max-h-[420px] overflow-y-auto flex flex-col gap-3">
+                    {templates
+                      .filter(
+                        (tpl) =>
+                          tpl.title
+                            .toLowerCase()
+                            .includes(search.toLowerCase()) ||
+                          tpl.description
+                            .toLowerCase()
+                            .includes(search.toLowerCase())
+                      )
+                      .map((tpl, _) => (
+                        <div
+                          key={tpl.title}
+                          className="relative flex flex-col bg-[#232323] border border-[#333] shadow hover:border-[#FF6B00]/60 transition-all rounded-lg p-3 gap-2"
+                        >
+                          <span className="absolute top-2 right-2 z-10 bg-[#FF6B00] text-white text-xs px-2 py-1 rounded-full shadow font-medium whitespace-nowrap">
+                            {tpl.duration} {tpl.durationType}
+                          </span>
+                          <div className="flex flex-col gap-3">
+                            <div className="flex gap-3">
+                              <Image
+                                src={tpl.coverImage}
+                                alt={tpl.title}
+                                className="w-16 h-16 object-cover rounded-lg flex-shrink-0 border border-[#222]"
+                                width={64}
+                                height={64}
+                              />
+                              <div className="flex flex-col flex-1 min-w-0 gap-2 pr-16">
+                                <div className="flex items-center gap-2">
+                                  <Icon
+                                    icon="mdi:nutrition"
+                                    className="w-4 h-4 text-[#FF6B00] flex-shrink-0"
+                                  />
+                                  <span className="font-bold text-sm text-white line-clamp-2">
+                                    {tpl.title}
+                                  </span>
+                                </div>
+                                <p className="text-gray-300 text-xs line-clamp-2">
+                                  {tpl.description}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {tpl.keyFeatures.map((f, i) => (
+                                <span
+                                  key={i}
+                                  className="bg-[#FF6B00]/10 text-[#FF6B00] text-[10px] px-2 py-0.5 rounded-full font-medium"
+                                >
+                                  {f}
+                                </span>
+                              ))}
+                            </div>
+                            <button
+                              className="bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] hover:from-[#FF8A00] hover:to-[#FF6B00] text-white font-bold py-2 px-3 rounded-lg shadow text-xs transition-all duration-200 hover:scale-105 active:scale-95 w-full"
+                              onClick={() => {
+                                prefillForm(tpl);
+                                setShowAllPlans(false);
+                              }}
+                              type="button"
+                            >
+                              Prefill this plan
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    {templates.filter(
+                      (tpl) =>
+                        tpl.title
+                          .toLowerCase()
+                          .includes(search.toLowerCase()) ||
+                        tpl.description
+                          .toLowerCase()
+                          .includes(search.toLowerCase())
+                    ).length === 0 && (
+                      <div className="text-gray-400 text-center py-8">
+                        No plans to display.
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (
-                <label
-                  htmlFor="coverImage"
-                  className="w-full h-full flex flex-col items-center justify-center cursor-pointer group-hover:bg-gradient-to-br group-hover:from-[#FF6B00]/5 group-hover:to-[#FF8A00]/5 transition-all duration-500 p-4"
+                <button
+                  className="w-full bg-[#232323] hover:bg-[#FF6B00]/10 text-[#FF6B00] font-semibold py-2 rounded-lg border border-[#FF6B00]/30 shadow"
+                  onClick={() => setShowAllPlans(true)}
+                  type="button"
                 >
-                  <div className="p-4 sm:p-8 rounded-full bg-gradient-to-r from-[#FF6B00]/10 to-[#FF8A00]/10 mb-3 sm:mb-6 group-hover:from-[#FF6B00]/20 group-hover:to-[#FF8A00]/20 transition-all duration-300">
-                    <Icon
-                      icon="mdi:image-plus"
-                      className="w-8 h-8 sm:w-12 sm:h-12 text-[#FF6B00]"
-                    />
-                  </div>
-                  <span className="text-white font-bold text-lg sm:text-2xl mb-2 sm:mb-3">
-                    Upload Cover Image
-                  </span>
-                  <span className="text-gray-400 text-sm sm:text-lg mb-2 sm:mb-4 text-center">
-                    Make your plan stand out with a stunning cover
-                  </span>
-                  <span className="text-[#FF6B00] text-xs sm:text-sm font-medium px-3 sm:px-4 py-1 sm:py-2 bg-[#FF6B00]/10 rounded-full">
-                    Recommended: 1920x1080px
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    name="coverImage"
-                    id="coverImage"
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
-                </label>
+                  Show all plans
+                </button>
               )}
             </div>
-          </div>
-        </motion.div>
+          )}
+        </div>
 
         {/* Main Form - Improved Layout */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-12">
