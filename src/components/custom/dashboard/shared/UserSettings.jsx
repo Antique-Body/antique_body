@@ -579,12 +579,12 @@ export const UserSettings = ({
           </div>
 
           {/* Enhanced Footer */}
-          <SettingsFooter
+          {/* <SettingsFooter
             sections={sections}
             activeSection={activeSection}
             setActiveSection={setActiveSection}
             onClose={handleClose}
-          />
+          /> */}
         </motion.div>
       </div>
     </AnimatePresence>
@@ -601,20 +601,37 @@ const SettingsSidebar = ({ sections, activeSection, setActiveSection }) => (
       transition={{ duration: 3, repeat: Infinity }}
     />
 
-    {/* Mobile: Enhanced Horizontal scroll */}
-    <div className="lg:hidden p-5 overflow-x-auto">
-      <div className="flex gap-3 min-w-max">
-        {sections.map((section, index) => (
-          <SidebarButton
+    {/* Mobile: Sticky Bottom Tab Bar */}
+    <div className="lg:hidden">
+      <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around bg-gradient-to-br from-[#0a0a0a]/95 via-[#1a1a1a]/95 to-[#050505]/95 border-t border-[rgba(255,107,0,0.12)] shadow-2xl py-2">
+        {sections.map((section) => (
+          <button
             key={section.id}
-            section={section}
-            index={index}
-            isActive={activeSection === section.id}
             onClick={() => setActiveSection(section.id)}
-            isMobile
-          />
+            className={`flex flex-col items-center flex-1 px-1 py-1 transition-all duration-200 ${
+              activeSection === section.id
+                ? "text-[#FF6B00] font-bold"
+                : "text-gray-400 hover:text-[#FF6B00]"
+            }`}
+            style={{ minWidth: 0 }}
+          >
+            <Icon
+              icon={section.icon}
+              width={24}
+              height={24}
+              className={`mb-1 ${
+                activeSection === section.id
+                  ? "text-[#FF6B00]"
+                  : "text-gray-400"
+              }`}
+            />
+            <span className="text-xs leading-tight truncate">
+              {section.label}
+            </span>
+          </button>
         ))}
-      </div>
+      </nav>
+      {/* Spacer for bottom nav */}
     </div>
 
     {/* Desktop: Enhanced Vertical sidebar */}
@@ -831,72 +848,3 @@ const SettingsHeader = ({ sections, activeSection }) => {
     </motion.div>
   );
 };
-
-// Enhanced Footer Component with sophisticated design
-const SettingsFooter = ({
-  sections,
-  activeSection,
-  setActiveSection,
-  onClose,
-}) => (
-  <motion.div
-    className="flex flex-col sm:flex-row items-center justify-between p-6 sm:p-8 border-t border-[rgba(255,107,0,0.12)] bg-gradient-to-r from-[rgba(255,107,0,0.05)] via-transparent to-[rgba(255,107,0,0.03)] flex-shrink-0 gap-6 sm:gap-0 relative"
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.3 }}
-  >
-    {/* Enhanced ambient glow */}
-    <motion.div
-      className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#FF6B00]/40 to-transparent"
-      animate={{ opacity: [0.3, 0.8, 0.3] }}
-      transition={{ duration: 3, repeat: Infinity }}
-    />
-
-    {/* Enhanced Progress Dots */}
-    <div className="flex items-center gap-3 order-2 sm:order-1">
-      {sections.map((section, index) => {
-        const isActive = activeSection === section.id;
-        const isCompleted =
-          sections.findIndex((s) => s.id === activeSection) > index;
-        return (
-          <motion.button
-            key={section.id}
-            onClick={() => setActiveSection(section.id)}
-            whileHover={{ scale: 1.3 }}
-            whileTap={{ scale: 0.9 }}
-            className={`relative w-3 h-3 sm:w-4 sm:h-4 rounded-full transition-all duration-300 ${
-              isActive
-                ? "bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] shadow-lg shadow-orange-500/40 scale-125"
-                : isCompleted
-                ? "bg-[#FF6B00]/70 hover:bg-[#FF6B00]/90 shadow-md"
-                : "bg-[#333] hover:bg-[#555] hover:scale-110"
-            }`}
-            aria-label={`Go to ${section.label}`}
-          >
-            {isActive && (
-              <motion.div
-                className="absolute inset-0 rounded-full bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] opacity-50"
-                animate={{ scale: [1, 1.5, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
-            )}
-          </motion.button>
-        );
-      })}
-    </div>
-
-    {/* Enhanced Close Button */}
-    <div className="order-1 sm:order-2">
-      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-        <Button
-          variant="outline"
-          onClick={onClose}
-          className="border-[rgba(255,107,0,0.4)] text-gray-300 hover:text-white hover:border-[#FF6B00] hover:bg-[rgba(255,107,0,0.15)] transition-all duration-300 px-6 py-3 text-base font-medium rounded-xl"
-        >
-          <Icon icon="mdi:close" width={18} height={18} className="mr-2" />
-          Close Settings
-        </Button>
-      </motion.div>
-    </div>
-  </motion.div>
-);

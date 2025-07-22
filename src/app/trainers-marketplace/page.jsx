@@ -469,7 +469,6 @@ export default function TrainersMarketplace() {
             proximity: selectedTrainer.location
               ? `${selectedTrainer.location.city}`
               : "Location not specified",
-            hourlyRate: selectedTrainer.pricePerSession || 0,
             certifications: selectedTrainer.certifications.map(
               (cert) => cert.name
             ),

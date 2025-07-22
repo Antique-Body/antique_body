@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import React from "react";
 
 import { FormField } from "@/components/common";
-import { SectionTitle } from "@/components/custom/dashboard/shared";
 import { LanguageSelector } from "@/components/custom/personal-details/shared/LanguageSelector";
 import { ProfileImageUpload } from "@/components/custom/shared";
 
@@ -76,9 +75,7 @@ export const TrainerBasicInformation = ({
       animate="visible"
       className="space-y-6"
     >
-      <div className="px-4">
-        <SectionTitle title="Basic Information" />
-
+      <div className="px-0">
         {/* Profile Picture */}
         <motion.div variants={fadeInUp}>
           <ProfileImageUpload
@@ -98,7 +95,7 @@ export const TrainerBasicInformation = ({
 
         {/* Personal Info */}
         <motion.div variants={fadeInUp}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
             <FormField
               label="First Name"
               name="firstName"

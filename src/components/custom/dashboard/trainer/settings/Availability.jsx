@@ -66,7 +66,7 @@ export const Availability = ({ trainerData, setTrainerData }) => {
       variants={staggerItems}
       initial="hidden"
       animate="visible"
-      className="space-y-6 border-t border-[#333] pt-8"
+      className="space-y-6 border-[#333]"
     >
       <SectionTitle title="Your Availability" />
 

@@ -233,13 +233,13 @@ export async function updateClientProfile(userId, data) {
 
     // Handle contactEmail and contactPhone mapping
     if (data.contactEmail !== undefined) {
-      updateData.email =
+      updateData.contactEmail =
         data.contactEmail && data.contactEmail.trim() !== ""
           ? data.contactEmail
           : null;
     }
     if (data.contactPhone !== undefined) {
-      updateData.phone =
+      updateData.contactPhone =
         data.contactPhone && data.contactPhone.trim() !== ""
           ? data.contactPhone
           : null;

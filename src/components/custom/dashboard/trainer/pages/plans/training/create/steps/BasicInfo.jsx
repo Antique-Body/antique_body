@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { useState, useEffect, useCallback } from "react";
 import { SESSION_FORMATS } from "src/enums/sessionFormats";
 import { TRAINING_LEVELS } from "src/enums/trainingLevels";
@@ -19,10 +20,13 @@ const CoverImageUploadDynamic = dynamic(
   { loading: () => <CoverImageUploadSkeleton /> }
 );
 
-export const BasicInfo = ({ data, onChange }) => {
+export const BasicInfo = ({ data, onChange, prefillForm, templates }) => {
   const [previewImage, setPreviewImage] = useState(null);
   const [imageError, setImageError] = useState("");
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [showPrefillInfo, setShowPrefillInfo] = useState(false);
+  const [showAllPlans, setShowAllPlans] = useState(false);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.matchMedia) {
@@ -42,14 +46,12 @@ export const BasicInfo = ({ data, onChange }) => {
 
   // Handle edit mode - if coverImage is a string URL, set it as preview
   useEffect(() => {
-    if (
-      !previewImage &&
-      typeof data.coverImage === "string" &&
-      data.coverImage
-    ) {
+    if (typeof data.coverImage === "string" && data.coverImage) {
       setPreviewImage(data.coverImage);
+    } else if (!data.coverImage) {
+      setPreviewImage(null);
     }
-  }, [data.coverImage, previewImage]);
+  }, [data.coverImage]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -123,6 +125,7 @@ export const BasicInfo = ({ data, onChange }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0f0f0f] p-3 sm:p-4 lg:p-8">
+      {/* Modal for all plans */}
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,_rgba(255,107,0,0.1)_1px,_transparent_0)] [background-size:20px_20px] pointer-events-none" />
 
@@ -157,12 +160,153 @@ export const BasicInfo = ({ data, onChange }) => {
           </p>
         </motion.div>
 
-        {/* Cover Image Upload */}
-        <CoverImageUploadDynamic
-          previewImage={previewImage}
-          imageError={imageError}
-          handleImageChange={handleImageChange}
-        />
+        {/* Cover Image + Prefill Options Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-12 items-start mb-8">
+          {/* Cover Image Upload (left) */}
+          <div>
+            <CoverImageUploadDynamic
+              previewImage={previewImage}
+              imageError={imageError}
+              handleImageChange={handleImageChange}
+            />
+          </div>
+
+          {/* Prefill Plan Selector (right) */}
+          {templates && templates.length > 0 && (
+            <div className="relative z-10 w-full">
+              <div className="flex items-center gap-3 mb-4">
+                <Icon
+                  icon="mdi:lightbulb-on-outline"
+                  className="w-6 h-6 text-[#FF6B00]"
+                />
+                <span className="text-lg font-semibold text-white">
+                  Want to prefill a plan? Choose a template:
+                </span>
+                <button
+                  className="ml-auto text-xs text-gray-400 underline hover:text-[#FF6B00]"
+                  onClick={() => setShowPrefillInfo((v) => !v)}
+                  type="button"
+                >
+                  {showPrefillInfo ? "Hide info" : "What is prefill?"}
+                </button>
+              </div>
+              {showPrefillInfo && (
+                <div className="mb-4 p-3 bg-[#181818] border border-[#FF6B00]/30 rounded text-gray-300 text-sm">
+                  Prefill lets you automatically fill in all data for popular
+                  training types. After selection, you can further edit all
+                  details.
+                </div>
+              )}
+              {showAllPlans ? (
+                <div>
+                  <button
+                    className="mb-4 w-full bg-[#232323] hover:bg-[#FF6B00]/10 text-[#FF6B00] font-semibold py-2 rounded-lg border border-[#FF6B00]/30 shadow"
+                    onClick={() => setShowAllPlans(false)}
+                    type="button"
+                  >
+                    Back to prefill cards
+                  </button>
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search plans..."
+                    className="mb-3 w-full px-3 py-2 rounded-lg border border-[#333] bg-[#232323] text-white placeholder-gray-400 focus:outline-none focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00]/10 transition-all"
+                  />
+                  <div className="max-h-[420px] overflow-y-auto flex flex-col gap-3">
+                    {templates
+                      .filter(
+                        (tpl) =>
+                          tpl.title
+                            .toLowerCase()
+                            .includes(search.toLowerCase()) ||
+                          tpl.description
+                            .toLowerCase()
+                            .includes(search.toLowerCase())
+                      )
+                      .map((tpl, _) => (
+                        <div
+                          key={tpl.title}
+                          className="flex flex-col bg-[#232323] border border-[#333] shadow hover:border-[#FF6B00]/60 transition-all rounded-lg p-3 gap-2"
+                        >
+                          <div className="flex flex-row gap-4 items-center">
+                            <Image
+                              src={tpl.coverImage}
+                              alt={tpl.title}
+                              className="w-24 h-24 object-cover rounded-lg flex-shrink-0 border border-[#222]"
+                              width={96}
+                              height={96}
+                            />
+                            <div className="flex flex-col flex-1 min-w-0 gap-1">
+                              <div className="flex items-center gap-2">
+                                <Icon
+                                  icon="mdi:dumbbell"
+                                  className="w-4 h-4 text-[#FF6B00]"
+                                />
+                                <span className="font-bold text-2xl text-white truncate">
+                                  {tpl.title}
+                                </span>
+                                <span
+                                  className="ml-2 bg-[#FF6B00] text-white text-xs px-2 py-0.5 rounded-full shadow flex items-center justify-center min-w-[60px] max-w-[90px] h-6 text-center whitespace-nowrap overflow-hidden text-ellipsis"
+                                  style={{ lineHeight: "1.2" }}
+                                >
+                                  {tpl.duration} {tpl.durationType}
+                                </span>
+                              </div>
+                              <p className="text-gray-300 text-xs truncate">
+                                {tpl.description}
+                              </p>
+                              <div className="flex flex-wrap gap-1">
+                                {tpl.keyFeatures.map((f, i) => (
+                                  <span
+                                    key={i}
+                                    className="bg-[#FF6B00]/10 text-[#FF6B00] text-[10px] px-2 py-0.5 rounded-full font-medium"
+                                  >
+                                    {f}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            className="mt-2 bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] hover:from-[#FF8A00] hover:to-[#FF6B00] text-white font-bold py-1.5 px-3 rounded-lg shadow text-xs transition-all duration-200 hover:scale-105 active:scale-95 w-full"
+                            onClick={() => {
+                              prefillForm(tpl);
+                              setShowAllPlans(false);
+                            }}
+                            type="button"
+                          >
+                            Prefill this plan
+                          </button>
+                        </div>
+                      ))}
+                    {templates.filter(
+                      (tpl) =>
+                        tpl.title
+                          .toLowerCase()
+                          .includes(search.toLowerCase()) ||
+                        tpl.description
+                          .toLowerCase()
+                          .includes(search.toLowerCase())
+                    ).length === 0 && (
+                      <div className="text-gray-400 text-center py-8">
+                        No plans to display.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <button
+                  className="w-full bg-[#232323] hover:bg-[#FF6B00]/10 text-[#FF6B00] font-semibold py-2 rounded-lg border border-[#FF6B00]/30 shadow"
+                  onClick={() => setShowAllPlans(true)}
+                  type="button"
+                >
+                  Show all plans
+                </button>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Main Form - Mobile Optimized Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-12">
@@ -346,7 +490,7 @@ export const BasicInfo = ({ data, onChange }) => {
                         tabIndex={0}
                         role="radio"
                         aria-checked={isSelected}
-                        aria-label={`${difficultyLevel.label}${
+                        aria-label={`${difficultyLevel.label}$${
                           difficultyLevel.description
                             ? `: ${difficultyLevel.description}`
                             : ""
