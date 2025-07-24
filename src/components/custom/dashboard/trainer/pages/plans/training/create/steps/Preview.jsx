@@ -370,7 +370,12 @@ export const Preview = ({ data }) => {
                               </div>
                               <div className="flex items-center gap-3 text-sm">
                                 <span className="text-gray-400">
-                                  {exercise.sets} × {exercise.reps}
+                                  {typeof exercise.sets === "number"
+                                    ? exercise.sets
+                                    : Array.isArray(exercise.sets)
+                                    ? exercise.sets.length
+                                    : 0}{" "}
+                                  × {exercise.reps}
                                 </span>
                                 <span className="text-gray-400">
                                   {exercise.rest} rest

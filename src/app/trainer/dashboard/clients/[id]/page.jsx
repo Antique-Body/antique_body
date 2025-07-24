@@ -1583,6 +1583,261 @@ function ProgressTab({ client }) {
   );
 }
 
+// Enhanced Training Plan Card Component with Lazy Loading
+function TrainingPlanCard({ plan, client, onViewPlan, onStartPlan, startingPlanId }) {
+  const [planDetails, setPlanDetails] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+
+  const handleViewPlan = async () => {
+    if (!planDetails && !isLoading) {
+      setIsLoading(true);
+      try {
+        // Lazy load detailed plan data
+        const response = await fetch(`/api/coaching-requests/${client.id}/assigned-training-plan/${plan.id}/progress`);
+        if (response.ok) {
+          const data = await response.json();
+          setPlanDetails(data);
+        }
+      } catch (error) {
+        console.error('Error loading plan details:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    setShowDetails(!showDetails);
+    onViewPlan(plan);
+  };
+
+  const getCompletionStats = () => {
+    if (!planDetails || !planDetails.schedule) return null;
+    
+    const totalDays = planDetails.schedule.length;
+    const completedDays = planDetails.schedule.filter(day => day.workoutStatus === 'completed').length;
+    const totalExercises = planDetails.schedule.reduce((sum, day) => sum + (day.exercises?.length || 0), 0);
+    const completedExercises = planDetails.schedule.reduce((sum, day) => {
+      if (day.workoutStatus === 'completed') {
+        return sum + (day.exercises?.filter(ex => ex.exerciseCompleted)?.length || 0);
+      }
+      return sum;
+    }, 0);
+    
+    return { totalDays, completedDays, totalExercises, completedExercises };
+  };
+
+  const stats = getCompletionStats();
+
+  return (
+    <div className={`rounded-xl border backdrop-blur-sm transition-all duration-200 ${
+      plan.status === "completed"
+        ? "bg-green-500/10 border-green-500/30"
+        : plan.status === "active"
+        ? "bg-blue-500/10 border-blue-500/30 ring-2 ring-blue-500/20"
+        : "bg-white/5 border-white/10 hover:border-white/20"
+    }`}>
+      {/* Main Card Content */}
+      <div className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          {/* Left Side - Plan Info */}
+          <div className="flex items-start gap-3 min-w-0 flex-1">
+            {/* Status Icon */}
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+              plan.status === "completed"
+                ? "bg-green-600 shadow-lg shadow-green-600/30"
+                : plan.status === "active"
+                ? "bg-blue-600 shadow-lg shadow-blue-600/30"
+                : "bg-orange-600 shadow-lg shadow-orange-600/30"
+            }`}>
+              <Icon 
+                icon={
+                  plan.status === "completed" 
+                    ? "mdi:check" 
+                    : plan.status === "active"
+                    ? "mdi:play"
+                    : "mdi:pause"
+                } 
+                className="text-white" 
+                width={18} 
+                height={18} 
+              />
+            </div>
+
+            {/* Plan Details */}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <h3 className="text-lg font-semibold text-white truncate">
+                  {plan.planData.title}
+                </h3>
+                {plan.status === "active" && (
+                  <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs font-medium rounded-full border border-blue-500/30">
+                    Active
+                  </span>
+                )}
+                {plan.status === "completed" && (
+                  <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-medium rounded-full border border-green-500/30">
+                    Completed
+                  </span>
+                )}
+              </div>
+              
+              <div className="flex items-center gap-4 text-sm text-slate-400 mb-2">
+                <span className="flex items-center gap-1">
+                  <Icon icon="mdi:clock" width={14} height={14} />
+                  {plan.planData.duration} {plan.planData.durationType}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Icon icon="mdi:calendar" width={14} height={14} />
+                  {plan.status}
+                </span>
+              </div>
+
+              {/* Completion Stats for Completed Plans */}
+              {plan.status === "completed" && stats && (
+                <div className="flex items-center gap-4 text-xs text-slate-400">
+                  <span className="flex items-center gap-1">
+                    <Icon icon="mdi:check-circle" width={12} height={12} />
+                    {stats.completedDays}/{stats.totalDays} days
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Icon icon="mdi:dumbbell" width={12} height={12} />
+                    {stats.completedExercises}/{stats.totalExercises} exercises
+                  </span>
+                </div>
+              )}
+
+              {/* Loading State */}
+              {isLoading && (
+                <div className="flex items-center gap-2 text-slate-400 text-xs mt-2">
+                  <div className="w-3 h-3 border border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                  Loading details...
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right Side - Actions */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleViewPlan}
+              className="px-3 py-2"
+            >
+              <Icon icon="mdi:eye" width={16} height={16} />
+              <span className="hidden sm:inline ml-1">View</span>
+            </Button>
+            
+            {plan.status !== "completed" && plan.status !== "active" && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => onStartPlan(plan.id)}
+                loading={startingPlanId === plan.id}
+                className="px-3 py-2"
+              >
+                <Icon icon="mdi:play" width={16} height={16} />
+                <span className="hidden sm:inline ml-1">Start</span>
+              </Button>
+            )}
+            
+            {plan.status === "active" && (
+              <Link href={`/trainer/dashboard/clients/${client.id}/plans/${plan.id}`}>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="px-3 py-2"
+                >
+                  <Icon icon="mdi:open-in-new" width={16} height={16} />
+                  <span className="hidden sm:inline ml-1">Track</span>
+                </Button>
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Expanded Details */}
+      {showDetails && planDetails && (
+        <div className="border-t border-white/10 p-4 sm:p-6">
+          <div className="space-y-4">
+            {/* Workout Summary */}
+            {plan.status === "completed" && (
+              <div className="bg-white/5 rounded-lg p-4">
+                <h4 className="text-white font-medium mb-3 flex items-center gap-2">
+                  <Icon icon="mdi:chart-line" width={16} height={16} className="text-green-400" />
+                  Completion Summary
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <div className="text-slate-400">Days Completed</div>
+                    <div className="text-white font-semibold">{stats.completedDays}/{stats.totalDays}</div>
+                  </div>
+                  <div>
+                    <div className="text-slate-400">Exercises Done</div>
+                    <div className="text-white font-semibold">{stats.completedExercises}/{stats.totalExercises}</div>
+                  </div>
+                  <div>
+                    <div className="text-slate-400">Completion Rate</div>
+                    <div className="text-green-400 font-semibold">
+                      {Math.round((stats.completedDays / stats.totalDays) * 100)}%
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-slate-400">Status</div>
+                    <div className="text-green-400 font-semibold">✓ Finished</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Recent Workouts */}
+            {planDetails.schedule && (
+              <div>
+                <h4 className="text-white font-medium mb-2 flex items-center gap-2">
+                  <Icon icon="mdi:format-list-bulleted" width={16} height={16} className="text-blue-400" />
+                  Workout Days ({planDetails.schedule.length})
+                </h4>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {planDetails.schedule.map((day, idx) => (
+                    <div 
+                      key={idx} 
+                      className="flex items-center justify-between p-3 bg-white/5 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                          day.workoutStatus === 'completed'
+                            ? 'bg-green-600 text-white'
+                            : 'bg-slate-600 text-white'
+                        }`}>
+                          {day.workoutStatus === 'completed' ? '✓' : idx + 1}
+                        </div>
+                        <div>
+                          <div className="text-white text-sm font-medium">{day.name}</div>
+                          <div className="text-slate-400 text-xs">
+                            {day.exercises?.length || 0} exercises • {day.duration || 60} min
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-xs">
+                        {day.workoutStatus === 'completed' && (
+                          <span className="text-green-400">Completed</span>
+                        )}
+                        {day.workoutStatus !== 'completed' && (
+                          <span className="text-slate-400">Pending</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Workouts Tab Component
 function WorkoutsTab({
   assignedTrainingPlans,
@@ -1592,132 +1847,70 @@ function WorkoutsTab({
   startingPlanId,
   startPlanError,
 }) {
-  console.log("Assigned Training Plans History:", assignedTrainingPlans);
   return (
-    <div className="space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       {/* Header Actions */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-white">Workout Management</h2>
-        <div className="flex gap-2">
-          <Link href="/trainer/dashboard/plans">
-            <Button
-              variant="primary"
-              leftIcon={<Icon icon="mdi:plus" width={20} height={20} />}
-            >
-              Create Plan
-            </Button>
-          </Link>
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h2 className="text-xl font-semibold text-white">Training Plans</h2>
+        <Link href="/trainer/dashboard/plans">
+          <Button
+            variant="primary"
+            leftIcon={<Icon icon="mdi:plus" width={18} height={18} />}
+            className="w-full sm:w-auto"
+          >
+            Create New Plan
+          </Button>
+        </Link>
       </div>
 
-      {/* Historija svih dodijeljenih planova */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center gap-2 mb-4">
+      {/* Training Plans History */}
+      <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-white/10">
+        <div className="flex items-center gap-2 mb-6">
           <Icon
             icon="mdi:history"
-            className="text-[#3E92CC]"
-            width={24}
-            height={24}
+            className="text-blue-400"
+            width={20}
+            height={20}
           />
-          <h3 className="text-xl font-semibold text-white">
+          <h3 className="text-lg font-semibold text-white">
             Assigned Training Plans History
           </h3>
         </div>
+        
         {startPlanError && (
-          <div className="text-red-500 text-sm mb-2">{startPlanError}</div>
+          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4">
+            <div className="text-red-400 text-sm">{startPlanError}</div>
+          </div>
         )}
-        <div className="space-y-3">
+        
+        <div className="space-y-4">
           {assignedTrainingPlans && assignedTrainingPlans.length > 0 ? (
             assignedTrainingPlans.map((plan) => (
-              <div
+              <TrainingPlanCard
                 key={plan.id}
-                className={`flex items-center justify-between p-3 rounded-lg border ${
-                  plan.status === "active"
-                    ? "bg-blue-900/30 border-blue-500/70 shadow-lg"
-                    : "bg-zinc-800/50 border-zinc-700"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <Icon
-                    icon="mdi:dumbbell"
-                    className={
-                      plan.status === "completed"
-                        ? "text-green-400"
-                        : plan.status === "active"
-                        ? "text-blue-400"
-                        : "text-orange-400"
-                    }
-                    width={20}
-                    height={20}
-                  />
-                  <div>
-                    <p className="text-white font-medium flex items-center gap-2">
-                      {plan.planData.title}
-                      {plan.status === "active" && (
-                        <span className="ml-2 px-2 py-0.5 bg-blue-700/60 text-blue-200 text-xs rounded-full">
-                          Active
-                        </span>
-                      )}
-                    </p>
-                    <p className="text-zinc-400 text-sm">
-                      {plan.planData.duration} {plan.planData.durationType} •{" "}
-                      {plan.status.charAt(0).toUpperCase() +
-                        plan.status.slice(1)}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="secondary"
-                    size="small"
-                    onClick={() => onViewPlan(plan)}
-                  >
-                    <Icon icon="mdi:eye" width={16} height={16} />
-                  </Button>
-                  {plan.status !== "completed" && plan.status !== "active" && (
-                    <Button
-                      variant="primary"
-                      size="small"
-                      onClick={() => onStartPlan(plan.id)}
-                      loading={startingPlanId === plan.id}
-                    >
-                      Start Plan
-                    </Button>
-                  )}
-                  {plan.status === "active" && (
-                    <Link
-                      href={`/trainer/dashboard/clients/${client.id}/plans/${plan.id}`}
-                      passHref
-                    >
-                      <Button
-                        as="a"
-                        variant="info"
-                        size="small"
-                        className="ml-2"
-                      >
-                        <Icon icon="mdi:open-in-new" width={16} height={16} />
-                        Open & Track Plan
-                      </Button>
-                    </Link>
-                  )}
-                </div>
-              </div>
+                plan={plan}
+                client={client}
+                onViewPlan={onViewPlan}
+                onStartPlan={onStartPlan}
+                startingPlanId={startingPlanId}
+              />
             ))
           ) : (
-            <div className="text-center py-6">
+            <div className="text-center py-12">
               <Icon
                 icon="mdi:clipboard-outline"
-                className="text-zinc-600 mx-auto mb-2"
-                width={32}
-                height={32}
+                className="text-slate-600 mx-auto mb-3"
+                width={48}
+                height={48}
               />
-              <p className="text-zinc-400 text-sm">
-                No assigned training plans
+              <p className="text-slate-400 text-lg font-medium mb-2">No Training Plans Yet</p>
+              <p className="text-slate-500 text-sm">
+                Create and assign training plans to start tracking workouts
               </p>
             </div>
           )}
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
