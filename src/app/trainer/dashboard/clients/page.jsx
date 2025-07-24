@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/common/Button";
-import { Card } from "@/components/common/Card";
 import { InfoBanner } from "@/components/common/InfoBanner";
 import { ACTIVITY_TYPES } from "@/enums/activityTypes";
 import { EXPERIENCE_LEVELS } from "@/enums/experienceLevels";
@@ -165,27 +164,31 @@ export default function ClientsPage() {
             const client = clientRequest.client;
             const profile = client.clientProfile;
             const clientGender = profile?.gender?.toLowerCase();
-            const isMale = clientGender === 'male';
-            const isFemale = clientGender === 'female';
-            
+            const isMale = clientGender === "male";
+            const isFemale = clientGender === "female";
+
             // Gender-based styling
             const genderStyles = {
-              background: isMale 
-                ? 'bg-gradient-to-r from-slate-900/95 via-blue-900/10 to-slate-900/95'
-                : isFemale 
-                ? 'bg-gradient-to-r from-slate-900/95 via-pink-900/20 to-slate-900/95'
-                : 'bg-gradient-to-r from-slate-900/95 via-slate-800/90 to-slate-900/95',
+              background: isMale
+                ? "bg-gradient-to-r from-slate-900/95 via-blue-900/10 to-slate-900/95"
+                : isFemale
+                ? "bg-gradient-to-r from-slate-900/95 via-pink-900/20 to-slate-900/95"
+                : "bg-gradient-to-r from-slate-900/95 via-slate-800/90 to-slate-900/95",
               border: isMale
-                ? 'border-cyan-600/30 hover:border-cyan-400/50'
+                ? "border-cyan-600/30 hover:border-cyan-400/50"
                 : isFemale
-                ? 'border-pink-600/40 hover:border-pink-400/60'
-                : 'border-slate-700/50 hover:border-blue-400/70',
+                ? "border-pink-600/40 hover:border-pink-400/60"
+                : "border-slate-700/50 hover:border-blue-400/70",
               shadow: isMale
-                ? 'hover:shadow-cyan-500/10'
+                ? "hover:shadow-cyan-500/10"
                 : isFemale
-                ? 'hover:shadow-pink-500/15'
-                : 'hover:shadow-blue-500/20',
-              accent: isMale ? 'from-cyan-500/10 to-blue-500/10' : isFemale ? 'from-pink-500/15 to-rose-500/15' : 'from-blue-500/10 to-blue-500/10'
+                ? "hover:shadow-pink-500/15"
+                : "hover:shadow-blue-500/20",
+              accent: isMale
+                ? "from-cyan-500/10 to-blue-500/10"
+                : isFemale
+                ? "from-pink-500/15 to-rose-500/15"
+                : "from-blue-500/10 to-blue-500/10",
             };
 
             return (
@@ -196,232 +199,242 @@ export default function ClientsPage() {
               >
                 {/* Gender Accent Strip */}
                 {(isMale || isFemale) && (
-                  <div className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${genderStyles.accent} opacity-70`} />
+                  <div
+                    className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${genderStyles.accent} opacity-70`}
+                  />
                 )}
-                
-                <div className="p-4">
-                <div className="flex items-start gap-4">
-                  {/* Profile Image */}
-                  <div className="relative group">
-                    <div className="h-20 w-20 overflow-hidden rounded-xl ring-2 ring-[#3E92CC]/20 transition-all duration-300 group-hover:ring-[#3E92CC]/50">
-                      {profile.profileImage ? (
-                        <Image
-                          src={profile.profileImage}
-                          alt={`${profile.firstName} profile`}
-                          className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110"
-                          width={80}
-                          height={80}
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#3E92CC] to-[#2D7EB8]">
-                          <Icon
-                            icon="mdi:account"
-                            width={32}
-                            height={32}
-                            color="white"
-                          />
-                        </div>
-                      )}
-                    </div>
-                    {/* Gender Badge */}
-                    {profile.gender && (
-                      <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border border-slate-800 shadow-lg ${
-                        profile.gender.toLowerCase() === 'male' 
-                          ? 'bg-gradient-to-br from-blue-500 to-blue-600' 
-                          : profile.gender.toLowerCase() === 'female'
-                          ? 'bg-gradient-to-br from-pink-500 to-pink-600'
-                          : 'bg-gradient-to-br from-slate-500 to-slate-600'
-                      }`}>
-                        <Icon 
-                          icon={
-                            profile.gender.toLowerCase() === 'male' 
-                              ? "mdi:gender-male" 
-                              : profile.gender.toLowerCase() === 'female'
-                              ? "mdi:gender-female"
-                              : "mdi:help"
-                          } 
-                          width={12} 
-                          height={12} 
-                          className="text-white" 
-                        />
-                      </div>
-                    )}
-                  </div>
 
-                  {/* Client Info */}
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-xl font-semibold text-white">
-                        {profile.firstName} {profile.lastName}
-                      </h3>
-                      <Icon
-                        icon="mdi:arrow-right"
-                        className="text-[#3E92CC] opacity-0 group-hover:opacity-100 transition-opacity"
-                        width={20}
-                        height={20}
-                      />
-                    </div>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      <span className="px-2 py-1 bg-green-900/30 text-green-400 text-xs rounded-full">
-                        Active Client
-                      </span>
-                      <span className="px-2 py-1 bg-blue-900/30 text-blue-400 text-xs rounded-full">
-                        {getExperienceText(profile.experienceLevel)}
-                      </span>
-                      {profile.location && (
-                        <span className="px-2 py-1 bg-emerald-900/30 text-emerald-400 text-xs rounded-full flex items-center gap-1">
-                          <Icon icon="mdi:map-marker" width={12} height={12} />
-                          {profile.location.city}
-                        </span>
-                      )}
-                      {/* Gender Pill */}
+                <div className="p-4">
+                  <div className="flex items-start gap-4">
+                    {/* Profile Image */}
+                    <div className="relative group">
+                      <div className="h-20 w-20 overflow-hidden rounded-xl ring-2 ring-[#3E92CC]/20 transition-all duration-300 group-hover:ring-[#3E92CC]/50">
+                        {profile.profileImage ? (
+                          <Image
+                            src={profile.profileImage}
+                            alt={`${profile.firstName} profile`}
+                            className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110"
+                            width={80}
+                            height={80}
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#3E92CC] to-[#2D7EB8]">
+                            <Icon
+                              icon="mdi:account"
+                              width={32}
+                              height={32}
+                              color="white"
+                            />
+                          </div>
+                        )}
+                      </div>
+                      {/* Gender Badge */}
                       {profile.gender && (
-                        <span className={`px-2 py-1 text-xs rounded-full flex items-center gap-1 ${
-                          profile.gender.toLowerCase() === 'male' 
-                            ? 'bg-blue-900/30 text-blue-400' 
-                            : profile.gender.toLowerCase() === 'female'
-                            ? 'bg-pink-900/30 text-pink-400'
-                            : 'bg-slate-900/30 text-slate-400'
-                        }`}>
-                          <Icon 
+                        <div
+                          className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border border-slate-800 shadow-lg ${
+                            profile.gender.toLowerCase() === "male"
+                              ? "bg-gradient-to-br from-blue-500 to-blue-600"
+                              : profile.gender.toLowerCase() === "female"
+                              ? "bg-gradient-to-br from-pink-500 to-pink-600"
+                              : "bg-gradient-to-br from-slate-500 to-slate-600"
+                          }`}
+                        >
+                          <Icon
                             icon={
-                              profile.gender.toLowerCase() === 'male' 
-                                ? "mdi:gender-male" 
-                                : profile.gender.toLowerCase() === 'female'
+                              profile.gender.toLowerCase() === "male"
+                                ? "mdi:gender-male"
+                                : profile.gender.toLowerCase() === "female"
                                 ? "mdi:gender-female"
                                 : "mdi:help"
-                            } 
-                            width={12} 
-                            height={12} 
+                            }
+                            width={12}
+                            height={12}
+                            className="text-white"
                           />
-                          {profile.gender}
-                        </span>
+                        </div>
                       )}
                     </div>
 
-                    {/* Quick Stats */}
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="bg-zinc-800/50 rounded-lg p-2">
-                        <div className="flex items-center gap-1.5">
-                          <Icon
-                            icon="mdi:target"
-                            className="text-[#3E92CC]"
-                            width={16}
-                            height={16}
-                          />
-                          <span className="text-zinc-400 text-xs">Goal</span>
-                        </div>
-                        <p className="text-white text-sm mt-0.5 truncate">
-                          {getFitnessGoalText(profile.primaryGoal)}
-                        </p>
+                    {/* Client Info */}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-xl font-semibold text-white">
+                          {profile.firstName} {profile.lastName}
+                        </h3>
+                        <Icon
+                          icon="mdi:arrow-right"
+                          className="text-[#3E92CC] opacity-0 group-hover:opacity-100 transition-opacity"
+                          width={20}
+                          height={20}
+                        />
                       </div>
-                      <div className="bg-zinc-800/50 rounded-lg p-2">
-                        <div className="flex items-center gap-1.5">
-                          <Icon
-                            icon="mdi:calendar-check"
-                            className="text-[#3E92CC]"
-                            width={16}
-                            height={16}
-                          />
-                          <span className="text-zinc-400 text-xs">
-                            Client Since
-                          </span>
-                        </div>
-                        <p className="text-white text-sm mt-0.5">
-                          {formatDate(clientRequest.respondedAt)}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Preferred Activities */}
-                    {profile.preferredActivities.length > 0 && (
-                      <div className="mb-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Icon
-                            icon="mdi:dumbbell"
-                            className="text-[#3E92CC]"
-                            width={16}
-                            height={16}
-                          />
-                          <span className="text-zinc-400 text-xs">
-                            Activities
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {profile.preferredActivities
-                            .slice(0, 3)
-                            .map((activity) => (
-                              <span
-                                key={activity.id}
-                                className="px-2 py-1 bg-blue-900/30 text-blue-400 text-xs rounded-full"
-                              >
-                                {mapActivityToLabel(activity.name)}
-                              </span>
-                            ))}
-                          {profile.preferredActivities.length > 3 && (
-                            <span className="px-2 py-1 bg-zinc-700 text-zinc-400 text-xs rounded-full">
-                              +{profile.preferredActivities.length - 3} more
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Medical Alerts */}
-                    {(profile.medicalConditions || profile.allergies) && (
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {profile.medicalConditions && (
-                          <span className="px-2 py-1 bg-amber-900/30 text-amber-400 text-xs rounded-full flex items-center gap-1">
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        <span className="px-2 py-1 bg-green-900/30 text-green-400 text-xs rounded-full">
+                          Active Client
+                        </span>
+                        <span className="px-2 py-1 bg-blue-900/30 text-blue-400 text-xs rounded-full">
+                          {getExperienceText(profile.experienceLevel)}
+                        </span>
+                        {profile.location && (
+                          <span className="px-2 py-1 bg-emerald-900/30 text-emerald-400 text-xs rounded-full flex items-center gap-1">
                             <Icon
-                              icon="mdi:medical-bag"
+                              icon="mdi:map-marker"
                               width={12}
                               height={12}
                             />
-                            Medical Info
+                            {profile.location.city}
                           </span>
                         )}
-                        {profile.allergies && (
-                          <span className="px-2 py-1 bg-red-900/30 text-red-400 text-xs rounded-full flex items-center gap-1">
-                            <Icon icon="mdi:alert" width={12} height={12} />
-                            Allergies
+                        {/* Gender Pill */}
+                        {profile.gender && (
+                          <span
+                            className={`px-2 py-1 text-xs rounded-full flex items-center gap-1 ${
+                              profile.gender.toLowerCase() === "male"
+                                ? "bg-blue-900/30 text-blue-400"
+                                : profile.gender.toLowerCase() === "female"
+                                ? "bg-pink-900/30 text-pink-400"
+                                : "bg-slate-900/30 text-slate-400"
+                            }`}
+                          >
+                            <Icon
+                              icon={
+                                profile.gender.toLowerCase() === "male"
+                                  ? "mdi:gender-male"
+                                  : profile.gender.toLowerCase() === "female"
+                                  ? "mdi:gender-female"
+                                  : "mdi:help"
+                              }
+                              width={12}
+                              height={12}
+                            />
+                            {profile.gender}
                           </span>
                         )}
                       </div>
-                    )}
 
-                    {/* Action Buttons */}
-                    <div className="flex gap-2">
-                      <Button
-                        variant="primary"
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleViewClient(clientRequest);
-                        }}
-                        leftIcon={
-                          <Icon icon="mdi:eye" width={16} height={16} />
-                        }
-                      >
-                        View Dashboard
-                      </Button>
-                      <div className="group relative">
+                      {/* Quick Stats */}
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="bg-zinc-800/50 rounded-lg p-2">
+                          <div className="flex items-center gap-1.5">
+                            <Icon
+                              icon="mdi:target"
+                              className="text-[#3E92CC]"
+                              width={16}
+                              height={16}
+                            />
+                            <span className="text-zinc-400 text-xs">Goal</span>
+                          </div>
+                          <p className="text-white text-sm mt-0.5 truncate">
+                            {getFitnessGoalText(profile.primaryGoal)}
+                          </p>
+                        </div>
+                        <div className="bg-zinc-800/50 rounded-lg p-2">
+                          <div className="flex items-center gap-1.5">
+                            <Icon
+                              icon="mdi:calendar-check"
+                              className="text-[#3E92CC]"
+                              width={16}
+                              height={16}
+                            />
+                            <span className="text-zinc-400 text-xs">
+                              Client Since
+                            </span>
+                          </div>
+                          <p className="text-white text-sm mt-0.5">
+                            {formatDate(clientRequest.respondedAt)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Preferred Activities */}
+                      {profile.preferredActivities.length > 0 && (
+                        <div className="mb-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Icon
+                              icon="mdi:dumbbell"
+                              className="text-[#3E92CC]"
+                              width={16}
+                              height={16}
+                            />
+                            <span className="text-zinc-400 text-xs">
+                              Activities
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {profile.preferredActivities
+                              .slice(0, 3)
+                              .map((activity) => (
+                                <span
+                                  key={activity.id}
+                                  className="px-2 py-1 bg-blue-900/30 text-blue-400 text-xs rounded-full"
+                                >
+                                  {mapActivityToLabel(activity.name)}
+                                </span>
+                              ))}
+                            {profile.preferredActivities.length > 3 && (
+                              <span className="px-2 py-1 bg-zinc-700 text-zinc-400 text-xs rounded-full">
+                                +{profile.preferredActivities.length - 3} more
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Medical Alerts */}
+                      {(profile.medicalConditions || profile.allergies) && (
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {profile.medicalConditions && (
+                            <span className="px-2 py-1 bg-amber-900/30 text-amber-400 text-xs rounded-full flex items-center gap-1">
+                              <Icon
+                                icon="mdi:medical-bag"
+                                width={12}
+                                height={12}
+                              />
+                              Medical Info
+                            </span>
+                          )}
+                          {profile.allergies && (
+                            <span className="px-2 py-1 bg-red-900/30 text-red-400 text-xs rounded-full flex items-center gap-1">
+                              <Icon icon="mdi:alert" width={12} height={12} />
+                              Allergies
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2">
                         <Button
-                          variant="success"
+                          variant="primary"
                           size="small"
-                          disabled
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewClient(clientRequest);
+                          }}
                           leftIcon={
-                            <Icon icon="mdi:message" width={16} height={16} />
+                            <Icon icon="mdi:eye" width={16} height={16} />
                           }
                         >
-                          Message
+                          View Dashboard
                         </Button>
-                        <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-max bg-zinc-800 text-xs text-green-400 rounded px-2 py-1 opacity-0 group-hover:opacity-100 pointer-events-none z-10 shadow-lg border border-zinc-700">
-                          Messaging feature coming soon!
+                        <div className="group relative">
+                          <Button
+                            variant="success"
+                            size="small"
+                            disabled
+                            leftIcon={
+                              <Icon icon="mdi:message" width={16} height={16} />
+                            }
+                          >
+                            Message
+                          </Button>
+                          <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-max bg-zinc-800 text-xs text-green-400 rounded px-2 py-1 opacity-0 group-hover:opacity-100 pointer-events-none z-10 shadow-lg border border-zinc-700">
+                            Messaging feature coming soon!
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
                 </div>
               </div>
             );

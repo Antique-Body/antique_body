@@ -337,7 +337,6 @@ export const Schedule = ({ data, onChange }) => {
   );
 
   const handleCreateExercise = async (exerciseData) => {
-    console.log("[DEBUG] handleCreateExercise called with:", exerciseData);
     try {
       const response = await fetch("/api/users/trainer/exercises", {
         method: "POST",
@@ -378,9 +377,6 @@ export const Schedule = ({ data, onChange }) => {
             : session
         );
         onChange({ schedule: newSchedule });
-        console.log("[DEBUG] Backend exercise:", normalizedExercise);
-        console.log("[DEBUG] New schedule:", newSchedule);
-        console.log("[DEBUG] data.schedule BEFORE update:", data.schedule);
         return normalizedExercise;
       } else {
         console.log(
@@ -505,7 +501,7 @@ export const Schedule = ({ data, onChange }) => {
   );
 
   // Fallback ako nema schedule
-  let schedule = data.schedule || [];
+  const schedule = data.schedule || [];
 
   // Reset video error when videoUrl changes
   useEffect(() => {
@@ -562,7 +558,7 @@ export const Schedule = ({ data, onChange }) => {
 
             return (
               <SessionDndWrapper
-                key={session.id}
+                key={session.id || sessionIndex}
                 id={session.id}
                 index={sessionIndex}
                 moveSession={moveSession}
@@ -911,8 +907,11 @@ export const Schedule = ({ data, onChange }) => {
 
                                       return (
                                         <Card
-                                          // Ispravljeno: koristimo samo exercise.id kao key
-                                          key={exercise.id}
+                                          key={
+                                            (exercise.id || exerciseIndex) +
+                                            "-" +
+                                            sessionIndex
+                                          }
                                           variant="dark"
                                           hover={true}
                                           hoverBorderColor="#666"
@@ -1088,9 +1087,14 @@ export const Schedule = ({ data, onChange }) => {
                                                     {normalizeMuscleGroups(
                                                       exercise.muscleGroups
                                                     ).map((muscle, idx) => (
-                                                      // Ispravljeno: koristimo muscle.id kao key
                                                       <span
-                                                        key={muscle.id}
+                                                        key={
+                                                          (muscle.id ||
+                                                            muscle.name ||
+                                                            idx) +
+                                                          "-" +
+                                                          idx
+                                                        }
                                                         className="px-3 py-1.5 bg-gradient-to-r from-[#FF6B00]/20 to-[#FF8500]/20 border border-[#FF6B00]/40 rounded-full text-xs sm:text-sm font-medium text-[#FF6B00] capitalize"
                                                       >
                                                         {muscle.name}
