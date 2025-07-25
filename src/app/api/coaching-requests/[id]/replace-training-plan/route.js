@@ -15,21 +15,9 @@ export async function POST(request, { params }) {
     const { id } = await params;
     const body = await request.json();
     const { planId } = body;
-    if (!planId) {
+    if (!planId || typeof planId !== "string" || planId.length < 5) {
       return NextResponse.json(
-        { success: false, error: "Missing planId" },
-        { status: 400 }
-      );
-    }
-    // Validate planId format (UUID v4)
-    const uuidV4Regex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidV4Regex.test(planId)) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Invalid planId format. Must be a valid UUID.",
-        },
+        { success: false, error: "Invalid planId format." },
         { status: 400 }
       );
     }

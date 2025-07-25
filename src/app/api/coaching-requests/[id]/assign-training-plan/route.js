@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "#/auth";
 import prisma from "@/lib/prisma";
 
-export async function POST(request, { params }) {
+export async function POST(request, context) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -12,7 +12,7 @@ export async function POST(request, { params }) {
         { status: 401 }
       );
     }
-    const { id } = params; // coaching request id
+    const { id } = await context.params; // coaching request id
     const body = await request.json();
     const { planId } = body;
     if (!planId) {
@@ -47,14 +47,14 @@ export async function POST(request, { params }) {
       },
     });
     if (existing) {
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            "Client already has an active training plan. Complete it before assigning a new one.",
+      // Complete the existing plan before assigning a new one
+      await prisma.assignedTrainingPlan.update({
+        where: { id: existing.id },
+        data: {
+          status: "completed",
+          completedAt: new Date(),
         },
-        { status: 409 }
-      );
+      });
     }
     // Get original plan
     const plan = await prisma.trainingPlan.findUnique({

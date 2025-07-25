@@ -51,6 +51,23 @@ export async function GET(request, { params }) {
         clientId: coachingRequest.clientId,
         trainerId: coachingRequest.trainerId,
       },
+      select: {
+        id: true,
+        status: true,
+        assignedAt: true,
+        completedAt: true,
+        originalPlanId: true,
+        clientId: true,
+        trainerId: true,
+        planData: true, // <-- Add this line to include full plan data
+        originalPlan: {
+          select: {
+            title: true,
+            description: true,
+            coverImage: true,
+          },
+        },
+      },
       orderBy: { assignedAt: "desc" },
       skip,
       take,
@@ -64,7 +81,12 @@ export async function GET(request, { params }) {
     });
     return NextResponse.json({
       success: true,
-      data: assignedPlans,
+      data: assignedPlans.map((plan) => ({
+        ...plan,
+        title: plan.originalPlan?.title || null,
+        description: plan.originalPlan?.description || null,
+        coverImage: plan.originalPlan?.coverImage || null,
+      })),
       totalCount,
     });
   } catch (error) {

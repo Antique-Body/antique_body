@@ -394,7 +394,10 @@ export default function TrackPlanPage({ params }) {
                 rest: exercise.rest || 60,
                 type: exercise.type || "strength",
                 level: exercise.level || "beginner",
-                imageUrl: exercise.imageUrl || null,
+                imageUrl:
+                  typeof exercise.imageUrl === "string"
+                    ? exercise.imageUrl
+                    : "",
                 location: exercise.location || "gym",
                 equipment: exercise.equipment || false,
                 instructions: exercise.instructions || "",
@@ -405,8 +408,8 @@ export default function TrackPlanPage({ params }) {
               if (Array.isArray(exercise.sets)) {
                 cleanExercise.sets = exercise.sets.map((set) => ({
                   setNumber: set.setNumber,
-                  weight: set.weight || "",
-                  reps: set.reps || "",
+                  weight: set.weight === "" ? null : Number(set.weight),
+                  reps: set.reps === "" ? null : Number(set.reps),
                   completed: set.completed || false,
                   notes: set.notes || "",
                   completedAt: set.completedAt || null,
@@ -420,8 +423,8 @@ export default function TrackPlanPage({ params }) {
                   { length: setsCount },
                   (_, setIdx) => ({
                     setNumber: setIdx + 1,
-                    weight: "",
-                    reps: (exercise.reps || 10).toString(),
+                    weight: null,
+                    reps: exercise.reps ? Number(exercise.reps) : 10,
                     completed: false,
                     notes: "",
                     completedAt: null,
@@ -663,7 +666,7 @@ export default function TrackPlanPage({ params }) {
           </h3>
           <p className="text-red-400 mb-4">{trainingPlan.error}</p>
           <Button
-            onClick={() => window.location.reload()}
+            onClick={trainingPlan.retryFetchPlan}
             variant="secondary"
             className="bg-red-600/20 border-red-500/30 text-red-300 hover:bg-red-600/30"
           >

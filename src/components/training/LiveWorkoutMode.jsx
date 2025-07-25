@@ -626,7 +626,10 @@ export function LiveWorkoutMode({
 
                 {/* Video Section Enhancement */}
                 {currentExercise?.videoUrl && (
-                  <div className="mt-4 p-4 bg-red-900/20 border border-red-700/50 rounded-xl">
+                  <div
+                    className="mt-4 p-4 bg-red-900/20 border border-red-700/50 rounded-xl w-full max-w-md"
+                    style={{ minWidth: 320 }}
+                  >
                     <div className="flex items-start gap-3">
                       <div className="p-2 bg-red-600/20 rounded-lg">
                         <Icon
@@ -652,9 +655,34 @@ export function LiveWorkoutMode({
                             <span>Play Video</span>
                           </button>
                         </div>
-                        <div className="text-xs text-red-200/80 font-mono bg-red-900/30 px-3 py-2 rounded-lg border border-red-700/50 truncate">
-                          {currentExercise.videoUrl}
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="text-xs text-red-200/80 font-mono bg-red-900/30 px-3 py-2 rounded-lg border border-red-700/50 truncate flex-1 select-all">
+                            {currentExercise.videoUrl}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(
+                                currentExercise.videoUrl
+                              );
+                              setSaveMessage("Copied!");
+                              setTimeout(() => setSaveMessage(""), 1500);
+                            }}
+                            className="ml-1 px-2 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded transition-colors text-xs border border-zinc-600"
+                            title="Copy URL"
+                          >
+                            <Icon
+                              icon="mdi:content-copy"
+                              width={14}
+                              height={14}
+                            />
+                          </button>
                         </div>
+                        {saveMessage === "Copied!" && (
+                          <div className="text-green-400 text-xs font-medium mb-2">
+                            Copied!
+                          </div>
+                        )}
                         <p className="text-red-200/70 text-sm mt-2">
                           Watch this video to learn the proper form and
                           technique for this exercise.
@@ -805,7 +833,7 @@ export function LiveWorkoutMode({
                                   currentExerciseIndex,
                                   setIdx,
                                   "weight",
-                                  value
+                                  value === "" ? null : Number(value)
                                 );
                               }
                             }}
@@ -841,7 +869,7 @@ export function LiveWorkoutMode({
                                   currentExerciseIndex,
                                   setIdx,
                                   "reps",
-                                  value
+                                  value === "" ? null : Number(value)
                                 );
                               }
                             }}
