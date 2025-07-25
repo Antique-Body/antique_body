@@ -27,44 +27,45 @@ export function useTrainingPlan(id, planId) {
       if (showSaveBar) {
         // For browser navigation (refresh, close tab, back button), show warning but allow user to choose
         e.preventDefault();
-        e.returnValue = "You have unsaved changes. Are you sure you want to leave?";
+        e.returnValue =
+          "You have unsaved changes. Are you sure you want to leave?";
         return e.returnValue;
       }
     };
-    
+
     if (showSaveBar) {
       window.addEventListener("beforeunload", handleBeforeUnload);
     }
-    
+
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [showSaveBar]);
 
   // Fetch plan
-  useEffect(() => {
-    async function fetchPlan() {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch(
-          `/api/coaching-requests/${id}/assigned-training-plans`
-        );
-        const data = await res.json();
-        if (!res.ok || !data.success)
-          throw new Error(data.error || "Failed to fetch plan");
-        const assigned = data.data.find((p) => p.id === planId);
-        if (!assigned) throw new Error("Plan not found");
-        setPlan(assigned.planData);
-        setLastSavedPlan(assigned.planData);
-      } catch (err) {
-        setError(err.message || "Failed to load plan");
-      } finally {
-        setLoading(false);
-      }
+  const fetchPlan = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/coaching-requests/${id}/assigned-training-plan/${planId}`
+      );
+      const data = await res.json();
+      if (!res.ok || !data.success)
+        throw new Error(data.error || "Failed to fetch plan");
+      if (!data.data.planData) throw new Error("Plan data not found");
+      setPlan(data.data.planData);
+      setLastSavedPlan(data.data.planData);
+    } catch (err) {
+      setError(err.message || "Failed to load plan");
+    } finally {
+      setLoading(false);
     }
-    fetchPlan();
   }, [id, planId]);
+
+  useEffect(() => {
+    fetchPlan();
+  }, [fetchPlan]);
 
   // Consolidated navigation block/shake logic - for programmatic navigation only
   const checkAndHandleNavigationBlock = useCallback(
@@ -74,14 +75,14 @@ export function useTrainingPlan(id, planId) {
         const userConfirmed = window.confirm(
           "You have unsaved changes. Are you sure you want to leave? Your changes will be lost."
         );
-        
+
         if (!userConfirmed) {
           setIsShaking(true);
           setTimeout(() => setIsShaking(false), 800);
           return false;
         }
       }
-      
+
       if (typeof navigationFn === "function") {
         navigationFn();
       }
@@ -95,17 +96,14 @@ export function useTrainingPlan(id, planId) {
     (navigationFn) => checkAndHandleNavigationBlock(navigationFn),
     [checkAndHandleNavigationBlock]
   );
-  const triggerNavigationBlock = useCallback(
-    () => {
-      if (showSaveBar) {
-        setIsShaking(true);
-        setTimeout(() => setIsShaking(false), 800);
-        return false;
-      }
-      return true;
-    },
-    [showSaveBar]
-  );
+  const triggerNavigationBlock = useCallback(() => {
+    if (showSaveBar) {
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 800);
+      return false;
+    }
+    return true;
+  }, [showSaveBar]);
   const safeNavigate = useCallback(
     (navigationCallback) => checkAndHandleNavigationBlock(navigationCallback),
     [checkAndHandleNavigationBlock]
@@ -281,5 +279,6 @@ export function useTrainingPlan(id, planId) {
     removeExercise,
     replaceExercise,
     updateExerciseParams,
+    retryFetchPlan: fetchPlan,
   };
 }

@@ -416,7 +416,7 @@ export function TrainingPlanOverview({
         {/* Training Days Timeline */}
         <div className="space-y-4">
           {plan.schedule
-            ?.map((day, dayIdx) => ({ day, dayIdx, originalIndex: dayIdx }))
+            ?.map((day, _dayIdx) => ({ day, originalIndex: _dayIdx }))
             .sort((a, b) => {
               const aStatus = getWorkoutStatus(a.originalIndex);
               const bStatus = getWorkoutStatus(b.originalIndex);
@@ -462,977 +462,964 @@ export function TrainingPlanOverview({
               // Default: maintain original order
               return a.originalIndex - b.originalIndex;
             })
-            .map(
-              ({ day, dayIdx, originalIndex }, displayIndex, sortedArray) => {
-                const isExpanded = expandedDays.has(originalIndex);
-                const isRestDay = day.type === "rest";
-                const workoutStatus = day.workoutStatus;
-                const isActiveWorkout =
-                  isWorkoutStarted &&
-                  currentDayIndex === originalIndex &&
-                  day.workoutStatus !== "completed";
-                const isCompleted = workoutStatus === "completed";
-                const buttonConfig = getSmartButtonConfig(originalIndex);
+            .map(({ day, originalIndex }, displayIndex, sortedArray) => {
+              const isExpanded = expandedDays.has(originalIndex);
+              const isRestDay = day.type === "rest";
+              const workoutStatus = day.workoutStatus;
+              const isActiveWorkout =
+                isWorkoutStarted &&
+                currentDayIndex === originalIndex &&
+                day.workoutStatus !== "completed";
+              const isCompleted = workoutStatus === "completed";
+              const buttonConfig = getSmartButtonConfig(originalIndex);
 
-                // Disable drag and drop for completed and active workouts
-                const isDragDisabled = isCompleted || isActiveWorkout;
+              // Disable drag and drop for completed and active workouts
+              const isDragDisabled = isCompleted || isActiveWorkout;
 
-                // Check if we need to show a section separator
-                const showSeparator =
-                  displayIndex > 0 &&
-                  (() => {
-                    const currentStatus =
-                      getWorkoutStatus(originalIndex).status;
-                    const prevItem = sortedArray[displayIndex - 1];
-                    const prevStatus = getWorkoutStatus(
-                      prevItem.originalIndex
-                    ).status;
+              // Check if we need to show a section separator
+              const showSeparator =
+                displayIndex > 0 &&
+                (() => {
+                  const currentStatus = getWorkoutStatus(originalIndex).status;
+                  const prevItem = sortedArray[displayIndex - 1];
+                  const prevStatus = getWorkoutStatus(
+                    prevItem.originalIndex
+                  ).status;
 
-                    // Show separator when transitioning between different status groups
-                    return (
-                      (prevStatus === "in_progress" &&
-                        currentStatus !== "in_progress") ||
-                      (prevStatus === "not_started" &&
-                        currentStatus === "completed") ||
-                      (prevStatus === "ended" && currentStatus === "completed")
-                    );
-                  })();
+                  // Show separator when transitioning between different status groups
+                  return (
+                    (prevStatus === "in_progress" &&
+                      currentStatus !== "in_progress") ||
+                    (prevStatus === "not_started" &&
+                      currentStatus === "completed") ||
+                    (prevStatus === "ended" && currentStatus === "completed")
+                  );
+                })();
 
-                return (
-                  <React.Fragment key={`day-section-${originalIndex}`}>
-                    {/* Section Separator */}
-                    {showSeparator && (
-                      <div className="flex items-center gap-4 py-6 px-2">
-                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-zinc-600 to-transparent"></div>
-                        <div className="px-4 py-2 bg-zinc-800/50 border border-zinc-700/50 rounded-full">
-                          <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
-                            {getWorkoutStatus(originalIndex).status ===
-                            "completed"
-                              ? "Completed Workouts"
-                              : "Upcoming Workouts"}
-                          </span>
-                        </div>
-                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-zinc-600 to-transparent"></div>
+              return (
+                <React.Fragment key={`day-section-${originalIndex}`}>
+                  {/* Section Separator */}
+                  {showSeparator && (
+                    <div className="flex items-center gap-4 py-6 px-2">
+                      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-zinc-600 to-transparent"></div>
+                      <div className="px-4 py-2 bg-zinc-800/50 border border-zinc-700/50 rounded-full">
+                        <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                          {getWorkoutStatus(originalIndex).status ===
+                          "completed"
+                            ? "Completed Workouts"
+                            : "Upcoming Workouts"}
+                        </span>
                       </div>
-                    )}
+                      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-zinc-600 to-transparent"></div>
+                    </div>
+                  )}
 
-                    <DraggableTrainingDay
-                      key={`day-${originalIndex}-${day.id}`}
-                      day={day}
-                      dayIdx={originalIndex}
-                      plan={plan}
-                      setPlan={setPlan}
-                      disabled={isDragDisabled}
-                    >
-                      <div className="relative group">
-                        {/* Timeline Connector */}
-                        {originalIndex < plan.schedule.length - 1 && (
-                          <div className="absolute left-8 top-20 w-0.5 h-8 bg-gradient-to-b from-zinc-600 to-zinc-700 z-0"></div>
-                        )}
+                  <DraggableTrainingDay
+                    key={`day-${originalIndex}-${day.id}`}
+                    day={day}
+                    dayIdx={originalIndex}
+                    plan={plan}
+                    setPlan={setPlan}
+                    disabled={isDragDisabled}
+                  >
+                    <div className="relative group">
+                      {/* Timeline Connector */}
+                      {originalIndex < plan.schedule.length - 1 && (
+                        <div className="absolute left-8 top-20 w-0.5 h-8 bg-gradient-to-b from-zinc-600 to-zinc-700 z-0"></div>
+                      )}
 
-                        {/* Day Card */}
-                        <div
-                          className={`relative bg-zinc-900/40 backdrop-blur-sm border rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-xl ${
-                            isDragDisabled
-                              ? "cursor-default opacity-90"
-                              : "cursor-grab active:cursor-grabbing"
-                          } transform hover:scale-[1.02] ${
-                            workoutStatus === "completed"
-                              ? "border-emerald-500/40 shadow-emerald-500/10 hover:shadow-emerald-500/25 hover:border-emerald-400/60"
-                              : isActiveWorkout
-                              ? "border-blue-500/50 shadow-blue-500/10 hover:shadow-blue-500/25 hover:border-blue-400/70"
-                              : isRestDay
-                              ? "border-purple-500/40 shadow-purple-500/10 hover:shadow-purple-500/25 hover:border-purple-400/60"
-                              : "border-zinc-700/50 hover:border-zinc-600/70 hover:shadow-zinc-600/10"
-                          }`}
-                          onClick={(e) => {
-                            if (
-                              e.target === e.currentTarget ||
-                              e.target.closest(".day-main-content")
-                            ) {
-                              toggleDayExpansion(originalIndex);
-                            }
-                          }}
-                          tabIndex={0}
-                          role="button"
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              toggleDayExpansion(originalIndex);
-                            }
-                          }}
-                        >
-                          {/* Card Header */}
-                          <div className="p-5 day-main-content">
-                            <div className="flex items-center gap-4">
-                              {/* Enhanced Day Number with Timeline Dot */}
-                              <div className="relative flex-shrink-0">
-                                <div
-                                  className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg transition-all duration-300 transform group-hover:scale-105 ${
-                                    workoutStatus === "completed"
-                                      ? "bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/30"
-                                      : isActiveWorkout
-                                      ? "bg-gradient-to-br from-blue-500 to-cyan-600 shadow-blue-500/30 animate-pulse"
-                                      : isRestDay
-                                      ? "bg-gradient-to-br from-purple-500 to-violet-600 shadow-purple-500/30"
-                                      : "bg-gradient-to-br from-zinc-600 to-zinc-700 shadow-zinc-600/30"
-                                  }`}
-                                >
-                                  {workoutStatus === "completed" ? (
-                                    <Icon
-                                      icon="mdi:trophy"
-                                      width={24}
-                                      height={24}
-                                    />
-                                  ) : isRestDay ? (
-                                    <Icon
-                                      icon="mdi:sleep"
-                                      width={24}
-                                      height={24}
-                                    />
-                                  ) : isActiveWorkout ? (
-                                    <Icon
-                                      icon="mdi:play"
-                                      width={24}
-                                      height={24}
-                                    />
-                                  ) : (
-                                    <span className="text-xl">
-                                      {originalIndex + 1}
-                                    </span>
-                                  )}
-                                </div>
-
-                                {/* Status Ring */}
-                                {(workoutStatus === "completed" ||
-                                  isActiveWorkout) && (
-                                  <div
-                                    className={`absolute -inset-1 rounded-2xl ${
-                                      workoutStatus === "completed"
-                                        ? "bg-gradient-to-r from-emerald-400 to-teal-400"
-                                        : "bg-gradient-to-r from-blue-400 to-cyan-400"
-                                    } opacity-20 blur-sm animate-pulse`}
-                                  ></div>
+                      {/* Day Card */}
+                      <div
+                        className={`relative bg-zinc-900/40 backdrop-blur-sm border rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-xl ${
+                          isDragDisabled
+                            ? "cursor-default opacity-90"
+                            : "cursor-grab active:cursor-grabbing"
+                        } transform hover:scale-[1.02] ${
+                          workoutStatus === "completed"
+                            ? "border-emerald-500/40 shadow-emerald-500/10 hover:shadow-emerald-500/25 hover:border-emerald-400/60"
+                            : isActiveWorkout
+                            ? "border-blue-500/50 shadow-blue-500/10 hover:shadow-blue-500/25 hover:border-blue-400/70"
+                            : isRestDay
+                            ? "border-purple-500/40 shadow-purple-500/10 hover:shadow-purple-500/25 hover:border-purple-400/60"
+                            : "border-zinc-700/50 hover:border-zinc-600/70 hover:shadow-zinc-600/10"
+                        }`}
+                        onClick={(e) => {
+                          if (
+                            e.target === e.currentTarget ||
+                            e.target.closest(".day-main-content")
+                          ) {
+                            toggleDayExpansion(originalIndex);
+                          }
+                        }}
+                        tabIndex={0}
+                        role="button"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            toggleDayExpansion(originalIndex);
+                          }
+                        }}
+                      >
+                        {/* Card Header */}
+                        <div className="p-5 day-main-content">
+                          <div className="flex items-center gap-4">
+                            {/* Enhanced Day Number with Timeline Dot */}
+                            <div className="relative flex-shrink-0">
+                              <div
+                                className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg transition-all duration-300 transform group-hover:scale-105 ${
+                                  workoutStatus === "completed"
+                                    ? "bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/30"
+                                    : isActiveWorkout
+                                    ? "bg-gradient-to-br from-blue-500 to-cyan-600 shadow-blue-500/30 animate-pulse"
+                                    : isRestDay
+                                    ? "bg-gradient-to-br from-purple-500 to-violet-600 shadow-purple-500/30"
+                                    : "bg-gradient-to-br from-zinc-600 to-zinc-700 shadow-zinc-600/30"
+                                }`}
+                              >
+                                {workoutStatus === "completed" ? (
+                                  <Icon
+                                    icon="mdi:trophy"
+                                    width={24}
+                                    height={24}
+                                  />
+                                ) : isRestDay ? (
+                                  <Icon
+                                    icon="mdi:sleep"
+                                    width={24}
+                                    height={24}
+                                  />
+                                ) : isActiveWorkout ? (
+                                  <Icon
+                                    icon="mdi:play"
+                                    width={24}
+                                    height={24}
+                                  />
+                                ) : (
+                                  <span className="text-xl">
+                                    {originalIndex + 1}
+                                  </span>
                                 )}
                               </div>
 
-                              {/* Content Area */}
-                              <div className="flex-1 min-w-0">
-                                {editingDay?.dayIdx === originalIndex ? (
-                                  <div className="space-y-4">
-                                    <input
-                                      type="text"
-                                      id={`day-name-input-${originalIndex}`}
-                                      value={editingDay.name}
-                                      onChange={(e) =>
-                                        setEditingDay({
-                                          ...editingDay,
-                                          name: e.target.value,
-                                        })
-                                      }
-                                      className="w-full bg-zinc-800/50 border border-zinc-600 rounded-xl px-4 py-3 text-white text-xl font-bold backdrop-blur focus:border-blue-500 focus:outline-none"
-                                      placeholder="Day name"
-                                    />
-                                    <div className="grid grid-cols-2 gap-4">
-                                      <div>
-                                        <label
-                                          htmlFor={`day-duration-input-${originalIndex}`}
-                                          className="text-sm text-zinc-400 font-medium mb-2 block"
-                                        >
-                                          Duration (min)
-                                        </label>
-                                        <input
-                                          type="number"
-                                          id={`day-duration-input-${originalIndex}`}
-                                          value={editingDay.duration}
-                                          onChange={(e) =>
-                                            setEditingDay({
-                                              ...editingDay,
-                                              duration:
-                                                parseInt(e.target.value) || 60,
-                                            })
-                                          }
-                                          className="w-full bg-zinc-800/50 border border-zinc-600 rounded-lg px-3 py-2 text-white backdrop-blur focus:border-blue-500 focus:outline-none"
-                                          min="1"
-                                          max="300"
-                                        />
-                                      </div>
-                                      <div>
-                                        <label
-                                          htmlFor={`day-type-select-${originalIndex}`}
-                                          className="text-sm text-zinc-400 font-medium mb-2 block"
-                                        >
-                                          Type
-                                        </label>
-                                        <select
-                                          id={`day-type-select-${originalIndex}`}
-                                          value={editingDay.type}
-                                          onChange={(e) =>
-                                            setEditingDay({
-                                              ...editingDay,
-                                              type: e.target.value,
-                                            })
-                                          }
-                                          className="w-full bg-zinc-800/50 border border-zinc-600 rounded-lg px-3 py-2 text-white backdrop-blur focus:border-blue-500 focus:outline-none"
-                                        >
-                                          <option value="strength">
-                                            Strength
-                                          </option>
-                                          <option value="cardio">Cardio</option>
-                                          <option value="hiit">HIIT</option>
-                                          <option value="flexibility">
-                                            Flexibility
-                                          </option>
-                                          <option value="rest">Rest</option>
-                                        </select>
-                                      </div>
+                              {/* Status Ring */}
+                              {(workoutStatus === "completed" ||
+                                isActiveWorkout) && (
+                                <div
+                                  className={`absolute -inset-1 rounded-2xl ${
+                                    workoutStatus === "completed"
+                                      ? "bg-gradient-to-r from-emerald-400 to-teal-400"
+                                      : "bg-gradient-to-r from-blue-400 to-cyan-400"
+                                  } opacity-20 blur-sm animate-pulse`}
+                                ></div>
+                              )}
+                            </div>
+
+                            {/* Content Area */}
+                            <div className="flex-1 min-w-0">
+                              {editingDay?.dayIdx === originalIndex ? (
+                                <div className="space-y-4">
+                                  <input
+                                    type="text"
+                                    id={`day-name-input-${originalIndex}`}
+                                    value={editingDay.name}
+                                    onChange={(e) =>
+                                      setEditingDay({
+                                        ...editingDay,
+                                        name: e.target.value,
+                                      })
+                                    }
+                                    className="w-full bg-zinc-800/50 border border-zinc-600 rounded-xl px-4 py-3 text-white text-xl font-bold backdrop-blur focus:border-blue-500 focus:outline-none"
+                                    placeholder="Day name"
+                                  />
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <label
+                                        htmlFor={`day-duration-input-${originalIndex}`}
+                                        className="text-sm text-zinc-400 font-medium mb-2 block"
+                                      >
+                                        Duration (min)
+                                      </label>
+                                      <input
+                                        type="number"
+                                        id={`day-duration-input-${originalIndex}`}
+                                        value={editingDay.duration}
+                                        onChange={(e) =>
+                                          setEditingDay({
+                                            ...editingDay,
+                                            duration:
+                                              parseInt(e.target.value) || 60,
+                                          })
+                                        }
+                                        className="w-full bg-zinc-800/50 border border-zinc-600 rounded-lg px-3 py-2 text-white backdrop-blur focus:border-blue-500 focus:outline-none"
+                                        min="1"
+                                        max="300"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label
+                                        htmlFor={`day-type-select-${originalIndex}`}
+                                        className="text-sm text-zinc-400 font-medium mb-2 block"
+                                      >
+                                        Type
+                                      </label>
+                                      <select
+                                        id={`day-type-select-${originalIndex}`}
+                                        value={editingDay.type}
+                                        onChange={(e) =>
+                                          setEditingDay({
+                                            ...editingDay,
+                                            type: e.target.value,
+                                          })
+                                        }
+                                        className="w-full bg-zinc-800/50 border border-zinc-600 rounded-lg px-3 py-2 text-white backdrop-blur focus:border-blue-500 focus:outline-none"
+                                      >
+                                        <option value="strength">
+                                          Strength
+                                        </option>
+                                        <option value="cardio">Cardio</option>
+                                        <option value="hiit">HIIT</option>
+                                        <option value="flexibility">
+                                          Flexibility
+                                        </option>
+                                        <option value="rest">Rest</option>
+                                      </select>
                                     </div>
                                   </div>
-                                ) : (
-                                  <div className="space-y-3">
-                                    {/* Title Row */}
-                                    <div className="flex items-center justify-between">
-                                      <h3 className="text-xl font-bold text-white group-hover:text-blue-100 transition-colors">
-                                        {day.name}
-                                      </h3>
-                                      <div className="flex items-center gap-2">
-                                        {workoutStatus === "completed" && (
-                                          <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-semibold rounded-full hover:bg-emerald-500/30 transition-all duration-300">
-                                            <Icon
-                                              icon="mdi:check-circle"
-                                              width={12}
-                                              height={12}
-                                              className="animate-pulse"
-                                            />
-                                            COMPLETED
-                                          </div>
-                                        )}
-                                        {isActiveWorkout && (
-                                          <div className="flex items-center gap-1.5 px-3 py-1 bg-blue-500/20 border border-blue-500/30 text-blue-300 text-xs font-semibold rounded-full animate-pulse">
-                                            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                                            ACTIVE
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-
-                                    {/* Stats Row */}
-                                    {!isRestDay ? (
-                                      <div className="flex items-center gap-6">
-                                        <div className="flex items-center gap-2 text-zinc-400">
-                                          <div className="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center">
-                                            <Icon
-                                              icon="mdi:dumbbell"
-                                              width={14}
-                                              height={14}
-                                              className="text-orange-400"
-                                            />
-                                          </div>
-                                          <span className="text-sm font-medium">
-                                            {day.exercises?.length || 0}{" "}
-                                            exercises
-                                          </span>
-                                        </div>
-
-                                        <div className="flex items-center gap-2 text-zinc-400">
-                                          <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                                            <Icon
-                                              icon="mdi:clock"
-                                              width={14}
-                                              height={14}
-                                              className="text-blue-400"
-                                            />
-                                          </div>
-                                          <span className="text-sm font-medium">
-                                            {day.duration || 60} min
-                                          </span>
-                                        </div>
-
-                                        <div className="flex items-center gap-2 text-zinc-400">
-                                          <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                                            <Icon
-                                              icon="mdi:fitness"
-                                              width={14}
-                                              height={14}
-                                              className="text-purple-400"
-                                            />
-                                          </div>
-                                          <span className="text-sm font-medium capitalize">
-                                            {day.type}
-                                          </span>
-                                        </div>
-                                      </div>
-                                    ) : (
-                                      <div className="flex items-center gap-2 text-purple-400">
-                                        <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                                </div>
+                              ) : (
+                                <div className="space-y-3">
+                                  {/* Title Row */}
+                                  <div className="flex items-center justify-between">
+                                    <h3 className="text-xl font-bold text-white group-hover:text-blue-100 transition-colors">
+                                      {day.name}
+                                    </h3>
+                                    <div className="flex items-center gap-2">
+                                      {workoutStatus === "completed" && (
+                                        <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-semibold rounded-full hover:bg-emerald-500/30 transition-all duration-300">
                                           <Icon
-                                            icon="mdi:sleep"
+                                            icon="mdi:check-circle"
+                                            width={12}
+                                            height={12}
+                                            className="animate-pulse"
+                                          />
+                                          COMPLETED
+                                        </div>
+                                      )}
+                                      {isActiveWorkout && (
+                                        <div className="flex items-center gap-1.5 px-3 py-1 bg-blue-500/20 border border-blue-500/30 text-blue-300 text-xs font-semibold rounded-full animate-pulse">
+                                          <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                                          ACTIVE
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Stats Row */}
+                                  {!isRestDay ? (
+                                    <div className="flex items-center gap-6">
+                                      <div className="flex items-center gap-2 text-zinc-400">
+                                        <div className="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center">
+                                          <Icon
+                                            icon="mdi:dumbbell"
                                             width={14}
                                             height={14}
+                                            className="text-orange-400"
                                           />
                                         </div>
                                         <span className="text-sm font-medium">
-                                          Recovery Day - Rest & Recover
+                                          {day.exercises?.length || 0} exercises
                                         </span>
+                                      </div>
+
+                                      <div className="flex items-center gap-2 text-zinc-400">
+                                        <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                                          <Icon
+                                            icon="mdi:clock"
+                                            width={14}
+                                            height={14}
+                                            className="text-blue-400"
+                                          />
+                                        </div>
+                                        <span className="text-sm font-medium">
+                                          {day.duration || 60} min
+                                        </span>
+                                      </div>
+
+                                      <div className="flex items-center gap-2 text-zinc-400">
+                                        <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                                          <Icon
+                                            icon="mdi:fitness"
+                                            width={14}
+                                            height={14}
+                                            className="text-purple-400"
+                                          />
+                                        </div>
+                                        <span className="text-sm font-medium capitalize">
+                                          {day.type}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-2 text-purple-400">
+                                      <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                                        <Icon
+                                          icon="mdi:sleep"
+                                          width={14}
+                                          height={14}
+                                        />
+                                      </div>
+                                      <span className="text-sm font-medium">
+                                        Recovery Day - Rest & Recover
+                                      </span>
+                                    </div>
+                                  )}
+
+                                  {/* Workout Notes */}
+                                  {workoutStatus === "completed" &&
+                                    day.workoutNotes && (
+                                      <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                                        <div className="flex items-start gap-3">
+                                          <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <Icon
+                                              icon="mdi:note-text"
+                                              width={14}
+                                              height={14}
+                                              className="text-emerald-400"
+                                            />
+                                          </div>
+                                          <div>
+                                            <h4 className="text-emerald-300 font-semibold text-sm mb-1">
+                                              Workout Notes
+                                            </h4>
+                                            <p className="text-emerald-100/90 text-sm leading-relaxed">
+                                              {day.workoutNotes}
+                                            </p>
+                                          </div>
+                                        </div>
                                       </div>
                                     )}
 
-                                    {/* Workout Notes */}
-                                    {workoutStatus === "completed" &&
-                                      day.workoutNotes && (
-                                        <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-                                          <div className="flex items-start gap-3">
-                                            <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                              <Icon
-                                                icon="mdi:note-text"
-                                                width={14}
-                                                height={14}
-                                                className="text-emerald-400"
-                                              />
-                                            </div>
-                                            <div>
-                                              <h4 className="text-emerald-300 font-semibold text-sm mb-1">
-                                                Workout Notes
-                                              </h4>
-                                              <p className="text-emerald-100/90 text-sm leading-relaxed">
-                                                {day.workoutNotes}
-                                              </p>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      )}
+                                  {/* Completion Info */}
+                                  {workoutStatus === "completed" &&
+                                    day.workoutCompletedAt && (
+                                      <div className="flex items-center gap-2 text-xs text-zinc-500 mt-2">
+                                        <Icon
+                                          icon="mdi:calendar-check"
+                                          width={12}
+                                          height={12}
+                                        />
+                                        <span>
+                                          Completed{" "}
+                                          {new Date(
+                                            day.workoutCompletedAt
+                                          ).toLocaleDateString()}{" "}
+                                          at{" "}
+                                          {new Date(
+                                            day.workoutCompletedAt
+                                          ).toLocaleTimeString()}
+                                        </span>
+                                      </div>
+                                    )}
+                                </div>
+                              )}
+                            </div>
 
-                                    {/* Completion Info */}
-                                    {workoutStatus === "completed" &&
-                                      day.workoutCompletedAt && (
-                                        <div className="flex items-center gap-2 text-xs text-zinc-500 mt-2">
-                                          <Icon
-                                            icon="mdi:calendar-check"
-                                            width={12}
-                                            height={12}
-                                          />
-                                          <span>
-                                            Completed{" "}
-                                            {new Date(
-                                              day.workoutCompletedAt
-                                            ).toLocaleDateString()}{" "}
-                                            at{" "}
-                                            {new Date(
-                                              day.workoutCompletedAt
-                                            ).toLocaleTimeString()}
-                                          </span>
-                                        </div>
-                                      )}
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Action Buttons */}
-                              <div className="flex items-center gap-2 flex-shrink-0">
-                                {editingDay?.dayIdx === originalIndex ? (
-                                  <div className="flex items-center gap-2">
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              {editingDay?.dayIdx === originalIndex ? (
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      saveDayDetails();
+                                    }}
+                                    variant="primary"
+                                    size="sm"
+                                    className="bg-blue-600 hover:bg-blue-700 px-4 py-2 text-sm font-medium transition-all"
+                                  >
+                                    Save
+                                  </Button>
+                                  <Button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      cancelEditingDay();
+                                    }}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="px-4 py-2 text-sm"
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
+                              ) : (
+                                <>
+                                  {!isCompleted && !isActiveWorkout && (
                                     <Button
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        saveDayDetails();
-                                      }}
-                                      variant="primary"
-                                      size="sm"
-                                      className="bg-blue-600 hover:bg-blue-700 px-4 py-2 text-sm font-medium transition-all"
-                                    >
-                                      Save
-                                    </Button>
-                                    <Button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        cancelEditingDay();
+                                        startEditingDay(originalIndex);
                                       }}
                                       variant="ghost"
                                       size="sm"
-                                      className="px-4 py-2 text-sm"
+                                      className="opacity-0 group-hover:opacity-100 transition-all p-2 hover:bg-zinc-700/50"
                                     >
-                                      Cancel
+                                      <Icon
+                                        icon="mdi:pencil"
+                                        width={16}
+                                        height={16}
+                                      />
                                     </Button>
-                                  </div>
-                                ) : (
-                                  <>
-                                    {!isCompleted && !isActiveWorkout && (
-                                      <Button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          startEditingDay(originalIndex);
-                                        }}
-                                        variant="ghost"
-                                        size="sm"
-                                        className="opacity-0 group-hover:opacity-100 transition-all p-2 hover:bg-zinc-700/50"
-                                      >
-                                        <Icon
-                                          icon="mdi:pencil"
-                                          width={16}
-                                          height={16}
-                                        />
-                                      </Button>
-                                    )}
+                                  )}
 
-                                    {!isRestDay &&
-                                      day.exercises?.length > 0 && (
-                                        <Button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            if (
-                                              buttonConfig.action &&
-                                              !buttonConfig.disabled
-                                            ) {
-                                              buttonConfig.action();
-                                            }
-                                          }}
-                                          disabled={buttonConfig.disabled}
-                                          className={`${buttonConfig.className} px-4 py-2 text-sm font-semibold flex items-center gap-2 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl`}
-                                        >
-                                          <Icon
-                                            icon={buttonConfig.icon}
-                                            width={16}
-                                            height={16}
-                                          />
-                                          {buttonConfig.text}
-                                        </Button>
-                                      )}
+                                  {!isRestDay && day.exercises?.length > 0 && (
+                                    <Button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (
+                                          buttonConfig.action &&
+                                          !buttonConfig.disabled
+                                        ) {
+                                          buttonConfig.action();
+                                        }
+                                      }}
+                                      disabled={buttonConfig.disabled}
+                                      className={`${buttonConfig.className} px-4 py-2 text-sm font-semibold flex items-center gap-2 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl`}
+                                    >
+                                      <Icon
+                                        icon={buttonConfig.icon}
+                                        width={16}
+                                        height={16}
+                                      />
+                                      {buttonConfig.text}
+                                    </Button>
+                                  )}
 
-                                    {!isRestDay &&
-                                      day.exercises?.length > 0 && (
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            toggleDayExpansion(originalIndex);
-                                          }}
-                                          className="p-2 hover:bg-zinc-700/50 transition-all"
-                                        >
-                                          <Icon
-                                            icon={
-                                              isExpanded
-                                                ? "mdi:chevron-up"
-                                                : "mdi:chevron-down"
-                                            }
-                                            width={18}
-                                            height={18}
-                                          />
-                                        </Button>
-                                      )}
-                                  </>
-                                )}
-                              </div>
+                                  {!isRestDay && day.exercises?.length > 0 && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleDayExpansion(originalIndex);
+                                      }}
+                                      className="p-2 hover:bg-zinc-700/50 transition-all"
+                                    >
+                                      <Icon
+                                        icon={
+                                          isExpanded
+                                            ? "mdi:chevron-up"
+                                            : "mdi:chevron-down"
+                                        }
+                                        width={18}
+                                        height={18}
+                                      />
+                                    </Button>
+                                  )}
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
+                      </div>
 
-                        {/* Expanded Exercises - only show if not rest day */}
-                        {isExpanded && !isRestDay && (
-                          <div className="border-t border-zinc-700/50 bg-zinc-800/30">
-                            <div className="p-6 space-y-4">
-                              {/* Warmup section */}
-                              <div className="mb-6">
-                                <label
-                                  className="block text-zinc-300 font-semibold mb-2 text-lg"
-                                  htmlFor={`warmup-${originalIndex}`}
-                                >
-                                  Warmup
-                                </label>
-                                <textarea
-                                  id={`warmup-${originalIndex}`}
-                                  className="w-full bg-zinc-800/50 border border-zinc-600/50 rounded-xl px-4 py-3 text-white h-20 backdrop-blur focus:border-blue-500 focus:outline-none resize-none disabled:opacity-50 disabled:cursor-not-allowed"
-                                  placeholder="Enter warmup description for this day..."
-                                  value={day.warmupDescription ?? ""}
-                                  onChange={(e) =>
-                                    updateWarmupDescription(
-                                      originalIndex,
-                                      e.target.value
-                                    )
+                      {/* Expanded Exercises - only show if not rest day */}
+                      {isExpanded && !isRestDay && (
+                        <div className="border-t border-zinc-700/50 bg-zinc-800/30">
+                          <div className="p-6 space-y-4">
+                            {/* Warmup section */}
+                            <div className="mb-6">
+                              <label
+                                className="block text-zinc-300 font-semibold mb-2 text-lg"
+                                htmlFor={`warmup-${originalIndex}`}
+                              >
+                                Warmup
+                              </label>
+                              <textarea
+                                id={`warmup-${originalIndex}`}
+                                className="w-full bg-zinc-800/50 border border-zinc-600/50 rounded-xl px-4 py-3 text-white h-20 backdrop-blur focus:border-blue-500 focus:outline-none resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+                                placeholder="Enter warmup description for this day..."
+                                value={day.warmupDescription ?? ""}
+                                onChange={(e) =>
+                                  updateWarmupDescription(
+                                    originalIndex,
+                                    e.target.value
+                                  )
+                                }
+                                disabled={isCompleted}
+                              />
+                            </div>
+
+                            {/* Add exercise button - only show if not completed */}
+                            {!isCompleted && (
+                              <div className="mb-4 flex justify-end">
+                                <button
+                                  type="button"
+                                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow transition-all"
+                                  onClick={() =>
+                                    onShowExerciseLibrary(originalIndex)
                                   }
-                                  disabled={isCompleted}
-                                />
+                                >
+                                  <Icon
+                                    icon="mdi:plus"
+                                    width={18}
+                                    height={18}
+                                  />
+                                  Add Exercise
+                                </button>
                               </div>
+                            )}
 
-                              {/* Add exercise button - only show if not completed */}
-                              {!isCompleted && (
-                                <div className="mb-4 flex justify-end">
-                                  <button
-                                    type="button"
-                                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow transition-all"
-                                    onClick={() =>
-                                      onShowExerciseLibrary(originalIndex)
-                                    }
-                                  >
-                                    <Icon
-                                      icon="mdi:plus"
-                                      width={18}
-                                      height={18}
-                                    />
-                                    Add Exercise
-                                  </button>
-                                </div>
-                              )}
+                            {day.exercises?.map((exercise, exerciseIdx) => {
+                              const exerciseProgress = getExerciseProgress(
+                                originalIndex,
+                                exerciseIdx
+                              );
 
-                              {day.exercises?.map((exercise, exerciseIdx) => {
-                                const exerciseProgress = getExerciseProgress(
-                                  originalIndex,
-                                  exerciseIdx
-                                );
-
-                                return (
-                                  <DraggableExercise
-                                    key={exerciseIdx}
-                                    exercise={exercise}
-                                    exerciseIdx={exerciseIdx}
-                                    dayIdx={originalIndex}
-                                    plan={plan}
-                                    setPlan={setPlan}
-                                    disabled={isCompleted || isActiveWorkout}
-                                  >
-                                    <div className="bg-zinc-900/50 rounded-xl p-5 border border-zinc-700/30 hover:bg-zinc-800/60 hover:border-zinc-600/50 transition-all duration-300 transform hover:scale-[1.01] hover:shadow-lg">
-                                      <div className="flex gap-6">
-                                        {/* Exercise Media */}
-                                        <div className="flex-shrink-0">
-                                          {exercise.imageUrl ? (
-                                            <div className="w-24 h-32 rounded-xl overflow-hidden shadow-lg bg-zinc-800">
-                                              <Image
-                                                src={exercise.imageUrl}
-                                                alt={exercise.name}
-                                                className="w-full h-full object-cover"
-                                                width={96}
-                                                height={128}
+                              return (
+                                <DraggableExercise
+                                  key={exerciseIdx}
+                                  exercise={exercise}
+                                  exerciseIdx={exerciseIdx}
+                                  dayIdx={originalIndex}
+                                  plan={plan}
+                                  setPlan={setPlan}
+                                  disabled={isCompleted || isActiveWorkout}
+                                >
+                                  <div className="bg-zinc-900/50 rounded-xl p-5 border border-zinc-700/30 hover:bg-zinc-800/60 hover:border-zinc-600/50 transition-all duration-300 transform hover:scale-[1.01] hover:shadow-lg">
+                                    <div className="flex gap-6">
+                                      {/* Exercise Media */}
+                                      <div className="flex-shrink-0">
+                                        {exercise.imageUrl ? (
+                                          <div className="w-24 h-32 rounded-xl overflow-hidden shadow-lg bg-zinc-800">
+                                            <Image
+                                              src={exercise.imageUrl}
+                                              alt={exercise.name}
+                                              className="w-full h-full object-cover"
+                                              width={96}
+                                              height={128}
+                                            />
+                                          </div>
+                                        ) : (
+                                          <div className="relative group">
+                                            <div className="w-24 h-32 rounded-xl border-2 border-orange-600/50 bg-gradient-to-br from-orange-900/30 to-red-900/30 shadow-lg flex items-center justify-center">
+                                              <AnatomicalViewer
+                                                exerciseName={exercise.name}
+                                                muscleGroups={
+                                                  exercise.muscleGroups?.map(
+                                                    (m) => m.name
+                                                  ) || []
+                                                }
+                                                size="small"
+                                                compact
+                                                showExerciseInfo={false}
+                                                showBothViews={false}
+                                                darkMode
+                                                bodyColor="white"
+                                                className="w-20 h-28"
                                               />
                                             </div>
-                                          ) : (
-                                            <div className="relative group">
-                                              <div className="w-24 h-32 rounded-xl border-2 border-orange-600/50 bg-gradient-to-br from-orange-900/30 to-red-900/30 shadow-lg flex items-center justify-center">
-                                                <AnatomicalViewer
-                                                  exerciseName={exercise.name}
-                                                  muscleGroups={
-                                                    exercise.muscleGroups?.map(
-                                                      (m) => m.name
-                                                    ) || []
+                                            {/* Anatomical overlay with type indicator */}
+                                            <div className="absolute top-1 right-1 bg-orange-600/90 backdrop-blur-sm rounded-md px-1.5 py-0.5">
+                                              <Icon
+                                                icon="mdi:human"
+                                                className="text-white"
+                                                width={12}
+                                                height={12}
+                                              />
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      {/* Exercise Content */}
+                                      <div className="flex-1">
+                                        <div className="flex items-center justify-between mb-2">
+                                          <h4 className="text-lg font-semibold text-white">
+                                            {exercise.name}
+                                          </h4>
+                                          <div className="flex items-center gap-2">
+                                            <div className="bg-zinc-800 px-3 py-1 rounded-full text-sm text-zinc-300">
+                                              {exerciseProgress.completed}/
+                                              {exerciseProgress.total} sets
+                                            </div>
+                                            <div
+                                              className={`w-3 h-3 rounded-full ${
+                                                exerciseProgress.percentage ===
+                                                100
+                                                  ? "bg-emerald-500"
+                                                  : exerciseProgress.percentage >
+                                                    0
+                                                  ? "bg-blue-500"
+                                                  : "bg-zinc-600"
+                                              }`}
+                                            />
+                                            {/* Show individual set completion status */}
+                                            {Array.isArray(exercise.sets) &&
+                                              exercise.sets.length > 0 && (
+                                                <div className="flex items-center gap-1">
+                                                  {exercise.sets.map(
+                                                    (set, setIdx) => (
+                                                      <div
+                                                        key={setIdx}
+                                                        className={`w-2 h-2 rounded-full ${
+                                                          set.completed
+                                                            ? "bg-emerald-500"
+                                                            : "bg-zinc-600"
+                                                        }`}
+                                                        title={`Set ${
+                                                          setIdx + 1
+                                                        }: ${
+                                                          set.completed
+                                                            ? `Completed${
+                                                                set.weight
+                                                                  ? ` - ${set.weight}kg`
+                                                                  : ""
+                                                              }${
+                                                                set.reps
+                                                                  ? ` × ${set.reps}`
+                                                                  : ""
+                                                              }`
+                                                            : "Not completed"
+                                                        }`}
+                                                      />
+                                                    )
+                                                  )}
+                                                </div>
+                                              )}
+                                            {/* Edit Controls - only show if not completed */}
+                                            {!isCompleted && (
+                                              <div className="flex gap-1">
+                                                <button
+                                                  type="button"
+                                                  onClick={() =>
+                                                    onShowExerciseLibrary(
+                                                      originalIndex,
+                                                      "replace",
+                                                      exerciseIdx
+                                                    )
                                                   }
-                                                  size="small"
-                                                  compact
-                                                  showExerciseInfo={false}
-                                                  showBothViews={false}
-                                                  darkMode
-                                                  bodyColor="white"
-                                                  className="w-20 h-28"
-                                                />
+                                                  className="p-1.5 bg-zinc-700 hover:bg-zinc-600 rounded-lg transition-colors"
+                                                  title="Replace exercise"
+                                                >
+                                                  <Icon
+                                                    icon="mdi:swap-horizontal"
+                                                    width={14}
+                                                    height={14}
+                                                    className="text-zinc-300"
+                                                  />
+                                                </button>
+                                                <button
+                                                  type="button"
+                                                  onClick={() =>
+                                                    removeExercise(
+                                                      originalIndex,
+                                                      exerciseIdx
+                                                    )
+                                                  }
+                                                  className="p-1.5 bg-red-700 hover:bg-red-600 rounded-lg transition-colors"
+                                                  title="Remove exercise"
+                                                >
+                                                  <Icon
+                                                    icon="mdi:delete"
+                                                    width={14}
+                                                    height={14}
+                                                    className="text-red-300"
+                                                  />
+                                                </button>
                                               </div>
-                                              {/* Anatomical overlay with type indicator */}
-                                              <div className="absolute top-1 right-1 bg-orange-600/90 backdrop-blur-sm rounded-md px-1.5 py-0.5">
+                                            )}
+                                          </div>
+                                        </div>
+
+                                        {/* Exercise Parameters */}
+                                        <div className="grid grid-cols-3 gap-4 mb-3">
+                                          <div>
+                                            <label
+                                              className="block text-xs text-zinc-400 mb-1"
+                                              htmlFor={`sets-${originalIndex}-${exerciseIdx}`}
+                                            >
+                                              Sets
+                                            </label>
+                                            <div className="flex items-center gap-2">
+                                              <button
+                                                type="button"
+                                                onClick={() =>
+                                                  handleRemoveSet(
+                                                    originalIndex,
+                                                    exerciseIdx
+                                                  )
+                                                }
+                                                disabled={
+                                                  (exercise.sets || 0) <= 1 ||
+                                                  isCompleted
+                                                }
+                                                className="p-1 bg-red-600 hover:bg-red-700 rounded text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                              >
                                                 <Icon
-                                                  icon="mdi:human"
-                                                  className="text-white"
+                                                  icon="mdi:minus"
                                                   width={12}
                                                   height={12}
                                                 />
+                                              </button>
+                                              <div
+                                                className="w-12 bg-zinc-800 border border-zinc-600 rounded px-2 py-1 text-white text-center font-semibold"
+                                                id={`sets-${originalIndex}-${exerciseIdx}`}
+                                              >
+                                                {typeof exercise.sets ===
+                                                "number"
+                                                  ? exercise.sets
+                                                  : Array.isArray(exercise.sets)
+                                                  ? exercise.sets.length
+                                                  : 0}
                                               </div>
+                                              <button
+                                                type="button"
+                                                onClick={() =>
+                                                  handleAddSet(
+                                                    originalIndex,
+                                                    exerciseIdx
+                                                  )
+                                                }
+                                                disabled={isCompleted}
+                                                className="p-1 bg-blue-600 hover:bg-blue-700 rounded text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                              >
+                                                <Icon
+                                                  icon="mdi:plus"
+                                                  width={12}
+                                                  height={12}
+                                                />
+                                              </button>
+                                            </div>
+                                          </div>
+                                          <div>
+                                            <div className="flex items-center justify-between mb-1">
+                                              <label
+                                                className="block text-xs text-zinc-400"
+                                                htmlFor={`reps-${originalIndex}-${exerciseIdx}`}
+                                              >
+                                                {exercise.repsUnit === "seconds"
+                                                  ? "Seconds"
+                                                  : "Reps"}
+                                              </label>
+                                              {!isCompleted && (
+                                                <Button
+                                                  variant="ghost"
+                                                  size="small"
+                                                  onClick={() =>
+                                                    updateExerciseParams(
+                                                      originalIndex,
+                                                      exerciseIdx,
+                                                      "repsUnit",
+                                                      exercise.repsUnit ===
+                                                        "reps"
+                                                        ? "seconds"
+                                                        : "reps"
+                                                    )
+                                                  }
+                                                  className="p-0.5 h-5 w-5 text-zinc-400 hover:text-blue-400 hover:bg-blue-400/20 rounded transition-all"
+                                                  title={`Switch to ${
+                                                    exercise.repsUnit === "reps"
+                                                      ? "seconds"
+                                                      : "reps"
+                                                  }`}
+                                                >
+                                                  <Icon
+                                                    icon={
+                                                      exercise.repsUnit ===
+                                                      "reps"
+                                                        ? "mdi:timer-outline"
+                                                        : "mdi:counter"
+                                                    }
+                                                    className="w-3 h-3"
+                                                  />
+                                                </Button>
+                                              )}
+                                            </div>
+                                            <input
+                                              id={`reps-${originalIndex}-${exerciseIdx}`}
+                                              type="number"
+                                              value={
+                                                typeof exercise.reps ===
+                                                "number"
+                                                  ? exercise.reps
+                                                  : ""
+                                              }
+                                              onChange={(e) => {
+                                                const value = e.target.value;
+                                                if (value === "") {
+                                                  updateExerciseParams(
+                                                    originalIndex,
+                                                    exerciseIdx,
+                                                    "reps",
+                                                    ""
+                                                  );
+                                                } else {
+                                                  const parsed =
+                                                    parseInt(value);
+                                                  if (
+                                                    exercise.repsUnit ===
+                                                    "seconds"
+                                                  ) {
+                                                    // Allow 0 or more
+                                                    updateExerciseParams(
+                                                      originalIndex,
+                                                      exerciseIdx,
+                                                      "reps",
+                                                      isNaN(parsed) ? 0 : parsed
+                                                    );
+                                                  } else {
+                                                    // repsUnit === 'reps' -- minimum 1
+                                                    updateExerciseParams(
+                                                      originalIndex,
+                                                      exerciseIdx,
+                                                      "reps",
+                                                      isNaN(parsed)
+                                                        ? ""
+                                                        : Math.max(1, parsed)
+                                                    );
+                                                  }
+                                                }
+                                              }}
+                                              disabled={isCompleted}
+                                              placeholder={
+                                                exercise.repsUnit === "reps"
+                                                  ? "12"
+                                                  : "30"
+                                              }
+                                              className="w-full bg-zinc-800 border border-zinc-600 rounded px-2 py-1 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                            />
+                                          </div>
+                                          <div>
+                                            <label
+                                              className="block text-xs text-zinc-400 mb-1"
+                                              htmlFor={`rest-${originalIndex}-${exerciseIdx}`}
+                                            >
+                                              Rest (s)
+                                            </label>
+                                            <input
+                                              id={`rest-${originalIndex}-${exerciseIdx}`}
+                                              type="number"
+                                              value={exercise.rest || 0}
+                                              onChange={(e) =>
+                                                updateExerciseParams(
+                                                  originalIndex,
+                                                  exerciseIdx,
+                                                  "rest",
+                                                  parseInt(e.target.value) || 0
+                                                )
+                                              }
+                                              disabled={isCompleted}
+                                              className="w-full bg-zinc-800 border border-zinc-600 rounded px-2 py-1 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                            />
+                                          </div>
+                                        </div>
+
+                                        {/* Instructions */}
+                                        <p className="text-sm text-zinc-400 mb-3">
+                                          {exercise.instructions}
+                                        </p>
+
+                                        {/* Muscle Groups */}
+                                        <div className="mb-3">
+                                          {exercise.muscleGroups && (
+                                            <div className="flex flex-wrap gap-2">
+                                              {exercise.muscleGroups.map(
+                                                (muscle, idx) => (
+                                                  <span
+                                                    key={idx}
+                                                    className={`px-2 py-1 rounded-full text-xs font-medium border ${getMuscleGroupColor(
+                                                      muscle.name
+                                                    )}`}
+                                                  >
+                                                    {muscle.name}
+                                                  </span>
+                                                )
+                                              )}
                                             </div>
                                           )}
                                         </div>
 
-                                        {/* Exercise Content */}
-                                        <div className="flex-1">
-                                          <div className="flex items-center justify-between mb-2">
-                                            <h4 className="text-lg font-semibold text-white">
-                                              {exercise.name}
-                                            </h4>
-                                            <div className="flex items-center gap-2">
-                                              <div className="bg-zinc-800 px-3 py-1 rounded-full text-sm text-zinc-300">
-                                                {exerciseProgress.completed}/
-                                                {exerciseProgress.total} sets
-                                              </div>
-                                              <div
-                                                className={`w-3 h-3 rounded-full ${
-                                                  exerciseProgress.percentage ===
-                                                  100
-                                                    ? "bg-emerald-500"
-                                                    : exerciseProgress.percentage >
-                                                      0
-                                                    ? "bg-blue-500"
-                                                    : "bg-zinc-600"
-                                                }`}
-                                              />
-                                              {/* Show individual set completion status */}
-                                              {Array.isArray(exercise.sets) &&
-                                                exercise.sets.length > 0 && (
-                                                  <div className="flex items-center gap-1">
-                                                    {exercise.sets.map(
-                                                      (set, setIdx) => (
+                                        {/* Progress bar for exercise */}
+                                        <div className="mt-3">
+                                          <div className="w-full bg-zinc-700 rounded-full h-2">
+                                            <div
+                                              className={`h-full rounded-full transition-all duration-300 relative overflow-hidden ${
+                                                exerciseProgress.percentage ===
+                                                100
+                                                  ? "bg-emerald-500"
+                                                  : "bg-blue-500"
+                                              }`}
+                                              style={{
+                                                width: `${
+                                                  isNaN(
+                                                    exerciseProgress.percentage
+                                                  )
+                                                    ? 0
+                                                    : Math.min(
+                                                        exerciseProgress.percentage,
+                                                        100
+                                                      )
+                                                }%`,
+                                              }}
+                                            />
+                                          </div>
+
+                                          {/* Show completed sets details */}
+                                          {Array.isArray(exercise.sets) &&
+                                            exercise.sets.some(
+                                              (set) => set.completed
+                                            ) && (
+                                              <div className="mt-2 p-3 bg-emerald-900/20 border border-emerald-700/30 rounded-lg">
+                                                <div className="text-xs text-emerald-300 mb-2 font-medium">
+                                                  Completed Sets:
+                                                </div>
+                                                <div className="flex flex-wrap gap-2">
+                                                  {exercise.sets.map(
+                                                    (set, setIdx) => {
+                                                      if (!set.completed)
+                                                        return null;
+                                                      return (
                                                         <div
                                                           key={setIdx}
-                                                          className={`w-2 h-2 rounded-full ${
-                                                            set.completed
-                                                              ? "bg-emerald-500"
-                                                              : "bg-zinc-600"
-                                                          }`}
-                                                          title={`Set ${
-                                                            setIdx + 1
-                                                          }: ${
-                                                            set.completed
-                                                              ? `Completed${
-                                                                  set.weight
-                                                                    ? ` - ${set.weight}kg`
-                                                                    : ""
-                                                                }${
-                                                                  set.reps
-                                                                    ? ` × ${set.reps}`
-                                                                    : ""
-                                                                }`
-                                                              : "Not completed"
-                                                          }`}
-                                                        />
-                                                      )
-                                                    )}
-                                                  </div>
-                                                )}
-                                              {/* Edit Controls - only show if not completed */}
-                                              {!isCompleted && (
-                                                <div className="flex gap-1">
-                                                  <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                      onShowExerciseLibrary(
-                                                        originalIndex,
-                                                        "replace",
-                                                        exerciseIdx
-                                                      )
-                                                    }
-                                                    className="p-1.5 bg-zinc-700 hover:bg-zinc-600 rounded-lg transition-colors"
-                                                    title="Replace exercise"
-                                                  >
-                                                    <Icon
-                                                      icon="mdi:swap-horizontal"
-                                                      width={14}
-                                                      height={14}
-                                                      className="text-zinc-300"
-                                                    />
-                                                  </button>
-                                                  <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                      removeExercise(
-                                                        originalIndex,
-                                                        exerciseIdx
-                                                      )
-                                                    }
-                                                    className="p-1.5 bg-red-700 hover:bg-red-600 rounded-lg transition-colors"
-                                                    title="Remove exercise"
-                                                  >
-                                                    <Icon
-                                                      icon="mdi:delete"
-                                                      width={14}
-                                                      height={14}
-                                                      className="text-red-300"
-                                                    />
-                                                  </button>
-                                                </div>
-                                              )}
-                                            </div>
-                                          </div>
-
-                                          {/* Exercise Parameters */}
-                                          <div className="grid grid-cols-3 gap-4 mb-3">
-                                            <div>
-                                              <label
-                                                className="block text-xs text-zinc-400 mb-1"
-                                                htmlFor={`sets-${originalIndex}-${exerciseIdx}`}
-                                              >
-                                                Sets
-                                              </label>
-                                              <div className="flex items-center gap-2">
-                                                <button
-                                                  type="button"
-                                                  onClick={() =>
-                                                    handleRemoveSet(
-                                                      originalIndex,
-                                                      exerciseIdx
-                                                    )
-                                                  }
-                                                  disabled={
-                                                    (exercise.sets || 0) <= 1 ||
-                                                    isCompleted
-                                                  }
-                                                  className="p-1 bg-red-600 hover:bg-red-700 rounded text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                                                >
-                                                  <Icon
-                                                    icon="mdi:minus"
-                                                    width={12}
-                                                    height={12}
-                                                  />
-                                                </button>
-                                                <div
-                                                  className="w-12 bg-zinc-800 border border-zinc-600 rounded px-2 py-1 text-white text-center font-semibold"
-                                                  id={`sets-${originalIndex}-${exerciseIdx}`}
-                                                >
-                                                  {typeof exercise.sets ===
-                                                  "number"
-                                                    ? exercise.sets
-                                                    : Array.isArray(
-                                                        exercise.sets
-                                                      )
-                                                    ? exercise.sets.length
-                                                    : 0}
-                                                </div>
-                                                <button
-                                                  type="button"
-                                                  onClick={() =>
-                                                    handleAddSet(
-                                                      originalIndex,
-                                                      exerciseIdx
-                                                    )
-                                                  }
-                                                  disabled={isCompleted}
-                                                  className="p-1 bg-blue-600 hover:bg-blue-700 rounded text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                                                >
-                                                  <Icon
-                                                    icon="mdi:plus"
-                                                    width={12}
-                                                    height={12}
-                                                  />
-                                                </button>
-                                              </div>
-                                            </div>
-                                            <div>
-                                              <div className="flex items-center justify-between mb-1">
-                                                <label
-                                                  className="block text-xs text-zinc-400"
-                                                  htmlFor={`reps-${originalIndex}-${exerciseIdx}`}
-                                                >
-                                                  {exercise.repsUnit ===
-                                                  "seconds"
-                                                    ? "Seconds"
-                                                    : "Reps"}
-                                                </label>
-                                                {!isCompleted && (
-                                                  <Button
-                                                    variant="ghost"
-                                                    size="small"
-                                                    onClick={() =>
-                                                      updateExerciseParams(
-                                                        originalIndex,
-                                                        exerciseIdx,
-                                                        "repsUnit",
-                                                        exercise.repsUnit ===
-                                                          "reps"
-                                                          ? "seconds"
-                                                          : "reps"
-                                                      )
-                                                    }
-                                                    className="p-0.5 h-5 w-5 text-zinc-400 hover:text-blue-400 hover:bg-blue-400/20 rounded transition-all"
-                                                    title={`Switch to ${
-                                                      exercise.repsUnit ===
-                                                      "reps"
-                                                        ? "seconds"
-                                                        : "reps"
-                                                    }`}
-                                                  >
-                                                    <Icon
-                                                      icon={
-                                                        exercise.repsUnit ===
-                                                        "reps"
-                                                          ? "mdi:timer-outline"
-                                                          : "mdi:counter"
-                                                      }
-                                                      className="w-3 h-3"
-                                                    />
-                                                  </Button>
-                                                )}
-                                              </div>
-                                              <input
-                                                id={`reps-${originalIndex}-${exerciseIdx}`}
-                                                type="number"
-                                                value={
-                                                  typeof exercise.reps ===
-                                                  "number"
-                                                    ? exercise.reps
-                                                    : ""
-                                                }
-                                                onChange={(e) => {
-                                                  const value = e.target.value;
-                                                  if (value === "") {
-                                                    updateExerciseParams(
-                                                      dayIdx,
-                                                      exerciseIdx,
-                                                      "reps",
-                                                      ""
-                                                    );
-                                                  } else {
-                                                    const parsed =
-                                                      parseInt(value);
-                                                    if (
-                                                      exercise.repsUnit ===
-                                                      "seconds"
-                                                    ) {
-                                                      // Dozvoli 0 ili više
-                                                      updateExerciseParams(
-                                                        originalIndex,
-                                                        exerciseIdx,
-                                                        "reps",
-                                                        isNaN(parsed)
-                                                          ? 0
-                                                          : parsed
-                                                      );
-                                                    } else {
-                                                      // repsUnit === 'reps' -- minimalno 1
-                                                      updateExerciseParams(
-                                                        originalIndex,
-                                                        exerciseIdx,
-                                                        "reps",
-                                                        isNaN(parsed)
-                                                          ? ""
-                                                          : Math.max(1, parsed)
-                                                      );
-                                                    }
-                                                  }
-                                                }}
-                                                disabled={isCompleted}
-                                                placeholder={
-                                                  exercise.repsUnit === "reps"
-                                                    ? "12"
-                                                    : "30"
-                                                }
-                                                className="w-full bg-zinc-800 border border-zinc-600 rounded px-2 py-1 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                                              />
-                                            </div>
-                                            <div>
-                                              <label
-                                                className="block text-xs text-zinc-400 mb-1"
-                                                htmlFor={`rest-${originalIndex}-${exerciseIdx}`}
-                                              >
-                                                Rest (s)
-                                              </label>
-                                              <input
-                                                id={`rest-${originalIndex}-${exerciseIdx}`}
-                                                type="number"
-                                                value={exercise.rest || 0}
-                                                onChange={(e) =>
-                                                  updateExerciseParams(
-                                                    dayIdx,
-                                                    exerciseIdx,
-                                                    "rest",
-                                                    parseInt(e.target.value) ||
-                                                      0
-                                                  )
-                                                }
-                                                disabled={isCompleted}
-                                                className="w-full bg-zinc-800 border border-zinc-600 rounded px-2 py-1 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                                              />
-                                            </div>
-                                          </div>
-
-                                          {/* Instructions */}
-                                          <p className="text-sm text-zinc-400 mb-3">
-                                            {exercise.instructions}
-                                          </p>
-
-                                          {/* Muscle Groups */}
-                                          <div className="mb-3">
-                                            {exercise.muscleGroups && (
-                                              <div className="flex flex-wrap gap-2">
-                                                {exercise.muscleGroups.map(
-                                                  (muscle, idx) => (
-                                                    <span
-                                                      key={idx}
-                                                      className={`px-2 py-1 rounded-full text-xs font-medium border ${getMuscleGroupColor(
-                                                        muscle.name
-                                                      )}`}
-                                                    >
-                                                      {muscle.name}
-                                                    </span>
-                                                  )
-                                                )}
-                                              </div>
-                                            )}
-                                          </div>
-
-                                          {/* Progress bar for exercise */}
-                                          <div className="mt-3">
-                                            <div className="w-full bg-zinc-700 rounded-full h-2">
-                                              <div
-                                                className={`h-full rounded-full transition-all duration-300 relative overflow-hidden ${
-                                                  exerciseProgress.percentage ===
-                                                  100
-                                                    ? "bg-emerald-500"
-                                                    : "bg-blue-500"
-                                                }`}
-                                                style={{
-                                                  width: `${
-                                                    isNaN(
-                                                      exerciseProgress.percentage
-                                                    )
-                                                      ? 0
-                                                      : Math.min(
-                                                          exerciseProgress.percentage,
-                                                          100
-                                                        )
-                                                  }%`,
-                                                }}
-                                              />
-                                            </div>
-
-                                            {/* Show completed sets details */}
-                                            {Array.isArray(exercise.sets) &&
-                                              exercise.sets.some(
-                                                (set) => set.completed
-                                              ) && (
-                                                <div className="mt-2 p-3 bg-emerald-900/20 border border-emerald-700/30 rounded-lg">
-                                                  <div className="text-xs text-emerald-300 mb-2 font-medium">
-                                                    Completed Sets:
-                                                  </div>
-                                                  <div className="flex flex-wrap gap-2">
-                                                    {exercise.sets.map(
-                                                      (set, setIdx) => {
-                                                        if (!set.completed)
-                                                          return null;
-                                                        return (
-                                                          <div
-                                                            key={setIdx}
-                                                            className="bg-emerald-800/30 px-2 py-1 rounded text-xs text-emerald-200 border border-emerald-600/30"
-                                                          >
-                                                            Set {setIdx + 1}:
-                                                            {set.reps &&
-                                                              ` ${set.reps} reps`}
-                                                            {set.weight &&
-                                                              !isNaN(
-                                                                parseFloat(
-                                                                  set.weight
-                                                                )
-                                                              ) &&
+                                                          className="bg-emerald-800/30 px-2 py-1 rounded text-xs text-emerald-200 border border-emerald-600/30"
+                                                        >
+                                                          Set {setIdx + 1}:
+                                                          {set.reps &&
+                                                            ` ${set.reps} reps`}
+                                                          {set.weight &&
+                                                            !isNaN(
                                                               parseFloat(
                                                                 set.weight
-                                                              ) > 0 &&
-                                                              ` @ ${parseFloat(
-                                                                set.weight
-                                                              )}kg`}
-                                                          </div>
-                                                        );
-                                                      }
-                                                    )}
-                                                  </div>
+                                                              )
+                                                            ) &&
+                                                            parseFloat(
+                                                              set.weight
+                                                            ) > 0 &&
+                                                            ` @ ${parseFloat(
+                                                              set.weight
+                                                            )}kg`}
+                                                        </div>
+                                                      );
+                                                    }
+                                                  )}
                                                 </div>
-                                              )}
-                                          </div>
+                                              </div>
+                                            )}
                                         </div>
                                       </div>
                                     </div>
-                                  </DraggableExercise>
-                                );
-                              })}
-                            </div>
+                                  </div>
+                                </DraggableExercise>
+                              );
+                            })}
                           </div>
-                        )}
-                      </div>
-                    </DraggableTrainingDay>
-                  </React.Fragment>
-                );
-              }
-            )}
+                        </div>
+                      )}
+                    </div>
+                  </DraggableTrainingDay>
+                </React.Fragment>
+              );
+            })}
         </div>
       </div>
 

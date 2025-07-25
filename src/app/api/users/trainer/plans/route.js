@@ -23,11 +23,14 @@ export async function GET(req) {
       );
     }
 
+    // Check if basic mode is requested (for overview pages)
+    const basic = searchParams.get("basic") === "true";
+
     // DRY: Model and select fields by type
     const modelMap = {
       nutrition: {
         model: prisma.nutritionPlan,
-        select: {
+        select: basic ? {
           id: true,
           title: true,
           description: true,
@@ -37,13 +40,31 @@ export async function GET(req) {
           durationType: true,
           clientCount: true,
           createdAt: true,
-
+        } : {
+          id: true,
+          title: true,
+          description: true,
+          coverImage: true,
+          price: true,
+          duration: true,
+          durationType: true,
+          clientCount: true,
+          createdAt: true,
+          keyFeatures: true,
+          timeline: true,
+          nutritionInfo: true,
+          mealTypes: true,
+          supplementRecommendations: true,
+          cookingTime: true,
+          targetGoal: true,
+          recommendedFrequency: true,
+          adaptability: true,
           days: true,
         },
       },
       training: {
         model: prisma.trainingPlan,
-        select: {
+        select: basic ? {
           id: true,
           title: true,
           description: true,
@@ -53,6 +74,24 @@ export async function GET(req) {
           durationType: true,
           clientCount: true,
           createdAt: true,
+        } : {
+          id: true,
+          title: true,
+          description: true,
+          coverImage: true,
+          price: true,
+          duration: true,
+          durationType: true,
+          clientCount: true,
+          createdAt: true,
+          keyFeatures: true,
+          timeline: true,
+          features: true,
+          schedule: true,
+          sessionsPerWeek: true,
+          sessionFormat: true,
+          trainingType: true,
+          difficultyLevel: true,
         },
       },
     };

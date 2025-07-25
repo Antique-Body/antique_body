@@ -116,11 +116,10 @@ export function useClientRegistration() {
 
     // if (currentStep === 3) {
     //   // Contact and Location Step validation
-
-    //   if (!formData.location.city)
-    //     newErrors["location.city"] = "City is required";
-    //   if (!formData.location.country)
-    //     newErrors["location.country"] = "Country is required";
+    //   // if (!formData.location.city)
+    //   //   newErrors["location.city"] = "City is required";
+    //   // if (!formData.location.country)
+    //   //   newErrors["location.country"] = "Country is required";
     // }
 
     setErrors(newErrors);

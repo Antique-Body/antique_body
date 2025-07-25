@@ -82,6 +82,7 @@ export default function ClientDashboard({ params }) {
 
       const data = await response.json();
       setPlans(data);
+      console.log("PLANS", data);
     } catch (err) {
       console.error("Error fetching plans:", err);
       // Handle error appropriately
@@ -110,7 +111,7 @@ export default function ClientDashboard({ params }) {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ planId: selectedPlan.id }),
+          body: JSON.stringify({ planId: String(selectedPlan.id) }),
         }
       );
       const data = await response.json();
@@ -673,7 +674,9 @@ export default function ClientDashboard({ params }) {
                             {
                               method: "POST",
                               headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({ planId: selectedPlan.id }),
+                              body: JSON.stringify({
+                                planId: String(selectedPlan.id),
+                              }),
                             }
                           );
                           const data = await response.json();
@@ -935,11 +938,11 @@ function OverviewTab({
                   />
                   <div>
                     <p className="text-white font-medium">
-                      {activePlan.planData.title}
+                      {activePlan.planData?.title || "Untitled Plan"}
                     </p>
                     <p className="text-zinc-400 text-sm">
-                      {activePlan.planData.duration}{" "}
-                      {activePlan.planData.durationType} • Active
+                      {activePlan.planData?.duration ?? "?"}{" "}
+                      {activePlan.planData?.durationType ?? ""} • Active
                     </p>
                   </div>
                 </div>
@@ -1584,7 +1587,13 @@ function ProgressTab({ client }) {
 }
 
 // Enhanced Training Plan Card Component with Lazy Loading
-function TrainingPlanCard({ plan, client, onViewPlan, onStartPlan, startingPlanId }) {
+function TrainingPlanCard({
+  plan,
+  client,
+  onViewPlan,
+  onStartPlan,
+  startingPlanId,
+}) {
   const [planDetails, setPlanDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
@@ -1594,13 +1603,15 @@ function TrainingPlanCard({ plan, client, onViewPlan, onStartPlan, startingPlanI
       setIsLoading(true);
       try {
         // Lazy load detailed plan data
-        const response = await fetch(`/api/coaching-requests/${client.id}/assigned-training-plan/${plan.id}/progress`);
+        const response = await fetch(
+          `/api/coaching-requests/${client.id}/assigned-training-plan/${plan.id}/progress`
+        );
         if (response.ok) {
           const data = await response.json();
           setPlanDetails(data);
         }
       } catch (error) {
-        console.error('Error loading plan details:', error);
+        console.error("Error loading plan details:", error);
       } finally {
         setIsLoading(false);
       }
@@ -1611,54 +1622,66 @@ function TrainingPlanCard({ plan, client, onViewPlan, onStartPlan, startingPlanI
 
   const getCompletionStats = () => {
     if (!planDetails || !planDetails.schedule) return null;
-    
+
     const totalDays = planDetails.schedule.length;
-    const completedDays = planDetails.schedule.filter(day => day.workoutStatus === 'completed').length;
-    const totalExercises = planDetails.schedule.reduce((sum, day) => sum + (day.exercises?.length || 0), 0);
+    const completedDays = planDetails.schedule.filter(
+      (day) => day.workoutStatus === "completed"
+    ).length;
+    const totalExercises = planDetails.schedule.reduce(
+      (sum, day) => sum + (day.exercises?.length || 0),
+      0
+    );
     const completedExercises = planDetails.schedule.reduce((sum, day) => {
-      if (day.workoutStatus === 'completed') {
-        return sum + (day.exercises?.filter(ex => ex.exerciseCompleted)?.length || 0);
+      if (day.workoutStatus === "completed") {
+        return (
+          sum +
+          (day.exercises?.filter((ex) => ex.exerciseCompleted)?.length || 0)
+        );
       }
       return sum;
     }, 0);
-    
+
     return { totalDays, completedDays, totalExercises, completedExercises };
   };
 
   const stats = getCompletionStats();
 
   return (
-    <div className={`rounded-xl border backdrop-blur-sm transition-all duration-200 ${
-      plan.status === "completed"
-        ? "bg-green-500/10 border-green-500/30"
-        : plan.status === "active"
-        ? "bg-blue-500/10 border-blue-500/30 ring-2 ring-blue-500/20"
-        : "bg-white/5 border-white/10 hover:border-white/20"
-    }`}>
+    <div
+      className={`rounded-xl border backdrop-blur-sm transition-all duration-200 ${
+        plan.status === "completed"
+          ? "bg-green-500/10 border-green-500/30"
+          : plan.status === "active"
+          ? "bg-blue-500/10 border-blue-500/30 ring-2 ring-blue-500/20"
+          : "bg-white/5 border-white/10 hover:border-white/20"
+      }`}
+    >
       {/* Main Card Content */}
       <div className="p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           {/* Left Side - Plan Info */}
           <div className="flex items-start gap-3 min-w-0 flex-1">
             {/* Status Icon */}
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-              plan.status === "completed"
-                ? "bg-green-600 shadow-lg shadow-green-600/30"
-                : plan.status === "active"
-                ? "bg-blue-600 shadow-lg shadow-blue-600/30"
-                : "bg-orange-600 shadow-lg shadow-orange-600/30"
-            }`}>
-              <Icon 
+            <div
+              className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                plan.status === "completed"
+                  ? "bg-green-600 shadow-lg shadow-green-600/30"
+                  : plan.status === "active"
+                  ? "bg-blue-600 shadow-lg shadow-blue-600/30"
+                  : "bg-orange-600 shadow-lg shadow-orange-600/30"
+              }`}
+            >
+              <Icon
                 icon={
-                  plan.status === "completed" 
-                    ? "mdi:check" 
+                  plan.status === "completed"
+                    ? "mdi:check"
                     : plan.status === "active"
                     ? "mdi:play"
                     : "mdi:pause"
-                } 
-                className="text-white" 
-                width={18} 
-                height={18} 
+                }
+                className="text-white"
+                width={18}
+                height={18}
               />
             </div>
 
@@ -1679,7 +1702,7 @@ function TrainingPlanCard({ plan, client, onViewPlan, onStartPlan, startingPlanI
                   </span>
                 )}
               </div>
-              
+
               <div className="flex items-center gap-4 text-sm text-slate-400 mb-2">
                 <span className="flex items-center gap-1">
                   <Icon icon="mdi:clock" width={14} height={14} />
@@ -1726,7 +1749,7 @@ function TrainingPlanCard({ plan, client, onViewPlan, onStartPlan, startingPlanI
               <Icon icon="mdi:eye" width={16} height={16} />
               <span className="hidden sm:inline ml-1">View</span>
             </Button>
-            
+
             {plan.status !== "completed" && plan.status !== "active" && (
               <Button
                 variant="primary"
@@ -1739,14 +1762,12 @@ function TrainingPlanCard({ plan, client, onViewPlan, onStartPlan, startingPlanI
                 <span className="hidden sm:inline ml-1">Start</span>
               </Button>
             )}
-            
+
             {plan.status === "active" && (
-              <Link href={`/trainer/dashboard/clients/${client.id}/plans/${plan.id}`}>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  className="px-3 py-2"
-                >
+              <Link
+                href={`/trainer/dashboard/clients/${client.id}/plans/${plan.id}`}
+              >
+                <Button variant="primary" size="sm" className="px-3 py-2">
                   <Icon icon="mdi:open-in-new" width={16} height={16} />
                   <span className="hidden sm:inline ml-1">Track</span>
                 </Button>
@@ -1764,27 +1785,41 @@ function TrainingPlanCard({ plan, client, onViewPlan, onStartPlan, startingPlanI
             {plan.status === "completed" && (
               <div className="bg-white/5 rounded-lg p-4">
                 <h4 className="text-white font-medium mb-3 flex items-center gap-2">
-                  <Icon icon="mdi:chart-line" width={16} height={16} className="text-green-400" />
+                  <Icon
+                    icon="mdi:chart-line"
+                    width={16}
+                    height={16}
+                    className="text-green-400"
+                  />
                   Completion Summary
                 </h4>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
                   <div>
                     <div className="text-slate-400">Days Completed</div>
-                    <div className="text-white font-semibold">{stats.completedDays}/{stats.totalDays}</div>
+                    <div className="text-white font-semibold">
+                      {stats.completedDays}/{stats.totalDays}
+                    </div>
                   </div>
                   <div>
                     <div className="text-slate-400">Exercises Done</div>
-                    <div className="text-white font-semibold">{stats.completedExercises}/{stats.totalExercises}</div>
+                    <div className="text-white font-semibold">
+                      {stats.completedExercises}/{stats.totalExercises}
+                    </div>
                   </div>
                   <div>
                     <div className="text-slate-400">Completion Rate</div>
                     <div className="text-green-400 font-semibold">
-                      {Math.round((stats.completedDays / stats.totalDays) * 100)}%
+                      {Math.round(
+                        (stats.completedDays / stats.totalDays) * 100
+                      )}
+                      %
                     </div>
                   </div>
                   <div>
                     <div className="text-slate-400">Status</div>
-                    <div className="text-green-400 font-semibold">✓ Finished</div>
+                    <div className="text-green-400 font-semibold">
+                      ✓ Finished
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1794,35 +1829,45 @@ function TrainingPlanCard({ plan, client, onViewPlan, onStartPlan, startingPlanI
             {planDetails.schedule && (
               <div>
                 <h4 className="text-white font-medium mb-2 flex items-center gap-2">
-                  <Icon icon="mdi:format-list-bulleted" width={16} height={16} className="text-blue-400" />
+                  <Icon
+                    icon="mdi:format-list-bulleted"
+                    width={16}
+                    height={16}
+                    className="text-blue-400"
+                  />
                   Workout Days ({planDetails.schedule.length})
                 </h4>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                   {planDetails.schedule.map((day, idx) => (
-                    <div 
-                      key={idx} 
+                    <div
+                      key={idx}
                       className="flex items-center justify-between p-3 bg-white/5 rounded-lg"
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-                          day.workoutStatus === 'completed'
-                            ? 'bg-green-600 text-white'
-                            : 'bg-slate-600 text-white'
-                        }`}>
-                          {day.workoutStatus === 'completed' ? '✓' : idx + 1}
+                        <div
+                          className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                            day.workoutStatus === "completed"
+                              ? "bg-green-600 text-white"
+                              : "bg-slate-600 text-white"
+                          }`}
+                        >
+                          {day.workoutStatus === "completed" ? "✓" : idx + 1}
                         </div>
                         <div>
-                          <div className="text-white text-sm font-medium">{day.name}</div>
+                          <div className="text-white text-sm font-medium">
+                            {day.name}
+                          </div>
                           <div className="text-slate-400 text-xs">
-                            {day.exercises?.length || 0} exercises • {day.duration || 60} min
+                            {day.exercises?.length || 0} exercises •{" "}
+                            {day.duration || 60} min
                           </div>
                         </div>
                       </div>
                       <div className="text-xs">
-                        {day.workoutStatus === 'completed' && (
+                        {day.workoutStatus === "completed" && (
                           <span className="text-green-400">Completed</span>
                         )}
-                        {day.workoutStatus !== 'completed' && (
+                        {day.workoutStatus !== "completed" && (
                           <span className="text-slate-400">Pending</span>
                         )}
                       </div>
@@ -1876,13 +1921,13 @@ function WorkoutsTab({
             Assigned Training Plans History
           </h3>
         </div>
-        
+
         {startPlanError && (
           <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4">
             <div className="text-red-400 text-sm">{startPlanError}</div>
           </div>
         )}
-        
+
         <div className="space-y-4">
           {assignedTrainingPlans && assignedTrainingPlans.length > 0 ? (
             assignedTrainingPlans.map((plan) => (
@@ -1903,7 +1948,9 @@ function WorkoutsTab({
                 width={48}
                 height={48}
               />
-              <p className="text-slate-400 text-lg font-medium mb-2">No Training Plans Yet</p>
+              <p className="text-slate-400 text-lg font-medium mb-2">
+                No Training Plans Yet
+              </p>
               <p className="text-slate-500 text-sm">
                 Create and assign training plans to start tracking workouts
               </p>

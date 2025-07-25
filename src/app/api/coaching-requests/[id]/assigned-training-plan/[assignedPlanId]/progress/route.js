@@ -169,11 +169,12 @@ export async function PATCH(request, context) {
     }
     // Validate planData
     if (!ajv.validate(planDataSchema, body.planData)) {
+      console.error("AJV validation errors:", ajv.errors); // <-- log errors for backend debugging
       return NextResponse.json(
         {
           success: false,
           error: "Invalid planData format",
-          details: ajv.errors,
+          details: ajv.errors, // <-- return full error details
         },
         { status: 400 }
       );
@@ -184,15 +185,23 @@ export async function PATCH(request, context) {
       where: {
         id: assignedPlanId,
       },
-      include: {
+      select: {
         client: {
-          include: {
-            user: true,
+          select: {
+            user: {
+              select: {
+                id: true,
+              },
+            },
           },
         },
         trainer: {
-          include: {
-            user: true,
+          select: {
+            user: {
+              select: {
+                id: true,
+              },
+            },
           },
         },
       },

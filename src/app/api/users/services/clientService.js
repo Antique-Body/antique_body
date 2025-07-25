@@ -26,12 +26,11 @@ async function createClientWithDetails(formData, userId) {
     throw new Error("Field 'preferredActivities' must be an array.");
   }
   const { location } = formData;
-  if (!location.city || !location.country) {
-    throw new Error("City and country are required.");
+  let dbLocation = null;
+  // Only create/connect location if at least one of city or country is provided
+  if (location && (location.city || location.country)) {
+    dbLocation = await getOrCreateLocation(prisma, location);
   }
-
-  // Find or create location
-  const dbLocation = await getOrCreateLocation(prisma, location);
 
   // Prvo kreiraj ClientInfo i unutar njega ClientProfile
   const clientInfo = await prisma.clientInfo.create({
@@ -50,9 +49,7 @@ async function createClientWithDetails(formData, userId) {
           primaryGoal: formData.primaryGoal,
           secondaryGoal: formData.secondaryGoal?.trim() || null,
           goalDescription: formData.goalDescription?.trim() || null,
-          location: {
-            connect: { id: dbLocation.id },
-          },
+          location: dbLocation ? { connect: { id: dbLocation.id } } : undefined,
           profileImage: formData.profileImage?.trim() || null,
           description: formData.description?.trim() || null,
           medicalConditions: formData.medicalConditions?.trim() || null,
