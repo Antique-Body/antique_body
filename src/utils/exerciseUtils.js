@@ -9,6 +9,8 @@ export const REPS_UNITS = {
   SECONDS: "seconds",
 };
 
+export const DEFAULT_SECONDS_REPS = 30;
+
 export const DEFAULT_EXERCISE_VALUES = {
   sets: 3,
   reps: 12,
@@ -122,7 +124,7 @@ export const formatRepsDisplay = (value, unit = REPS_UNITS.REPS) => {
  * @returns {string} Placeholder text
  */
 export const getRepsPlaceholder = (unit = REPS_UNITS.REPS) => {
-  return unit === REPS_UNITS.SECONDS ? "30" : "12";
+  return unit === REPS_UNITS.SECONDS ? String(DEFAULT_SECONDS_REPS) : "12";
 };
 
 /**
@@ -195,8 +197,11 @@ export class ExerciseManager {
         value === REPS_UNITS.SECONDS &&
         exercise.reps === DEFAULT_EXERCISE_VALUES.reps
       ) {
-        updatedExercise.reps = 30;
-      } else if (value === REPS_UNITS.REPS && exercise.reps === 30) {
+        updatedExercise.reps = DEFAULT_SECONDS_REPS;
+      } else if (
+        value === REPS_UNITS.REPS &&
+        exercise.reps === DEFAULT_SECONDS_REPS
+      ) {
         updatedExercise.reps = DEFAULT_EXERCISE_VALUES.reps;
       }
 
