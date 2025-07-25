@@ -794,9 +794,9 @@ export default function TrackPlanPage({ params }) {
             />
           )}
 
-        <div className="max-w-7xl mx-auto p-4 sm:p-6">
+        <div className="max-w-7xl mx-auto p-2 sm:p-4 lg:p-6">
           {/* Enhanced Header with Breadcrumb */}
-          <div className="bg-zinc-900/80 backdrop-blur-xl rounded-2xl border border-zinc-700/50 p-6 mb-6 shadow-2xl">
+          <div className="bg-zinc-900/80 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-zinc-700/50 p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6 shadow-2xl">
             {/* Breadcrumb Navigation */}
             <div className="mb-4 hidden sm:block">
               <nav className="flex items-center gap-2 text-sm flex-wrap">
@@ -839,7 +839,7 @@ export default function TrackPlanPage({ params }) {
               </nav>
             </div>
 
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-3">
                   <Button
@@ -856,45 +856,46 @@ export default function TrackPlanPage({ params }) {
                   <div className="h-8 w-px bg-zinc-700"></div>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 sm:gap-4">
                   {plan.coverImage && (
-                    <div className="relative">
+                    <div className="relative flex-shrink-0">
                       <Image
                         src={plan.coverImage}
                         alt={plan.title}
-                        className="w-16 h-16 object-cover rounded-xl border border-zinc-600/50 shadow-lg"
+                        className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg sm:rounded-xl border border-zinc-600/50 shadow-lg"
                         width={64}
                         height={64}
                       />
-                      <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center border-2 border-zinc-900">
+                      <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-4 h-4 sm:w-6 sm:h-6 bg-blue-500 rounded-full flex items-center justify-center border-2 border-zinc-900">
                         <Icon
                           icon="mdi:weight-lifter"
-                          width={12}
-                          height={12}
-                          className="text-white"
+                          width={8}
+                          height={8}
+                          className="text-white sm:w-3 sm:h-3"
                         />
                       </div>
                     </div>
                   )}
-                  <div>
-                    <h1 className="text-3xl font-bold text-white mb-1">
+                  <div className="min-w-0 flex-1">
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 truncate">
                       {plan.title}
                     </h1>
-                    <div className="flex items-center gap-3 text-sm text-zinc-400">
+                    <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-zinc-400 flex-wrap">
                       <span className="flex items-center gap-1">
-                        <Icon icon="mdi:calendar" width={16} height={16} />
+                        <Icon icon="mdi:calendar" width={14} height={14} className="sm:w-4 sm:h-4" />
                         {plan.duration} {plan.durationType}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Icon icon="mdi:star" width={16} height={16} />
+                        <Icon icon="mdi:star" width={14} height={14} className="sm:w-4 sm:h-4" />
                         {plan.difficultyLevel}
                       </span>
                       {plan.price && (
                         <span className="flex items-center gap-1">
                           <Icon
                             icon="mdi:currency-usd"
-                            width={16}
-                            height={16}
+                            width={14}
+                            height={14}
+                            className="sm:w-4 sm:h-4"
                           />
                           ${plan.price}
                         </span>
@@ -905,8 +906,8 @@ export default function TrackPlanPage({ params }) {
               </div>
 
               {/* View Mode Tabs */}
-              <div className="flex items-center gap-4">
-                <div className="flex bg-zinc-800/50 rounded-lg p-1">
+              <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
+                <div className="flex bg-zinc-800/50 rounded-lg p-1 flex-1 sm:flex-none">
                   {[
                     {
                       key: VIEW_MODES.OVERVIEW,
@@ -933,7 +934,7 @@ export default function TrackPlanPage({ params }) {
                         !mode.disabled && handleViewModeChange(mode.key)
                       }
                       disabled={mode.disabled}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                      className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-all flex-1 sm:flex-none justify-center ${
                         viewMode === mode.key
                           ? "bg-blue-600 text-white shadow-lg"
                           : mode.disabled
@@ -946,14 +947,15 @@ export default function TrackPlanPage({ params }) {
                           : ""
                       }
                     >
-                      <Icon icon={mode.icon} width={16} height={16} />
-                      {mode.label}
+                      <Icon icon={mode.icon} width={14} height={14} className="sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">{mode.label}</span>
+                      <span className="sm:hidden">{mode.label.slice(0, 3)}</span>
                       {mode.disabled && (
                         <Icon
                           icon="mdi:lock"
-                          width={14}
-                          height={14}
-                          className="ml-1"
+                          width={12}
+                          height={12}
+                          className="ml-0.5 sm:ml-1 sm:w-3 sm:h-3"
                         />
                       )}
                     </button>
@@ -961,8 +963,8 @@ export default function TrackPlanPage({ params }) {
                 </div>
 
                 {/* Session Timer */}
-                <div className="text-right bg-zinc-800/30 rounded-lg px-4 py-3">
-                  <div className="text-white text-xl font-mono font-bold">
+                <div className="text-center sm:text-right bg-zinc-800/30 rounded-lg px-2 sm:px-4 py-2 sm:py-3 w-full sm:w-auto">
+                  <div className="text-white text-lg sm:text-xl font-mono font-bold">
                     {isActiveSession && workoutSession.getSessionDuration
                       ? workoutSession.getSessionDuration()
                       : "00:00"}

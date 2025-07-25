@@ -598,7 +598,7 @@ export function LiveWorkoutMode({
                   <div className="bg-zinc-800/50 px-4 py-3 rounded-xl backdrop-blur">
                     <span className="text-zinc-400 text-sm">Target: </span>
                     <span className="text-white font-semibold text-lg">
-                      {setsCount} sets × {currentExercise?.reps} reps
+                      {setsCount} sets × {currentExercise?.reps} {currentExercise?.repsUnit === "seconds" ? "seconds" : "reps"}
                     </span>
                   </div>
                   <div className="bg-zinc-800/50 px-4 py-3 rounded-xl backdrop-blur">
@@ -816,7 +816,7 @@ export function LiveWorkoutMode({
                         </div>
                         <div>
                           <label className="block text-zinc-400 text-sm mb-1 font-medium">
-                            Reps
+                            {currentExercise?.repsUnit === "seconds" ? "Seconds" : "Reps"}
                           </label>
                           <input
                             type="number"
@@ -842,7 +842,7 @@ export function LiveWorkoutMode({
                             disabled={isDayCompleted}
                             className="w-full bg-zinc-800/50 border border-zinc-600/50 rounded-xl px-4 py-3 text-white text-lg font-semibold backdrop-blur focus:border-blue-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                             placeholder={
-                              currentExercise?.reps?.toString() || "10"
+                              currentExercise?.reps?.toString() || (currentExercise?.repsUnit === "seconds" ? "30" : "10")
                             }
                           />
                         </div>
@@ -1111,7 +1111,7 @@ export function LiveWorkoutMode({
                             : Array.isArray(exercise.sets)
                             ? exercise.sets.length
                             : exercise.sets || 0}{" "}
-                          sets × {exercise.reps} reps
+                          sets × {exercise.reps} {exercise.repsUnit === "seconds" ? "seconds" : "reps"}
                         </div>
                         <div className="w-full bg-zinc-700 rounded-full h-1.5 mt-2 overflow-hidden">
                           <div
