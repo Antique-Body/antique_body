@@ -204,6 +204,7 @@ export const Schedule = ({ data, onChange }) => {
   const [expandedSession, setExpandedSession] = useState(null);
   const [activeMedia, setActiveMedia] = useState({}); // Add this state to track active media for each exercise
   const [videoError, setVideoError] = useState({});
+  const [exerciseError, setExerciseError] = useState("");
 
   // Exercise library pagination and filtering state
   const [libraryExercises, setLibraryExercises] = useState([]);
@@ -339,6 +340,7 @@ export const Schedule = ({ data, onChange }) => {
 
   const handleCreateExercise = async (exerciseData) => {
     try {
+      setExerciseError("");
       const response = await fetch("/api/users/trainer/exercises", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -359,14 +361,14 @@ export const Schedule = ({ data, onChange }) => {
 
         // Provjera duplikata po id-u
         if (!normalizedExercise.id) {
-          window.alert("Cannot add exercise: missing exercise ID.");
+          setExerciseError("Cannot add exercise: missing exercise ID.");
           return null;
         }
         const alreadyExists = data.schedule[activeSession].exercises.some(
           (ex) => ex.id === normalizedExercise.id
         );
         if (alreadyExists) {
-          window.alert(
+          setExerciseError(
             "This exercise is already in the session and cannot be added again."
           );
           return normalizedExercise;
@@ -383,13 +385,12 @@ export const Schedule = ({ data, onChange }) => {
         onChange({ schedule: newSchedule });
         return normalizedExercise;
       } else {
-        console.log(
-          "[DEBUG] Backend response error or missing exercise:",
-          result
+        setExerciseError(
+          result.error || "Failed to create exercise. Please try again."
         );
       }
     } catch (error) {
-      console.error("Error creating exercise:", error);
+      setExerciseError("Error creating exercise. Please try again.");
     }
   };
 

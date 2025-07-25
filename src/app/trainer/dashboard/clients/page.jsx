@@ -11,6 +11,30 @@ import { EXPERIENCE_LEVELS } from "@/enums/experienceLevels";
 import { FITNESS_GOALS } from "@/enums/fitnessGoals";
 import { getGenderStyles } from "@/lib/utils";
 
+// Utility function to get gender icon and background class
+function getGenderIconAndClass(gender) {
+  const g = (gender || "").toLowerCase();
+  if (g === "male") {
+    return {
+      icon: "mdi:gender-male",
+      bgClass: "bg-gradient-to-br from-blue-500 to-blue-600",
+      pillClass: "bg-blue-900/30 text-blue-400",
+    };
+  } else if (g === "female") {
+    return {
+      icon: "mdi:gender-female",
+      bgClass: "bg-gradient-to-br from-pink-500 to-pink-600",
+      pillClass: "bg-pink-900/30 text-pink-400",
+    };
+  } else {
+    return {
+      icon: "mdi:help",
+      bgClass: "bg-gradient-to-br from-slate-500 to-slate-600",
+      pillClass: "bg-slate-900/30 text-slate-400",
+    };
+  }
+}
+
 export default function ClientsPage() {
   const router = useRouter();
   const [clients, setClients] = useState([]);
@@ -215,30 +239,24 @@ export default function ClientsPage() {
                         )}
                       </div>
                       {/* Gender Badge */}
-                      {profile.gender && (
-                        <div
-                          className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border border-slate-800 shadow-lg ${
-                            profile.gender.toLowerCase() === "male"
-                              ? "bg-gradient-to-br from-blue-500 to-blue-600"
-                              : profile.gender.toLowerCase() === "female"
-                              ? "bg-gradient-to-br from-pink-500 to-pink-600"
-                              : "bg-gradient-to-br from-slate-500 to-slate-600"
-                          }`}
-                        >
-                          <Icon
-                            icon={
-                              profile.gender.toLowerCase() === "male"
-                                ? "mdi:gender-male"
-                                : profile.gender.toLowerCase() === "female"
-                                ? "mdi:gender-female"
-                                : "mdi:help"
-                            }
-                            width={12}
-                            height={12}
-                            className="text-white"
-                          />
-                        </div>
-                      )}
+                      {profile.gender &&
+                        (() => {
+                          const { icon, bgClass } = getGenderIconAndClass(
+                            profile.gender
+                          );
+                          return (
+                            <div
+                              className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border border-slate-800 shadow-lg ${bgClass}`}
+                            >
+                              <Icon
+                                icon={icon}
+                                width={12}
+                                height={12}
+                                className="text-white"
+                              />
+                            </div>
+                          );
+                        })()}
                     </div>
 
                     {/* Client Info */}
@@ -272,30 +290,20 @@ export default function ClientsPage() {
                           </span>
                         )}
                         {/* Gender Pill */}
-                        {profile.gender && (
-                          <span
-                            className={`px-2 py-1 text-xs rounded-full flex items-center gap-1 ${
-                              profile.gender.toLowerCase() === "male"
-                                ? "bg-blue-900/30 text-blue-400"
-                                : profile.gender.toLowerCase() === "female"
-                                ? "bg-pink-900/30 text-pink-400"
-                                : "bg-slate-900/30 text-slate-400"
-                            }`}
-                          >
-                            <Icon
-                              icon={
-                                profile.gender.toLowerCase() === "male"
-                                  ? "mdi:gender-male"
-                                  : profile.gender.toLowerCase() === "female"
-                                  ? "mdi:gender-female"
-                                  : "mdi:help"
-                              }
-                              width={12}
-                              height={12}
-                            />
-                            {profile.gender}
-                          </span>
-                        )}
+                        {profile.gender &&
+                          (() => {
+                            const { icon, pillClass } = getGenderIconAndClass(
+                              profile.gender
+                            );
+                            return (
+                              <span
+                                className={`px-2 py-1 text-xs rounded-full flex items-center gap-1 ${pillClass}`}
+                              >
+                                <Icon icon={icon} width={12} height={12} />
+                                {profile.gender}
+                              </span>
+                            );
+                          })()}
                       </div>
 
                       {/* Quick Stats */}

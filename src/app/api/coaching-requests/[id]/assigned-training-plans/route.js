@@ -55,7 +55,18 @@ export async function GET(request, { params }) {
       skip,
       take,
     });
-    return NextResponse.json({ success: true, data: assignedPlans });
+    // Add total count for pagination
+    const totalCount = await prisma.assignedTrainingPlan.count({
+      where: {
+        clientId: coachingRequest.clientId,
+        trainerId: coachingRequest.trainerId,
+      },
+    });
+    return NextResponse.json({
+      success: true,
+      data: assignedPlans,
+      totalCount,
+    });
   } catch (error) {
     console.error("Error fetching assigned training plans:", error);
     return NextResponse.json(

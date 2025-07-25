@@ -707,12 +707,8 @@ export default function TrackPlanPage({ params }) {
   const isActiveSession = isWorkoutStarted && !isCurrentDayCompleted;
 
   // Add a planKey that changes when plan changes, to force remount of child components
-  const planKey =
-    plan?.lastUpdated ||
-    (plan?.schedule
-      ? plan.schedule.map((d) => d.workoutStatus).join("-")
-      : "") ||
-    "";
+  // Use a stable planKey based on planId to avoid unnecessary remounts
+  const planKey = planId || "";
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -876,7 +872,7 @@ export default function TrackPlanPage({ params }) {
                       key: VIEW_MODES.REVIEW,
                       label: "Review",
                       icon: "mdi:chart-line",
-                      disabled: false,
+                      disabled: showSaveBar, // Disable if save bar is active (unsaved changes)
                     },
                   ].map((mode) => (
                     <button
