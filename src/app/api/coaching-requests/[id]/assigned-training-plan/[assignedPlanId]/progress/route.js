@@ -2,6 +2,19 @@ import { NextResponse } from "next/server";
 
 import { auth } from "#/auth";
 import prisma from "@/lib/prisma";
+import Ajv from "ajv";
+
+const planDataSchema = {
+  type: "object",
+  properties: {
+    title: { type: "string" },
+    description: { type: "string" },
+    schedule: { type: "array" },
+    // Add more fields as needed, e.g., workouts, exercises, progress
+  },
+  required: ["title", "description", "schedule"],
+};
+const ajv = new Ajv();
 
 // GET: Get workout progress from planData
 export async function GET(request, context) {
@@ -88,6 +101,17 @@ export async function PATCH(request, context) {
     if (!body.planData) {
       return NextResponse.json(
         { success: false, error: "Missing planData" },
+        { status: 400 }
+      );
+    }
+    // Validate planData
+    if (!ajv.validate(planDataSchema, body.planData)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Invalid planData format",
+          details: ajv.errors,
+        },
         { status: 400 }
       );
     }

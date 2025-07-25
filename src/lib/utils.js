@@ -104,3 +104,36 @@ export function updateFormData(data, e) {
     };
   }
 }
+
+/**
+ * Returns style classes for gender-based styling.
+ * @param {string} gender - The gender string (e.g., 'male', 'female').
+ * @returns {object} - An object with background, border, shadow, and accent class strings.
+ */
+export function getGenderStyles(gender) {
+  const g = gender?.toLowerCase();
+  const isMale = g === "male";
+  const isFemale = g === "female";
+  return {
+    background: isMale
+      ? "bg-gradient-to-r from-slate-900/95 via-blue-900/10 to-slate-900/95"
+      : isFemale
+      ? "bg-gradient-to-r from-slate-900/95 via-pink-900/20 to-slate-900/95"
+      : "bg-gradient-to-r from-slate-900/95 via-slate-800/90 to-slate-900/95",
+    border: isMale
+      ? "border-cyan-600/30 hover:border-cyan-400/50"
+      : isFemale
+      ? "border-pink-600/40 hover:border-pink-400/60"
+      : "border-slate-700/50 hover:border-blue-400/70",
+    shadow: isMale
+      ? "hover:shadow-cyan-500/10"
+      : isFemale
+      ? "hover:shadow-pink-500/15"
+      : "hover:shadow-blue-500/20",
+    accent: isMale
+      ? "from-cyan-500/10 to-blue-500/10"
+      : isFemale
+      ? "from-pink-500/15 to-rose-500/15"
+      : "from-blue-500/10 to-blue-500/10",
+  };
+}

@@ -24,10 +24,11 @@ export const ExerciseLibrarySelector = ({
   const [filteredStaticExercises, setFilteredStaticExercises] =
     useState(exerciseLibrary);
 
-  // State za dinamičke vježbe iz baze
+  // State for dynamic exercises from the database
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [error, setError] = useState(null); // Add error state
 
   // Determine which exercises to display
   const displayExercises = useStaticData ? filteredStaticExercises : exercises;
@@ -62,13 +63,31 @@ export const ExerciseLibrarySelector = ({
   useEffect(() => {
     if (!useStaticData) {
       setLoading(true);
-      fetch(`/api/users/trainer/exercises?search=${encodeURIComponent(search)}`)
-        .then((res) => res.json())
+      setError(null); // Reset error state before fetching
+      const controller = new AbortController();
+      fetch(
+        `/api/users/trainer/exercises?search=${encodeURIComponent(search)}`,
+        { signal: controller.signal }
+      )
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch exercises");
+          return res.json();
+        })
         .then((data) => {
           setExercises(data.exercises || []);
           setLoading(false);
         })
-        .catch(() => setLoading(false));
+        .catch((err) => {
+          if (err.name !== "AbortError") {
+            setError(
+              err.message || "An error occurred while fetching exercises."
+            );
+            setLoading(false);
+          }
+        });
+      return () => {
+        controller.abort();
+      };
     }
   }, [useStaticData, search]);
 
@@ -247,14 +266,16 @@ export const ExerciseLibrarySelector = ({
                         </p>
                       </div>
                       <div className="flex flex-wrap gap-1.5 mt-1">
-                        {exercise.muscleGroups.slice(0, 3).map((muscle, idx) => (
-                          <span
-                            key={idx}
-                            className="text-[10px] px-2 py-0.5 bg-orange-900/40 text-orange-200 rounded-full border border-orange-700/40 shadow-sm hover:shadow-md transition-shadow duration-200"
-                          >
-                            {formatMuscleDisplayName(muscle)}
-                          </span>
-                        ))}
+                        {exercise.muscleGroups
+                          .slice(0, 3)
+                          .map((muscle, idx) => (
+                            <span
+                              key={idx}
+                              className="text-[10px] px-2 py-0.5 bg-orange-900/40 text-orange-200 rounded-full border border-orange-700/40 shadow-sm hover:shadow-md transition-shadow duration-200"
+                            >
+                              {formatMuscleDisplayName(muscle)}
+                            </span>
+                          ))}
                         {exercise.muscleGroups.length > 3 && (
                           <span className="text-[10px] px-2 py-0.5 bg-zinc-700 text-zinc-400 rounded-full border border-zinc-600/30 shadow-sm">
                             +{exercise.muscleGroups.length - 3}
@@ -266,7 +287,10 @@ export const ExerciseLibrarySelector = ({
                     {isSelected && (
                       <div className="flex-shrink-0 ml-2 flex items-center">
                         <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center shadow-lg">
-                          <Icon icon="mdi:check" className="w-4 h-4 text-white" />
+                          <Icon
+                            icon="mdi:check"
+                            className="w-4 h-4 text-white"
+                          />
                         </div>
                       </div>
                     )}

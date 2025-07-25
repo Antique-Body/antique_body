@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
+import isEqual from "lodash/isEqual";
+import { ErrorMessage } from "@/components/common/ErrorMessage";
 
 export function useTrainingPlan(id, planId) {
   const [plan, setPlan] = useState(null);
@@ -9,11 +11,12 @@ export function useTrainingPlan(id, planId) {
   const [isSaving, setIsSaving] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
   const [isNavigationBlocked, setIsNavigationBlocked] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Check for unsaved changes
   useEffect(() => {
     if (!plan || !lastSavedPlan) return;
-    const hasChanges = JSON.stringify(plan) !== JSON.stringify(lastSavedPlan);
+    const hasChanges = !isEqual(plan, lastSavedPlan);
     setShowSaveBar(hasChanges);
     setIsNavigationBlocked(hasChanges);
   }, [plan, lastSavedPlan]);
@@ -61,44 +64,74 @@ export function useTrainingPlan(id, planId) {
     fetchPlan();
   }, [id, planId]);
 
-  // Enhanced navigation handler with save bar shake
-  const handleNavigationAttempt = useCallback(
+  // Consolidated navigation block/shake logic
+  const checkAndHandleNavigationBlock = useCallback(
     (navigationFn) => {
       if (isNavigationBlocked) {
         setIsShaking(true);
         setTimeout(() => setIsShaking(false), 800);
         return false;
       }
-      navigationFn();
+      if (typeof navigationFn === "function") {
+        navigationFn();
+      }
       return true;
     },
     [isNavigationBlocked]
   );
 
-  // Method to trigger shake when navigation is blocked
-  const triggerNavigationBlock = useCallback(() => {
-    if (isNavigationBlocked) {
-      setIsShaking(true);
-      setTimeout(() => setIsShaking(false), 800);
-      return true; // Navigation was blocked
-    }
-    return false; // Navigation allowed
-  }, [isNavigationBlocked]);
+  // Enhanced navigation handler with save bar shake (replaced)
+  // const handleNavigationAttempt = useCallback(
+  //   (navigationFn) => {
+  //     if (isNavigationBlocked) {
+  //       setIsShaking(true);
+  //       setTimeout(() => setIsShaking(false), 800);
+  //       return false;
+  //     }
+  //     navigationFn();
+  //     return true;
+  //   },
+  //   [isNavigationBlocked]
+  // );
 
-  // Safe navigation wrapper
+  // Method to trigger shake when navigation is blocked (replaced)
+  // const triggerNavigationBlock = useCallback(() => {
+  //   if (isNavigationBlocked) {
+  //     setIsShaking(true);
+  //     setTimeout(() => setIsShaking(false), 800);
+  //     return true; // Navigation was blocked
+  //   }
+  //   return false; // Navigation allowed
+  // }, [isNavigationBlocked]);
+
+  // Safe navigation wrapper (replaced)
+  // const safeNavigate = useCallback(
+  //   (navigationCallback) => {
+  //     if (isNavigationBlocked) {
+  //       setIsShaking(true);
+  //       setTimeout(() => setIsShaking(false), 800);
+  //       return false;
+  //     }
+  //     if (typeof navigationCallback === "function") {
+  //       navigationCallback();
+  //     }
+  //     return true;
+  //   },
+  //   [isNavigationBlocked]
+  // );
+
+  // New API-compatible wrappers
+  const handleNavigationAttempt = useCallback(
+    (navigationFn) => checkAndHandleNavigationBlock(navigationFn),
+    [checkAndHandleNavigationBlock]
+  );
+  const triggerNavigationBlock = useCallback(
+    () => !checkAndHandleNavigationBlock(),
+    [checkAndHandleNavigationBlock]
+  );
   const safeNavigate = useCallback(
-    (navigationCallback) => {
-      if (isNavigationBlocked) {
-        setIsShaking(true);
-        setTimeout(() => setIsShaking(false), 800);
-        return false;
-      }
-      if (typeof navigationCallback === "function") {
-        navigationCallback();
-      }
-      return true;
-    },
-    [isNavigationBlocked]
+    (navigationCallback) => checkAndHandleNavigationBlock(navigationCallback),
+    [checkAndHandleNavigationBlock]
   );
 
   // Save handler
@@ -119,10 +152,11 @@ export function useTrainingPlan(id, planId) {
       setLastSavedPlan(plan);
       setShowSaveBar(false);
       setIsNavigationBlocked(false);
+      setErrorMessage(""); // Clear error on success
     } catch (err) {
       setIsShaking(true);
       setTimeout(() => setIsShaking(false), 800);
-      alert(err.message || "Failed to save plan");
+      setErrorMessage(err.message || "Failed to save plan");
     } finally {
       setIsSaving(false);
     }
@@ -254,6 +288,7 @@ export function useTrainingPlan(id, planId) {
     isSaving,
     isShaking,
     isNavigationBlocked,
+    errorMessage,
 
     // Actions
     handleSavePlan,

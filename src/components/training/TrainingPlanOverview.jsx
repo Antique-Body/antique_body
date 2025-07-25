@@ -114,7 +114,7 @@ export function TrainingPlanOverview({
     // Check if another workout is already in progress (different day)
     if (isWorkoutStarted && currentDayIndex !== dayIdx) {
       setPreventionMessage(
-        `Trenutno imate aktivan trening na "${plan.schedule?.[currentDayIndex]?.name}". Završite ili zaustavite trenutni trening pre pokretanja novog.`
+        `You currently have an active workout on "${plan.schedule?.[currentDayIndex]?.name}". Finish or stop the current workout before starting a new one.`
       );
       setShowWorkoutPreventionModal(true);
       return;
@@ -290,11 +290,12 @@ export function TrainingPlanOverview({
     if (!editingDay) return;
 
     // Check if any values actually changed
-    const hasChanges = 
+    const hasChanges =
       editingDay.name !== editingDay.originalValues.name ||
       editingDay.type !== editingDay.originalValues.type ||
       editingDay.notes !== editingDay.originalValues.notes ||
-      (parseInt(editingDay.duration) || 60) !== editingDay.originalValues.duration;
+      (parseInt(editingDay.duration) || 60) !==
+        editingDay.originalValues.duration;
 
     // Only update if there are actual changes
     if (hasChanges) {
@@ -345,28 +346,41 @@ export function TrainingPlanOverview({
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl border border-blue-500/30 flex items-center justify-center">
-                  <Icon icon="mdi:dumbbell" width={20} height={20} className="text-blue-400" />
+                  <Icon
+                    icon="mdi:dumbbell"
+                    width={20}
+                    height={20}
+                    className="text-blue-400"
+                  />
                 </div>
-                <h1 className="text-2xl font-bold text-white">Training Overview</h1>
+                <h1 className="text-2xl font-bold text-white">
+                  Training Overview
+                </h1>
               </div>
-              
+
               {/* Progress Bar */}
               {(() => {
-                const completedCount = plan.schedule?.filter((day) => {
-                  const status = getWorkoutStatus(plan.schedule.indexOf(day));
-                  return status?.status === "completed";
-                }).length || 0;
+                const completedCount =
+                  plan.schedule?.filter((day) => {
+                    const status = getWorkoutStatus(plan.schedule.indexOf(day));
+                    return status?.status === "completed";
+                  }).length || 0;
                 const totalCount = plan.schedule?.length || 0;
-                const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
-                
+                const progress =
+                  totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+
                 return (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-zinc-400">Progress: {completedCount} of {totalCount} days</span>
-                      <span className="text-blue-400 font-medium">{Math.round(progress)}%</span>
+                      <span className="text-zinc-400">
+                        Progress: {completedCount} of {totalCount} days
+                      </span>
+                      <span className="text-blue-400 font-medium">
+                        {Math.round(progress)}%
+                      </span>
                     </div>
                     <div className="w-full bg-zinc-800 rounded-full h-2 overflow-hidden">
-                      <div 
+                      <div
                         className="h-full bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full transition-all duration-700 ease-out"
                         style={{ width: `${progress}%` }}
                       />
@@ -374,18 +388,20 @@ export function TrainingPlanOverview({
                   </div>
                 );
               })()}
-              
+
               {/* Active Session Indicator */}
-              {isWorkoutStarted && plan.schedule?.[currentDayIndex]?.workoutStatus !== "completed" && (
-                <div className="flex items-center gap-2 px-3 py-2 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                  <span className="text-blue-300 text-sm font-medium">
-                    Active: {plan.schedule?.[currentDayIndex]?.name}
-                  </span>
-                </div>
-              )}
+              {isWorkoutStarted &&
+                plan.schedule?.[currentDayIndex]?.workoutStatus !==
+                  "completed" && (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                    <span className="text-blue-300 text-sm font-medium">
+                      Active: {plan.schedule?.[currentDayIndex]?.name}
+                    </span>
+                  </div>
+                )}
             </div>
-            
+
             <Button
               onClick={onAddTrainingDay}
               variant="primary"
@@ -426,7 +442,7 @@ export function TrainingPlanOverview({
                     {dayIdx < plan.schedule.length - 1 && (
                       <div className="absolute left-8 top-20 w-0.5 h-8 bg-gradient-to-b from-zinc-600 to-zinc-700 z-0"></div>
                     )}
-                    
+
                     {/* Day Card */}
                     <div
                       className={`relative bg-zinc-900/40 backdrop-blur-sm border rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-xl cursor-grab active:cursor-grabbing transform hover:scale-[1.02] ${
@@ -439,7 +455,18 @@ export function TrainingPlanOverview({
                           : "border-zinc-700/50 hover:border-zinc-600/70 hover:shadow-zinc-600/10"
                       }`}
                       onClick={(e) => {
-                        if (e.target === e.currentTarget || e.target.closest(".day-main-content")) {
+                        if (
+                          e.target === e.currentTarget ||
+                          e.target.closest(".day-main-content")
+                        ) {
+                          toggleDayExpansion(dayIdx);
+                        }
+                      }}
+                      tabIndex={0}
+                      role="button"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
                           toggleDayExpansion(dayIdx);
                         }
                       }}
@@ -461,7 +488,11 @@ export function TrainingPlanOverview({
                               }`}
                             >
                               {workoutStatus === "completed" ? (
-                                <Icon icon="mdi:trophy" width={24} height={24} />
+                                <Icon
+                                  icon="mdi:trophy"
+                                  width={24}
+                                  height={24}
+                                />
                               ) : isRestDay ? (
                                 <Icon icon="mdi:sleep" width={24} height={24} />
                               ) : isActiveWorkout ? (
@@ -470,17 +501,20 @@ export function TrainingPlanOverview({
                                 <span className="text-xl">{dayIdx + 1}</span>
                               )}
                             </div>
-                            
+
                             {/* Status Ring */}
-                            {(workoutStatus === "completed" || isActiveWorkout) && (
-                              <div className={`absolute -inset-1 rounded-2xl ${
-                                workoutStatus === "completed" 
-                                  ? "bg-gradient-to-r from-emerald-400 to-teal-400" 
-                                  : "bg-gradient-to-r from-blue-400 to-cyan-400"
-                              } opacity-20 blur-sm animate-pulse`}></div>
+                            {(workoutStatus === "completed" ||
+                              isActiveWorkout) && (
+                              <div
+                                className={`absolute -inset-1 rounded-2xl ${
+                                  workoutStatus === "completed"
+                                    ? "bg-gradient-to-r from-emerald-400 to-teal-400"
+                                    : "bg-gradient-to-r from-blue-400 to-cyan-400"
+                                } opacity-20 blur-sm animate-pulse`}
+                              ></div>
                             )}
                           </div>
-                          
+
                           {/* Content Area */}
                           <div className="flex-1 min-w-0">
                             {editingDay?.dayIdx === dayIdx ? (
@@ -488,33 +522,55 @@ export function TrainingPlanOverview({
                                 <input
                                   type="text"
                                   value={editingDay.name}
-                                  onChange={(e) => setEditingDay({ ...editingDay, name: e.target.value })}
+                                  onChange={(e) =>
+                                    setEditingDay({
+                                      ...editingDay,
+                                      name: e.target.value,
+                                    })
+                                  }
                                   className="w-full bg-zinc-800/50 border border-zinc-600 rounded-xl px-4 py-3 text-white text-xl font-bold backdrop-blur focus:border-blue-500 focus:outline-none"
                                   placeholder="Day name"
-                                  autoFocus
                                 />
                                 <div className="grid grid-cols-2 gap-4">
                                   <div>
-                                    <label className="text-sm text-zinc-400 font-medium mb-2 block">Duration (min)</label>
+                                    <label className="text-sm text-zinc-400 font-medium mb-2 block">
+                                      Duration (min)
+                                    </label>
                                     <input
                                       type="number"
                                       value={editingDay.duration}
-                                      onChange={(e) => setEditingDay({ ...editingDay, duration: parseInt(e.target.value) || 60 })}
+                                      onChange={(e) =>
+                                        setEditingDay({
+                                          ...editingDay,
+                                          duration:
+                                            parseInt(e.target.value) || 60,
+                                        })
+                                      }
                                       className="w-full bg-zinc-800/50 border border-zinc-600 rounded-lg px-3 py-2 text-white backdrop-blur focus:border-blue-500 focus:outline-none"
-                                      min="1" max="300"
+                                      min="1"
+                                      max="300"
                                     />
                                   </div>
                                   <div>
-                                    <label className="text-sm text-zinc-400 font-medium mb-2 block">Type</label>
+                                    <label className="text-sm text-zinc-400 font-medium mb-2 block">
+                                      Type
+                                    </label>
                                     <select
                                       value={editingDay.type}
-                                      onChange={(e) => setEditingDay({ ...editingDay, type: e.target.value })}
+                                      onChange={(e) =>
+                                        setEditingDay({
+                                          ...editingDay,
+                                          type: e.target.value,
+                                        })
+                                      }
                                       className="w-full bg-zinc-800/50 border border-zinc-600 rounded-lg px-3 py-2 text-white backdrop-blur focus:border-blue-500 focus:outline-none"
                                     >
                                       <option value="strength">Strength</option>
                                       <option value="cardio">Cardio</option>
                                       <option value="hiit">HIIT</option>
-                                      <option value="flexibility">Flexibility</option>
+                                      <option value="flexibility">
+                                        Flexibility
+                                      </option>
                                       <option value="rest">Rest</option>
                                     </select>
                                   </div>
@@ -530,7 +586,12 @@ export function TrainingPlanOverview({
                                   <div className="flex items-center gap-2">
                                     {workoutStatus === "completed" && (
                                       <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-semibold rounded-full hover:bg-emerald-500/30 transition-all duration-300">
-                                        <Icon icon="mdi:check-circle" width={12} height={12} className="animate-pulse" />
+                                        <Icon
+                                          icon="mdi:check-circle"
+                                          width={12}
+                                          height={12}
+                                          className="animate-pulse"
+                                        />
                                         COMPLETED
                                       </div>
                                     )}
@@ -542,72 +603,126 @@ export function TrainingPlanOverview({
                                     )}
                                   </div>
                                 </div>
-                                
+
                                 {/* Stats Row */}
                                 {!isRestDay ? (
                                   <div className="flex items-center gap-6">
                                     <div className="flex items-center gap-2 text-zinc-400">
                                       <div className="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center">
-                                        <Icon icon="mdi:dumbbell" width={14} height={14} className="text-orange-400" />
+                                        <Icon
+                                          icon="mdi:dumbbell"
+                                          width={14}
+                                          height={14}
+                                          className="text-orange-400"
+                                        />
                                       </div>
-                                      <span className="text-sm font-medium">{day.exercises?.length || 0} exercises</span>
+                                      <span className="text-sm font-medium">
+                                        {day.exercises?.length || 0} exercises
+                                      </span>
                                     </div>
-                                    
+
                                     <div className="flex items-center gap-2 text-zinc-400">
                                       <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                                        <Icon icon="mdi:clock" width={14} height={14} className="text-blue-400" />
+                                        <Icon
+                                          icon="mdi:clock"
+                                          width={14}
+                                          height={14}
+                                          className="text-blue-400"
+                                        />
                                       </div>
-                                      <span className="text-sm font-medium">{day.duration || 60} min</span>
+                                      <span className="text-sm font-medium">
+                                        {day.duration || 60} min
+                                      </span>
                                     </div>
-                                    
+
                                     <div className="flex items-center gap-2 text-zinc-400">
                                       <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                                        <Icon icon="mdi:fitness" width={14} height={14} className="text-purple-400" />
+                                        <Icon
+                                          icon="mdi:fitness"
+                                          width={14}
+                                          height={14}
+                                          className="text-purple-400"
+                                        />
                                       </div>
-                                      <span className="text-sm font-medium capitalize">{day.type}</span>
+                                      <span className="text-sm font-medium capitalize">
+                                        {day.type}
+                                      </span>
                                     </div>
                                   </div>
                                 ) : (
                                   <div className="flex items-center gap-2 text-purple-400">
                                     <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                                      <Icon icon="mdi:sleep" width={14} height={14} />
+                                      <Icon
+                                        icon="mdi:sleep"
+                                        width={14}
+                                        height={14}
+                                      />
                                     </div>
-                                    <span className="text-sm font-medium">Recovery Day - Rest & Recover</span>
+                                    <span className="text-sm font-medium">
+                                      Recovery Day - Rest & Recover
+                                    </span>
                                   </div>
                                 )}
-                                
+
                                 {/* Workout Notes */}
-                                {workoutStatus === "completed" && day.workoutNotes && (
-                                  <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-                                    <div className="flex items-start gap-3">
-                                      <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <Icon icon="mdi:note-text" width={14} height={14} className="text-emerald-400" />
-                                      </div>
-                                      <div>
-                                        <h4 className="text-emerald-300 font-semibold text-sm mb-1">Workout Notes</h4>
-                                        <p className="text-emerald-100/90 text-sm leading-relaxed">{day.workoutNotes}</p>
+                                {workoutStatus === "completed" &&
+                                  day.workoutNotes && (
+                                    <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                                      <div className="flex items-start gap-3">
+                                        <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                                          <Icon
+                                            icon="mdi:note-text"
+                                            width={14}
+                                            height={14}
+                                            className="text-emerald-400"
+                                          />
+                                        </div>
+                                        <div>
+                                          <h4 className="text-emerald-300 font-semibold text-sm mb-1">
+                                            Workout Notes
+                                          </h4>
+                                          <p className="text-emerald-100/90 text-sm leading-relaxed">
+                                            {day.workoutNotes}
+                                          </p>
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
-                                )}
-                                
+                                  )}
+
                                 {/* Completion Info */}
-                                {workoutStatus === "completed" && day.workoutCompletedAt && (
-                                  <div className="flex items-center gap-2 text-xs text-zinc-500 mt-2">
-                                    <Icon icon="mdi:calendar-check" width={12} height={12} />
-                                    <span>Completed {new Date(day.workoutCompletedAt).toLocaleDateString()} at {new Date(day.workoutCompletedAt).toLocaleTimeString()}</span>
-                                  </div>
-                                )}
+                                {workoutStatus === "completed" &&
+                                  day.workoutCompletedAt && (
+                                    <div className="flex items-center gap-2 text-xs text-zinc-500 mt-2">
+                                      <Icon
+                                        icon="mdi:calendar-check"
+                                        width={12}
+                                        height={12}
+                                      />
+                                      <span>
+                                        Completed{" "}
+                                        {new Date(
+                                          day.workoutCompletedAt
+                                        ).toLocaleDateString()}{" "}
+                                        at{" "}
+                                        {new Date(
+                                          day.workoutCompletedAt
+                                        ).toLocaleTimeString()}
+                                      </span>
+                                    </div>
+                                  )}
                               </div>
                             )}
                           </div>
-                          
+
                           {/* Action Buttons */}
                           <div className="flex items-center gap-2 flex-shrink-0">
                             {editingDay?.dayIdx === dayIdx ? (
                               <div className="flex items-center gap-2">
                                 <Button
-                                  onClick={(e) => { e.stopPropagation(); saveDayDetails(); }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    saveDayDetails();
+                                  }}
                                   variant="primary"
                                   size="sm"
                                   className="bg-blue-600 hover:bg-blue-700 px-4 py-2 text-sm font-medium transition-all"
@@ -615,7 +730,10 @@ export function TrainingPlanOverview({
                                   Save
                                 </Button>
                                 <Button
-                                  onClick={(e) => { e.stopPropagation(); cancelEditingDay(); }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    cancelEditingDay();
+                                  }}
                                   variant="ghost"
                                   size="sm"
                                   className="px-4 py-2 text-sm"
@@ -627,40 +745,61 @@ export function TrainingPlanOverview({
                               <>
                                 {!isCompleted && !isActiveWorkout && (
                                   <Button
-                                    onClick={(e) => { e.stopPropagation(); startEditingDay(dayIdx); }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      startEditingDay(dayIdx);
+                                    }}
                                     variant="ghost"
                                     size="sm"
                                     className="opacity-0 group-hover:opacity-100 transition-all p-2 hover:bg-zinc-700/50"
                                   >
-                                    <Icon icon="mdi:pencil" width={16} height={16} />
+                                    <Icon
+                                      icon="mdi:pencil"
+                                      width={16}
+                                      height={16}
+                                    />
                                   </Button>
                                 )}
-                                
+
                                 {!isRestDay && day.exercises?.length > 0 && (
                                   <Button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      if (buttonConfig.action && !buttonConfig.disabled) {
+                                      if (
+                                        buttonConfig.action &&
+                                        !buttonConfig.disabled
+                                      ) {
                                         buttonConfig.action();
                                       }
                                     }}
                                     disabled={buttonConfig.disabled}
                                     className={`${buttonConfig.className} px-4 py-2 text-sm font-semibold flex items-center gap-2 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl`}
                                   >
-                                    <Icon icon={buttonConfig.icon} width={16} height={16} />
+                                    <Icon
+                                      icon={buttonConfig.icon}
+                                      width={16}
+                                      height={16}
+                                    />
                                     {buttonConfig.text}
                                   </Button>
                                 )}
-                                
+
                                 {!isRestDay && day.exercises?.length > 0 && (
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={(e) => { e.stopPropagation(); toggleDayExpansion(dayIdx); }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleDayExpansion(dayIdx);
+                                    }}
                                     className="p-2 hover:bg-zinc-700/50 transition-all"
                                   >
                                     <Icon
-                                      icon={isExpanded ? "mdi:chevron-up" : "mdi:chevron-down"}
+                                      icon={
+                                        isExpanded
+                                          ? "mdi:chevron-up"
+                                          : "mdi:chevron-down"
+                                      }
                                       width={18}
                                       height={18}
                                     />
@@ -679,10 +818,14 @@ export function TrainingPlanOverview({
                         <div className="p-6 space-y-4">
                           {/* Warmup section */}
                           <div className="mb-6">
-                            <label className="block text-zinc-300 font-semibold mb-2 text-lg">
+                            <label
+                              className="block text-zinc-300 font-semibold mb-2 text-lg"
+                              htmlFor={`warmup-${dayIdx}`}
+                            >
                               Warmup
                             </label>
                             <textarea
+                              id={`warmup-${dayIdx}`}
                               className="w-full bg-zinc-800/50 border border-zinc-600/50 rounded-xl px-4 py-3 text-white h-20 backdrop-blur focus:border-blue-500 focus:outline-none resize-none disabled:opacity-50 disabled:cursor-not-allowed"
                               placeholder="Enter warmup description for this day..."
                               value={day.warmupDescription ?? ""}
@@ -697,6 +840,7 @@ export function TrainingPlanOverview({
                           {!isCompleted && (
                             <div className="mb-4 flex justify-end">
                               <button
+                                type="button"
                                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow transition-all"
                                 onClick={() => onShowExerciseLibrary(dayIdx)}
                               >
@@ -827,6 +971,7 @@ export function TrainingPlanOverview({
                                           {!isCompleted && (
                                             <div className="flex gap-1">
                                               <button
+                                                type="button"
                                                 onClick={() =>
                                                   onShowExerciseLibrary(
                                                     dayIdx,
@@ -845,6 +990,7 @@ export function TrainingPlanOverview({
                                                 />
                                               </button>
                                               <button
+                                                type="button"
                                                 onClick={() =>
                                                   removeExercise(
                                                     dayIdx,
@@ -869,11 +1015,15 @@ export function TrainingPlanOverview({
                                       {/* Exercise Parameters */}
                                       <div className="grid grid-cols-3 gap-4 mb-3">
                                         <div>
-                                          <label className="block text-xs text-zinc-400 mb-1">
+                                          <label
+                                            className="block text-xs text-zinc-400 mb-1"
+                                            htmlFor={`sets-${dayIdx}-${exerciseIdx}`}
+                                          >
                                             Sets
                                           </label>
                                           <div className="flex items-center gap-2">
                                             <button
+                                              type="button"
                                               onClick={() =>
                                                 handleRemoveSet(
                                                   dayIdx,
@@ -892,7 +1042,10 @@ export function TrainingPlanOverview({
                                                 height={12}
                                               />
                                             </button>
-                                            <div className="w-12 bg-zinc-800 border border-zinc-600 rounded px-2 py-1 text-white text-center font-semibold">
+                                            <div
+                                              className="w-12 bg-zinc-800 border border-zinc-600 rounded px-2 py-1 text-white text-center font-semibold"
+                                              id={`sets-${dayIdx}-${exerciseIdx}`}
+                                            >
                                               {typeof exercise.sets === "number"
                                                 ? exercise.sets
                                                 : Array.isArray(exercise.sets)
@@ -900,6 +1053,7 @@ export function TrainingPlanOverview({
                                                 : 0}
                                             </div>
                                             <button
+                                              type="button"
                                               onClick={() =>
                                                 handleAddSet(
                                                   dayIdx,
@@ -919,8 +1073,13 @@ export function TrainingPlanOverview({
                                         </div>
                                         <div>
                                           <div className="flex items-center justify-between mb-1">
-                                            <label className="block text-xs text-zinc-400">
-                                              {exercise.repsUnit === "seconds" ? "Seconds" : "Reps"}
+                                            <label
+                                              className="block text-xs text-zinc-400"
+                                              htmlFor={`reps-${dayIdx}-${exerciseIdx}`}
+                                            >
+                                              {exercise.repsUnit === "seconds"
+                                                ? "Seconds"
+                                                : "Reps"}
                                             </label>
                                             {!isCompleted && (
                                               <Button
@@ -931,20 +1090,31 @@ export function TrainingPlanOverview({
                                                     dayIdx,
                                                     exerciseIdx,
                                                     "repsUnit",
-                                                    exercise.repsUnit === "reps" ? "seconds" : "reps"
+                                                    exercise.repsUnit === "reps"
+                                                      ? "seconds"
+                                                      : "reps"
                                                   )
                                                 }
                                                 className="p-0.5 h-5 w-5 text-zinc-400 hover:text-blue-400 hover:bg-blue-400/20 rounded transition-all"
-                                                title={`Switch to ${exercise.repsUnit === "reps" ? "seconds" : "reps"}`}
+                                                title={`Switch to ${
+                                                  exercise.repsUnit === "reps"
+                                                    ? "seconds"
+                                                    : "reps"
+                                                }`}
                                               >
                                                 <Icon
-                                                  icon={exercise.repsUnit === "reps" ? "mdi:timer-outline" : "mdi:counter"}
+                                                  icon={
+                                                    exercise.repsUnit === "reps"
+                                                      ? "mdi:timer-outline"
+                                                      : "mdi:counter"
+                                                  }
                                                   className="w-3 h-3"
                                                 />
                                               </Button>
                                             )}
                                           </div>
                                           <input
+                                            id={`reps-${dayIdx}-${exerciseIdx}`}
                                             type="number"
                                             value={exercise.reps || 0}
                                             onChange={(e) =>
@@ -956,15 +1126,23 @@ export function TrainingPlanOverview({
                                               )
                                             }
                                             disabled={isCompleted}
-                                            placeholder={exercise.repsUnit === "reps" ? "12" : "30"}
+                                            placeholder={
+                                              exercise.repsUnit === "reps"
+                                                ? "12"
+                                                : "30"
+                                            }
                                             className="w-full bg-zinc-800 border border-zinc-600 rounded px-2 py-1 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                                           />
                                         </div>
                                         <div>
-                                          <label className="block text-xs text-zinc-400 mb-1">
+                                          <label
+                                            className="block text-xs text-zinc-400 mb-1"
+                                            htmlFor={`rest-${dayIdx}-${exerciseIdx}`}
+                                          >
                                             Rest (s)
                                           </label>
                                           <input
+                                            id={`rest-${dayIdx}-${exerciseIdx}`}
                                             type="number"
                                             value={exercise.rest || 0}
                                             onChange={(e) =>

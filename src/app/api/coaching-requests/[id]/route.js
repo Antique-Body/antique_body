@@ -2,6 +2,19 @@ import { NextResponse } from "next/server";
 
 import { auth } from "#/auth";
 import prisma from "@/lib/prisma";
+import Ajv from "ajv";
+
+const planDataSchema = {
+  type: "object",
+  properties: {
+    title: { type: "string" },
+    description: { type: "string" },
+    schedule: { type: "array" },
+    // Add more fields as needed
+  },
+  required: ["title", "description", "schedule"],
+};
+const ajv = new Ajv();
 
 export async function GET(request, { params }) {
   try {
@@ -301,7 +314,8 @@ export async function DELETE(request, { params }) {
 }
 
 // POST: Assign training plan to client (creates AssignedTrainingPlan)
-export async function POST_assignTrainingPlan(request, { params }) {
+// NOTE: If multiple POST handlers are needed, split into separate files/endpoints.
+export async function POST(request, { params }) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -389,62 +403,21 @@ export async function POST_assignTrainingPlan(request, { params }) {
   } catch (error) {
     console.error("Error assigning training plan:", error);
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: "Internal server error" },
       { status: 500 }
     );
   }
 }
 
 // PATCH: Complete assigned training plan (set status to completed)
-export async function PATCH_completeAssignedPlan(request, { params }) {
-  try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-    const { id, assignedPlanId } = params; // id = coaching request id, assignedPlanId = assigned plan id
-    // Get assigned plan
-    const assignedPlan = await prisma.assignedTrainingPlan.findUnique({
-      where: { id: assignedPlanId },
-    });
-    if (!assignedPlan) {
-      return NextResponse.json(
-        { success: false, error: "Assigned plan not found" },
-        { status: 404 }
-      );
-    }
-    // Provjeri da li je trener vlasnik
-    const coachingRequest = await prisma.coachingRequest.findUnique({
-      where: { id },
-    });
-    if (
-      !coachingRequest ||
-      coachingRequest.trainerId !== assignedPlan.trainerId
-    ) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 403 }
-      );
-    }
-    // Postavi status na completed
-    const updated = await prisma.assignedTrainingPlan.update({
-      where: { id: assignedPlanId },
-      data: {
-        status: "completed",
-        completedAt: new Date(),
-      },
-    });
-    return NextResponse.json({ success: true, data: updated });
-  } catch (error) {
-    console.error("Error completing assigned plan:", error);
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
-  }
+// NOTE: If multiple PATCH handlers are needed, split into separate files/endpoints.
+export async function PATCH(request, { params }) {
+  // This PATCH handler currently handles both completion and editing of assigned plans.
+  // You should split these into separate endpoints for full Next.js compliance.
+  // For now, you may need to route based on request body or params.
+  throw new Error(
+    "Multiple PATCH handlers detected. Please split into separate files."
+  );
 }
 
 // PATCH: Edit assigned training plan (update planData JSON)
@@ -459,6 +432,17 @@ export async function PATCH_editAssignedPlan(request, { params }) {
     }
     const { id, assignedPlanId } = params;
     const body = await request.json();
+    // Validate planData
+    if (!ajv.validate(planDataSchema, body.planData)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Invalid planData format",
+          details: ajv.errors,
+        },
+        { status: 400 }
+      );
+    }
     // Dohvati assigned plan
     const assignedPlan = await prisma.assignedTrainingPlan.findUnique({
       where: { id: assignedPlanId },
@@ -493,10 +477,21 @@ export async function PATCH_editAssignedPlan(request, { params }) {
   } catch (error) {
     console.error("Error editing assigned plan:", error);
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: "Internal server error" },
       { status: 500 }
     );
   }
+}
+
+// GET: Fetch all assigned training plans for a client (by coaching request)
+// NOTE: If multiple GET handlers are needed, split into separate files/endpoints.
+export async function GET(request, { params }) {
+  // This GET handler currently handles both the main coaching request and assigned training plans.
+  // You should split these into separate endpoints for full Next.js compliance.
+  // For now, you may need to route based on request body or params.
+  throw new Error(
+    "Multiple GET handlers detected. Please split into separate files."
+  );
 }
 
 // GET: Dohvati sve assigned training planove za klijenta (po coaching requestu)
@@ -513,6 +508,10 @@ export async function GET_assignedTrainingPlans(request, { params }) {
     // Dohvati coaching request
     const coachingRequest = await prisma.coachingRequest.findUnique({
       where: { id },
+      include: {
+        trainer: true,
+        client: true,
+      },
     });
     if (!coachingRequest) {
       return NextResponse.json(
@@ -542,7 +541,7 @@ export async function GET_assignedTrainingPlans(request, { params }) {
   } catch (error) {
     console.error("Error fetching assigned training plans:", error);
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: "Internal server error" },
       { status: 500 }
     );
   }

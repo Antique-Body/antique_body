@@ -6,7 +6,11 @@ import { Button } from "./Button";
 import { Card } from "./Card";
 
 import AnatomicalViewer from "@/components/custom/dashboard/trainer/pages/exercises/components/AnatomicalViewer";
-import { formatRepsDisplay, getRepsPlaceholder, toggleRepsUnit } from "@/utils/exerciseUtils";
+import {
+  formatRepsDisplay,
+  getRepsPlaceholder,
+  toggleRepsUnit,
+} from "@/utils/exerciseUtils";
 
 /**
  * Mobile-first responsive exercise card component
@@ -36,9 +40,11 @@ export const ExerciseCard = ({
     handleParameterChange("repsUnit", newUnit);
   };
 
-  const setsCount = Array.isArray(exercise.sets) 
-    ? exercise.sets.length 
-    : (typeof exercise.sets === 'number' ? exercise.sets : 3);
+  const setsCount = Array.isArray(exercise.sets)
+    ? exercise.sets.length
+    : typeof exercise.sets === "number"
+    ? exercise.sets
+    : 3;
 
   return (
     <Card
@@ -49,7 +55,7 @@ export const ExerciseCard = ({
       padding="0"
       className={`shadow-lg !p-0 ${className}`}
     >
-      <div className={`flex ${compact ? 'flex-row' : 'flex-col lg:flex-row'}`}>
+      <div className={`flex ${compact ? "flex-row" : "flex-col lg:flex-row"}`}>
         {/* Exercise details */}
         <div className="flex-1 p-3 sm:p-4 lg:p-6">
           <div className="flex items-center justify-between mb-3 sm:mb-4">
@@ -64,7 +70,10 @@ export const ExerciseCard = ({
                   onClick={() => onRemoveExercise?.(dayIndex, exerciseIndex)}
                   className="text-red-400 hover:text-red-300 hover:bg-red-500/30 p-1 sm:p-2 rounded-lg transition-all"
                 >
-                  <Icon icon="mdi:trash-can-outline" className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <Icon
+                    icon="mdi:trash-can-outline"
+                    className="w-3 h-3 sm:w-4 sm:h-4"
+                  />
                 </Button>
               </div>
             )}
@@ -80,6 +89,7 @@ export const ExerciseCard = ({
               {showControls && !disabled ? (
                 <div className="flex items-center gap-1">
                   <button
+                    type="button"
                     onClick={() => onRemoveSet?.(dayIndex, exerciseIndex)}
                     disabled={setsCount <= 1}
                     className="p-0.5 sm:p-1 bg-red-600 hover:bg-red-700 rounded text-white text-xs disabled:opacity-50 disabled:cursor-not-allowed"
@@ -90,6 +100,7 @@ export const ExerciseCard = ({
                     {setsCount}
                   </div>
                   <button
+                    type="button"
                     onClick={() => onAddSet?.(dayIndex, exerciseIndex)}
                     className="p-0.5 sm:p-1 bg-blue-600 hover:bg-blue-700 rounded text-white text-xs"
                   >
@@ -106,7 +117,10 @@ export const ExerciseCard = ({
             {/* Reps/Seconds */}
             <div className="space-y-1 sm:space-y-2">
               <div className="flex items-center justify-center gap-1 sm:gap-2">
-                <label className="block text-xs sm:text-sm font-medium text-gray-300 text-center">
+                <label
+                  htmlFor={`reps-input-${dayIndex}-${exerciseIndex}`}
+                  className="block text-xs sm:text-sm font-medium text-gray-300 text-center"
+                >
                   {exercise.repsUnit === "seconds" ? "Seconds" : "Reps"}
                 </label>
                 {showControls && !disabled && (
@@ -115,19 +129,28 @@ export const ExerciseCard = ({
                     size="small"
                     onClick={handleRepsUnitToggle}
                     className="p-0.5 h-4 w-4 sm:h-5 sm:w-5 text-gray-400 hover:text-[#FF6B00] hover:bg-[#FF6B00]/20 rounded-md transition-all"
-                    title={`Switch to ${exercise.repsUnit === "reps" ? "seconds" : "reps"}`}
+                    title={`Switch to ${
+                      exercise.repsUnit === "reps" ? "seconds" : "reps"
+                    }`}
                   >
                     <Icon
-                      icon={exercise.repsUnit === "reps" ? "mdi:timer-outline" : "mdi:counter"}
+                      icon={
+                        exercise.repsUnit === "reps"
+                          ? "mdi:timer-outline"
+                          : "mdi:counter"
+                      }
                       className="w-2 h-2 sm:w-3 sm:h-3"
                     />
                   </Button>
                 )}
               </div>
               <input
+                id={`reps-input-${dayIndex}-${exerciseIndex}`}
                 type="number"
                 value={exercise.reps || 0}
-                onChange={(e) => handleParameterChange("reps", parseInt(e.target.value) || 1)}
+                onChange={(e) =>
+                  handleParameterChange("reps", parseInt(e.target.value) || 1)
+                }
                 disabled={disabled}
                 className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-lg text-white text-center font-semibold text-xs sm:text-sm lg:text-base py-1 sm:py-2 focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder={getRepsPlaceholder(exercise.repsUnit)}
@@ -136,13 +159,19 @@ export const ExerciseCard = ({
 
             {/* Rest */}
             <div className="space-y-1 sm:space-y-2">
-              <label className="block text-xs sm:text-sm font-medium text-gray-300 text-center">
+              <label
+                htmlFor={`rest-input-${dayIndex}-${exerciseIndex}`}
+                className="block text-xs sm:text-sm font-medium text-gray-300 text-center"
+              >
                 Rest (s)
               </label>
               <input
+                id={`rest-input-${dayIndex}-${exerciseIndex}`}
                 type="number"
                 value={exercise.rest || 0}
-                onChange={(e) => handleParameterChange("rest", parseInt(e.target.value) || 0)}
+                onChange={(e) =>
+                  handleParameterChange("rest", parseInt(e.target.value) || 0)
+                }
                 disabled={disabled}
                 className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-lg text-white text-center font-semibold text-xs sm:text-sm lg:text-base py-1 sm:py-2 focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed"
               />
@@ -152,11 +181,20 @@ export const ExerciseCard = ({
           {/* Exercise Instructions - Mobile responsive */}
           {exercise.instructions && (
             <div className="space-y-2 mb-3 sm:mb-4">
-              <label className="block text-xs sm:text-sm font-medium text-gray-200 flex items-center gap-2">
-                <Icon icon="mdi:information-outline" className="w-3 h-3 sm:w-4 sm:h-4" />
+              <label
+                htmlFor={`instructions-${dayIndex}-${exerciseIndex}`}
+                className="block text-xs sm:text-sm font-medium text-gray-200 flex items-center gap-2"
+              >
+                <Icon
+                  icon="mdi:information-outline"
+                  className="w-3 h-3 sm:w-4 sm:h-4"
+                />
                 Instructions
               </label>
-              <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
+              <p
+                id={`instructions-${dayIndex}-${exerciseIndex}`}
+                className="text-xs sm:text-sm text-gray-300 leading-relaxed"
+              >
                 {exercise.instructions}
               </p>
             </div>
@@ -165,11 +203,15 @@ export const ExerciseCard = ({
           {/* Exercise Notes - Mobile responsive */}
           {showControls && (
             <div className="space-y-2 mb-3 sm:mb-4">
-              <label className="block text-xs sm:text-sm font-medium text-gray-200 flex items-center gap-2">
+              <label
+                htmlFor={`notes-${dayIndex}-${exerciseIndex}`}
+                className="block text-xs sm:text-sm font-medium text-gray-200 flex items-center gap-2"
+              >
                 <Icon icon="mdi:note-text" className="w-3 h-3 sm:w-4 sm:h-4" />
                 Notes
               </label>
               <textarea
+                id={`notes-${dayIndex}-${exerciseIndex}`}
                 value={exercise.notes || ""}
                 onChange={(e) => handleParameterChange("notes", e.target.value)}
                 disabled={disabled}
@@ -183,11 +225,17 @@ export const ExerciseCard = ({
           {/* Muscle Groups - Mobile responsive */}
           {exercise.muscleGroups && exercise.muscleGroups.length > 0 && (
             <div className="space-y-2">
-              <label className="block text-xs sm:text-sm font-medium text-gray-200 flex items-center gap-2">
+              <label
+                htmlFor={`muscle-groups-${dayIndex}-${exerciseIndex}`}
+                className="block text-xs sm:text-sm font-medium text-gray-200 flex items-center gap-2"
+              >
                 <Icon icon="mdi:muscle" className="w-3 h-3 sm:w-4 sm:h-4" />
                 Target Muscles
               </label>
-              <div className="flex flex-wrap gap-1 sm:gap-2">
+              <div
+                id={`muscle-groups-${dayIndex}-${exerciseIndex}`}
+                className="flex flex-wrap gap-1 sm:gap-2"
+              >
                 {exercise.muscleGroups.map((muscle, idx) => (
                   <span
                     key={muscle.id || muscle.name || idx}

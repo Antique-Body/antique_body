@@ -310,6 +310,8 @@ export default function NewClientsPage() {
                     <div
                       className="relative cursor-pointer group/image flex-shrink-0"
                       tabIndex="0"
+                      role="button"
+                      aria-label={`View profile image of ${request.client.clientProfile.firstName} ${request.client.clientProfile.lastName}`}
                       onClick={() =>
                         handleProfileImageClick(
                           request.client.clientProfile.profileImage,
@@ -584,6 +586,17 @@ export default function NewClientsPage() {
                   {/* Profile Image */}
                   <div
                     className="relative flex-shrink-0 cursor-pointer"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleProfileImageClick(
+                          selectedClientDetails.client.clientProfile
+                            .profileImage,
+                          `${selectedClientDetails.client.clientProfile.firstName} ${selectedClientDetails.client.clientProfile.lastName}`
+                        );
+                      }
+                    }}
                     onClick={() =>
                       handleProfileImageClick(
                         selectedClientDetails.client.clientProfile.profileImage,
@@ -1127,24 +1140,30 @@ export default function NewClientsPage() {
                   </div>
                   {/* Gender Badge */}
                   {selectedRequest.client.clientProfile.gender && (
-                    <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border border-slate-800 shadow-lg ${
-                      selectedRequest.client.clientProfile.gender.toLowerCase() === 'male' 
-                        ? 'bg-gradient-to-br from-blue-500 to-blue-600' 
-                        : selectedRequest.client.clientProfile.gender.toLowerCase() === 'female'
-                        ? 'bg-gradient-to-br from-pink-500 to-pink-600'
-                        : 'bg-gradient-to-br from-slate-500 to-slate-600'
-                    }`}>
-                      <Icon 
+                    <div
+                      className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border border-slate-800 shadow-lg ${
+                        selectedRequest.client.clientProfile.gender.toLowerCase() ===
+                        "male"
+                          ? "bg-gradient-to-br from-blue-500 to-blue-600"
+                          : selectedRequest.client.clientProfile.gender.toLowerCase() ===
+                            "female"
+                          ? "bg-gradient-to-br from-pink-500 to-pink-600"
+                          : "bg-gradient-to-br from-slate-500 to-slate-600"
+                      }`}
+                    >
+                      <Icon
                         icon={
-                          selectedRequest.client.clientProfile.gender.toLowerCase() === 'male' 
-                            ? "mdi:gender-male" 
-                            : selectedRequest.client.clientProfile.gender.toLowerCase() === 'female'
+                          selectedRequest.client.clientProfile.gender.toLowerCase() ===
+                          "male"
+                            ? "mdi:gender-male"
+                            : selectedRequest.client.clientProfile.gender.toLowerCase() ===
+                              "female"
                             ? "mdi:gender-female"
                             : "mdi:help"
-                        } 
-                        width={12} 
-                        height={12} 
-                        className="text-white" 
+                        }
+                        width={12}
+                        height={12}
+                        className="text-white"
                       />
                     </div>
                   )}
@@ -1156,15 +1175,22 @@ export default function NewClientsPage() {
                     {selectedRequest.client.clientProfile.firstName}{" "}
                     {selectedRequest.client.clientProfile.lastName}
                   </h3>
-                  
+
                   {/* Info Pills - Compact */}
                   <div className="flex flex-wrap gap-2">
                     {/* Experience Level */}
                     <div className="bg-slate-900/30 rounded-lg px-2 py-1 border border-slate-700/30">
                       <div className="flex items-center gap-1">
-                        <Icon icon="mdi:dumbbell" width={14} height={14} className="text-blue-400" />
+                        <Icon
+                          icon="mdi:dumbbell"
+                          width={14}
+                          height={14}
+                          className="text-blue-400"
+                        />
                         <span className="text-slate-300 text-xs font-medium">
-                          {getExperienceText(selectedRequest.client.clientProfile.experienceLevel)}
+                          {getExperienceText(
+                            selectedRequest.client.clientProfile.experienceLevel
+                          )}
                         </span>
                       </div>
                     </div>
@@ -1172,9 +1198,17 @@ export default function NewClientsPage() {
                     {/* Age */}
                     <div className="bg-slate-900/30 rounded-lg px-2 py-1 border border-slate-700/30">
                       <div className="flex items-center gap-1">
-                        <Icon icon="mdi:calendar" width={14} height={14} className="text-purple-400" />
+                        <Icon
+                          icon="mdi:calendar"
+                          width={14}
+                          height={14}
+                          className="text-purple-400"
+                        />
                         <span className="text-slate-300 text-xs font-medium">
-                          {calculateAge(selectedRequest.client.clientProfile.dateOfBirth)} yrs
+                          {calculateAge(
+                            selectedRequest.client.clientProfile.dateOfBirth
+                          )}{" "}
+                          yrs
                         </span>
                       </div>
                     </div>
@@ -1183,7 +1217,12 @@ export default function NewClientsPage() {
                     {selectedRequest.client.clientProfile.location?.city && (
                       <div className="bg-slate-900/30 rounded-lg px-2 py-1 border border-slate-700/30">
                         <div className="flex items-center gap-1">
-                          <Icon icon="mdi:map-marker" width={14} height={14} className="text-emerald-400" />
+                          <Icon
+                            icon="mdi:map-marker"
+                            width={14}
+                            height={14}
+                            className="text-emerald-400"
+                          />
                           <span className="text-slate-300 text-xs font-medium">
                             {selectedRequest.client.clientProfile.location.city}
                           </span>
@@ -1195,19 +1234,21 @@ export default function NewClientsPage() {
                     {selectedRequest.client.clientProfile.gender && (
                       <div className="bg-slate-900/30 rounded-lg px-2 py-1 border border-slate-700/30">
                         <div className="flex items-center gap-1">
-                          <Icon 
+                          <Icon
                             icon={
-                              selectedRequest.client.clientProfile.gender.toLowerCase() === 'male' 
-                                ? "mdi:gender-male" 
+                              selectedRequest.client.clientProfile.gender.toLowerCase() ===
+                              "male"
+                                ? "mdi:gender-male"
                                 : "mdi:gender-female"
-                            } 
-                            width={14} 
-                            height={14} 
+                            }
+                            width={14}
+                            height={14}
                             className={
-                              selectedRequest.client.clientProfile.gender.toLowerCase() === 'male' 
-                                ? "text-blue-400" 
+                              selectedRequest.client.clientProfile.gender.toLowerCase() ===
+                              "male"
+                                ? "text-blue-400"
                                 : "text-pink-400"
-                            } 
+                            }
                           />
                           <span className="text-slate-300 text-xs font-medium capitalize">
                             {selectedRequest.client.clientProfile.gender}

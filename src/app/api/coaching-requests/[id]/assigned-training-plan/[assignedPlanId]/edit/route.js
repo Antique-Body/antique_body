@@ -2,6 +2,19 @@ import { NextResponse } from "next/server";
 
 import { auth } from "#/auth";
 import prisma from "@/lib/prisma";
+import Ajv from "ajv";
+
+const planDataSchema = {
+  type: "object",
+  properties: {
+    title: { type: "string" },
+    description: { type: "string" },
+    schedule: { type: "array" },
+    // Add more fields as needed
+  },
+  required: ["title", "description", "schedule"],
+};
+const ajv = new Ajv();
 
 export async function PATCH(request, { params }) {
   try {
@@ -14,7 +27,18 @@ export async function PATCH(request, { params }) {
     }
     const { id, assignedPlanId } = params;
     const body = await request.json();
-    // Dohvati assigned plan
+    // Validate planData
+    if (!ajv.validate(planDataSchema, body.planData)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Invalid planData format",
+          details: ajv.errors,
+        },
+        { status: 400 }
+      );
+    }
+    // Fetch the assigned plan
     const assignedPlan = await prisma.assignedTrainingPlan.findUnique({
       where: { id: assignedPlanId },
     });
@@ -24,7 +48,7 @@ export async function PATCH(request, { params }) {
         { status: 404 }
       );
     }
-    // Provjeri da li je trener vlasnik
+    // Check if the trainer is the owner
     const coachingRequest = await prisma.coachingRequest.findUnique({
       where: { id },
     });
@@ -38,9 +62,18 @@ export async function PATCH(request, { params }) {
       );
     }
     // Update planData
+    const previousPlanData = assignedPlan.planData;
     const updated = await prisma.assignedTrainingPlan.update({
       where: { id: assignedPlanId },
       data: { planData: body.planData },
+    });
+    // Audit log: log previous and new planData values
+    console.log("[AUDIT] AssignedTrainingPlan updated", {
+      assignedPlanId,
+      previousPlanData,
+      newPlanData: body.planData,
+      updatedAt: new Date().toISOString(),
+      userId: session.user.id,
     });
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {

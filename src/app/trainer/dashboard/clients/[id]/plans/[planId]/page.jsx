@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
+import { FullScreenLoader } from "@/components";
 import { Button } from "@/components/common/Button";
 import ContextualSaveBar from "@/components/common/ContextualSaveBar";
 import { Modal } from "@/components/common/Modal";
@@ -82,45 +83,6 @@ export default function TrackPlanPage({ params }) {
   // Video modal state
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [currentVideoUrl, setCurrentVideoUrl] = useState(null);
-
-  // Remove any memoization or stale plan usage for preview
-  React.useEffect(() => {
-    if (plan && plan.schedule && plan.schedule.length > 0) {
-      // Always use the latest plan from state for preview
-      // (no-op, removed unused variable)
-    }
-  }, [plan]);
-
-  // Ensure workout data is initialized when plan changes
-  React.useEffect(() => {
-    if (plan && plan.schedule && workoutSession.workoutData) {
-      // Check if workout data needs to be initialized or updated
-      const needsInitialization = plan.schedule.some((day, dayIdx) => {
-        if (!workoutSession.workoutData[dayIdx]) return true;
-
-        return day.exercises?.some(() => {
-          // Find the first exerciseData for this day that is missing or mismatched
-          const exerciseDataArr = workoutSession.workoutData[dayIdx]?.exercises;
-          if (!exerciseDataArr) return true;
-          // Find the index of the current exercise
-          const exerciseIndices = Object.keys(exerciseDataArr);
-          // Try to find a matching exerciseData by index
-          for (const idx of exerciseIndices) {
-            const exerciseData = exerciseDataArr[idx];
-            if (!exerciseData) return true;
-            const expectedSets = day.exercises[idx]?.sets || 3;
-            const actualSets = exerciseData.sets?.length || 0;
-            if (actualSets !== expectedSets) return true;
-          }
-          return false;
-        });
-      });
-
-      if (needsInitialization) {
-        // The useWorkoutSession hook will handle this automatically
-      }
-    }
-  }, [plan, workoutSession.workoutData]);
 
   // Safe navigation handlers - only block specific navigations
   const handleBackNavigation = () => {
@@ -498,19 +460,20 @@ export default function TrackPlanPage({ params }) {
         if (result.plan) {
           setPlan(result.plan);
           updateLastSavedPlan(result.plan);
-        } else if (result.planData) {
-          setPlan(result.planData);
-          updateLastSavedPlan(result.planData);
-        } else if (result.data) {
-          setPlan(result.data);
-          updateLastSavedPlan(result.data);
         } else {
+          // Unexpected response format
+          console.error(
+            "Unexpected API response: missing 'plan' field",
+            result
+          );
+          return { success: false, message: "Unexpected API response format" };
         }
         return { success: true, message: "Progress saved!" };
       } else {
         throw new Error(result.error || "Failed to save progress");
       }
-    } catch {
+    } catch (error) {
+      console.error("Failed to save workout progress:", error);
       return { success: false, message: "Failed to save progress" };
     }
   };
@@ -575,47 +538,48 @@ export default function TrackPlanPage({ params }) {
       }
 
       // ONLY UPDATE PLAN STATE - no workoutSession calls to avoid duplication
-      setPlan((prev) => ({
-        ...prev,
-        schedule: prev.schedule.map((day, dIdx) =>
-          dIdx === dayIdx
-            ? {
-                ...day,
-                exercises: day.exercises.map((ex, eIdx) =>
-                  eIdx === exerciseIdx
-                    ? {
-                        ...ex,
-                        sets: [
-                          ...(Array.isArray(ex.sets) ? ex.sets : []),
-                          {
-                            setNumber:
-                              (Array.isArray(ex.sets) ? ex.sets.length : 0) + 1,
-                            weight: "",
-                            reps: (ex.reps || 10).toString(),
-                            completed: false,
-                            notes: "",
-                            completedAt: null,
-                            restTime: ex.rest || 60,
-                          },
-                        ],
-                      }
-                    : ex
-                ),
-              }
-            : day
-        ),
-      }));
-    } catch (error) {
-      console.error("Error in handleAddSet:", error);
-    } finally {
-      // Clear operation flag
-      setTimeout(() => {
-        setSetOperationInProgress((prev) => {
-          const newSet = new Set(prev);
+      setPlan((prev) => {
+        const updated = {
+          ...prev,
+          schedule: prev.schedule.map((day, dIdx) =>
+            dIdx === dayIdx
+              ? {
+                  ...day,
+                  exercises: day.exercises.map((ex, eIdx) =>
+                    eIdx === exerciseIdx
+                      ? {
+                          ...ex,
+                          sets: [
+                            ...(Array.isArray(ex.sets) ? ex.sets : []),
+                            {
+                              setNumber:
+                                (Array.isArray(ex.sets) ? ex.sets.length : 0) +
+                                1,
+                              weight: "",
+                              reps: (ex.reps || 10).toString(),
+                              completed: false,
+                              notes: "",
+                              completedAt: null,
+                              restTime: ex.rest || 60,
+                            },
+                          ],
+                        }
+                      : ex
+                  ),
+                }
+              : day
+          ),
+        };
+        // Clear operation flag after state update
+        setSetOperationInProgress((prevSet) => {
+          const newSet = new Set(prevSet);
           newSet.delete(operationKey);
           return newSet;
         });
-      }, 300);
+        return updated;
+      });
+    } catch (error) {
+      console.error("Error in handleAddSet:", error);
     }
   };
 
@@ -647,65 +611,40 @@ export default function TrackPlanPage({ params }) {
       }
 
       // ONLY UPDATE PLAN STATE - no workoutSession calls to avoid duplication
-      setPlan((prev) => ({
-        ...prev,
-        schedule: prev.schedule.map((day, dIdx) =>
-          dIdx === dayIdx
-            ? {
-                ...day,
-                exercises: day.exercises.map((ex, eIdx) =>
-                  eIdx === exerciseIdx &&
-                  Array.isArray(ex.sets) &&
-                  ex.sets.length > 1
-                    ? { ...ex, sets: ex.sets.slice(0, -1) }
-                    : ex
-                ),
-              }
-            : day
-        ),
-      }));
-    } catch (error) {
-      console.error("Error in handleRemoveSet:", error);
-    } finally {
-      // Clear operation flag
-      setTimeout(() => {
-        setSetOperationInProgress((prev) => {
-          const newSet = new Set(prev);
+      setPlan((prev) => {
+        const updated = {
+          ...prev,
+          schedule: prev.schedule.map((day, dIdx) =>
+            dIdx === dayIdx
+              ? {
+                  ...day,
+                  exercises: day.exercises.map((ex, eIdx) =>
+                    eIdx === exerciseIdx &&
+                    Array.isArray(ex.sets) &&
+                    ex.sets.length > 1
+                      ? { ...ex, sets: ex.sets.slice(0, -1) }
+                      : ex
+                  ),
+                }
+              : day
+          ),
+        };
+        // Clear operation flag after state update
+        setSetOperationInProgress((prevSet) => {
+          const newSet = new Set(prevSet);
           newSet.delete(operationKey);
           return newSet;
         });
-      }, 300);
-    }
-  };
-
-  const handleRemoveExercise = (dayIdx, exerciseIdx) => {
-    removeExercise(dayIdx, exerciseIdx);
-    updateWorkoutDataAfterRemoveExercise(dayIdx, exerciseIdx);
-  };
-
-  const handleUpdateExerciseParams = (dayIdx, exerciseIdx, field, value) => {
-    updateExerciseParams(dayIdx, exerciseIdx, field, value);
-    if (field === "reps") {
-      updateWorkoutDataAfterRepsChange(dayIdx, exerciseIdx, value);
+        return updated;
+      });
+    } catch (error) {
+      console.error("Error in handleRemoveSet:", error);
     }
   };
 
   // Loading state
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative mb-4">
-            <div className="w-16 h-16 border-4 border-zinc-600 border-t-blue-500 rounded-full animate-spin mx-auto"></div>
-            <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-blue-400 rounded-full animate-pulse mx-auto"></div>
-          </div>
-          <h3 className="text-xl font-semibold text-white mb-2">
-            Loading Training Plan
-          </h3>
-          <p className="text-zinc-400">Preparing your workout schedule...</p>
-        </div>
-      </div>
-    );
+    return <FullScreenLoader text="Loading Training Plan" />;
   }
 
   // Error state
@@ -801,6 +740,7 @@ export default function TrackPlanPage({ params }) {
             <div className="mb-4 hidden sm:block">
               <nav className="flex items-center gap-2 text-sm flex-wrap">
                 <button
+                  type="button"
                   onClick={() =>
                     handleBreadcrumbNavigation("/trainer/dashboard")
                   }
@@ -816,6 +756,7 @@ export default function TrackPlanPage({ params }) {
                   className="text-zinc-600"
                 />
                 <button
+                  type="button"
                   onClick={() =>
                     handleBreadcrumbNavigation(
                       `/trainer/dashboard/clients/${id}`
@@ -882,11 +823,21 @@ export default function TrackPlanPage({ params }) {
                     </h1>
                     <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-zinc-400 flex-wrap">
                       <span className="flex items-center gap-1">
-                        <Icon icon="mdi:calendar" width={14} height={14} className="sm:w-4 sm:h-4" />
+                        <Icon
+                          icon="mdi:calendar"
+                          width={14}
+                          height={14}
+                          className="sm:w-4 sm:h-4"
+                        />
                         {plan.duration} {plan.durationType}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Icon icon="mdi:star" width={14} height={14} className="sm:w-4 sm:h-4" />
+                        <Icon
+                          icon="mdi:star"
+                          width={14}
+                          height={14}
+                          className="sm:w-4 sm:h-4"
+                        />
                         {plan.difficultyLevel}
                       </span>
                       {plan.price && (
@@ -929,6 +880,7 @@ export default function TrackPlanPage({ params }) {
                     },
                   ].map((mode) => (
                     <button
+                      type="button"
                       key={mode.key}
                       onClick={() =>
                         !mode.disabled && handleViewModeChange(mode.key)
@@ -947,9 +899,16 @@ export default function TrackPlanPage({ params }) {
                           : ""
                       }
                     >
-                      <Icon icon={mode.icon} width={14} height={14} className="sm:w-4 sm:h-4" />
+                      <Icon
+                        icon={mode.icon}
+                        width={14}
+                        height={14}
+                        className="sm:w-4 sm:h-4"
+                      />
                       <span className="hidden sm:inline">{mode.label}</span>
-                      <span className="sm:hidden">{mode.label.slice(0, 3)}</span>
+                      <span className="sm:hidden">
+                        {mode.label.slice(0, 3)}
+                      </span>
                       {mode.disabled && (
                         <Icon
                           icon="mdi:lock"
@@ -1047,12 +1006,12 @@ export default function TrackPlanPage({ params }) {
               onVideoOpen={handleVideoOpen}
               onAddSet={handleAddSet}
               onRemoveSet={handleRemoveSet}
-              onUpdateExerciseParams={handleUpdateExerciseParams}
+              onUpdateExerciseParams={handleModifyExerciseParams}
               onUpdateSetData={handleUpdateSetData}
               onUpdateExerciseNotes={handleUpdateExerciseNotes}
               onModifyExerciseParams={handleModifyExerciseParams}
               onShowExerciseLibrary={handleShowExerciseLibrary}
-              onRemoveExercise={handleRemoveExercise}
+              onRemoveExercise={removeExercise}
               onCompleteWorkout={handleCompleteWorkoutSession}
               onEndWorkout={handleEndWorkout}
               onSaveProgress={handleSaveWorkoutProgress}
@@ -1079,6 +1038,7 @@ export default function TrackPlanPage({ params }) {
                       : "Add Exercise"}
                   </h2>
                   <button
+                    type="button"
                     onClick={closeExerciseLibraryModal}
                     className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
                   >
@@ -1108,6 +1068,7 @@ export default function TrackPlanPage({ params }) {
                   selectedExercisesForNewDay.length > 0 && (
                     <div className="mt-4 flex justify-end">
                       <Button
+                        type="button"
                         onClick={createNewDayWithSelectedExercises}
                         variant="primary"
                         className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800"

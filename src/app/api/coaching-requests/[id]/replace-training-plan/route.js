@@ -21,6 +21,18 @@ export async function POST(request, { params }) {
         { status: 400 }
       );
     }
+    // Validate planId format (UUID v4)
+    const uuidV4Regex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidV4Regex.test(planId)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Invalid planId format. Must be a valid UUID.",
+        },
+        { status: 400 }
+      );
+    }
     // Get coaching request
     const coachingRequest = await prisma.coachingRequest.findUnique({
       where: { id },
@@ -46,14 +58,7 @@ export async function POST(request, { params }) {
         status: "active",
       },
     });
-    // Complete current plan if exists
-    if (activePlan) {
-      await prisma.assignedTrainingPlan.update({
-        where: { id: activePlan.id },
-        data: { status: "completed", completedAt: new Date() },
-      });
-    }
-    // Assign new plan
+    // Prepare planData for new assignment
     const plan = await prisma.trainingPlan.findUnique({
       where: { id: planId },
     });
@@ -63,25 +68,33 @@ export async function POST(request, { params }) {
         { status: 404 }
       );
     }
-    const planData = { ...plan };
-    delete planData.id;
-    delete planData.trainerInfoId;
-    delete planData.createdAt;
-    delete planData.updatedAt;
-    delete planData.deletedAt;
-    const assigned = await prisma.assignedTrainingPlan.create({
-      data: {
-        clientId: coachingRequest.clientId,
-        trainerId: coachingRequest.trainerId,
-        originalPlanId: plan.id,
-        planData,
-        status: "active",
-      },
+    const {
+      id: _id,
+      trainerInfoId,
+      createdAt,
+      updatedAt,
+      deletedAt,
+      ...planData
+    } = plan;
+    // Transaction: complete old plan and assign new one atomically
+    const result = await prisma.$transaction(async (tx) => {
+      if (activePlan) {
+        await tx.assignedTrainingPlan.update({
+          where: { id: activePlan.id },
+          data: { status: "completed", completedAt: new Date() },
+        });
+      }
+      return await tx.assignedTrainingPlan.create({
+        data: {
+          clientId: coachingRequest.clientId,
+          trainerId: coachingRequest.trainerId,
+          originalPlanId: plan.id,
+          planData,
+          status: "active",
+        },
+      });
     });
-    return NextResponse.json(
-      { success: true, data: assigned },
-      { status: 201 }
-    );
+    return NextResponse.json({ success: true, data: result }, { status: 201 });
   } catch (error) {
     console.error("Error replacing training plan:", error);
     return NextResponse.json(

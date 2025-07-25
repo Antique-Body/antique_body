@@ -1,4 +1,5 @@
 import { Icon } from "@iconify/react";
+import PropTypes from "prop-types";
 import React, { useEffect } from "react";
 
 import { getYouTubeEmbedUrl } from "@/utils/trainingUtils";
@@ -50,6 +51,7 @@ export function VideoModal({ isOpen, onClose, videoUrl, exercise }) {
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="p-2 hover:bg-zinc-800 rounded-lg transition-colors group"
             title="Close video (Esc)"
@@ -68,10 +70,9 @@ export function VideoModal({ isOpen, onClose, videoUrl, exercise }) {
           <div className="relative bg-black rounded-xl overflow-hidden">
             <iframe
               src={getYouTubeEmbedUrl(videoUrl)}
-              className="w-full aspect-video"
+              className="w-full aspect-video video-modal-iframe-min-height"
               allowFullScreen
               title={`${exercise?.name || "Exercise"} Tutorial`}
-              style={{ minHeight: "400px" }}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             />
           </div>
@@ -189,6 +190,7 @@ export function VideoModal({ isOpen, onClose, videoUrl, exercise }) {
               to close
             </div>
             <button
+              type="button"
               onClick={onClose}
               className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg transition-colors font-medium"
             >
@@ -200,3 +202,16 @@ export function VideoModal({ isOpen, onClose, videoUrl, exercise }) {
     </div>
   );
 }
+
+VideoModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  videoUrl: PropTypes.string.isRequired,
+  exercise: PropTypes.shape({
+    name: PropTypes.string,
+    sets: PropTypes.oneOfType([PropTypes.number, PropTypes.array]),
+    reps: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    rest: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    // Add more fields as needed based on usage
+  }),
+};

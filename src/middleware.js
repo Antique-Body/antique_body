@@ -116,7 +116,7 @@ function getOnboardingRedirect(role, token, pathname) {
   // Check if request path is allowed
   const isAllowed = config.allowed.some((allowedPath) => {
     if (allowedPath.includes(":")) {
-      // Zamijeni sve :nekiParam s [^/]+
+      // Replace all :nekiParam with [^/]+
       const regex = new RegExp(
         `^${allowedPath.replace(/:([a-zA-Z0-9_]+)/g, "[^/]+")}$`,
         "i"
