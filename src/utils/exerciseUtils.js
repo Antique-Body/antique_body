@@ -5,8 +5,8 @@
 
 // Constants
 export const REPS_UNITS = {
-  REPS: 'reps',
-  SECONDS: 'seconds'
+  REPS: "reps",
+  SECONDS: "seconds",
 };
 
 export const DEFAULT_EXERCISE_VALUES = {
@@ -30,7 +30,11 @@ export const normalizeExercise = (exercise) => {
     // Ensure repsUnit exists
     repsUnit: exercise.repsUnit || REPS_UNITS.REPS,
     // Ensure sets is properly structured
-    sets: normalizeExerciseSets(exercise.sets, exercise.reps || DEFAULT_EXERCISE_VALUES.reps, exercise.rest || DEFAULT_EXERCISE_VALUES.rest),
+    sets: normalizeExerciseSets(
+      exercise.sets,
+      exercise.reps || DEFAULT_EXERCISE_VALUES.reps,
+      exercise.rest || DEFAULT_EXERCISE_VALUES.rest
+    ),
     // Normalize muscle groups
     muscleGroups: normalizeMuscleGroups(exercise.muscleGroups),
   };
@@ -43,7 +47,11 @@ export const normalizeExercise = (exercise) => {
  * @param {number} defaultRest - Default rest value
  * @returns {Array} Normalized sets array
  */
-export const normalizeExerciseSets = (sets, defaultReps = 12, defaultRest = 60) => {
+export const normalizeExerciseSets = (
+  sets,
+  defaultReps = 12,
+  defaultRest = 60
+) => {
   if (Array.isArray(sets)) {
     return sets.map((set, index) => ({
       setNumber: index + 1,
@@ -55,8 +63,9 @@ export const normalizeExerciseSets = (sets, defaultReps = 12, defaultRest = 60) 
       restTime: set.restTime || defaultRest,
     }));
   }
-  
-  const setsCount = typeof sets === 'number' ? sets : DEFAULT_EXERCISE_VALUES.sets;
+
+  const setsCount =
+    typeof sets === "number" ? sets : DEFAULT_EXERCISE_VALUES.sets;
   return Array.from({ length: setsCount }, (_, index) => ({
     setNumber: index + 1,
     weight: "",
@@ -75,7 +84,7 @@ export const normalizeExerciseSets = (sets, defaultReps = 12, defaultRest = 60) 
  */
 export const normalizeMuscleGroups = (muscleGroups) => {
   if (!Array.isArray(muscleGroups)) return [];
-  
+
   return muscleGroups.map((muscle) => {
     if (typeof muscle === "object" && (muscle.id || muscle.name)) {
       return {
@@ -85,7 +94,11 @@ export const normalizeMuscleGroups = (muscleGroups) => {
     } else if (typeof muscle === "string") {
       return { id: muscle, name: muscle };
     } else {
-      return { id: JSON.stringify(muscle), name: String(muscle) };
+      // Safer fallback: use 'unknown' for null/undefined, otherwise String(muscle)
+      if (muscle === undefined || muscle === null) {
+        return { id: "unknown", name: "unknown" };
+      }
+      return { id: String(muscle), name: String(muscle) };
     }
   });
 };
@@ -133,7 +146,7 @@ export class ExerciseManager {
   static addSet(exercise) {
     const currentSets = Array.isArray(exercise.sets) ? exercise.sets : [];
     const newSetNumber = currentSets.length + 1;
-    
+
     const newSet = {
       setNumber: newSetNumber,
       weight: "",
@@ -143,13 +156,13 @@ export class ExerciseManager {
       completedAt: null,
       restTime: exercise.rest || DEFAULT_EXERCISE_VALUES.rest,
     };
-    
+
     return {
       ...exercise,
-      sets: [...currentSets, newSet]
+      sets: [...currentSets, newSet],
     };
   }
-  
+
   /**
    * Removes a set from an exercise
    * @param {Object} exercise - Exercise object
@@ -158,13 +171,13 @@ export class ExerciseManager {
   static removeSet(exercise) {
     const currentSets = Array.isArray(exercise.sets) ? exercise.sets : [];
     if (currentSets.length <= 1) return exercise;
-    
+
     return {
       ...exercise,
-      sets: currentSets.slice(0, -1)
+      sets: currentSets.slice(0, -1),
     };
   }
-  
+
   /**
    * Updates exercise parameters
    * @param {Object} exercise - Exercise object
@@ -174,22 +187,25 @@ export class ExerciseManager {
    */
   static updateParameter(exercise, field, value) {
     // Handle special cases for repsUnit changes
-    if (field === 'repsUnit') {
+    if (field === "repsUnit") {
       const updatedExercise = { ...exercise, [field]: value };
-      
+
       // Update placeholder value when switching units
-      if (value === REPS_UNITS.SECONDS && exercise.reps === DEFAULT_EXERCISE_VALUES.reps) {
+      if (
+        value === REPS_UNITS.SECONDS &&
+        exercise.reps === DEFAULT_EXERCISE_VALUES.reps
+      ) {
         updatedExercise.reps = 30;
       } else if (value === REPS_UNITS.REPS && exercise.reps === 30) {
         updatedExercise.reps = DEFAULT_EXERCISE_VALUES.reps;
       }
-      
+
       return updatedExercise;
     }
-    
+
     return {
       ...exercise,
-      [field]: value
+      [field]: value,
     };
   }
 }
@@ -217,15 +233,15 @@ export class TrainingPlanManager {
       field,
       value
     );
-    
+
     updatedExercises[exerciseIndex] = updatedExercise;
     updatedDay.exercises = updatedExercises;
     updatedSchedule[dayIndex] = updatedDay;
     updatedPlan.schedule = updatedSchedule;
-    
+
     return updatedPlan;
   }
-  
+
   /**
    * Adds a set to an exercise in a training plan
    * @param {Object} plan - Training plan object
@@ -238,16 +254,18 @@ export class TrainingPlanManager {
     const updatedSchedule = [...updatedPlan.schedule];
     const updatedDay = { ...updatedSchedule[dayIndex] };
     const updatedExercises = [...updatedDay.exercises];
-    const updatedExercise = ExerciseManager.addSet(updatedExercises[exerciseIndex]);
-    
+    const updatedExercise = ExerciseManager.addSet(
+      updatedExercises[exerciseIndex]
+    );
+
     updatedExercises[exerciseIndex] = updatedExercise;
     updatedDay.exercises = updatedExercises;
     updatedSchedule[dayIndex] = updatedDay;
     updatedPlan.schedule = updatedSchedule;
-    
+
     return updatedPlan;
   }
-  
+
   /**
    * Removes a set from an exercise in a training plan
    * @param {Object} plan - Training plan object
@@ -260,13 +278,15 @@ export class TrainingPlanManager {
     const updatedSchedule = [...updatedPlan.schedule];
     const updatedDay = { ...updatedSchedule[dayIndex] };
     const updatedExercises = [...updatedDay.exercises];
-    const updatedExercise = ExerciseManager.removeSet(updatedExercises[exerciseIndex]);
-    
+    const updatedExercise = ExerciseManager.removeSet(
+      updatedExercises[exerciseIndex]
+    );
+
     updatedExercises[exerciseIndex] = updatedExercise;
     updatedDay.exercises = updatedExercises;
     updatedSchedule[dayIndex] = updatedDay;
     updatedPlan.schedule = updatedSchedule;
-    
+
     return updatedPlan;
   }
 }

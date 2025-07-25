@@ -13,17 +13,12 @@ export function LiveWorkoutMode({
   onVideoOpen,
   onAddSet,
   onRemoveSet,
-  _onUpdateExerciseParams,
   onUpdateSetData,
   onUpdateExerciseNotes,
   onShowExerciseLibrary,
-  _onRemoveExercise,
   onExitLiveMode,
-  _onEndWorkout,
   onSaveProgress,
   onCompleteWorkout,
-  _planId,
-  _clientId,
 }) {
   const [isCompletingWorkout, setIsCompletingWorkout] = useState(false);
   const [isSavingProgress, setIsSavingProgress] = useState(false);
@@ -36,33 +31,20 @@ export function LiveWorkoutMode({
     setCurrentDayIndex,
     currentExerciseIndex,
     setCurrentExerciseIndex,
-    _currentSet,
     setCurrentSet,
     isWorkoutStarted,
     startWorkout,
-    _setIsWorkoutStarted,
     restTimer,
     isResting,
     setIsResting,
-    _sessionStartTime,
-    _setSessionStartTime,
     getCurrentDay,
-    _getCurrentExercise,
-    _getCurrentExerciseData,
     getSessionDuration,
     getCompletedSets,
     getDayProgress,
     getExerciseProgress,
     getTotalSessionStats,
-    _updateWorkoutData,
-    _updateExerciseNotes,
-    _completeSet,
-    _undoSet,
     nextExercise,
     prevExercise,
-    _saveWorkoutProgress,
-    _completeDayWorkout,
-    _endWorkout,
     isDayAccessible,
     getDayStatus,
   } = workoutSession;
@@ -70,9 +52,6 @@ export function LiveWorkoutMode({
   const currentDay = getCurrentDay();
   // Get current exercise directly from plan instead of workoutSession to avoid errors
   const currentExercise =
-    plan.schedule?.[currentDayIndex]?.exercises?.[currentExerciseIndex] || null;
-  // Get exercise data directly from plan instead of workoutSession to avoid errors
-  const currentExerciseData =
     plan.schedule?.[currentDayIndex]?.exercises?.[currentExerciseIndex] || null;
   const sessionStats = getTotalSessionStats();
   const currentDayProgress = getDayProgress(currentDayIndex);
@@ -101,7 +80,8 @@ export function LiveWorkoutMode({
       } else {
         setSaveMessage("❌ Failed to save progress");
       }
-    } catch {
+    } catch (error) {
+      console.error("Error saving progress:", error);
       setSaveMessage("❌ Error saving progress");
     } finally {
       setIsSavingProgress(false);
@@ -136,7 +116,8 @@ export function LiveWorkoutMode({
       } else {
         setSaveMessage("❌ Failed to complete workout - please try again");
       }
-    } catch {
+    } catch (error) {
+      console.error("Error completing workout:", error);
       setSaveMessage("❌ Error completing workout - please try again");
     } finally {
       setIsCompletingWorkout(false);
@@ -198,6 +179,7 @@ export function LiveWorkoutMode({
 
                 return (
                   <button
+                    type="button"
                     key={idx}
                     onClick={() => {
                       if (isAccessible) {
@@ -405,6 +387,7 @@ export function LiveWorkoutMode({
                       Video Available
                     </span>
                     <button
+                      type="button"
                       onClick={() => onVideoOpen(currentExercise.videoUrl)}
                       className="bg-red-600 hover:bg-red-500 px-2 py-1 rounded-lg transition-colors"
                     >
@@ -421,6 +404,7 @@ export function LiveWorkoutMode({
                 {/* Set Controls Group */}
                 <div className="flex items-center bg-zinc-800/30 rounded-xl border border-zinc-700/50">
                   <button
+                    type="button"
                     onClick={() => {
                       onRemoveSet(currentDayIndex, currentExerciseIndex);
                     }}
@@ -434,6 +418,7 @@ export function LiveWorkoutMode({
                     {setsCount} sets
                   </div>
                   <button
+                    type="button"
                     onClick={() => {
                       onAddSet(currentDayIndex, currentExerciseIndex);
                     }}
@@ -447,6 +432,7 @@ export function LiveWorkoutMode({
                 {/* Exercise Navigation */}
                 <div className="flex items-center bg-zinc-800/30 rounded-xl border border-zinc-700/50">
                   <button
+                    type="button"
                     onClick={prevExercise}
                     disabled={currentExerciseIndex === 0}
                     className="group p-2.5 hover:bg-blue-600/20 rounded-l-xl text-blue-400 hover:text-blue-300 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
@@ -464,6 +450,7 @@ export function LiveWorkoutMode({
                     {currentDay?.exercises?.length || 0}
                   </div>
                   <button
+                    type="button"
                     onClick={nextExercise}
                     disabled={
                       currentExerciseIndex >=
@@ -483,6 +470,7 @@ export function LiveWorkoutMode({
 
                 {/* Exercise Management */}
                 <button
+                  type="button"
                   onClick={() =>
                     onShowExerciseLibrary(
                       currentDayIndex,
@@ -498,6 +486,7 @@ export function LiveWorkoutMode({
 
                 {/* Exit Live Mode */}
                 <button
+                  type="button"
                   onClick={onExitLiveMode}
                   className="p-2.5 bg-orange-600/20 border border-orange-500/30 hover:bg-orange-600/30 rounded-xl text-orange-400 hover:text-orange-300 transition-all"
                   title="Exit Live Mode"
@@ -559,6 +548,7 @@ export function LiveWorkoutMode({
                   {/* Video Play Button */}
                   {currentExercise?.videoUrl && (
                     <button
+                      type="button"
                       onClick={() => onVideoOpen(currentExercise.videoUrl)}
                       className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200 rounded-xl"
                     >
@@ -583,6 +573,7 @@ export function LiveWorkoutMode({
                   </h2>
                   {currentExercise?.videoUrl && (
                     <button
+                      type="button"
                       onClick={() => onVideoOpen(currentExercise.videoUrl)}
                       className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-lg text-white font-medium transition-colors flex items-center gap-2 shadow-lg"
                     >
@@ -598,7 +589,10 @@ export function LiveWorkoutMode({
                   <div className="bg-zinc-800/50 px-4 py-3 rounded-xl backdrop-blur">
                     <span className="text-zinc-400 text-sm">Target: </span>
                     <span className="text-white font-semibold text-lg">
-                      {setsCount} sets × {currentExercise?.reps} {currentExercise?.repsUnit === "seconds" ? "seconds" : "reps"}
+                      {setsCount} sets × {currentExercise?.reps}{" "}
+                      {currentExercise?.repsUnit === "seconds"
+                        ? "seconds"
+                        : "reps"}
                     </span>
                   </div>
                   <div className="bg-zinc-800/50 px-4 py-3 rounded-xl backdrop-blur">
@@ -648,6 +642,7 @@ export function LiveWorkoutMode({
                             Tutorial Video
                           </h4>
                           <button
+                            type="button"
                             onClick={() =>
                               onVideoOpen(currentExercise.videoUrl)
                             }
@@ -731,6 +726,7 @@ export function LiveWorkoutMode({
                             this exercise.
                           </p>
                           <Button
+                            type="button"
                             onClick={() => {
                               onAddSet(currentDayIndex, currentExerciseIndex);
                             }}
@@ -785,10 +781,14 @@ export function LiveWorkoutMode({
                       {/* Set Inputs */}
                       <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                          <label className="block text-zinc-400 text-sm mb-1 font-medium">
+                          <label
+                            className="block text-zinc-400 text-sm mb-1 font-medium"
+                            htmlFor={`weight-${currentDayIndex}-${currentExerciseIndex}-${setIdx}`}
+                          >
                             Weight (kg)
                           </label>
                           <input
+                            id={`weight-${currentDayIndex}-${currentExerciseIndex}-${setIdx}`}
                             type="number"
                             min="0"
                             step="0.5"
@@ -815,10 +815,16 @@ export function LiveWorkoutMode({
                           />
                         </div>
                         <div>
-                          <label className="block text-zinc-400 text-sm mb-1 font-medium">
-                            {currentExercise?.repsUnit === "seconds" ? "Seconds" : "Reps"}
+                          <label
+                            className="block text-zinc-400 text-sm mb-1 font-medium"
+                            htmlFor={`reps-${currentDayIndex}-${currentExerciseIndex}-${setIdx}`}
+                          >
+                            {currentExercise?.repsUnit === "seconds"
+                              ? "Seconds"
+                              : "Reps"}
                           </label>
                           <input
+                            id={`reps-${currentDayIndex}-${currentExerciseIndex}-${setIdx}`}
                             type="number"
                             min="1"
                             step="1"
@@ -842,7 +848,10 @@ export function LiveWorkoutMode({
                             disabled={isDayCompleted}
                             className="w-full bg-zinc-800/50 border border-zinc-600/50 rounded-xl px-4 py-3 text-white text-lg font-semibold backdrop-blur focus:border-blue-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                             placeholder={
-                              currentExercise?.reps?.toString() || (currentExercise?.repsUnit === "seconds" ? "30" : "10")
+                              currentExercise?.reps?.toString() ||
+                              (currentExercise?.repsUnit === "seconds"
+                                ? "30"
+                                : "10")
                             }
                           />
                         </div>
@@ -853,6 +862,7 @@ export function LiveWorkoutMode({
                         <div className="flex flex-col gap-2">
                           {setData.completed ? (
                             <button
+                              type="button"
                               onClick={() =>
                                 onUpdateSetData(
                                   currentDayIndex,
@@ -868,6 +878,7 @@ export function LiveWorkoutMode({
                             </button>
                           ) : (
                             <button
+                              type="button"
                               onClick={() =>
                                 onUpdateSetData(
                                   currentDayIndex,
@@ -894,10 +905,14 @@ export function LiveWorkoutMode({
 
                       {/* Set Notes */}
                       <div className="mt-4">
-                        <label className="block text-zinc-400 text-xs mb-1 font-medium">
+                        <label
+                          className="block text-zinc-400 text-xs mb-1 font-medium"
+                          htmlFor={`set-notes-${currentDayIndex}-${currentExerciseIndex}-${setIdx}`}
+                        >
                           Set Notes
                         </label>
                         <textarea
+                          id={`set-notes-${currentDayIndex}-${currentExerciseIndex}-${setIdx}`}
                           value={setData.notes || ""}
                           onChange={(e) =>
                             onUpdateSetData(
@@ -923,6 +938,7 @@ export function LiveWorkoutMode({
             {!isDayCompleted && (
               <div className="flex gap-4 mt-8">
                 <Button
+                  type="button"
                   onClick={() => {
                     onAddSet(currentDayIndex, currentExerciseIndex);
                   }}
@@ -932,6 +948,7 @@ export function LiveWorkoutMode({
                   Add Set
                 </Button>
                 <Button
+                  type="button"
                   onClick={() => {
                     onRemoveSet(currentDayIndex, currentExerciseIndex);
                   }}
@@ -946,10 +963,14 @@ export function LiveWorkoutMode({
 
             {/* Exercise Notes */}
             <div className="mt-6">
-              <label className="block text-zinc-300 font-semibold mb-2">
+              <label
+                className="block text-zinc-300 font-semibold mb-2"
+                htmlFor={`exercise-notes-${currentDayIndex}-${currentExerciseIndex}`}
+              >
                 Exercise Notes
               </label>
               <textarea
+                id={`exercise-notes-${currentDayIndex}-${currentExerciseIndex}`}
                 value={
                   plan.schedule?.[currentDayIndex]?.exercises?.[
                     currentExerciseIndex
@@ -990,6 +1011,7 @@ export function LiveWorkoutMode({
                 {formatTime(restTimer)}
               </div>
               <button
+                type="button"
                 onClick={() => {
                   setIsResting(false);
                 }}
@@ -1068,16 +1090,23 @@ export function LiveWorkoutMode({
                   idx
                 );
                 const exerciseWorkoutData =
-                  _getCurrentExerciseData && idx === currentExerciseIndex
-                    ? currentExerciseData
-                    : workoutSession?.workoutData?.[currentDayIndex]
-                        ?.exercises?.[idx];
+                  workoutSession?.workoutData?.[currentDayIndex]?.exercises?.[
+                    idx
+                  ];
                 return (
                   <div
                     key={idx}
                     onClick={() => {
                       setCurrentExerciseIndex(idx);
                       setCurrentSet(1);
+                    }}
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setCurrentExerciseIndex(idx);
+                        setCurrentSet(1);
+                      }
                     }}
                     className={`p-4 rounded-xl cursor-pointer transition-all border-2 ${
                       idx === currentExerciseIndex
@@ -1111,7 +1140,8 @@ export function LiveWorkoutMode({
                             : Array.isArray(exercise.sets)
                             ? exercise.sets.length
                             : exercise.sets || 0}{" "}
-                          sets × {exercise.reps} {exercise.repsUnit === "seconds" ? "seconds" : "reps"}
+                          sets × {exercise.reps}{" "}
+                          {exercise.repsUnit === "seconds" ? "seconds" : "reps"}
                         </div>
                         <div className="w-full bg-zinc-700 rounded-full h-1.5 mt-2 overflow-hidden">
                           <div
@@ -1165,6 +1195,7 @@ export function LiveWorkoutMode({
             <div className="space-y-3">
               {/* Save Progress */}
               <Button
+                type="button"
                 onClick={handleSaveProgress}
                 disabled={isSavingProgress}
                 variant="secondary"
@@ -1183,6 +1214,7 @@ export function LiveWorkoutMode({
               {/* Complete Workout - only show if not already completed */}
               {!isDayCompleted && (
                 <Button
+                  type="button"
                   onClick={handleEndWorkout}
                   className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold"
                   leftIcon={

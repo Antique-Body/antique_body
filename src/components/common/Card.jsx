@@ -47,7 +47,7 @@ export const Card = ({
   ...otherProps
 }) => {
   // Remove any remaining custom props that shouldn't go to DOM
-  const { accentColor: _, ...finalProps } = otherProps;
+  const {accentColor: _, ...finalProps } = otherProps;
 
   // Set styles based on variant
   let variantClassName = "";

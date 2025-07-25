@@ -358,13 +358,16 @@ export const Schedule = ({ data, onChange }) => {
         };
 
         // Provjera duplikata po id-u
+        if (!normalizedExercise.id) {
+          window.alert("Cannot add exercise: missing exercise ID.");
+          return null;
+        }
         const alreadyExists = data.schedule[activeSession].exercises.some(
           (ex) => ex.id === normalizedExercise.id
         );
         if (alreadyExists) {
-          console.warn(
-            "[DEBUG] Exercise with this id already exists, skipping add:",
-            normalizedExercise.id
+          window.alert(
+            "This exercise is already in the session and cannot be added again."
           );
           return normalizedExercise;
         }
@@ -981,8 +984,14 @@ export const Schedule = ({ data, onChange }) => {
                                                 </div>
                                                 <div className="space-y-2">
                                                   <div className="flex items-center justify-center gap-2 mb-1">
-                                                    <label className="block text-xs sm:text-sm font-medium text-gray-300 text-center">
-                                                      {exercise.repsUnit === "reps" ? "Reps" : "Seconds"}
+                                                    <label
+                                                      htmlFor={`reps-unit-toggle-${sessionIndex}-${exerciseIndex}`}
+                                                      className="block text-xs sm:text-sm font-medium text-gray-300 text-center"
+                                                    >
+                                                      {exercise.repsUnit ===
+                                                      "reps"
+                                                        ? "Reps"
+                                                        : "Seconds"}
                                                     </label>
                                                     <Button
                                                       variant="ghost"
@@ -992,19 +1001,33 @@ export const Schedule = ({ data, onChange }) => {
                                                           sessionIndex,
                                                           exerciseIndex,
                                                           "repsUnit",
-                                                          exercise.repsUnit === "reps" ? "seconds" : "reps"
+                                                          exercise.repsUnit ===
+                                                            "reps"
+                                                            ? "seconds"
+                                                            : "reps"
                                                         )
                                                       }
                                                       className="p-1 h-6 w-6 text-gray-400 hover:text-[#FF6B00] hover:bg-[#FF6B00]/20 rounded-md transition-all"
-                                                      title={`Switch to ${exercise.repsUnit === "reps" ? "seconds" : "reps"}`}
+                                                      title={`Switch to ${
+                                                        exercise.repsUnit ===
+                                                        "reps"
+                                                          ? "seconds"
+                                                          : "reps"
+                                                      }`}
                                                     >
                                                       <Icon
-                                                        icon={exercise.repsUnit === "reps" ? "mdi:timer-outline" : "mdi:counter"}
+                                                        icon={
+                                                          exercise.repsUnit ===
+                                                          "reps"
+                                                            ? "mdi:timer-outline"
+                                                            : "mdi:counter"
+                                                        }
                                                         className="w-3 h-3"
                                                       />
                                                     </Button>
                                                   </div>
                                                   <input
+                                                    id={`reps-unit-toggle-${sessionIndex}-${exerciseIndex}`}
                                                     type="number"
                                                     value={exercise.reps}
                                                     min={1}
@@ -1019,7 +1042,12 @@ export const Schedule = ({ data, onChange }) => {
                                                       )
                                                     }
                                                     className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-lg text-white text-center font-semibold text-base sm:text-lg py-2 sm:py-3 focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm"
-                                                    placeholder={exercise.repsUnit === "reps" ? "12" : "30"}
+                                                    placeholder={
+                                                      exercise.repsUnit ===
+                                                      "reps"
+                                                        ? "12"
+                                                        : "30"
+                                                    }
                                                   />
                                                 </div>
                                                 <div className="space-y-2">
@@ -1114,8 +1142,7 @@ export const Schedule = ({ data, onChange }) => {
                                                       <span
                                                         key={
                                                           (muscle.id ||
-                                                            muscle.name ||
-                                                            idx) +
+                                                            muscle.name) +
                                                           "-" +
                                                           idx
                                                         }

@@ -39,7 +39,7 @@ export async function PATCH(request, { params }) {
         { status: 404 }
       );
     }
-    // Provjeri da li je trener vlasnik
+    // Check if the coach is the owner
     const coachingRequest = await prisma.coachingRequest.findUnique({
       where: { id },
     });

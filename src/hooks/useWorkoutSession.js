@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import debounce from "lodash/debounce";
 
 export function useWorkoutSession(plan, planId, clientId) {
   // Live tracking state
@@ -34,27 +35,13 @@ export function useWorkoutSession(plan, planId, clientId) {
     try {
       planData.schedule.forEach((day, dayIdx) => {
         data[dayIdx] = {
-          status:
-            dayIdx === 0
-              ? "unlocked"
-              : dayIdx === 1 || dayIdx === 2
-              ? "completed"
-              : "locked",
+          status: dayIdx === 0 ? "unlocked" : "locked",
           startedAt: null,
-          completedAt:
-            dayIdx === 1 || dayIdx === 2 ? new Date().toISOString() : null,
-          totalTimeSpent: dayIdx === 1 || dayIdx === 2 ? 1800 : 0,
-          attempts: dayIdx === 1 || dayIdx === 2 ? 1 : 0,
+          completedAt: null,
+          totalTimeSpent: 0,
+          attempts: 0,
           exercises: {},
-          workoutSummary:
-            dayIdx === 1 || dayIdx === 2
-              ? {
-                  userNotes: "Test workout completed successfully",
-                  completedAt: new Date().toISOString(),
-                  duration: 1800,
-                  wasCompleted: true,
-                }
-              : null,
+          workoutSummary: null,
         };
 
         if (day.exercises && Array.isArray(day.exercises)) {
@@ -79,7 +66,8 @@ export function useWorkoutSession(plan, planId, clientId) {
           });
         }
       });
-    } catch {
+    } catch (err) {
+      console.error("Error initializing workout data:", err);
       return {};
     }
 
@@ -147,13 +135,15 @@ export function useWorkoutSession(plan, planId, clientId) {
             }
           });
         }
-      } catch {
+      } catch (err) {
+        console.error(
+          "Error during workout data initialization or progress loading:",
+          err
+        );
         setWorkoutData({});
       }
 
-      // Try to load existing progress
-      // Note: We need planId and clientId to be passed to this hook
-      // For now, we'll skip auto-loading and let the component handle it
+      // Existing progress is loaded above if planId and clientId are provided.
     }
   }, [plan, initializeWorkoutData, planId, clientId]);
 
@@ -174,17 +164,21 @@ export function useWorkoutSession(plan, planId, clientId) {
     return () => clearInterval(interval);
   }, [isResting, restTimer]);
 
-  // Auto-save effect - save progress every 30 seconds during workout
-  // DISABLED: Preventing unwanted API calls when adding sets
-  /* useEffect(() => {
-    let interval;
-    if (isWorkoutStarted) {
-      interval = setInterval(() => {
-        // Auto-save progress
-      }, 30000); // Every 30 seconds
-    }
-    return () => clearInterval(interval);
-  }, [isWorkoutStarted]); */
+  // Auto-save effect - debounced to avoid excessive API calls
+  useEffect(() => {
+    if (!isWorkoutStarted) return;
+    // Debounce save function: only save after 10s of inactivity
+    const debouncedSave = debounce(() => {
+      saveWorkoutProgress(planId, clientId);
+    }, 10000); // 10 seconds
+
+    debouncedSave();
+
+    return () => {
+      debouncedSave.cancel();
+    };
+    // Only run when workoutData changes during an active workout
+  }, [workoutData, isWorkoutStarted, planId, clientId]);
 
   // Helper functions
   const formatTime = (seconds) => {
@@ -288,22 +282,12 @@ export function useWorkoutSession(plan, planId, clientId) {
         sets = [];
       }
 
-      // If setIdx is beyond current sets length, extend the array
-      while (sets.length <= setIdx) {
-        const exerciseTemplate = plan?.schedule?.[dayIdx]?.exercises?.[exIdx];
-        const targetReps = exerciseTemplate?.reps || 10;
-        const restTime = exerciseTemplate?.rest || 60;
-
-        sets.push({
-          setNumber: sets.length + 1,
-          weight: "",
-          reps: targetReps.toString(),
-          completed: false,
-          notes: "",
-          completedAt: null,
-          restTime: restTime,
-          actualRestTime: null,
-        });
+      // Validate setIdx is within bounds
+      if (setIdx < 0 || setIdx >= sets.length) {
+        console.error(
+          `Invalid setIdx: ${setIdx} for exercise at day ${dayIdx}, exercise ${exIdx}.`
+        );
+        return prev; // Or throw new Error(...) if you want to crash in dev
       }
 
       // Update the specific set
@@ -495,8 +479,12 @@ export function useWorkoutSession(plan, planId, clientId) {
       let result;
       try {
         result = await response.json();
-      } catch {
-        throw new Error("Invalid response from server");
+      } catch (jsonError) {
+        throw new Error(
+          `Invalid response from server: ${
+            jsonError && jsonError.message ? jsonError.message : jsonError
+          }`
+        );
       }
 
       if (!response.ok || !result.success) {
@@ -593,8 +581,8 @@ export function useWorkoutSession(plan, planId, clientId) {
           return extractedWorkoutData;
         }
       }
-    } catch {
-      // Error handling
+    } catch (err) {
+      console.error("Error loading workout progress:", err);
     }
     return null;
   };
@@ -635,8 +623,7 @@ export function useWorkoutSession(plan, planId, clientId) {
           };
         }
 
-        // Resolve the promise after state is updated
-        setTimeout(() => resolve(updated[completedDayIdx]), 0);
+        resolve(updated[completedDayIdx]);
 
         return updated;
       });
@@ -672,8 +659,7 @@ export function useWorkoutSession(plan, planId, clientId) {
           },
         };
 
-        // Resolve the promise after state is updated
-        setTimeout(() => resolve(updated[endedDayIdx]), 0);
+        resolve(updated[endedDayIdx]);
 
         return updated;
       });

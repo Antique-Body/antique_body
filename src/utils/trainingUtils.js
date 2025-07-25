@@ -36,7 +36,10 @@ export const getTypeColor = (type) => {
     bodyweight: "bg-yellow-500",
     rest: "bg-purple-500",
   };
-  return colors[type] || "bg-zinc-500";
+  if (!type || typeof type !== "string" || !(type in colors)) {
+    return "bg-zinc-500";
+  }
+  return colors[type];
 };
 
 // YouTube URL utilities
@@ -55,9 +58,12 @@ export function getYouTubeEmbedUrl(url) {
 
 // Time formatting utilities
 export const formatTime = (seconds) => {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, "0")}`;
+  const isNegative = seconds < 0;
+  const absSeconds = Math.abs(seconds);
+  const mins = Math.floor(absSeconds / 60);
+  const secs = absSeconds % 60;
+  const formatted = `${mins}:${secs.toString().padStart(2, "0")}`;
+  return isNegative ? `-${formatted}` : formatted;
 };
 
 export const formatDuration = (minutes) => {
@@ -71,6 +77,16 @@ export const formatDuration = (minutes) => {
 
 // Drag and drop utilities
 export const moveItemInArray = (array, fromIndex, toIndex) => {
+  if (
+    !Array.isArray(array) ||
+    fromIndex < 0 ||
+    fromIndex >= array.length ||
+    toIndex < 0 ||
+    toIndex > array.length ||
+    fromIndex === toIndex
+  ) {
+    return array;
+  }
   const newArray = [...array];
   const [movedItem] = newArray.splice(fromIndex, 1);
   newArray.splice(toIndex, 0, movedItem);
@@ -83,6 +99,19 @@ export const moveItemBetweenArrays = (
   sourceIndex,
   targetIndex
 ) => {
+  if (
+    !Array.isArray(sourceArray) ||
+    !Array.isArray(targetArray) ||
+    sourceIndex < 0 ||
+    sourceIndex >= sourceArray.length ||
+    targetIndex < 0 ||
+    targetIndex > targetArray.length
+  ) {
+    return {
+      source: sourceArray,
+      target: targetArray,
+    };
+  }
   const newSourceArray = [...sourceArray];
   const newTargetArray = [...targetArray];
 
@@ -99,7 +128,7 @@ export const moveItemBetweenArrays = (
 export const validateExercise = (exercise) => {
   const errors = [];
 
-  if (!exercise.name || exercise.name.trim() === "") {
+  if (!exercise.name) {
     errors.push("Exercise name is required");
   }
 
@@ -125,7 +154,7 @@ export const validateExercise = (exercise) => {
 export const validateTrainingDay = (day) => {
   const errors = [];
 
-  if (!day.name || day.name.trim() === "") {
+  if (!day.name) {
     errors.push("Day name is required");
   }
 
@@ -199,23 +228,23 @@ export const createNewTrainingDay = (
   type = "training",
   duration = 60
 ) => ({
-    name,
-    type,
-    duration,
-    exercises: [],
-    notes: "",
-    warmupDescription: "",
-  });
+  name,
+  type,
+  duration,
+  exercises: [],
+  notes: "",
+  warmupDescription: "",
+});
 
 export const createNewExercise = (baseExercise, overrides = {}) => ({
-    ...baseExercise,
-    sets: baseExercise.sets || 3,
-    reps: baseExercise.reps || 10,
-    rest: baseExercise.rest || 60,
-    weight: baseExercise.weight || "",
-    notes: "",
-    ...overrides,
-  });
+  ...baseExercise,
+  sets: baseExercise.sets || 3,
+  reps: baseExercise.reps || 10,
+  rest: baseExercise.rest || 60,
+  weight: baseExercise.weight || "",
+  notes: "",
+  ...overrides,
+});
 
 // Local storage utilities for workout data
 export const saveWorkoutToStorage = (planId, workoutData) => {
@@ -235,12 +264,19 @@ export const saveWorkoutToStorage = (planId, workoutData) => {
   }
 };
 
-export const loadWorkoutFromStorage = (planId) => {
+export const loadWorkoutFromStorage = (
+  planId,
+  expirationMs = 24 * 60 * 60 * 1000
+) => {
   try {
     const key = `workout_${planId}`;
     const stored = localStorage.getItem(key);
     if (stored) {
       const parsed = JSON.parse(stored);
+      const now = Date.now();
+      if (!parsed.timestamp || now - parsed.timestamp > expirationMs) {
+        return null;
+      }
       return parsed.data;
     }
     return null;

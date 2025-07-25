@@ -67,7 +67,7 @@ export async function POST(request, { params }) {
       );
     }
     // Copy plan data as JSON
-    const planData = { ...plan };
+    const planData = JSON.parse(JSON.stringify(plan));
     delete planData.id;
     delete planData.trainerInfoId;
     delete planData.createdAt;

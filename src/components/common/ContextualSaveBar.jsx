@@ -21,7 +21,6 @@ export default function ContextualSaveBar({
     const handlePopState = (event) => {
       event.preventDefault();
       event.stopPropagation();
-      console.log("Navigation blocked - browser back/forward");
       triggerShake();
       // Push the current state back to prevent navigation
       window.history.pushState(null, "", window.location.href);
@@ -165,6 +164,7 @@ export default function ContextualSaveBar({
         <div className="flex items-center gap-3">
           {/* Discard button */}
           <button
+            type="button"
             onClick={onDiscard}
             disabled={isSaving}
             className="group relative px-5 py-2.5 bg-white/10 hover:bg-white/20 border-2 border-white/30 hover:border-white/50 rounded-lg text-white font-semibold transition-all duration-300 hover:scale-105 backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed"
@@ -182,6 +182,7 @@ export default function ContextualSaveBar({
 
           {/* Enhanced Save button with animation */}
           <button
+            type="button"
             onClick={onSave}
             disabled={isSaving}
             className={`group relative px-6 py-2.5 font-bold rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-xl border-2 disabled:cursor-not-allowed ${
