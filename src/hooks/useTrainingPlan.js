@@ -21,23 +21,25 @@ export function useTrainingPlan(id, planId) {
     setIsNavigationBlocked(hasChanges);
   }, [plan, lastSavedPlan]);
 
-  // Navigation blocking effect
+  // Navigation blocking effect - only warn for browser navigation, don't block it
   useEffect(() => {
     const handleBeforeUnload = (e) => {
-      if (isNavigationBlocked) {
+      if (showSaveBar) {
+        // For browser navigation (refresh, close tab, back button), show warning but allow user to choose
         e.preventDefault();
-        e.returnValue = "";
+        e.returnValue = "You have unsaved changes. Are you sure you want to leave?";
+        return e.returnValue;
       }
     };
-
-    if (isNavigationBlocked) {
+    
+    if (showSaveBar) {
       window.addEventListener("beforeunload", handleBeforeUnload);
     }
-
+    
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [isNavigationBlocked]);
+  }, [showSaveBar]);
 
   // Fetch plan
   useEffect(() => {
@@ -64,61 +66,29 @@ export function useTrainingPlan(id, planId) {
     fetchPlan();
   }, [id, planId]);
 
-  // Consolidated navigation block/shake logic
+  // Consolidated navigation block/shake logic - for programmatic navigation only
   const checkAndHandleNavigationBlock = useCallback(
     (navigationFn) => {
-      if (isNavigationBlocked) {
-        setIsShaking(true);
-        setTimeout(() => setIsShaking(false), 800);
-        return false;
+      if (showSaveBar) {
+        // For programmatic navigation, show a confirmation dialog
+        const userConfirmed = window.confirm(
+          "You have unsaved changes. Are you sure you want to leave? Your changes will be lost."
+        );
+        
+        if (!userConfirmed) {
+          setIsShaking(true);
+          setTimeout(() => setIsShaking(false), 800);
+          return false;
+        }
       }
+      
       if (typeof navigationFn === "function") {
         navigationFn();
       }
       return true;
     },
-    [isNavigationBlocked]
+    [showSaveBar]
   );
-
-  // Enhanced navigation handler with save bar shake (replaced)
-  // const handleNavigationAttempt = useCallback(
-  //   (navigationFn) => {
-  //     if (isNavigationBlocked) {
-  //       setIsShaking(true);
-  //       setTimeout(() => setIsShaking(false), 800);
-  //       return false;
-  //     }
-  //     navigationFn();
-  //     return true;
-  //   },
-  //   [isNavigationBlocked]
-  // );
-
-  // Method to trigger shake when navigation is blocked (replaced)
-  // const triggerNavigationBlock = useCallback(() => {
-  //   if (isNavigationBlocked) {
-  //     setIsShaking(true);
-  //     setTimeout(() => setIsShaking(false), 800);
-  //     return true; // Navigation was blocked
-  //   }
-  //   return false; // Navigation allowed
-  // }, [isNavigationBlocked]);
-
-  // Safe navigation wrapper (replaced)
-  // const safeNavigate = useCallback(
-  //   (navigationCallback) => {
-  //     if (isNavigationBlocked) {
-  //       setIsShaking(true);
-  //       setTimeout(() => setIsShaking(false), 800);
-  //       return false;
-  //     }
-  //     if (typeof navigationCallback === "function") {
-  //       navigationCallback();
-  //     }
-  //     return true;
-  //   },
-  //   [isNavigationBlocked]
-  // );
 
   // New API-compatible wrappers
   const handleNavigationAttempt = useCallback(
@@ -126,8 +96,15 @@ export function useTrainingPlan(id, planId) {
     [checkAndHandleNavigationBlock]
   );
   const triggerNavigationBlock = useCallback(
-    () => !checkAndHandleNavigationBlock(),
-    [checkAndHandleNavigationBlock]
+    () => {
+      if (showSaveBar) {
+        setIsShaking(true);
+        setTimeout(() => setIsShaking(false), 800);
+        return false;
+      }
+      return true;
+    },
+    [showSaveBar]
   );
   const safeNavigate = useCallback(
     (navigationCallback) => checkAndHandleNavigationBlock(navigationCallback),

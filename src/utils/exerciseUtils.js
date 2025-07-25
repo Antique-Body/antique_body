@@ -58,7 +58,7 @@ export const normalizeExerciseSets = (
     return sets.map((set, index) => ({
       setNumber: index + 1,
       weight: set.weight || "",
-      reps: set.reps || defaultReps.toString(),
+      reps: set.reps !== undefined ? set.reps : defaultReps,
       completed: set.completed || false,
       notes: set.notes || "",
       completedAt: set.completedAt || null,
@@ -71,7 +71,7 @@ export const normalizeExerciseSets = (
   return Array.from({ length: setsCount }, (_, index) => ({
     setNumber: index + 1,
     weight: "",
-    reps: defaultReps.toString(),
+    reps: defaultReps,
     completed: false,
     notes: "",
     completedAt: null,

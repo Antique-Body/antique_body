@@ -296,3 +296,57 @@ export const clearWorkoutFromStorage = (planId) => {
     return false;
   }
 };
+
+/**
+ * Initializes workout data structure from a plan object.
+ * @param {Object} planData - The workout plan object.
+ * @returns {Object} Initialized workout data structure.
+ */
+export function initializeWorkoutData(planData) {
+  if (!planData || !planData.schedule) {
+    return {};
+  }
+
+  const data = {};
+
+  try {
+    planData.schedule.forEach((day, dayIdx) => {
+      data[dayIdx] = {
+        status: dayIdx === 0 ? "unlocked" : "locked",
+        startedAt: null,
+        completedAt: null,
+        totalTimeSpent: 0,
+        attempts: 0,
+        exercises: {},
+        workoutSummary: null,
+      };
+
+      if (day.exercises && Array.isArray(day.exercises)) {
+        day.exercises.forEach((exercise, exIdx) => {
+          const setsCount = exercise.sets || 3;
+          const targetReps = exercise.reps || 10;
+
+          data[dayIdx].exercises[exIdx] = {
+            sets: Array.from({ length: setsCount }, (_, setIdx) => ({
+              setNumber: setIdx + 1,
+              weight: "",
+              reps: targetReps.toString(),
+              completed: false,
+              notes: "",
+              completedAt: null,
+              restTime: exercise.rest || 60,
+              actualRestTime: null,
+            })),
+            exerciseNotes: "",
+            completed: false,
+          };
+        });
+      }
+    });
+  } catch (err) {
+    console.error("Error initializing workout data:", err);
+    return {};
+  }
+
+  return data;
+}

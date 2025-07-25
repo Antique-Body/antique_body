@@ -25,7 +25,7 @@ export async function PATCH(request, { params }) {
         { status: 401 }
       );
     }
-    const { id, assignedPlanId } = params;
+    const { id, assignedPlanId } = await params;
     const body = await request.json();
     // Validate planData
     if (!ajv.validate(planDataSchema, body.planData)) {

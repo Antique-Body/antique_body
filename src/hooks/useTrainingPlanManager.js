@@ -178,26 +178,24 @@ export const useTrainingPlanManager = (plan, setPlan) => {
           ),
         }));
       },
-
-      /**
-       * Toggles reps unit for an exercise (reps <-> seconds)
-       */
-      toggleRepsUnit: (dayIndex, exerciseIndex) => {
-        const currentExercise =
-          plan.schedule?.[dayIndex]?.exercises?.[exerciseIndex];
-        if (!currentExercise) return;
-
-        const currentUnit = currentExercise.repsUnit || REPS_UNITS.REPS;
-        const newUnit =
-          currentUnit === REPS_UNITS.REPS
-            ? REPS_UNITS.SECONDS
-            : REPS_UNITS.REPS;
-
-        operations.updateExercise(dayIndex, exerciseIndex, "repsUnit", newUnit);
-      },
     }),
     [plan, setPlan]
   );
+
+  // Define toggleRepsUnit after operations is fully created to avoid circular reference
+  const toggleRepsUnit = (dayIndex, exerciseIndex) => {
+    const currentExercise =
+      plan.schedule?.[dayIndex]?.exercises?.[exerciseIndex];
+    if (!currentExercise) return;
+
+    const currentUnit = currentExercise.repsUnit || REPS_UNITS.REPS;
+    const newUnit =
+      currentUnit === REPS_UNITS.REPS ? REPS_UNITS.SECONDS : REPS_UNITS.REPS;
+
+    operations.updateExercise(dayIndex, exerciseIndex, "repsUnit", newUnit);
+  };
+  // Assign to operations
+  operations.toggleRepsUnit = toggleRepsUnit;
 
   // Computed properties
   const computed = useMemo(

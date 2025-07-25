@@ -9,8 +9,71 @@ const planDataSchema = {
   properties: {
     title: { type: "string" },
     description: { type: "string" },
-    schedule: { type: "array" },
-    // Add more fields as needed, e.g., workouts, exercises, progress
+    schedule: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          day: { anyOf: [{ type: "string" }, { type: "number" }] },
+          name: { type: "string" },
+          type: { type: "string" },
+          duration: { type: "number" },
+          description: { type: "string" },
+          workoutStatus: { type: "string" },
+          workoutStartedAt: { type: ["string", "null"] },
+          workoutCompletedAt: { type: ["string", "null"] },
+          workoutEndedAt: { type: ["string", "null"] },
+          workoutDuration: { type: ["number", "null"] },
+          workoutNotes: { type: "string" },
+          workoutWasCompleted: { type: "boolean" },
+          exercises: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                name: { type: "string" },
+                reps: { type: ["number", "null"] },
+                rest: { type: ["number", "null"] },
+                sets: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      weight: { type: ["number", "null"] },
+                      reps: { type: ["number", "null"] },
+                      completed: { type: "boolean" },
+                      notes: { type: "string" },
+                    },
+                    required: ["reps", "completed"],
+                  },
+                },
+                type: { type: "string" },
+                level: { type: "string" },
+                imageUrl: { type: "string" },
+                location: { type: "string" },
+                equipment: { type: ["boolean", "null"] },
+                instructions: { type: "string" },
+                muscleGroups: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                    },
+                    required: ["name"],
+                  },
+                },
+                exerciseNotes: { type: "string" },
+                exerciseCompleted: { type: "boolean" },
+              },
+              required: ["name", "type", "sets"],
+            },
+          },
+        },
+        required: ["day", "name", "type", "duration", "exercises"],
+      },
+    },
+    lastUpdated: { type: ["string", "null"] },
   },
   required: ["title", "description", "schedule"],
 };
@@ -172,7 +235,7 @@ export async function PATCH(request, context) {
 
     return NextResponse.json({
       success: true,
-      data: updatedPlanData,
+      plan: updatedPlanData,
     });
   } catch (error) {
     return NextResponse.json(

@@ -9,8 +9,71 @@ const planDataSchema = {
   properties: {
     title: { type: "string" },
     description: { type: "string" },
-    schedule: { type: "array" },
-    // Add more fields as needed
+    schedule: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          day: { anyOf: [{ type: "string" }, { type: "number" }] },
+          name: { type: "string" },
+          type: { type: "string" },
+          duration: { type: "number" },
+          description: { type: "string" },
+          workoutStatus: { type: "string" },
+          workoutStartedAt: { type: ["string", "null"] },
+          workoutCompletedAt: { type: ["string", "null"] },
+          workoutEndedAt: { type: ["string", "null"] },
+          workoutDuration: { type: ["number", "null"] },
+          workoutNotes: { type: "string" },
+          workoutWasCompleted: { type: "boolean" },
+          exercises: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                name: { type: "string" },
+                reps: { type: ["number", "null"] },
+                rest: { type: ["number", "null"] },
+                sets: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      weight: { type: ["number", "null"] },
+                      reps: { type: ["number", "null"] },
+                      completed: { type: "boolean" },
+                      notes: { type: "string" },
+                    },
+                    required: ["reps", "completed"],
+                  },
+                },
+                type: { type: "string" },
+                level: { type: "string" },
+                imageUrl: { type: "string" },
+                location: { type: "string" },
+                equipment: { type: ["boolean", "null"] },
+                instructions: { type: "string" },
+                muscleGroups: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                    },
+                    required: ["name"],
+                  },
+                },
+                exerciseNotes: { type: "string" },
+                exerciseCompleted: { type: "boolean" },
+              },
+              required: ["name", "type", "sets"],
+            },
+          },
+        },
+        required: ["day", "name", "type", "duration", "exercises"],
+      },
+    },
+    lastUpdated: { type: ["string", "null"] },
   },
   required: ["title", "description", "schedule"],
 };
@@ -386,6 +449,17 @@ export async function POST(request, { params }) {
     delete planData.createdAt;
     delete planData.updatedAt;
     delete planData.deletedAt;
+    // Validate planData before assignment
+    if (!ajv.validate(planDataSchema, planData)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Invalid planData format",
+          details: ajv.errors,
+        },
+        { status: 400 }
+      );
+    }
     // Assign plan
     const assigned = await prisma.assignedTrainingPlan.create({
       data: {
@@ -407,17 +481,6 @@ export async function POST(request, { params }) {
       { status: 500 }
     );
   }
-}
-
-// PATCH: Complete assigned training plan (set status to completed)
-// NOTE: If multiple PATCH handlers are needed, split into separate files/endpoints.
-export async function PATCH(request, { params }) {
-  // This PATCH handler currently handles both completion and editing of assigned plans.
-  // You should split these into separate endpoints for full Next.js compliance.
-  // For now, you may need to route based on request body or params.
-  throw new Error(
-    "Multiple PATCH handlers detected. Please split into separate files."
-  );
 }
 
 // PATCH: Edit assigned training plan (update planData JSON)
@@ -481,17 +544,6 @@ export async function PATCH_editAssignedPlan(request, { params }) {
       { status: 500 }
     );
   }
-}
-
-// GET: Fetch all assigned training plans for a client (by coaching request)
-// NOTE: If multiple GET handlers are needed, split into separate files/endpoints.
-export async function GET(request, { params }) {
-  // This GET handler currently handles both the main coaching request and assigned training plans.
-  // You should split these into separate endpoints for full Next.js compliance.
-  // For now, you may need to route based on request body or params.
-  throw new Error(
-    "Multiple GET handlers detected. Please split into separate files."
-  );
 }
 
 // GET: Dohvati sve assigned training planove za klijenta (po coaching requestu)
