@@ -105,6 +105,7 @@ const DEFAULT_EXERCISE = {
   name: "",
   sets: 3,
   reps: 12,
+  repsUnit: "reps", // new field: "reps" or "seconds"
   rest: 60,
   notes: "",
   type: "strength",
@@ -405,6 +406,7 @@ export const Schedule = ({ data, onChange }) => {
       muscleGroups: exercise.muscleGroups || [],
       level: exercise.level || "intermediate",
       location: exercise.location || "gym",
+      repsUnit: "reps", // default to reps
     }));
 
     newSchedule[activeSession].exercises = [
@@ -978,9 +980,30 @@ export const Schedule = ({ data, onChange }) => {
                                                   />
                                                 </div>
                                                 <div className="space-y-2">
-                                                  <label className="block text-xs sm:text-sm font-medium text-gray-300 text-center">
-                                                    Reps
-                                                  </label>
+                                                  <div className="flex items-center justify-center gap-2 mb-1">
+                                                    <label className="block text-xs sm:text-sm font-medium text-gray-300 text-center">
+                                                      {exercise.repsUnit === "reps" ? "Reps" : "Seconds"}
+                                                    </label>
+                                                    <Button
+                                                      variant="ghost"
+                                                      size="small"
+                                                      onClick={() =>
+                                                        handleExerciseChange(
+                                                          sessionIndex,
+                                                          exerciseIndex,
+                                                          "repsUnit",
+                                                          exercise.repsUnit === "reps" ? "seconds" : "reps"
+                                                        )
+                                                      }
+                                                      className="p-1 h-6 w-6 text-gray-400 hover:text-[#FF6B00] hover:bg-[#FF6B00]/20 rounded-md transition-all"
+                                                      title={`Switch to ${exercise.repsUnit === "reps" ? "seconds" : "reps"}`}
+                                                    >
+                                                      <Icon
+                                                        icon={exercise.repsUnit === "reps" ? "mdi:timer-outline" : "mdi:counter"}
+                                                        className="w-3 h-3"
+                                                      />
+                                                    </Button>
+                                                  </div>
                                                   <input
                                                     type="number"
                                                     value={exercise.reps}
@@ -996,6 +1019,7 @@ export const Schedule = ({ data, onChange }) => {
                                                       )
                                                     }
                                                     className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-lg text-white text-center font-semibold text-base sm:text-lg py-2 sm:py-3 focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm"
+                                                    placeholder={exercise.repsUnit === "reps" ? "12" : "30"}
                                                   />
                                                 </div>
                                                 <div className="space-y-2">
