@@ -137,8 +137,8 @@ export const GoalsAndPreferencesStep = ({ formData, onChange, errors }) => {
                       isSelected
                         ? "bg-[#FF6B00]/10 border-[#FF6B00]/50 text-[#FF6B00]"
                         : isPrimary
-                        ? "opacity-50 cursor-not-allowed bg-[rgba(30,30,30,0.5)] border-[#333] text-gray-500"
-                        : "bg-[rgba(30,30,30,0.5)] border-[#333] text-gray-300 hover:border-[#444] hover:bg-[rgba(40,40,40,0.7)]"
+                          ? "opacity-50 cursor-not-allowed bg-[rgba(30,30,30,0.5)] border-[#333] text-gray-500"
+                          : "bg-[rgba(30,30,30,0.5)] border-[#333] text-gray-300 hover:border-[#444] hover:bg-[rgba(40,40,40,0.7)]"
                     }`}
                     leftIcon={<Icon icon={goal.icon} width={18} height={18} />}
                   >

@@ -13,7 +13,7 @@ export async function GET(request, { params }) {
       );
     }
     const { id, assignedPlanId } = await params;
-    
+
     if (!id || !assignedPlanId) {
       return NextResponse.json(
         { success: false, error: "Request ID and assignedPlanId are required" },
@@ -68,7 +68,10 @@ export async function GET(request, { params }) {
       assignedPlan.trainerId !== coachingRequest.trainerId
     ) {
       return NextResponse.json(
-        { success: false, error: "Plan not associated with this coaching request" },
+        {
+          success: false,
+          error: "Plan not associated with this coaching request",
+        },
         { status: 403 }
       );
     }

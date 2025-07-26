@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 
 import { userService } from "./services";
 
-
 import { auth } from "#/auth";
 
 function parseQueryParams(request) {

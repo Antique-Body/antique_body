@@ -340,8 +340,8 @@ export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
                           cert.status === "approved"
                             ? "bg-green-500"
                             : cert.status === "pending"
-                            ? "bg-yellow-500"
-                            : "bg-red-500"
+                              ? "bg-yellow-500"
+                              : "bg-red-500"
                         }`}
                       ></div>
                       <div className="flex-1">
@@ -364,8 +364,8 @@ export const TrainerProfile = ({ trainerData, onProfileUpdate }) => {
                             cert.status === "approved"
                               ? "bg-green-500/20 text-green-400"
                               : cert.status === "pending"
-                              ? "bg-yellow-500/20 text-yellow-400"
-                              : "bg-red-500/20 text-red-400"
+                                ? "bg-yellow-500/20 text-yellow-400"
+                                : "bg-red-500/20 text-red-400"
                           }`}
                         >
                           {cert.status}

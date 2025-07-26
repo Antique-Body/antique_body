@@ -622,7 +622,9 @@ export const FormField = ({
               <div
                 key={index}
                 className={`px-4 py-2 cursor-pointer hover:bg-[rgba(255,107,0,0.1)] transition-colors duration-200 ${
-                  value === option.value ? "bg-[rgba(255,107,0,0.15)] text-[#FF6B00]" : ""
+                  value === option.value
+                    ? "bg-[rgba(255,107,0,0.15)] text-[#FF6B00]"
+                    : ""
                 }`}
                 onClick={() => {
                   if (onSelectOption) onSelectOption(option);

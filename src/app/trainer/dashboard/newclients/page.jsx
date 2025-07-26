@@ -256,38 +256,38 @@ export default function NewClientsPage() {
               background: isMale
                 ? "bg-gradient-to-r from-slate-900/95 via-blue-900/10 to-slate-900/95"
                 : isFemale
-                ? "bg-gradient-to-r from-slate-900/95 via-purple-900/10 to-slate-900/95"
-                : "bg-gradient-to-r from-slate-900/95 via-slate-800/90 to-slate-900/95",
+                  ? "bg-gradient-to-r from-slate-900/95 via-purple-900/10 to-slate-900/95"
+                  : "bg-gradient-to-r from-slate-900/95 via-slate-800/90 to-slate-900/95",
               border: isMale
                 ? "border-cyan-600/30 hover:border-cyan-400/50"
                 : isFemale
-                ? "border-violet-600/30 hover:border-violet-400/50"
-                : "border-slate-700/50 hover:border-blue-400/70",
+                  ? "border-violet-600/30 hover:border-violet-400/50"
+                  : "border-slate-700/50 hover:border-blue-400/70",
               shadow: isMale
                 ? "hover:shadow-cyan-500/10"
                 : isFemale
-                ? "hover:shadow-violet-500/10"
-                : "hover:shadow-blue-500/20",
+                  ? "hover:shadow-violet-500/10"
+                  : "hover:shadow-blue-500/20",
               profileRing: isMale
                 ? "ring-cyan-400/40"
                 : isFemale
-                ? "ring-violet-400/40"
-                : "ring-white/10",
+                  ? "ring-violet-400/40"
+                  : "ring-white/10",
               genderIcon: isMale
                 ? "mdi:gender-male"
                 : isFemale
-                ? "mdi:gender-female"
-                : null,
+                  ? "mdi:gender-female"
+                  : null,
               genderColor: isMale
                 ? "text-cyan-400"
                 : isFemale
-                ? "text-violet-400"
-                : "text-gray-400",
+                  ? "text-violet-400"
+                  : "text-gray-400",
               accent: isMale
                 ? "from-cyan-500/10 to-blue-500/10"
                 : isFemale
-                ? "from-violet-500/10 to-purple-500/10"
-                : "from-blue-500/10 to-blue-500/10",
+                  ? "from-violet-500/10 to-purple-500/10"
+                  : "from-blue-500/10 to-blue-500/10",
             };
 
             return (
@@ -636,9 +636,9 @@ export default function NewClientsPage() {
                           "male"
                             ? "bg-gradient-to-br from-blue-500 to-blue-600"
                             : selectedClientDetails.client.clientProfile.gender.toLowerCase() ===
-                              "female"
-                            ? "bg-gradient-to-br from-pink-500 to-pink-600"
-                            : "bg-gradient-to-br from-slate-500 to-slate-600"
+                                "female"
+                              ? "bg-gradient-to-br from-pink-500 to-pink-600"
+                              : "bg-gradient-to-br from-slate-500 to-slate-600"
                         }`}
                       >
                         <Icon
@@ -647,9 +647,9 @@ export default function NewClientsPage() {
                             "male"
                               ? "mdi:gender-male"
                               : selectedClientDetails.client.clientProfile.gender.toLowerCase() ===
-                                "female"
-                              ? "mdi:gender-female"
-                              : "mdi:help"
+                                  "female"
+                                ? "mdi:gender-female"
+                                : "mdi:help"
                           }
                           width={12}
                           height={12}
@@ -1146,9 +1146,9 @@ export default function NewClientsPage() {
                         "male"
                           ? "bg-gradient-to-br from-blue-500 to-blue-600"
                           : selectedRequest.client.clientProfile.gender.toLowerCase() ===
-                            "female"
-                          ? "bg-gradient-to-br from-pink-500 to-pink-600"
-                          : "bg-gradient-to-br from-slate-500 to-slate-600"
+                              "female"
+                            ? "bg-gradient-to-br from-pink-500 to-pink-600"
+                            : "bg-gradient-to-br from-slate-500 to-slate-600"
                       }`}
                     >
                       <Icon
@@ -1157,9 +1157,9 @@ export default function NewClientsPage() {
                           "male"
                             ? "mdi:gender-male"
                             : selectedRequest.client.clientProfile.gender.toLowerCase() ===
-                              "female"
-                            ? "mdi:gender-female"
-                            : "mdi:help"
+                                "female"
+                              ? "mdi:gender-female"
+                              : "mdi:help"
                         }
                         width={12}
                         height={12}

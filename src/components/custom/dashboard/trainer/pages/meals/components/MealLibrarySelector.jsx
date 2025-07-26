@@ -190,8 +190,8 @@ export const MealLibrarySelector = ({
                           meal.difficulty === "easy"
                             ? "bg-emerald-500/90 text-white border-emerald-400/70"
                             : meal.difficulty === "medium"
-                            ? "bg-amber-500/90 text-white border-amber-400/70"
-                            : "bg-red-500/90 text-white border-red-400/70"
+                              ? "bg-amber-500/90 text-white border-amber-400/70"
+                              : "bg-red-500/90 text-white border-red-400/70"
                         }`}
                       >
                         {meal.difficulty.charAt(0).toUpperCase() +

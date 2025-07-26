@@ -229,9 +229,7 @@ export const BasicInfo = ({ data, onChange, prefillForm, templates }) => {
                           key={tpl.title}
                           className="relative flex flex-col bg-[#232323] border border-[#333] shadow hover:border-[#FF6B00]/60 transition-all rounded-lg p-3 gap-2"
                         >
-                          <span
-                            className="absolute top-2 right-2 z-10 bg-[#FF6B00] text-white text-xs px-2 py-1 rounded-full shadow font-medium whitespace-nowrap"
-                          >
+                          <span className="absolute top-2 right-2 z-10 bg-[#FF6B00] text-white text-xs px-2 py-1 rounded-full shadow font-medium whitespace-nowrap">
                             {tpl.duration} {tpl.durationType}
                           </span>
                           <div className="flex flex-col gap-3">

@@ -88,8 +88,8 @@ export function VideoModal({ isOpen, onClose, videoUrl, exercise }) {
                       {typeof exercise.sets === "number"
                         ? exercise.sets
                         : Array.isArray(exercise.sets)
-                        ? exercise.sets.length
-                        : 0}{" "}
+                          ? exercise.sets.length
+                          : 0}{" "}
                       sets × {exercise.reps} reps
                     </span>
                   </div>

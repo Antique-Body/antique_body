@@ -99,8 +99,8 @@ export default function OverviewPage() {
                   trainer.trainerProfile.lastName
                     ? `${trainer.trainerProfile.firstName} ${trainer.trainerProfile.lastName} profile`
                     : trainer.trainerProfile.firstName
-                    ? `${trainer.trainerProfile.firstName} profile`
-                    : "Trainer profile image"
+                      ? `${trainer.trainerProfile.firstName} profile`
+                      : "Trainer profile image"
                 }
                 className="object-cover w-full h-full"
                 width={96}

@@ -41,10 +41,10 @@ export default function ClientsPage() {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Get tracking parameters
-  const planId = searchParams.get('planId');
-  const planType = searchParams.get('type');
+  const planId = searchParams.get("planId");
+  const planType = searchParams.get("type");
 
   // Fetch accepted clients
   const fetchAcceptedClients = async () => {
@@ -79,7 +79,9 @@ export default function ClientsPage() {
   const handleViewClient = (clientRequest) => {
     if (planId) {
       // If tracking a specific plan, navigate to the assigned plan page
-      router.push(`/trainer/dashboard/clients/${clientRequest.id}/plans/${planId}?type=${planType}`);
+      router.push(
+        `/trainer/dashboard/clients/${clientRequest.id}/plans/${planId}?type=${planType}`
+      );
     } else {
       // Normal client dashboard navigation
       router.push(`/trainer/dashboard/clients/${clientRequest.id}`);
@@ -172,20 +174,25 @@ export default function ClientsPage() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white mb-2">
-          {planId ? 'Track Plan Progress' : 'My Clients'}
+          {planId ? "Track Plan Progress" : "My Clients"}
         </h1>
         <p className="text-zinc-400">
-          {planId 
-            ? 'Select a client to track their progress with this plan'
-            : 'Manage your accepted clients and their fitness journeys'
-          }
+          {planId
+            ? "Select a client to track their progress with this plan"
+            : "Manage your accepted clients and their fitness journeys"}
         </p>
         {planId && (
           <div className="mt-3 p-3 bg-orange-900/20 border border-orange-500/30 rounded-lg flex items-center gap-3">
-            <Icon icon="mdi:information" className="text-orange-400" width={20} height={20} />
+            <Icon
+              icon="mdi:information"
+              className="text-orange-400"
+              width={20}
+              height={20}
+            />
             <div>
               <p className="text-orange-200 text-sm font-medium">
-                Plan Tracking Mode: {planType === 'nutrition' ? 'Nutrition Plan' : 'Training Plan'}
+                Plan Tracking Mode:{" "}
+                {planType === "nutrition" ? "Nutrition Plan" : "Training Plan"}
               </p>
               <p className="text-orange-300/80 text-xs">
                 Click on a client to view their progress with the selected plan
@@ -435,7 +442,11 @@ export default function ClientsPage() {
                             handleViewClient(clientRequest);
                           }}
                           leftIcon={
-                            <Icon icon={planId ? "mdi:chart-line" : "mdi:eye"} width={16} height={16} />
+                            <Icon
+                              icon={planId ? "mdi:chart-line" : "mdi:eye"}
+                              width={16}
+                              height={16}
+                            />
                           }
                         >
                           {planId ? "Track Plan" : "View Dashboard"}
