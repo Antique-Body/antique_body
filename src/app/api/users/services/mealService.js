@@ -1,6 +1,7 @@
+import prisma from "@/lib/prisma";
+
 import { MEAL_CONFIG, DEFAULT_MEALS } from "./defaultSettings";
 
-import prisma from "@/lib/prisma";
 // Abstract config for meal validation
 
 // Validation for meal data

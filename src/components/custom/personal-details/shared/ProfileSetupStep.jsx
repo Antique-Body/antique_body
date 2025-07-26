@@ -2,11 +2,12 @@
 import { Icon } from "@iconify/react";
 import { useEffect } from "react";
 
-import { FormSection } from "./FormSection";
 
 import { FormField } from "@/components/common";
 import { ProfileImageUpload } from "@/components/custom/shared";
 import { UPLOAD_CONFIG } from "@/config/upload";
+
+import { FormSection } from "./FormSection";
 
 export const ProfileSetupStep = ({
   formData,

@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 
+import prisma from "@/lib/prisma";
+import { formatPhoneNumber } from "@/lib/utils";
+
 import { verifyEmailCode } from "../services/email";
 import { verifyPhoneCode } from "../services/phone";
 
-import prisma from "@/lib/prisma";
-import { formatPhoneNumber } from "@/lib/utils";
 
 export async function POST(request) {
   try {

@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
-import { PlanPreviewModal } from "./PlanPreviewModal";
 
 import {
   fetchPlanDetails,
@@ -24,6 +23,8 @@ import {
   ViewIcon,
 } from "@/components/common/Icons";
 import { Modal } from "@/components/common/Modal";
+
+import { PlanPreviewModal } from "./PlanPreviewModal";
 
 export const PlanCard = ({
   id,

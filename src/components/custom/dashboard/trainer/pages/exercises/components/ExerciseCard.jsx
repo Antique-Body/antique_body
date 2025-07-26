@@ -4,7 +4,6 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useState } from "react";
 
-import { AnatomicalViewer } from "./AnatomicalViewer";
 
 import { Button } from "@/components/common/Button";
 import { Card } from "@/components/common/Card";
@@ -12,6 +11,8 @@ import {
   formatMuscleDisplayName,
   getPrimaryAnatomicalView,
 } from "@/utils/muscleMapper";
+
+import { AnatomicalViewer } from "./AnatomicalViewer";
 
 export const ExerciseCard = ({ exercise, onView, onEdit, onDelete }) => {
   const [isHovered, setIsHovered] = useState(false);

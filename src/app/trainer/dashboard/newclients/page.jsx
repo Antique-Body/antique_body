@@ -3,7 +3,6 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useEffect, useState, useContext } from "react";
 
-import { BadgeContext } from "../layout";
 
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
@@ -13,6 +12,8 @@ import { ACTIVITY_TYPES } from "@/enums/activityTypes";
 import { EXPERIENCE_LEVELS } from "@/enums/experienceLevels";
 import { FITNESS_GOALS } from "@/enums/fitnessGoals";
 import { calculateAge } from "@/utils/dateUtils";
+
+import { BadgeContext } from "../layout";
 
 export default function NewClientsPage() {
   const { refreshBadgeCounts } = useContext(BadgeContext);

@@ -5,7 +5,6 @@ import { useState, useEffect, useCallback } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-import { AnimatedTabContent } from "./DashboardTabs";
 
 import { Button } from "@/components/common/Button";
 import { InfoBanner } from "@/components/common/InfoBanner";
@@ -25,6 +24,8 @@ import {
 } from "@/components/custom/dashboard/trainer/settings";
 import { useClientEditProfileForm } from "@/hooks/useClientEditProfileForm";
 import { useTrainerEditProfileForm } from "@/hooks/useTrainerEditProfileForm";
+
+import { AnimatedTabContent } from "./DashboardTabs";
 
 // Enhanced Modal Component with sophisticated design
 const ProfileEditModal = ({

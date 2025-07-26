@@ -3,6 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState, useRef } from "react";
 
+import { Card } from "@/components/common";
+import { BackButton } from "@/components/common/BackButton";
+import { useTrainingPlanForm } from "@/hooks/useTrainingPlanForm";
+
 import { MobileStepHeader } from "./components/MobileStepHeader";
 import { NavigationButtons } from "./components/NavigationButtons";
 import { StepIndicator } from "./components/StepIndicator";
@@ -11,9 +15,6 @@ import { Features } from "./steps/Features";
 import { Preview } from "./steps/Preview";
 import { Schedule } from "./steps/Schedule";
 
-import { Card } from "@/components/common";
-import { BackButton } from "@/components/common/BackButton";
-import { useTrainingPlanForm } from "@/hooks/useTrainingPlanForm";
 
 const STEPS = [
   { id: "basic", label: "Basic Info", icon: "mdi:information" },

@@ -4,9 +4,6 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-import { AnatomicalViewer } from "./AnatomicalViewer";
-import exerciseLibrary from "./exerciseLibrary.json";
-import { ExerciseLibrarySelector } from "./ExerciseLibrarySelector";
 
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
@@ -22,6 +19,10 @@ import {
   MUSCLE_GROUPS,
 } from "@/enums";
 import { formatMuscleDisplayName } from "@/utils/muscleMapper";
+
+import { AnatomicalViewer } from "./AnatomicalViewer";
+import exerciseLibrary from "./exerciseLibrary.json";
+import { ExerciseLibrarySelector } from "./ExerciseLibrarySelector";
 
 // File upload validation
 const validateFile = (file, type) => {

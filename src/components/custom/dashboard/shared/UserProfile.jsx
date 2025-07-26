@@ -2,10 +2,11 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useState } from "react";
 
+import { Button } from "@/components/common/Button";
+
 import { UserEditProfile } from "./UserEditProfile";
 import { UserSettings } from "./UserSettings";
 
-import { Button } from "@/components/common/Button";
 
 export const UserProfile = ({
   profileType = "client",
