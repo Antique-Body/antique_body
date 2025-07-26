@@ -176,7 +176,7 @@ const Gallery = ({ trainerData, setTrainerData }) => {
   );
 
   return (
-    <div className="space-y-6 p-4 mx-6">
+    <div className="space-y-6 ">
       <SectionTitle
         title="Showcase Your Training Gallery"
         subtitle="Upload images that showcase your training style, facilities, and client results. Feature your best images to highlight them on your public profile."

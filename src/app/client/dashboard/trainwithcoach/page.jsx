@@ -354,9 +354,6 @@ export default function TrainWithCoachPage() {
           comparison =
             (a.trainerInfo?.rating || 0) - (b.trainerInfo?.rating || 0);
           break;
-        case "price":
-          comparison = (a.pricePerSession || 0) - (b.pricePerSession || 0);
-          break;
         case "experience":
           comparison = (a.trainerSince || 0) - (b.trainerSince || 0);
           break;
@@ -393,7 +390,6 @@ export default function TrainWithCoachPage() {
       ? [{ value: "location", label: "Location (Closest)" }]
       : []),
     { value: "rating", label: "Rating" },
-    { value: "price", label: "Price" },
     { value: "experience", label: "Experience" },
     { value: "name", label: "Name" },
   ];
@@ -581,7 +577,6 @@ export default function TrainWithCoachPage() {
             proximity: selectedTrainer.location
               ? `${selectedTrainer.location.city}`
               : "Location not specified",
-            hourlyRate: selectedTrainer.pricePerSession || 0,
             certifications: selectedTrainer.certifications.map(
               (cert) => cert.name
             ),

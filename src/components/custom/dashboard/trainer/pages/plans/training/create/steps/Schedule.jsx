@@ -94,8 +94,7 @@ const DEFAULT_SESSION = {
   id: "",
   name: "",
   duration: 60,
-  day: "day1",
-  description: "",
+  day: 1, // promijenjeno iz stringa u broj
   type: "strength",
   exercises: [],
   isRestDay: false,
@@ -106,6 +105,7 @@ const DEFAULT_EXERCISE = {
   name: "",
   sets: 3,
   reps: 12,
+  repsUnit: "reps", // new field: "reps" or "seconds"
   rest: 60,
   notes: "",
   type: "strength",
@@ -204,6 +204,7 @@ export const Schedule = ({ data, onChange }) => {
   const [expandedSession, setExpandedSession] = useState(null);
   const [activeMedia, setActiveMedia] = useState({}); // Add this state to track active media for each exercise
   const [videoError, setVideoError] = useState({});
+  const [exerciseError, setExerciseError] = useState("");
 
   // Exercise library pagination and filtering state
   const [libraryExercises, setLibraryExercises] = useState([]);
@@ -339,6 +340,7 @@ export const Schedule = ({ data, onChange }) => {
 
   const handleCreateExercise = async (exerciseData) => {
     try {
+      setExerciseError("");
       const response = await fetch("/api/users/trainer/exercises", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -346,25 +348,49 @@ export const Schedule = ({ data, onChange }) => {
       });
 
       const result = await response.json();
-      if (result.success) {
-        const exerciseToAdd = {
-          ...DEFAULT_EXERCISE,
-          id: crypto.randomUUID(),
-          ...exerciseData,
-          ...result.exercise,
+      const exerciseFromDb =
+        result.exercise || result.data?.exercise || result.data;
+      if (result.success && exerciseFromDb) {
+        // Add the exercise as returned from the backend (with backend id, normalized fields, etc)
+        const normalizedExercise = {
+          ...exerciseFromDb,
+          muscleGroups: Array.isArray(exerciseFromDb.muscleGroups)
+            ? exerciseFromDb.muscleGroups
+            : [],
         };
 
-        const newSchedule = [...data.schedule];
-        newSchedule[activeSession].exercises = [
-          ...newSchedule[activeSession].exercises,
-          exerciseToAdd,
-        ];
+        // Provjera duplikata po id-u
+        if (!normalizedExercise.id) {
+          setExerciseError("Cannot add exercise: missing exercise ID.");
+          return null;
+        }
+        const alreadyExists = data.schedule[activeSession].exercises.some(
+          (ex) => ex.id === normalizedExercise.id
+        );
+        if (alreadyExists) {
+          setExerciseError(
+            "This exercise is already in the session and cannot be added again."
+          );
+          return normalizedExercise;
+        }
 
+        const newSchedule = data.schedule.map((session, idx) =>
+          idx === activeSession
+            ? {
+                ...session,
+                exercises: [...session.exercises, normalizedExercise],
+              }
+            : session
+        );
         onChange({ schedule: newSchedule });
-        setShowCreateExercise(false);
+        return normalizedExercise;
+      } else {
+        setExerciseError(
+          result.error || "Failed to create exercise. Please try again."
+        );
       }
     } catch (error) {
-      console.error("Error creating exercise:", error);
+      setExerciseError("Error creating exercise. Please try again.");
     }
   };
 
@@ -384,6 +410,7 @@ export const Schedule = ({ data, onChange }) => {
       muscleGroups: exercise.muscleGroups || [],
       level: exercise.level || "intermediate",
       location: exercise.location || "gym",
+      repsUnit: "reps", // default to reps
     }));
 
     newSchedule[activeSession].exercises = [
@@ -425,7 +452,7 @@ export const Schedule = ({ data, onChange }) => {
       const newSession = {
         ...DEFAULT_SESSION,
         id: crypto.randomUUID(),
-        day: `day${(data.schedule.length % 7) + 1}`,
+        day: data.schedule.length + 1, // uvijek broj, npr. 1, 2, 3...
         isRestDay,
         type: defaultType,
         name: isRestDay ? "Rest Day" : "",
@@ -480,17 +507,7 @@ export const Schedule = ({ data, onChange }) => {
   );
 
   // Fallback ako nema schedule
-  let schedule = data.schedule || [];
-
-  // Ensure every session and every exercise in every session has a unique id
-  schedule = schedule.map((session) => ({
-    ...session,
-    id: session.id || crypto.randomUUID(),
-    exercises: (session.exercises || []).map((exercise) => ({
-      ...exercise,
-      id: exercise.id || crypto.randomUUID(),
-    })),
-  }));
+  const schedule = data.schedule || [];
 
   // Reset video error when videoUrl changes
   useEffect(() => {
@@ -547,7 +564,7 @@ export const Schedule = ({ data, onChange }) => {
 
             return (
               <SessionDndWrapper
-                key={session.id}
+                key={session.id || sessionIndex}
                 id={session.id}
                 index={sessionIndex}
                 moveSession={moveSession}
@@ -896,9 +913,11 @@ export const Schedule = ({ data, onChange }) => {
 
                                       return (
                                         <Card
-                                          key={`${session.id}-${
-                                            exercise.id || exerciseIndex
-                                          }`}
+                                          key={
+                                            (exercise.id || exerciseIndex) +
+                                            "-" +
+                                            sessionIndex
+                                          }
                                           variant="dark"
                                           hover={true}
                                           hoverBorderColor="#666"
@@ -965,10 +984,51 @@ export const Schedule = ({ data, onChange }) => {
                                                   />
                                                 </div>
                                                 <div className="space-y-2">
-                                                  <label className="block text-xs sm:text-sm font-medium text-gray-300 text-center">
-                                                    Reps
-                                                  </label>
+                                                  <div className="flex items-center justify-center gap-2 mb-1">
+                                                    <label
+                                                      htmlFor={`reps-unit-toggle-${sessionIndex}-${exerciseIndex}`}
+                                                      className="block text-xs sm:text-sm font-medium text-gray-300 text-center"
+                                                    >
+                                                      {exercise.repsUnit ===
+                                                      "reps"
+                                                        ? "Reps"
+                                                        : "Seconds"}
+                                                    </label>
+                                                    <Button
+                                                      variant="ghost"
+                                                      size="small"
+                                                      onClick={() =>
+                                                        handleExerciseChange(
+                                                          sessionIndex,
+                                                          exerciseIndex,
+                                                          "repsUnit",
+                                                          exercise.repsUnit ===
+                                                            "reps"
+                                                            ? "seconds"
+                                                            : "reps"
+                                                        )
+                                                      }
+                                                      className="p-1 h-6 w-6 text-gray-400 hover:text-[#FF6B00] hover:bg-[#FF6B00]/20 rounded-md transition-all"
+                                                      title={`Switch to ${
+                                                        exercise.repsUnit ===
+                                                        "reps"
+                                                          ? "seconds"
+                                                          : "reps"
+                                                      }`}
+                                                    >
+                                                      <Icon
+                                                        icon={
+                                                          exercise.repsUnit ===
+                                                          "reps"
+                                                            ? "mdi:timer-outline"
+                                                            : "mdi:counter"
+                                                        }
+                                                        className="w-3 h-3"
+                                                      />
+                                                    </Button>
+                                                  </div>
                                                   <input
+                                                    id={`reps-unit-toggle-${sessionIndex}-${exerciseIndex}`}
                                                     type="number"
                                                     value={exercise.reps}
                                                     min={1}
@@ -983,6 +1043,12 @@ export const Schedule = ({ data, onChange }) => {
                                                       )
                                                     }
                                                     className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-lg text-white text-center font-semibold text-base sm:text-lg py-2 sm:py-3 focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm"
+                                                    placeholder={
+                                                      exercise.repsUnit ===
+                                                      "reps"
+                                                        ? "12"
+                                                        : "30"
+                                                    }
                                                   />
                                                 </div>
                                                 <div className="space-y-2">
@@ -1076,8 +1142,9 @@ export const Schedule = ({ data, onChange }) => {
                                                     ).map((muscle, idx) => (
                                                       <span
                                                         key={
-                                                          muscle.id ||
-                                                          muscle.name ||
+                                                          (muscle.id ||
+                                                            muscle.name) +
+                                                          "-" +
                                                           idx
                                                         }
                                                         className="px-3 py-1.5 bg-gradient-to-r from-[#FF6B00]/20 to-[#FF8500]/20 border border-[#FF6B00]/40 rounded-full text-xs sm:text-sm font-medium text-[#FF6B00] capitalize"
@@ -1206,6 +1273,7 @@ export const Schedule = ({ data, onChange }) => {
                                                           darkMode={true}
                                                           compact={false}
                                                           className="mx-auto"
+                                                          bodyColor="white"
                                                         />
                                                       </div>
                                                     </div>

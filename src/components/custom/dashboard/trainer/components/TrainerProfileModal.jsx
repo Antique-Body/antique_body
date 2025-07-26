@@ -127,28 +127,6 @@ export const TrainerProfileModal = ({ trainerData, isOpen, onClose }) => {
               </p>
             </div>
             <div>
-              <span className="text-zinc-400">Pricing</span>
-              <p className="text-white">
-                {trainerData?.pricePerSession ? (
-                  <>
-                    {trainerData.currency === "EUR" ? "€" : "$"}
-                    {trainerData.pricePerSession}/
-                    {trainerData?.pricingType === "per_session"
-                      ? "session"
-                      : "package"}
-                  </>
-                ) : (
-                  <>
-                    {trainerData?.pricingType === "contact_for_pricing"
-                      ? "Contact for pricing"
-                      : trainerData?.pricingType === "free_consultation"
-                      ? "Free consultation"
-                      : "Price not specified"}
-                  </>
-                )}
-              </p>
-            </div>
-            <div>
               <span className="text-zinc-400">Training Environment</span>
               <p className="text-white">
                 {trainerData?.trainingEnvironment

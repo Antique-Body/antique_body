@@ -14,12 +14,12 @@ export async function createDefaultPlansForTrainer(trainerInfoId) {
     await Promise.all([
       ...TRAINING_PLAN_CONFIG.map((plan) =>
         tx.trainingPlan.create({
-          data: { ...plan, trainerInfoId, isActive: true, isPublished: false },
+          data: { ...plan, trainerInfoId },
         })
       ),
       ...NUTRITION_PLAN_CONFIG.map((plan) =>
         tx.nutritionPlan.create({
-          data: { ...plan, trainerInfoId, isActive: true, isPublished: false },
+          data: { ...plan, trainerInfoId },
         })
       ),
     ]);
@@ -141,7 +141,7 @@ export const softDeletePlan = async (planId, type = "training") => {
   const res = await fetchWithTimeout(url, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ isActive: false, type }),
+    body: JSON.stringify({ type }),
   });
   if (!res.ok) {
     let errorMsg = `Failed to soft delete plan at ${url} (status: ${res.status})`;

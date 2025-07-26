@@ -179,16 +179,76 @@ export const PlanCard = ({
     copyTimeoutRef.current = setTimeout(() => setIsCopyRotating(false), 1000);
   };
 
-  const handleEditClick = () => {
+  const handleTrackClick = async () => {
     setIsEditRotating(true);
+    try {
+      // First fetch all coaching requests to find which clients have this plan assigned
+      const response = await fetch("/api/coaching-requests?role=trainer&status=accepted");
+      if (!response.ok) throw new Error("Failed to fetch clients");
+      
+      const data = await response.json();
+      if (!data.success) throw new Error(data.error || "Failed to fetch clients");
+      
+      const clients = data.data;
+      
+      // Find all assigned plans for each client that match this original plan ID
+      const matchingAssignments = [];
+      
+      for (const client of clients) {
+        try {
+          const assignedPlansRes = await fetch(
+            `/api/coaching-requests/${client.id}/assigned-training-plans`
+          );
+          if (assignedPlansRes.ok) {
+            const assignedData = await assignedPlansRes.json();
+            if (assignedData.success && assignedData.data) {
+              const matchingPlans = assignedData.data.filter(
+                plan => plan.originalPlanId === id
+              );
+              matchingPlans.forEach(plan => {
+                matchingAssignments.push({
+                  assignedPlanId: plan.id,
+                  clientId: client.id,
+                  clientName: `${client.client.clientProfile.firstName} ${client.client.clientProfile.lastName}`,
+                  status: plan.status,
+                  assignedAt: plan.assignedAt
+                });
+              });
+            }
+          }
+        } catch (err) {
+          console.error(`Error fetching plans for client ${client.id}:`, err);
+        }
+      }
+      
+      if (matchingAssignments.length === 0) {
+        // No assigned plans found - navigate to client selection page
+        router.push(`/trainer/dashboard/clients?planId=${id}&type=${type}`);
+      } else if (matchingAssignments.length === 1) {
+        // Only one client has this plan - navigate directly
+        const assignment = matchingAssignments[0];
+        router.push(`/trainer/dashboard/clients/${assignment.clientId}/plans/${assignment.assignedPlanId}?type=${type}`);
+      } else {
+        // Multiple clients have this plan - navigate to special tracking overview
+        router.push(`/trainer/dashboard/plans/${id}/track?type=${type}&assignments=${encodeURIComponent(JSON.stringify(matchingAssignments))}`);
+      }
+    } catch (error) {
+      console.error("Error in handleTrackClick:", error);
+      // Fallback to original behavior
+      router.push(`/trainer/dashboard/clients?planId=${id}&type=${type}`);
+    } finally {
+      // Reset rotation after a short delay and store timeout ID for cleanup
+      editTimeoutRef.current = setTimeout(() => setIsEditRotating(false), 1000);
+    }
+  };
+
+  const handleEditClick = () => {
     // Use the correct edit URL based on plan type
     if (isNutrition) {
       router.push(`/trainer/dashboard/plans/nutrition/edit/${id}`);
     } else {
       router.push(`/trainer/dashboard/plans/training/edit/${id}`);
     }
-    // Reset rotation after a short delay and store timeout ID for cleanup
-    editTimeoutRef.current = setTimeout(() => setIsEditRotating(false), 1000);
   };
 
   const handleDeleteClick = () => {
@@ -289,47 +349,22 @@ export const PlanCard = ({
               </div>
 
               <div
-                className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 sm:gap-2 w-full"
+                className="grid grid-cols-2 gap-2 w-full"
                 onClick={(e) => e.stopPropagation()}
               >
-                <Button
-                  variant="darkOutline"
-                  size="small"
-                  leftIcon={
-                    <CopyIcon
-                      size={14}
-                      className={`transition-transform duration-300 ${
-                        isCopyRotating ? "animate-rotate-once" : ""
-                      }`}
-                    />
-                  }
-                  onClick={handleCopyClick}
-                  className="hover:border-[#FF6B00] hover:text-[#FF6B00] hover:scale-105 hover:shadow-md transition-all duration-200 text-xs px-2 py-1.5 h-8 sm:h-9"
-                >
-                  Copy
-                </Button>
                 <Button
                   variant="darkOutline"
                   size="small"
                   leftIcon={<ViewIcon size={14} />}
                   onClick={handleViewClick}
                   loading={loadingPlanDetails}
-                  className="hover:border-blue-400 hover:text-blue-300 hover:scale-105 hover:shadow-md transition-all duration-200 text-xs px-2 py-1.5 h-8 sm:h-9"
+                  className="hover:border-blue-400 hover:text-blue-300 hover:scale-105 hover:shadow-md transition-all duration-200 text-xs px-3 py-2 h-9 font-medium"
                 >
                   {loadingPlanDetails ? "Loading..." : "View"}
                 </Button>
                 <Button
-                  variant="dangerOutline"
-                  size="small"
-                  leftIcon={<TrashIcon size={14} />}
-                  onClick={handleDeleteClick}
-                  className="hover:border-red-500 hover:text-red-400 hover:scale-105 hover:shadow-md transition-all duration-200 text-xs px-2 py-1.5 h-8 sm:h-9"
-                >
-                  Delete
-                </Button>
-                <Button
-                  onClick={handleEditClick}
-                  variant="orangeOutline"
+                  onClick={handleTrackClick}
+                  variant="primary"
                   size="small"
                   leftIcon={
                     <EditIcon
@@ -339,9 +374,47 @@ export const PlanCard = ({
                       }`}
                     />
                   }
-                  className="hover:border-orange-400 hover:text-orange-300 hover:scale-105 hover:shadow-md transition-all duration-200 text-xs px-2 py-1.5 h-8 sm:h-9"
+                  className="bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] hover:from-[#FF5500] hover:to-[#FF7700] hover:scale-105 hover:shadow-lg transition-all duration-200 text-xs px-3 py-2 h-9 font-medium border-0"
+                >
+                  Track
+                </Button>
+              </div>
+
+              {/* Additional Actions */}
+              <div className="flex justify-center gap-1 mt-2" onClick={(e) => e.stopPropagation()}>
+                <Button
+                  variant="ghost"
+                  size="small"
+                  leftIcon={<EditIcon size={12} />}
+                  onClick={handleEditClick}
+                  className="hover:bg-zinc-800 hover:text-blue-400 transition-all duration-200 text-xs px-2 py-1 h-7 text-zinc-500"
                 >
                   Edit
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="small"
+                  leftIcon={
+                    <CopyIcon
+                      size={12}
+                      className={`transition-transform duration-300 ${
+                        isCopyRotating ? "animate-rotate-once" : ""
+                      }`}
+                    />
+                  }
+                  onClick={handleCopyClick}
+                  className="hover:bg-zinc-800 hover:text-[#FF6B00] transition-all duration-200 text-xs px-2 py-1 h-7 text-zinc-500"
+                >
+                  Copy
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="small"
+                  leftIcon={<TrashIcon size={12} />}
+                  onClick={handleDeleteClick}
+                  className="hover:bg-zinc-800 hover:text-red-400 transition-all duration-200 text-xs px-2 py-1 h-7 text-zinc-500"
+                >
+                  Delete
                 </Button>
               </div>
             </div>

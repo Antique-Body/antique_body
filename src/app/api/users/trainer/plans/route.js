@@ -23,11 +23,14 @@ export async function GET(req) {
       );
     }
 
+    // Check if basic mode is requested (for overview pages)
+    const basic = searchParams.get("basic") === "true";
+
     // DRY: Model and select fields by type
     const modelMap = {
       nutrition: {
         model: prisma.nutritionPlan,
-        select: {
+        select: basic ? {
           id: true,
           title: true,
           description: true,
@@ -37,14 +40,31 @@ export async function GET(req) {
           durationType: true,
           clientCount: true,
           createdAt: true,
-          isActive: true,
-          isPublished: true,
+        } : {
+          id: true,
+          title: true,
+          description: true,
+          coverImage: true,
+          price: true,
+          duration: true,
+          durationType: true,
+          clientCount: true,
+          createdAt: true,
+          keyFeatures: true,
+          timeline: true,
+          nutritionInfo: true,
+          mealTypes: true,
+          supplementRecommendations: true,
+          cookingTime: true,
+          targetGoal: true,
+          recommendedFrequency: true,
+          adaptability: true,
           days: true,
         },
       },
       training: {
         model: prisma.trainingPlan,
-        select: {
+        select: basic ? {
           id: true,
           title: true,
           description: true,
@@ -54,15 +74,31 @@ export async function GET(req) {
           durationType: true,
           clientCount: true,
           createdAt: true,
-          isActive: true,
-          isPublished: true,
+        } : {
+          id: true,
+          title: true,
+          description: true,
+          coverImage: true,
+          price: true,
+          duration: true,
+          durationType: true,
+          clientCount: true,
+          createdAt: true,
+          keyFeatures: true,
+          timeline: true,
+          features: true,
+          schedule: true,
+          sessionsPerWeek: true,
+          sessionFormat: true,
+          trainingType: true,
+          difficultyLevel: true,
         },
       },
     };
     const planType = type === "nutrition" ? "nutrition" : "training";
     const { model, select } = modelMap[planType];
     let plans = await model.findMany({
-      where: { trainerInfoId: trainerInfo.id, isActive: true },
+      where: { trainerInfoId: trainerInfo.id },
       orderBy: { createdAt: "desc" },
       select,
     });
@@ -131,8 +167,7 @@ export async function POST(req) {
           days: body.days || null,
           recommendedFrequency: body.recommendedFrequency || null,
           adaptability: body.adaptability || null,
-          isActive: true,
-          isPublished: false,
+
           trainerInfoId: trainerInfo.id,
         },
       });
@@ -153,8 +188,7 @@ export async function POST(req) {
           sessionFormat: body.sessionFormat,
           trainingType: body.trainingType,
           difficultyLevel: body.difficultyLevel,
-          isActive: true,
-          isPublished: false,
+
           trainerInfoId: trainerInfo.id,
         },
       });

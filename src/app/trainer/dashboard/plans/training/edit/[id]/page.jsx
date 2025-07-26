@@ -36,7 +36,7 @@ export default function EditTrainingPlanPage() {
                   : Math.random().toString(36) + Date.now().toString(36),
               name: "Full Body Workout",
               duration: 60,
-              day: "Monday",
+              day: 1,
               description: "",
               exercises: [],
               type: "strength",

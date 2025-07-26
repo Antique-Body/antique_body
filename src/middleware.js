@@ -98,6 +98,7 @@ function getOnboardingRedirect(role, token, pathname) {
         "/trainer/dashboard/exercises",
         "/trainer/dashboard/meals",
         "/trainer/edit-profile",
+        "/trainer/dashboard/clients/:id/plans/:planId",
       ],
       fallback: "/trainer/dashboard",
     },
@@ -114,14 +115,15 @@ function getOnboardingRedirect(role, token, pathname) {
 
   // Check if request path is allowed
   const isAllowed = config.allowed.some((allowedPath) => {
-    if (allowedPath.includes(":id")) {
-      // Convert allowedPath to regex, e.g. "/trainer/dashboard/plans/edit/:id" => /^\/trainer\/dashboard\/plans\/edit\/[^\/]+$/
-      const regex = new RegExp(`^${allowedPath.replace(":id", "[^/]+")}$`, "i");
-      const matches = regex.test(pathname);
-      return matches;
+    if (allowedPath.includes(":")) {
+      // Replace all :nekiParam with [^/]+
+      const regex = new RegExp(
+        `^${allowedPath.replace(/:([a-zA-Z0-9_]+)/g, "[^/]+")}$`,
+        "i"
+      );
+      return regex.test(pathname);
     }
-    const matches = allowedPath === pathname;
-    return matches;
+    return allowedPath === pathname;
   });
 
   const redirect = isAllowed ? null : config.fallback;

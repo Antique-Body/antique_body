@@ -92,18 +92,18 @@ export const FormField = ({
   const getBgStyle = () => {
     switch (backgroundStyle) {
       case "transparent":
-        return "bg-[rgba(20,20,20,0.8)]";
+        return "bg-[rgba(15,15,15,0.8)]";
       case "darker":
-        return "bg-[rgba(20,20,20,0.5)]";
+        return "bg-[rgba(10,10,10,0.7)]";
       case "semi-transparent":
-        return "bg-[rgba(30,30,30,0.8)]";
+        return "bg-[rgba(26,26,26,0.9)]";
       default:
-        return "bg-[#1a1a1a]";
+        return "bg-[rgba(26,26,26,0.95)]";
     }
   };
 
   // Determine padding based on size
-  const getPadding = () => (size === "small" ? "p-2" : "p-3");
+  const getPadding = () => (size === "small" ? "p-2" : "p-2.5 sm:p-3");
 
   // Adjust padding if prefix or suffix icons are present
   const getInputPadding = () => {
@@ -117,10 +117,10 @@ export const FormField = ({
   const inputClass = `w-full min-w-0 ${getPadding()} rounded-lg ${getBgStyle()} border ${
     error
       ? "border-red-500 focus:border-red-500"
-      : "border-[#333] focus:border-[#FF6B00]"
+      : "border-[rgba(255,107,0,0.2)] focus:border-[#FF6B00]"
   } text-white focus:outline-none focus:ring-2 ${
     error ? "focus:ring-red-500/30" : "focus:ring-[#FF6B00]/30"
-  } transition ${getInputPadding()} ${className}`;
+  } transition-all duration-200 backdrop-blur-sm ${getInputPadding()} ${className}`;
 
   // Handler to restrict input to only numbers (and optionally a single decimal point)
   const handleNumberKeyDown = (e) => {
@@ -168,8 +168,9 @@ export const FormField = ({
   // Consistent label component
   const LabelComponent = ({ htmlFor }) =>
     label && (
-      <label className="block text-gray-300 mb-2" htmlFor={htmlFor}>
+      <label className="block text-gray-300 mb-1.5 sm:mb-2" htmlFor={htmlFor}>
         {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
       </label>
     );
 
@@ -370,7 +371,7 @@ export const FormField = ({
     };
 
     return (
-      <div className={`mb-3 sm:mb-4 ${className}`}>
+      <div className={`mb-2.5 sm:mb-3 ${className}`}>
         <LabelComponent htmlFor={id || name} />
         {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
 
@@ -450,7 +451,7 @@ export const FormField = ({
                 {selectedFiles.map((file, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center gap-3 bg-[#1a1a1a] rounded-lg p-2 border border-[#333] group"
+                    className="flex items-center gap-3 bg-[rgba(26,26,26,0.9)] backdrop-blur-sm rounded-lg p-2 border border-[rgba(255,107,0,0.2)] group hover:border-[rgba(255,107,0,0.4)] transition-all duration-200"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <div className="w-10 h-10 bg-[#FF6B00]/10 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -595,7 +596,7 @@ export const FormField = ({
 
     const dropdown = (
       <div
-        className="absolute z-[200] w-full mt-1 bg-[#1a1a1a] border border-[#333] rounded-lg shadow-lg"
+        className="absolute z-[200] w-full mt-1 bg-[rgba(26,26,26,0.95)] backdrop-blur-lg border border-[rgba(255,107,0,0.2)] rounded-lg shadow-xl"
         style={{
           position: "absolute",
           top: dropdownPos.top,
@@ -606,7 +607,7 @@ export const FormField = ({
         <div className="p-2">
           <input
             type="text"
-            className="w-full p-2 bg-[#333] text-white rounded border border-[#444] focus:border-[#FF6B00] focus:outline-none"
+            className="w-full p-2 bg-[rgba(51,51,51,0.9)] backdrop-blur-sm text-white rounded border border-[rgba(255,107,0,0.2)] focus:border-[#FF6B00] focus:outline-none transition-all duration-200"
             placeholder="Search"
             value={searchTerm}
             onChange={handleSearch}
@@ -620,8 +621,8 @@ export const FormField = ({
             filteredOptions.map((option, index) => (
               <div
                 key={index}
-                className={`px-4 py-2 cursor-pointer hover:bg-[#333] ${
-                  value === option.value ? "bg-[#333]" : ""
+                className={`px-4 py-2 cursor-pointer hover:bg-[rgba(255,107,0,0.1)] transition-colors duration-200 ${
+                  value === option.value ? "bg-[rgba(255,107,0,0.15)] text-[#FF6B00]" : ""
                 }`}
                 onClick={() => {
                   if (onSelectOption) onSelectOption(option);
@@ -647,7 +648,7 @@ export const FormField = ({
     );
 
     return (
-      <div className={`mb-3 sm:mb-4 ${className}`}>
+      <div className={`mb-2.5 sm:mb-3 ${className}`}>
         <LabelComponent htmlFor={id || name} />
         {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
         <div className="relative">
@@ -694,7 +695,7 @@ export const FormField = ({
   if (type === "select") {
     // Standard select
     return (
-      <div className={`mb-3 sm:mb-4 ${className}`}>
+      <div className={`mb-2.5 sm:mb-3 ${className}`}>
         <LabelComponent htmlFor={id || name} />
         {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
         <div className="relative">
@@ -707,7 +708,7 @@ export const FormField = ({
               <option
                 key={index}
                 value={typeof option === "object" ? option.value : option}
-                className="bg-[#1a1a1a] text-white"
+                className="bg-[rgba(26,26,26,0.95)] backdrop-blur-sm text-white"
               >
                 {typeof option === "object" ? option.label : option}
               </option>
@@ -734,7 +735,7 @@ export const FormField = ({
 
   if (type === "textarea") {
     return (
-      <div className={`mb-3 sm:mb-4 ${className}`}>
+      <div className={`mb-2.5 sm:mb-3 ${className}`}>
         <LabelComponent htmlFor={id || name} />
         {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
         <textarea {...inputProps} className={inputClass} rows={rows}></textarea>
@@ -751,7 +752,7 @@ export const FormField = ({
   // If type is date, use our custom DatePicker
   if (type === "date") {
     return (
-      <div className={`mb-3 sm:mb-4 ${className}`}>
+      <div className={`mb-2.5 sm:mb-3 ${className}`}>
         <LabelComponent htmlFor={id || name} />
         {subLabel && <p className="mb-2 text-sm text-gray-400">{subLabel}</p>}
         <DatePicker

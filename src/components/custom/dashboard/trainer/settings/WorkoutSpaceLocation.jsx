@@ -106,7 +106,7 @@ export const WorkoutSpaceLocation = ({
   };
 
   return (
-    <motion.div className="space-y-6 p-4 mx-6">
+    <motion.div className="space-y-6 p-4 ">
       <SectionTitle title="Workout Space & Location" />
 
       {/* Location Selector */}

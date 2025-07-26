@@ -18,8 +18,6 @@ const ALLOWED_TRAINING_FIELDS = [
   "sessionFormat",
   "difficultyLevel",
   "schedule",
-  "isActive",
-  "isPublished",
 ];
 const ALLOWED_NUTRITION_FIELDS = [
   "title",
@@ -38,8 +36,6 @@ const ALLOWED_NUTRITION_FIELDS = [
   "days",
   "recommendedFrequency",
   "adaptability",
-  "isActive",
-  "isPublished",
 ];
 
 function filterAllowedFields(data, allowedFields) {
@@ -165,7 +161,6 @@ export async function DELETE(req, { params }) {
     }
     await model.update({
       where: { id: id, trainerInfoId: trainerInfo.id },
-      data: { isActive: false },
     });
     return NextResponse.json({ success: true });
   } catch (error) {

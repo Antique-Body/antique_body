@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import React, { useState } from "react";
+import React from "react";
 
 import { FormField } from "@/components/common";
 import { SectionTitle } from "@/components/custom/dashboard/shared";
@@ -26,215 +26,184 @@ export const ClientBasicInformation = ({
   handleChange,
   previewImage,
   handleImageUpload,
-  onSubmit, // Add onSubmit prop for form submission
 }) => {
-  const [errors, setErrors] = useState({});
-
-  const validate = () => {
-    const newErrors = {};
-    // Email validation
-    if (!clientData.contactEmail) {
-      newErrors.contactEmail = "Email is required.";
-    } else if (!/^\S+@\S+\.\S+$/.test(clientData.contactEmail)) {
-      newErrors.contactEmail = "Please enter a valid email address.";
-    }
-    // Phone validation (basic, can be improved)
-    if (
-      clientData.contactPhone &&
-      !/^\+?\d{7,15}$/.test(clientData.contactPhone)
-    ) {
-      newErrors.contactPhone = "Please enter a valid phone number.";
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    if (validate()) {
-      if (onSubmit) onSubmit(e);
-    }
-  };
+  const errors = {};
 
   return (
-    <form onSubmit={handleFormSubmit} noValidate>
-      <motion.div
-        variants={staggerItems}
-        initial="hidden"
-        animate="visible"
-        className="space-y-6"
-      >
-        <SectionTitle title="Basic Information" />
-        {/* Profile Picture */}
-        <motion.div variants={fadeInUp}>
-          <ProfileImageUpload
-            image={previewImage || clientData.profileImage}
-            onImageChange={handleImageUpload}
-            guidelines={[
-              "Choose a clear photo that shows your face",
-              "Well-lit with a simple background",
-              "JPG, PNG, or GIF format (max 1MB)",
-            ]}
-            guidelineHelpText="A profile photo helps trainers recognize you and personalizes your experience."
-            inputId="profile-image"
-            label={null}
-            description={null}
-          />
-        </motion.div>
-        {/* Personal Info */}
-        <motion.div variants={fadeInUp}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              label="First Name"
-              name="firstName"
-              value={clientData.firstName || ""}
-              onChange={handleChange}
-              placeholder="Your first name"
-              required
-              backgroundStyle="semi-transparent"
-            />
-            <FormField
-              label="Last Name"
-              name="lastName"
-              value={clientData.lastName || ""}
-              onChange={handleChange}
-              placeholder="Your last name"
-              required
-              backgroundStyle="semi-transparent"
-            />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <FormField
-              label="Date of Birth"
-              name="dateOfBirth"
-              type="date"
-              value={clientData.dateOfBirth || ""}
-              onChange={handleChange}
-              required
-              backgroundStyle="semi-transparent"
-            />
-            <FormField
-              label="Gender"
-              name="gender"
-              type="select"
-              value={clientData.gender || ""}
-              onChange={handleChange}
-              options={[
-                { value: "", label: "Select gender" },
-                { value: "male", label: "Male" },
-                { value: "female", label: "Female" },
-              ]}
-              required
-              backgroundStyle="semi-transparent"
-            />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <FormField
-              label="Height (cm)"
-              name="height"
-              type="number"
-              value={clientData.height || ""}
-              onChange={handleChange}
-              placeholder="Enter your height in cm"
-              min="100"
-              max="250"
-              required
-              backgroundStyle="semi-transparent"
-            />
-            <FormField
-              label="Weight (kg)"
-              name="weight"
-              type="number"
-              value={clientData.weight || ""}
-              onChange={handleChange}
-              placeholder="Enter your weight in kg"
-              min="30"
-              max="250"
-              required
-              backgroundStyle="semi-transparent"
-            />
-          </div>
-        </motion.div>
-        {/* Description/Bio */}
-        <motion.div variants={fadeInUp}>
+    <motion.div
+      variants={staggerItems}
+      initial="hidden"
+      animate="visible"
+      className="space-y-4 sm:space-y-6"
+    >
+      <SectionTitle title="Basic Information" />
+      {/* Profile Picture */}
+      <motion.div variants={fadeInUp} className="mb-6 sm:mb-8">
+        <ProfileImageUpload
+          image={previewImage || clientData.profileImage}
+          onImageChange={handleImageUpload}
+          guidelines={[
+            "Choose a clear photo that shows your face",
+            "Well-lit with a simple background",
+            "JPG, PNG, or GIF format (max 1MB)",
+          ]}
+          guidelineHelpText="A profile photo helps trainers recognize you and personalizes your experience."
+          inputId="profile-image"
+          label={null}
+          description={null}
+        />
+      </motion.div>
+      {/* Personal Info */}
+      <motion.div variants={fadeInUp} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
-            label="About Me"
-            name="description"
-            type="textarea"
-            value={clientData.description || ""}
+            label="First Name"
+            name="firstName"
+            value={clientData.firstName || ""}
             onChange={handleChange}
-            placeholder="Tell trainers about yourself and your fitness journey..."
-            rows={5}
+            placeholder="Your first name"
+            required
             backgroundStyle="semi-transparent"
           />
-          <p className="mt-1 text-xs text-gray-400">
-            Help trainers understand your background, goals, and what you're
-            looking for in a coach.
-          </p>
-        </motion.div>
-
-        {/* Contact Information */}
-        <motion.div variants={fadeInUp}>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                label="Contact Email"
-                name="contactEmail"
-                type="email"
-                value={clientData.contactEmail || ""}
-                onChange={handleChange}
-                placeholder="your.email@example.com"
-                backgroundStyle="semi-transparent"
-                required
-                error={errors.contactEmail}
-              />
-              <FormField
-                label="Contact Phone"
-                name="contactPhone"
-                type="tel"
-                value={clientData.contactPhone || ""}
-                onChange={handleChange}
-                placeholder="+1234567890"
-                backgroundStyle="semi-transparent"
-                error={errors.contactPhone}
-              />
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Fitness Experience */}
-        <motion.div variants={fadeInUp}>
-          <div className="space-y-4">
-            <FormField
-              label="Experience Level"
-              name="experienceLevel"
-              type="select"
-              value={clientData.experienceLevel || ""}
-              onChange={handleChange}
-              options={[
-                { value: "", label: "Select your experience level" },
-                ...EXPERIENCE_LEVELS,
-              ]}
-              backgroundStyle="semi-transparent"
-            />
-            <FormField
-              label="Previous Activities"
-              name="previousActivities"
-              type="textarea"
-              value={clientData.previousActivities || ""}
-              onChange={handleChange}
-              placeholder="Describe any previous fitness activities or sports you've participated in..."
-              rows={3}
-              backgroundStyle="semi-transparent"
-            />
-          </div>
-          <p className="mt-1 text-xs text-gray-400">
-            This information helps trainers understand your fitness background
-            and tailor workouts accordingly.
-          </p>
-        </motion.div>
-        <button type="submit" className="hidden" aria-hidden="true" />
+          <FormField
+            label="Last Name"
+            name="lastName"
+            value={clientData.lastName || ""}
+            onChange={handleChange}
+            placeholder="Your last name"
+            required
+            backgroundStyle="semi-transparent"
+          />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            label="Date of Birth"
+            name="dateOfBirth"
+            type="date"
+            value={clientData.dateOfBirth || ""}
+            onChange={handleChange}
+            required
+            backgroundStyle="semi-transparent"
+          />
+          <FormField
+            label="Gender"
+            name="gender"
+            type="select"
+            value={clientData.gender || ""}
+            onChange={handleChange}
+            options={[
+              { value: "", label: "Select gender" },
+              { value: "male", label: "Male" },
+              { value: "female", label: "Female" },
+            ]}
+            required
+            backgroundStyle="semi-transparent"
+          />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            label="Height (cm)"
+            name="height"
+            type="number"
+            value={clientData.height || ""}
+            onChange={handleChange}
+            placeholder="Enter your height in cm"
+            min="100"
+            max="250"
+            backgroundStyle="semi-transparent"
+          />
+          <FormField
+            label="Weight (kg)"
+            name="weight"
+            type="number"
+            value={clientData.weight || ""}
+            onChange={handleChange}
+            placeholder="Enter your weight in kg"
+            min="30"
+            max="200"
+            backgroundStyle="semi-transparent"
+          />
+        </div>
+        {/* Add more fields as needed */}
       </motion.div>
-    </form>
+      {/* Description/Bio */}
+      <motion.div variants={fadeInUp} className="space-y-2">
+        <FormField
+          label="About Me"
+          name="description"
+          type="textarea"
+          value={clientData.description || ""}
+          onChange={handleChange}
+          placeholder="Tell trainers about yourself and your fitness journey..."
+          rows={5}
+          backgroundStyle="semi-transparent"
+        />
+        <p className="mt-1 text-xs text-gray-400">
+          Help trainers understand your background, goals, and what you're
+          looking for in a coach.
+        </p>
+      </motion.div>
+
+      {/* Contact Information */}
+      <motion.div variants={fadeInUp} className="space-y-2">
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              label="Contact Email"
+              name="contactEmail"
+              type="email"
+              value={clientData.contactEmail || ""}
+              onChange={handleChange}
+              placeholder="your.email@example.com"
+              backgroundStyle="semi-transparent"
+              error={errors.contactEmail}
+            />
+            <FormField
+              label="Contact Phone"
+              name="contactPhone"
+              type="tel"
+              value={clientData.contactPhone || ""}
+              onChange={handleChange}
+              placeholder="+1234567890"
+              backgroundStyle="semi-transparent"
+              error={errors.contactPhone}
+            />
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Fitness Experience */}
+      <motion.div variants={fadeInUp} className="space-y-2">
+        <div className="space-y-3">
+          <FormField
+            label="Experience Level"
+            name="experienceLevel"
+            type="select"
+            value={clientData.experienceLevel || ""}
+            onChange={handleChange}
+            options={[
+              { value: "", label: "Select your experience level" },
+              ...EXPERIENCE_LEVELS,
+            ]}
+            backgroundStyle="semi-transparent"
+          />
+          <FormField
+            label="Previous Activities"
+            name="previousActivities"
+            type="textarea"
+            value={clientData.previousActivities || ""}
+            onChange={handleChange}
+            placeholder="Describe any previous fitness activities or sports you've participated in..."
+            rows={3}
+            backgroundStyle="semi-transparent"
+          />
+        </div>
+        <p className="mt-1 text-xs text-gray-400">
+          This information helps trainers understand your fitness background and
+          tailor workouts accordingly.
+        </p>
+      </motion.div>
+      <button type="submit" className="hidden" aria-hidden="true" />
+    </motion.div>
   );
 };
