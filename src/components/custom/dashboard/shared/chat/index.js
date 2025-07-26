@@ -6,3 +6,4 @@ export { MessageInput } from "./ChatComponents";
 export { EmptyChatState } from "./ChatComponents";
 export { NoConversationSelected } from "./ChatComponents";
 export { MessageBubble } from "./ChatComponents";
+export { RealTimeChatInterface } from "./RealTimeChatInterface";
