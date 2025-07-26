@@ -2,8 +2,8 @@
 
 import { Icon } from "@iconify/react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useState, useRef, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -23,6 +23,8 @@ import { createNewTrainingDay } from "@/utils/trainingUtils";
 
 export default function TrackPlanPage({ params }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const timeoutRef = useRef(null);
   // Unwrap params for Next.js 15 compatibility
   const unwrappedParams = React.use(params);
   const { id, planId } = unwrappedParams;
@@ -63,14 +65,9 @@ export default function TrackPlanPage({ params }) {
 
   // UI state
   const [viewMode, setViewMode] = useState(() => {
-    // Check if mode=review is in URL params
-    if (typeof window !== "undefined") {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get("mode") === "review"
-        ? VIEW_MODES.REVIEW
-        : VIEW_MODES.OVERVIEW;
-    }
-    return VIEW_MODES.OVERVIEW;
+    // Check if mode=review is in URL params using useSearchParams
+    const modeParam = searchParams.get("mode");
+    return modeParam === "review" ? VIEW_MODES.REVIEW : VIEW_MODES.OVERVIEW;
   });
   const [selectedReviewDay, setSelectedReviewDay] = useState(null);
 
@@ -91,6 +88,16 @@ export default function TrackPlanPage({ params }) {
   // Video modal state
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [currentVideoUrl, setCurrentVideoUrl] = useState(null);
+
+  // Cleanup timeout on unmount
+  useEffect(
+    () => () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    },
+    []
+  );
 
   // Safe navigation handlers - only block specific navigations
   const handleBackNavigation = () => {
@@ -125,20 +132,48 @@ export default function TrackPlanPage({ params }) {
 
   // Handle URL query params and auto-switch logic
   React.useEffect(() => {
-    // Check URL params on mount and route changes
-    if (typeof window !== "undefined") {
-      const urlParams = new URLSearchParams(window.location.search);
-      const modeParam = urlParams.get("mode");
-      if (modeParam === "review" && viewMode !== VIEW_MODES.REVIEW) {
-        setViewMode(VIEW_MODES.REVIEW);
-      }
+    // Check URL params on mount and route changes using useSearchParams
+    const modeParam = searchParams.get("mode");
+    if (modeParam === "review" && viewMode !== VIEW_MODES.REVIEW) {
+      setViewMode(VIEW_MODES.REVIEW);
     }
 
     // Auto-switch to Overview if trying to access Live mode without workout
     if (viewMode === VIEW_MODES.LIVE && !isWorkoutStarted) {
       setViewMode(VIEW_MODES.OVERVIEW);
     }
-  }, [viewMode, isWorkoutStarted]);
+  }, [viewMode, isWorkoutStarted, searchParams]);
+
+  // Helper functions for workout status logic
+  const getWorkoutStatus = (day, dayIdx, isWorkoutStarted, currentDayIndex) => {
+    // If this is the current active workout day, set status to in_progress
+    if (
+      isWorkoutStarted &&
+      currentDayIndex === dayIdx &&
+      !day.workoutCompletedAt
+    ) {
+      return "in_progress";
+    }
+    // Use existing status or default logic
+    return day.workoutStatus || (dayIdx === 0 ? "not_started" : "locked");
+  };
+
+  const getWorkoutStartedAt = (
+    day,
+    dayIdx,
+    isWorkoutStarted,
+    currentDayIndex
+  ) => {
+    // If this is the current active workout day and workout is started, ensure workoutStartedAt is set
+    if (
+      isWorkoutStarted &&
+      currentDayIndex === dayIdx &&
+      !day.workoutStartedAt
+    ) {
+      return new Date().toISOString();
+    }
+    return day.workoutStartedAt || null;
+  };
 
   const handleStartWorkout = (dayIdx = currentDayIndex) => {
     if (
@@ -326,8 +361,7 @@ export default function TrackPlanPage({ params }) {
       await handleSavePlan();
 
       // Update lastSavedPlan to prevent save bar from showing after automatic save
-      // We need to get the updated plan state to sync it properly
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         setPlan((currentPlan) => {
           updateLastSavedPlan(currentPlan);
           return currentPlan;
@@ -374,7 +408,7 @@ export default function TrackPlanPage({ params }) {
     await handleSaveWorkoutProgress();
 
     // Update lastSavedPlan to prevent save bar from showing after automatic save
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       setPlan((currentPlan) => {
         updateLastSavedPlan(currentPlan);
         return currentPlan;
@@ -407,31 +441,18 @@ export default function TrackPlanPage({ params }) {
             description: day.description || "",
 
             // Workout completion data from plan state (already updated in handleCompleteWorkoutSession)
-            workoutStatus: (() => {
-              // If this is the current active workout day, set status to in_progress
-              if (
-                isWorkoutStarted &&
-                currentDayIndex === dayIdx &&
-                !day.workoutCompletedAt
-              ) {
-                return "in_progress";
-              }
-              // Use existing status or default logic
-              return (
-                day.workoutStatus || (dayIdx === 0 ? "not_started" : "locked")
-              );
-            })(),
-            workoutStartedAt: (() => {
-              // If this is the current active workout day and workout is started, ensure workoutStartedAt is set
-              if (
-                isWorkoutStarted &&
-                currentDayIndex === dayIdx &&
-                !day.workoutStartedAt
-              ) {
-                return new Date().toISOString();
-              }
-              return day.workoutStartedAt || null;
-            })(),
+            workoutStatus: getWorkoutStatus(
+              day,
+              dayIdx,
+              isWorkoutStarted,
+              currentDayIndex
+            ),
+            workoutStartedAt: getWorkoutStartedAt(
+              day,
+              dayIdx,
+              isWorkoutStarted,
+              currentDayIndex
+            ),
             workoutCompletedAt: day.workoutCompletedAt || null,
             workoutEndedAt: day.workoutEndedAt || null,
             workoutDuration: day.workoutDuration || 0,

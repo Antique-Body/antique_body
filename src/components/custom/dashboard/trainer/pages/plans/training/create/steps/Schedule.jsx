@@ -641,6 +641,16 @@ export const Schedule = ({ data, onChange }) => {
                         <div
                           className="cursor-move p-1 rounded hover:bg-white/10 transition-colors duration-150"
                           onMouseDown={(e) => e.stopPropagation()}
+                          role="button"
+                          tabIndex={0}
+                          aria-label="Drag to reorder session"
+                          aria-grabbed="false"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }
+                          }}
                         >
                           <Icon
                             icon="mdi:drag-vertical"

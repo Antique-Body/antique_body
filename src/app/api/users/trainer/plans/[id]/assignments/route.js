@@ -85,9 +85,6 @@ export async function GET(request, { params }) {
           },
         });
 
-        if (!coachingRequest) {
-        }
-
         return {
           assignedPlanId: assignment.id,
           clientId: assignment.clientId,
