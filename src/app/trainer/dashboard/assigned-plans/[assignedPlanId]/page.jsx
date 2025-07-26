@@ -28,7 +28,7 @@ export default function AssignedPlanTrackingPage({ params }) {
   const { assignedPlanId } = unwrappedParams;
 
   // Training plan management - use dummy clientId since we don't need it with new API
-  const trainingPlan = useTrainingPlan("dummy-client-id", assignedPlanId);
+  const trainingPlan = useTrainingPlan(undefined, assignedPlanId);
   const {
     plan,
     loading,
@@ -45,11 +45,14 @@ export default function AssignedPlanTrackingPage({ params }) {
   } = trainingPlan;
 
   // Workout session management
-  const workoutSession = useWorkoutSession(
-    plan,
-    assignedPlanId,
-    "dummy-client-id"
-  );
+  const clientId = React.useMemo(() => {
+    // Try to get clientId from plan object if available
+    if (plan && plan.clientId) return plan.clientId;
+    // If plan is not loaded yet, return undefined
+    return undefined;
+  }, [plan]);
+
+  const workoutSession = useWorkoutSession(plan, assignedPlanId, clientId);
   const {
     currentDayIndex,
     setCurrentDayIndex,
@@ -193,7 +196,7 @@ export default function AssignedPlanTrackingPage({ params }) {
 
   const handleSaveWorkoutProgress = async () => {
     try {
-      // Here you would typically save the workout progress
+      // TODO: Implement workout progress saving logic here
     } catch (error) {
       console.error("Error saving workout progress:", error);
     }

@@ -1596,6 +1596,7 @@ function TrainingPlanCard({
   const [planDetails, setPlanDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [viewResultsLoading, setViewResultsLoading] = useState(false);
 
   const handleViewPlan = async () => {
     if (!planDetails && !isLoading) {
@@ -1751,18 +1752,32 @@ function TrainingPlanCard({
             </Button>
 
             {plan.status === "completed" && (
-              <Link
-                href={`/trainer/dashboard/clients/${client.id}/plans/${plan.id}?mode=review`}
+              <Button
+                variant="secondary"
+                size="sm"
+                className="px-3 py-2 bg-green-600/20 border-green-500/30 text-green-300 hover:bg-green-600/30"
+                disabled={viewResultsLoading}
+                onClick={async () => {
+                  setViewResultsLoading(true);
+                  try {
+                    window.location.href = `/trainer/dashboard/clients/${client.id}/plans/${plan.id}?mode=review`;
+                  } finally {
+                    // Optionally keep loading true until navigation
+                  }
+                }}
               >
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="px-3 py-2 bg-green-600/20 border-green-500/30 text-green-300 hover:bg-green-600/30"
-                >
-                  <Icon icon="mdi:chart-line" width={16} height={16} />
-                  <span className="hidden sm:inline ml-1">View Results</span>
-                </Button>
-              </Link>
+                {viewResultsLoading ? (
+                  <span className="flex items-center">
+                    <span className="w-3 h-3 border-2 border-green-300 border-t-transparent rounded-full animate-spin mr-2"></span>
+                    Loading...
+                  </span>
+                ) : (
+                  <>
+                    <Icon icon="mdi:chart-line" width={16} height={16} />
+                    <span className="hidden sm:inline ml-1">View Results</span>
+                  </>
+                )}
+              </Button>
             )}
 
             {plan.status !== "completed" && plan.status !== "active" && (

@@ -407,6 +407,15 @@ export const PlanCard = ({
               <div
                 className="flex justify-center gap-1 mt-2"
                 onClick={(e) => e.stopPropagation()}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }
+                }}
+                aria-label="Plan action buttons"
               >
                 <Button
                   variant="ghost"

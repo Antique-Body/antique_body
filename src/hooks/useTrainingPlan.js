@@ -1,6 +1,8 @@
 import isEqual from "lodash/isEqual";
 import { useState, useEffect, useCallback } from "react";
 
+import logger from "@/lib/logger";
+
 export function useTrainingPlan(id, planId) {
   const [plan, setPlan] = useState(null);
   const [lastSavedPlan, setLastSavedPlan] = useState(null);
@@ -60,7 +62,12 @@ export function useTrainingPlan(id, planId) {
     } catch (err) {
       // Fallback to old API if new one fails
       try {
-        console.warn("New API failed, trying fallback:", err.message);
+        logger.logApiFallback("fetchPlan", err, true, {
+          planId,
+          clientId: id,
+          endpoint: `/api/users/trainer/assigned-plans/${planId}`,
+          fallbackEndpoint: `/api/coaching-requests/${id}/assigned-training-plan/${planId}`,
+        });
         const res = await fetch(
           `/api/coaching-requests/${id}/assigned-training-plan/${planId}`
         );
@@ -146,7 +153,12 @@ export function useTrainingPlan(id, planId) {
     } catch (err) {
       // Fallback to old API if new one fails
       try {
-        console.warn("New save API failed, trying fallback:", err.message);
+        logger.logApiFallback("savePlan", err, true, {
+          planId,
+          clientId: id,
+          endpoint: `/api/users/trainer/assigned-plans/${planId}/edit`,
+          fallbackEndpoint: `/api/coaching-requests/${id}/assigned-training-plan/${planId}/edit`,
+        });
         const res = await fetch(
           `/api/coaching-requests/${id}/assigned-training-plan/${planId}/edit`,
           {

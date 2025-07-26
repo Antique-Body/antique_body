@@ -107,20 +107,27 @@ export async function GET(req) {
       select,
     });
 
-    // Calculate dynamic clientCount by counting active assigned plans
-    const plansWithClientCount = await Promise.all(
-      plans.map(async (plan) => {
-        // For both training and nutrition plans, we use assignedTrainingPlan table
-        // (this might need to be adjusted if nutrition plans have a separate assignment table)
-        const clientCount = await prisma.assignedTrainingPlan.count({
-          where: {
-            originalPlanId: plan.id,
-            status: "active",
-          },
-        });
-        return { ...plan, type: planType, clientCount };
-      })
+    // Aggregate client counts for all plans in a single query
+    // Both training and nutrition plans use the same assignedTrainingPlan table.
+    // The originalPlanId field in assignedTrainingPlan refers to either a TrainingPlan or NutritionPlan.
+    const planIds = plans.map((plan) => plan.id);
+    const clientCounts = await prisma.assignedTrainingPlan.groupBy({
+      by: ["originalPlanId"],
+      where: {
+        originalPlanId: { in: planIds },
+        status: "active",
+      },
+      _count: { originalPlanId: true },
+    });
+    const clientCountMap = Object.fromEntries(
+      clientCounts.map((c) => [c.originalPlanId, c._count.originalPlanId])
     );
+
+    const plansWithClientCount = plans.map((plan) => ({
+      ...plan,
+      type: planType,
+      clientCount: clientCountMap[plan.id] || 0,
+    }));
 
     return NextResponse.json(plansWithClientCount);
   } catch (error) {

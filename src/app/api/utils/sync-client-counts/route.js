@@ -35,20 +35,24 @@ export async function POST(_request) {
       where: { trainerInfoId: trainerInfo.id },
       select: { id: true },
     });
-
+    const trainingPlanIds = trainingPlans.map((plan) => plan.id);
+    const trainingCounts = await prisma.assignedTrainingPlan.groupBy({
+      by: ["originalPlanId"],
+      where: {
+        originalPlanId: { in: trainingPlanIds },
+        status: "active",
+      },
+      _count: { originalPlanId: true },
+    });
+    const trainingCountMap = Object.fromEntries(
+      trainingCounts.map((c) => [c.originalPlanId, c._count.originalPlanId])
+    );
     for (const plan of trainingPlans) {
-      const activeAssignments = await prisma.assignedTrainingPlan.count({
-        where: {
-          originalPlanId: plan.id,
-          status: "active",
-        },
-      });
-
+      const clientCount = trainingCountMap[plan.id] || 0;
       await prisma.trainingPlan.update({
         where: { id: plan.id },
-        data: { clientCount: activeAssignments },
+        data: { clientCount },
       });
-
       updatedCount++;
     }
 
@@ -57,20 +61,24 @@ export async function POST(_request) {
       where: { trainerInfoId: trainerInfo.id },
       select: { id: true },
     });
-
+    const nutritionPlanIds = nutritionPlans.map((plan) => plan.id);
+    const nutritionCounts = await prisma.assignedTrainingPlan.groupBy({
+      by: ["originalPlanId"],
+      where: {
+        originalPlanId: { in: nutritionPlanIds },
+        status: "active",
+      },
+      _count: { originalPlanId: true },
+    });
+    const nutritionCountMap = Object.fromEntries(
+      nutritionCounts.map((c) => [c.originalPlanId, c._count.originalPlanId])
+    );
     for (const plan of nutritionPlans) {
-      const activeAssignments = await prisma.assignedTrainingPlan.count({
-        where: {
-          originalPlanId: plan.id,
-          status: "active",
-        },
-      });
-
+      const clientCount = nutritionCountMap[plan.id] || 0;
       await prisma.nutritionPlan.update({
         where: { id: plan.id },
-        data: { clientCount: activeAssignments },
+        data: { clientCount },
       });
-
       updatedCount++;
     }
 
