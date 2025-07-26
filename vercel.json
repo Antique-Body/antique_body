@@ -9,7 +9,7 @@
     "autoAlias": false,
     "silent": true
   },
-  "buildCommand": "prisma generate && next build",
+  "buildCommand": "prisma generate && prisma migrate deploy && next build",
   "build": {
     "env": {
       "NODE_ENV": "production"
