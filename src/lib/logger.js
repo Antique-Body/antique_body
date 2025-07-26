@@ -108,7 +108,7 @@ class Logger {
 
     const logData = this.formatMessage("info", message, context);
 
-    // Console output
+    // Console output - using console.warn for info level as console.info is not allowed
     console.warn(`[INFO] ${message}`, context);
 
     // Send to external service
@@ -123,8 +123,8 @@ class Logger {
 
     const logData = this.formatMessage("debug", message, context);
 
-    // Console output
-    console.debug(`[DEBUG] ${message}`, context);
+    // Console output - using console.warn for debug level as console.debug is not allowed
+    console.warn(`[DEBUG] ${message}`, context);
 
     // Send to external service
     this.sendToExternalService(logData);
