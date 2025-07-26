@@ -109,7 +109,7 @@ class Logger {
     const logData = this.formatMessage("info", message, context);
 
     // Console output
-    console.info(`[INFO] ${message}`, context);
+    console.warn(`[INFO] ${message}`, context);
 
     // Send to external service
     this.sendToExternalService(logData);

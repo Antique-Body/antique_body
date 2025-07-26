@@ -1,12 +1,13 @@
 import bcrypt from "bcrypt";
 import { NextResponse } from "next/server";
 
-import { trainerService, exerciseService } from "../services";
-import { createDefaultPlansForTrainer } from "../services/planService";
 
 import { auth } from "#/auth";
 import prisma from "@/lib/prisma";
 import { validateTrainerProfile } from "@/middleware/validation";
+
+import { trainerService, exerciseService } from "../services";
+import { createDefaultPlansForTrainer } from "../services/planService";
 
 export async function POST(req) {
   try {

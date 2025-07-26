@@ -4,11 +4,12 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 
+import { Button, FormField, InfoBanner } from "@/components/common";
+import { formatMuscleDisplayName } from "@/utils/muscleMapper";
+
 import { AnatomicalViewer } from "./AnatomicalViewer";
 import exerciseLibrary from "./exerciseLibrary.json";
 
-import { Button, FormField, InfoBanner } from "@/components/common";
-import { formatMuscleDisplayName } from "@/utils/muscleMapper";
 export const ExerciseLibrarySelector = ({
   searchLoading = false,
   onSelectExercise,

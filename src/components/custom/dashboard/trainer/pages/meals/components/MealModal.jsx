@@ -4,8 +4,6 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-import mealLibrary from "./mealLibrary.json";
-import { MealLibrarySelector } from "./MealLibrarySelector";
 
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
@@ -19,6 +17,9 @@ import {
   DIETARY_PREFERENCES,
   CUISINE_TYPES,
 } from "@/enums";
+
+import mealLibrary from "./mealLibrary.json";
+import { MealLibrarySelector } from "./MealLibrarySelector";
 
 // File upload validation
 const validateFile = (file, type) => {

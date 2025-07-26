@@ -3,13 +3,14 @@ import { Icon } from "@iconify/react";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-import { FormSection } from "./";
 
 import { FormField } from "@/components/common";
 import { ErrorIcon } from "@/components/common/Icons";
 import { SpecialtySelector } from "@/components/custom/shared";
 import { EXPERIENCE_LEVELS } from "@/enums";
 import { usePrefillFromSession } from "@/hooks";
+
+import { FormSection } from "./";
 
 export const BasicInfoStep = ({
   formData,

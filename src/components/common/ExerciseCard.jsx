@@ -2,11 +2,12 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import React from "react";
 
+import AnatomicalViewer from "@/components/custom/dashboard/trainer/pages/exercises/components/AnatomicalViewer";
+import { getRepsPlaceholder, toggleRepsUnit } from "@/utils/exerciseUtils";
+
 import { Button } from "./Button";
 import { Card } from "./Card";
 
-import AnatomicalViewer from "@/components/custom/dashboard/trainer/pages/exercises/components/AnatomicalViewer";
-import { getRepsPlaceholder, toggleRepsUnit } from "@/utils/exerciseUtils";
 
 /**
  * Mobile-first responsive exercise card component

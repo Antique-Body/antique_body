@@ -6,9 +6,10 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Card } from "@/components/common";
+
 import { Button } from "./Button";
 
-import { Card } from "@/components/common";
 
 export const ErrorBoundary = ({ error, reset, className = "" }) => {
   const { t } = useTranslation();

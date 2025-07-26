@@ -4,12 +4,13 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 
-import mealLibrary from "./mealLibrary.json";
 
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { InfoBanner } from "@/components/common/InfoBanner";
 import { DIETARY_PREFERENCES } from "@/enums";
+
+import mealLibrary from "./mealLibrary.json";
 
 // Function to map dietary preference values to display labels
 const formatDietaryDisplayName = (dietaryValue) => {

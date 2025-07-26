@@ -6,10 +6,11 @@ import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 
+import { Card, Modal, FormField, Button } from "@/components/common";
+
 import { MealLibrarySelector } from "../../../../meals/components";
 import { MealModal } from "../../../../meals/components/MealModal";
 
-import { Card, Modal, FormField, Button } from "@/components/common";
 
 // Helper to check if a URL is a YouTube link
 const isYouTubeUrl = (url) => {

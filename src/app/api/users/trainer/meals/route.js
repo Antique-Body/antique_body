@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { mealService } from "../../services";
 
 import { auth } from "#/auth";
 import prisma from "@/lib/prisma";
 import { validateMeal } from "@/middleware/validation";
+
+import { mealService } from "../../services";
 
 export async function GET(request) {
   try {

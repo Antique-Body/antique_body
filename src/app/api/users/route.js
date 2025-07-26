@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 
+import { auth } from "#/auth";
+
 import { userService } from "./services";
 
-import { auth } from "#/auth";
 
 function parseQueryParams(request) {
   const url = new URL(request.url);

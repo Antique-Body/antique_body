@@ -1,6 +1,7 @@
+import prisma from "@/lib/prisma";
+
 import { TRAINING_PLAN_CONFIG, NUTRITION_PLAN_CONFIG } from "./defaultSettings";
 
-import prisma from "@/lib/prisma";
 
 export async function createDefaultPlansForTrainer(trainerInfoId) {
   await prisma.$transaction(async (tx) => {

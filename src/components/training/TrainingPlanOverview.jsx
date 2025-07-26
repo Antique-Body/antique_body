@@ -2,14 +2,15 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import React, { useState } from "react";
 
-import { DraggableExercise } from "./DraggableExercise";
-import { DraggableTrainingDay } from "./DraggableTrainingDay";
-import { WorkoutReview } from "./WorkoutReview";
 
 import { Button } from "@/components/common/Button";
 import { Modal } from "@/components/common/Modal";
 import AnatomicalViewer from "@/components/custom/dashboard/trainer/pages/exercises/components/AnatomicalViewer";
 import { getMuscleGroupColor } from "@/utils/trainingUtils";
+
+import { DraggableExercise } from "./DraggableExercise";
+import { DraggableTrainingDay } from "./DraggableTrainingDay";
+import { WorkoutReview } from "./WorkoutReview";
 
 // Helper function to get status-based styling
 

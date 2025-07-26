@@ -1,12 +1,13 @@
 "use client";
 import { Icon } from "@iconify/react";
 
-import { FormSection, LanguageSelector } from "./";
 
 import { FormField } from "@/components/common";
 import { Button } from "@/components/common/Button";
 import { ErrorIcon } from "@/components/common/Icons";
 import { ACTIVITY_TYPES, FITNESS_GOALS } from "@/enums";
+
+import { FormSection, LanguageSelector } from "./";
 
 export const GoalsAndPreferencesStep = ({ formData, onChange, errors }) => {
   // Handler for language selection

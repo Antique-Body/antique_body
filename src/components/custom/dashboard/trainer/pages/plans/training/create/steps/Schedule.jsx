@@ -7,13 +7,14 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
+import { Button } from "@/components/common/Button";
+import { Card } from "@/components/common/Card";
+import { Modal } from "@/components/common/Modal";
+
 import { AnatomicalViewer } from "../../../../exercises/components/AnatomicalViewer";
 import { ExerciseLibrarySelector } from "../../../../exercises/components/ExerciseLibrarySelector";
 import { ExerciseModal } from "../../../../exercises/components/ExerciseModal";
 
-import { Button } from "@/components/common/Button";
-import { Card } from "@/components/common/Card";
-import { Modal } from "@/components/common/Modal";
 
 const SESSION_TYPES = [
   {

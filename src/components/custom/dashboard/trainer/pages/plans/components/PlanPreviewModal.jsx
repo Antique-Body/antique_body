@@ -4,6 +4,10 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
+import { Button } from "@/components/common/Button";
+import { ErrorMessage } from "@/components/common/ErrorMessage";
+import { Modal } from "@/components/common/Modal";
+
 import { DetailsTabNutrition } from "./planPreviewModal/DetailsTabNutrition";
 import { DetailsTabTraining } from "./planPreviewModal/DetailsTabTraining";
 import { OverviewTab } from "./planPreviewModal/OverviewTab";
@@ -12,9 +16,6 @@ import { StatsTab } from "./planPreviewModal/StatsTab";
 import { usePlanPDF } from "./planPreviewModal/usePlanPDF";
 import { WeeklyScheduleTab } from "./planPreviewModal/WeeklyScheduleTab";
 
-import { Button } from "@/components/common/Button";
-import { ErrorMessage } from "@/components/common/ErrorMessage";
-import { Modal } from "@/components/common/Modal";
 
 export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
   const [activeTab, setActiveTab] = useState("overview");

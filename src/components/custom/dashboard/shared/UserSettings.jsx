@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { useState, useEffect, useCallback } from "react";
 
-import { AnimatedTabContent } from "./DashboardTabs";
 
 import { Button } from "@/components/common/Button";
 // Client Settings
@@ -19,6 +18,8 @@ import {
   AccountSettings as TrainerAccountSettings,
   LanguagePreferences as TrainerLanguagePreferences,
 } from "@/components/custom/dashboard/trainer/settings";
+
+import { AnimatedTabContent } from "./DashboardTabs";
 
 export const UserSettings = ({
   profileType = "client",
