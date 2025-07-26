@@ -1,11 +1,51 @@
 {
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "framework": "nextjs",
+  "git": {
+    "deploymentEnabled": {
+      "main": false,
+      "stage": true
+    }
+  },
+  "github": {
+    "autoAlias": false,
+    "silent": true
+  },
+  "buildCommand": "prisma generate && next build",
+  "build": {
+    "env": {
+      "NODE_ENV": "production"
+    }
+  },
+  "env": {
+    "DATABASE_URL": "@database-url-staging",
+    "DIRECT_URL": "@direct-url-staging",
+    "NEXTAUTH_URL": "@nextauth-url-staging",
+    "NEXTAUTH_SECRET": "@nextauth-secret-staging",
+    "AUTH_SECRET": "@auth-secret-staging",
+    "AUTH_GOOGLE_ID": "@auth-google-id",
+    "AUTH_GOOGLE_SECRET": "@auth-google-secret",
+    "AUTH_FACEBOOK_ID": "@auth-facebook-id",
+    "AUTH_FACEBOOK_SECRET": "@auth-facebook-secret",
+    "NEXT_PUBLIC_SUPABASE_URL": "@supabase-url",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase-anon-key",
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase-service-role-key",
+    "EMAIL_HOST": "@email-host",
+    "EMAIL_PORT": "@email-port",
+    "EMAIL_USER": "@email-user",
+    "EMAIL_PASS": "@email-pass",
+    "EMAIL_FROM": "@email-from",
+    "TWILIO_ACCOUNT_SID": "@twilio-account-sid",
+    "TWILIO_AUTH_TOKEN": "@twilio-auth-token",
+    "TWILIO_PHONE_NUMBER": "@twilio-phone-number",
+    "GOOGLE_CLOUD_PROJECT_ID": "@google-cloud-project-id",
+    "GOOGLE_CLOUD_BUCKET_NAME": "@google-cloud-bucket-name",
+    "GOOGLE_PLACES_API_KEY": "@google-places-api-key",
+    "NEXT_PUBLIC_APP_ENV": "staging"
+  },
   "functions": {
-    "app/api/**/*.js": {
+    "src/app/api/**/*.js": {
       "maxDuration": 30
     }
-  }
+  },
+  "regions": ["fra1"],
+  "framework": "nextjs"
 }
