@@ -104,8 +104,8 @@ export const ExerciseCard = ({ exercise, onView, onEdit, onDelete }) => {
                     safeType === "strength"
                       ? "bg-purple-900/60 text-purple-200"
                       : safeType === "bodyweight"
-                      ? "bg-green-900/60 text-green-200"
-                      : "bg-blue-900/60 text-blue-200"
+                        ? "bg-green-900/60 text-green-200"
+                        : "bg-blue-900/60 text-blue-200"
                   }`}
                 >
                   {safeType.charAt(0).toUpperCase() + safeType.slice(1)}
@@ -149,10 +149,10 @@ export const ExerciseCard = ({ exercise, onView, onEdit, onDelete }) => {
                   ? "Equipment"
                   : "No equipment"
                 : Array.isArray(equipment)
-                ? equipment.length > 0
-                  ? "Equipment"
-                  : "No equipment"
-                : "Equipment"}
+                  ? equipment.length > 0
+                    ? "Equipment"
+                    : "No equipment"
+                  : "Equipment"}
             </span>
           </div>
 

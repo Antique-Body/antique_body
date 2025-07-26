@@ -14,8 +14,8 @@ const fadeInUp = {
 };
 
 export const SectionTitle = ({ title, className = "" }) => (
-  <motion.div 
-    variants={fadeInUp} 
+  <motion.div
+    variants={fadeInUp}
     className={`flex items-center justify-between ${className}`}
   >
     <h2 className="bg-gradient-to-r from-[#FF7800] to-[#FF9A00] bg-clip-text text-xl font-semibold text-transparent">
@@ -23,4 +23,4 @@ export const SectionTitle = ({ title, className = "" }) => (
     </h2>
     <div className="ml-4 h-px flex-1 bg-gradient-to-r from-[#FF7800]/50 to-transparent"></div>
   </motion.div>
-); 
+);

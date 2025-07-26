@@ -39,8 +39,8 @@ export const ExerciseCard = ({
   const setsCount = Array.isArray(exercise.sets)
     ? exercise.sets.length
     : typeof exercise.sets === "number"
-    ? exercise.sets
-    : 3;
+      ? exercise.sets
+      : 3;
 
   return (
     <Card

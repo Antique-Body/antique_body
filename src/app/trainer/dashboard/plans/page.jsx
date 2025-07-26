@@ -54,7 +54,9 @@ const PlanManagementPage = () => {
       const typeParam = VALID_PLAN_TYPES.includes(activeTab)
         ? `?type=${activeTab}`
         : "";
-      const response = await fetch(`/api/users/trainer/plans${typeParam}${typeParam ? '&' : '?'}basic=true`);
+      const response = await fetch(
+        `/api/users/trainer/plans${typeParam}${typeParam ? "&" : "?"}basic=true`
+      );
       if (!response.ok) throw new Error("Failed to fetch plans");
       const data = await response.json();
       setPlans(data);

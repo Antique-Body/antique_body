@@ -208,8 +208,8 @@ export const BookingSessionModal = ({ trainer, onClose, isOpen }) => {
                       selectedTime === slot.time
                         ? "bg-[#FF6B00] text-white"
                         : slot.available
-                        ? "border border-[#444] bg-[rgba(30,30,30,0.8)] text-white hover:-translate-y-1 hover:border-[#FF6B00]"
-                        : "cursor-not-allowed border border-[#333] bg-[rgba(20,20,20,0.5)] text-gray-500"
+                          ? "border border-[#444] bg-[rgba(30,30,30,0.8)] text-white hover:-translate-y-1 hover:border-[#FF6B00]"
+                          : "cursor-not-allowed border border-[#333] bg-[rgba(20,20,20,0.5)] text-gray-500"
                     }`}
                   >
                     {slot.time}

@@ -1652,8 +1652,8 @@ function TrainingPlanCard({
         plan.status === "completed"
           ? "bg-green-500/10 border-green-500/30"
           : plan.status === "active"
-          ? "bg-blue-500/10 border-blue-500/30 ring-2 ring-blue-500/20"
-          : "bg-white/5 border-white/10 hover:border-white/20"
+            ? "bg-blue-500/10 border-blue-500/30 ring-2 ring-blue-500/20"
+            : "bg-white/5 border-white/10 hover:border-white/20"
       }`}
     >
       {/* Main Card Content */}
@@ -1667,8 +1667,8 @@ function TrainingPlanCard({
                 plan.status === "completed"
                   ? "bg-green-600 shadow-lg shadow-green-600/30"
                   : plan.status === "active"
-                  ? "bg-blue-600 shadow-lg shadow-blue-600/30"
-                  : "bg-orange-600 shadow-lg shadow-orange-600/30"
+                    ? "bg-blue-600 shadow-lg shadow-blue-600/30"
+                    : "bg-orange-600 shadow-lg shadow-orange-600/30"
               }`}
             >
               <Icon
@@ -1676,8 +1676,8 @@ function TrainingPlanCard({
                   plan.status === "completed"
                     ? "mdi:check"
                     : plan.status === "active"
-                    ? "mdi:play"
-                    : "mdi:pause"
+                      ? "mdi:play"
+                      : "mdi:pause"
                 }
                 className="text-white"
                 width={18}

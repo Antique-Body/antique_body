@@ -983,8 +983,8 @@ export default function TrackPlanPage({ params }) {
                         viewMode === mode.key
                           ? "bg-blue-600 text-white shadow-lg"
                           : mode.disabled
-                          ? "text-zinc-500 cursor-not-allowed opacity-50"
-                          : "text-zinc-400 hover:text-white hover:bg-zinc-700/50"
+                            ? "text-zinc-500 cursor-not-allowed opacity-50"
+                            : "text-zinc-400 hover:text-white hover:bg-zinc-700/50"
                       }`}
                       title={
                         mode.disabled
@@ -1127,8 +1127,8 @@ export default function TrackPlanPage({ params }) {
                     {pendingAddExerciseDayIdx === -1
                       ? "Create New Training Day"
                       : editingExercise
-                      ? "Replace Exercise"
-                      : "Add Exercise"}
+                        ? "Replace Exercise"
+                        : "Add Exercise"}
                   </h2>
                   <button
                     type="button"

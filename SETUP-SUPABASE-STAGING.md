@@ -25,7 +25,6 @@
 Nakon kreiranja projekta:
 
 1. **API URL & Keys**:
-
    - Idi na `Settings` → `API`
    - Kopiraj:
      - `Project URL` → `NEXT_PUBLIC_SUPABASE_URL`

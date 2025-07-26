@@ -1065,8 +1065,8 @@ export const ExerciseModal = ({
                 mode === "view"
                   ? "mdi:dumbbell"
                   : mode === "edit"
-                  ? "mdi:pencil"
-                  : "mdi:plus-circle"
+                    ? "mdi:pencil"
+                    : "mdi:plus-circle"
               }
               className="text-[#FF7800]"
               width={20}
@@ -1076,8 +1076,8 @@ export const ExerciseModal = ({
               {mode === "view"
                 ? exercise?.name
                 : mode === "edit"
-                ? "Edit Exercise"
-                : "Create New Exercise"}
+                  ? "Edit Exercise"
+                  : "Create New Exercise"}
             </span>
           </div>
         }
@@ -1086,16 +1086,16 @@ export const ExerciseModal = ({
           mode === "view"
             ? "Close"
             : mode === "edit"
-            ? isUploading
-              ? "Uploading files..."
-              : isSubmitting
-              ? "Updating exercise..."
-              : "Update Exercise"
-            : isUploading
-            ? "Uploading files..."
-            : isSubmitting
-            ? "Creating exercise..."
-            : "Save Exercise"
+              ? isUploading
+                ? "Uploading files..."
+                : isSubmitting
+                  ? "Updating exercise..."
+                  : "Update Exercise"
+              : isUploading
+                ? "Uploading files..."
+                : isSubmitting
+                  ? "Creating exercise..."
+                  : "Save Exercise"
         }
         secondaryButtonText={mode !== "view" ? "Cancel" : undefined}
         primaryButtonAction={mode === "view" ? onClose : handleSubmit}
