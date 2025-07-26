@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import { AnatomicalViewer } from "./AnatomicalViewer";
+import exerciseLibrary from "./exerciseLibrary.json";
 import { ExerciseLibrarySelector } from "./ExerciseLibrarySelector";
 
 import { Button } from "@/components/common/Button";
@@ -82,6 +83,15 @@ export const ExerciseModal = ({
   const [showVideoUrlInput, setShowVideoUrlInput] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [videoFile, setVideoFile] = useState(null);
+
+  // Dodaj stateove za autocomplete
+  const [nameInput, setNameInput] = useState(formData.name || "");
+  const [suggestions, setSuggestions] = useState([]);
+
+  // Sinkronizuj nameInput i formData.name
+  useEffect(() => {
+    setNameInput(formData.name || "");
+  }, [formData.name]);
 
   // Load exercise data if in edit mode
   useEffect(() => {
@@ -169,6 +179,48 @@ export const ExerciseModal = ({
       setErrors((prev) => ({ ...prev, [name]: null }));
     }
   };
+
+  // Funkcija za filtriranje prijedloga
+  const handleNameChange = (e) => {
+    const value = e.target.value;
+    setNameInput(value);
+    setFormData((prev) => ({ ...prev, name: value }));
+
+    if (value.length > 1) {
+      const filtered = exerciseLibrary.filter((ex) =>
+        ex.name.toLowerCase().includes(value.toLowerCase())
+      );
+      setSuggestions(filtered);
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+  // Funkcija za popunjavanje iz predloška
+  const handleSuggestionClick = (template) => {
+    setFormData((prev) => ({
+      ...prev,
+      ...template,
+      instructions: template.instructions, // ako je string, ili join('\n') za textarea
+    }));
+    setSelectedMuscles(template.muscleGroups || []);
+    setNameInput(template.name);
+    setSuggestions([]);
+    setImagePreview(template.imageUrl || null);
+    setVideoPreview(template.videoUrl || null);
+    setVideoUrl(template.videoUrl || "");
+  };
+
+  // (Opcionalno) Zatvori suggestions kad klikneš vani
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest(".suggestions-dropdown")) {
+        setSuggestions([]);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Handle muscle group selection
   const toggleMuscleGroup = (muscle) => {
@@ -359,6 +411,7 @@ export const ExerciseModal = ({
       }
 
       await onSave(finalFormData);
+      onClose();
     } catch (error) {
       console.error("Error saving exercise:", error);
       setErrors((prev) => ({ ...prev, upload: error.message }));
@@ -570,6 +623,7 @@ export const ExerciseModal = ({
                       darkMode={true}
                       compact={false}
                       className="w-full"
+                      bodyColor="white"
                     />
                   </div>
                 )}
@@ -579,15 +633,15 @@ export const ExerciseModal = ({
         )}
 
         {activeTab === "video" && (
-          <div className="w-full">
+          <div className="w-full flex items-center justify-center min-h-[37rem]">
             {exercise.videoUrl ? (
-              <div className="aspect-w-16 aspect-h-9 overflow-hidden rounded-lg">
+              <div className="h-[37rem] w-[60rem] overflow-hidden rounded-lg flex items-center justify-center">
                 {exercise.videoUrl.includes("youtube.com") ||
                 exercise.videoUrl.includes("youtu.be") ? (
                   <iframe
                     src={`https://www.youtube.com/embed/${
                       exercise.videoUrl.match(
-                        /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/
+                        /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\\s]{11})/
                       )?.[1]
                     }`}
                     title={`${exercise.name} video`}
@@ -616,7 +670,7 @@ export const ExerciseModal = ({
                 )}
               </div>
             ) : (
-              <div className="flex h-[500px] w-full flex-col items-center justify-center rounded-lg bg-zinc-800">
+              <div className="flex h-[500px] w-[60rem] flex-col items-center justify-center rounded-lg bg-zinc-800">
                 <Icon
                   icon="mdi:video-off"
                   className="text-zinc-500"
@@ -663,17 +717,39 @@ export const ExerciseModal = ({
 
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         {/* Basic Info */}
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 relative">
           <FormField
             type="text"
             label="Exercise Name"
             name="name"
-            value={formData.name}
-            onChange={handleChange}
+            value={nameInput}
+            onChange={handleNameChange}
             placeholder="e.g., Barbell Squat"
             error={errors.name}
             required
+            autoComplete="off"
           />
+          {suggestions.length > 0 && (
+            <div className="absolute z-20 bg-zinc-900 border border-zinc-700 rounded w-full mt-1 max-h-56 overflow-y-auto shadow-lg suggestions-dropdown">
+              {suggestions.map((s) => (
+                <div
+                  key={s.id}
+                  className="px-4 py-2 cursor-pointer hover:bg-zinc-800 text-zinc-200"
+                  onClick={() => handleSuggestionClick(s)}
+                >
+                  {s.name}
+                </div>
+              ))}
+              <div className="border-t border-zinc-700">
+                <button
+                  className="w-full text-left px-4 py-2 text-orange-400 hover:bg-zinc-800"
+                  onClick={() => handleSuggestionClick(suggestions[0])}
+                >
+                  Popuni ostale podatke za "{suggestions[0].name}"
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Location & Equipment */}
@@ -842,6 +918,7 @@ export const ExerciseModal = ({
                       showExerciseInfo={false}
                       darkMode={true}
                       compact={false}
+                      bodyColor="white"
                     />
                   </div>
                   <div className="border-t border-zinc-700 p-3">

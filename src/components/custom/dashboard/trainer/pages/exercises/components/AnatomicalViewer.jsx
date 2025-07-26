@@ -27,6 +27,7 @@ export const AnatomicalViewer = ({
   showExerciseInfo = true, // New prop to control exercise info display
   darkMode = false, // New prop for dark background
   compact = false, // New prop for compact display
+  bodyColor: propBodyColor = null, // New prop for body color
 }) => {
   // Determine the optimal initial view based on muscle groups
   const primaryView = useMemo(
@@ -94,8 +95,9 @@ export const AnatomicalViewer = ({
   // Check if we have muscles to display
   const hasMusclesToShow = supportedMuscles.length > 0;
 
-  // Custom colors for the anatomical model based on dark mode
-  const bodyColor = darkMode ? "#2A2A2A" : MUSCLE_COLORS.default;
+  // Custom colors for the anatomical model based on dark mode and prop
+  const bodyColor =
+    propBodyColor || (darkMode ? "#2A2A2A" : MUSCLE_COLORS.default);
   const highlightedColors = MUSCLE_COLORS.highlighted;
 
   return (
@@ -177,7 +179,7 @@ export const AnatomicalViewer = ({
       )}
 
       {/* Body Model */}
-      <div className="flex justify-center">
+      <div className="flex justify-center h-full">
         <div
           className={`anatomical-model rounded-xl overflow-hidden ${
             darkMode ? "bg-[#121211]" : "bg-[#121211]"

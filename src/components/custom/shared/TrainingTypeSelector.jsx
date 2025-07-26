@@ -30,33 +30,33 @@ export const TrainingTypeSelector = ({
   const sortedCategories = Object.keys(typesByCategory).sort();
 
   return (
-    <div className={`space-y-8 ${className}`}>
+    <div className={`space-y-4 sm:space-y-6 lg:space-y-8 ${className}`}>
       {/* Training Environment Section */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="space-y-5"
+        className="space-y-3 sm:space-y-4 lg:space-y-5"
       >
-        <div className="flex items-start justify-between">
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-white flex items-center gap-3">
-              <div className="w-1 h-6 bg-gradient-to-b from-[#FF6B00] to-[#FF8A00] rounded-full"></div>
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
+          <div className="space-y-1 sm:space-y-2">
+            <h3 className="text-base sm:text-lg font-semibold text-white flex items-center gap-2 sm:gap-3">
+              <div className="w-0.5 h-4 sm:w-1 sm:h-5 lg:h-6 bg-gradient-to-b from-[#FF6B00] to-[#FF8A00] rounded-full"></div>
               <Icon
                 icon="mdi:home-variant"
-                className="text-[#FF6B00]"
-                width={20}
-                height={20}
+                className="text-[#FF6B00] sm:w-[20px] sm:h-[20px]"
+                width={18}
+                height={18}
               />
               Training Environment
             </h3>
-            <p className="text-sm text-zinc-400 leading-relaxed">
+            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
               Where do you prefer to conduct your training sessions?
             </p>
           </div>
 
           {selectedEnvironment && (
-            <div className="px-3 py-1.5 bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-lg text-[#FF6B00] text-xs font-medium backdrop-blur-sm">
+            <div className="self-start sm:self-auto px-2.5 sm:px-3 py-1 sm:py-1.5 bg-gradient-to-r from-[#FF6B00]/15 to-[#FF8A00]/10 border border-[#FF6B00]/30 rounded-lg text-[#FF6B00] text-xs font-semibold backdrop-blur-sm shadow-sm">
               {TRAINING_ENVIRONMENTS.find(
                 (env) => env.id === selectedEnvironment
               )?.label || "Selected"}
@@ -64,7 +64,7 @@ export const TrainingTypeSelector = ({
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
           {TRAINING_ENVIRONMENTS.map((env) => (
             <motion.div
               key={env.id}
@@ -79,7 +79,7 @@ export const TrainingTypeSelector = ({
                 }
                 type="button"
                 onClick={() => onEnvironmentChange(env.id)}
-                className={`w-full h-full rounded-2xl text-left transition-all duration-300 p-0 overflow-hidden border-2 group ${
+                className={`w-full h-full rounded-xl sm:rounded-2xl text-left transition-all duration-300 p-0 overflow-hidden border-2 group ${
                   selectedEnvironment === env.id
                     ? "border-[#FF6B00]/50 shadow-xl shadow-[#FF6B00]/10 bg-gradient-to-br from-[#FF6B00]/5 to-transparent"
                     : "border-zinc-800/50 hover:border-zinc-700/50 bg-gradient-to-br from-zinc-900/40 via-zinc-900/30 to-zinc-900/40 backdrop-blur-sm"
@@ -92,9 +92,9 @@ export const TrainingTypeSelector = ({
                   )}
 
                   {/* Header */}
-                  <div className="relative z-10 p-6 flex items-center gap-4">
+                  <div className="relative z-10 p-3 sm:p-4 lg:p-6 flex items-center gap-3 sm:gap-4">
                     <div
-                      className={`w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-300 ${
+                      className={`w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 flex items-center justify-center rounded-lg sm:rounded-xl transition-all duration-300 ${
                         selectedEnvironment === env.id
                           ? "bg-[#FF6B00]/20 border border-[#FF6B00]/30"
                           : "bg-zinc-800/50 border border-zinc-700/50 group-hover:bg-zinc-700/50"
@@ -102,7 +102,7 @@ export const TrainingTypeSelector = ({
                     >
                       <Icon
                         icon={env.icon}
-                        className={`text-2xl transition-colors duration-300 ${
+                        className={`text-lg sm:text-xl lg:text-2xl transition-colors duration-300 ${
                           selectedEnvironment === env.id
                             ? "text-[#FF6B00]"
                             : "text-zinc-400 group-hover:text-zinc-300"
@@ -112,7 +112,7 @@ export const TrainingTypeSelector = ({
 
                     <div className="flex-1 min-w-0">
                       <h4
-                        className={`font-semibold text-base transition-colors duration-300 ${
+                        className={`font-semibold text-sm sm:text-base transition-colors duration-300 ${
                           selectedEnvironment === env.id
                             ? "text-[#FF6B00]"
                             : "text-white group-hover:text-zinc-100"
@@ -134,18 +134,18 @@ export const TrainingTypeSelector = ({
                       >
                         <Icon
                           icon="mdi:check-circle"
-                          className="text-[#FF6B00]"
-                          width={24}
-                          height={24}
+                          className="text-[#FF6B00] sm:w-[24px] sm:h-[24px]"
+                          width={20}
+                          height={20}
                         />
                       </motion.div>
                     )}
                   </div>
 
                   {/* Description */}
-                  <div className="relative z-10 px-6 pb-6 flex-grow">
+                  <div className="relative z-10 px-3 sm:px-4 lg:px-6 pb-3 sm:pb-4 lg:pb-6 flex-grow">
                     <p
-                      className={`text-sm leading-relaxed transition-colors duration-300 ${
+                      className={`text-xs sm:text-sm leading-relaxed transition-colors duration-300 ${
                         selectedEnvironment === env.id
                           ? "text-zinc-300"
                           : "text-zinc-400 group-hover:text-zinc-300"
@@ -178,7 +178,7 @@ export const TrainingTypeSelector = ({
       </motion.div>
 
       {/* Divider */}
-      <hr className="h-px bg-gradient-to-r from-transparent via-gray-700/50 to-transparent" />
+      <hr className="h-px bg-gradient-to-r from-transparent via-[rgba(255,107,0,0.2)] to-transparent my-4 sm:my-6" />
 
       {/* Training Types Section */}
       <motion.div
@@ -199,14 +199,14 @@ export const TrainingTypeSelector = ({
               />
               Training Types
             </h3>
-            <p className="text-sm text-zinc-400 leading-relaxed">
+            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
               Select all types of training you offer (multiple selections
               allowed)
             </p>
           </div>
 
           {selectedTypes.length > 0 && (
-            <div className="px-3 py-1.5 bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-lg text-[#FF6B00] text-xs font-medium backdrop-blur-sm">
+            <div className="self-start sm:self-auto px-2.5 sm:px-3 py-1 sm:py-1.5 bg-gradient-to-r from-[#FF6B00]/15 to-[#FF8A00]/10 border border-[#FF6B00]/30 rounded-lg text-[#FF6B00] text-xs font-semibold backdrop-blur-sm shadow-sm">
               {selectedTypes.length} selected
             </div>
           )}

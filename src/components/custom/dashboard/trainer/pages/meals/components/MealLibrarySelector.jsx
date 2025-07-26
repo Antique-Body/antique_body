@@ -107,6 +107,8 @@ export const MealLibrarySelector = ({
     };
   }, [displayLoading, displayHasMore, onScroll]);
 
+  // Console log prikazanih meals
+
   return (
     <div className="flex flex-col h-full">
       {/* Header with toggle */}
@@ -153,86 +155,123 @@ export const MealLibrarySelector = ({
         style={{ minHeight: 200, maxHeight: 400 }}
       >
         {displayMeals.length > 0 || displaySearchLoading ? (
-          <div className="grid grid-cols-1 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {displayMeals.map((meal) => (
               <button
                 key={meal.id}
                 type="button"
-                className="w-full text-left bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-600 rounded-lg p-4 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500/30"
+                className="group w-full text-left bg-gradient-to-br from-zinc-800/80 to-zinc-900/80 hover:from-zinc-700/80 hover:to-zinc-800/80 border border-zinc-700/50 hover:border-orange-500/40 rounded-2xl p-3 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500/40 shadow-md hover:shadow-2xl backdrop-blur-md"
                 onClick={() => onSelectMeal(meal)}
               >
-                <div className="flex items-center gap-3">
-                  {/* Meal Image */}
-                  <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-zinc-600 flex-shrink-0">
+                <div className="flex flex-col">
+                  {/* Meal Image - Full width at top */}
+                  <div className="relative w-full h-32 rounded-xl overflow-hidden bg-gradient-to-br from-zinc-700 to-zinc-800 mb-3 shadow-inner">
                     {meal.imageUrl ? (
                       <Image
                         src={meal.imageUrl}
                         alt={meal.name}
-                        className="w-full h-full object-cover"
-                        width={48}
-                        height={48}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        width={320}
+                        height={128}
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center">
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-600 to-zinc-700">
                         <Icon
                           icon="mdi:food"
-                          className="w-5 h-5 text-zinc-400"
+                          className="w-12 h-12 text-zinc-400 transition-transform duration-300 group-hover:scale-110"
                         />
                       </div>
                     )}
-                  </div>
-                  {/* Meal Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start mb-1">
-                      <h4 className="font-semibold text-sm text-white truncate">
-                        {meal.name}
-                      </h4>
-                      <div className="flex gap-1 ml-2">
-                        <span
-                          className={`text-xs px-2 py-1 rounded ${
-                            meal.difficulty === "easy"
-                              ? "bg-green-900/40 text-green-300"
-                              : meal.difficulty === "medium"
-                              ? "bg-orange-900/40 text-orange-300"
-                              : "bg-red-900/40 text-red-300"
-                          }`}
-                        >
-                          {meal.difficulty.charAt(0).toUpperCase() +
-                            meal.difficulty.slice(1)}
-                        </span>
-                      </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10 opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
+                    {/* Difficulty badge overlay */}
+                    <div className="absolute top-2 right-2">
+                      <span
+                        className={`text-xs font-bold px-2 py-1 rounded-full backdrop-blur-sm shadow-md transition-all duration-200 border-2 group-hover:shadow-lg group-hover:scale-105 ${
+                          meal.difficulty === "easy"
+                            ? "bg-emerald-500/90 text-white border-emerald-400/70"
+                            : meal.difficulty === "medium"
+                            ? "bg-amber-500/90 text-white border-amber-400/70"
+                            : "bg-red-500/90 text-white border-red-400/70"
+                        }`}
+                      >
+                        {meal.difficulty.charAt(0).toUpperCase() +
+                          meal.difficulty.slice(1)}
+                      </span>
                     </div>
-                    {/* Meal Details */}
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="text-xs text-zinc-400 capitalize">
+                    {/* Meal type overlay */}
+                    <div className="absolute bottom-2 left-2">
+                      <span className="text-xs font-bold text-white capitalize bg-orange-500/90 px-2 py-1 rounded-full backdrop-blur-sm border border-orange-400/60 shadow-md">
                         {meal.mealType}
                       </span>
-                      <div className="flex items-center gap-1 text-xs text-zinc-400">
-                        <Icon icon="mdi:clock-outline" className="w-3 h-3" />
-                        {meal.preparationTime}m
-                      </div>
-                      <div className="flex items-center gap-1 text-xs text-zinc-400">
+                    </div>
+                  </div>
+                  {/* Meal Info */}
+                  <div className="flex-1">
+                    {/* Header with title only */}
+                    <div className="mb-2">
+                      <h4 className="font-bold text-base text-white group-hover:text-orange-100 transition-colors duration-200 truncate">
+                        {meal.name}
+                      </h4>
+                    </div>
+                    {/* Time Info */}
+                    <div className="flex items-center gap-1 mb-2">
+                      <Icon
+                        icon="mdi:clock-outline"
+                        className="w-4 h-4 text-orange-400"
+                      />
+                      <span className="text-xs font-medium text-zinc-300">
+                        {meal.preparationTime} min
+                      </span>
+                    </div>
+                    {/* Nutrition Info */}
+                    <div className="flex items-center gap-4 mb-2">
+                      <div className="flex items-center gap-1">
                         <Icon
                           icon="mdi:fire"
-                          className="w-3 h-3 text-orange-400"
+                          className="w-4 h-4 text-orange-400"
                         />
-                        {meal.calories}
+                        <span className="text-xs text-white font-semibold">
+                          {meal.calories}
+                        </span>
+                        <span className="text-[10px] text-zinc-400">cal</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Icon
+                          icon="mdi:dumbbell"
+                          className="w-4 h-4 text-blue-400"
+                        />
+                        <span className="text-xs text-white font-semibold">
+                          {meal.protein}g
+                        </span>
+                        <span className="text-[10px] text-zinc-400">
+                          protein
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Icon
+                          icon="mdi:grain"
+                          className="w-4 h-4 text-yellow-400"
+                        />
+                        <span className="text-xs text-white font-semibold">
+                          {meal.carbs}g
+                        </span>
+                        <span className="text-[10px] text-zinc-400">carbs</span>
                       </div>
                     </div>
                     {/* Dietary Tags */}
                     {meal.dietary && meal.dietary.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {meal.dietary.slice(0, 2).map((diet, idx) => (
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {meal.dietary.slice(0, 3).map((diet, idx) => (
                           <span
                             key={idx}
-                            className="text-xs px-2 py-1 bg-orange-900/20 text-orange-300 rounded"
+                            className="text-[10px] font-medium px-2 py-0.5 bg-gradient-to-r from-orange-900/40 to-orange-800/40 text-orange-200 rounded-full border border-orange-700/40 shadow-sm hover:shadow-md transition-shadow duration-200"
                           >
                             {formatDietaryDisplayName(diet)}
                           </span>
                         ))}
-                        {meal.dietary.length > 2 && (
-                          <span className="text-xs px-2 py-1 bg-zinc-700 text-zinc-400 rounded">
-                            +{meal.dietary.length - 2}
+                        {meal.dietary.length > 3 && (
+                          <span className="text-[10px] font-medium px-2 py-0.5 bg-gradient-to-r from-zinc-700/60 to-zinc-600/60 text-zinc-300 rounded-full border border-zinc-600/30 shadow-sm">
+                            +{meal.dietary.length - 3}
                           </span>
                         )}
                       </div>

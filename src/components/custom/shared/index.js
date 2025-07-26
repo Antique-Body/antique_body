@@ -6,6 +6,7 @@ export { SpecialtySelector } from "./SpecialtySelector";
 export { TrainingTypeSelector } from "./TrainingTypeSelector";
 export { I18nProvider } from "./I18nProvider";
 export { default as DraggableImage } from "./DraggableImage";
+export { LocationStep } from "./LocationStep";
 
 // New shared components
 export { SearchFilters } from "./SearchFilters";

@@ -149,6 +149,7 @@ model TrainerInfo {
   coachingRequests  CoachingRequest[]
   coachingRequestCooldowns CoachingRequestCooldown[]
   dietPlanAssignments DietPlanAssignment[]
+  assignedTrainingPlans AssignedTrainingPlan[]
 }
 
 // TrainerProfile now belongs to TrainerInfo
@@ -170,9 +171,6 @@ model TrainerProfile {
   certifications    Certification[]
   locationId        String?
   location          Location? @relation(fields: [locationId], references: [id])
-  pricingType       String?
-  pricePerSession   Int?
-  currency          String?
   contactEmail      String?
   contactPhone      String?
   sessionDuration   Int?
@@ -281,6 +279,7 @@ model ClientInfo {
   coachingRequestCooldowns CoachingRequestCooldown[]
   dietPlanAssignments DietPlanAssignment[]
   customMeals       CustomMeal[]
+  assignedTrainingPlans AssignedTrainingPlan[]
 }
 
 // ClientProfile now belongs to ClientInfo
@@ -291,11 +290,11 @@ model ClientProfile {
   lastName             String
   dateOfBirth          DateTime
   gender               String
-  height               Int
-  weight               Int
+  height               Int?
+  weight               Int?
   experienceLevel      String
   previousActivities   String?  @db.Text
-  primaryGoal          String
+  primaryGoal          String?
   secondaryGoal        String?
   goalDescription      String?  @db.Text
   contactEmail         String?
@@ -509,17 +508,15 @@ model TrainingPlan {
   sessionFormat     Json?
   difficultyLevel   String?
   schedule          Json?    // Dodano polje za raspored sesija
-  isActive          Boolean  @default(true)
-  isPublished       Boolean  @default(false)
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   deletedAt         DateTime?
   clientCount       Int?     // Dodano polje za broj klijenata
   trainerInfo       TrainerInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  assignedTrainingPlans AssignedTrainingPlan[]
 
   @@index([trainerInfoId])
-  @@index([isActive])
-  @@index([isPublished])
 }
 
 model NutritionPlan {
@@ -541,8 +538,7 @@ model NutritionPlan {
   days              Json?
   recommendedFrequency String?
   adaptability      String?
-  isActive          Boolean  @default(true)
-  isPublished       Boolean  @default(false)
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   deletedAt         DateTime?
@@ -551,8 +547,7 @@ model NutritionPlan {
   dietPlanAssignments DietPlanAssignment[]
 
   @@index([trainerInfoId])
-  @@index([isActive])
-  @@index([isPublished])
+
 }
 
 // Coaching Request System
@@ -731,4 +726,23 @@ model CustomMeal {
   @@index([usageCount])
   @@index([clientId, mealType])
   @@index([clientId, lastUsed])
+}
+
+model AssignedTrainingPlan {
+  id             String   @id @default(cuid())
+  clientId       String
+  trainerId      String
+  originalPlanId String
+  planData       Json
+  status         String   @default("active") // active, completed, cancelled
+  assignedAt     DateTime @default(now())
+  completedAt    DateTime?
+
+  client         ClientInfo   @relation(fields: [clientId], references: [id])
+  trainer        TrainerInfo  @relation(fields: [trainerId], references: [id])
+  originalPlan   TrainingPlan @relation(fields: [originalPlanId], references: [id])
+
+  @@index([clientId])
+  @@index([trainerId])
+  @@index([status])
 }

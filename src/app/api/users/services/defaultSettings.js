@@ -53,7 +53,7 @@ export const TRAINING_PLAN_CONFIG = [
     difficultyLevel: "beginner",
     schedule: [
       {
-        day: "Monday",
+        day: 1,
         name: "Full Body Strength",
         type: "strength",
         duration: 60,
@@ -216,7 +216,7 @@ export const TRAINING_PLAN_CONFIG = [
     difficultyLevel: "intermediate",
     schedule: [
       {
-        day: "Tuesday",
+        day: 2,
         name: "HIIT Circuit",
         type: "hiit",
         duration: 40,
@@ -341,7 +341,7 @@ export const TRAINING_PLAN_CONFIG = [
     difficultyLevel: "advanced",
     schedule: [
       {
-        day: "Monday",
+        day: 1,
         name: "Heavy Squat Day",
         type: "strength",
         duration: 75,

@@ -1,12 +1,16 @@
 "use client";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
 
 import { Button } from "@/components/common/Button";
 import { Card } from "@/components/common/Card";
+import { ErrorMessage } from "@/components/common/ErrorMessage";
+import { InfoBanner } from "@/components/common/InfoBanner";
 import { Modal } from "@/components/common/Modal";
+import { PlanPreviewModal } from "@/components/custom/dashboard/trainer/pages/plans/components";
 import { ACTIVITY_TYPES } from "@/enums/activityTypes";
 import { EXPERIENCE_LEVELS } from "@/enums/experienceLevels";
 import { FITNESS_GOALS } from "@/enums/fitnessGoals";
@@ -24,6 +28,11 @@ export default function ClientDashboard({ params }) {
   const [plansLoading, setPlansLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [assigning, setAssigning] = useState(false);
+  const [assignError, setAssignError] = useState(null);
+  const [planPreviewOpen, setPlanPreviewOpen] = useState(false);
+  const [planPreviewData, setPlanPreviewData] = useState(null);
+  const [startingPlanId, setStartingPlanId] = useState(null);
+  const [startPlanError, setStartPlanError] = useState(null);
   // Unwrap params using React.use() for Next.js 15 compatibility
   const unwrappedParams = React.use(params);
   const clientId = unwrappedParams.id;
@@ -40,7 +49,16 @@ export default function ClientDashboard({ params }) {
 
       const data = await response.json();
       if (data.success) {
-        setClient(data.data);
+        // Dohvati i assigned planove
+        const assignedPlansRes = await fetch(
+          `/api/coaching-requests/${clientId}/assigned-training-plans`
+        );
+        let assignedPlans = [];
+        if (assignedPlansRes.ok) {
+          const assignedData = await assignedPlansRes.json();
+          assignedPlans = assignedData.data || [];
+        }
+        setClient({ ...data.data, assignedTrainingPlans: assignedPlans });
       } else {
         throw new Error(data.error || "Failed to fetch client data");
       }
@@ -64,6 +82,7 @@ export default function ClientDashboard({ params }) {
 
       const data = await response.json();
       setPlans(data);
+      console.log("PLANS", data);
     } catch (err) {
       console.error("Error fetching plans:", err);
       // Handle error appropriately
@@ -85,30 +104,37 @@ export default function ClientDashboard({ params }) {
 
     try {
       setAssigning(true);
-      // TODO: Implement API endpoint for assigning plans to clients
-      // const response = await fetch(`/api/clients/${clientId}/assign-plan`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     planId: selectedPlan.id,
-      //     planType: assignType
-      //   })
-      // });
-
-      // For now, just close the modal
+      setAssignError(null);
+      // Novi API poziv za assignanje plana
+      const response = await fetch(
+        `/api/coaching-requests/${client.id}/assign-training-plan`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ planId: String(selectedPlan.id) }),
+        }
+      );
+      const data = await response.json();
+      if (
+        data.error ===
+        "Client already has an active training plan. Complete it before assigning a new one."
+      ) {
+        setAssignError(
+          "Assigning a new plan will end the current plan for this client. " +
+            "Click 'End Current & Assign New Plan' to proceed."
+        );
+        return;
+      }
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to assign plan");
+      }
       setShowAssignModal(false);
       setSelectedPlan(null);
       setAssignType(null);
-
-      // Show success message
-      alert(
-        `${
-          assignType === "training" ? "Training" : "Nutrition"
-        } plan assigned successfully!`
-      );
+      fetchClientData();
     } catch (err) {
       console.error("Error assigning plan:", err);
-      alert("Failed to assign plan. Please try again.");
+      setAssignError(err.message || "Failed to assign plan. Please try again.");
     } finally {
       setAssigning(false);
     }
@@ -121,6 +147,8 @@ export default function ClientDashboard({ params }) {
     setAssignType(null);
     setPlans([]);
   };
+
+  // State za prikaz gumba End & Assign
 
   useEffect(() => {
     fetchClientData();
@@ -241,39 +269,75 @@ export default function ClientDashboard({ params }) {
 
   const profile = client.client.clientProfile;
 
+  // Handler for starting a plan
+  const handleStartPlan = async (planId) => {
+    if (!client?.id || !planId) return;
+    setStartingPlanId(planId);
+    setStartPlanError(null);
+    try {
+      const res = await fetch(
+        `/api/coaching-requests/${client.id}/assigned-training-plan/${planId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "active" }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to start plan");
+      }
+      fetchClientData();
+    } catch (err) {
+      setStartPlanError(err.message || "Failed to start plan");
+    } finally {
+      setStartingPlanId(null);
+    }
+  };
+
   return (
     <div className="px-4 py-5">
-      {/* Header with Back Button */}
-      <div className="mb-6">
-        <Button
-          variant="secondary"
-          onClick={() => router.push("/trainer/dashboard/clients")}
-          leftIcon={<Icon icon="mdi:arrow-left" width={20} height={20} />}
-          className="mb-4"
-        >
-          Back to Clients
-        </Button>
-        <div className="flex items-center gap-4">
-          <div className="h-16 w-16 overflow-hidden rounded-xl ring-2 ring-[#3E92CC]/20">
+      {/* Header */}
+      <div className="mb-8">
+        {/* Back Navigation */}
+        <div className="mb-6">
+          <button
+            onClick={() => router.push("/trainer/dashboard/clients")}
+            className="group flex items-center gap-2 text-zinc-400 hover:text-white transition-colors duration-200"
+          >
+            <Icon
+              icon="mdi:arrow-left"
+              width={20}
+              height={20}
+              className="group-hover:-translate-x-1 transition-transform duration-200"
+            />
+            <span className="text-sm font-medium">Back to Clients</span>
+          </button>
+        </div>
+
+        {/* Client Profile Header */}
+        <div className="flex items-center gap-6">
+          <div className="h-20 w-20 overflow-hidden rounded-2xl ring-2 ring-[#3E92CC]/30 shadow-lg">
             {profile.profileImage ? (
               <Image
                 src={profile.profileImage}
                 alt={`${profile.firstName} profile`}
                 className="object-cover w-full h-full"
-                width={64}
-                height={64}
+                width={80}
+                height={80}
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#3E92CC] to-[#2D7EB8]">
-                <Icon icon="mdi:account" width={24} height={24} color="white" />
+                <Icon icon="mdi:account" width={32} height={32} color="white" />
               </div>
             )}
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">
+            <h1 className="text-3xl font-bold text-white mb-1">
               {profile.firstName} {profile.lastName}
             </h1>
-            <p className="text-zinc-400">
+            <p className="text-zinc-400 flex items-center gap-2">
+              <Icon icon="mdi:calendar" width={16} height={16} />
               Client since {formatDate(client.respondedAt)}
             </p>
           </div>
@@ -309,10 +373,24 @@ export default function ClientDashboard({ params }) {
             client={client}
             profile={profile}
             onAssignPlan={handleAssignPlan}
+            assignedTrainingPlans={client.assignedTrainingPlans || []}
+            setActiveTab={setActiveTab}
           />
         )}
         {activeTab === "progress" && <ProgressTab client={client} />}
-        {activeTab === "workouts" && <WorkoutsTab client={client} />}
+        {activeTab === "workouts" && (
+          <WorkoutsTab
+            assignedTrainingPlans={client.assignedTrainingPlans || []}
+            client={client}
+            onViewPlan={(plan) => {
+              setPlanPreviewData(plan.planData);
+              setPlanPreviewOpen(true);
+            }}
+            onStartPlan={handleStartPlan}
+            startingPlanId={startingPlanId}
+            startPlanError={startPlanError}
+          />
+        )}
         {activeTab === "nutrition" && <NutritionTab client={client} />}
         {activeTab === "messages" && <MessagesTab client={client} />}
       </div>
@@ -337,7 +415,33 @@ export default function ClientDashboard({ params }) {
           }
           hideButtons={true}
           className="max-w-4xl"
+          footerButtons={false}
         >
+          {/* Prikaži info/error poruku odmah ako postoji aktivni plan */}
+          {assignType === "training" &&
+            client.assignedTrainingPlans?.some(
+              (plan) => plan.status === "active"
+            ) && (
+              <>
+                <InfoBanner
+                  icon="mdi:alert"
+                  title="Current Active Plan"
+                  subtitle={(() => {
+                    const activePlan = client.assignedTrainingPlans.find(
+                      (plan) => plan.status === "active"
+                    );
+                    if (!activePlan) return null;
+                    return `${activePlan.planData.title} • ${activePlan.planData.duration} ${activePlan.planData.durationType}`;
+                  })()}
+                  variant="warning"
+                  className="mb-4"
+                />
+                <ErrorMessage
+                  error={"Client already has an active training plan."}
+                />
+              </>
+            )}
+          {assignError && <ErrorMessage error={assignError} />}
           <div className="space-y-6">
             <div className="text-center">
               <p className="text-zinc-400 mb-4">
@@ -554,33 +658,123 @@ export default function ClientDashboard({ params }) {
                   >
                     Cancel
                   </Button>
-                  <Button
-                    variant="primary"
-                    onClick={handleAssignPlanToClient}
-                    disabled={!selectedPlan || assigning}
-                    leftIcon={
-                      assigning ? (
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                      ) : (
-                        <Icon icon="mdi:check" width={20} height={20} />
-                      )
-                    }
-                    fullWidth
-                  >
-                    {assigning ? "Assigning..." : "Assign Plan"}
-                  </Button>
+                  {/* Ako postoji aktivni plan, prikazi Replace Current Plan dugme */}
+                  {assignType === "training" &&
+                  client.assignedTrainingPlans?.some(
+                    (plan) => plan.status === "active"
+                  ) ? (
+                    <Button
+                      className="bg-orange-500 hover:bg-orange-600 text-white border-none"
+                      onClick={async () => {
+                        setAssigning(true);
+                        setAssignError(null);
+                        try {
+                          const response = await fetch(
+                            `/api/coaching-requests/${client.id}/replace-training-plan`,
+                            {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                planId: String(selectedPlan.id),
+                              }),
+                            }
+                          );
+                          const data = await response.json();
+                          if (!response.ok || !data.success) {
+                            throw new Error(
+                              data.error || "Failed to replace plan"
+                            );
+                          }
+                          setShowAssignModal(false);
+                          setSelectedPlan(null);
+                          setAssignType(null);
+                          fetchClientData();
+                        } catch (err) {
+                          setAssignError(
+                            err.message ||
+                              "Failed to replace plan. Please try again."
+                          );
+                        } finally {
+                          setAssigning(false);
+                        }
+                      }}
+                      disabled={!selectedPlan || assigning}
+                      leftIcon={
+                        assigning ? (
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        ) : (
+                          <Icon icon="mdi:check" width={20} height={20} />
+                        )
+                      }
+                      fullWidth
+                    >
+                      {assigning ? "Replacing..." : "Replace Current Plan"}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="primary"
+                      onClick={handleAssignPlanToClient}
+                      disabled={!selectedPlan || assigning}
+                      leftIcon={
+                        assigning ? (
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        ) : (
+                          <Icon icon="mdi:check" width={20} height={20} />
+                        )
+                      }
+                      fullWidth
+                    >
+                      {assigning ? "Assigning..." : "Assign Plan"}
+                    </Button>
+                  )}
                 </div>
               </div>
             )}
           </div>
         </Modal>
       )}
+      {/* Plan Preview Modal */}
+      <PlanPreviewModal
+        plan={planPreviewData}
+        isOpen={planPreviewOpen}
+        onClose={() => setPlanPreviewOpen(false)}
+        days={planPreviewData?.days}
+        type="training"
+      />
+      <style jsx>{`
+        .animate-fade-in {
+          animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .scrollbar-thin::-webkit-scrollbar {
+          width: 6px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+          background: #27272a;
+          border-radius: 6px;
+        }
+      `}</style>
     </div>
   );
 }
 
 // Overview Tab Component
-function OverviewTab({ client, profile, onAssignPlan }) {
+function OverviewTab({
+  client,
+  profile,
+  onAssignPlan,
+  assignedTrainingPlans,
+  setActiveTab,
+}) {
   const getExperienceText = (level) => {
     if (!level) return "Unknown";
     const experienceLevel = EXPERIENCE_LEVELS.find(
@@ -608,6 +802,11 @@ function OverviewTab({ client, profile, onAssignPlan }) {
           .replace(/_/g, " ")
           .replace(/\b\w/g, (l) => l.toUpperCase());
   };
+
+  // Pronađi aktivni plan
+  const activePlan = assignedTrainingPlans?.find(
+    (plan) => plan.status === "active"
+  );
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -706,7 +905,7 @@ function OverviewTab({ client, profile, onAssignPlan }) {
           </div>
         </Card>
 
-        {/* Current Plans */}
+        {/* Current Plan */}
         <Card variant="dark" className="overflow-visible">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -716,83 +915,48 @@ function OverviewTab({ client, profile, onAssignPlan }) {
                 width={24}
                 height={24}
               />
-              <h3 className="text-xl font-semibold text-white">
-                Current Plans
-              </h3>
+              <h3 className="text-xl font-semibold text-white">Current Plan</h3>
             </div>
             <Button
               variant="primary"
               size="small"
               leftIcon={<Icon icon="mdi:plus" width={16} height={16} />}
+              onClick={() => onAssignPlan("training")}
             >
-              Assign Plan
+              {activePlan ? "Replace Plan" : "Assign Plan"}
             </Button>
           </div>
           <div className="space-y-3">
-            {/* Training Plan */}
-            <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg border border-zinc-700">
-              <div className="flex items-center gap-3">
-                <Icon
-                  icon="mdi:dumbbell"
-                  className="text-orange-400"
-                  width={20}
-                  height={20}
-                />
-                <div>
-                  <p className="text-white font-medium">
-                    Full Body Transformation
-                  </p>
-                  <p className="text-zinc-400 text-sm">
-                    Week 3 of 8 • 75% complete
-                  </p>
+            {activePlan ? (
+              <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg border border-zinc-700">
+                <div className="flex items-center gap-3">
+                  <Icon
+                    icon="mdi:dumbbell"
+                    className="text-orange-400"
+                    width={20}
+                    height={20}
+                  />
+                  <div>
+                    <p className="text-white font-medium">
+                      {activePlan.planData?.title || "Untitled Plan"}
+                    </p>
+                    <p className="text-zinc-400 text-sm">
+                      {activePlan.planData?.duration ?? "?"}{" "}
+                      {activePlan.planData?.durationType ?? ""} • Active
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    onClick={() => setActiveTab("workouts")}
+                  >
+                    <Icon icon="mdi:eye" width={16} height={16} />
+                  </Button>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-20 bg-zinc-700 rounded-full h-2">
-                  <div
-                    className="bg-orange-400 h-2 rounded-full"
-                    style={{ width: "75%" }}
-                  ></div>
-                </div>
-                <Button variant="secondary" size="small">
-                  <Icon icon="mdi:eye" width={16} height={16} />
-                </Button>
-              </div>
-            </div>
-
-            {/* Nutrition Plan */}
-            <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg border border-zinc-700">
-              <div className="flex items-center gap-3">
-                <Icon
-                  icon="mdi:food-apple"
-                  className="text-green-400"
-                  width={20}
-                  height={20}
-                />
-                <div>
-                  <p className="text-white font-medium">
-                    Muscle Gain Nutrition
-                  </p>
-                  <p className="text-zinc-400 text-sm">
-                    Week 2 of 8 • 25% complete
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-20 bg-zinc-700 rounded-full h-2">
-                  <div
-                    className="bg-green-400 h-2 rounded-full"
-                    style={{ width: "25%" }}
-                  ></div>
-                </div>
-                <Button variant="secondary" size="small">
-                  <Icon icon="mdi:eye" width={16} height={16} />
-                </Button>
-              </div>
-            </div>
-
-            {/* No Plans State */}
-            {false && (
+            ) : (
               <div className="text-center py-6">
                 <Icon
                   icon="mdi:clipboard-outline"
@@ -1422,443 +1586,378 @@ function ProgressTab({ client }) {
   );
 }
 
-// Workouts Tab Component
-function WorkoutsTab({}) {
+// Enhanced Training Plan Card Component with Lazy Loading
+function TrainingPlanCard({
+  plan,
+  client,
+  onViewPlan,
+  onStartPlan,
+  startingPlanId,
+}) {
+  const [planDetails, setPlanDetails] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+
+  const handleViewPlan = async () => {
+    if (!planDetails && !isLoading) {
+      setIsLoading(true);
+      try {
+        // Lazy load detailed plan data
+        const response = await fetch(
+          `/api/coaching-requests/${client.id}/assigned-training-plan/${plan.id}/progress`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setPlanDetails(data);
+        }
+      } catch (error) {
+        console.error("Error loading plan details:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    setShowDetails(!showDetails);
+    onViewPlan(plan);
+  };
+
+  const getCompletionStats = () => {
+    if (!planDetails || !planDetails.schedule) return null;
+
+    const totalDays = planDetails.schedule.length;
+    const completedDays = planDetails.schedule.filter(
+      (day) => day.workoutStatus === "completed"
+    ).length;
+    const totalExercises = planDetails.schedule.reduce(
+      (sum, day) => sum + (day.exercises?.length || 0),
+      0
+    );
+    const completedExercises = planDetails.schedule.reduce((sum, day) => {
+      if (day.workoutStatus === "completed") {
+        return (
+          sum +
+          (day.exercises?.filter((ex) => ex.exerciseCompleted)?.length || 0)
+        );
+      }
+      return sum;
+    }, 0);
+
+    return { totalDays, completedDays, totalExercises, completedExercises };
+  };
+
+  const stats = getCompletionStats();
+
   return (
-    <div className="space-y-6">
+    <div
+      className={`rounded-xl border backdrop-blur-sm transition-all duration-200 ${
+        plan.status === "completed"
+          ? "bg-green-500/10 border-green-500/30"
+          : plan.status === "active"
+          ? "bg-blue-500/10 border-blue-500/30 ring-2 ring-blue-500/20"
+          : "bg-white/5 border-white/10 hover:border-white/20"
+      }`}
+    >
+      {/* Main Card Content */}
+      <div className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          {/* Left Side - Plan Info */}
+          <div className="flex items-start gap-3 min-w-0 flex-1">
+            {/* Status Icon */}
+            <div
+              className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                plan.status === "completed"
+                  ? "bg-green-600 shadow-lg shadow-green-600/30"
+                  : plan.status === "active"
+                  ? "bg-blue-600 shadow-lg shadow-blue-600/30"
+                  : "bg-orange-600 shadow-lg shadow-orange-600/30"
+              }`}
+            >
+              <Icon
+                icon={
+                  plan.status === "completed"
+                    ? "mdi:check"
+                    : plan.status === "active"
+                    ? "mdi:play"
+                    : "mdi:pause"
+                }
+                className="text-white"
+                width={18}
+                height={18}
+              />
+            </div>
+
+            {/* Plan Details */}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <h3 className="text-lg font-semibold text-white truncate">
+                  {plan.planData.title}
+                </h3>
+                {plan.status === "active" && (
+                  <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs font-medium rounded-full border border-blue-500/30">
+                    Active
+                  </span>
+                )}
+                {plan.status === "completed" && (
+                  <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-medium rounded-full border border-green-500/30">
+                    Completed
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-4 text-sm text-slate-400 mb-2">
+                <span className="flex items-center gap-1">
+                  <Icon icon="mdi:clock" width={14} height={14} />
+                  {plan.planData.duration} {plan.planData.durationType}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Icon icon="mdi:calendar" width={14} height={14} />
+                  {plan.status}
+                </span>
+              </div>
+
+              {/* Completion Stats for Completed Plans */}
+              {plan.status === "completed" && stats && (
+                <div className="flex items-center gap-4 text-xs text-slate-400">
+                  <span className="flex items-center gap-1">
+                    <Icon icon="mdi:check-circle" width={12} height={12} />
+                    {stats.completedDays}/{stats.totalDays} days
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Icon icon="mdi:dumbbell" width={12} height={12} />
+                    {stats.completedExercises}/{stats.totalExercises} exercises
+                  </span>
+                </div>
+              )}
+
+              {/* Loading State */}
+              {isLoading && (
+                <div className="flex items-center gap-2 text-slate-400 text-xs mt-2">
+                  <div className="w-3 h-3 border border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                  Loading details...
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right Side - Actions */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleViewPlan}
+              className="px-3 py-2"
+            >
+              <Icon icon="mdi:eye" width={16} height={16} />
+              <span className="hidden sm:inline ml-1">View</span>
+            </Button>
+
+            {plan.status !== "completed" && plan.status !== "active" && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => onStartPlan(plan.id)}
+                loading={startingPlanId === plan.id}
+                className="px-3 py-2"
+              >
+                <Icon icon="mdi:play" width={16} height={16} />
+                <span className="hidden sm:inline ml-1">Start</span>
+              </Button>
+            )}
+
+            {plan.status === "active" && (
+              <Link
+                href={`/trainer/dashboard/clients/${client.id}/plans/${plan.id}`}
+              >
+                <Button variant="primary" size="sm" className="px-3 py-2">
+                  <Icon icon="mdi:open-in-new" width={16} height={16} />
+                  <span className="hidden sm:inline ml-1">Track</span>
+                </Button>
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Expanded Details */}
+      {showDetails && planDetails && (
+        <div className="border-t border-white/10 p-4 sm:p-6">
+          <div className="space-y-4">
+            {/* Workout Summary */}
+            {plan.status === "completed" && (
+              <div className="bg-white/5 rounded-lg p-4">
+                <h4 className="text-white font-medium mb-3 flex items-center gap-2">
+                  <Icon
+                    icon="mdi:chart-line"
+                    width={16}
+                    height={16}
+                    className="text-green-400"
+                  />
+                  Completion Summary
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <div className="text-slate-400">Days Completed</div>
+                    <div className="text-white font-semibold">
+                      {stats.completedDays}/{stats.totalDays}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-slate-400">Exercises Done</div>
+                    <div className="text-white font-semibold">
+                      {stats.completedExercises}/{stats.totalExercises}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-slate-400">Completion Rate</div>
+                    <div className="text-green-400 font-semibold">
+                      {Math.round(
+                        (stats.completedDays / stats.totalDays) * 100
+                      )}
+                      %
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-slate-400">Status</div>
+                    <div className="text-green-400 font-semibold">
+                      ✓ Finished
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Recent Workouts */}
+            {planDetails.schedule && (
+              <div>
+                <h4 className="text-white font-medium mb-2 flex items-center gap-2">
+                  <Icon
+                    icon="mdi:format-list-bulleted"
+                    width={16}
+                    height={16}
+                    className="text-blue-400"
+                  />
+                  Workout Days ({planDetails.schedule.length})
+                </h4>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {planDetails.schedule.map((day, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between p-3 bg-white/5 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                            day.workoutStatus === "completed"
+                              ? "bg-green-600 text-white"
+                              : "bg-slate-600 text-white"
+                          }`}
+                        >
+                          {day.workoutStatus === "completed" ? "✓" : idx + 1}
+                        </div>
+                        <div>
+                          <div className="text-white text-sm font-medium">
+                            {day.name}
+                          </div>
+                          <div className="text-slate-400 text-xs">
+                            {day.exercises?.length || 0} exercises •{" "}
+                            {day.duration || 60} min
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-xs">
+                        {day.workoutStatus === "completed" && (
+                          <span className="text-green-400">Completed</span>
+                        )}
+                        {day.workoutStatus !== "completed" && (
+                          <span className="text-slate-400">Pending</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Workouts Tab Component
+function WorkoutsTab({
+  assignedTrainingPlans,
+  client,
+  onViewPlan,
+  onStartPlan,
+  startingPlanId,
+  startPlanError,
+}) {
+  return (
+    <div className="max-w-5xl mx-auto space-y-6">
       {/* Header Actions */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-white">Workout Management</h2>
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            leftIcon={<Icon icon="mdi:eye" width={20} height={20} />}
-          >
-            View Library
-          </Button>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h2 className="text-xl font-semibold text-white">Training Plans</h2>
+        <Link href="/trainer/dashboard/plans">
           <Button
             variant="primary"
-            leftIcon={<Icon icon="mdi:plus" width={20} height={20} />}
+            leftIcon={<Icon icon="mdi:plus" width={18} height={18} />}
+            className="w-full sm:w-auto"
           >
-            Create Workout
+            Create New Plan
           </Button>
-        </div>
+        </Link>
       </div>
 
-      {/* Current Plan Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card variant="dark" className="overflow-visible">
-          <div className="flex items-center gap-2 mb-4">
-            <Icon
-              icon="mdi:dumbbell"
-              className="text-[#3E92CC]"
-              width={24}
-              height={24}
-            />
-            <h3 className="text-lg font-semibold text-white">
-              Current Training Plan
-            </h3>
-          </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-400">Plan Name</span>
-              <span className="text-white font-medium">
-                Full Body Transformation
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-400">Duration</span>
-              <span className="text-white">8 weeks</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-400">Frequency</span>
-              <span className="text-white">4x per week</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-400">Progress</span>
-              <span className="text-green-400">Week 3/8 (75%)</span>
-            </div>
-            <div className="w-full bg-zinc-700 rounded-full h-2">
-              <div
-                className="bg-green-400 h-2 rounded-full"
-                style={{ width: "75%" }}
-              ></div>
-            </div>
-          </div>
-          <div className="mt-4 pt-4 border-t border-zinc-700">
-            <div className="flex gap-2">
-              <Button variant="primary" size="small" fullWidth>
-                <Icon icon="mdi:eye" width={16} height={16} />
-                View Plan
-              </Button>
-              <Button variant="secondary" size="small" fullWidth>
-                <Icon icon="mdi:pencil" width={16} height={16} />
-                Edit
-              </Button>
-            </div>
-          </div>
-        </Card>
-
-        <Card variant="dark" className="overflow-visible">
-          <div className="flex items-center gap-2 mb-4">
-            <Icon
-              icon="mdi:calendar-check"
-              className="text-[#3E92CC]"
-              width={24}
-              height={24}
-            />
-            <h3 className="text-lg font-semibold text-white">
-              This Week's Schedule
-            </h3>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <Icon
-                  icon="mdi:check-circle"
-                  className="text-green-400"
-                  width={16}
-                  height={16}
-                />
-                <span className="text-zinc-300">Mon - Upper Body</span>
-              </div>
-              <span className="text-zinc-500 text-sm">Completed</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <Icon
-                  icon="mdi:check-circle"
-                  className="text-green-400"
-                  width={16}
-                  height={16}
-                />
-                <span className="text-zinc-300">Wed - Lower Body</span>
-              </div>
-              <span className="text-zinc-500 text-sm">Completed</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-orange-900/20 rounded-lg border border-orange-700/30">
-              <div className="flex items-center gap-2">
-                <Icon
-                  icon="mdi:clock"
-                  className="text-orange-400"
-                  width={16}
-                  height={16}
-                />
-                <span className="text-white">Fri - Full Body</span>
-              </div>
-              <span className="text-orange-400 text-sm">Today</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <Icon
-                  icon="mdi:circle-outline"
-                  className="text-zinc-500"
-                  width={16}
-                  height={16}
-                />
-                <span className="text-zinc-300">Sun - Cardio</span>
-              </div>
-              <span className="text-zinc-500 text-sm">Pending</span>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Workout Performance */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center gap-2 mb-4">
+      {/* Training Plans History */}
+      <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-white/10">
+        <div className="flex items-center gap-2 mb-6">
           <Icon
-            icon="mdi:chart-line"
-            className="text-[#3E92CC]"
-            width={24}
-            height={24}
+            icon="mdi:history"
+            className="text-blue-400"
+            width={20}
+            height={20}
           />
-          <h3 className="text-xl font-semibold text-white">
-            Performance Tracking
+          <h3 className="text-lg font-semibold text-white">
+            Assigned Training Plans History
           </h3>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
-            <Icon
-              icon="mdi:weight-lifter"
-              className="text-blue-400 mx-auto mb-2"
-              width={24}
-              height={24}
-            />
-            <p className="text-2xl font-bold text-white">2,450kg</p>
-            <p className="text-zinc-400 text-sm">Total Volume</p>
-          </div>
-          <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
-            <Icon
-              icon="mdi:timer"
-              className="text-green-400 mx-auto mb-2"
-              width={24}
-              height={24}
-            />
-            <p className="text-2xl font-bold text-white">45min</p>
-            <p className="text-zinc-400 text-sm">Avg Duration</p>
-          </div>
-          <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
-            <Icon
-              icon="mdi:trending-up"
-              className="text-orange-400 mx-auto mb-2"
-              width={24}
-              height={24}
-            />
-            <p className="text-2xl font-bold text-white">+12%</p>
-            <p className="text-zinc-400 text-sm">Strength Gain</p>
-          </div>
-          <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
-            <Icon
-              icon="mdi:heart-pulse"
-              className="text-red-400 mx-auto mb-2"
-              width={24}
-              height={24}
-            />
-            <p className="text-2xl font-bold text-white">142</p>
-            <p className="text-zinc-400 text-sm">Avg Heart Rate</p>
-          </div>
-        </div>
-      </Card>
 
-      {/* Exercise Library */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Icon
-              icon="mdi:library"
-              className="text-[#3E92CC]"
-              width={24}
-              height={24}
-            />
-            <h3 className="text-xl font-semibold text-white">
-              Exercise Library
-            </h3>
+        {startPlanError && (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4">
+            <div className="text-red-400 text-sm">{startPlanError}</div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="secondary" size="small">
-              <Icon icon="mdi:filter" width={16} height={16} />
-              Filter
-            </Button>
-            <Button variant="primary" size="small">
-              <Icon icon="mdi:plus" width={16} height={16} />
-              Add Exercise
-            </Button>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors">
-            <div className="flex items-center gap-2 mb-2">
-              <Icon
-                icon="mdi:dumbbell"
-                className="text-blue-400"
-                width={20}
-                height={20}
-              />
-              <h4 className="text-white font-medium">Bench Press</h4>
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">
-              Chest, Shoulders, Triceps
-            </p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>Intermediate</span>
-              <span>Equipment: Barbell</span>
-            </div>
-          </div>
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors">
-            <div className="flex items-center gap-2 mb-2">
-              <Icon
-                icon="mdi:run"
-                className="text-green-400"
-                width={20}
-                height={20}
-              />
-              <h4 className="text-white font-medium">Squats</h4>
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">Legs, Glutes, Core</p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>Beginner</span>
-              <span>Equipment: Bodyweight</span>
-            </div>
-          </div>
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors">
-            <div className="flex items-center gap-2 mb-2">
-              <Icon
-                icon="mdi:arm-flex"
-                className="text-orange-400"
-                width={20}
-                height={20}
-              />
-              <h4 className="text-white font-medium">Pull-ups</h4>
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">Back, Biceps, Core</p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>Advanced</span>
-              <span>Equipment: Pull-up Bar</span>
-            </div>
-          </div>
-        </div>
-      </Card>
+        )}
 
-      {/* Workout History */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Icon
-              icon="mdi:history"
-              className="text-[#3E92CC]"
-              width={24}
-              height={24}
-            />
-            <h3 className="text-xl font-semibold text-white">
-              Recent Workouts
-            </h3>
-          </div>
-          <Button variant="secondary" size="small">
-            <Icon icon="mdi:eye" width={16} height={16} />
-            View All
-          </Button>
-        </div>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center gap-3">
-              <Icon
-                icon="mdi:check-circle"
-                className="text-green-400"
-                width={20}
-                height={20}
+        <div className="space-y-4">
+          {assignedTrainingPlans && assignedTrainingPlans.length > 0 ? (
+            assignedTrainingPlans.map((plan) => (
+              <TrainingPlanCard
+                key={plan.id}
+                plan={plan}
+                client={client}
+                onViewPlan={onViewPlan}
+                onStartPlan={onStartPlan}
+                startingPlanId={startingPlanId}
               />
-              <div>
-                <h4 className="text-white font-medium">Upper Body Strength</h4>
-                <p className="text-zinc-400 text-sm">Jan 15, 2024 • 45 min</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-white font-medium">8 exercises</p>
-              <p className="text-zinc-400 text-sm">2,450kg total</p>
-            </div>
-          </div>
-          <div className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center gap-3">
+            ))
+          ) : (
+            <div className="text-center py-12">
               <Icon
-                icon="mdi:check-circle"
-                className="text-green-400"
-                width={20}
-                height={20}
+                icon="mdi:clipboard-outline"
+                className="text-slate-600 mx-auto mb-3"
+                width={48}
+                height={48}
               />
-              <div>
-                <h4 className="text-white font-medium">Lower Body Power</h4>
-                <p className="text-zinc-400 text-sm">Jan 13, 2024 • 50 min</p>
-              </div>
+              <p className="text-slate-400 text-lg font-medium mb-2">
+                No Training Plans Yet
+              </p>
+              <p className="text-slate-500 text-sm">
+                Create and assign training plans to start tracking workouts
+              </p>
             </div>
-            <div className="text-right">
-              <p className="text-white font-medium">6 exercises</p>
-              <p className="text-zinc-400 text-sm">1,890kg total</p>
-            </div>
-          </div>
-          <div className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center gap-3">
-              <Icon
-                icon="mdi:check-circle"
-                className="text-green-400"
-                width={20}
-                height={20}
-              />
-              <div>
-                <h4 className="text-white font-medium">Full Body Circuit</h4>
-                <p className="text-zinc-400 text-sm">Jan 11, 2024 • 35 min</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-white font-medium">10 exercises</p>
-              <p className="text-zinc-400 text-sm">1,200kg total</p>
-            </div>
-          </div>
+          )}
         </div>
-      </Card>
-
-      {/* Workout Templates */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Icon
-              icon="mdi:content-copy"
-              className="text-[#3E92CC]"
-              width={24}
-              height={24}
-            />
-            <h3 className="text-xl font-semibold text-white">
-              Workout Templates
-            </h3>
-          </div>
-          <Button variant="primary" size="small">
-            <Icon icon="mdi:plus" width={16} height={16} />
-            Create Template
-          </Button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-white font-medium">Push Day</h4>
-              <Button variant="secondary" size="small">
-                <Icon icon="mdi:play" width={16} height={16} />
-              </Button>
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">
-              Chest, Shoulders, Triceps
-            </p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>6 exercises</span>
-              <span>45-60 min</span>
-            </div>
-          </div>
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-white font-medium">Pull Day</h4>
-              <Button variant="secondary" size="small">
-                <Icon icon="mdi:play" width={16} height={16} />
-              </Button>
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">
-              Back, Biceps, Rear Delts
-            </p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>7 exercises</span>
-              <span>50-65 min</span>
-            </div>
-          </div>
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-white font-medium">Leg Day</h4>
-              <Button variant="secondary" size="small">
-                <Icon icon="mdi:play" width={16} height={16} />
-              </Button>
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">
-              Quads, Hamstrings, Glutes
-            </p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>8 exercises</span>
-              <span>60-75 min</span>
-            </div>
-          </div>
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-white font-medium">HIIT Cardio</h4>
-              <Button variant="secondary" size="small">
-                <Icon icon="mdi:play" width={16} height={16} />
-              </Button>
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">
-              High Intensity Intervals
-            </p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>5 exercises</span>
-              <span>20-30 min</span>
-            </div>
-          </div>
-        </div>
-      </Card>
+      </div>
     </div>
   );
 }
@@ -2381,431 +2480,251 @@ function NutritionTab({}) {
 
 // Messages Tab Component
 function MessagesTab({}) {
+  const [messages, setMessages] = React.useState([
+    {
+      id: 1,
+      sender: "client",
+      text: "Hey! Just finished today's workout. The bench press felt much easier than last week!",
+      time: "2:30 PM",
+      date: "Today",
+    },
+    {
+      id: 2,
+      sender: "trainer",
+      text: "That's fantastic! Your form has improved significantly. Keep up the great work! 💪",
+      time: "2:32 PM",
+      date: "Today",
+    },
+    {
+      id: 3,
+      sender: "client",
+      text: "Quick question about tomorrow's leg day - should I increase the weight on squats?",
+      time: "3:15 PM",
+      date: "Today",
+    },
+    {
+      id: 4,
+      sender: "trainer",
+      text: "Here's your updated meal plan for this week. Focus on hitting your protein targets!",
+      time: "10:30 AM",
+      date: "Yesterday",
+      file: "meal-plan-week3.pdf",
+    },
+    {
+      id: 5,
+      sender: "client",
+      text: "Perfect! Thanks for the meal plan. I'll start implementing it today.",
+      time: "11:45 AM",
+      date: "Yesterday",
+    },
+  ]);
+  const [newMessage, setNewMessage] = React.useState("");
+  const [showVideoModal, setShowVideoModal] = React.useState(false);
+  const messagesEndRef = React.useRef(null);
+
+  // Auto-scroll to bottom on new message
+  React.useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, showVideoModal]);
+
+  // Group messages by date
+  const groupedMessages = messages.reduce((acc, msg) => {
+    if (!acc[msg.date]) acc[msg.date] = [];
+    acc[msg.date].push(msg);
+    return acc;
+  }, {});
+
+  const handleSend = () => {
+    if (!newMessage.trim()) return;
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: prev.length + 1,
+        sender: "trainer",
+        text: newMessage,
+        time: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        date: "Today",
+      },
+    ]);
+    setNewMessage("");
+  };
+
+  // Helper for avatar (initials)
+  const getAvatar = (sender) => (
+    <div
+      className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-white shadow-md border-2 select-none ${
+        sender === "trainer"
+          ? "bg-gradient-to-br from-blue-600 to-blue-400 border-blue-400"
+          : "bg-gradient-to-br from-zinc-700 to-zinc-500 border-zinc-400"
+      }`}
+    >
+      {sender === "trainer" ? "T" : "C"}
+    </div>
+  );
+
   return (
-    <div className="space-y-6">
-      {/* Header Actions */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-white">Communication</h2>
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            leftIcon={<Icon icon="mdi:video" width={20} height={20} />}
-          >
-            Video Call
-          </Button>
-          <Button
-            variant="primary"
-            leftIcon={<Icon icon="mdi:plus" width={20} height={20} />}
-          >
-            New Message
-          </Button>
-        </div>
+    <div className="max-w-2xl mx-auto flex flex-col h-[calc(100vh-180px)] sm:h-[600px]">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-10 bg-zinc-900/90 backdrop-blur border-b border-zinc-800 px-6 py-4 flex items-center justify-between rounded-t-2xl shadow-lg">
+        <h2 className="text-xl font-bold text-white tracking-tight">
+          Messages
+        </h2>
+        <button
+          onClick={() => setShowVideoModal(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-lg font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+        >
+          <Icon icon="mdi:video" width={20} height={20} />
+          Video Call
+        </button>
       </div>
 
-      {/* Communication Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card variant="dark" className="overflow-visible">
-          <div className="flex items-center gap-2 mb-2">
+      {/* Message History */}
+      <div className="flex-1 overflow-y-auto bg-zinc-900/80 px-4 py-6 rounded-b-2xl rounded-t-none border-x border-b border-zinc-700/50 shadow-xl scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+        {messages.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-full text-zinc-500">
             <Icon
-              icon="mdi:message-text"
-              className="text-[#3E92CC]"
-              width={20}
-              height={20}
+              icon="mdi:chat-outline"
+              width={48}
+              height={48}
+              className="mb-2"
             />
-            <span className="text-zinc-400 text-sm">Total Messages</span>
+            <p className="text-lg">No messages yet</p>
+            <p className="text-sm">Start the conversation below!</p>
           </div>
-          <p className="text-2xl font-bold text-white">127</p>
-          <p className="text-green-400 text-sm mt-1">+5 this week</p>
-        </Card>
-        <Card variant="dark" className="overflow-visible">
-          <div className="flex items-center gap-2 mb-2">
-            <Icon
-              icon="mdi:clock"
-              className="text-[#3E92CC]"
-              width={20}
-              height={20}
-            />
-            <span className="text-zinc-400 text-sm">Response Time</span>
-          </div>
-          <p className="text-2xl font-bold text-white">2.5h</p>
-          <p className="text-blue-400 text-sm mt-1">Average</p>
-        </Card>
-        <Card variant="dark" className="overflow-visible">
-          <div className="flex items-center gap-2 mb-2">
-            <Icon
-              icon="mdi:video"
-              className="text-[#3E92CC]"
-              width={20}
-              height={20}
-            />
-            <span className="text-zinc-400 text-sm">Video Calls</span>
-          </div>
-          <p className="text-2xl font-bold text-white">8</p>
-          <p className="text-orange-400 text-sm mt-1">This month</p>
-        </Card>
-        <Card variant="dark" className="overflow-visible">
-          <div className="flex items-center gap-2 mb-2">
-            <Icon
-              icon="mdi:file-document"
-              className="text-[#3E92CC]"
-              width={20}
-              height={20}
-            />
-            <span className="text-zinc-400 text-sm">Files Shared</span>
-          </div>
-          <p className="text-2xl font-bold text-white">23</p>
-          <p className="text-purple-400 text-sm mt-1">Documents</p>
-        </Card>
+        )}
+        {Object.entries(groupedMessages).map(([date, msgs]) => (
+          <React.Fragment key={date}>
+            <div className="text-center my-4">
+              <span className="text-zinc-500 text-xs bg-zinc-800 px-3 py-1 rounded-full shadow">
+                {date}
+              </span>
+            </div>
+            {msgs.map((msg, idx) => (
+              <div
+                key={msg.id}
+                className={`flex items-end gap-2 mb-2 group ${
+                  msg.sender === "trainer" ? "justify-end" : "justify-start"
+                }`}
+              >
+                {msg.sender === "client" && getAvatar("client")}
+                <div
+                  className={`max-w-[70%] flex flex-col ${
+                    msg.sender === "trainer" ? "items-end" : "items-start"
+                  }`}
+                >
+                  <div
+                    className={`relative px-4 py-2 rounded-2xl shadow-md transition-all duration-200 text-base whitespace-pre-line break-words ${
+                      msg.sender === "trainer"
+                        ? "bg-gradient-to-br from-blue-600 to-blue-500 text-white rounded-br-md"
+                        : "bg-zinc-800/80 text-zinc-100 rounded-bl-md"
+                    } ${idx === msgs.length - 1 ? "animate-fade-in" : ""}`}
+                  >
+                    {msg.text}
+                    {msg.file && (
+                      <div className="mt-2 p-2 bg-blue-900/30 rounded border border-blue-700/30 flex items-center gap-2">
+                        <Icon
+                          icon="mdi:file-document"
+                          className="text-blue-400"
+                          width={16}
+                          height={16}
+                        />
+                        <span className="text-blue-400 text-xs">
+                          {msg.file}
+                        </span>
+                      </div>
+                    )}
+                    {/* Timestamp on hover */}
+                    <span
+                      className={`absolute -bottom-5 right-2 text-xs text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 select-none`}
+                    >
+                      {msg.time}
+                    </span>
+                  </div>
+                  {/* Always show timestamp below bubble, smaller on mobile */}
+                  <span className="mt-1 text-xs text-zinc-500/80 select-none sm:hidden block">
+                    {msg.time}
+                  </span>
+                </div>
+                {msg.sender === "trainer" && getAvatar("trainer")}
+              </div>
+            ))}
+          </React.Fragment>
+        ))}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Message Composer */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center gap-2 mb-4">
-          <Icon
-            icon="mdi:pencil"
-            className="text-[#3E92CC]"
-            width={24}
-            height={24}
-          />
-          <h3 className="text-xl font-semibold text-white">Send Message</h3>
-        </div>
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Icon
-              icon="mdi:tag"
-              className="text-zinc-400"
-              width={16}
-              height={16}
-            />
-            <span className="text-zinc-400 text-sm">Subject</span>
-          </div>
-          <input
-            type="text"
-            placeholder="Message subject..."
-            className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3 text-white placeholder-zinc-500 focus:border-[#3E92CC] focus:outline-none transition-colors"
-          />
-          <div className="flex items-center gap-2 mb-2">
-            <Icon
-              icon="mdi:message-text"
-              className="text-zinc-400"
-              width={16}
-              height={16}
-            />
-            <span className="text-zinc-400 text-sm">Message</span>
-          </div>
-          <textarea
-            placeholder="Type your message here..."
-            rows={4}
-            className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3 text-white placeholder-zinc-500 focus:border-[#3E92CC] focus:outline-none transition-colors resize-none"
-          />
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Button variant="secondary" size="small">
-                <Icon icon="mdi:attachment" width={16} height={16} />
-                Attach File
-              </Button>
-              <Button variant="secondary" size="small">
-                <Icon icon="mdi:emoticon" width={16} height={16} />
-                Emoji
-              </Button>
-            </div>
-            <Button variant="primary">
-              <Icon icon="mdi:send" width={16} height={16} />
-              Send Message
-            </Button>
-          </div>
-        </div>
-      </Card>
+      <div className="bg-zinc-900/90 border-t border-zinc-800 px-4 py-3 flex items-center gap-3 rounded-b-2xl shadow-lg">
+        <textarea
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          placeholder="Type your message..."
+          rows={1}
+          className="flex-1 bg-zinc-800/70 border border-zinc-700 rounded-full px-5 py-3 text-white placeholder-zinc-500 focus:border-blue-500 focus:outline-none resize-none shadow-sm transition-all"
+          style={{ minHeight: 44, maxHeight: 120 }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          }}
+        />
+        <button
+          onClick={handleSend}
+          className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-6 py-3 rounded-full font-semibold shadow-md transition-all disabled:opacity-50"
+          disabled={!newMessage.trim()}
+        >
+          <Icon icon="mdi:send" width={22} height={22} />
+        </button>
+      </div>
 
-      {/* Quick Responses */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center gap-2 mb-4">
-          <Icon
-            icon="mdi:lightning-bolt"
-            className="text-[#3E92CC]"
-            width={24}
-            height={24}
-          />
-          <h3 className="text-xl font-semibold text-white">Quick Responses</h3>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <button className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors text-left">
-            <p className="text-white font-medium text-sm">
-              Great job on today's workout!
-            </p>
-            <p className="text-zinc-400 text-xs mt-1">Workout encouragement</p>
-          </button>
-          <button className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors text-left">
-            <p className="text-white font-medium text-sm">
-              Don't forget to log your meals
-            </p>
-            <p className="text-zinc-400 text-xs mt-1">Nutrition reminder</p>
-          </button>
-          <button className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors text-left">
-            <p className="text-white font-medium text-sm">
-              How are you feeling today?
-            </p>
-            <p className="text-zinc-400 text-xs mt-1">Check-in question</p>
-          </button>
-          <button className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors text-left">
-            <p className="text-white font-medium text-sm">
-              Let's schedule your next session
-            </p>
-            <p className="text-zinc-400 text-xs mt-1">Scheduling</p>
-          </button>
-        </div>
-      </Card>
-
-      {/* Message History */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Icon
-              icon="mdi:history"
-              className="text-[#3E92CC]"
-              width={24}
-              height={24}
-            />
-            <h3 className="text-xl font-semibold text-white">
-              Message History
-            </h3>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="secondary" size="small">
-              <Icon icon="mdi:filter" width={16} height={16} />
-              Filter
-            </Button>
-            <Button variant="secondary" size="small">
-              <Icon icon="mdi:download" width={16} height={16} />
-              Export
-            </Button>
-          </div>
-        </div>
-        <div className="space-y-4 max-h-96 overflow-y-auto">
-          {/* Today's Messages */}
-          <div className="text-center">
-            <span className="text-zinc-500 text-sm bg-zinc-800 px-3 py-1 rounded-full">
-              Today
-            </span>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 bg-[#3E92CC] rounded-full flex items-center justify-center flex-shrink-0">
-              <Icon icon="mdi:account" width={16} height={16} color="white" />
-            </div>
-            <div className="flex-1">
-              <div className="bg-zinc-800/50 rounded-lg p-3 border border-zinc-700">
-                <p className="text-white text-sm">
-                  Hey! Just finished today's workout. The bench press felt much
-                  easier than last week!
-                </p>
-                <p className="text-zinc-400 text-xs mt-2">2:30 PM</p>
+      {/* Video Call Modal */}
+      {showVideoModal && (
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-zinc-900 rounded-2xl border border-zinc-700 shadow-2xl max-w-3xl w-full overflow-hidden relative">
+            <div className="flex items-center justify-between p-6 border-b border-zinc-700 bg-zinc-900/95">
+              <div className="flex items-center gap-2">
+                <Icon
+                  icon="mdi:video"
+                  width={28}
+                  height={28}
+                  className="text-blue-400"
+                />
+                <h3 className="text-2xl font-bold text-white">Video Call</h3>
               </div>
+              <button
+                onClick={() => setShowVideoModal(false)}
+                className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+                aria-label="Close video call"
+              >
+                <Icon
+                  icon="mdi:close"
+                  width={28}
+                  height={28}
+                  className="text-zinc-400"
+                />
+              </button>
             </div>
-          </div>
-
-          <div className="flex items-start gap-3 justify-end">
-            <div className="flex-1 max-w-md">
-              <div className="bg-[#3E92CC] rounded-lg p-3 ml-auto">
-                <p className="text-white text-sm">
-                  That's fantastic! Your form has improved significantly. Keep
-                  up the great work! 💪
-                </p>
-                <p className="text-blue-100 text-xs mt-2">2:32 PM</p>
-              </div>
-            </div>
-            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-              <Icon icon="mdi:account" width={16} height={16} color="white" />
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 bg-[#3E92CC] rounded-full flex items-center justify-center flex-shrink-0">
-              <Icon icon="mdi:account" width={16} height={16} color="white" />
-            </div>
-            <div className="flex-1">
-              <div className="bg-zinc-800/50 rounded-lg p-3 border border-zinc-700">
-                <p className="text-white text-sm">
-                  Quick question about tomorrow's leg day - should I increase
-                  the weight on squats?
-                </p>
-                <p className="text-zinc-400 text-xs mt-2">3:15 PM</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Yesterday's Messages */}
-          <div className="text-center">
-            <span className="text-zinc-500 text-sm bg-zinc-800 px-3 py-1 rounded-full">
-              Yesterday
-            </span>
-          </div>
-
-          <div className="flex items-start gap-3 justify-end">
-            <div className="flex-1 max-w-md">
-              <div className="bg-[#3E92CC] rounded-lg p-3 ml-auto">
-                <p className="text-white text-sm">
-                  Here's your updated meal plan for this week. Focus on hitting
-                  your protein targets!
-                </p>
-                <div className="mt-2 p-2 bg-blue-900/30 rounded border border-blue-700/30">
-                  <div className="flex items-center gap-2">
-                    <Icon
-                      icon="mdi:file-document"
-                      className="text-blue-400"
-                      width={16}
-                      height={16}
-                    />
-                    <span className="text-blue-400 text-sm">
-                      meal-plan-week3.pdf
-                    </span>
-                  </div>
-                </div>
-                <p className="text-blue-100 text-xs mt-2">10:30 AM</p>
-              </div>
-            </div>
-            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-              <Icon icon="mdi:account" width={16} height={16} color="white" />
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 bg-[#3E92CC] rounded-full flex items-center justify-center flex-shrink-0">
-              <Icon icon="mdi:account" width={16} height={16} color="white" />
-            </div>
-            <div className="flex-1">
-              <div className="bg-zinc-800/50 rounded-lg p-3 border border-zinc-700">
-                <p className="text-white text-sm">
-                  Perfect! Thanks for the meal plan. I'll start implementing it
-                  today.
-                </p>
-                <p className="text-zinc-400 text-xs mt-2">11:45 AM</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Scheduled Messages */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Icon
-              icon="mdi:calendar-clock"
-              className="text-[#3E92CC]"
-              width={24}
-              height={24}
-            />
-            <h3 className="text-xl font-semibold text-white">
-              Scheduled Messages
-            </h3>
-          </div>
-          <Button variant="primary" size="small">
-            <Icon icon="mdi:plus" width={16} height={16} />
-            Schedule Message
-          </Button>
-        </div>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center gap-3">
-              <Icon
-                icon="mdi:clock"
-                className="text-orange-400"
-                width={20}
-                height={20}
+            <div className="p-4 bg-black">
+              <iframe
+                src="https://meet.jit.si/AntiqueBodyDemoRoom"
+                allow="camera; microphone; fullscreen; display-capture"
+                className="w-full h-[500px] rounded-xl border-none bg-black"
+                title="Video Call"
               />
-              <div>
-                <p className="text-white font-medium text-sm">
-                  Weekly check-in reminder
-                </p>
-                <p className="text-zinc-400 text-xs">Every Monday at 9:00 AM</p>
+              <div className="mt-4 text-center text-zinc-400 text-base">
+                Video poziv je pokrenut. Pošaljite link klijentu ako je
+                potrebno.
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="secondary" size="small">
-                <Icon icon="mdi:pencil" width={16} height={16} />
-              </Button>
-              <Button variant="danger" size="small">
-                <Icon icon="mdi:delete" width={16} height={16} />
-              </Button>
-            </div>
-          </div>
-          <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center gap-3">
-              <Icon
-                icon="mdi:clock"
-                className="text-blue-400"
-                width={20}
-                height={20}
-              />
-              <div>
-                <p className="text-white font-medium text-sm">
-                  Meal prep reminder
-                </p>
-                <p className="text-zinc-400 text-xs">Every Sunday at 6:00 PM</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="secondary" size="small">
-                <Icon icon="mdi:pencil" width={16} height={16} />
-              </Button>
-              <Button variant="danger" size="small">
-                <Icon icon="mdi:delete" width={16} height={16} />
-              </Button>
-            </div>
           </div>
         </div>
-      </Card>
-
-      {/* Communication Settings */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center gap-2 mb-4">
-          <Icon
-            icon="mdi:cog"
-            className="text-[#3E92CC]"
-            width={24}
-            height={24}
-          />
-          <h3 className="text-xl font-semibold text-white">
-            Communication Settings
-          </h3>
-        </div>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-white font-medium">Email Notifications</p>
-              <p className="text-zinc-400 text-sm">
-                Receive email alerts for new messages
-              </p>
-            </div>
-            <button className="w-12 h-6 bg-[#3E92CC] rounded-full relative">
-              <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 right-0.5 transition-transform"></div>
-            </button>
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-white font-medium">Push Notifications</p>
-              <p className="text-zinc-400 text-sm">
-                Get instant notifications on your device
-              </p>
-            </div>
-            <button className="w-12 h-6 bg-[#3E92CC] rounded-full relative">
-              <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 right-0.5 transition-transform"></div>
-            </button>
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-white font-medium">Auto-Reply</p>
-              <p className="text-zinc-400 text-sm">
-                Send automatic responses when offline
-              </p>
-            </div>
-            <button className="w-12 h-6 bg-zinc-700 rounded-full relative">
-              <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform"></div>
-            </button>
-          </div>
-        </div>
-      </Card>
+      )}
     </div>
   );
 }

@@ -26,8 +26,15 @@ const STEPS = [
 export const NutritionPlanCreator = ({ initialData }) => {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
-  const { formData, updateFormData, handleSubmit, isValid, isSubmitting } =
-    useNutritionPlanForm(initialData);
+  const {
+    formData,
+    updateFormData,
+    handleSubmit,
+    isValid,
+    isSubmitting,
+    prefillForm,
+    templates,
+  } = useNutritionPlanForm(initialData);
 
   const handleNext = async () => {
     if (currentStep < STEPS.length - 1) {
@@ -48,7 +55,14 @@ export const NutritionPlanCreator = ({ initialData }) => {
   const renderStep = () => {
     switch (currentStep) {
       case 0:
-        return <BasicInfo data={formData} onChange={updateFormData} />;
+        return (
+          <BasicInfo
+            data={formData}
+            onChange={updateFormData}
+            prefillForm={prefillForm}
+            templates={templates}
+          />
+        );
       case 1:
         return <MealPlanning data={formData} onChange={updateFormData} />;
       case 2:

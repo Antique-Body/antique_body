@@ -27,25 +27,6 @@ export const ContactAndLocationStep = ({
     ],
   });
 
-  // For trainers, add special handling for pricing
-  const handleChange = (e) => {
-    if (
-      userType === "trainer" &&
-      e.target &&
-      e.target.name === "pricePerSession"
-    ) {
-      const value = e.target.value;
-      onChange({
-        target: {
-          name: "pricePerSession",
-          value: value === "" ? "" : Number(value),
-        },
-      });
-    } else {
-      onChange(e);
-    }
-  };
-
   // Custom handler for city select (Google Places)
   const handleCitySelect = async (option) => {
     onChange({
@@ -196,79 +177,6 @@ export const ContactAndLocationStep = ({
           )}
         </div>
       </FormSection>
-
-      {/* Pricing - Only for trainers */}
-      {userType === "trainer" && (
-        <FormSection
-          title="Pricing"
-          description="Set your session rates and pricing preferences"
-          icon="mdi:currency-usd"
-          className="mb-0"
-        >
-          <div className="space-y-4 sm:space-y-5">
-            <FormField
-              label="Pricing Approach"
-              name="pricingType"
-              type="select"
-              value={formData.pricingType}
-              onChange={handleChange}
-              backgroundStyle="darker"
-              options={[
-                { value: "", label: "Select pricing approach" },
-                { value: "fixed", label: "Fixed Rate - Set My Price" },
-                { value: "negotiable", label: "Negotiable - Will Discuss" },
-                { value: "package_deals", label: "Package Deals Available" },
-                { value: "contact_for_pricing", label: "Contact for Pricing" },
-                {
-                  value: "free_consultation",
-                  label: "Free Consultation First",
-                },
-                { value: "prefer_not_to_say", label: "Prefer Not to Display" },
-              ]}
-              error={errors.pricingType}
-            />
-
-            {/* Show price field only for specific pricing types */}
-            {(formData.pricingType === "fixed" ||
-              formData.pricingType === "package_deals") && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                <FormField
-                  label={
-                    formData.pricingType === "package_deals"
-                      ? "Starting Price per Session"
-                      : "Price per Session"
-                  }
-                  name="pricePerSession"
-                  type="number"
-                  value={formData.pricePerSession}
-                  onChange={handleChange}
-                  placeholder="50"
-                  min="0"
-                  step="5"
-                  error={errors.pricePerSession}
-                  backgroundStyle="darker"
-                />
-
-                <FormField
-                  label="Currency"
-                  name="currency"
-                  type="select"
-                  value={formData.currency || "EUR"}
-                  onChange={handleChange}
-                  backgroundStyle="darker"
-                  options={[
-                    { value: "BAM", label: "BAM - Bosnian Mark" },
-                    { value: "RSD", label: "RSD - Serbian Dinar" },
-                    { value: "EUR", label: "EUR - Euro" },
-                    { value: "USD", label: "USD - US Dollar" },
-                    { value: "GBP", label: "GBP - British Pound" },
-                  ]}
-                />
-              </div>
-            )}
-          </div>
-        </FormSection>
-      )}
     </div>
   );
 };

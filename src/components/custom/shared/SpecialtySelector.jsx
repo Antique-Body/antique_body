@@ -48,26 +48,26 @@ export const SpecialtySelector = ({
   };
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={`space-y-4 sm:space-y-5 lg:space-y-6 ${className}`}>
       {/* Header with title, description and counter */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h3 className="text-base font-medium text-gray-300 flex items-center">
+          <h3 className="text-sm sm:text-base font-medium text-gray-300 flex items-center">
             <Icon
               icon="mdi:star-circle"
-              className="mr-2 text-[#FF6B00]"
-              width={18}
-              height={18}
+              className="mr-2 text-[#FF6B00] sm:w-[18px] sm:h-[18px]"
+              width={16}
+              height={16}
             />
             Choose Your Expertise Areas
           </h3>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2 leading-relaxed">
             Pick the fitness areas where you have knowledge and experience
           </p>
         </div>
 
         {selectedSpecialties.length > 0 && (
-          <div className="px-3 py-1 text-nowrap bg-[#FF6B00]/10 border border-[#FF6B00]/30 rounded-lg text-[#FF6B00] text-xs font-medium">
+          <div className="self-start sm:self-auto px-2.5 sm:px-3 py-1 sm:py-1.5 text-nowrap bg-gradient-to-r from-[#FF6B00]/15 to-[#FF8A00]/10 border border-[#FF6B00]/30 rounded-lg text-[#FF6B00] text-xs font-semibold backdrop-blur-sm shadow-sm">
             {selectedSpecialties.length} selected
           </div>
         )}
@@ -81,7 +81,7 @@ export const SpecialtySelector = ({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.2 }}
-          className="flex flex-wrap gap-2 sm:gap-3"
+          className="flex flex-wrap gap-1.5 sm:gap-2 lg:gap-3"
         >
           {filteredSpecialties.map((specialty) => {
             const isSelected = selectedSpecialties.includes(specialty.id);
@@ -97,29 +97,29 @@ export const SpecialtySelector = ({
                   variant={isSelected ? "orangeFilled" : "secondary"}
                   type="button"
                   onClick={() => handleSpecialtyToggle(specialty.id)}
-                  className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                  className={`inline-flex items-center gap-1 sm:gap-1.5 lg:gap-2 px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-full text-xs font-medium transition-all duration-300 whitespace-nowrap ${
                     isSelected
-                      ? "shadow-lg shadow-[#FF6B00]/25 scale-105"
-                      : "border border-[#333] hover:border-[#FF6B00]/50 hover:text-white hover:bg-[#FF6B00]/10"
+                      ? "shadow-lg shadow-[#FF6B00]/25 scale-105 ring-1 ring-[#FF6B00]/20"
+                      : "border border-[rgba(255,107,0,0.2)] hover:border-[#FF6B00]/50 hover:text-white hover:bg-[#FF6B00]/15 hover:scale-105 backdrop-blur-sm"
                   }`}
                 >
                   <Icon
                     icon={specialty.icon || "mdi:star"}
-                    width={14}
-                    height={14}
-                    className={`flex-shrink-0 ${
+                    width={12}
+                    height={12}
+                    className={`flex-shrink-0 sm:w-[14px] sm:h-[14px] ${
                       isSelected ? "text-white" : "text-gray-400"
                     }`}
                   />
-                  <span className="text-xs sm:text-sm leading-tight">
+                  <span className="text-xs leading-tight font-medium">
                     {specialty.label}
                   </span>
                   {isSelected && (
                     <Icon
                       icon="mdi:check"
-                      width={12}
-                      height={12}
-                      className="text-white flex-shrink-0"
+                      width={10}
+                      height={10}
+                      className="text-white flex-shrink-0 sm:w-[12px] sm:h-[12px]"
                     />
                   )}
                 </Button>

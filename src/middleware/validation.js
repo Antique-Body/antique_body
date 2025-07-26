@@ -169,13 +169,6 @@ export const validateTrainerProfile = (data) => {
     "dateOfBirth",
     "gender",
     "trainerSince",
-    "specialties",
-    "languages",
-    "trainingEnvironment",
-    "trainingTypes",
-    "location",
-    "pricingType",
-    "currency",
   ];
   for (const field of requiredFields) {
     if (
@@ -185,12 +178,7 @@ export const validateTrainerProfile = (data) => {
       errors[field] = `Field '${field}' is required.`;
     }
   }
-  if (data.pricingType === "fixed" || data.pricingType === "package_deals") {
-    if (!data.pricePerSession || Number(data.pricePerSession) <= 0) {
-      errors.pricePerSession =
-        "Field 'pricePerSession' is required for selected pricing type.";
-    }
-  }
+ 
   if (data.location) {
     if (!data.location.city || !data.location.country) {
       errors.location = "City and country are required.";

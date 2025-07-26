@@ -140,7 +140,12 @@ export const WeeklyScheduleTab = ({
                           <div className="grid grid-cols-2 gap-2 mt-2">
                             {exercise.sets && (
                               <div className="text-zinc-300 text-sm">
-                                Sets: {exercise.sets}
+                                Sets:{" "}
+                                {typeof exercise.sets === "number"
+                                  ? exercise.sets
+                                  : Array.isArray(exercise.sets)
+                                  ? exercise.sets.length
+                                  : 0}
                               </div>
                             )}
                             {exercise.reps && (

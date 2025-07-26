@@ -2,6 +2,82 @@ import { NextResponse } from "next/server";
 
 import { auth } from "#/auth";
 import prisma from "@/lib/prisma";
+import Ajv from "ajv";
+
+const planDataSchema = {
+  type: "object",
+  properties: {
+    title: { type: "string" },
+    description: { type: "string" },
+    schedule: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          day: { anyOf: [{ type: "string" }, { type: "number" }] },
+          name: { type: "string" },
+          type: { type: "string" },
+          duration: { type: "number" },
+          description: { type: "string" },
+          workoutStatus: { type: "string" },
+          workoutStartedAt: { type: ["string", "null"] },
+          workoutCompletedAt: { type: ["string", "null"] },
+          workoutEndedAt: { type: ["string", "null"] },
+          workoutDuration: { type: ["number", "null"] },
+          workoutNotes: { type: "string" },
+          workoutWasCompleted: { type: "boolean" },
+          exercises: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                name: { type: "string" },
+                reps: { type: ["number", "null"] },
+                rest: { type: ["number", "null"] },
+                sets: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      weight: { type: ["number", "null"] },
+                      reps: { type: ["number", "null"] },
+                      completed: { type: "boolean" },
+                      notes: { type: "string" },
+                    },
+                    required: ["reps", "completed"],
+                  },
+                },
+                type: { type: "string" },
+                level: { type: "string" },
+                imageUrl: { type: "string" },
+                location: { type: "string" },
+                equipment: { type: ["boolean", "null"] },
+                instructions: { type: "string" },
+                muscleGroups: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                    },
+                    required: ["name"],
+                  },
+                },
+                exerciseNotes: { type: "string" },
+                exerciseCompleted: { type: "boolean" },
+              },
+              required: ["name", "type", "sets"],
+            },
+          },
+        },
+        required: ["day", "name", "type", "duration", "exercises"],
+      },
+    },
+    lastUpdated: { type: ["string", "null"] },
+  },
+  required: ["title", "description", "schedule"],
+};
+const ajv = new Ajv();
 
 export async function GET(request, { params }) {
   try {
@@ -293,6 +369,229 @@ export async function DELETE(request, { params }) {
     });
   } catch (error) {
     console.error("Error deleting coaching request:", error);
+    return NextResponse.json(
+      { success: false, error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+// POST: Assign training plan to client (creates AssignedTrainingPlan)
+// NOTE: If multiple POST handlers are needed, split into separate files/endpoints.
+export async function POST(request, { params }) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    const { id } = params; // coaching request id
+    const body = await request.json();
+    const { planId } = body;
+    if (!planId) {
+      return NextResponse.json(
+        { success: false, error: "Missing planId" },
+        { status: 400 }
+      );
+    }
+    // Get coaching request
+    const coachingRequest = await prisma.coachingRequest.findUnique({
+      where: { id },
+      include: { client: true, trainer: true },
+    });
+    if (!coachingRequest) {
+      return NextResponse.json(
+        { success: false, error: "Coaching request not found" },
+        { status: 404 }
+      );
+    }
+    // Only trainer can assign
+    if (coachingRequest.trainer.userId !== session.user.id) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 403 }
+      );
+    }
+    // Check if client already has active assigned plan
+    const existing = await prisma.assignedTrainingPlan.findFirst({
+      where: {
+        clientId: coachingRequest.clientId,
+        status: "active",
+      },
+    });
+    if (existing) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Client already has an active training plan. Complete it before assigning a new one.",
+        },
+        { status: 409 }
+      );
+    }
+    // Get original plan
+    const plan = await prisma.trainingPlan.findUnique({
+      where: { id: planId },
+    });
+    if (!plan) {
+      return NextResponse.json(
+        { success: false, error: "Training plan not found" },
+        { status: 404 }
+      );
+    }
+    // Copy plan data as JSON
+    const planData = { ...plan };
+    // Remove fields that shouldn't be in planData
+    delete planData.id;
+    delete planData.trainerInfoId;
+    delete planData.createdAt;
+    delete planData.updatedAt;
+    delete planData.deletedAt;
+    // Validate planData before assignment
+    if (!ajv.validate(planDataSchema, planData)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Invalid planData format",
+          details: ajv.errors,
+        },
+        { status: 400 }
+      );
+    }
+    // Assign plan
+    const assigned = await prisma.assignedTrainingPlan.create({
+      data: {
+        clientId: coachingRequest.clientId,
+        trainerId: coachingRequest.trainerId,
+        originalPlanId: plan.id,
+        planData,
+        status: "active",
+      },
+    });
+    return NextResponse.json(
+      { success: true, data: assigned },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Error assigning training plan:", error);
+    return NextResponse.json(
+      { success: false, error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+// PATCH: Edit assigned training plan (update planData JSON)
+export async function PATCH_editAssignedPlan(request, { params }) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    const { id, assignedPlanId } = params;
+    const body = await request.json();
+    // Validate planData
+    if (!ajv.validate(planDataSchema, body.planData)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Invalid planData format",
+          details: ajv.errors,
+        },
+        { status: 400 }
+      );
+    }
+    // Dohvati assigned plan
+    const assignedPlan = await prisma.assignedTrainingPlan.findUnique({
+      where: { id: assignedPlanId },
+    });
+    if (!assignedPlan) {
+      return NextResponse.json(
+        { success: false, error: "Assigned plan not found" },
+        { status: 404 }
+      );
+    }
+    // Provjeri da li je trener vlasnik
+    const coachingRequest = await prisma.coachingRequest.findUnique({
+      where: { id },
+    });
+    if (
+      !coachingRequest ||
+      coachingRequest.trainerId !== assignedPlan.trainerId
+    ) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 403 }
+      );
+    }
+    // Update planData
+    const updated = await prisma.assignedTrainingPlan.update({
+      where: { id: assignedPlanId },
+      data: {
+        planData: body.planData,
+      },
+    });
+    return NextResponse.json({ success: true, data: updated });
+  } catch (error) {
+    console.error("Error editing assigned plan:", error);
+    return NextResponse.json(
+      { success: false, error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+// GET: Dohvati sve assigned training planove za klijenta (po coaching requestu)
+export async function GET_assignedTrainingPlans(request, { params }) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    const { id } = params; // coaching request id
+    // Dohvati coaching request
+    const coachingRequest = await prisma.coachingRequest.findUnique({
+      where: { id },
+      include: {
+        trainer: true,
+        client: true,
+      },
+    });
+    if (!coachingRequest) {
+      return NextResponse.json(
+        { success: false, error: "Coaching request not found" },
+        { status: 404 }
+      );
+    }
+    // Samo trener ili klijent mogu vidjeti
+    if (
+      session.user.id !== coachingRequest.trainer.userId &&
+      session.user.id !== coachingRequest.client.userId
+    ) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 403 }
+      );
+    }
+    // Dohvati sve assigned planove za ovog klijenta i trenera
+    const assignedPlans = await prisma.assignedTrainingPlan.findMany({
+      where: {
+        clientId: coachingRequest.clientId,
+        trainerId: coachingRequest.trainerId,
+      },
+      orderBy: { assignedAt: "desc" },
+    });
+    return NextResponse.json({ success: true, data: assignedPlans });
+  } catch (error) {
+    console.error("Error fetching assigned training plans:", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }

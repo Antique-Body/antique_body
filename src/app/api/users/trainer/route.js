@@ -1,7 +1,6 @@
 import bcrypt from "bcrypt";
 import { NextResponse } from "next/server";
 
-import { convertToEUR } from "../../../utils/currency";
 import { trainerService, exerciseService } from "../services";
 import { createDefaultPlansForTrainer } from "../services/planService";
 
@@ -19,43 +18,7 @@ export async function POST(req) {
     }
     const body = await req.json();
 
-    // Konvertuj pricePerSession u EUR ako postoji i valuta nije EUR
-    if (body.pricePerSession && body.currency && body.currency !== "EUR") {
-      try {
-        const priceInEUR = await convertToEUR(
-          body.pricePerSession,
-          body.currency
-        );
-        body.pricePerSession = priceInEUR;
-      } catch (err) {
-        // Provjeri različite tipove grešaka za usage limit
-        const errorMessage = err.message || "";
-        const isUsageLimitError =
-          errorMessage.includes("usage_limit_reached") ||
-          errorMessage.includes("monthly usage limit") ||
-          errorMessage.includes("usage limit") ||
-          errorMessage.includes("limit has been reached") ||
-          errorMessage.includes("subscription") ||
-          errorMessage.includes("upgrade");
-
-        if (isUsageLimitError) {
-          // Ako je dosegnut limit, nastavi sa originalnom cijenom ali postavi valutu na EUR
-
-          body.currency = "EUR"; // Postavi valutu na EUR
-          // body.pricePerSession ostaje ista kao što je unesena
-        } else {
-          // Za ostale greške, vrati grešku
-          return new Response(
-            JSON.stringify({
-              error: "Currency conversion failed: " + err.message,
-            }),
-            {
-              status: 400,
-            }
-          );
-        }
-      }
-    }
+    // Removed pricePerSession logic
 
     // Očekujemo contactEmail i contactPhone u payloadu
     const { trainerProfile, trainerInfoId } =

@@ -28,18 +28,18 @@ export const Specialties = ({ trainerData, handleChange, setTrainerData }) => (
     variants={staggerItems}
     initial="hidden"
     animate="visible"
-    className="space-y-8 p-4 mx-6"
+    className="space-y-4 "
   >
     <SectionTitle title="Specialties & Training Types" />
 
     {/* Specialty Selector */}
     <motion.div
       variants={fadeInUp}
-      className="p-6 bg-[rgba(25,25,25,0.5)] border border-[#333] rounded-lg"
+      className="p-4 sm:p-5 lg:p-6 bg-[rgba(25,25,25,0.6)] border border-[rgba(255,107,0,0.2)] rounded-xl sm:rounded-2xl backdrop-blur-sm hover:border-[rgba(255,107,0,0.3)] transition-all duration-300"
     >
-      <h3 className="text-base font-medium text-gray-300 mb-4 flex items-center">
-        <span className="w-8 h-8 rounded-full bg-[#FF6B00]/20 inline-flex items-center justify-center mr-2">
-          <span className="text-[#FF6B00]">1</span>
+      <h3 className="text-sm sm:text-base font-medium text-gray-300 mb-3 sm:mb-4 flex items-center">
+        <span className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 rounded-full bg-gradient-to-br from-[#FF6B00]/30 to-[#FF8A00]/20 inline-flex items-center justify-center mr-2 sm:mr-3 border border-[#FF6B00]/20">
+          <span className="text-[#FF6B00] text-xs sm:text-sm font-bold">1</span>
         </span>
         Specialties
       </h3>
@@ -57,11 +57,11 @@ export const Specialties = ({ trainerData, handleChange, setTrainerData }) => (
     {/* Training Types Selector */}
     <motion.div
       variants={fadeInUp}
-      className="p-6 bg-[rgba(25,25,25,0.5)] border border-[#333] rounded-lg"
+      className="p-4 sm:p-5 lg:p-6 bg-[rgba(25,25,25,0.6)] border border-[rgba(255,107,0,0.2)] rounded-xl sm:rounded-2xl backdrop-blur-sm hover:border-[rgba(255,107,0,0.3)] transition-all duration-300"
     >
-      <h3 className="text-base font-medium text-gray-300 mb-4 flex items-center">
-        <span className="w-8 h-8 rounded-full bg-[#FF6B00]/20 inline-flex items-center justify-center mr-2">
-          <span className="text-[#FF6B00]">2</span>
+      <h3 className="text-sm sm:text-base font-medium text-gray-300 mb-3 sm:mb-4 flex items-center">
+        <span className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 rounded-full bg-gradient-to-br from-[#FF6B00]/30 to-[#FF8A00]/20 inline-flex items-center justify-center mr-2 sm:mr-3 border border-[#FF6B00]/20">
+          <span className="text-[#FF6B00] text-xs sm:text-sm font-bold">2</span>
         </span>
         Training Setup
       </h3>

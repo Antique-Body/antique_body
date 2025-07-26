@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
+import mealLibrary from "./mealLibrary.json";
 import { MealLibrarySelector } from "./MealLibrarySelector";
 
 import { Button } from "@/components/common/Button";
@@ -77,6 +78,57 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
   const [showVideoUrlInput, setShowVideoUrlInput] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [videoFile, setVideoFile] = useState(null);
+
+  // Dodaj stateove za autocomplete
+  const [nameInput, setNameInput] = useState(formData.name || "");
+  const [suggestions, setSuggestions] = useState([]);
+
+  // Sinkronizuj nameInput i formData.name
+  useEffect(() => {
+    setNameInput(formData.name || "");
+  }, [formData.name]);
+
+  // Funkcija za filtriranje prijedloga
+  const handleNameChange = (e) => {
+    const value = e.target.value;
+    setNameInput(value);
+    setFormData((prev) => ({ ...prev, name: value }));
+
+    if (value.length > 1) {
+      const filtered = mealLibrary.filter((meal) =>
+        meal.name.toLowerCase().includes(value.toLowerCase())
+      );
+      setSuggestions(filtered);
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+  // Funkcija za popunjavanje iz predloška
+  const handleSuggestionClick = (template) => {
+    setFormData((prev) => ({
+      ...prev,
+      ...template,
+      // recipe i ingredients su stringovi
+    }));
+    setSelectedDietary(template.dietary || []);
+    setNameInput(template.name);
+    setSuggestions([]);
+    setImagePreview(template.imageUrl || null);
+    setVideoPreview(template.videoUrl || null);
+    setVideoUrl(template.videoUrl || "");
+  };
+
+  // (Opcionalno) Zatvori suggestions kad klikneš vani
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest(".suggestions-dropdown")) {
+        setSuggestions([]);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Load meal data if in edit mode
   useEffect(() => {
@@ -566,14 +618,14 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
             </div>
           </div>
         ) : (
-          <div className="w-full">
-            {meal.video ? (
-              <div className="aspect-w-16 aspect-h-9 overflow-hidden rounded-lg">
-                {meal.video.includes("youtube.com") ||
-                meal.video.includes("youtu.be") ? (
+          <div className="w-full flex items-center justify-center min-h-[27rem]">
+            {meal.videoUrl ? (
+              <div className="h-[27rem] w-[46rem] overflow-hidden rounded-lg flex items-center justify-center">
+                {meal.videoUrl.includes("youtube.com") ||
+                meal.videoUrl.includes("youtu.be") ? (
                   <iframe
                     src={`https://www.youtube.com/embed/${
-                      meal.video.match(
+                      meal.videoUrl.match(
                         /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
                       )?.[1]
                     }`}
@@ -581,10 +633,10 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
                     className="h-[400px] w-full rounded-lg"
                     allowFullScreen
                   ></iframe>
-                ) : meal.video.includes("vimeo.com") ? (
+                ) : meal.videoUrl.includes("vimeo.com") ? (
                   <iframe
                     src={`https://player.vimeo.com/video/${
-                      meal.video.match(/vimeo\.com\/(\d+)/)?.[1]
+                      meal.videoUrl.match(/vimeo\.com\/(\d+)/)?.[1]
                     }`}
                     title={`${meal.name} video`}
                     className="h-[400px] w-full rounded-lg"
@@ -592,18 +644,18 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
                   ></iframe>
                 ) : (
                   <video
-                    src={meal.video}
+                    src={meal.videoUrl}
                     controls
-                    className="h-[400px] w-full rounded-lg"
+                    className="h-[400px] w-full rounded-lg object-cover"
                     preload="metadata"
                   >
-                    <source src={meal.video} type="video/mp4" />
+                    <source src={meal.videoUrl} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
                 )}
               </div>
             ) : (
-              <div className="flex h-[400px] w-full flex-col items-center justify-center rounded-lg bg-zinc-800">
+              <div className="flex h-[400px] w-[46rem] flex-col items-center justify-center rounded-lg bg-zinc-800">
                 <Icon
                   icon="mdi:video-off"
                   className="text-zinc-500"
@@ -648,17 +700,39 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
 
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         {/* Basic Info */}
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 relative">
           <FormField
             type="text"
             label="Meal Name"
             name="name"
-            value={formData.name}
-            onChange={handleChange}
+            value={nameInput}
+            onChange={handleNameChange}
             placeholder="e.g., Grilled Chicken Salad"
             error={errors.name}
             required
+            autoComplete="off"
           />
+          {suggestions.length > 0 && (
+            <div className="absolute z-20 bg-zinc-900 border border-zinc-700 rounded w-full mt-1 max-h-56 overflow-y-auto shadow-lg suggestions-dropdown">
+              {suggestions.map((s) => (
+                <div
+                  key={s.id}
+                  className="px-4 py-2 cursor-pointer hover:bg-zinc-800 text-zinc-200"
+                  onClick={() => handleSuggestionClick(s)}
+                >
+                  {s.name}
+                </div>
+              ))}
+              <div className="border-t border-zinc-700">
+                <button
+                  className="w-full text-left px-4 py-2 text-orange-400 hover:bg-zinc-800"
+                  onClick={() => handleSuggestionClick(suggestions[0])}
+                >
+                  Popuni ostale podatke za "{suggestions[0].name}"
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Meal Type & Difficulty */}
