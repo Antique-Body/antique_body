@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-
 import { auth } from "#/auth";
 import { validateMeal } from "@/middleware/validation";
 

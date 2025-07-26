@@ -2,7 +2,6 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import React, { useState } from "react";
 
-
 import { Button } from "@/components/common/Button";
 import { Modal } from "@/components/common/Modal";
 import AnatomicalViewer from "@/components/custom/dashboard/trainer/pages/exercises/components/AnatomicalViewer";

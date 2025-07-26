@@ -3,7 +3,6 @@ import { Icon } from "@iconify/react";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-
 import { FormField } from "@/components/common";
 import { ErrorIcon } from "@/components/common/Icons";
 import { SpecialtySelector } from "@/components/custom/shared";

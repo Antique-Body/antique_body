@@ -15,7 +15,6 @@ import { TRAINING_LEVELS } from "src/enums/trainingLevels";
 
 import { CoverImageUploadSkeleton } from "../components/CoverImageUpload";
 
-
 const CoverImageUploadDynamic = dynamic(
   () => import("../components/CoverImageUpload"),
   { loading: () => <CoverImageUploadSkeleton /> }

@@ -16,7 +16,6 @@ import { Features } from "./steps/Features";
 import { MealPlanning } from "./steps/MealPlanning";
 import { Preview } from "./steps/Preview";
 
-
 const STEPS = [
   { id: "basic", label: "Basic Info", icon: "mdi:information" },
   { id: "meals", label: "Meal Planning", icon: "mdi:food" },

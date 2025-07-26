@@ -11,7 +11,6 @@ import { Card, Modal, FormField, Button } from "@/components/common";
 import { MealLibrarySelector } from "../../../../meals/components";
 import { MealModal } from "../../../../meals/components/MealModal";
 
-
 // Helper to check if a URL is a YouTube link
 const isYouTubeUrl = (url) => {
   if (!url) return false;

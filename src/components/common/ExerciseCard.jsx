@@ -8,7 +8,6 @@ import { getRepsPlaceholder, toggleRepsUnit } from "@/utils/exerciseUtils";
 import { Button } from "./Button";
 import { Card } from "./Card";
 
-
 /**
  * Mobile-first responsive exercise card component
  * Provides consistent exercise display across different contexts

@@ -3,7 +3,6 @@ import * as Tooltip from "@radix-ui/react-tooltip";
 import Image from "next/image";
 import { useState } from "react";
 
-
 import { Button } from "@/components/common/Button";
 import { mapSpecialtyToLabel } from "@/utils/specialtyMapper";
 

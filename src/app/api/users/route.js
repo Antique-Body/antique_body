@@ -4,7 +4,6 @@ import { auth } from "#/auth";
 
 import { userService } from "./services";
 
-
 function parseQueryParams(request) {
   const url = new URL(request.url);
   const params = {};

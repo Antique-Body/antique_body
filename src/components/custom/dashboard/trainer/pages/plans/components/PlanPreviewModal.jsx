@@ -16,7 +16,6 @@ import { StatsTab } from "./planPreviewModal/StatsTab";
 import { usePlanPDF } from "./planPreviewModal/usePlanPDF";
 import { WeeklyScheduleTab } from "./planPreviewModal/WeeklyScheduleTab";
 
-
 export const PlanPreviewModal = ({ plan, isOpen, onClose, days, type }) => {
   const [activeTab, setActiveTab] = useState("overview");
   const [activeDay, setActiveDay] = useState(null);
