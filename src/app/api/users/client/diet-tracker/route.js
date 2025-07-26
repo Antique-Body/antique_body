@@ -9,7 +9,9 @@ import {
 } from "../../services/dietTrackerService";
 
 import { auth } from "#/auth";
+import { mockNutritionPlan as mockPlanData } from "@/components/custom/dashboard/client/pages/diet-tracker/mockNutritionPlan";
 import prisma from "@/lib/prisma";
+// Import the mock nutrition plan directly
 
 // GET: Get current diet plan and progress for client
 export async function GET(req) {
@@ -135,17 +137,13 @@ export async function POST(req) {
         }
 
         // Check if mock nutrition plan already exists
-        let mockNutritionPlan = await prisma.nutritionPlan.findFirst({
+        let existingNutritionPlan = await prisma.nutritionPlan.findFirst({
           where: { trainerInfoId: trainer.id },
         });
 
         // If no plan exists, create one using our mock data
-        if (!mockNutritionPlan) {
-          const { mockNutritionPlan: mockPlanData } = await import(
-            "@/components/custom/dashboard/client/pages/diet-tracker"
-          );
-
-          mockNutritionPlan = await prisma.nutritionPlan.create({
+        if (!existingNutritionPlan) {
+          existingNutritionPlan = await prisma.nutritionPlan.create({
             data: {
               title: mockPlanData.title,
               description: mockPlanData.description,
@@ -159,8 +157,6 @@ export async function POST(req) {
                 carbs: mockPlanData.dailyCarbsGoal || 200,
                 fats: mockPlanData.dailyFatGoal || 80,
               },
-              isActive: mockPlanData.isActive,
-              isPublished: mockPlanData.isPublished,
               days: mockPlanData.days,
               trainerInfoId: trainer.id,
             },
@@ -171,7 +167,7 @@ export async function POST(req) {
         const assignment = await prisma.dietPlanAssignment.create({
           data: {
             clientId: clientInfo.id,
-            nutritionPlanId: mockNutritionPlan.id,
+            nutritionPlanId: existingNutritionPlan.id,
             assignedById: trainer.id,
           },
         });
