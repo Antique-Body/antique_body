@@ -25,8 +25,17 @@ export async function PATCH(request, { params }) {
         { status: 401 }
       );
     }
-    const { id, assignedPlanId } = await params;
+
+    const { assignedPlanId } = await params;
     const body = await request.json();
+
+    if (!assignedPlanId) {
+      return NextResponse.json(
+        { success: false, error: "Assigned Plan ID is required" },
+        { status: 400 }
+      );
+    }
+
     // Validate planData
     if (!ajv.validate(planDataSchema, body.planData)) {
       return NextResponse.json(
@@ -38,34 +47,37 @@ export async function PATCH(request, { params }) {
         { status: 400 }
       );
     }
+
     // Fetch the assigned plan
     const assignedPlan = await prisma.assignedTrainingPlan.findUnique({
       where: { id: assignedPlanId },
     });
+
     if (!assignedPlan) {
       return NextResponse.json(
         { success: false, error: "Assigned plan not found" },
         { status: 404 }
       );
     }
-    // Check if the trainer is the owner
-    const coachingRequest = await prisma.coachingRequest.findUnique({
-      where: { id },
+
+    // Verify the trainer owns this assignment
+    const trainerInfo = await prisma.trainerInfo.findUnique({
+      where: { userId: session.user.id },
     });
-    if (
-      !coachingRequest ||
-      coachingRequest.trainerId !== assignedPlan.trainerId
-    ) {
+
+    if (!trainerInfo || assignedPlan.trainerId !== trainerInfo.id) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized" },
+        { success: false, error: "Unauthorized access to this plan" },
         { status: 403 }
       );
     }
+
     // Update planData
     const updated = await prisma.assignedTrainingPlan.update({
       where: { id: assignedPlanId },
       data: { planData: body.planData },
     });
+
     // Audit log: log previous and new planData values
 
     return NextResponse.json({ success: true, data: updated });

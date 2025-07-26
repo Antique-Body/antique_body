@@ -57,13 +57,21 @@ export default function TrackPlanPage({ params }) {
     completeDayWorkout: _completeDayWorkout,
     getTotalSessionStats,
     updateWorkoutDataAfterExerciseChange,
-    updateWorkoutDataAfterRemoveExercise,
     addNewDayWorkoutData,
     updateWorkoutDataAfterRepsChange,
   } = workoutSession;
 
   // UI state
-  const [viewMode, setViewMode] = useState(VIEW_MODES.OVERVIEW);
+  const [viewMode, setViewMode] = useState(() => {
+    // Check if mode=review is in URL params
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get("mode") === "review"
+        ? VIEW_MODES.REVIEW
+        : VIEW_MODES.OVERVIEW;
+    }
+    return VIEW_MODES.OVERVIEW;
+  });
   const [selectedReviewDay, setSelectedReviewDay] = useState(null);
 
   // End workout modal state
@@ -115,8 +123,18 @@ export default function TrackPlanPage({ params }) {
     return true;
   };
 
-  // Auto-switch to Overview if trying to access Live mode without workout
+  // Handle URL query params and auto-switch logic
   React.useEffect(() => {
+    // Check URL params on mount and route changes
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const modeParam = urlParams.get("mode");
+      if (modeParam === "review" && viewMode !== VIEW_MODES.REVIEW) {
+        setViewMode(VIEW_MODES.REVIEW);
+      }
+    }
+
+    // Auto-switch to Overview if trying to access Live mode without workout
     if (viewMode === VIEW_MODES.LIVE && !isWorkoutStarted) {
       setViewMode(VIEW_MODES.OVERVIEW);
     }
@@ -156,6 +174,17 @@ export default function TrackPlanPage({ params }) {
             });
           }
 
+          return updatedPlan;
+        });
+
+        // Set workout status and started time in plan state
+        setPlan((prevPlan) => {
+          const updatedPlan = { ...prevPlan };
+          const day = updatedPlan.schedule[dayIdx];
+          if (day && !day.workoutStartedAt) {
+            day.workoutStatus = "in_progress";
+            day.workoutStartedAt = new Date().toISOString();
+          }
           return updatedPlan;
         });
 
@@ -298,10 +327,12 @@ export default function TrackPlanPage({ params }) {
 
       // Update lastSavedPlan to prevent save bar from showing after automatic save
       // We need to get the updated plan state to sync it properly
-      setPlan((currentPlan) => {
-        updateLastSavedPlan(currentPlan);
-        return currentPlan;
-      });
+      setTimeout(() => {
+        setPlan((currentPlan) => {
+          updateLastSavedPlan(currentPlan);
+          return currentPlan;
+        });
+      }, 100);
 
       // Switch back to overview mode
       setViewMode(VIEW_MODES.OVERVIEW);
@@ -343,10 +374,12 @@ export default function TrackPlanPage({ params }) {
     await handleSaveWorkoutProgress();
 
     // Update lastSavedPlan to prevent save bar from showing after automatic save
-    setPlan((currentPlan) => {
-      updateLastSavedPlan(currentPlan);
-      return currentPlan;
-    });
+    setTimeout(() => {
+      setPlan((currentPlan) => {
+        updateLastSavedPlan(currentPlan);
+        return currentPlan;
+      });
+    }, 100);
 
     // Ensure workout session is ended
     if (workoutSession.completeDayWorkout) {
@@ -374,9 +407,31 @@ export default function TrackPlanPage({ params }) {
             description: day.description || "",
 
             // Workout completion data from plan state (already updated in handleCompleteWorkoutSession)
-            workoutStatus:
-              day.workoutStatus || (dayIdx === 0 ? "not_started" : "locked"),
-            workoutStartedAt: day.workoutStartedAt || null,
+            workoutStatus: (() => {
+              // If this is the current active workout day, set status to in_progress
+              if (
+                isWorkoutStarted &&
+                currentDayIndex === dayIdx &&
+                !day.workoutCompletedAt
+              ) {
+                return "in_progress";
+              }
+              // Use existing status or default logic
+              return (
+                day.workoutStatus || (dayIdx === 0 ? "not_started" : "locked")
+              );
+            })(),
+            workoutStartedAt: (() => {
+              // If this is the current active workout day and workout is started, ensure workoutStartedAt is set
+              if (
+                isWorkoutStarted &&
+                currentDayIndex === dayIdx &&
+                !day.workoutStartedAt
+              ) {
+                return new Date().toISOString();
+              }
+              return day.workoutStartedAt || null;
+            })(),
             workoutCompletedAt: day.workoutCompletedAt || null,
             workoutEndedAt: day.workoutEndedAt || null,
             workoutDuration: day.workoutDuration || 0,
@@ -863,7 +918,16 @@ export default function TrackPlanPage({ params }) {
                       key: VIEW_MODES.OVERVIEW,
                       label: "Overview",
                       icon: "mdi:view-dashboard",
-                      disabled: false,
+                      disabled: (() => {
+                        // If accessed via mode=review query param, disable overview tab
+                        if (typeof window !== "undefined") {
+                          const urlParams = new URLSearchParams(
+                            window.location.search
+                          );
+                          return urlParams.get("mode") === "review";
+                        }
+                        return false;
+                      })(),
                     },
                     {
                       key: VIEW_MODES.LIVE,
@@ -875,7 +939,16 @@ export default function TrackPlanPage({ params }) {
                       key: VIEW_MODES.REVIEW,
                       label: "Review",
                       icon: "mdi:chart-line",
-                      disabled: showSaveBar, // Disable if save bar is active (unsaved changes)
+                      disabled: (() => {
+                        // If accessed via mode=review query param, don't disable
+                        if (typeof window !== "undefined") {
+                          const urlParams = new URLSearchParams(
+                            window.location.search
+                          );
+                          if (urlParams.get("mode") === "review") return false;
+                        }
+                        return showSaveBar; // Default behavior: disable if save bar is active
+                      })(),
                     },
                   ].map((mode) => (
                     <button

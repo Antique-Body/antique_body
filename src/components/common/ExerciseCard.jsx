@@ -6,11 +6,7 @@ import { Button } from "./Button";
 import { Card } from "./Card";
 
 import AnatomicalViewer from "@/components/custom/dashboard/trainer/pages/exercises/components/AnatomicalViewer";
-import {
-  formatRepsDisplay,
-  getRepsPlaceholder,
-  toggleRepsUnit,
-} from "@/utils/exerciseUtils";
+import { getRepsPlaceholder, toggleRepsUnit } from "@/utils/exerciseUtils";
 
 /**
  * Mobile-first responsive exercise card component

@@ -25,22 +25,20 @@ export const DEFAULT_EXERCISE_VALUES = {
  * @param {Object} exercise - Raw exercise data
  * @returns {Object} Normalized exercise data
  */
-export const normalizeExercise = (exercise) => {
-  return {
-    ...DEFAULT_EXERCISE_VALUES,
-    ...exercise,
-    // Ensure repsUnit exists
-    repsUnit: exercise.repsUnit || REPS_UNITS.REPS,
-    // Ensure sets is properly structured
-    sets: normalizeExerciseSets(
-      exercise.sets,
-      exercise.reps || DEFAULT_EXERCISE_VALUES.reps,
-      exercise.rest || DEFAULT_EXERCISE_VALUES.rest
-    ),
-    // Normalize muscle groups
-    muscleGroups: normalizeMuscleGroups(exercise.muscleGroups),
-  };
-};
+export const normalizeExercise = (exercise) => ({
+  ...DEFAULT_EXERCISE_VALUES,
+  ...exercise,
+  // Ensure repsUnit exists
+  repsUnit: exercise.repsUnit || REPS_UNITS.REPS,
+  // Ensure sets is properly structured
+  sets: normalizeExerciseSets(
+    exercise.sets,
+    exercise.reps || DEFAULT_EXERCISE_VALUES.reps,
+    exercise.rest || DEFAULT_EXERCISE_VALUES.rest
+  ),
+  // Normalize muscle groups
+  muscleGroups: normalizeMuscleGroups(exercise.muscleGroups),
+});
 
 /**
  * Normalizes exercise sets to ensure consistent structure
@@ -123,18 +121,16 @@ export const formatRepsDisplay = (value, unit = REPS_UNITS.REPS) => {
  * @param {string} unit - The unit type ('reps' or 'seconds')
  * @returns {string} Placeholder text
  */
-export const getRepsPlaceholder = (unit = REPS_UNITS.REPS) => {
-  return unit === REPS_UNITS.SECONDS ? String(DEFAULT_SECONDS_REPS) : "12";
-};
+export const getRepsPlaceholder = (unit = REPS_UNITS.REPS) =>
+  unit === REPS_UNITS.SECONDS ? String(DEFAULT_SECONDS_REPS) : "12";
 
 /**
  * Toggles between reps and seconds unit
  * @param {string} currentUnit - Current unit
  * @returns {string} New unit
  */
-export const toggleRepsUnit = (currentUnit) => {
-  return currentUnit === REPS_UNITS.REPS ? REPS_UNITS.SECONDS : REPS_UNITS.REPS;
-};
+export const toggleRepsUnit = (currentUnit) =>
+  currentUnit === REPS_UNITS.REPS ? REPS_UNITS.SECONDS : REPS_UNITS.REPS;
 
 /**
  * Exercise operations for training plans
