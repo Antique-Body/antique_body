@@ -12,45 +12,17 @@ export async function GET(request, { params }) {
         { status: 401 }
       );
     }
-    const { id, assignedPlanId } = await params;
-    
-    if (!id || !assignedPlanId) {
+
+    const { assignedPlanId } = await params;
+
+    if (!assignedPlanId) {
       return NextResponse.json(
-        { success: false, error: "Request ID and assignedPlanId are required" },
+        { success: false, error: "Assigned Plan ID is required" },
         { status: 400 }
       );
     }
 
-    // Fetch coaching request to verify access
-    const coachingRequest = await prisma.coachingRequest.findUnique({
-      where: { id },
-      select: {
-        client: { select: { userId: true } },
-        trainer: { select: { userId: true } },
-        clientId: true,
-        trainerId: true,
-      },
-    });
-
-    if (!coachingRequest) {
-      return NextResponse.json(
-        { success: false, error: "Coaching request not found" },
-        { status: 404 }
-      );
-    }
-
-    // Only the trainer or client can view
-    if (
-      session.user.id !== coachingRequest.trainer.userId &&
-      session.user.id !== coachingRequest.client.userId
-    ) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 403 }
-      );
-    }
-
-    // Get assigned plan with full planData
+    // Get assigned plan directly
     const assignedPlan = await prisma.assignedTrainingPlan.findUnique({
       where: { id: assignedPlanId },
     });
@@ -62,18 +34,31 @@ export async function GET(request, { params }) {
       );
     }
 
-    // Verify the plan belongs to this coaching request
-    if (
-      assignedPlan.clientId !== coachingRequest.clientId ||
-      assignedPlan.trainerId !== coachingRequest.trainerId
-    ) {
+    // Verify the trainer owns this assignment
+    const trainerInfo = await prisma.trainerInfo.findUnique({
+      where: { userId: session.user.id },
+    });
+
+    if (!trainerInfo || assignedPlan.trainerId !== trainerInfo.id) {
       return NextResponse.json(
-        { success: false, error: "Plan not associated with this coaching request" },
+        { success: false, error: "Unauthorized access to this plan" },
         { status: 403 }
       );
     }
 
-    return NextResponse.json({ success: true, data: assignedPlan });
+    return NextResponse.json({
+      success: true,
+      data: {
+        planData: assignedPlan.planData,
+        id: assignedPlan.id,
+        originalPlanId: assignedPlan.originalPlanId,
+        clientId: assignedPlan.clientId,
+        trainerId: assignedPlan.trainerId,
+        status: assignedPlan.status,
+        assignedAt: assignedPlan.assignedAt,
+        completedAt: assignedPlan.completedAt,
+      },
+    });
   } catch (error) {
     console.error("Error fetching assigned plan:", error);
     return NextResponse.json(
@@ -92,14 +77,17 @@ export async function PATCH(request, { params }) {
         { status: 401 }
       );
     }
-    const { id, assignedPlanId } = await params;
+
+    const { assignedPlanId } = await params;
     const { status } = await request.json();
-    if (!id || !assignedPlanId) {
+
+    if (!assignedPlanId) {
       return NextResponse.json(
-        { success: false, error: "Request ID and assignedPlanId are required" },
+        { success: false, error: "Assigned Plan ID is required" },
         { status: 400 }
       );
     }
+
     if (!status || !["active", "inactive", "completed"].includes(status)) {
       return NextResponse.json(
         {
@@ -109,29 +97,31 @@ export async function PATCH(request, { params }) {
         { status: 400 }
       );
     }
+
     // Get assigned plan
     const assignedPlan = await prisma.assignedTrainingPlan.findUnique({
       where: { id: assignedPlanId },
     });
+
     if (!assignedPlan) {
       return NextResponse.json(
         { success: false, error: "Assigned plan not found" },
         { status: 404 }
       );
     }
-    // Check if the coach is the owner
-    const coachingRequest = await prisma.coachingRequest.findUnique({
-      where: { id },
+
+    // Verify the trainer owns this assignment
+    const trainerInfo = await prisma.trainerInfo.findUnique({
+      where: { userId: session.user.id },
     });
-    if (
-      !coachingRequest ||
-      coachingRequest.trainerId !== assignedPlan.trainerId
-    ) {
+
+    if (!trainerInfo || assignedPlan.trainerId !== trainerInfo.id) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized" },
+        { success: false, error: "Unauthorized access to this plan" },
         { status: 403 }
       );
     }
+
     // Update status
     const updateData = { status };
     if (status === "completed") {
@@ -139,6 +129,7 @@ export async function PATCH(request, { params }) {
     } else if (status === "active") {
       updateData.completedAt = null;
     }
+
     const updated = await prisma.assignedTrainingPlan.update({
       where: { id: assignedPlanId },
       data: updateData,
@@ -159,7 +150,7 @@ export async function PATCH(request, { params }) {
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {
-    console.error("Error updating assigned plan status:", error);
+    console.error("Error updating assigned plan:", error);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }

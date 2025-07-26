@@ -82,7 +82,6 @@ export default function ClientDashboard({ params }) {
 
       const data = await response.json();
       setPlans(data);
-      console.log("PLANS", data);
     } catch (err) {
       console.error("Error fetching plans:", err);
       // Handle error appropriately
@@ -1719,11 +1718,12 @@ function TrainingPlanCard({
                 <div className="flex items-center gap-4 text-xs text-slate-400">
                   <span className="flex items-center gap-1">
                     <Icon icon="mdi:check-circle" width={12} height={12} />
-                    {stats.completedDays}/{stats.totalDays} days
+                    {stats?.completedDays || 0}/{stats?.totalDays || 0} days
                   </span>
                   <span className="flex items-center gap-1">
                     <Icon icon="mdi:dumbbell" width={12} height={12} />
-                    {stats.completedExercises}/{stats.totalExercises} exercises
+                    {stats?.completedExercises || 0}/
+                    {stats?.totalExercises || 0} exercises
                   </span>
                 </div>
               )}
@@ -1749,6 +1749,21 @@ function TrainingPlanCard({
               <Icon icon="mdi:eye" width={16} height={16} />
               <span className="hidden sm:inline ml-1">View</span>
             </Button>
+
+            {plan.status === "completed" && (
+              <Link
+                href={`/trainer/dashboard/clients/${client.id}/plans/${plan.id}?mode=review`}
+              >
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="px-3 py-2 bg-green-600/20 border-green-500/30 text-green-300 hover:bg-green-600/30"
+                >
+                  <Icon icon="mdi:chart-line" width={16} height={16} />
+                  <span className="hidden sm:inline ml-1">View Results</span>
+                </Button>
+              </Link>
+            )}
 
             {plan.status !== "completed" && plan.status !== "active" && (
               <Button
@@ -1797,20 +1812,23 @@ function TrainingPlanCard({
                   <div>
                     <div className="text-slate-400">Days Completed</div>
                     <div className="text-white font-semibold">
-                      {stats.completedDays}/{stats.totalDays}
+                      {stats?.completedDays || 0}/{stats?.totalDays || 0}
                     </div>
                   </div>
                   <div>
                     <div className="text-slate-400">Exercises Done</div>
                     <div className="text-white font-semibold">
-                      {stats.completedExercises}/{stats.totalExercises}
+                      {stats?.completedExercises || 0}/
+                      {stats?.totalExercises || 0}
                     </div>
                   </div>
                   <div>
                     <div className="text-slate-400">Completion Rate</div>
                     <div className="text-green-400 font-semibold">
                       {Math.round(
-                        (stats.completedDays / stats.totalDays) * 100
+                        ((stats?.completedDays || 0) /
+                          (stats?.totalDays || 1)) *
+                          100
                       )}
                       %
                     </div>

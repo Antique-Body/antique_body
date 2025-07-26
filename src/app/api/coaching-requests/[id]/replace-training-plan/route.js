@@ -58,21 +58,22 @@ export async function POST(request, { params }) {
     }
     const {
       id: _id,
-      trainerInfoId,
-      createdAt,
-      updatedAt,
-      deletedAt,
+
       ...planData
     } = plan;
     // Transaction: complete old plan and assign new one atomically
     const result = await prisma.$transaction(async (tx) => {
+      let oldPlanId = null;
+
       if (activePlan) {
+        oldPlanId = activePlan.originalPlanId;
         await tx.assignedTrainingPlan.update({
           where: { id: activePlan.id },
           data: { status: "completed", completedAt: new Date() },
         });
       }
-      return await tx.assignedTrainingPlan.create({
+
+      const newAssignment = await tx.assignedTrainingPlan.create({
         data: {
           clientId: coachingRequest.clientId,
           trainerId: coachingRequest.trainerId,
@@ -81,6 +82,27 @@ export async function POST(request, { params }) {
           status: "active",
         },
       });
+
+      // Update clientCount for both old and new plans
+      if (oldPlanId) {
+        const oldPlanActiveCount = await tx.assignedTrainingPlan.count({
+          where: { originalPlanId: oldPlanId, status: "active" },
+        });
+        await tx.trainingPlan.update({
+          where: { id: oldPlanId },
+          data: { clientCount: oldPlanActiveCount },
+        });
+      }
+
+      const newPlanActiveCount = await tx.assignedTrainingPlan.count({
+        where: { originalPlanId: plan.id, status: "active" },
+      });
+      await tx.trainingPlan.update({
+        where: { id: plan.id },
+        data: { clientCount: newPlanActiveCount },
+      });
+
+      return newAssignment;
     });
     return NextResponse.json({ success: true, data: result }, { status: 201 });
   } catch (error) {

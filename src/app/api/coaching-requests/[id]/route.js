@@ -1,8 +1,8 @@
+import Ajv from "ajv";
 import { NextResponse } from "next/server";
 
 import { auth } from "#/auth";
 import prisma from "@/lib/prisma";
-import Ajv from "ajv";
 
 const planDataSchema = {
   type: "object",

@@ -809,17 +809,50 @@ export function LiveWorkoutMode({
                       {/* Set Inputs */}
                       <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                          <label
-                            className="block text-zinc-400 text-sm mb-1 font-medium"
-                            htmlFor={`weight-${currentDayIndex}-${currentExerciseIndex}-${setIdx}`}
-                          >
-                            Weight (kg)
-                          </label>
+                          <div className="flex items-center justify-between mb-1">
+                            <label
+                              className="block text-zinc-400 text-sm font-medium"
+                              htmlFor={`weight-${currentDayIndex}-${currentExerciseIndex}-${setIdx}`}
+                            >
+                              {setData.inputMode === "time" ? "Time (sec)" : "Weight (kg)"}
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newMode = setData.inputMode === "time" ? "weight" : "time";
+                                onUpdateSetData(
+                                  currentDayIndex,
+                                  currentExerciseIndex,
+                                  setIdx,
+                                  "inputMode",
+                                  newMode
+                                );
+                                // Clear the value when switching modes
+                                onUpdateSetData(
+                                  currentDayIndex,
+                                  currentExerciseIndex,
+                                  setIdx,
+                                  "weight",
+                                  null
+                                );
+                              }}
+                              className="text-xs px-2 py-1 rounded-md bg-zinc-700 hover:bg-zinc-600 text-zinc-300 hover:text-white transition-colors flex items-center gap-1"
+                              title={`Switch to ${setData.inputMode === "time" ? "weight" : "time"} mode`}
+                              disabled={isDayCompleted}
+                            >
+                              <Icon
+                                icon={setData.inputMode === "time" ? "mdi:weight" : "mdi:timer"}
+                                width={12}
+                                height={12}
+                              />
+                              {setData.inputMode === "time" ? "kg" : "sec"}
+                            </button>
+                          </div>
                           <input
                             id={`weight-${currentDayIndex}-${currentExerciseIndex}-${setIdx}`}
                             type="number"
                             min="0"
-                            step="0.5"
+                            step={setData.inputMode === "time" ? "1" : "0.5"}
                             value={setData.weight || ""}
                             onChange={(e) => {
                               const value = e.target.value;
@@ -839,7 +872,7 @@ export function LiveWorkoutMode({
                             }}
                             disabled={isDayCompleted}
                             className="w-full bg-zinc-800/50 border border-zinc-600/50 rounded-xl px-4 py-3 text-white text-lg font-semibold backdrop-blur focus:border-blue-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                            placeholder="0"
+                            placeholder={setData.inputMode === "time" ? "0" : "0"}
                           />
                         </div>
                         <div>

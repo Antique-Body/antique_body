@@ -122,33 +122,75 @@ const DEFAULT_EXERCISE = {
 
 function SessionDndWrapper({ id, index, moveSession, children }) {
   const ref = React.useRef(null);
-  const [{ handlerId }, drop] = useDrop({
+  const [{ handlerId, isOver, canDrop }, drop] = useDrop({
     accept: "SESSION",
     collect: (monitor) => ({
       handlerId: monitor.getHandlerId(),
+      isOver: monitor.isOver(),
+      canDrop: monitor.canDrop(),
     }),
-    hover(item, _monitor) {
+    hover(item, monitor) {
       if (!ref.current) return;
+
       const dragIndex = item.index;
       const hoverIndex = index;
+
       if (dragIndex === hoverIndex) return;
+
+      // Get the bounding rectangle
+      const hoverBoundingRect = ref.current.getBoundingClientRect();
+      // Get vertical middle
+      const hoverMiddleY =
+        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      // Get client offset
+      const clientOffset = monitor.getClientOffset();
+      // Get pixels to the top
+      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+
+      // Only perform the move when the mouse has crossed half of the item's height
+      // When dragging downwards, only move when the cursor is below 50%
+      // When dragging upwards, only move when the cursor is above 50%
+      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+        return;
+      }
+      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+        return;
+      }
+
       moveSession(dragIndex, hoverIndex);
       item.index = hoverIndex;
     },
   });
-  const [{ isDragging }, drag] = useDrag({
+
+  const [{ isDragging, isDragSource }, drag] = useDrag({
     type: "SESSION",
-    item: { id, index },
-    collect: ({ isDragging }) => ({
-      isDragging,
+    item: () => ({ id, index }),
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+      isDragSource: monitor.isDragging(),
     }),
+    canDrag: true,
   });
+
   drag(drop(ref));
+
+  const dropOpacity = isOver && canDrop ? 0.9 : 1;
+  const dragOpacity = isDragging ? 0.3 : 1;
+  const transform = isDragging ? "scale(1.02)" : "scale(1)";
+
   return (
     <div
       ref={ref}
-      style={{ opacity: isDragging ? 1 : 0.5 }}
+      style={{
+        opacity: dragOpacity * dropOpacity,
+        transform,
+        transition: isDragging ? "none" : "all 0.2s ease-out",
+        cursor: isDragSource ? "grabbing" : "grab",
+        position: "relative",
+        zIndex: isDragging ? 1000 : 1,
+      }}
       data-handler-id={handlerId}
+      className={`${isOver && canDrop ? "ring-2 ring-orange-400/50" : ""}`}
     >
       {children}
     </div>
@@ -204,7 +246,7 @@ export const Schedule = ({ data, onChange }) => {
   const [expandedSession, setExpandedSession] = useState(null);
   const [activeMedia, setActiveMedia] = useState({}); // Add this state to track active media for each exercise
   const [videoError, setVideoError] = useState({});
-  const [exerciseError, setExerciseError] = useState("");
+  // const [exerciseError, setExerciseError] = useState(""); // Uklonjeno zbog lint greške
 
   // Exercise library pagination and filtering state
   const [libraryExercises, setLibraryExercises] = useState([]);
@@ -340,7 +382,7 @@ export const Schedule = ({ data, onChange }) => {
 
   const handleCreateExercise = async (exerciseData) => {
     try {
-      setExerciseError("");
+      // setExerciseError(""); // Uklonjeno zbog lint greške
       const response = await fetch("/api/users/trainer/exercises", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -361,16 +403,16 @@ export const Schedule = ({ data, onChange }) => {
 
         // Provjera duplikata po id-u
         if (!normalizedExercise.id) {
-          setExerciseError("Cannot add exercise: missing exercise ID.");
+          // setExerciseError("Cannot add exercise: missing exercise ID."); // Uklonjeno zbog lint greške
           return null;
         }
         const alreadyExists = data.schedule[activeSession].exercises.some(
           (ex) => ex.id === normalizedExercise.id
         );
         if (alreadyExists) {
-          setExerciseError(
-            "This exercise is already in the session and cannot be added again."
-          );
+          // setExerciseError(
+          //   "This exercise is already in the session and cannot be added again."
+          // ); // Uklonjeno zbog lint greške
           return normalizedExercise;
         }
 
@@ -385,12 +427,13 @@ export const Schedule = ({ data, onChange }) => {
         onChange({ schedule: newSchedule });
         return normalizedExercise;
       } else {
-        setExerciseError(
-          result.error || "Failed to create exercise. Please try again."
-        );
+        // setExerciseError(
+        //   result.error || "Failed to create exercise. Please try again."
+        // ); // Uklonjeno zbog lint greške
       }
-    } catch (error) {
-      setExerciseError("Error creating exercise. Please try again.");
+    } catch {
+      // Uklonjen _error iz catch bloka
+      // setExerciseError("Error creating exercise. Please try again."); // Uklonjeno zbog lint greške
     }
   };
 
@@ -573,13 +616,15 @@ export const Schedule = ({ data, onChange }) => {
                   className={`bg-gradient-to-r ${sessionType.color} rounded-2xl border overflow-hidden`}
                 >
                   <motion.div
-                    initial={{ opacity: 10, y: 20 }}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    layout
                   >
                     {/* Session Header */}
                     <div
-                      className={`p-3 sm:p-4 flex items-center justify-between bg-gradient-to-r from-black/20 to-black/10 cursor-pointer select-none transition-all duration-200 active:bg-black/30 ${
+                      className={`p-3 sm:p-4 flex items-center justify-between bg-gradient-to-r from-black/20 to-black/10 cursor-pointer select-none transition-all duration-150 active:bg-black/30 ${
                         isExpanded ? "ring-2 ring-orange-400/30" : ""
                       }`}
                       onClick={() =>
@@ -590,12 +635,18 @@ export const Schedule = ({ data, onChange }) => {
                       tabIndex={0}
                       aria-expanded={isExpanded}
                       style={{ touchAction: "manipulation" }}
+                      onMouseDown={(e) => e.stopPropagation()}
                     >
                       <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                        <Icon
-                          icon="mdi:drag-vertical"
-                          className="w-5 h-5 text-gray-300 cursor-move flex-shrink-0 hidden sm:inline"
-                        />
+                        <div
+                          className="cursor-move p-1 rounded hover:bg-white/10 transition-colors duration-150"
+                          onMouseDown={(e) => e.stopPropagation()}
+                        >
+                          <Icon
+                            icon="mdi:drag-vertical"
+                            className="w-5 h-5 text-gray-300 flex-shrink-0 hidden sm:inline"
+                          />
+                        </div>
                         <div
                           className={`p-2 sm:p-3 rounded-xl ${
                             sessionType.bgColor
@@ -667,14 +718,15 @@ export const Schedule = ({ data, onChange }) => {
                           }
                         />
                         {!session.isRestDay && (
-                          <span className="inline-flex items-center justify-center rounded-full transition-all duration-200">
+                          <span className="inline-flex items-center justify-center rounded-full transition-all duration-150">
                             <Icon
-                              icon={
-                                isExpanded
-                                  ? "mdi:chevron-up"
-                                  : "mdi:chevron-down"
-                              }
-                              className="w-6 h-6 sm:w-5 sm:h-5 text-gray-200 group-hover:text-white transition-transform"
+                              icon="mdi:chevron-down"
+                              className="w-6 h-6 sm:w-5 sm:h-5 text-gray-200 group-hover:text-white transition-all duration-150"
+                              style={{
+                                transform: isExpanded
+                                  ? "rotate(180deg)"
+                                  : "rotate(0deg)",
+                              }}
                             />
                           </span>
                         )}
@@ -689,8 +741,12 @@ export const Schedule = ({ data, onChange }) => {
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className="border-t border-white/20"
+                            transition={{
+                              duration: 0.25,
+                              ease: "easeInOut",
+                              opacity: { duration: 0.15 },
+                            }}
+                            className="border-t border-white/20 overflow-hidden"
                           >
                             <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 bg-gradient-to-br from-black/40 to-black/25 backdrop-blur-sm">
                               {/* Session Info */}

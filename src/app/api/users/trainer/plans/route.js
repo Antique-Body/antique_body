@@ -30,80 +30,99 @@ export async function GET(req) {
     const modelMap = {
       nutrition: {
         model: prisma.nutritionPlan,
-        select: basic ? {
-          id: true,
-          title: true,
-          description: true,
-          coverImage: true,
-          price: true,
-          duration: true,
-          durationType: true,
-          clientCount: true,
-          createdAt: true,
-        } : {
-          id: true,
-          title: true,
-          description: true,
-          coverImage: true,
-          price: true,
-          duration: true,
-          durationType: true,
-          clientCount: true,
-          createdAt: true,
-          keyFeatures: true,
-          timeline: true,
-          nutritionInfo: true,
-          mealTypes: true,
-          supplementRecommendations: true,
-          cookingTime: true,
-          targetGoal: true,
-          recommendedFrequency: true,
-          adaptability: true,
-          days: true,
-        },
+        select: basic
+          ? {
+              id: true,
+              title: true,
+              description: true,
+              coverImage: true,
+              price: true,
+              duration: true,
+              durationType: true,
+              clientCount: true,
+              createdAt: true,
+            }
+          : {
+              id: true,
+              title: true,
+              description: true,
+              coverImage: true,
+              price: true,
+              duration: true,
+              durationType: true,
+              clientCount: true,
+              createdAt: true,
+              keyFeatures: true,
+              timeline: true,
+              nutritionInfo: true,
+              mealTypes: true,
+              supplementRecommendations: true,
+              cookingTime: true,
+              targetGoal: true,
+              recommendedFrequency: true,
+              adaptability: true,
+              days: true,
+            },
       },
       training: {
         model: prisma.trainingPlan,
-        select: basic ? {
-          id: true,
-          title: true,
-          description: true,
-          coverImage: true,
-          price: true,
-          duration: true,
-          durationType: true,
-          clientCount: true,
-          createdAt: true,
-        } : {
-          id: true,
-          title: true,
-          description: true,
-          coverImage: true,
-          price: true,
-          duration: true,
-          durationType: true,
-          clientCount: true,
-          createdAt: true,
-          keyFeatures: true,
-          timeline: true,
-          features: true,
-          schedule: true,
-          sessionsPerWeek: true,
-          sessionFormat: true,
-          trainingType: true,
-          difficultyLevel: true,
-        },
+        select: basic
+          ? {
+              id: true,
+              title: true,
+              description: true,
+              coverImage: true,
+              price: true,
+              duration: true,
+              durationType: true,
+              clientCount: true,
+              createdAt: true,
+            }
+          : {
+              id: true,
+              title: true,
+              description: true,
+              coverImage: true,
+              price: true,
+              duration: true,
+              durationType: true,
+              clientCount: true,
+              createdAt: true,
+              keyFeatures: true,
+              timeline: true,
+              features: true,
+              schedule: true,
+              sessionsPerWeek: true,
+              sessionFormat: true,
+              trainingType: true,
+              difficultyLevel: true,
+            },
       },
     };
     const planType = type === "nutrition" ? "nutrition" : "training";
     const { model, select } = modelMap[planType];
-    let plans = await model.findMany({
+    const plans = await model.findMany({
       where: { trainerInfoId: trainerInfo.id },
       orderBy: { createdAt: "desc" },
       select,
     });
-    plans = plans.map((plan) => ({ ...plan, type: planType }));
-    return NextResponse.json(plans);
+
+    // Calculate dynamic clientCount by counting active assigned plans
+    const plansWithClientCount = await Promise.all(
+      plans.map(async (plan) => {
+        // For both training and nutrition plans, we use assignedTrainingPlan table
+        // (this might need to be adjusted if nutrition plans have a separate assignment table)
+        const clientCount = await prisma.assignedTrainingPlan.count({
+          where: {
+            originalPlanId: plan.id,
+            status: "active",
+          },
+        });
+        return { ...plan, type: planType, clientCount };
+      })
+    );
+
+    return NextResponse.json(plansWithClientCount);
   } catch (error) {
     return handleApiError("GET /plans", error);
   }

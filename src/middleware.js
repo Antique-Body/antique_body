@@ -95,6 +95,7 @@ function getOnboardingRedirect(role, token, pathname) {
         "/trainer/dashboard/plans/training/edit/:id",
         "/trainer/dashboard/plans/nutrition/create",
         "/trainer/dashboard/plans/nutrition/edit/:id",
+        "/trainer/dashboard/plans/:id/track",
         "/trainer/dashboard/exercises",
         "/trainer/dashboard/meals",
         "/trainer/edit-profile",

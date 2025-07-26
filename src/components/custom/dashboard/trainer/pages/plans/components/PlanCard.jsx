@@ -182,60 +182,59 @@ export const PlanCard = ({
   const handleTrackClick = async () => {
     setIsEditRotating(true);
     try {
-      // First fetch all coaching requests to find which clients have this plan assigned
-      const response = await fetch("/api/coaching-requests?role=trainer&status=accepted");
-      if (!response.ok) throw new Error("Failed to fetch clients");
-      
-      const data = await response.json();
-      if (!data.success) throw new Error(data.error || "Failed to fetch clients");
-      
-      const clients = data.data;
-      
-      // Find all assigned plans for each client that match this original plan ID
-      const matchingAssignments = [];
-      
-      for (const client of clients) {
-        try {
-          const assignedPlansRes = await fetch(
-            `/api/coaching-requests/${client.id}/assigned-training-plans`
-          );
-          if (assignedPlansRes.ok) {
-            const assignedData = await assignedPlansRes.json();
-            if (assignedData.success && assignedData.data) {
-              const matchingPlans = assignedData.data.filter(
-                plan => plan.originalPlanId === id
-              );
-              matchingPlans.forEach(plan => {
-                matchingAssignments.push({
-                  assignedPlanId: plan.id,
-                  clientId: client.id,
-                  clientName: `${client.client.clientProfile.firstName} ${client.client.clientProfile.lastName}`,
-                  status: plan.status,
-                  assignedAt: plan.assignedAt
-                });
-              });
-            }
-          }
-        } catch (err) {
-          console.error(`Error fetching plans for client ${client.id}:`, err);
+      // Fetch active assignments for this specific plan
+      const response = await fetch(
+        `/api/users/trainer/plans/${id}/assignments`
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("API Error Response:", errorText);
+
+        // If unauthorized, redirect to login
+        if (response.status === 401) {
+          router.push("/auth/login");
+          return;
         }
+
+        throw new Error(
+          `Failed to fetch plan assignments: ${response.status} ${response.statusText}`
+        );
       }
-      
-      if (matchingAssignments.length === 0) {
-        // No assigned plans found - navigate to client selection page
-        router.push(`/trainer/dashboard/clients?planId=${id}&type=${type}`);
-      } else if (matchingAssignments.length === 1) {
-        // Only one client has this plan - navigate directly
-        const assignment = matchingAssignments[0];
-        router.push(`/trainer/dashboard/clients/${assignment.clientId}/plans/${assignment.assignedPlanId}?type=${type}`);
+
+      const data = await response.json();
+
+      if (!data.success)
+        throw new Error(data.error || "Failed to fetch plan assignments");
+
+      const assignments = data.data || [];
+
+      if (assignments.length === 0) {
+        // No assigned plans found - navigate to client selection page to assign the plan
+        router.push(
+          `/trainer/dashboard/clients?planId=${id}&type=${type}&action=assign`
+        );
+      } else if (assignments.length === 1) {
+        // Only one client has this plan - navigate directly to their plan page
+        const assignment = assignments[0];
+        // Use assignedPlanId directly with the new API - no need for coachingRequestId
+        router.push(
+          `/trainer/dashboard/assigned-plans/${assignment.assignedPlanId}?type=${type}`
+        );
       } else {
-        // Multiple clients have this plan - navigate to special tracking overview
-        router.push(`/trainer/dashboard/plans/${id}/track?type=${type}&assignments=${encodeURIComponent(JSON.stringify(matchingAssignments))}`);
+        // Multiple clients have this plan - navigate to tracking overview page
+        router.push(
+          `/trainer/dashboard/plans/${id}/track?type=${type}&assignments=${encodeURIComponent(
+            JSON.stringify(assignments)
+          )}`
+        );
       }
     } catch (error) {
       console.error("Error in handleTrackClick:", error);
-      // Fallback to original behavior
-      router.push(`/trainer/dashboard/clients?planId=${id}&type=${type}`);
+      // Fallback to original behavior - go to clients page for assignment
+      router.push(
+        `/trainer/dashboard/clients?planId=${id}&type=${type}&action=assign`
+      );
     } finally {
       // Reset rotation after a short delay and store timeout ID for cleanup
       editTimeoutRef.current = setTimeout(() => setIsEditRotating(false), 1000);
@@ -338,9 +337,16 @@ export const PlanCard = ({
 
                 <div className="flex items-center gap-1">
                   <UsersIcon size={16} className="text-gray-500" />
-                  <span>
+                  <span
+                    className={`font-medium ${
+                      clientCount > 0 ? "text-green-400" : "text-gray-500"
+                    }`}
+                  >
                     {clientCount} {clientCount === 1 ? "client" : "clients"}
                   </span>
+                  {clientCount > 0 && (
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse ml-1"></div>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-1 ml-auto">
@@ -374,14 +380,34 @@ export const PlanCard = ({
                       }`}
                     />
                   }
-                  className="bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] hover:from-[#FF5500] hover:to-[#FF7700] hover:scale-105 hover:shadow-lg transition-all duration-200 text-xs px-3 py-2 h-9 font-medium border-0"
+                  className={`${
+                    clientCount > 0
+                      ? "bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] hover:from-[#FF5500] hover:to-[#FF7700] shadow-lg shadow-[#FF6B00]/25"
+                      : "bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600"
+                  } hover:scale-105 hover:shadow-lg transition-all duration-200 text-xs px-3 py-2 h-9 font-medium border-0 relative`}
+                  disabled={clientCount === 0}
+                  title={
+                    clientCount === 0
+                      ? "No clients assigned to this plan"
+                      : `Track progress for ${clientCount} ${
+                          clientCount === 1 ? "client" : "clients"
+                        }`
+                  }
                 >
-                  Track
+                  {clientCount > 0 ? "Track" : "Assign"}
+                  {clientCount > 1 && (
+                    <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-sm">
+                      {clientCount}
+                    </span>
+                  )}
                 </Button>
               </div>
 
               {/* Additional Actions */}
-              <div className="flex justify-center gap-1 mt-2" onClick={(e) => e.stopPropagation()}>
+              <div
+                className="flex justify-center gap-1 mt-2"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <Button
                   variant="ghost"
                   size="small"

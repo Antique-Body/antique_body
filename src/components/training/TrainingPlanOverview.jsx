@@ -1038,9 +1038,20 @@ export function TrainingPlanOverview({
                                             {exercise.name}
                                           </h4>
                                           <div className="flex items-center gap-2">
-                                            <div className="bg-zinc-800 px-3 py-1 rounded-full text-sm text-zinc-300">
-                                              {exerciseProgress.completed}/
-                                              {exerciseProgress.total} sets
+                                            <div className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 ${
+                                              exerciseProgress.percentage === 100 
+                                                ? 'bg-emerald-900/30 text-emerald-300 border border-emerald-700/50' 
+                                                : exerciseProgress.percentage > 0 
+                                                  ? 'bg-blue-900/30 text-blue-300 border border-blue-700/50' 
+                                                  : 'bg-zinc-800 text-zinc-400'
+                                            }`}>
+                                              {exerciseProgress.completed}/{exerciseProgress.total} sets
+                                              {exerciseProgress.percentage === 100 && (
+                                                <Icon icon="mdi:check-circle" width={14} height={14} className="text-emerald-400" />
+                                              )}
+                                              {exerciseProgress.percentage > 0 && exerciseProgress.percentage < 100 && (
+                                                <Icon icon="mdi:clock-outline" width={14} height={14} className="text-blue-400" />
+                                              )}
                                             </div>
                                             <div
                                               className={`w-3 h-3 rounded-full ${
@@ -1339,29 +1350,41 @@ export function TrainingPlanOverview({
                                           )}
                                         </div>
 
-                                        {/* Progress bar for exercise */}
+                                        {/* Enhanced Progress bar for exercise */}
                                         <div className="mt-3">
-                                          <div className="w-full bg-zinc-700 rounded-full h-2">
+                                          <div className="flex items-center justify-between mb-1">
+                                            <span className="text-xs text-zinc-400">Exercise Progress</span>
+                                            <span className={`text-xs font-medium ${
+                                              exerciseProgress.percentage === 100 
+                                                ? 'text-emerald-400' 
+                                                : exerciseProgress.percentage > 0 
+                                                  ? 'text-blue-400' 
+                                                  : 'text-zinc-500'
+                                            }`}>
+                                              {Math.round(exerciseProgress.percentage)}%
+                                            </span>
+                                          </div>
+                                          <div className="w-full bg-zinc-700 rounded-full h-3 shadow-inner">
                                             <div
-                                              className={`h-full rounded-full transition-all duration-300 relative overflow-hidden ${
-                                                exerciseProgress.percentage ===
-                                                100
-                                                  ? "bg-emerald-500"
-                                                  : "bg-blue-500"
+                                              className={`h-full rounded-full transition-all duration-500 ease-out relative overflow-hidden ${
+                                                exerciseProgress.percentage === 100
+                                                  ? "bg-gradient-to-r from-emerald-500 to-emerald-400 shadow-sm shadow-emerald-500/25"
+                                                  : exerciseProgress.percentage > 0
+                                                    ? "bg-gradient-to-r from-blue-500 to-blue-400 shadow-sm shadow-blue-500/25"
+                                                    : "bg-zinc-600"
                                               }`}
                                               style={{
                                                 width: `${
-                                                  isNaN(
-                                                    exerciseProgress.percentage
-                                                  )
+                                                  isNaN(exerciseProgress.percentage)
                                                     ? 0
-                                                    : Math.min(
-                                                        exerciseProgress.percentage,
-                                                        100
-                                                      )
+                                                    : Math.min(exerciseProgress.percentage, 100)
                                                 }%`,
                                               }}
-                                            />
+                                            >
+                                              {exerciseProgress.percentage > 0 && (
+                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+                                              )}
+                                            </div>
                                           </div>
 
                                           {/* Show completed sets details */}
