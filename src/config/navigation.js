@@ -60,6 +60,31 @@ export const CLIENT_NAVIGATION = Object.freeze([
   }),
 ]);
 
+// Client Dashboard Bottom Navigation
+export const CLIENT_BOTTOM_NAVIGATION = Object.freeze([
+  Object.freeze({
+    id: "edit",
+    label: "Edit Profile",
+    icon: "mdi:pencil",
+    route: "/client/dashboard/edit",
+    description: "Edit your profile information",
+  }),
+  Object.freeze({
+    id: "settings",
+    label: "Settings",
+    icon: "mdi:cog",
+    route: "/client/dashboard/settings",
+    description: "Manage your account settings",
+  }),
+  Object.freeze({
+    id: "logout",
+    label: "Logout",
+    icon: "mdi:logout",
+    route: "#logout",
+    description: "Sign out of your account",
+  }),
+]);
+
 // Trainer Dashboard Navigation Configuration
 export const TRAINER_NAVIGATION = Object.freeze([
   Object.freeze({
@@ -116,9 +141,40 @@ export const TRAINER_NAVIGATION = Object.freeze([
   }),
 ]);
 
+// Trainer Dashboard Bottom Navigation
+export const TRAINER_BOTTOM_NAVIGATION = Object.freeze([
+  Object.freeze({
+    id: "edit",
+    label: "Edit Profile",
+    icon: "mdi:pencil",
+    route: "/trainer/dashboard/edit",
+    description: "Edit your profile information",
+  }),
+  Object.freeze({
+    id: "settings",
+    label: "Settings",
+    icon: "mdi:cog",
+    route: "/trainer/dashboard/settings",
+    description: "Manage your account settings",
+  }),
+  Object.freeze({
+    id: "logout",
+    label: "Logout",
+    icon: "mdi:logout",
+    route: "#logout",
+    description: "Sign out of your account",
+  }),
+]);
+
 // Helper function to get navigation config by profile type
 export const getNavigationConfig = (profileType) =>
   profileType === "trainer" ? TRAINER_NAVIGATION : CLIENT_NAVIGATION;
+
+// Helper function to get bottom navigation config by profile type
+export const getBottomNavigationConfig = (profileType) =>
+  profileType === "trainer"
+    ? TRAINER_BOTTOM_NAVIGATION
+    : CLIENT_BOTTOM_NAVIGATION;
 
 // Helper function to update badge counts
 export const updateNavigationBadges = (navigation, badges = {}) =>
