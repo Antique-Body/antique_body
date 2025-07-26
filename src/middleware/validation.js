@@ -179,11 +179,11 @@ export const validateTrainerProfile = (data) => {
     }
   }
  
-  if (data.location) {
-    if (!data.location.city || !data.location.country) {
-      errors.location = "City and country are required.";
-    }
-  }
+  // if (data.location) {
+  //   if (!data.location.city || !data.location.country) {
+  //     errors.location = "City and country are required.";
+  //   }
+  // }
   return {
     valid: Object.keys(errors).length === 0,
     errors,

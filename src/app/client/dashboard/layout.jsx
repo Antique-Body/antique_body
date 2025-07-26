@@ -5,13 +5,10 @@ import React, { useEffect, useState, useMemo, createContext } from "react";
 
 import { EffectBackground } from "@/components/background";
 import { ClientProfileModal } from "@/components/custom/dashboard/client/components";
-import {
-  SidebarDashboard,
-  UserEditProfile,
-  UserSettings,
-} from "@/components/custom/dashboard/shared";
+import { SidebarDashboard } from "@/components/custom/dashboard/shared";
 import {
   getNavigationConfig,
+  getBottomNavigationConfig,
   updateNavigationBadges,
 } from "@/config/navigation";
 
@@ -27,13 +24,15 @@ export default function ClientDashboardLayout({ children }) {
 
   // Map pathname to tab ID
   const getActiveTabFromPath = (path) => {
+    if (path.includes("/edit")) return "edit";
+    if (path.includes("/settings")) return "settings";
     if (path.includes("/trainwithcoach")) return "trainwithcoach";
     if (path.includes("/overview")) return "overview";
     if (path.includes("/upcoming-trainings")) return "upcoming-trainings";
     if (path.includes("/trainings")) return "trainings";
     if (path.includes("/progress")) return "progress";
     if (path.includes("/messages")) return "messages";
-    if (path.includes("/nutrition")) return "nutrition";
+    if (path.includes("/diet-tracker")) return "diet-tracker";
     if (path.includes("/health")) return "health";
     return "trainwithcoach"; // Default tab
   };
@@ -42,8 +41,6 @@ export default function ClientDashboardLayout({ children }) {
   const [clientData, setClientData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // State for badge counts
@@ -129,12 +126,19 @@ export default function ClientDashboardLayout({ children }) {
       case "messages":
         router.push("/client/dashboard/messages");
         break;
-      case "nutrition":
-        router.push("/client/dashboard/nutrition");
+      case "diet-tracker":
+        router.push("/client/dashboard/diet-tracker");
         break;
       case "health":
         router.push("/client/dashboard/health");
         break;
+      case "edit":
+        router.push("/client/dashboard/edit");
+        break;
+      case "settings":
+        router.push("/client/dashboard/settings");
+        break;
+      // No need for logout case as it's handled in the SidebarDashboard component
       default:
         router.push("/client/dashboard/trainwithcoach");
     }
@@ -145,23 +149,9 @@ export default function ClientDashboardLayout({ children }) {
     setShowDetailModal(true);
   };
 
-  // Handle edit click
-  const handleEditClick = () => {
-    setShowEditModal(true);
-  };
-
-  // Handle settings click
-  const handleSettingsClick = () => {
-    setShowSettingsModal(true);
-  };
-
-  // Handle profile save
-  const handleProfileSave = async (_profileData) => {
+  // Refresh client data after profile update
+  const _refreshClientData = async () => {
     try {
-      // Add a small delay to ensure session is updated
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // Refresh the client data from the server to get the latest information
       setLoading(true);
       const res = await fetch("/api/users/client?mode=basic");
       if (res.ok) {
@@ -170,11 +160,9 @@ export default function ClientDashboardLayout({ children }) {
       } else if (res.status === 401) {
         // Silently handle unauthorized errors - session might not be updated yet
       }
-      setShowEditModal(false);
-      return { success: true };
+      setShowDetailModal(false);
     } catch (error) {
-      console.error("Error saving profile:", error);
-      return { success: false, error: error.message };
+      console.error("Error refreshing client data:", error);
     } finally {
       setLoading(false);
     }
@@ -185,6 +173,12 @@ export default function ClientDashboardLayout({ children }) {
     const baseNavigation = getNavigationConfig("client");
     return updateNavigationBadges(baseNavigation, badgeCounts);
   }, [badgeCounts]);
+
+  // Get bottom navigation items
+  const bottomNavigationItems = useMemo(
+    () => getBottomNavigationConfig("client"),
+    []
+  );
 
   // Function to refresh badge counts (can be called from child components)
   const refreshBadgeCounts = async () => {
@@ -217,11 +211,10 @@ export default function ClientDashboardLayout({ children }) {
           userData={clientData?.data}
           loading={loading}
           navigationItems={navigationItems}
+          bottomNavigationItems={bottomNavigationItems}
           activeItem={activeTab}
           onNavigationChange={handleTabChange}
           onProfileClick={handleProfileClick}
-          onEditClick={handleEditClick}
-          onSettingsClick={handleSettingsClick}
           onCollapseChange={setSidebarCollapsed}
         />
 
@@ -245,26 +238,6 @@ export default function ClientDashboardLayout({ children }) {
           isOpen={showDetailModal}
           onClose={() => setShowDetailModal(false)}
         />
-
-        {/* Edit Profile Modal */}
-        {showEditModal && (
-          <UserEditProfile
-            profileType="client"
-            userData={clientData?.data}
-            onClose={() => setShowEditModal(false)}
-            onSave={handleProfileSave}
-          />
-        )}
-
-        {/* Settings Modal */}
-        {showSettingsModal && (
-          <UserSettings
-            profileType="client"
-            userData={clientData?.data}
-            onClose={() => setShowSettingsModal(false)}
-            onSave={handleProfileSave}
-          />
-        )}
       </div>
     </BadgeRefreshContext.Provider>
   );

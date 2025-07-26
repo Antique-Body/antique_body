@@ -114,7 +114,7 @@ export const FormField = ({
   };
 
   // Base input class with conditional styling
-  const inputClass = `w-full ${getPadding()} rounded-lg ${getBgStyle()} border ${
+  const inputClass = `w-full min-w-0 ${getPadding()} rounded-lg ${getBgStyle()} border ${
     error
       ? "border-red-500 focus:border-red-500"
       : "border-[rgba(255,107,0,0.2)] focus:border-[#FF6B00]"

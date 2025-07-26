@@ -127,9 +127,6 @@ CREATE TABLE `TrainerProfile` (
     `paidAds` DATETIME(3) NULL,
     `trainingEnvironment` VARCHAR(191) NULL,
     `locationId` VARCHAR(191) NULL,
-    `pricingType` VARCHAR(191) NULL,
-    `pricePerSession` INTEGER NULL,
-    `currency` VARCHAR(191) NULL,
     `contactEmail` VARCHAR(191) NULL,
     `contactPhone` VARCHAR(191) NULL,
     `sessionDuration` INTEGER NULL,
@@ -242,11 +239,11 @@ CREATE TABLE `ClientProfile` (
     `lastName` VARCHAR(191) NOT NULL,
     `dateOfBirth` DATETIME(3) NOT NULL,
     `gender` VARCHAR(191) NOT NULL,
-    `height` INTEGER NOT NULL,
-    `weight` INTEGER NOT NULL,
+    `height` INTEGER NULL,
+    `weight` INTEGER NULL,
     `experienceLevel` VARCHAR(191) NOT NULL,
     `previousActivities` TEXT NULL,
-    `primaryGoal` VARCHAR(191) NOT NULL,
+    `primaryGoal` VARCHAR(191) NULL,
     `secondaryGoal` VARCHAR(191) NULL,
     `goalDescription` TEXT NULL,
     `contactEmail` VARCHAR(191) NULL,
@@ -457,16 +454,12 @@ CREATE TABLE `TrainingPlan` (
     `sessionFormat` JSON NULL,
     `difficultyLevel` VARCHAR(191) NULL,
     `schedule` JSON NULL,
-    `isActive` BOOLEAN NOT NULL DEFAULT true,
-    `isPublished` BOOLEAN NOT NULL DEFAULT false,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `deletedAt` DATETIME(3) NULL,
     `clientCount` INTEGER NULL,
 
     INDEX `TrainingPlan_trainerInfoId_idx`(`trainerInfoId`),
-    INDEX `TrainingPlan_isActive_idx`(`isActive`),
-    INDEX `TrainingPlan_isPublished_idx`(`isPublished`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -490,16 +483,12 @@ CREATE TABLE `NutritionPlan` (
     `days` JSON NULL,
     `recommendedFrequency` VARCHAR(191) NULL,
     `adaptability` VARCHAR(191) NULL,
-    `isActive` BOOLEAN NOT NULL DEFAULT true,
-    `isPublished` BOOLEAN NOT NULL DEFAULT false,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `deletedAt` DATETIME(3) NULL,
     `clientCount` INTEGER NULL,
 
     INDEX `NutritionPlan_trainerInfoId_idx`(`trainerInfoId`),
-    INDEX `NutritionPlan_isActive_idx`(`isActive`),
-    INDEX `NutritionPlan_isPublished_idx`(`isPublished`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -654,6 +643,23 @@ CREATE TABLE `CustomMeal` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `AssignedTrainingPlan` (
+    `id` VARCHAR(191) NOT NULL,
+    `clientId` VARCHAR(191) NOT NULL,
+    `trainerId` VARCHAR(191) NOT NULL,
+    `originalPlanId` VARCHAR(191) NOT NULL,
+    `planData` JSON NOT NULL,
+    `status` VARCHAR(191) NOT NULL DEFAULT 'active',
+    `assignedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `completedAt` DATETIME(3) NULL,
+
+    INDEX `AssignedTrainingPlan_clientId_idx`(`clientId`),
+    INDEX `AssignedTrainingPlan_trainerId_idx`(`trainerId`),
+    INDEX `AssignedTrainingPlan_status_idx`(`status`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `Account` ADD CONSTRAINT `Account_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -773,3 +779,12 @@ ALTER TABLE `SnackLog` ADD CONSTRAINT `SnackLog_dailyDietLogId_fkey` FOREIGN KEY
 
 -- AddForeignKey
 ALTER TABLE `CustomMeal` ADD CONSTRAINT `CustomMeal_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `ClientInfo`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `AssignedTrainingPlan` ADD CONSTRAINT `AssignedTrainingPlan_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `ClientInfo`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `AssignedTrainingPlan` ADD CONSTRAINT `AssignedTrainingPlan_trainerId_fkey` FOREIGN KEY (`trainerId`) REFERENCES `TrainerInfo`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `AssignedTrainingPlan` ADD CONSTRAINT `AssignedTrainingPlan_originalPlanId_fkey` FOREIGN KEY (`originalPlanId`) REFERENCES `TrainingPlan`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
