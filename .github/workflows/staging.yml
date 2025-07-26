@@ -21,8 +21,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: "18"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -38,6 +38,9 @@ jobs:
 
   database-check:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -45,8 +48,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: "18"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -61,6 +64,13 @@ jobs:
     needs: [lint-and-test, database-check]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/stage'
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+      NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -68,8 +78,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: "18"
+          cache: "npm"
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
@@ -100,6 +110,13 @@ jobs:
     needs: [lint-and-test, database-check]
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+      NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -107,8 +124,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: "18"
+          cache: "npm"
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
@@ -133,21 +150,21 @@ jobs:
               repo: context.repo.repo,
               issue_number: context.issue.number,
             });
-            
+
             const botComment = comments.find(comment => 
               comment.user.type === 'Bot' && comment.body.includes('Preview deployment')
             );
-            
+
             const body = `🔍 **Preview deployment ready!**
-            
+
             ✅ Build successful
             🌐 **Preview URL**: ${{ steps.deploy.outputs.url }}
             📝 **Branch**: \`${context.head_ref}\`
             🔧 **Commit**: ${context.sha.substring(0, 7)}
-            
+
             ---
             *This preview will be automatically updated when you push new commits to this PR.*`;
-            
+
             if (botComment) {
               github.rest.issues.updateComment({
                 owner: context.repo.owner,
@@ -162,4 +179,4 @@ jobs:
                 issue_number: context.issue.number,
                 body: body
               });
-            } 
+            }
