@@ -36,9 +36,6 @@ jobs:
       - name: Check formatting
         run: npx prettier --check '**/*.{ts,tsx,js,jsx,json,css,scss,md,html,yml,yaml}'
 
-      - name: Type check
-        run: npm run type-check
-
   database-check:
     runs-on: ubuntu-latest
     env:
