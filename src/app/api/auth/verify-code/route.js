@@ -6,7 +6,6 @@ import { formatPhoneNumber } from "@/lib/utils";
 import { verifyEmailCode } from "../services/email";
 import { verifyPhoneCode } from "../services/phone";
 
-
 export async function POST(request) {
   try {
     const { type, code, value, userId } = await request.json();

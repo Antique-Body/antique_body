@@ -2,7 +2,6 @@
 import { Icon } from "@iconify/react";
 import { useSession } from "next-auth/react";
 
-
 import { EffectBackground } from "@/components/background";
 import { Button, Footer, BrandLogo, FormField } from "@/components/common";
 import { ProfileImageUpload, LocationStep } from "@/components/custom/shared";

@@ -10,7 +10,6 @@ import { Card } from "@/components/common";
 
 import { Button } from "./Button";
 
-
 export const ErrorBoundary = ({ error, reset, className = "" }) => {
   const { t } = useTranslation();
   const router = useRouter();

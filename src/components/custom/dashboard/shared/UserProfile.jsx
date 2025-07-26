@@ -7,7 +7,6 @@ import { Button } from "@/components/common/Button";
 import { UserEditProfile } from "./UserEditProfile";
 import { UserSettings } from "./UserSettings";
 
-
 export const UserProfile = ({
   profileType = "client",
   avatarContent,

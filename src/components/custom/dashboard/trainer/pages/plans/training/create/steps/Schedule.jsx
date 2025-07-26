@@ -15,7 +15,6 @@ import { AnatomicalViewer } from "../../../../exercises/components/AnatomicalVie
 import { ExerciseLibrarySelector } from "../../../../exercises/components/ExerciseLibrarySelector";
 import { ExerciseModal } from "../../../../exercises/components/ExerciseModal";
 
-
 const SESSION_TYPES = [
   {
     id: "strength",

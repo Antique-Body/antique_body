@@ -15,7 +15,6 @@ import { Features } from "./steps/Features";
 import { Preview } from "./steps/Preview";
 import { Schedule } from "./steps/Schedule";
 
-
 const STEPS = [
   { id: "basic", label: "Basic Info", icon: "mdi:information" },
   { id: "schedule", label: "Schedule", icon: "mdi:calendar" },

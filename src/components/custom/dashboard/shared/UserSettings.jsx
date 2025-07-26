@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { useState, useEffect, useCallback } from "react";
 
-
 import { Button } from "@/components/common/Button";
 // Client Settings
 import {

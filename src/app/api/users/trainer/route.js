@@ -1,7 +1,6 @@
 import bcrypt from "bcrypt";
 import { NextResponse } from "next/server";
 
-
 import { auth } from "#/auth";
 import prisma from "@/lib/prisma";
 import { validateTrainerProfile } from "@/middleware/validation";

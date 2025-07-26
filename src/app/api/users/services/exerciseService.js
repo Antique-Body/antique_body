@@ -2,7 +2,6 @@ import prisma from "@/lib/prisma";
 
 import { DEFAULT_EXERCISES, EXERCISE_CONFIG } from "./defaultSettings";
 
-
 // Apstraktna validacija exercise podataka
 function validateExerciseData(data) {
   const errors = [];
