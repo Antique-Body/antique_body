@@ -68,7 +68,7 @@ export async function getActiveDietPlan(clientId) {
     return assignment;
   } catch (error) {
     console.error("Error fetching active diet plan:", error);
-    throw error;
+    throw new Error("Error fetching active diet plan");
   }
 }
 
@@ -90,55 +90,59 @@ export async function startDietPlan(dietPlanAssignmentId) {
     const nutritionPlan = assignment.nutritionPlan;
     const days = nutritionPlan.days || [];
 
-    // Create daily logs for each day in the plan
-    const dailyLogs = [];
-    for (let i = 0; i < days.length; i++) {
-      const day = days[i];
-      const date = new Date();
-      date.setDate(date.getDate() + i);
+    // Use transaction for atomic operation
+    const result = await prisma.$transaction(async (tx) => {
+      const dailyLogs = [];
+      for (let i = 0; i < days.length; i++) {
+        const day = days[i];
+        const date = new Date();
+        date.setDate(date.getDate() + i);
 
-      const dailyLog = await prisma.dailyDietLog.create({
+        const dailyLog = await tx.dailyDietLog.create({
+          data: {
+            dietPlanAssignmentId: assignment.id,
+            date: date, // Use Date object directly
+            dayNumber: i + 1,
+            totalMeals: day.meals?.length || 0,
+          },
+        });
+
+        // Create meal logs for each meal in the day
+        if (day.meals) {
+          for (const meal of day.meals) {
+            await tx.mealLog.create({
+              data: {
+                dailyDietLogId: dailyLog.id,
+                mealName: meal.name,
+                mealTime: meal.time,
+                selectedOption: meal.options?.[0] || {},
+                calories: meal.options?.[0]?.calories || 0,
+                protein: meal.options?.[0]?.protein || 0,
+                carbs: meal.options?.[0]?.carbs || 0,
+                fat: meal.options?.[0]?.fat || 0,
+              },
+            });
+          }
+        }
+
+        dailyLogs.push(dailyLog);
+      }
+
+      // Update assignment start date
+      await tx.dietPlanAssignment.update({
+        where: { id: assignment.id },
         data: {
-          dietPlanAssignmentId: assignment.id,
-          date: date, // Use Date object directly
-          dayNumber: i + 1,
-          totalMeals: day.meals?.length || 0,
+          startDate: new Date(),
         },
       });
 
-      // Create meal logs for each meal in the day
-      if (day.meals) {
-        for (const meal of day.meals) {
-          await prisma.mealLog.create({
-            data: {
-              dailyDietLogId: dailyLog.id,
-              mealName: meal.name,
-              mealTime: meal.time,
-              selectedOption: meal.options?.[0] || {},
-              calories: meal.options?.[0]?.calories || 0,
-              protein: meal.options?.[0]?.protein || 0,
-              carbs: meal.options?.[0]?.carbs || 0,
-              fat: meal.options?.[0]?.fat || 0,
-            },
-          });
-        }
-      }
-
-      dailyLogs.push(dailyLog);
-    }
-
-    // Update assignment start date
-    await prisma.dietPlanAssignment.update({
-      where: { id: assignment.id },
-      data: {
-        startDate: new Date(),
-      },
+      return dailyLogs;
     });
 
     return {
       success: true,
       message: "Diet plan started successfully",
-      dailyLogs,
+      dailyLogs: result,
     };
   } catch (error) {
     console.error("Error starting diet plan:", error);
@@ -252,8 +256,8 @@ export async function getAllDailyLogs(dietPlanAssignmentId) {
   }
 }
 
-// Mark a meal as completed
-export async function completeMeal(mealLogId) {
+// Single function to update meal completion status
+async function updateMealCompletionStatus(mealLogId, isCompleted) {
   try {
     // First get the meal to check its date
     const mealLog = await prisma.mealLog.findUnique({
@@ -268,13 +272,16 @@ export async function completeMeal(mealLogId) {
     }
 
     // Validate that the day is editable
-    validateDayEdit(mealLog.dailyDietLog.date, "complete");
+    validateDayEdit(
+      mealLog.dailyDietLog.date,
+      isCompleted ? "complete" : "uncomplete"
+    );
 
     const updatedMealLog = await prisma.mealLog.update({
       where: { id: mealLogId },
       data: {
-        isCompleted: true,
-        completedAt: new Date(),
+        isCompleted,
+        completedAt: isCompleted ? new Date() : null,
       },
       include: {
         dailyDietLog: true,
@@ -286,48 +293,22 @@ export async function completeMeal(mealLogId) {
 
     return updatedMealLog;
   } catch (error) {
-    console.error("Error completing meal:", error);
+    console.error(
+      `Error ${isCompleted ? "completing" : "uncompleting"} meal:`,
+      error
+    );
     throw error;
   }
 }
 
+// Mark a meal as completed
+export async function completeMeal(mealLogId) {
+  return updateMealCompletionStatus(mealLogId, true);
+}
+
 // Mark a meal as not completed
 export async function uncompleteMeal(mealLogId) {
-  try {
-    // First get the meal to check its date
-    const mealLog = await prisma.mealLog.findUnique({
-      where: { id: mealLogId },
-      include: {
-        dailyDietLog: true,
-      },
-    });
-
-    if (!mealLog) {
-      throw new Error("Meal log not found");
-    }
-
-    // Validate that the day is editable
-    validateDayEdit(mealLog.dailyDietLog.date, "uncomplete");
-
-    const updatedMealLog = await prisma.mealLog.update({
-      where: { id: mealLogId },
-      data: {
-        isCompleted: false,
-        completedAt: null,
-      },
-      include: {
-        dailyDietLog: true,
-      },
-    });
-
-    // Update daily totals
-    await updateDailyTotals(updatedMealLog.dailyDietLog.id);
-
-    return updatedMealLog;
-  } catch (error) {
-    console.error("Error uncompleting meal:", error);
-    throw error;
-  }
+  return updateMealCompletionStatus(mealLogId, false);
 }
 
 // Update daily nutrition totals

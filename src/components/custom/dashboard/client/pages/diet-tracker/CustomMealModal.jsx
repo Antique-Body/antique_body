@@ -3,11 +3,12 @@
 import { Icon } from "@iconify/react";
 import { useState, useEffect, useCallback } from "react";
 
-import { FoodImageAnalyzer } from "./FoodImageAnalyzer";
 
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { Modal } from "@/components/common/Modal";
+
+import { FoodImageAnalyzer } from "./FoodImageAnalyzer";
 
 export const CustomMealModal = ({
   isOpen,

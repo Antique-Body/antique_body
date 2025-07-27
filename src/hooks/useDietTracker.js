@@ -80,6 +80,22 @@ export const useDietTracker = () => {
     [fetchDietTrackerData]
   );
 
+  // Fetch next meal
+  const fetchNextMeal = useCallback(async () => {
+    try {
+      const response = await fetch(
+        "/api/users/client/diet-tracker?action=next-meal"
+      );
+      const data = await response.json();
+
+      if (response.ok) {
+        setNextMeal(data.nextMeal);
+      }
+    } catch (err) {
+      console.error("Error fetching next meal:", err);
+    }
+  }, []);
+
   // Complete a meal
   const completeMeal = useCallback(
     async (mealLogId) => {
@@ -280,7 +296,7 @@ export const useDietTracker = () => {
       throw new Error(data.error || "Failed to fetch custom meal history");
     } catch (err) {
       console.error("Error fetching custom meal history:", err);
-      return [];
+      return null;
     }
   }, []);
 
@@ -424,22 +440,6 @@ export const useDietTracker = () => {
       console.error("Error deleting snack:", err);
       setError(err.message);
       throw err;
-    }
-  }, []);
-
-  // Fetch next meal
-  const fetchNextMeal = useCallback(async () => {
-    try {
-      const response = await fetch(
-        "/api/users/client/diet-tracker?action=next-meal"
-      );
-      const data = await response.json();
-
-      if (response.ok) {
-        setNextMeal(data.nextMeal);
-      }
-    } catch (err) {
-      console.error("Error fetching next meal:", err);
     }
   }, []);
 

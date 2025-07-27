@@ -29,8 +29,6 @@ export default function ClientsPage() {
   // Get tracking parameters
   const planId = searchParams.get("planId");
   const planType = searchParams.get("type");
-  const planId = searchParams.get("planId");
-  const planType = searchParams.get("type");
 
   // Fetch all accepted clients (without pagination for local filtering)
   // Fetch all accepted clients (without pagination for local filtering)

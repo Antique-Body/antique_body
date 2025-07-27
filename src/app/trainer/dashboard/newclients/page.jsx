@@ -2,7 +2,6 @@
 import { Icon } from "@iconify/react";
 import { useEffect, useState, useContext } from "react";
 
-import { BadgeContext } from "../layout";
 
 import { InfoBanner } from "@/components/common/InfoBanner";
 import {
@@ -14,6 +13,8 @@ import {
   ErrorState,
   EmptyState,
 } from "@/components/custom/dashboard/trainer/pages/newclients/components";
+
+import { BadgeContext } from "../layout";
 
 export default function NewClientsPage() {
   const { refreshBadgeCounts } = useContext(BadgeContext);

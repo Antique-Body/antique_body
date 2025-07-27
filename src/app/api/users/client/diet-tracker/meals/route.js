@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { auth } from "#/auth";
+
 import {
   completeMeal,
   uncompleteMeal,
@@ -9,7 +11,6 @@ import {
   deleteSnackLog,
 } from "../../../services/dietTrackerService";
 
-import { auth } from "#/auth";
 
 // GET: Get meals for a specific date
 export async function GET(req) {

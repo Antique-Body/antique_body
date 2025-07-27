@@ -5,7 +5,29 @@ import { FormField } from "@/components/common/FormField";
 import { Modal } from "@/components/common/Modal";
 import { EXPERIENCE_LEVELS } from "@/enums/experienceLevels";
 import { FITNESS_GOALS } from "@/enums/fitnessGoals";
-import { calculateAge } from "@/utils/dateUtils";
+import { calculateAge, formatDate } from "@/utils/dateUtils";
+
+// Helper function to get gender information
+const getGenderInfo = (gender) => {
+  const normalized = gender?.toLowerCase();
+  return {
+    isMale: normalized === "male",
+    isFemale: normalized === "female",
+    icon:
+      normalized === "male"
+        ? "mdi:gender-male"
+        : normalized === "female"
+          ? "mdi:gender-female"
+          : "mdi:help",
+    gradient:
+      normalized === "male"
+        ? "bg-gradient-to-br from-[#FF7800] to-[#FF9A00]"
+        : normalized === "female"
+          ? "bg-gradient-to-br from-[#FF9A00] to-[#FF7800]"
+          : "bg-gradient-to-br from-zinc-500 to-zinc-600",
+    color: normalized === "male" ? "text-[#FF7800]" : "text-[#FF9A00]",
+  };
+};
 
 export const ResponseModal = ({
   isOpen,
@@ -37,14 +59,6 @@ export const ResponseModal = ({
     );
     return experienceLevel ? experienceLevel.label : level;
   };
-
-  // Format date
-  const formatDate = (dateString) =>
-    new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
 
   return (
     <Modal
@@ -106,24 +120,14 @@ export const ResponseModal = ({
               {selectedRequest.client.clientProfile.gender && (
                 <div
                   className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border border-zinc-800 shadow-lg ${
-                    selectedRequest.client.clientProfile.gender.toLowerCase() ===
-                    "male"
-                      ? "bg-gradient-to-br from-[#FF7800] to-[#FF9A00]"
-                      : selectedRequest.client.clientProfile.gender.toLowerCase() ===
-                        "female"
-                      ? "bg-gradient-to-br from-[#FF9A00] to-[#FF7800]"
-                      : "bg-gradient-to-br from-zinc-500 to-zinc-600"
+                    getGenderInfo(selectedRequest.client.clientProfile.gender)
+                      .gradient
                   }`}
                 >
                   <Icon
                     icon={
-                      selectedRequest.client.clientProfile.gender.toLowerCase() ===
-                      "male"
-                        ? "mdi:gender-male"
-                        : selectedRequest.client.clientProfile.gender.toLowerCase() ===
-                          "female"
-                        ? "mdi:gender-female"
-                        : "mdi:help"
+                      getGenderInfo(selectedRequest.client.clientProfile.gender)
+                        .icon
                     }
                     width={12}
                     height={12}
@@ -215,18 +219,16 @@ export const ResponseModal = ({
                     <div className="flex items-center gap-1">
                       <Icon
                         icon={
-                          selectedRequest.client.clientProfile.gender.toLowerCase() ===
-                          "male"
-                            ? "mdi:gender-male"
-                            : "mdi:gender-female"
+                          getGenderInfo(
+                            selectedRequest.client.clientProfile.gender
+                          ).icon
                         }
                         width={14}
                         height={14}
                         className={
-                          selectedRequest.client.clientProfile.gender.toLowerCase() ===
-                          "male"
-                            ? "text-[#FF7800]"
-                            : "text-[#FF9A00]"
+                          getGenderInfo(
+                            selectedRequest.client.clientProfile.gender
+                          ).color
                         }
                       />
                       <span className="text-zinc-300 text-xs font-medium capitalize">
