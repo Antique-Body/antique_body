@@ -6,14 +6,35 @@ import { useEffect, useState } from "react";
 export const AIImageScanner = ({ isScanning }) => {
   const [scanPosition, setScanPosition] = useState(0);
   const [scanDirection, setScanDirection] = useState("down");
-  const [pulseIntensity, setPulseIntensity] = useState(0.5);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [currentPhase, setCurrentPhase] = useState("scanning");
+  const [detectionPoints, setDetectionPoints] = useState([]);
+
+  useEffect(() => {
+    if (isScanning) {
+      // Generate 4-5 detection points
+      const points = Array.from({ length: 5 }, (_, i) => ({
+        id: i,
+        x: 20 + Math.random() * 60,
+        y: 20 + Math.random() * 60,
+        detected: false,
+        confidence: Math.floor(75 + Math.random() * 25),
+      }));
+      setDetectionPoints(points);
+
+      // Analysis phases
+      setTimeout(() => setCurrentPhase("detecting"), 1000);
+      setTimeout(() => setCurrentPhase("analyzing"), 3000);
+      setTimeout(() => setCurrentPhase("processing"), 5000);
+    }
+  }, [isScanning]);
 
   useEffect(() => {
     let animationFrame;
-    let pulseFrame;
+    let progressTimer;
 
     if (isScanning) {
-      // Main scan line animation
+      // Scan line animation
       const animate = () => {
         setScanPosition((prev) => {
           if (prev >= 100 && scanDirection === "down") {
@@ -23,70 +44,82 @@ export const AIImageScanner = ({ isScanning }) => {
             setScanDirection("down");
             return 0;
           }
-          return scanDirection === "down" ? prev + 1.2 : prev - 1.2;
+          return scanDirection === "down" ? prev + 1 : prev - 1;
         });
         animationFrame = requestAnimationFrame(animate);
       };
 
-      // Pulse animation for AI elements
-      const animatePulse = () => {
-        setPulseIntensity(() => {
-          const newIntensity = 0.3 + Math.sin(Date.now() * 0.003) * 0.4;
-          return Math.max(0.2, Math.min(0.8, newIntensity));
+      // Progress animation
+      const updateProgress = () => {
+        setAnalysisProgress((prev) => {
+          if (prev >= 100) return 100;
+          return prev + 1;
         });
-        pulseFrame = requestAnimationFrame(animatePulse);
+
+        // Activate detection points as progress increases
+        if (analysisProgress > 30) {
+          setDetectionPoints((prev) =>
+            prev.map((point, index) => ({
+              ...point,
+              detected: analysisProgress > 30 + index * 15,
+            }))
+          );
+        }
       };
 
       animationFrame = requestAnimationFrame(animate);
-      pulseFrame = requestAnimationFrame(animatePulse);
+      progressTimer = setInterval(updateProgress, 80);
     }
 
     return () => {
       if (animationFrame) cancelAnimationFrame(animationFrame);
-      if (pulseFrame) cancelAnimationFrame(pulseFrame);
+      if (progressTimer) clearInterval(progressTimer);
     };
-  }, [isScanning, scanDirection]);
+  }, [isScanning, scanDirection, analysisProgress]);
 
   if (!isScanning) return null;
 
+  const getPhaseText = () => {
+    switch (currentPhase) {
+      case "scanning":
+        return "SCANNING IMAGE";
+      case "detecting":
+        return "DETECTING OBJECTS";
+      case "analyzing":
+        return "ANALYZING NUTRITION";
+      case "processing":
+        return "PROCESSING RESULTS";
+      default:
+        return "SCANNING IMAGE";
+    }
+  };
+
   return (
     <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none z-20">
-      {/* Enhanced backdrop with better blur */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/50 via-black/30 to-black/50 backdrop-blur-md">
-        {/* Advanced corner brackets with glow */}
-        <div className="absolute top-3 left-3 w-8 h-8">
-          <div className="w-full h-full border-t-3 border-l-3 border-[#FF6B00] rounded-tl-lg shadow-lg shadow-[#FF6B00]/30"></div>
-          <div className="absolute -top-1 -left-1 w-3 h-3 bg-[#FF6B00] rounded-full opacity-80 animate-pulse"></div>
-        </div>
-        <div className="absolute top-3 right-3 w-8 h-8">
-          <div className="w-full h-full border-t-3 border-r-3 border-[#FF6B00] rounded-tr-lg shadow-lg shadow-[#FF6B00]/30"></div>
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#FF6B00] rounded-full opacity-80 animate-pulse"></div>
-        </div>
-        <div className="absolute bottom-3 left-3 w-8 h-8">
-          <div className="w-full h-full border-b-3 border-l-3 border-[#FF6B00] rounded-bl-lg shadow-lg shadow-[#FF6B00]/30"></div>
-          <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-[#FF6B00] rounded-full opacity-80 animate-pulse"></div>
-        </div>
-        <div className="absolute bottom-3 right-3 w-8 h-8">
-          <div className="w-full h-full border-b-3 border-r-3 border-[#FF6B00] rounded-br-lg shadow-lg shadow-[#FF6B00]/30"></div>
-          <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-[#FF6B00] rounded-full opacity-80 animate-pulse"></div>
-        </div>
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm">
+        {/* Corner frames */}
+        <div className="absolute top-4 left-4 w-8 h-8 border-t-2 border-l-2 border-[#FF6B00] rounded-tl-lg"></div>
+        <div className="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 border-[#FF6B00] rounded-tr-lg"></div>
+        <div className="absolute bottom-4 left-4 w-8 h-8 border-b-2 border-l-2 border-[#FF6B00] rounded-bl-lg"></div>
+        <div className="absolute bottom-4 right-4 w-8 h-8 border-b-2 border-r-2 border-[#FF6B00] rounded-br-lg"></div>
 
-        {/* Grid overlay for tech feel */}
-        <div className="absolute inset-0 opacity-20">
+        {/* Subtle grid */}
+        <div className="absolute inset-0 opacity-10">
           <div
             className="w-full h-full"
             style={{
               backgroundImage: `
-              linear-gradient(rgba(255, 107, 0, 0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255, 107, 0, 0.1) 1px, transparent 1px)
-            `,
-              backgroundSize: "20px 20px",
+                linear-gradient(rgba(255, 107, 0, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 107, 0, 0.3) 1px, transparent 1px)
+              `,
+              backgroundSize: "30px 30px",
             }}
-          ></div>
+          />
         </div>
       </div>
 
-      {/* Enhanced main scan line with multiple layers */}
+      {/* Scan line */}
       <div
         className="absolute left-0 w-full z-30 transition-all duration-75"
         style={{
@@ -94,184 +127,106 @@ export const AIImageScanner = ({ isScanning }) => {
           transform: "translateY(-50%)",
         }}
       >
-        {/* Main scan line */}
         <div className="relative h-1">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#FF6B00] to-transparent"></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-[#FF6B00]/40 via-[#FFD700] to-[#FF6B00]/40"></div>
-
-          {/* Bright center core */}
-          <div className="absolute top-0 left-1/2 w-20 h-px bg-white transform -translate-x-1/2 shadow-lg shadow-white/50"></div>
+          <div className="absolute top-0 left-1/2 w-16 h-px bg-white transform -translate-x-1/2"></div>
         </div>
-
-        {/* Glow effects */}
-        <div className="absolute top-1/2 left-0 w-full h-8 -translate-y-1/2 bg-gradient-to-r from-transparent via-[#FF6B00]/30 to-transparent blur-sm"></div>
-        <div className="absolute top-1/2 left-0 w-full h-4 -translate-y-1/2 bg-gradient-to-r from-transparent via-[#FF6B00]/50 to-transparent blur-xs"></div>
-
-        {/* Side sparks */}
-        <div className="absolute top-1/2 left-2 w-2 h-2 bg-[#FFD700] rounded-full -translate-y-1/2 animate-ping"></div>
-        <div className="absolute top-1/2 right-2 w-2 h-2 bg-[#FFD700] rounded-full -translate-y-1/2 animate-ping"></div>
+        <div className="absolute top-1/2 left-0 w-full h-6 -translate-y-1/2 bg-gradient-to-r from-transparent via-[#FF6B00]/20 to-transparent blur-sm"></div>
       </div>
 
-      {/* Vertical scanning guides */}
-      <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-[#FF6B00]/30 via-[#FF6B00]/80 to-[#FF6B00]/30 z-25"></div>
-      <div className="absolute top-0 right-0 w-px h-full bg-gradient-to-b from-[#FF6B00]/30 via-[#FF6B00]/80 to-[#FF6B00]/30 z-25"></div>
+      {/* Detection points */}
+      {detectionPoints.map((point) => (
+        <div
+          key={point.id}
+          className={`absolute z-25 transition-all duration-500 ${point.detected ? "opacity-100" : "opacity-0"}`}
+          style={{
+            left: `${point.x}%`,
+            top: `${point.y}%`,
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <div className="relative">
+            {/* Detection crosshair */}
+            <div className="w-6 h-6 border-2 border-[#FF6B00] rounded-full relative">
+              <div className="absolute top-1/2 left-0 w-full h-px bg-[#FF6B00] transform -translate-y-1/2"></div>
+              <div className="absolute top-0 left-1/2 w-px h-full bg-[#FF6B00] transform -translate-x-1/2"></div>
 
-      {/* Center vertical guide */}
-      <div className="absolute top-0 left-1/2 w-px h-full bg-gradient-to-b from-transparent via-[#FF6B00]/40 to-transparent transform -translate-x-1/2 z-20"></div>
-
-      {/* Enhanced AI Analysis Interface */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-40">
-        <div className="flex items-center bg-gradient-to-r from-black/80 via-black/90 to-black/80 backdrop-blur-lg px-5 py-3 rounded-2xl border border-[#FF6B00]/40 shadow-2xl shadow-[#FF6B00]/20">
-          {/* AI Brain Icon with pulse */}
-          <div className="relative mr-3">
-            <div
-              className="w-6 h-6 bg-gradient-to-br from-[#FF6B00] to-[#FFD700] rounded-lg flex items-center justify-center shadow-lg"
-              style={{ opacity: pulseIntensity + 0.5 }}
-            >
-              <Icon icon="mdi:brain" className="w-4 h-4 text-white" />
+              {point.detected && (
+                <div className="absolute inset-1 bg-green-400 rounded-full flex items-center justify-center">
+                  <Icon icon="mdi:check" className="w-2 h-2 text-white" />
+                </div>
+              )}
             </div>
-            <div className="absolute inset-0 bg-[#FF6B00] rounded-lg animate-ping opacity-30"></div>
-          </div>
 
-          {/* Status text with typewriter effect */}
-          <div className="flex items-center">
-            <span className="text-[#FF6B00] font-bold text-sm tracking-wider mr-2">
-              AI ANALYZING
-            </span>
-            <div className="flex space-x-1">
-              <div
-                className="w-1 h-1 bg-[#FF6B00] rounded-full animate-bounce"
-                style={{ animationDelay: "0ms" }}
-              ></div>
-              <div
-                className="w-1 h-1 bg-[#FF6B00] rounded-full animate-bounce"
-                style={{ animationDelay: "150ms" }}
-              ></div>
-              <div
-                className="w-1 h-1 bg-[#FF6B00] rounded-full animate-bounce"
-                style={{ animationDelay: "300ms" }}
-              ></div>
-            </div>
-          </div>
-
-          {/* Progress indicator */}
-          <div className="ml-4 flex items-center space-x-1">
-            <div className="w-16 h-1 bg-zinc-700 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-[#FF6B00] to-[#FFD700] rounded-full transition-all duration-300"
-                style={{
-                  width: `${(scanPosition / 100) * 50 + 50}%`,
-                  boxShadow: "0 0 8px rgba(255, 107, 0, 0.5)",
-                }}
-              ></div>
-            </div>
-            <span className="text-[#FF6B00] text-xs font-mono">
-              {Math.round((scanPosition / 100) * 50 + 50)}%
-            </span>
+            {/* Confidence label */}
+            {point.detected && (
+              <div className="absolute top-8 left-1/2 transform -translate-x-1/2 bg-black/80 px-2 py-1 rounded text-xs">
+                <span className="text-[#FF6B00] font-mono">
+                  {point.confidence}%
+                </span>
+              </div>
+            )}
           </div>
         </div>
-      </div>
+      ))}
 
-      {/* Floating data points with enhanced animation */}
-      <div className="absolute inset-0 z-15">
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div
-            key={i}
-            className="absolute"
-            style={{
-              top: `${10 + ((i * 4) % 80)}%`,
-              left: `${5 + ((i * 7) % 90)}%`,
-              animationDuration: `${2 + Math.random() * 3}s`,
-              animationDelay: `${Math.random() * 2}s`,
-            }}
-          >
-            <div className="relative">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#FF6B00] animate-ping opacity-70"></div>
-              <div className="absolute top-0 left-0 w-1.5 h-1.5 rounded-full bg-[#FFD700] animate-pulse"></div>
+      {/* Status panel */}
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-40">
+        <div className="bg-black/90 backdrop-blur-sm px-6 py-3 rounded-xl border border-[#FF6B00]/50 shadow-xl">
+          <div className="flex items-center space-x-4">
+            {/* AI icon */}
+            <div className="w-8 h-8 bg-[#FF6B00] rounded-lg flex items-center justify-center">
+              <Icon icon="mdi:brain" className="w-5 h-5 text-white" />
             </div>
-          </div>
-        ))}
-      </div>
 
-      {/* Scanning particles effect */}
-      <div className="absolute inset-0 z-10">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div
-            key={`particle-${i}`}
-            className="absolute w-0.5 h-0.5 bg-[#FF6B00] rounded-full opacity-60"
-            style={{
-              left: `${10 + i * 10}%`,
-              top: `${scanPosition}%`,
-              transform: "translateY(-50%)",
-              boxShadow: "0 0 4px rgba(255, 107, 0, 0.8)",
-              animation: `float 1.5s ease-in-out infinite`,
-              animationDelay: `${i * 100}ms`,
-            }}
-          />
-        ))}
-      </div>
+            {/* Status text */}
+            <div className="flex items-center space-x-3">
+              <span className="text-[#FF6B00] font-semibold text-sm tracking-wide">
+                {getPhaseText()}
+              </span>
 
-      {/* Neural network visualization */}
-      <div className="absolute top-4 right-4 z-30">
-        <div className="bg-black/60 backdrop-blur-sm rounded-lg p-2 border border-[#FF6B00]/30">
-          <div className="grid grid-cols-3 gap-1">
-            {Array.from({ length: 9 }).map((_, i) => (
-              <div
-                key={`neural-${i}`}
-                className="w-2 h-2 rounded-full bg-[#FF6B00] animate-pulse"
-                style={{
-                  animationDelay: `${i * 100}ms`,
-                  opacity: pulseIntensity + 0.3,
-                }}
-              />
-            ))}
-          </div>
-          <div className="text-[#FF6B00] text-xs font-mono mt-1 text-center">
-            NEURAL
+              <div className="flex space-x-1">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="w-1 h-1 bg-[#FF6B00] rounded-full animate-bounce"
+                    style={{ animationDelay: `${i * 200}ms` }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Progress */}
+            <div className="flex items-center space-x-2">
+              <div className="w-20 h-1.5 bg-zinc-700 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-[#FF6B00] rounded-full transition-all duration-300"
+                  style={{ width: `${analysisProgress}%` }}
+                />
+              </div>
+              <span className="text-[#FF6B00] text-xs font-mono w-8">
+                {analysisProgress}%
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Food detection indicators */}
-      <div className="absolute top-4 left-4 z-30">
-        <div className="bg-black/60 backdrop-blur-sm rounded-lg p-2 border border-[#FF6B00]/30">
+      {/* Simple detection counter */}
+      <div className="absolute top-6 right-6 z-30">
+        <div className="bg-black/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-[#FF6B00]/50">
           <div className="flex items-center space-x-2">
-            <Icon
-              icon="mdi:food"
-              className="w-4 h-4 text-[#FF6B00] animate-pulse"
-            />
-            <div className="text-[#FF6B00] text-xs font-mono">DETECTING</div>
+            <Icon icon="mdi:target" className="w-4 h-4 text-[#FF6B00]" />
+            <span className="text-white text-sm font-mono">
+              {detectionPoints.filter((p) => p.detected).length}/
+              {detectionPoints.length}
+            </span>
           </div>
-          <div className="flex mt-1 space-x-1">
-            <div
-              className="w-1 h-4 bg-[#FF6B00] rounded-full animate-pulse"
-              style={{ animationDelay: "0ms" }}
-            ></div>
-            <div
-              className="w-1 h-4 bg-[#FF6B00]/70 rounded-full animate-pulse"
-              style={{ animationDelay: "200ms" }}
-            ></div>
-            <div
-              className="w-1 h-4 bg-[#FF6B00]/50 rounded-full animate-pulse"
-              style={{ animationDelay: "400ms" }}
-            ></div>
+          <div className="text-[#FF6B00] text-xs text-center mt-1">
+            DETECTED
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes float {
-          0%,
-          100% {
-            transform: translateY(-50%) translateX(0px);
-            opacity: 0.6;
-          }
-          50% {
-            transform: translateY(-50%) translateX(10px);
-            opacity: 1;
-          }
-        }
-      `}</style>
     </div>
   );
 };
