@@ -86,14 +86,23 @@ export async function PUT(req) {
       );
     }
     const body = await req.json();
-    // Ovdje možete dodati validaciju ako želite
-    // Formatiraj broj telefona prije spremanja
+
+    // Convert height and weight from string to integer if they exist
+    const processedBody = {
+      ...body,
+      height: body.height ? parseInt(body.height, 10) : null,
+      weight: body.weight ? parseInt(body.weight, 10) : null,
+    };
+
+    // Format phone number before saving
     const phone = body.phone ? formatPhoneNumber(body.phone) : undefined;
+
     const updatedProfile = await clientService.updateClientProfile(
       session.user.id,
-      { ...body, phone }
+      { ...processedBody, phone }
     );
-    // Također update User model (ako je potrebno)
+
+    // Also update User model (if necessary)
     const prisma = (await import("@/lib/prisma")).default;
     await prisma.user.update({
       where: { id: session.user.id },
@@ -101,9 +110,10 @@ export async function PUT(req) {
         phone,
         email: body.email,
         phoneVerified: body.phoneVerified ? new Date() : undefined,
-        // Ostala polja po potrebi
+        // Other fields as needed
       },
     });
+
     return new Response(
       JSON.stringify({ success: true, data: updatedProfile }),
       { status: 200 }
