@@ -15,15 +15,23 @@ const AUTH_PATHS = ["/auth/reset-password"];
 async function checkUserExistsInDB(request) {
   try {
     const url = `${request.nextUrl.origin}/api/users/me`;
+    console.log(`[Middleware] Checking user existence at: ${url}`);
+
     const response = await fetch(url, {
       method: "GET",
       headers: {
         Cookie: request.headers.get("cookie") || "",
       },
     });
+
+    console.log(
+      `[Middleware] /api/users/me response status: ${response.status}`
+    );
     const exists = response.status === 200;
+    console.log(`[Middleware] User exists in DB: ${exists}`);
     return exists;
-  } catch {
+  } catch (error) {
+    console.error(`[Middleware] Error checking user existence:`, error);
     return false;
   }
 }
@@ -35,6 +43,14 @@ function isOAuthCallback(request) {
     pathname.includes("/api/auth/callback/") ||
     searchParams.has("code") ||
     searchParams.has("state");
+
+  console.log(`[Middleware] OAuth callback check:`, {
+    pathname,
+    hasCode: searchParams.has("code"),
+    hasState: searchParams.has("state"),
+    isCallback,
+  });
+
   return isCallback;
 }
 
@@ -51,12 +67,28 @@ function getDashboardRedirect(token) {
   } else {
     redirect = "/select-role";
   }
+
+  console.log(`[Middleware] Dashboard redirect:`, {
+    role: token.role,
+    clientProfile: token.clientProfile,
+    trainerProfile: token.trainerProfile,
+    redirect,
+  });
+
   return redirect;
 }
 
 function getOnboardingRedirect(role, token, pathname) {
+  console.log(`[Middleware] Onboarding redirect check:`, {
+    role,
+    pathname,
+    clientProfile: token.clientProfile,
+    trainerProfile: token.trainerProfile,
+  });
+
   if (!role) {
     const redirect = pathname === "/select-role" ? null : "/select-role";
+    console.log(`[Middleware] No role - redirect: ${redirect}`);
     return redirect;
   }
 
@@ -106,11 +138,17 @@ function getOnboardingRedirect(role, token, pathname) {
   }[role];
 
   if (!config) {
+    console.log(
+      `[Middleware] No config for role ${role} - redirecting to /select-role`
+    );
     return "/select-role";
   }
 
   if (!config.profile) {
     const redirect = pathname === config.personal ? null : config.personal;
+    console.log(
+      `[Middleware] No profile for role ${role} - redirect: ${redirect}`
+    );
     return redirect;
   }
 
@@ -128,68 +166,150 @@ function getOnboardingRedirect(role, token, pathname) {
   });
 
   const redirect = isAllowed ? null : config.fallback;
+  console.log(`[Middleware] Path allowed: ${isAllowed}, redirect: ${redirect}`);
   return redirect;
 }
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
+  const { searchParams } = request.nextUrl;
 
-  const token = await getToken({
-    req: request,
-    secret: process.env.AUTH_SECRET,
-  });
+  // Comprehensive debugging
+  console.log("=== MIDDLEWARE DEBUG START ===");
+  console.log(`[Middleware] Path: ${pathname}`);
+  console.log(`[Middleware] NODE_ENV: ${process.env.NODE_ENV}`);
+  console.log(`[Middleware] URL: ${request.url}`);
+  console.log(`[Middleware] Method: ${request.method}`);
+  console.log(
+    `[Middleware] Search params:`,
+    Object.fromEntries(searchParams.entries())
+  );
 
-  const isOAuthFlow = isOAuthCallback(request);
-
-  // 1. Public paths
-  if (PUBLIC_PATHS.includes(pathname)) {
-    return NextResponse.next();
+  // Debug headers
+  const cookieHeader = request.headers.get("cookie");
+  console.log(`[Middleware] Cookie header exists: ${!!cookieHeader}`);
+  if (cookieHeader) {
+    console.log(`[Middleware] Cookie header length: ${cookieHeader.length}`);
+    console.log(
+      `[Middleware] Cookie header preview: ${cookieHeader.substring(0, 100)}...`
+    );
   }
 
-  // 2. /select-role
-  if (pathname === "/select-role") {
+  // Debug environment variables
+  console.log(`[Middleware] AUTH_SECRET exists: ${!!process.env.AUTH_SECRET}`);
+  console.log(
+    `[Middleware] AUTH_SECRET length: ${process.env.AUTH_SECRET?.length || 0}`
+  );
+  console.log(`[Middleware] NEXTAUTH_URL: ${process.env.NEXTAUTH_URL}`);
+  console.log(`[Middleware] NEXTAUTH_SECRET: ${!!process.env.NEXTAUTH_SECRET}`);
+
+  try {
+    const token = await getToken({
+      req: request,
+      secret: process.env.AUTH_SECRET,
+    });
+
+    console.log(`[Middleware] Token obtained successfully: ${!!token}`);
+    if (token) {
+      console.log(`[Middleware] Token details:`, {
+        id: token.id,
+        role: token.role,
+        email: token.email,
+        sub: token.sub,
+        iat: token.iat,
+        exp: token.exp,
+      });
+    } else {
+      console.log(`[Middleware] No token found`);
+    }
+
+    const isOAuthFlow = isOAuthCallback(request);
+    console.log(`[Middleware] Is OAuth callback: ${isOAuthFlow}`);
+
+    // 1. Public paths
+    if (PUBLIC_PATHS.includes(pathname)) {
+      console.log(`[Middleware] Public path - allowing access`);
+      return NextResponse.next();
+    }
+
+    // 2. /select-role
+    if (pathname === "/select-role") {
+      console.log(`[Middleware] Processing /select-role`);
+      if (!token) {
+        console.log(`[Middleware] No token - redirecting to login`);
+        return NextResponse.redirect(new URL("/auth/login", request.url));
+      }
+      if (token.sub && token.email && !isOAuthFlow) {
+        console.log(`[Middleware] Checking if user exists in DB`);
+        const userExists = await checkUserExistsInDB(request);
+        console.log(`[Middleware] User exists in DB: ${userExists}`);
+        if (!userExists) {
+          console.log(`[Middleware] User not in DB - redirecting to login`);
+          return NextResponse.redirect(new URL("/auth/login", request.url));
+        }
+      }
+      if (token.role) {
+        const redirect = getDashboardRedirect(token);
+        console.log(
+          `[Middleware] User has role ${token.role} - redirecting to ${redirect}`
+        );
+        return NextResponse.redirect(new URL(redirect, request.url));
+      }
+      console.log(`[Middleware] No role - allowing access to /select-role`);
+      return NextResponse.next();
+    }
+
+    // 3. Not logged in
     if (!token) {
+      console.log(`[Middleware] No token - redirecting to login`);
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
+
+    // 4. User must exist in DB
     if (token.sub && token.email && !isOAuthFlow) {
+      console.log(
+        `[Middleware] Checking if user exists in DB for protected route`
+      );
       const userExists = await checkUserExistsInDB(request);
+      console.log(`[Middleware] User exists in DB: ${userExists}`);
       if (!userExists) {
+        console.log(`[Middleware] User not in DB - redirecting to login`);
         return NextResponse.redirect(new URL("/auth/login", request.url));
       }
     }
-    if (token.role) {
+
+    // 5. Auth pages
+    if (["/auth/login", "/auth/register", ...AUTH_PATHS].includes(pathname)) {
       const redirect = getDashboardRedirect(token);
+      console.log(
+        `[Middleware] User on auth page - redirecting to ${redirect}`
+      );
       return NextResponse.redirect(new URL(redirect, request.url));
     }
-    return NextResponse.next();
-  }
 
-  // 3. Not logged in
-  if (!token) {
+    // 6. Onboarding/dashboard redirect
+    const onboardingRedirect = getOnboardingRedirect(
+      token.role,
+      token,
+      pathname
+    );
+    if (onboardingRedirect) {
+      console.log(
+        `[Middleware] Onboarding redirect needed: ${onboardingRedirect}`
+      );
+      return NextResponse.redirect(new URL(onboardingRedirect, request.url));
+    }
+
+    console.log(`[Middleware] All checks passed - allowing access`);
+    console.log("=== MIDDLEWARE DEBUG END ===");
+
+    return NextResponse.next();
+  } catch (error) {
+    console.error(`[Middleware] Error:`, error);
+    console.log(`[Middleware] Falling back to login redirect`);
+    console.log("=== MIDDLEWARE DEBUG END (ERROR) ===");
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
-
-  // 4. User must exist in DB
-  if (token.sub && token.email && !isOAuthFlow) {
-    const userExists = await checkUserExistsInDB(request);
-    if (!userExists) {
-      return NextResponse.redirect(new URL("/auth/login", request.url));
-    }
-  }
-
-  // 5. Auth pages
-  if (["/auth/login", "/auth/register", ...AUTH_PATHS].includes(pathname)) {
-    const redirect = getDashboardRedirect(token);
-    return NextResponse.redirect(new URL(redirect, request.url));
-  }
-
-  // 6. Onboarding/dashboard redirect
-  const onboardingRedirect = getOnboardingRedirect(token.role, token, pathname);
-  if (onboardingRedirect) {
-    return NextResponse.redirect(new URL(onboardingRedirect, request.url));
-  }
-
-  return NextResponse.next();
 }
 
 export const config = {
