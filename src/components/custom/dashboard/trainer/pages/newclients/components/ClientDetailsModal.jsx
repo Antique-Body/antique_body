@@ -5,7 +5,7 @@ import { Modal } from "@/components/common/Modal";
 import { ACTIVITY_TYPES } from "@/enums/activityTypes";
 import { EXPERIENCE_LEVELS } from "@/enums/experienceLevels";
 import { FITNESS_GOALS } from "@/enums/fitnessGoals";
-import { calculateAge } from "@/utils/dateUtils";
+import { calculateAge, formatDate } from "@/utils/dateUtils";
 
 export const ClientDetailsModal = ({
   isOpen,
@@ -48,14 +48,6 @@ export const ClientDetailsModal = ({
           .replace(/_/g, " ")
           .replace(/\b\w/g, (l) => l.toUpperCase());
   };
-
-  // Format date
-  const formatDate = (dateString) =>
-    new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
 
   return (
     <Modal

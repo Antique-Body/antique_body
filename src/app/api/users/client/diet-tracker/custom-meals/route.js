@@ -27,6 +27,27 @@ export async function GET(req) {
     const mealType = searchParams.get("mealType");
     const limit = parseInt(searchParams.get("limit")) || 10;
 
+    // Validate query parameters
+    if (limit < 1 || limit > 100) {
+      return NextResponse.json(
+        { error: "Limit must be between 1 and 100" },
+        { status: 400 }
+      );
+    }
+
+    if (mealType) {
+      const validMealTypes = ["breakfast", "lunch", "dinner", "snack"];
+      if (!validMealTypes.includes(mealType.toLowerCase())) {
+        return NextResponse.json(
+          {
+            error:
+              "Invalid meal type. Must be one of: breakfast, lunch, dinner, snack",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     // Build where clause
     const whereClause = {
       clientId: clientInfo.id,
@@ -101,6 +122,91 @@ export async function POST(req) {
         { error: "Missing required fields" },
         { status: 400 }
       );
+    }
+
+    // Validate data types and ranges
+    const numericFields = { calories, protein, carbs, fat };
+    const maxValues = {
+      calories: 5000,
+      protein: 500,
+      carbs: 1000,
+      fat: 500,
+    };
+
+    for (const [field, value] of Object.entries(numericFields)) {
+      const numValue = parseFloat(value);
+      if (isNaN(numValue) || numValue < 0) {
+        return NextResponse.json(
+          { error: `Invalid ${field} value` },
+          { status: 400 }
+        );
+      }
+      if (numValue > maxValues[field]) {
+        return NextResponse.json(
+          { error: `${field} value cannot exceed ${maxValues[field]}` },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (name.trim().length === 0 || name.trim().length > 100) {
+      return NextResponse.json(
+        { error: "Name must be between 1 and 100 characters" },
+        { status: 400 }
+      );
+    }
+
+    // Validate meal type
+    const validMealTypes = ["breakfast", "lunch", "dinner", "snack"];
+    if (!validMealTypes.includes(mealType.toLowerCase())) {
+      return NextResponse.json(
+        {
+          error:
+            "Invalid meal type. Must be one of: breakfast, lunch, dinner, snack",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validate description if provided
+    if (description && description.trim().length > 500) {
+      return NextResponse.json(
+        { error: "Description must be less than 500 characters" },
+        { status: 400 }
+      );
+    }
+
+    // Validate ingredients if provided
+    if (ingredients && !Array.isArray(ingredients)) {
+      return NextResponse.json(
+        { error: "Ingredients must be an array" },
+        { status: 400 }
+      );
+    }
+
+    if (ingredients && ingredients.length > 50) {
+      return NextResponse.json(
+        { error: "Ingredients list cannot exceed 50 items" },
+        { status: 400 }
+      );
+    }
+
+    if (ingredients) {
+      for (const ingredient of ingredients) {
+        if (
+          typeof ingredient !== "string" ||
+          ingredient.trim().length === 0 ||
+          ingredient.trim().length > 100
+        ) {
+          return NextResponse.json(
+            {
+              error:
+                "Each ingredient must be a non-empty string with maximum 100 characters",
+            },
+            { status: 400 }
+          );
+        }
+      }
     }
 
     // Check if this exact meal already exists for this client
@@ -188,6 +294,14 @@ export async function DELETE(req) {
     if (!customMealId) {
       return NextResponse.json(
         { error: "Custom meal ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Validate ID format (assuming it's a UUID or similar)
+    if (typeof customMealId !== "string" || customMealId.trim().length === 0) {
+      return NextResponse.json(
+        { error: "Invalid custom meal ID format" },
         { status: 400 }
       );
     }
