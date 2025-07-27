@@ -24,6 +24,8 @@ export const Modal = memo(
     footerBorder = true,
     size = "default", // default, large, small
     isNested = false, // New prop to handle nested modals
+    hideButtons = false, // Added prop to handle case when buttons should be hidden
+    className = "", // Added prop for additional styling
   }) => {
     // Handle ESC key press and body scroll lock
     useEffect(() => {
@@ -92,7 +94,7 @@ export const Modal = memo(
         }}
       >
         <div
-          className={`animate-modalFadeIn relative max-h-screen sm:max-h-[90vh] rounded-none sm:rounded-xl border-0 sm:border border-[#333] bg-[#121212]/95 shadow-2xl flex flex-col ${getMaxWidth()}`}
+          className={`animate-modalFadeIn relative max-h-screen sm:max-h-[90vh] rounded-none sm:rounded-xl border-0 sm:border border-[#333] bg-[#121212]/95 shadow-2xl flex flex-col ${getMaxWidth()} ${className}`}
           style={{
             animation: "modalFadeIn 0.3s ease-out",
             boxShadow: "0 15px 40px -10px rgba(255,107,0,0.3)",
@@ -121,13 +123,13 @@ export const Modal = memo(
           {/* Modal content - with scrolling */}
           <div className="flex-1 overflow-y-auto">
             <div className="p-4 sm:p-6">
-              <div className="mb-4">{message}</div>
+              {message && <div className="mb-4">{message}</div>}
               {children}
             </div>
           </div>
 
           {/* Footer with action buttons */}
-          {footerButtons && (
+          {footerButtons && !hideButtons && (
             <div
               className={`flex-shrink-0${
                 footerBorder ? " border-t border-[#333]" : ""
@@ -170,3 +172,5 @@ export const Modal = memo(
     );
   }
 );
+
+Modal.displayName = "Modal";

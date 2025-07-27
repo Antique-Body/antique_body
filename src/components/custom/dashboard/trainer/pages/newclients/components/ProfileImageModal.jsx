@@ -15,7 +15,7 @@ export const ProfileImageModal = ({ isOpen, onClose, profileImage }) => {
         <div className="flex items-center gap-2">
           <Icon
             icon="mdi:account"
-            className="text-[#3E92CC]"
+            className="text-[#FF7800]"
             width={24}
             height={24}
           />
@@ -27,7 +27,7 @@ export const ProfileImageModal = ({ isOpen, onClose, profileImage }) => {
       <div className="flex justify-center items-center w-full h-[70vh]">
         {profileImage.url ? (
           <div
-            className="relative rounded-2xl overflow-hidden border-4 border-blue-400/30 shadow-2xl bg-zinc-900/70"
+            className="relative rounded-2xl overflow-hidden border-4 border-[#FF7800]/30 shadow-2xl bg-zinc-900/70"
             style={{
               width: "min(600px, 90vw)",
               height: "min(600px, 70vh)",
@@ -43,7 +43,7 @@ export const ProfileImageModal = ({ isOpen, onClose, profileImage }) => {
             />
           </div>
         ) : (
-          <div className="flex h-[300px] w-[300px] items-center justify-center bg-gradient-to-br from-[#3E92CC] to-[#2D7EB8] rounded-2xl border-4 border-blue-400/30 shadow-2xl">
+          <div className="flex h-[300px] w-[300px] items-center justify-center bg-gradient-to-br from-[#FF7800] to-[#FF9A00] rounded-2xl border-4 border-[#FF7800]/30 shadow-2xl">
             <Icon icon="mdi:account" width={128} height={128} color="white" />
           </div>
         )}
