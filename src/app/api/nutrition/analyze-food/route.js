@@ -1,5 +1,3 @@
-// app/api/nutrition/analyze-food/route.js
-
 import { NextResponse } from "next/server";
 
 import { foodAnalysisService } from "@/app/api/users/services";
