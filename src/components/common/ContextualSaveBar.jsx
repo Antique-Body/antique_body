@@ -2,14 +2,14 @@ import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-export default function ContextualSaveBar({
+export const ContextualSaveBar = ({
   visible,
   onSave,
   onDiscard,
   isShaking,
   isSaving,
   message = "You have unsaved changes",
-}) {
+}) => {
   const router = useRouter();
   const [isInternalShaking, setIsInternalShaking] = useState(false);
 
@@ -305,4 +305,4 @@ export default function ContextualSaveBar({
       `}</style>
     </div>
   );
-}
+};
