@@ -1,4 +1,5 @@
 import { Icon } from "@iconify/react";
+
 import { Button } from "@/components/common/Button";
 
 export const LoadingState = () => (
