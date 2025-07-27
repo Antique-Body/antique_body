@@ -132,10 +132,6 @@ function getOnboardingRedirect(role, token, pathname) {
 }
 
 export async function middleware(request) {
-  if (process.env.NODE_ENV_TYPE === "production") {
-    return NextResponse.next();
-  }
-
   const { pathname } = request.nextUrl;
 
   const token = await getToken({
