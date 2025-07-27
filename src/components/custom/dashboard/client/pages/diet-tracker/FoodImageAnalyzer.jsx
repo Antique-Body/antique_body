@@ -197,7 +197,7 @@ export const FoodImageAnalyzer = ({
 
               <button
                 onClick={() => setManualInput(true)}
-                className="mt-6 text-zinc-400 hover:text-[#FF6B00] text-sm underline transition-colors duration-200 flex items-center gap-1"
+                className="mt-6 text-zinc-400 hover:text-[#FF6B00] text-md underline transition-colors duration-200 flex items-center gap-1"
               >
                 <Icon icon="mdi:keyboard" className="w-4 h-4" />
                 Can't take a photo? Enter manually instead

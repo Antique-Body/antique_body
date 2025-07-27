@@ -3,7 +3,6 @@
 import { Icon } from "@iconify/react";
 import { useState, useEffect, useCallback } from "react";
 
-
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { Modal } from "@/components/common/Modal";
@@ -266,6 +265,12 @@ export const AddSnackModal = ({ isOpen, onClose, onSave, selectedDate }) => {
 
   const modalButtons = getModalButtons();
 
+  // Handle cancellation from FoodImageAnalyzer
+  const handleAiCancel = useCallback(() => {
+    setAiAnalysis(null);
+    setAiError(null);
+  }, []);
+
   // Memoize the onAnalyze callback to prevent infinite re-renders
   const handleOnAnalyze = useCallback((getDataFn, setManualInputFn) => {
     setAiGetAnalysisData(() => getDataFn);
@@ -284,7 +289,7 @@ export const AddSnackModal = ({ isOpen, onClose, onSave, selectedDate }) => {
       ingredients: "",
     });
     setErrors({});
-    setActiveTab("create");
+    setActiveTab("ai-scanner");
     setAiAnalysis(null);
     setAiError(null);
     setIsAnalyzing(false);
@@ -347,6 +352,30 @@ export const AddSnackModal = ({ isOpen, onClose, onSave, selectedDate }) => {
       <div className="space-y-6 max-w-full overflow-hidden">
         {/* Tab Navigation */}
         <div className="flex gap-1 p-1 bg-zinc-800/40 rounded-lg border border-zinc-700/50">
+          {/* AI Scanner Tab - First and promoted */}
+          <button
+            onClick={() => setActiveTab("ai-scanner")}
+            className={`relative flex-1 flex items-center justify-center gap-2 px-4 py-4 rounded-lg text-sm font-semibold transition-all duration-300 ${
+              activeTab === "ai-scanner"
+                ? "bg-gradient-to-r from-[#FF6B00] to-[#FF8B20] text-white shadow-xl transform scale-105"
+                : "text-zinc-300 hover:text-white hover:bg-zinc-700/60"
+            }`}
+          >
+            <div className="relative">
+              <Icon icon="mdi:brain" className="w-5 h-5" />
+              {activeTab === "ai-scanner" && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full flex items-center justify-center">
+                  <Icon icon="mdi:star" className="w-2 h-2 text-[#FF6B00]" />
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col items-start">
+              <span>AI Scanner</span>
+            </div>
+            {activeTab === "ai-scanner" && (
+              <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-white/0 via-white/10 to-white/0 opacity-50" />
+            )}
+          </button>
           <button
             onClick={() => setActiveTab("create")}
             className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
@@ -358,17 +387,7 @@ export const AddSnackModal = ({ isOpen, onClose, onSave, selectedDate }) => {
             <Icon icon="mdi:plus" className="w-4 h-4" />
             Add New
           </button>
-          <button
-            onClick={() => setActiveTab("ai-scanner")}
-            className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
-              activeTab === "ai-scanner"
-                ? "bg-[#FF6B00] text-white shadow-lg"
-                : "text-zinc-400 hover:text-white hover:bg-zinc-700/50"
-            }`}
-          >
-            <Icon icon="mdi:brain" className="w-4 h-4" />
-            AI Scanner
-          </button>
+
           <button
             onClick={() => setActiveTab("history")}
             className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
@@ -613,6 +632,7 @@ export const AddSnackModal = ({ isOpen, onClose, onSave, selectedDate }) => {
                 minute: "2-digit",
               })}
               onAnalyze={handleOnAnalyze}
+              onCancel={handleAiCancel}
               isAnalyzing={isAnalyzing}
               analysis={aiAnalysis}
               error={aiError}

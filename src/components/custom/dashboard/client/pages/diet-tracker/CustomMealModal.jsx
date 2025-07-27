@@ -400,11 +400,6 @@ export const CustomMealModal = ({
             </div>
             <div className="flex flex-col items-start">
               <span>AI Scanner</span>
-              {activeTab !== "ai-scanner" && (
-                <span className="text-xs text-[#FF6B00] font-normal">
-                  ✨ Try AI!
-                </span>
-              )}
             </div>
             {activeTab === "ai-scanner" && (
               <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-white/0 via-white/10 to-white/0 opacity-50" />
