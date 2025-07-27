@@ -240,7 +240,11 @@ export async function GET(request) {
 
       // If search is provided, add client name search condition
       if (search && search.trim() !== "") {
-        const searchTerms = search.toLowerCase().split(" ");
+        const searchTerms = search
+          .trim()
+          .toLowerCase()
+          .split(/\s+/)
+          .filter((term) => term.length > 0);
 
         whereClause = {
           ...whereClause,
@@ -251,6 +255,8 @@ export async function GET(request) {
                   OR: [
                     { firstName: { contains: term } },
                     { lastName: { contains: term } },
+                    { firstName: { contains: term, mode: "insensitive" } },
+                    { lastName: { contains: term, mode: "insensitive" } },
                   ],
                 })),
               ],

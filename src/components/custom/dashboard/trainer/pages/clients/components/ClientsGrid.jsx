@@ -1,8 +1,9 @@
 import { Icon } from "@iconify/react";
 
+import { Button } from "@/components/common/Button";
+
 import { ClientCard } from "./ClientCard";
 
-import { Button } from "@/components/common/Button";
 
 export const ClientsGrid = ({
   clients,

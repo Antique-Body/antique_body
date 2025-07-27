@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 
+
+import { auth } from "#/auth";
+import { mockNutritionPlan as mockPlanData } from "@/components/custom/dashboard/client/pages/diet-tracker/mockNutritionPlan";
+import prisma from "@/lib/prisma";
+
 import {
   getActiveDietPlan,
   startDietPlan,
@@ -7,10 +12,6 @@ import {
   getDietPlanStats,
   getNextMeal,
 } from "../../services/dietTrackerService";
-
-import { auth } from "#/auth";
-import { mockNutritionPlan as mockPlanData } from "@/components/custom/dashboard/client/pages/diet-tracker/mockNutritionPlan";
-import prisma from "@/lib/prisma";
 // Import the mock nutrition plan directly
 
 // GET: Get current diet plan and progress for client

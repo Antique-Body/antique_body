@@ -84,6 +84,8 @@ export const ClientDetailsModal = ({
               {/* Profile Image */}
               <div
                 className="relative flex-shrink-0 cursor-pointer"
+                role="button"
+                aria-label="View client profile"
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -129,9 +131,9 @@ export const ClientDetailsModal = ({
                       "male"
                         ? "bg-gradient-to-br from-[#FF7800] to-[#FF9A00]"
                         : clientDetails.client.clientProfile.gender.toLowerCase() ===
-                          "female"
-                        ? "bg-gradient-to-br from-[#FF9A00] to-[#FF7800]"
-                        : "bg-gradient-to-br from-zinc-500 to-zinc-600"
+                            "female"
+                          ? "bg-gradient-to-br from-[#FF9A00] to-[#FF7800]"
+                          : "bg-gradient-to-br from-zinc-500 to-zinc-600"
                     }`}
                   >
                     <Icon
@@ -140,9 +142,9 @@ export const ClientDetailsModal = ({
                         "male"
                           ? "mdi:gender-male"
                           : clientDetails.client.clientProfile.gender.toLowerCase() ===
-                            "female"
-                          ? "mdi:gender-female"
-                          : "mdi:help"
+                              "female"
+                            ? "mdi:gender-female"
+                            : "mdi:help"
                       }
                       width={12}
                       height={12}

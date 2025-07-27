@@ -4,10 +4,11 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
 
-import { AIImageScanner } from "./AIImageScanner";
 
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
+
+import { AIImageScanner } from "./AIImageScanner";
 
 export const FoodImageAnalyzer = ({
   mealName,

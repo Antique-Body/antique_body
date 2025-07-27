@@ -3,6 +3,8 @@
 import { Icon } from "@iconify/react";
 import { useState, useMemo } from "react";
 
+import { Button } from "@/components/common/Button";
+
 import { AddSnackModal } from "./AddSnackModal";
 import { CustomMealModal } from "./CustomMealModal";
 import { DayNavigation } from "./DayNavigation";
@@ -11,7 +13,6 @@ import { NewMealCard } from "./NewMealCard";
 import { NutritionSummary } from "./NutritionSummary";
 import { PlanHeader } from "./PlanHeader";
 
-import { Button } from "@/components/common/Button";
 
 export const ActiveDietPlan = ({
   activePlan,

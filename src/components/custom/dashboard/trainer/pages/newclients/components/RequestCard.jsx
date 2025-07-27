@@ -2,7 +2,7 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 
 import { Button } from "@/components/common/Button";
-import { calculateAge } from "@/utils/dateUtils";
+import { calculateAge, formatDate } from "@/utils/dateUtils";
 
 export const RequestCard = ({
   request,
@@ -15,53 +15,43 @@ export const RequestCard = ({
   const isMale = clientGender === "male";
   const isFemale = clientGender === "female";
 
-  // Format date
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
   // Gender-based styling with app colors
   const genderStyles = {
     background: isMale
       ? "bg-gradient-to-r from-zinc-900/95 via-[#FF7800]/5 to-zinc-900/95"
       : isFemale
-      ? "bg-gradient-to-r from-zinc-900/95 via-[#FF9A00]/5 to-zinc-900/95"
-      : "bg-gradient-to-r from-zinc-900/95 via-zinc-800/90 to-zinc-900/95",
+        ? "bg-gradient-to-r from-zinc-900/95 via-[#FF9A00]/5 to-zinc-900/95"
+        : "bg-gradient-to-r from-zinc-900/95 via-zinc-800/90 to-zinc-900/95",
     border: isMale
       ? "border-[#FF7800]/30 hover:border-[#FF7800]/50"
       : isFemale
-      ? "border-[#FF9A00]/30 hover:border-[#FF9A00]/50"
-      : "border-zinc-700/50 hover:border-[#FF7800]/70",
+        ? "border-[#FF9A00]/30 hover:border-[#FF9A00]/50"
+        : "border-zinc-700/50 hover:border-[#FF7800]/70",
     shadow: isMale
       ? "hover:shadow-[#FF7800]/10"
       : isFemale
-      ? "hover:shadow-[#FF9A00]/10"
-      : "hover:shadow-[#FF7800]/20",
+        ? "hover:shadow-[#FF9A00]/10"
+        : "hover:shadow-[#FF7800]/20",
     profileRing: isMale
       ? "ring-[#FF7800]/40"
       : isFemale
-      ? "ring-[#FF9A00]/40"
-      : "ring-white/10",
+        ? "ring-[#FF9A00]/40"
+        : "ring-white/10",
     genderIcon: isMale
       ? "mdi:gender-male"
       : isFemale
-      ? "mdi:gender-female"
-      : null,
+        ? "mdi:gender-female"
+        : null,
     genderColor: isMale
       ? "text-[#FF7800]"
       : isFemale
-      ? "text-[#FF9A00]"
-      : "text-gray-400",
+        ? "text-[#FF9A00]"
+        : "text-gray-400",
     accent: isMale
       ? "from-[#FF7800]/10 to-[#FF7800]/10"
       : isFemale
-      ? "from-[#FF9A00]/10 to-[#FF9A00]/10"
-      : "from-[#FF7800]/10 to-[#FF7800]/10",
+        ? "from-[#FF9A00]/10 to-[#FF9A00]/10"
+        : "from-[#FF7800]/10 to-[#FF7800]/10",
   };
 
   return (
@@ -80,9 +70,10 @@ export const RequestCard = ({
         {/* Profile Section */}
         <div className="flex items-center gap-3 min-w-0 flex-1">
           {/* Profile Image */}
-          <div
+          <button
             className="relative cursor-pointer group/image flex-shrink-0"
             tabIndex="0"
+            type="button"
             role="button"
             aria-label={`View profile image of ${request.client.clientProfile.firstName} ${request.client.clientProfile.lastName}`}
             onClick={() =>
@@ -91,15 +82,6 @@ export const RequestCard = ({
                 `${request.client.clientProfile.firstName} ${request.client.clientProfile.lastName}`
               )
             }
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                onProfileImageClick(
-                  request.client.clientProfile.profileImage,
-                  `${request.client.clientProfile.firstName} ${request.client.clientProfile.lastName}`
-                );
-              }
-            }}
           >
             <div
               className={`relative h-12 w-12 lg:h-14 lg:w-14 overflow-hidden rounded-xl ring-2 ring-white/10 group-hover/image:${genderStyles.profileRing} shadow-md transition-all duration-300`}
@@ -131,7 +113,7 @@ export const RequestCard = ({
                 height={14}
               />
             </div>
-          </div>
+          </button>
 
           {/* Client Info */}
           <div className="flex-1 min-w-0">
