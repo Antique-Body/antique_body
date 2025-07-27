@@ -109,46 +109,15 @@ export async function POST(req) {
       ingredients,
     } = body;
 
-    // Validate required fields
-    if (
-      !name ||
-      !mealType ||
-      calories === undefined ||
-      protein === undefined ||
-      carbs === undefined ||
-      fat === undefined
-    ) {
+    // Validate required fields - only name and mealType are required
+    if (!name || !mealType) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Name and meal type are required" },
         { status: 400 }
       );
     }
 
-    // Validate data types and ranges
-    const numericFields = { calories, protein, carbs, fat };
-    const maxValues = {
-      calories: 5000,
-      protein: 500,
-      carbs: 1000,
-      fat: 500,
-    };
-
-    for (const [field, value] of Object.entries(numericFields)) {
-      const numValue = parseFloat(value);
-      if (isNaN(numValue) || numValue < 0) {
-        return NextResponse.json(
-          { error: `Invalid ${field} value` },
-          { status: 400 }
-        );
-      }
-      if (numValue > maxValues[field]) {
-        return NextResponse.json(
-          { error: `${field} value cannot exceed ${maxValues[field]}` },
-          { status: 400 }
-        );
-      }
-    }
-
+    // Validate name
     if (name.trim().length === 0 || name.trim().length > 100) {
       return NextResponse.json(
         { error: "Name must be between 1 and 100 characters" },
@@ -157,12 +126,21 @@ export async function POST(req) {
     }
 
     // Validate meal type
-    const validMealTypes = ["breakfast", "lunch", "dinner", "snack"];
+    const validMealTypes = [
+      "breakfast",
+      "lunch",
+      "dinner",
+      "snack",
+      "drink",
+      "dessert",
+      "supplement",
+      "other",
+    ];
     if (!validMealTypes.includes(mealType.toLowerCase())) {
       return NextResponse.json(
         {
           error:
-            "Invalid meal type. Must be one of: breakfast, lunch, dinner, snack",
+            "Invalid meal type. Must be one of: breakfast, lunch, dinner, snack, drink, dessert, supplement, other",
         },
         { status: 400 }
       );
@@ -209,16 +187,22 @@ export async function POST(req) {
       }
     }
 
+    // Ensure nutritional values are numbers or default to 0
+    const processedCalories = parseFloat(calories) || 0;
+    const processedProtein = parseFloat(protein) || 0;
+    const processedCarbs = parseFloat(carbs) || 0;
+    const processedFat = parseFloat(fat) || 0;
+
     // Check if this exact meal already exists for this client
     const existingMeal = await prisma.customMeal.findFirst({
       where: {
         clientId: clientInfo.id,
         name: name.trim(),
         mealType: mealType.toLowerCase(),
-        calories: parseFloat(calories),
-        protein: parseFloat(protein),
-        carbs: parseFloat(carbs),
-        fat: parseFloat(fat),
+        calories: processedCalories,
+        protein: processedProtein,
+        carbs: processedCarbs,
+        fat: processedFat,
       },
     });
 
@@ -246,10 +230,10 @@ export async function POST(req) {
         name: name.trim(),
         description: description?.trim() || null,
         mealType: mealType.toLowerCase(),
-        calories: parseFloat(calories),
-        protein: parseFloat(protein),
-        carbs: parseFloat(carbs),
-        fat: parseFloat(fat),
+        calories: processedCalories,
+        protein: processedProtein,
+        carbs: processedCarbs,
+        fat: processedFat,
         ingredients: ingredients || [],
       },
     });

@@ -3,29 +3,60 @@
 import { Icon } from "@iconify/react";
 import { useEffect, useState } from "react";
 
+// Animation and timing constants
+const SCAN_SPEED = 1; // percentage per frame
+const PROGRESS_INTERVAL = 80; // milliseconds
+const PROGRESS_INCREMENT = 1; // percentage per update
+const MAX_PROGRESS = 100; // maximum progress percentage
+const MIN_PROGRESS = 0; // minimum progress percentage
+
+// Detection constants
+const DETECTION_POINTS_COUNT = 5; // number of detection points to generate
+const DETECTION_THRESHOLD = 30; // progress percentage to start detection
+const DETECTION_INTERVAL = 15; // progress percentage between detections
+const MIN_CONFIDENCE = 75; // minimum confidence percentage
+const MAX_CONFIDENCE = 100; // maximum confidence percentage
+
+// Detection point positioning
+const MIN_POSITION = 20; // minimum position percentage
+const MAX_POSITION_RANGE = 60; // position range percentage
+
+// Phase timing constants
+const PHASE_DELAYS = {
+  detecting: 1000, // milliseconds
+  analyzing: 3000, // milliseconds
+  processing: 5000, // milliseconds
+};
+
+// UI constants
+const ANIMATION_DELAY_BASE = 200; // milliseconds
+const BOUNCE_DOTS_COUNT = 3; // number of bouncing dots
+
 export const AIImageScanner = ({ isScanning }) => {
-  const [scanPosition, setScanPosition] = useState(0);
+  const [scanPosition, setScanPosition] = useState(MIN_PROGRESS);
   const [scanDirection, setScanDirection] = useState("down");
-  const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [analysisProgress, setAnalysisProgress] = useState(MIN_PROGRESS);
   const [currentPhase, setCurrentPhase] = useState("scanning");
   const [detectionPoints, setDetectionPoints] = useState([]);
 
   useEffect(() => {
     if (isScanning) {
-      // Generate 4-5 detection points
-      const points = Array.from({ length: 5 }, (_, i) => ({
+      // Generate detection points
+      const points = Array.from({ length: DETECTION_POINTS_COUNT }, (_, i) => ({
         id: i,
-        x: 20 + Math.random() * 60,
-        y: 20 + Math.random() * 60,
+        x: MIN_POSITION + Math.random() * MAX_POSITION_RANGE,
+        y: MIN_POSITION + Math.random() * MAX_POSITION_RANGE,
         detected: false,
-        confidence: Math.floor(75 + Math.random() * 25),
+        confidence: Math.floor(
+          MIN_CONFIDENCE + Math.random() * (MAX_CONFIDENCE - MIN_CONFIDENCE)
+        ),
       }));
       setDetectionPoints(points);
 
       // Analysis phases
-      setTimeout(() => setCurrentPhase("detecting"), 1000);
-      setTimeout(() => setCurrentPhase("analyzing"), 3000);
-      setTimeout(() => setCurrentPhase("processing"), 5000);
+      setTimeout(() => setCurrentPhase("detecting"), PHASE_DELAYS.detecting);
+      setTimeout(() => setCurrentPhase("analyzing"), PHASE_DELAYS.analyzing);
+      setTimeout(() => setCurrentPhase("processing"), PHASE_DELAYS.processing);
     }
   }, [isScanning]);
 
@@ -37,14 +68,16 @@ export const AIImageScanner = ({ isScanning }) => {
       // Scan line animation
       const animate = () => {
         setScanPosition((prev) => {
-          if (prev >= 100 && scanDirection === "down") {
+          if (prev >= MAX_PROGRESS && scanDirection === "down") {
             setScanDirection("up");
-            return 100;
-          } else if (prev <= 0 && scanDirection === "up") {
+            return MAX_PROGRESS;
+          } else if (prev <= MIN_PROGRESS && scanDirection === "up") {
             setScanDirection("down");
-            return 0;
+            return MIN_PROGRESS;
           }
-          return scanDirection === "down" ? prev + 1 : prev - 1;
+          return scanDirection === "down"
+            ? prev + SCAN_SPEED
+            : prev - SCAN_SPEED;
         });
         animationFrame = requestAnimationFrame(animate);
       };
@@ -52,23 +85,25 @@ export const AIImageScanner = ({ isScanning }) => {
       // Progress animation
       const updateProgress = () => {
         setAnalysisProgress((prev) => {
-          if (prev >= 100) return 100;
-          return prev + 1;
+          if (prev >= MAX_PROGRESS) return MAX_PROGRESS;
+          return prev + PROGRESS_INCREMENT;
         });
 
         // Activate detection points as progress increases
-        if (analysisProgress > 30) {
+        if (analysisProgress > DETECTION_THRESHOLD) {
           setDetectionPoints((prev) =>
             prev.map((point, index) => ({
               ...point,
-              detected: analysisProgress > 30 + index * 15,
+              detected:
+                analysisProgress >
+                DETECTION_THRESHOLD + index * DETECTION_INTERVAL,
             }))
           );
         }
       };
 
       animationFrame = requestAnimationFrame(animate);
-      progressTimer = setInterval(updateProgress, 80);
+      progressTimer = setInterval(updateProgress, PROGRESS_INTERVAL);
     }
 
     return () => {
@@ -186,11 +221,11 @@ export const AIImageScanner = ({ isScanning }) => {
               </span>
 
               <div className="flex space-x-1">
-                {Array.from({ length: 3 }).map((_, i) => (
+                {Array.from({ length: BOUNCE_DOTS_COUNT }).map((_, i) => (
                   <div
                     key={i}
                     className="w-1 h-1 bg-[#FF6B00] rounded-full animate-bounce"
-                    style={{ animationDelay: `${i * 200}ms` }}
+                    style={{ animationDelay: `${i * ANIMATION_DELAY_BASE}ms` }}
                   />
                 ))}
               </div>

@@ -654,7 +654,6 @@ model CustomMeal {
   @@index([usageCount])
   @@index([clientId, mealType])
   @@index([clientId, lastUsed])
-  @@index([clientId, name, mealType, calories, protein, carbs, fat])
 }
 
 

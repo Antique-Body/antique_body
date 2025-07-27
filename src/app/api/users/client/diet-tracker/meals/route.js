@@ -71,70 +71,40 @@ export async function POST(req) {
       );
     }
 
-    // Validate custom meal data
+    // Validate custom meal data - only name is required
     if (
       !customMeal.name ||
       typeof customMeal.name !== "string" ||
-      customMeal.name.trim() === "" ||
-      typeof customMeal.calories !== "number" ||
-      customMeal.calories < 0 ||
-      typeof customMeal.protein !== "number" ||
-      customMeal.protein < 0 ||
-      typeof customMeal.carbs !== "number" ||
-      customMeal.carbs < 0 ||
-      typeof customMeal.fat !== "number" ||
-      customMeal.fat < 0
+      customMeal.name.trim() === ""
     ) {
       return NextResponse.json(
         {
-          error:
-            "Custom meal must include valid name (non-empty string) and non-negative numeric values for calories, protein, carbs, and fat",
+          error: "Custom meal must include a valid name (non-empty string)",
         },
         { status: 400 }
       );
     }
 
-    // Validate reasonable upper bounds
-    const maxValues = {
-      calories: 5000,
-      protein: 500,
-      carbs: 1000,
-      fat: 500,
+    // Ensure nutritional values are numbers or default to 0
+    const processedMeal = {
+      ...customMeal,
+      name: customMeal.name.trim(),
+      description:
+        customMeal.description?.trim() || `Custom ${customMeal.name.trim()}`,
+      calories: parseFloat(customMeal.calories) || 0,
+      protein: parseFloat(customMeal.protein) || 0,
+      carbs: parseFloat(customMeal.carbs) || 0,
+      fat: parseFloat(customMeal.fat) || 0,
+      ingredients: Array.isArray(customMeal.ingredients)
+        ? customMeal.ingredients
+        : [],
     };
-
-    if (customMeal.calories > maxValues.calories) {
-      return NextResponse.json(
-        { error: `Calories cannot exceed ${maxValues.calories}` },
-        { status: 400 }
-      );
-    }
-
-    if (customMeal.protein > maxValues.protein) {
-      return NextResponse.json(
-        { error: `Protein cannot exceed ${maxValues.protein}g` },
-        { status: 400 }
-      );
-    }
-
-    if (customMeal.carbs > maxValues.carbs) {
-      return NextResponse.json(
-        { error: `Carbs cannot exceed ${maxValues.carbs}g` },
-        { status: 400 }
-      );
-    }
-
-    if (customMeal.fat > maxValues.fat) {
-      return NextResponse.json(
-        { error: `Fat cannot exceed ${maxValues.fat}g` },
-        { status: 400 }
-      );
-    }
 
     try {
       const newSnackLog = await addCustomMealToDay(
         dietPlanAssignmentId,
         date,
-        customMeal
+        processedMeal
       );
 
       return NextResponse.json({

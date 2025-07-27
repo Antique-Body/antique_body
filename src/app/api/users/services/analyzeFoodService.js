@@ -575,7 +575,14 @@ async function processManualInput(manualData) {
   }
 
   // Adjust for serving size
-  const servingRatio = parseFloat(servingSize) / nutritionData.servingWeight;
+  const servingWeight = nutritionData.servingWeight;
+  if (!servingWeight || servingWeight <= 0) {
+    throw new Error(
+      "Invalid serving weight data - cannot calculate serving ratio"
+    );
+  }
+
+  const servingRatio = parseFloat(servingSize) / servingWeight;
 
   return {
     success: true,

@@ -11,3 +11,4 @@ export { useTrainerRegistration } from "./useTrainerRegistration";
 export { useTrainingPlanForm } from "./useTrainingPlanForm";
 export { useVerificationCode } from "./useVerificationCode";
 export { useNutritionPlanForm } from "./useNutritionPlanForm";
+export { useAIFoodAnalysis } from "./useAIFoodAnalysis";
