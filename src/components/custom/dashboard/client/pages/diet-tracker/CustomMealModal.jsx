@@ -3,7 +3,6 @@
 import { Icon } from "@iconify/react";
 import { useState, useEffect, useCallback } from "react";
 
-
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { Modal } from "@/components/common/Modal";
@@ -17,7 +16,7 @@ export const CustomMealModal = ({
   mealName,
   mealTime,
 }) => {
-  const [activeTab, setActiveTab] = useState("create"); // "create", "history", or "ai-scanner"
+  const [activeTab, setActiveTab] = useState("ai-scanner"); // AI Scanner first!
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -220,12 +219,11 @@ export const CustomMealModal = ({
 
       const data = await response.json();
 
-      if (!response.ok) {
+      if (!response.ok || !data.success) {
         if (data.error?.includes("manual input")) {
           if (aiSetManualInput) aiSetManualInput(true);
-          throw new Error(data.error);
+          throw new Error(data.error || "Failed to analyze image");
         }
-        throw new Error(data.error || "Failed to analyze image");
       }
 
       setAiAnalysis(data);
@@ -243,6 +241,8 @@ export const CustomMealModal = ({
     if (!aiAnalysis) return;
 
     try {
+      setIsSubmitting(true);
+
       const customMealData = {
         name: aiAnalysis.foodName,
         description:
@@ -266,6 +266,8 @@ export const CustomMealModal = ({
     } catch (error) {
       console.error("Error saving AI analyzed meal:", error);
       setAiError("Failed to save meal. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -279,9 +281,9 @@ export const CustomMealModal = ({
         };
       } else {
         return {
-          primaryText: "Save Meal",
+          primaryText: isSubmitting ? "Saving..." : "Save Meal",
           primaryAction: handleAiSave,
-          primaryDisabled: false,
+          primaryDisabled: isSubmitting,
         };
       }
     } else if (activeTab === "create") {
@@ -300,6 +302,12 @@ export const CustomMealModal = ({
 
   const modalButtons = getModalButtons();
 
+  // Handle cancellation from FoodImageAnalyzer
+  const handleAiCancel = useCallback(() => {
+    setAiAnalysis(null);
+    setAiError(null);
+  }, []);
+
   // Memoize the onAnalyze callback to prevent infinite re-renders
   const handleOnAnalyze = useCallback((getDataFn, setManualInputFn) => {
     setAiGetAnalysisData(() => getDataFn);
@@ -317,7 +325,7 @@ export const CustomMealModal = ({
       ingredients: "",
     });
     setErrors({});
-    setActiveTab("create");
+    setActiveTab("ai-scanner"); // Reset to AI scanner
     setAiAnalysis(null);
     setAiError(null);
     setIsAnalyzing(false);
@@ -371,35 +379,55 @@ export const CustomMealModal = ({
       secondaryButtonAction={handleClose}
     >
       <div className="space-y-6 max-w-full overflow-hidden">
-        {/* Tab Navigation */}
-        <div className="flex gap-1 p-1 bg-zinc-800/40 rounded-lg border border-zinc-700/50">
+        {/* Enhanced Tab Navigation */}
+        <div className="flex gap-1 p-1 bg-gradient-to-r from-zinc-800/60 to-zinc-800/40 rounded-xl border border-zinc-700/50 shadow-lg">
+          {/* AI Scanner Tab - First and promoted */}
+          <button
+            onClick={() => setActiveTab("ai-scanner")}
+            className={`relative flex-1 flex items-center justify-center gap-2 px-4 py-4 rounded-lg text-sm font-semibold transition-all duration-300 ${
+              activeTab === "ai-scanner"
+                ? "bg-gradient-to-r from-[#FF6B00] to-[#FF8B20] text-white shadow-xl transform scale-105"
+                : "text-zinc-300 hover:text-white hover:bg-zinc-700/60"
+            }`}
+          >
+            <div className="relative">
+              <Icon icon="mdi:brain" className="w-5 h-5" />
+              {activeTab === "ai-scanner" && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full flex items-center justify-center">
+                  <Icon icon="mdi:star" className="w-2 h-2 text-[#FF6B00]" />
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col items-start">
+              <span>AI Scanner</span>
+              {activeTab !== "ai-scanner" && (
+                <span className="text-xs text-[#FF6B00] font-normal">
+                  ✨ Try AI!
+                </span>
+              )}
+            </div>
+            {activeTab === "ai-scanner" && (
+              <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-white/0 via-white/10 to-white/0 opacity-50" />
+            )}
+          </button>
+
           <button
             onClick={() => setActiveTab("create")}
-            className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
+            className={`flex-1 flex items-center justify-center gap-2 px-3 py-4 rounded-lg text-sm font-medium transition-all duration-200 ${
               activeTab === "create"
-                ? "bg-[#FF6B00] text-white shadow-lg"
+                ? "bg-gradient-to-r from-zinc-600 to-zinc-700 text-white shadow-lg"
                 : "text-zinc-400 hover:text-white hover:bg-zinc-700/50"
             }`}
           >
             <Icon icon="mdi:plus" className="w-4 h-4" />
-            Create New
+            Create Manual
           </button>
-          <button
-            onClick={() => setActiveTab("ai-scanner")}
-            className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
-              activeTab === "ai-scanner"
-                ? "bg-[#FF6B00] text-white shadow-lg"
-                : "text-zinc-400 hover:text-white hover:bg-zinc-700/50"
-            }`}
-          >
-            <Icon icon="mdi:brain" className="w-4 h-4" />
-            AI Scanner
-          </button>
+
           <button
             onClick={() => setActiveTab("history")}
-            className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
+            className={`flex-1 flex items-center justify-center gap-2 px-3 py-4 rounded-lg text-sm font-medium transition-all duration-200 ${
               activeTab === "history"
-                ? "bg-[#FF6B00] text-white shadow-lg"
+                ? "bg-gradient-to-r from-zinc-600 to-zinc-700 text-white shadow-lg"
                 : "text-zinc-400 hover:text-white hover:bg-zinc-700/50"
             }`}
           >
@@ -408,9 +436,41 @@ export const CustomMealModal = ({
           </button>
         </div>
 
+        {/* AI Scanner Tab - First tab */}
+        {activeTab === "ai-scanner" && (
+          <div className="space-y-4">
+            <FoodImageAnalyzer
+              mealName={mealName}
+              mealTime={mealTime}
+              onAnalyze={handleOnAnalyze}
+              onCancel={handleAiCancel}
+              isAnalyzing={isAnalyzing}
+              analysis={aiAnalysis}
+              error={aiError}
+              setError={setAiError}
+            />
+          </div>
+        )}
+
         {/* Create New Meal Tab */}
         {activeTab === "create" && (
           <div className="space-y-6 max-w-full">
+            <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
+              <div className="flex items-center gap-3">
+                <Icon
+                  icon="mdi:information"
+                  className="w-5 h-5 text-blue-400"
+                />
+                <div>
+                  <p className="text-blue-300 text-sm">
+                    <span className="font-semibold">Tip:</span> Try our AI
+                    Scanner above for instant food recognition and nutrition
+                    analysis!
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <p className="text-zinc-400 text-sm">
               Create a custom meal entry for your {mealName?.toLowerCase()} at{" "}
               {formatTime(mealTime)}.
@@ -610,36 +670,6 @@ export const CustomMealModal = ({
           </div>
         )}
 
-        {/* AI Scanner Tab */}
-        {activeTab === "ai-scanner" && (
-          <div className="space-y-4">
-            <FoodImageAnalyzer
-              mealName={mealName}
-              mealTime={mealTime}
-              onAnalyze={handleOnAnalyze}
-              isAnalyzing={isAnalyzing}
-              analysis={aiAnalysis}
-              error={aiError}
-              setError={setAiError}
-            />
-
-            {/* Error Display */}
-            {aiError && (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <Icon
-                    icon="mdi:alert"
-                    className="w-5 h-5 text-red-400 mt-0.5"
-                  />
-                  <div className="flex-1">
-                    <p className="text-red-400 text-sm">{aiError}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
         {/* History Tab */}
         {activeTab === "history" && (
           <div className="space-y-4 max-w-full">
@@ -664,19 +694,29 @@ export const CustomMealModal = ({
                   className="w-12 h-12 text-zinc-500 mx-auto mb-3"
                 />
                 <h4 className="text-white font-medium mb-2">No History Yet</h4>
-                <p className="text-zinc-400 text-sm">
+                <p className="text-zinc-400 text-sm mb-4">
                   Create your first custom {mealName?.toLowerCase()} to start
                   building your history.
                 </p>
-                <Button
-                  variant="secondary"
-                  size="small"
-                  onClick={() => setActiveTab("create")}
-                  className="mt-4"
-                >
-                  <Icon icon="mdi:plus" className="w-4 h-4 mr-2" />
-                  Create First Meal
-                </Button>
+                <div className="flex gap-2 justify-center">
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    onClick={() => setActiveTab("ai-scanner")}
+                    className="bg-[#FF6B00]/10 text-[#FF6B00] border-[#FF6B00]/30 hover:bg-[#FF6B00]/20"
+                  >
+                    <Icon icon="mdi:brain" className="w-4 h-4 mr-2" />
+                    Try AI Scanner
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    onClick={() => setActiveTab("create")}
+                  >
+                    <Icon icon="mdi:plus" className="w-4 h-4 mr-2" />
+                    Manual Entry
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="space-y-3 max-h-80 overflow-y-auto pr-1">

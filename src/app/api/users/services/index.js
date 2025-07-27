@@ -3,3 +3,4 @@ export { trainerService } from "./trainerService";
 export { clientService } from "./clientService";
 export { exerciseService } from "./exerciseService";
 export { mealService } from "./mealService";
+export { foodAnalysisService } from "./analyzeFoodService";
