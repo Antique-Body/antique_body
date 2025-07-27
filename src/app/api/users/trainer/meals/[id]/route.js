@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { mealService } from "../../../services";
-
 import { auth } from "#/auth";
 import { validateMeal } from "@/middleware/validation";
+
+import { mealService } from "../../../services";
 
 export async function GET(request, { params }) {
   try {

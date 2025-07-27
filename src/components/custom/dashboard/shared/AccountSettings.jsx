@@ -338,8 +338,8 @@ export const AccountSettings = ({ userData }) => {
                     {hasOAuthProvider
                       ? "OAuth"
                       : formData.email
-                      ? "Set"
-                      : "Not Set"}
+                        ? "Set"
+                        : "Not Set"}
                   </p>
                 </div>
               </div>
@@ -416,8 +416,8 @@ export const AccountSettings = ({ userData }) => {
                     {hasOAuthProvider
                       ? "OAuth"
                       : userData?.user?.password
-                      ? "Set"
-                      : "Not Set"}
+                        ? "Set"
+                        : "Not Set"}
                   </p>
                 </div>
               </div>
@@ -612,8 +612,8 @@ export const AccountSettings = ({ userData }) => {
               hasOAuthProvider
                 ? "Managed by your OAuth provider"
                 : hasPhoneProvider && !userData?.user?.email
-                ? "Add email for account recovery and alternative login"
-                : "Your primary email address"
+                  ? "Add email for account recovery and alternative login"
+                  : "Your primary email address"
             }
             value={formData.email}
             onChange={handleInputChange}
@@ -1015,17 +1015,17 @@ export const AccountSettings = ({ userData }) => {
                     hasGoogleProvider
                       ? "mdi:google"
                       : hasFacebookProvider
-                      ? "mdi:facebook"
-                      : hasPhoneProvider
-                      ? "mdi:phone"
-                      : "mdi:account-key"
+                        ? "mdi:facebook"
+                        : hasPhoneProvider
+                          ? "mdi:phone"
+                          : "mdi:account-key"
                   }
                   className={`w-5 h-5 ${
                     hasOAuthProvider
                       ? "text-blue-400"
                       : hasPhoneProvider
-                      ? "text-green-400"
-                      : "text-[#FF6B00]"
+                        ? "text-green-400"
+                        : "text-[#FF6B00]"
                   }`}
                 />
                 <div>
@@ -1034,10 +1034,10 @@ export const AccountSettings = ({ userData }) => {
                     {hasGoogleProvider
                       ? "Google OAuth Account - Secure login with Google"
                       : hasFacebookProvider
-                      ? "Facebook OAuth Account - Secure login with Facebook"
-                      : hasPhoneProvider
-                      ? "Phone Login Account - Login with phone number"
-                      : "Standard Account - Email and password login"}
+                        ? "Facebook OAuth Account - Secure login with Facebook"
+                        : hasPhoneProvider
+                          ? "Phone Login Account - Login with phone number"
+                          : "Standard Account - Email and password login"}
                   </p>
                 </div>
               </div>
@@ -1047,15 +1047,15 @@ export const AccountSettings = ({ userData }) => {
                     hasOAuthProvider
                       ? "bg-blue-500/20 text-blue-400"
                       : hasPhoneProvider
-                      ? "bg-green-500/20 text-green-400"
-                      : "bg-[#FF6B00]/20 text-[#FF6B00]"
+                        ? "bg-green-500/20 text-green-400"
+                        : "bg-[#FF6B00]/20 text-[#FF6B00]"
                   }`}
                 >
                   {hasOAuthProvider
                     ? "OAuth"
                     : hasPhoneProvider
-                    ? "Phone"
-                    : "Standard"}
+                      ? "Phone"
+                      : "Standard"}
                 </span>
               </div>
             </div>

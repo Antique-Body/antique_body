@@ -42,8 +42,8 @@ export const CountrySelect = ({
       displayLanguageOnly && option.languageName
         ? option.languageName
         : showLanguageName && option.languageName
-        ? option.languageName
-        : getDisplayValue(option),
+          ? option.languageName
+          : getDisplayValue(option),
   }));
 
   return (

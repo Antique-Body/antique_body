@@ -221,8 +221,8 @@ export const useTrainingPlanManager = (plan, setPlan) => {
               const setsCount = Array.isArray(exercise.sets)
                 ? exercise.sets.length
                 : typeof exercise.sets === "number"
-                ? exercise.sets
-                : 3;
+                  ? exercise.sets
+                  : 3;
               return dayTotal + setsCount;
             }, 0) || 0),
           0

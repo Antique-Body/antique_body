@@ -461,21 +461,21 @@ export default function TrainWithCoachPage() {
               hasAcceptedRequest
                 ? `You are currently training with ${acceptedTrainer?.trainerProfile?.firstName} ${acceptedTrainer?.trainerProfile?.lastName}. You cannot request other trainers at this time.`
                 : requestedTrainers.length === 0
-                ? "You haven't requested any trainers yet. You can request up to 5 trainers."
-                : requestedTrainers.length >= MAX_TRAINER_REQUESTS
-                ? "You've reached the maximum number of trainer requests. Remove a request to add a new one."
-                : `You have ${
-                    requestedTrainers.length
-                  } active requests. You can request ${
-                    MAX_TRAINER_REQUESTS - requestedTrainers.length
-                  } more trainers.`
+                  ? "You haven't requested any trainers yet. You can request up to 5 trainers."
+                  : requestedTrainers.length >= MAX_TRAINER_REQUESTS
+                    ? "You've reached the maximum number of trainer requests. Remove a request to add a new one."
+                    : `You have ${
+                        requestedTrainers.length
+                      } active requests. You can request ${
+                        MAX_TRAINER_REQUESTS - requestedTrainers.length
+                      } more trainers.`
             }
             variant={
               hasAcceptedRequest
                 ? "success"
                 : requestedTrainers.length >= MAX_TRAINER_REQUESTS
-                ? "primary"
-                : "info"
+                  ? "primary"
+                  : "info"
             }
           />
         </div>

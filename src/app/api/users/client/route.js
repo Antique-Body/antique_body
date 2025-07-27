@@ -1,7 +1,7 @@
-import { clientService } from "../services";
-
 import { auth } from "#/auth";
 import { formatPhoneNumber } from "@/lib/utils";
+
+import { clientService } from "../services";
 
 export async function POST(req) {
   try {

@@ -3,10 +3,10 @@ import * as Tooltip from "@radix-ui/react-tooltip";
 import Image from "next/image";
 import { useState } from "react";
 
-import UnrequestConfirmationModal from "./UnrequestConfirmationModal";
-
 import { Button } from "@/components/common/Button";
 import { mapSpecialtyToLabel } from "@/utils/specialtyMapper";
+
+import UnrequestConfirmationModal from "./UnrequestConfirmationModal";
 
 export const TrainerCard = ({
   trainer,
@@ -35,8 +35,8 @@ export const TrainerCard = ({
   const experienceYears = trainer.trainerSince
     ? `${new Date().getFullYear() - trainer.trainerSince}+ years`
     : trainer.trainerInfo?.totalSessions
-    ? `${trainer.trainerInfo.totalSessions}+ sessions`
-    : null;
+      ? `${trainer.trainerInfo.totalSessions}+ sessions`
+      : null;
 
   // Check if trainer has paid ads (featured)
   const isFeatured = trainer.paidAds && new Date(trainer.paidAds) > new Date();
@@ -221,19 +221,19 @@ export const TrainerCard = ({
         isAccepted
           ? "border-green-600"
           : hasRequested
-          ? "border-zinc-800"
-          : isFeatured
-          ? "border-[#FFD700]"
-          : "border-zinc-800"
+            ? "border-zinc-800"
+            : isFeatured
+              ? "border-[#FFD700]"
+              : "border-zinc-800"
       } hover:shadow-lg hover:translate-y-[-2px] sm:hover:translate-y-[-4px]`}
       style={
         isAccepted
           ? { borderColor: "#16a34a" }
           : hasRequested
-          ? { borderColor: themeColors.primary }
-          : isFeatured
-          ? { borderColor: "#FFD700" }
-          : { borderColor: "#27272a" }
+            ? { borderColor: themeColors.primary }
+            : isFeatured
+              ? { borderColor: "#FFD700" }
+              : { borderColor: "#27272a" }
       }
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -673,8 +673,8 @@ export const TrainerCard = ({
                     hasRequested
                       ? "remove-request-btn"
                       : buttonConfig.text === "Request Coaching"
-                      ? "request-coaching-btn"
-                      : ""
+                        ? "request-coaching-btn"
+                        : ""
                   }`}
                   leftIcon={
                     <Icon

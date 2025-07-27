@@ -62,20 +62,12 @@ export async function PATCH(request, { params }) {
       );
     }
     // Update planData
-    const previousPlanData = assignedPlan.planData;
     const updated = await prisma.assignedTrainingPlan.update({
       where: { id: assignedPlanId },
       data: { planData: body.planData },
     });
     // Audit log: log previous and new planData values
-    // eslint-disable-next-line no-console
-    console.log("[AUDIT] AssignedTrainingPlan updated", {
-      assignedPlanId,
-      previousPlanData,
-      newPlanData: body.planData,
-      updatedAt: new Date().toISOString(),
-      userId: session.user.id,
-    });
+
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {
     console.error("Error editing assigned plan:", error);

@@ -166,9 +166,8 @@ export async function GET(request) {
         delete allTrainersQuery.take;
         delete allTrainersQuery.skip;
 
-        let allTrainers = await prisma.trainerProfile.findMany(
-          allTrainersQuery
-        );
+        let allTrainers =
+          await prisma.trainerProfile.findMany(allTrainersQuery);
         totalTrainers = allTrainers.length;
 
         // Map gyms and calculate distances for all trainers

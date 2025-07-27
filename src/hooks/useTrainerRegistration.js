@@ -40,7 +40,6 @@ export function useTrainerRegistration() {
   const [certFields, setCertFields] = useState([
     { name: "", issuer: "", expiryDate: "", files: [] },
   ]);
-  
 
   // Handle form input changes
   const handleChange = (e) => {

@@ -47,7 +47,7 @@ export const Card = ({
   ...otherProps
 }) => {
   // Remove any remaining custom props that shouldn't go to DOM
-  const {accentColor: _, ...finalProps } = otherProps;
+  const { accentColor: _, ...finalProps } = otherProps;
 
   // Set styles based on variant
   let variantClassName = "";
@@ -317,12 +317,12 @@ export const Card = ({
         variant?.startsWith("dark")
           ? ""
           : variant === "entityCard"
-          ? "text-left"
-          : variant === "planCard" ||
-            variant === "createPlanCard" ||
-            variant === "clientCard"
-          ? "text-left"
-          : "items-center text-center"
+            ? "text-left"
+            : variant === "planCard" ||
+                variant === "createPlanCard" ||
+                variant === "clientCard"
+              ? "text-left"
+              : "items-center text-center"
       } overflow-hidden ${variantClassName} ${className} min-h-max ${
         hoverTranslateY ? `hover:translate-y-[${hoverTranslateY}]` : ""
       } transition-all duration-300`}

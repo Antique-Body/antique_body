@@ -134,46 +134,146 @@ export const WeeklyScheduleTab = ({
                           key={index}
                           className="bg-zinc-700/30 rounded-lg p-3"
                         >
-                          <div className="text-white font-medium">
-                            {exercise.name || exercise.exercise}
-                          </div>
-                          <div className="grid grid-cols-2 gap-2 mt-2">
-                            {exercise.sets && (
-                              <div className="text-zinc-300 text-sm">
-                                Sets:{" "}
-                                {typeof exercise.sets === "number"
-                                  ? exercise.sets
-                                  : Array.isArray(exercise.sets)
-                                  ? exercise.sets.length
-                                  : 0}
-                              </div>
-                            )}
-                            {exercise.reps && (
-                              <div className="text-zinc-300 text-sm">
-                                Reps: {exercise.reps}
-                              </div>
-                            )}
-                            {exercise.weight && (
-                              <div className="text-zinc-300 text-sm">
-                                Weight: {exercise.weight}
-                              </div>
-                            )}
-                            {exercise.duration && (
-                              <div className="text-zinc-300 text-sm">
-                                Duration: {exercise.duration}
-                              </div>
-                            )}
-                            {exercise.rest && (
-                              <div className="text-zinc-300 text-sm">
-                                Rest: {exercise.rest}s
-                              </div>
-                            )}
+                          <div className="flex items-center justify-between">
+                            <div className="text-white font-medium">
+                              {exercise.name || exercise.exercise}
+                            </div>
                             {exercise.type && (
-                              <div className="text-zinc-300 text-sm">
-                                Type: {exercise.type}
+                              <span className="px-2 py-1 bg-blue-600/20 text-blue-300 text-xs rounded-full border border-blue-500/30">
+                                {exercise.type}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Enhanced exercise metrics */}
+                          <div className="grid grid-cols-3 gap-3 mt-3">
+                            {/* Sets display */}
+                            {exercise.sets && (
+                              <div className="bg-zinc-600/30 rounded-lg p-2 text-center">
+                                <div className="text-zinc-400 text-xs uppercase tracking-wide mb-1">
+                                  Sets
+                                </div>
+                                <div className="text-white font-semibold">
+                                  {typeof exercise.sets === "number"
+                                    ? exercise.sets
+                                    : Array.isArray(exercise.sets)
+                                      ? exercise.sets.length
+                                      : 0}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Reps display */}
+                            {exercise.reps && (
+                              <div className="bg-zinc-600/30 rounded-lg p-2 text-center">
+                                <div className="text-zinc-400 text-xs uppercase tracking-wide mb-1">
+                                  {exercise.repsUnit === "seconds"
+                                    ? "Seconds"
+                                    : "Reps"}
+                                </div>
+                                <div className="text-white font-semibold">
+                                  {exercise.reps}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Rest display */}
+                            {exercise.rest && (
+                              <div className="bg-zinc-600/30 rounded-lg p-2 text-center">
+                                <div className="text-zinc-400 text-xs uppercase tracking-wide mb-1">
+                                  Rest
+                                </div>
+                                <div className="text-white font-semibold">
+                                  {exercise.rest}s
+                                </div>
                               </div>
                             )}
                           </div>
+
+                          {/* Weight progression display */}
+                          {Array.isArray(exercise.sets) &&
+                            exercise.sets.some((set) => set.weight) && (
+                              <div className="mt-3 bg-orange-600/10 border border-orange-500/30 rounded-lg p-3">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                  <span className="text-orange-300 text-sm font-medium">
+                                    Weight Progression
+                                  </span>
+                                </div>
+                                <div className="grid grid-cols-4 gap-2">
+                                  {exercise.sets.map(
+                                    (set, setIndex) =>
+                                      set.weight && (
+                                        <div
+                                          key={setIndex}
+                                          className="text-center"
+                                        >
+                                          <div className="text-xs text-zinc-400 mb-1">
+                                            Set {set.setNumber || setIndex + 1}
+                                          </div>
+                                          <div className="text-white font-bold text-sm bg-zinc-700/50 rounded py-1">
+                                            {set.weight}kg
+                                          </div>
+                                        </div>
+                                      )
+                                  )}
+                                </div>
+                                {/* Total weight calculation */}
+                                {(() => {
+                                  const totalWeight = exercise.sets.reduce(
+                                    (sum, set) => {
+                                      const weight = Number(set.weight) || 0;
+                                      const reps =
+                                        Number(set.reps) ||
+                                        Number(exercise.reps) ||
+                                        0;
+                                      return sum + weight * reps;
+                                    },
+                                    0
+                                  );
+
+                                  if (totalWeight > 0) {
+                                    return (
+                                      <div className="mt-2 pt-2 border-t border-orange-500/20">
+                                        <div className="text-center">
+                                          <span className="text-orange-300 text-xs">
+                                            Total Volume:{" "}
+                                          </span>
+                                          <span className="text-white font-bold">
+                                            {totalWeight}kg
+                                          </span>
+                                        </div>
+                                      </div>
+                                    );
+                                  }
+                                  return null;
+                                })()}
+                              </div>
+                            )}
+
+                          {/* Duration for cardio exercises */}
+                          {exercise.duration && (
+                            <div className="mt-2 bg-green-600/10 border border-green-500/30 rounded-lg p-2">
+                              <div className="flex items-center justify-center gap-2">
+                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span className="text-green-300 text-sm">
+                                  Duration: {exercise.duration}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Legacy weight display for non-array sets */}
+                          {exercise.weight && !Array.isArray(exercise.sets) && (
+                            <div className="mt-2 bg-orange-600/10 border border-orange-500/30 rounded-lg p-2">
+                              <div className="flex items-center justify-center gap-2">
+                                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                <span className="text-orange-300 text-sm">
+                                  Weight: {exercise.weight}
+                                </span>
+                              </div>
+                            </div>
+                          )}
                           {exercise.instructions && (
                             <div className="text-zinc-400 text-sm mt-2">
                               <strong>Instructions:</strong>{" "}
