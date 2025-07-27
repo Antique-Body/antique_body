@@ -202,8 +202,23 @@ export async function middleware(request) {
   );
   console.log(`[Middleware] NEXTAUTH_URL: ${process.env.NEXTAUTH_URL}`);
   console.log(`[Middleware] NEXTAUTH_SECRET: ${!!process.env.NEXTAUTH_SECRET}`);
+  console.log(`[Middleware] Request origin: ${request.nextUrl.origin}`);
+  console.log(
+    `[Middleware] URL mismatch: ${process.env.NEXTAUTH_URL !== request.nextUrl.origin}`
+  );
 
   try {
+    // Debug cookie details
+    const cookieHeader = request.headers.get("cookie");
+    if (cookieHeader) {
+      const cookies = cookieHeader.split(";").map((c) => c.trim());
+      console.log(`[Middleware] All cookies:`, cookies);
+
+      // Look for NextAuth cookies
+      const nextAuthCookies = cookies.filter((c) => c.startsWith("next-auth."));
+      console.log(`[Middleware] NextAuth cookies:`, nextAuthCookies);
+    }
+
     const token = await getToken({
       req: request,
       secret: process.env.AUTH_SECRET,
@@ -221,6 +236,16 @@ export async function middleware(request) {
       });
     } else {
       console.log(`[Middleware] No token found`);
+
+      // Try with different secret
+      console.log(`[Middleware] Trying with NEXTAUTH_SECRET...`);
+      const tokenWithNextAuthSecret = await getToken({
+        req: request,
+        secret: process.env.NEXTAUTH_SECRET,
+      });
+      console.log(
+        `[Middleware] Token with NEXTAUTH_SECRET: ${!!tokenWithNextAuthSecret}`
+      );
     }
 
     const isOAuthFlow = isOAuthCallback(request);
@@ -229,6 +254,7 @@ export async function middleware(request) {
     // 1. Public paths
     if (PUBLIC_PATHS.includes(pathname)) {
       console.log(`[Middleware] Public path - allowing access`);
+      console.log("=== MIDDLEWARE DEBUG END ===");
       return NextResponse.next();
     }
 
