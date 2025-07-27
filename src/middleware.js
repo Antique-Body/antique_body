@@ -207,6 +207,12 @@ export async function middleware(request) {
     `[Middleware] URL mismatch: ${process.env.NEXTAUTH_URL !== request.nextUrl.origin}`
   );
 
+  // Set correct NEXTAUTH_URL if it doesn't match
+  if (process.env.NEXTAUTH_URL !== request.nextUrl.origin) {
+    console.log(`[Middleware] Fixing NEXTAUTH_URL mismatch`);
+    process.env.NEXTAUTH_URL = request.nextUrl.origin;
+  }
+
   try {
     // Debug cookie details
     const cookieHeader = request.headers.get("cookie");
@@ -217,12 +223,56 @@ export async function middleware(request) {
       // Look for NextAuth cookies
       const nextAuthCookies = cookies.filter((c) => c.startsWith("next-auth."));
       console.log(`[Middleware] NextAuth cookies:`, nextAuthCookies);
+
+      // Look for AuthJS cookies
+      const authjsCookies = cookies.filter((c) => c.includes("authjs."));
+      console.log(`[Middleware] AuthJS cookies:`, authjsCookies);
+
+      // Check for session token specifically
+      const sessionTokenCookie = cookies.find((c) =>
+        c.includes("session-token")
+      );
+      if (sessionTokenCookie) {
+        console.log(
+          `[Middleware] Session token cookie found:`,
+          sessionTokenCookie.substring(0, 50) + "..."
+        );
+      }
     }
 
-    const token = await getToken({
+    // Try to get token with different approaches
+    let token = await getToken({
       req: request,
       secret: process.env.AUTH_SECRET,
     });
+
+    // If no token, try with explicit cookie name
+    if (!token) {
+      console.log(`[Middleware] Trying with explicit cookie name...`);
+      const sessionToken =
+        request.cookies.get("__Secure-authjs.session-token") ||
+        request.cookies.get("authjs.session-token");
+
+      if (sessionToken) {
+        console.log(
+          `[Middleware] Found session token cookie: ${sessionToken.name}`
+        );
+        console.log(
+          `[Middleware] Session token value: ${sessionToken.value.substring(0, 50)}...`
+        );
+        try {
+          token = await getToken({
+            req: request,
+            secret: process.env.AUTH_SECRET,
+            secureCookie: true,
+          });
+        } catch (error) {
+          console.error(`[Middleware] Error decoding token:`, error);
+        }
+      } else {
+        console.log(`[Middleware] No session token cookie found`);
+      }
+    }
 
     console.log(`[Middleware] Token obtained successfully: ${!!token}`);
     if (token) {
