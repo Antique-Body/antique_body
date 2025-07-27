@@ -32,10 +32,15 @@ const CreateFoodTab = forwardRef(
 
     // Expose handleSave method to parent component via ref
     useImperativeHandle(ref, () => ({
-      handleSave: () => {
+      handleSave: async () => {
         if (validateForm()) {
-          handleSaveInternal();
-          return true;
+          try {
+            await handleSaveInternal();
+            return true;
+          } catch (error) {
+            // Re-throw the error so parent component can handle it
+            throw error;
+          }
         }
         return false;
       },
@@ -85,6 +90,8 @@ const CreateFoodTab = forwardRef(
         await onSave(foodData);
       } catch (error) {
         console.error("Error saving food:", error);
+        // Re-throw the error so it can be handled by the parent component
+        throw error;
       }
     };
 

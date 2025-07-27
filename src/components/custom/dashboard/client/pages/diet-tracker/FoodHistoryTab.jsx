@@ -33,8 +33,12 @@ export const FoodHistoryTab = ({
       } else {
         // Default fetch logic
         const mealType = mealName?.toLowerCase();
+        const params = new URLSearchParams({ limit: "20" });
+        if (mealType) {
+          params.append("mealType", mealType);
+        }
         const response = await fetch(
-          `/api/users/client/diet-tracker/custom-meals${mealType ? `?mealType=${mealType}` : ""}${mealType ? "&" : "?"}limit=20`
+          `/api/users/client/diet-tracker/custom-meals?${params.toString()}`
         );
         const result = await response.json();
         data = result.success ? result.data : [];
@@ -120,21 +124,6 @@ export const FoodHistoryTab = ({
             Create your first custom {mealName?.toLowerCase() || "food"} to
             start building your history.
           </p>
-          <div className="flex gap-2 justify-center">
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={() => {}}
-              className="bg-[#FF6B00]/10 text-[#FF6B00] border-[#FF6B00]/30 hover:bg-[#FF6B00]/20"
-            >
-              <Icon icon="mdi:brain" className="w-4 h-4 mr-2" />
-              Try AI Scanner
-            </Button>
-            <Button variant="secondary" size="small" onClick={() => {}}>
-              <Icon icon="mdi:plus" className="w-4 h-4 mr-2" />
-              Manual Entry
-            </Button>
-          </div>
         </div>
       ) : (
         <div className="space-y-3 max-h-80 overflow-y-auto pr-1">

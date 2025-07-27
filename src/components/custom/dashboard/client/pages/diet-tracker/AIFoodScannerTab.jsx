@@ -50,8 +50,13 @@ export const AIFoodScannerTab = forwardRef(
         await onSave(foodData);
         return true;
       } catch (error) {
-        console.error("Error saving AI analyzed food:", error);
-        setError("Failed to save food. Please try again.");
+        setError(
+          "Failed to save food. Please try again." +
+            " " +
+            error.message +
+            " " +
+            error.stack
+        );
         return false;
       }
     };

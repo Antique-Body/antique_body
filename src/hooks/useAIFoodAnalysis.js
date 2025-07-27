@@ -43,7 +43,8 @@ export const useAIFoodAnalysis = () => {
       if (!response.ok) {
         if (data.error?.includes("manual input")) {
           if (setManualInput) setManualInput(true);
-          throw new Error(data.error);
+          setError(data.error);
+          return;
         }
         throw new Error(data.error || "Failed to analyze image");
       }
@@ -52,7 +53,6 @@ export const useAIFoodAnalysis = () => {
       return data;
     } catch (err) {
       setError(err.message || "Failed to analyze the image. Please try again.");
-      console.error(err);
     } finally {
       setIsAnalyzing(false);
     }
