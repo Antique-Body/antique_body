@@ -1,7 +1,7 @@
 "use client";
 import { Icon } from "@iconify/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 
 import { Button } from "@/components/common/Button";
 import { InfoBanner } from "@/components/common/InfoBanner";
@@ -31,7 +31,8 @@ export default function ClientsPage() {
   const planType = searchParams.get("type");
 
   // Fetch all accepted clients (without pagination for local filtering)
-  const fetchAllClients = async () => {
+  // Fetch all accepted clients (without pagination for local filtering)
+  const fetchAllClients = useCallback(async () => {
     try {
       setLoading(true);
       const queryParams = new URLSearchParams({
@@ -64,7 +65,7 @@ export default function ClientsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [sortOption, sortOrder]);
 
   // Function to sort clients
   const sortClients = (clientsToSort, option, order) =>
@@ -148,12 +149,12 @@ export default function ClientsPage() {
   // Handle sort changes - refetch all data
   useEffect(() => {
     fetchAllClients();
-  }, [sortOption, sortOrder]);
+  }, [sortOption, sortOrder, fetchAllClients]);
 
   // Initial fetch
   useEffect(() => {
     fetchAllClients();
-  }, []);
+  }, [fetchAllClients]);
 
   const handleViewClient = (clientRequest) => {
     if (planId) {

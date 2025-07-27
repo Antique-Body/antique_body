@@ -1,8 +1,8 @@
+import Ajv from "ajv";
 import { NextResponse } from "next/server";
 
 import { auth } from "#/auth";
 import prisma from "@/lib/prisma";
-import Ajv from "ajv";
 
 const planDataSchema = {
   type: "object",
@@ -68,6 +68,7 @@ export async function PATCH(request, { params }) {
       data: { planData: body.planData },
     });
     // Audit log: log previous and new planData values
+    // eslint-disable-next-line no-console
     console.log("[AUDIT] AssignedTrainingPlan updated", {
       assignedPlanId,
       previousPlanData,

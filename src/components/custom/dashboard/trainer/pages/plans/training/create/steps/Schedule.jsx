@@ -221,7 +221,8 @@ export const Schedule = ({ data, onChange }) => {
     const key = `${sessionIndex}-${exerciseIndex}`;
     return activeMedia[key] || "image";
   };
-
+  // eslint-disable-next-line no-console
+  console.log(exerciseError);
   // Helper function to set active media for a specific exercise
   const setActiveMediaForExercise = (
     sessionIndex,
@@ -390,7 +391,9 @@ export const Schedule = ({ data, onChange }) => {
         );
       }
     } catch (error) {
-      setExerciseError("Error creating exercise. Please try again.");
+      setExerciseError(
+        "Error creating exercise. Please try again. " + error.message
+      );
     }
   };
 

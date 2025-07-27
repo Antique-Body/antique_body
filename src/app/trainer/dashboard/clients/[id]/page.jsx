@@ -82,7 +82,6 @@ export default function ClientDashboard({ params }) {
 
       const data = await response.json();
       setPlans(data);
-      console.log("PLANS", data);
     } catch (err) {
       console.error("Error fetching plans:", err);
       // Handle error appropriately

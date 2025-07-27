@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
 import debounce from "lodash/debounce";
+import { useState, useEffect, useCallback } from "react";
 
 export function useWorkoutSession(plan, planId, clientId) {
   // Live tracking state
@@ -178,7 +178,7 @@ export function useWorkoutSession(plan, planId, clientId) {
       debouncedSave.cancel();
     };
     // Only run when workoutData changes during an active workout
-  }, [workoutData, isWorkoutStarted, planId, clientId]);
+  }, [workoutData, isWorkoutStarted, planId, clientId, saveWorkoutProgress]);
 
   // Helper functions
   const formatTime = (seconds) => {
@@ -415,90 +415,94 @@ export function useWorkoutSession(plan, planId, clientId) {
   };
 
   // Save workout progress to planData
-  const saveWorkoutProgress = async (planId, clientId) => {
-    try {
-      // The API expects planData structure, not just workoutData
-      // We need to merge workoutData into the plan structure
-      if (!plan) {
-        throw new Error("No plan data available for saving");
-      }
-
-      // Create planData with embedded workout progress
-      const planDataWithProgress = {
-        ...plan,
-        schedule:
-          plan.schedule?.map((day, dayIdx) => {
-            const dayWorkoutData = workoutData[dayIdx];
-
-            if (!dayWorkoutData) {
-              return day; // No workout data for this day
-            }
-
-            return {
-              ...day,
-              // Save day-level workout status
-              workoutStatus: dayWorkoutData.status,
-              workoutStartedAt: dayWorkoutData.startedAt,
-              workoutCompletedAt: dayWorkoutData.completedAt,
-              workoutEndedAt: dayWorkoutData.endedAt,
-              workoutDuration: dayWorkoutData.totalTimeSpent || 0,
-              workoutNotes: dayWorkoutData.workoutSummary?.userNotes || "",
-              workoutWasCompleted:
-                dayWorkoutData.workoutSummary?.wasCompleted || false,
-
-              // Save exercise-level data by embedding sets into exercises
-              exercises:
-                day.exercises?.map((exercise, exIdx) => {
-                  const exerciseWorkoutData = dayWorkoutData.exercises?.[exIdx];
-
-                  if (!exerciseWorkoutData) {
-                    return exercise; // No workout data for this exercise
-                  }
-
-                  return {
-                    ...exercise,
-                    // Embed workout sets data
-                    sets: exerciseWorkoutData.sets || [],
-                    exerciseNotes: exerciseWorkoutData.exerciseNotes || "",
-                    exerciseCompleted: exerciseWorkoutData.completed || false,
-                  };
-                }) || [],
-            };
-          }) || [],
-      };
-
-      const response = await fetch(
-        `/api/coaching-requests/${clientId}/assigned-training-plan/${planId}/progress`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ planData: planDataWithProgress }),
-        }
-      );
-
-      let result;
+  const saveWorkoutProgress = useCallback(
+    async (planId, clientId) => {
       try {
-        result = await response.json();
-      } catch (jsonError) {
-        throw new Error(
-          `Invalid response from server: ${
-            jsonError && jsonError.message ? jsonError.message : jsonError
-          }`
+        // The API expects planData structure, not just workoutData
+        // We need to merge workoutData into the plan structure
+        if (!plan) {
+          throw new Error("No plan data available for saving");
+        }
+
+        // Create planData with embedded workout progress
+        const planDataWithProgress = {
+          ...plan,
+          schedule:
+            plan.schedule?.map((day, dayIdx) => {
+              const dayWorkoutData = workoutData[dayIdx];
+
+              if (!dayWorkoutData) {
+                return day; // No workout data for this day
+              }
+
+              return {
+                ...day,
+                // Save day-level workout status
+                workoutStatus: dayWorkoutData.status,
+                workoutStartedAt: dayWorkoutData.startedAt,
+                workoutCompletedAt: dayWorkoutData.completedAt,
+                workoutEndedAt: dayWorkoutData.endedAt,
+                workoutDuration: dayWorkoutData.totalTimeSpent || 0,
+                workoutNotes: dayWorkoutData.workoutSummary?.userNotes || "",
+                workoutWasCompleted:
+                  dayWorkoutData.workoutSummary?.wasCompleted || false,
+
+                // Save exercise-level data by embedding sets into exercises
+                exercises:
+                  day.exercises?.map((exercise, exIdx) => {
+                    const exerciseWorkoutData =
+                      dayWorkoutData.exercises?.[exIdx];
+
+                    if (!exerciseWorkoutData) {
+                      return exercise; // No workout data for this exercise
+                    }
+
+                    return {
+                      ...exercise,
+                      // Embed workout sets data
+                      sets: exerciseWorkoutData.sets || [],
+                      exerciseNotes: exerciseWorkoutData.exerciseNotes || "",
+                      exerciseCompleted: exerciseWorkoutData.completed || false,
+                    };
+                  }) || [],
+              };
+            }) || [],
+        };
+
+        const response = await fetch(
+          `/api/coaching-requests/${clientId}/assigned-training-plan/${planId}/progress`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ planData: planDataWithProgress }),
+          }
         );
-      }
 
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || `API returned ${response.status}`);
-      }
+        let result;
+        try {
+          result = await response.json();
+        } catch (jsonError) {
+          throw new Error(
+            `Invalid response from server: ${
+              jsonError && jsonError.message ? jsonError.message : jsonError
+            }`
+          );
+        }
 
-      return { success: true, message: "Progress saved successfully!" };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message || "Failed to save progress",
-      };
-    }
-  };
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || `API returned ${response.status}`);
+        }
+
+        return { success: true, message: "Progress saved successfully!" };
+      } catch (error) {
+        return {
+          success: false,
+          message: error.message || "Failed to save progress",
+        };
+      }
+    },
+    [plan, workoutData]
+  );
 
   // Load workout progress from planData
   const loadWorkoutProgress = async (planId, clientId) => {
