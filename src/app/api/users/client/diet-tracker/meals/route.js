@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 
-import { auth } from "#/auth";
-
 import {
   completeMeal,
   uncompleteMeal,
@@ -11,6 +9,7 @@ import {
   deleteSnackLog,
 } from "../../../services/dietTrackerService";
 
+import { auth } from "@/auth";
 
 // GET: Get meals for a specific date
 export async function GET(req) {
@@ -75,16 +74,58 @@ export async function POST(req) {
     // Validate custom meal data
     if (
       !customMeal.name ||
-      customMeal.calories === undefined ||
-      customMeal.protein === undefined ||
-      customMeal.carbs === undefined ||
-      customMeal.fat === undefined
+      typeof customMeal.name !== "string" ||
+      customMeal.name.trim() === "" ||
+      typeof customMeal.calories !== "number" ||
+      customMeal.calories < 0 ||
+      typeof customMeal.protein !== "number" ||
+      customMeal.protein < 0 ||
+      typeof customMeal.carbs !== "number" ||
+      customMeal.carbs < 0 ||
+      typeof customMeal.fat !== "number" ||
+      customMeal.fat < 0
     ) {
       return NextResponse.json(
         {
           error:
-            "Custom meal must include name, calories, protein, carbs, and fat",
+            "Custom meal must include valid name (non-empty string) and non-negative numeric values for calories, protein, carbs, and fat",
         },
+        { status: 400 }
+      );
+    }
+
+    // Validate reasonable upper bounds
+    const maxValues = {
+      calories: 5000,
+      protein: 500,
+      carbs: 1000,
+      fat: 500,
+    };
+
+    if (customMeal.calories > maxValues.calories) {
+      return NextResponse.json(
+        { error: `Calories cannot exceed ${maxValues.calories}` },
+        { status: 400 }
+      );
+    }
+
+    if (customMeal.protein > maxValues.protein) {
+      return NextResponse.json(
+        { error: `Protein cannot exceed ${maxValues.protein}g` },
+        { status: 400 }
+      );
+    }
+
+    if (customMeal.carbs > maxValues.carbs) {
+      return NextResponse.json(
+        { error: `Carbs cannot exceed ${maxValues.carbs}g` },
+        { status: 400 }
+      );
+    }
+
+    if (customMeal.fat > maxValues.fat) {
+      return NextResponse.json(
+        { error: `Fat cannot exceed ${maxValues.fat}g` },
         { status: 400 }
       );
     }

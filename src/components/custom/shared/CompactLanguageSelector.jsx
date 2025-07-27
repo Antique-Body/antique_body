@@ -23,12 +23,17 @@ export const CompactLanguageSelector = ({ isCollapsed = false }) => {
 
   // Initialize language from localStorage
   useEffect(() => {
-    const savedLanguage = localStorage.getItem("language");
-    if (savedLanguage) {
-      i18n.changeLanguage(savedLanguage);
-    } else {
+    try {
+      const savedLanguage = localStorage.getItem("language");
+      if (savedLanguage) {
+        i18n.changeLanguage(savedLanguage);
+      } else {
+        i18n.changeLanguage("en");
+        localStorage.setItem("language", "en");
+      }
+    } catch (error) {
+      console.warn("Error initializing language:", error);
       i18n.changeLanguage("en");
-      localStorage.setItem("language", "en");
     }
     setMounted(true);
   }, [i18n]);
@@ -49,7 +54,11 @@ export const CompactLanguageSelector = ({ isCollapsed = false }) => {
 
   const handleLanguageChange = async (langCode) => {
     i18n.changeLanguage(langCode);
-    localStorage.setItem("language", langCode);
+    try {
+      localStorage.setItem("language", langCode);
+    } catch (error) {
+      console.error("Error saving language to localStorage:", error);
+    }
     setIsOpen(false);
 
     if (session?.user) {
@@ -70,6 +79,11 @@ export const CompactLanguageSelector = ({ isCollapsed = false }) => {
               language: langCode,
             },
           });
+        } else {
+          console.warn(
+            "Failed to update language on server",
+            await response.text()
+          );
         }
       } catch (error) {
         console.error("Error updating language:", error);
@@ -94,7 +108,14 @@ export const CompactLanguageSelector = ({ isCollapsed = false }) => {
     <div
       className={`relative ${isCollapsed ? "flex justify-center" : ""}`}
       ref={dropdownRef}
+      role="application"
       onClick={(e) => e.stopPropagation()}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          setIsOpen((prev) => !prev);
+        }
+      }}
     >
       <button
         onClick={toggleDropdown}

@@ -122,7 +122,11 @@ export function useClientEditProfileForm() {
       }));
     } else if (name === "height" || name === "weight") {
       // Convert height and weight to numbers or null
-      const numValue = value ? parseInt(value, 10) : null;
+      const numValue = value
+        ? isNaN(parseInt(value, 10))
+          ? null
+          : parseInt(value, 10)
+        : null;
       setClientData((prev) => ({ ...prev, [name]: numValue }));
     } else {
       setClientData((prev) => ({ ...prev, [name]: value }));

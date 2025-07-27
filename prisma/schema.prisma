@@ -362,7 +362,7 @@ model TrainerGym {
   trainer         TrainerProfile @relation(fields: [trainerId], references: [id], onDelete: Cascade)
   gym             Gym            @relation(fields: [gymId], references: [id], onDelete: Cascade)
   createdAt       DateTime @default(now())
-  updatedAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@unique([trainerId, gymId])
   @@index([gymId])
@@ -566,7 +566,7 @@ model CoachingRequest {
   status            CoachingRequestStatus @default(pending)
   rejectionReason   String?  @db.Text
   createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt @default(now())
+  updatedAt         DateTime @updatedAt
   respondedAt       DateTime?
   
   // Relations
@@ -726,6 +726,7 @@ model CustomMeal {
   @@index([usageCount])
   @@index([clientId, mealType])
   @@index([clientId, lastUsed])
+  @@index([clientId, name, mealType, calories, protein, carbs, fat])
 }
 
 model AssignedTrainingPlan {
