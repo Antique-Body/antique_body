@@ -786,8 +786,8 @@ export const CertificationUpload = ({
                                   file?.type === "application/pdf"
                                     ? "mdi:file-pdf"
                                     : file?.type && file.type.includes("word")
-                                    ? "mdi:file-word"
-                                    : "mdi:file-document"
+                                      ? "mdi:file-word"
+                                      : "mdi:file-document"
                                 }
                                 width={20}
                                 height={20}
@@ -803,8 +803,8 @@ export const CertificationUpload = ({
                                   ? file.size < 1024
                                     ? `${file.size} B`
                                     : file.size < 1048576
-                                    ? `${(file.size / 1024).toFixed(1)} KB`
-                                    : `${(file.size / 1048576).toFixed(1)} MB`
+                                      ? `${(file.size / 1024).toFixed(1)} KB`
+                                      : `${(file.size / 1048576).toFixed(1)} MB`
                                   : "Unknown size"}
                               </p>
                             </div>

@@ -27,8 +27,8 @@ export const StepProgressBar = ({ steps, currentStep, className = "" }) => (
                       index + 1 === currentStep
                         ? "border-[#FF6B00] bg-[#FF6B00]/10"
                         : index + 1 < currentStep
-                        ? "border-[#FF6B00] bg-[#FF6B00]"
-                        : "border-zinc-600 bg-zinc-800/50"
+                          ? "border-[#FF6B00] bg-[#FF6B00]"
+                          : "border-zinc-600 bg-zinc-800/50"
                     }`}
                   >
                     {/* Icon */}
@@ -44,8 +44,8 @@ export const StepProgressBar = ({ steps, currentStep, className = "" }) => (
                           index + 1 === currentStep
                             ? "text-[#FF6B00]"
                             : index + 1 < currentStep
-                            ? "text-white"
-                            : "text-zinc-400"
+                              ? "text-white"
+                              : "text-zinc-400"
                         }`}
                       />
                     )}
@@ -57,8 +57,8 @@ export const StepProgressBar = ({ steps, currentStep, className = "" }) => (
                       index + 1 === currentStep
                         ? "bg-[#FF6B00] text-white"
                         : index + 1 < currentStep
-                        ? "bg-green-500 text-white"
-                        : "bg-zinc-600 text-zinc-300"
+                          ? "bg-green-500 text-white"
+                          : "bg-zinc-600 text-zinc-300"
                     }`}
                   >
                     {step.id}
@@ -71,8 +71,8 @@ export const StepProgressBar = ({ steps, currentStep, className = "" }) => (
                         index + 1 === currentStep
                           ? "text-white"
                           : index + 1 < currentStep
-                          ? "text-zinc-300"
-                          : "text-zinc-500"
+                            ? "text-zinc-300"
+                            : "text-zinc-500"
                       }`}
                     >
                       {step.title}

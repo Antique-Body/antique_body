@@ -29,6 +29,8 @@ export default function ClientsPage() {
   // Get tracking parameters
   const planId = searchParams.get("planId");
   const planType = searchParams.get("type");
+  const planId = searchParams.get("planId");
+  const planType = searchParams.get("type");
 
   // Fetch all accepted clients (without pagination for local filtering)
   // Fetch all accepted clients (without pagination for local filtering)
@@ -162,6 +164,9 @@ export default function ClientsPage() {
       router.push(
         `/trainer/dashboard/clients/${clientRequest.id}/plans/${planId}?type=${planType}`
       );
+      router.push(
+        `/trainer/dashboard/clients/${clientRequest.id}/plans/${planId}?type=${planType}`
+      );
     } else {
       // Normal client dashboard navigation
       router.push(`/trainer/dashboard/clients/${clientRequest.id}`);
@@ -237,8 +242,12 @@ export default function ClientsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white mb-2">
           {planId ? "Track Plan Progress" : "My Clients"}
+          {planId ? "Track Plan Progress" : "My Clients"}
         </h1>
         <p className="text-zinc-400">
+          {planId
+            ? "Select a client to track their progress with this plan"
+            : "Manage your accepted clients and their fitness journeys"}
           {planId
             ? "Select a client to track their progress with this plan"
             : "Manage your accepted clients and their fitness journeys"}

@@ -4,9 +4,6 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-import mealLibrary from "./mealLibrary.json";
-import { MealLibrarySelector } from "./MealLibrarySelector";
-
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { InfoBanner } from "@/components/common/InfoBanner";
@@ -19,6 +16,9 @@ import {
   DIETARY_PREFERENCES,
   CUISINE_TYPES,
 } from "@/enums";
+
+import mealLibrary from "./mealLibrary.json";
+import { MealLibrarySelector } from "./MealLibrarySelector";
 
 // File upload validation
 const validateFile = (file, type) => {
@@ -528,12 +528,12 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
                     meal.mealType === "breakfast"
                       ? "bg-yellow-900/60 text-yellow-200"
                       : meal.mealType === "lunch"
-                      ? "bg-blue-900/60 text-blue-200"
-                      : meal.mealType === "dinner"
-                      ? "bg-purple-900/60 text-purple-200"
-                      : meal.mealType === "snack"
-                      ? "bg-green-900/60 text-green-200"
-                      : "bg-pink-900/60 text-pink-200"
+                        ? "bg-blue-900/60 text-blue-200"
+                        : meal.mealType === "dinner"
+                          ? "bg-purple-900/60 text-purple-200"
+                          : meal.mealType === "snack"
+                            ? "bg-green-900/60 text-green-200"
+                            : "bg-pink-900/60 text-pink-200"
                   }`}
                 >
                   {meal.mealType.charAt(0).toUpperCase() +
@@ -545,8 +545,8 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
                     meal.difficulty === "easy"
                       ? "bg-green-900/40 text-green-300"
                       : meal.difficulty === "medium"
-                      ? "bg-orange-900/40 text-orange-300"
-                      : "bg-red-900/40 text-red-300"
+                        ? "bg-orange-900/40 text-orange-300"
+                        : "bg-red-900/40 text-red-300"
                   }`}
                 >
                   {meal.difficulty.charAt(0).toUpperCase() +
@@ -993,8 +993,8 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
                 mode === "view"
                   ? "mdi:silverware-fork-knife"
                   : mode === "edit"
-                  ? "mdi:pencil"
-                  : "mdi:plus-circle"
+                    ? "mdi:pencil"
+                    : "mdi:plus-circle"
               }
               className="text-[#FF7800]"
               width={20}
@@ -1004,8 +1004,8 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
               {mode === "view"
                 ? meal?.name
                 : mode === "edit"
-                ? "Edit Meal"
-                : "Create New Meal"}
+                  ? "Edit Meal"
+                  : "Create New Meal"}
             </span>
           </div>
         }
@@ -1014,16 +1014,16 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
           mode === "view"
             ? "Close"
             : mode === "edit"
-            ? isUploading
-              ? "Uploading files..."
-              : isSubmitting
-              ? "Updating meal..."
-              : "Update Meal"
-            : isUploading
-            ? "Uploading files..."
-            : isSubmitting
-            ? "Creating meal..."
-            : "Save Meal"
+              ? isUploading
+                ? "Uploading files..."
+                : isSubmitting
+                  ? "Updating meal..."
+                  : "Update Meal"
+              : isUploading
+                ? "Uploading files..."
+                : isSubmitting
+                  ? "Creating meal..."
+                  : "Save Meal"
         }
         secondaryButtonText={mode !== "view" ? "Cancel" : undefined}
         primaryButtonAction={mode === "view" ? onClose : handleSubmit}

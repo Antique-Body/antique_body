@@ -96,6 +96,7 @@ function getOnboardingRedirect(role, token, pathname) {
         "/trainer/dashboard/plans/training/edit/:id",
         "/trainer/dashboard/plans/nutrition/create",
         "/trainer/dashboard/plans/nutrition/edit/:id",
+        "/trainer/dashboard/plans/:id/track",
         "/trainer/dashboard/exercises",
         "/trainer/dashboard/meals",
         "/trainer/dashboard/edit",
@@ -133,68 +134,96 @@ function getOnboardingRedirect(role, token, pathname) {
 }
 
 export async function middleware(request) {
-  if (process.env.NODE_ENV_TYPE === "production") {
-    return NextResponse.next();
-  }
-
   const { pathname } = request.nextUrl;
 
-  const token = await getToken({
-    req: request,
-    secret: process.env.AUTH_SECRET,
-  });
-
-  const isOAuthFlow = isOAuthCallback(request);
-
-  // 1. Public paths
-  if (PUBLIC_PATHS.includes(pathname)) {
-    return NextResponse.next();
+  // Set correct NEXTAUTH_URL if it doesn't match
+  if (process.env.NEXTAUTH_URL !== request.nextUrl.origin) {
+    process.env.NEXTAUTH_URL = request.nextUrl.origin;
   }
 
-  // 2. /select-role
-  if (pathname === "/select-role") {
+  try {
+    let token = await getToken({
+      req: request,
+      secret: process.env.AUTH_SECRET,
+    });
+
+    // If no token, try with explicit cookie name
+    if (!token) {
+      const sessionToken =
+        request.cookies.get("__Secure-authjs.session-token") ||
+        request.cookies.get("authjs.session-token");
+
+      if (sessionToken) {
+        try {
+          token = await getToken({
+            req: request,
+            secret: process.env.AUTH_SECRET,
+            secureCookie: true,
+          });
+        } catch {
+          // Continue without token
+        }
+      }
+    }
+
+    const isOAuthFlow = isOAuthCallback(request);
+
+    // 1. Public paths
+    if (PUBLIC_PATHS.includes(pathname)) {
+      return NextResponse.next();
+    }
+
+    // 2. /select-role
+    if (pathname === "/select-role") {
+      if (!token) {
+        return NextResponse.redirect(new URL("/auth/login", request.url));
+      }
+      if (token.sub && token.email && !isOAuthFlow) {
+        const userExists = await checkUserExistsInDB(request);
+        if (!userExists) {
+          return NextResponse.redirect(new URL("/auth/login", request.url));
+        }
+      }
+      if (token.role) {
+        const redirect = getDashboardRedirect(token);
+        return NextResponse.redirect(new URL(redirect, request.url));
+      }
+      return NextResponse.next();
+    }
+
+    // 3. Not logged in
     if (!token) {
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
+
+    // 4. User must exist in DB
     if (token.sub && token.email && !isOAuthFlow) {
       const userExists = await checkUserExistsInDB(request);
       if (!userExists) {
         return NextResponse.redirect(new URL("/auth/login", request.url));
       }
     }
-    if (token.role) {
+
+    // 5. Auth pages
+    if (["/auth/login", "/auth/register", ...AUTH_PATHS].includes(pathname)) {
       const redirect = getDashboardRedirect(token);
       return NextResponse.redirect(new URL(redirect, request.url));
     }
-    return NextResponse.next();
-  }
 
-  // 3. Not logged in
-  if (!token) {
+    // 6. Onboarding/dashboard redirect
+    const onboardingRedirect = getOnboardingRedirect(
+      token.role,
+      token,
+      pathname
+    );
+    if (onboardingRedirect) {
+      return NextResponse.redirect(new URL(onboardingRedirect, request.url));
+    }
+
+    return NextResponse.next();
+  } catch {
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
-
-  // 4. User must exist in DB
-  if (token.sub && token.email && !isOAuthFlow) {
-    const userExists = await checkUserExistsInDB(request);
-    if (!userExists) {
-      return NextResponse.redirect(new URL("/auth/login", request.url));
-    }
-  }
-
-  // 5. Auth pages
-  if (["/auth/login", "/auth/register", ...AUTH_PATHS].includes(pathname)) {
-    const redirect = getDashboardRedirect(token);
-    return NextResponse.redirect(new URL(redirect, request.url));
-  }
-
-  // 6. Onboarding/dashboard redirect
-  const onboardingRedirect = getOnboardingRedirect(token.role, token, pathname);
-  if (onboardingRedirect) {
-    return NextResponse.redirect(new URL(onboardingRedirect, request.url));
-  }
-
-  return NextResponse.next();
 }
 
 export const config = {

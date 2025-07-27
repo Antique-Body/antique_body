@@ -228,8 +228,8 @@ export const FeaturePreviews = () => {
                     activeFeature === 0
                       ? "border-[#FF6B00]/30"
                       : activeFeature === 1
-                      ? "border-[#3b82f6]/30"
-                      : "border-[#22c55e]/30"
+                        ? "border-[#3b82f6]/30"
+                        : "border-[#22c55e]/30"
                   } -z-10`}
                 ></div>
               </div>
@@ -282,14 +282,14 @@ export const FeaturePreviews = () => {
                     activeFeature === 0
                       ? "from-[#FF6B00]/10 to-black/20"
                       : activeFeature === 1
-                      ? "from-[#3b82f6]/10 to-black/20"
-                      : "from-[#22c55e]/10 to-black/20"
+                        ? "from-[#3b82f6]/10 to-black/20"
+                        : "from-[#22c55e]/10 to-black/20"
                   } border ${
                     activeFeature === 0
                       ? "border-[#FF6B00]/20"
                       : activeFeature === 1
-                      ? "border-[#3b82f6]/20"
-                      : "border-[#22c55e]/20"
+                        ? "border-[#3b82f6]/20"
+                        : "border-[#22c55e]/20"
                   }`}
                 >
                   <div className="flex items-center gap-3 mb-3">

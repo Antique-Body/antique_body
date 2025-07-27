@@ -117,7 +117,10 @@ body {
   border-color: #7c1d1d !important;
   color: #fff !important;
   border-width: 2.5px !important;
-  transition: background 0.2s, border 0.2s, box-shadow 0.2s;
+  transition:
+    background 0.2s,
+    border 0.2s,
+    box-shadow 0.2s;
 }
 .remove-request-btn:hover:not(:disabled) {
   background-color: #a83232 !important;
@@ -129,7 +132,10 @@ body {
   border-color: #3e92cc !important;
   color: #fff !important;
   border-width: 2.5px !important;
-  transition: background 0.2s, border 0.2s, box-shadow 0.2s;
+  transition:
+    background 0.2s,
+    border 0.2s,
+    box-shadow 0.2s;
 }
 .request-coaching-btn:hover:not(:disabled) {
   background-color: #5bb3f7 !important;

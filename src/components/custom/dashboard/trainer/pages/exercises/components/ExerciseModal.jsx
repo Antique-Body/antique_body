@@ -4,10 +4,6 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-import { AnatomicalViewer } from "./AnatomicalViewer";
-import exerciseLibrary from "./exerciseLibrary.json";
-import { ExerciseLibrarySelector } from "./ExerciseLibrarySelector";
-
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { InfoBanner } from "@/components/common/InfoBanner";
@@ -22,6 +18,10 @@ import {
   MUSCLE_GROUPS,
 } from "@/enums";
 import { formatMuscleDisplayName } from "@/utils/muscleMapper";
+
+import { AnatomicalViewer } from "./AnatomicalViewer";
+import exerciseLibrary from "./exerciseLibrary.json";
+import { ExerciseLibrarySelector } from "./ExerciseLibrarySelector";
 
 // File upload validation
 const validateFile = (file, type) => {
@@ -1065,8 +1065,8 @@ export const ExerciseModal = ({
                 mode === "view"
                   ? "mdi:dumbbell"
                   : mode === "edit"
-                  ? "mdi:pencil"
-                  : "mdi:plus-circle"
+                    ? "mdi:pencil"
+                    : "mdi:plus-circle"
               }
               className="text-[#FF7800]"
               width={20}
@@ -1076,8 +1076,8 @@ export const ExerciseModal = ({
               {mode === "view"
                 ? exercise?.name
                 : mode === "edit"
-                ? "Edit Exercise"
-                : "Create New Exercise"}
+                  ? "Edit Exercise"
+                  : "Create New Exercise"}
             </span>
           </div>
         }
@@ -1086,16 +1086,16 @@ export const ExerciseModal = ({
           mode === "view"
             ? "Close"
             : mode === "edit"
-            ? isUploading
-              ? "Uploading files..."
-              : isSubmitting
-              ? "Updating exercise..."
-              : "Update Exercise"
-            : isUploading
-            ? "Uploading files..."
-            : isSubmitting
-            ? "Creating exercise..."
-            : "Save Exercise"
+              ? isUploading
+                ? "Uploading files..."
+                : isSubmitting
+                  ? "Updating exercise..."
+                  : "Update Exercise"
+              : isUploading
+                ? "Uploading files..."
+                : isSubmitting
+                  ? "Creating exercise..."
+                  : "Save Exercise"
         }
         secondaryButtonText={mode !== "view" ? "Cancel" : undefined}
         primaryButtonAction={mode === "view" ? onClose : handleSubmit}

@@ -166,7 +166,7 @@ async function createOrUpdateAccount(userId, account) {
 
 export const authConfig = {
   providers,
-  debug: true,
+  debug: process.env.NODE_ENV === "development",
   callbacks: {
     async signIn({ user, account }) {
       if (["google", "facebook"].includes(account?.provider)) {

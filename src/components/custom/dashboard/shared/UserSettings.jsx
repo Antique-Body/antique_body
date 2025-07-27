@@ -4,8 +4,6 @@ import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { useState, useEffect, useCallback } from "react";
 
-import { AnimatedTabContent } from "./DashboardTabs";
-
 import { Button } from "@/components/common/Button";
 // Client Settings
 import {
@@ -19,6 +17,8 @@ import {
   AccountSettings as TrainerAccountSettings,
   LanguagePreferences as TrainerLanguagePreferences,
 } from "@/components/custom/dashboard/trainer/settings";
+
+import { AnimatedTabContent } from "./DashboardTabs";
 
 export const UserSettings = ({
   profileType = "client",
@@ -699,8 +699,8 @@ const SidebarButton = ({
       isActive
         ? "bg-gradient-to-r from-[#FF6B00] to-[#FF9A00] text-white shadow-xl shadow-orange-500/25 border border-orange-400/30"
         : isMobile
-        ? "bg-[rgba(255,107,0,0.08)] text-gray-300 hover:text-white hover:bg-[rgba(255,107,0,0.15)] border border-[rgba(255,107,0,0.2)] hover:border-[rgba(255,107,0,0.4)]"
-        : "hover:bg-[rgba(255,107,0,0.08)] text-gray-300 hover:text-white border border-transparent hover:border-[rgba(255,107,0,0.2)]"
+          ? "bg-[rgba(255,107,0,0.08)] text-gray-300 hover:text-white hover:bg-[rgba(255,107,0,0.15)] border border-[rgba(255,107,0,0.2)] hover:border-[rgba(255,107,0,0.4)]"
+          : "hover:bg-[rgba(255,107,0,0.08)] text-gray-300 hover:text-white border border-transparent hover:border-[rgba(255,107,0,0.2)]"
     }`}
   >
     {/* Enhanced background glow effect for active state */}

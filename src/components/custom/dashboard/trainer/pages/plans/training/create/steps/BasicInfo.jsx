@@ -6,14 +6,14 @@ import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState, useEffect, useCallback } from "react";
-import { SESSION_FORMATS } from "src/enums/sessionFormats";
-import { TRAINING_LEVELS } from "src/enums/trainingLevels";
-
-import { CoverImageUploadSkeleton } from "../components/CoverImageUpload";
 
 import { FormField } from "@/components/common/FormField";
 import { UPLOAD_CONFIG } from "@/config/upload";
 import { updateFormData } from "@/lib/utils";
+import { SESSION_FORMATS } from "src/enums/sessionFormats";
+import { TRAINING_LEVELS } from "src/enums/trainingLevels";
+
+import { CoverImageUploadSkeleton } from "../components/CoverImageUpload";
 
 const CoverImageUploadDynamic = dynamic(
   () => import("../components/CoverImageUpload"),
@@ -229,9 +229,7 @@ export const BasicInfo = ({ data, onChange, prefillForm, templates }) => {
                           key={tpl.title}
                           className="relative flex flex-col bg-[#232323] border border-[#333] shadow hover:border-[#FF6B00]/60 transition-all rounded-lg p-3 gap-2"
                         >
-                          <span
-                            className="absolute top-2 right-2 z-10 bg-[#FF6B00] text-white text-xs px-2 py-1 rounded-full shadow font-medium whitespace-nowrap"
-                          >
+                          <span className="absolute top-2 right-2 z-10 bg-[#FF6B00] text-white text-xs px-2 py-1 rounded-full shadow font-medium whitespace-nowrap">
                             {tpl.duration} {tpl.durationType}
                           </span>
                           <div className="flex flex-col gap-3">

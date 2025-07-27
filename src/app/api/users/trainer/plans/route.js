@@ -30,80 +30,106 @@ export async function GET(req) {
     const modelMap = {
       nutrition: {
         model: prisma.nutritionPlan,
-        select: basic ? {
-          id: true,
-          title: true,
-          description: true,
-          coverImage: true,
-          price: true,
-          duration: true,
-          durationType: true,
-          clientCount: true,
-          createdAt: true,
-        } : {
-          id: true,
-          title: true,
-          description: true,
-          coverImage: true,
-          price: true,
-          duration: true,
-          durationType: true,
-          clientCount: true,
-          createdAt: true,
-          keyFeatures: true,
-          timeline: true,
-          nutritionInfo: true,
-          mealTypes: true,
-          supplementRecommendations: true,
-          cookingTime: true,
-          targetGoal: true,
-          recommendedFrequency: true,
-          adaptability: true,
-          days: true,
-        },
+        select: basic
+          ? {
+              id: true,
+              title: true,
+              description: true,
+              coverImage: true,
+              price: true,
+              duration: true,
+              durationType: true,
+              clientCount: true,
+              createdAt: true,
+            }
+          : {
+              id: true,
+              title: true,
+              description: true,
+              coverImage: true,
+              price: true,
+              duration: true,
+              durationType: true,
+              clientCount: true,
+              createdAt: true,
+              keyFeatures: true,
+              timeline: true,
+              nutritionInfo: true,
+              mealTypes: true,
+              supplementRecommendations: true,
+              cookingTime: true,
+              targetGoal: true,
+              recommendedFrequency: true,
+              adaptability: true,
+              days: true,
+            },
       },
       training: {
         model: prisma.trainingPlan,
-        select: basic ? {
-          id: true,
-          title: true,
-          description: true,
-          coverImage: true,
-          price: true,
-          duration: true,
-          durationType: true,
-          clientCount: true,
-          createdAt: true,
-        } : {
-          id: true,
-          title: true,
-          description: true,
-          coverImage: true,
-          price: true,
-          duration: true,
-          durationType: true,
-          clientCount: true,
-          createdAt: true,
-          keyFeatures: true,
-          timeline: true,
-          features: true,
-          schedule: true,
-          sessionsPerWeek: true,
-          sessionFormat: true,
-          trainingType: true,
-          difficultyLevel: true,
-        },
+        select: basic
+          ? {
+              id: true,
+              title: true,
+              description: true,
+              coverImage: true,
+              price: true,
+              duration: true,
+              durationType: true,
+              clientCount: true,
+              createdAt: true,
+            }
+          : {
+              id: true,
+              title: true,
+              description: true,
+              coverImage: true,
+              price: true,
+              duration: true,
+              durationType: true,
+              clientCount: true,
+              createdAt: true,
+              keyFeatures: true,
+              timeline: true,
+              features: true,
+              schedule: true,
+              sessionsPerWeek: true,
+              sessionFormat: true,
+              trainingType: true,
+              difficultyLevel: true,
+            },
       },
     };
     const planType = type === "nutrition" ? "nutrition" : "training";
     const { model, select } = modelMap[planType];
-    let plans = await model.findMany({
+    const plans = await model.findMany({
       where: { trainerInfoId: trainerInfo.id },
       orderBy: { createdAt: "desc" },
       select,
     });
-    plans = plans.map((plan) => ({ ...plan, type: planType }));
-    return NextResponse.json(plans);
+
+    // Aggregate client counts for all plans in a single query
+    // Both training and nutrition plans use the same assignedTrainingPlan table.
+    // The originalPlanId field in assignedTrainingPlan refers to either a TrainingPlan or NutritionPlan.
+    const planIds = plans.map((plan) => plan.id);
+    const clientCounts = await prisma.assignedTrainingPlan.groupBy({
+      by: ["originalPlanId"],
+      where: {
+        originalPlanId: { in: planIds },
+        status: "active",
+      },
+      _count: { originalPlanId: true },
+    });
+    const clientCountMap = Object.fromEntries(
+      clientCounts.map((c) => [c.originalPlanId, c._count.originalPlanId])
+    );
+
+    const plansWithClientCount = plans.map((plan) => ({
+      ...plan,
+      type: planType,
+      clientCount: clientCountMap[plan.id] || 0,
+    }));
+
+    return NextResponse.json(plansWithClientCount);
   } catch (error) {
     return handleApiError("GET /plans", error);
   }
@@ -203,45 +229,6 @@ export async function POST(req) {
 function inferPlanType(body) {
   if (body.nutritionInfo || body.mealTypes) return "nutrition";
   return "training";
-}
-
-// GET: Fetch single plan by id and type
-export async function GET_planId(req, { params }) {
-  try {
-    const { id } = params;
-    const { searchParams } = new URL(req.url);
-    const type = searchParams.get("type") || "training";
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    // Fetch trainerInfoId using userId
-    const trainerInfo = await prisma.trainerInfo.findUnique({
-      where: { userId: session.user.id },
-    });
-    if (!trainerInfo) {
-      return NextResponse.json(
-        { error: "Trainer info not found" },
-        { status: 404 }
-      );
-    }
-    let plan;
-    if (type === "nutrition") {
-      plan = await prisma.nutritionPlan.findUnique({
-        where: { id: id, trainerInfoId: trainerInfo.id },
-      });
-    } else {
-      plan = await prisma.trainingPlan.findUnique({
-        where: { id: id, trainerInfoId: trainerInfo.id },
-      });
-    }
-    if (!plan) {
-      return NextResponse.json({ error: "Plan not found" }, { status: 404 });
-    }
-    return NextResponse.json(plan);
-  } catch (error) {
-    return handleApiError("GET /plans/:id", error);
-  }
 }
 
 // Centralized error handler

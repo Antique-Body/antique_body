@@ -2,13 +2,13 @@
 import { Icon } from "@iconify/react";
 import { useSession } from "next-auth/react";
 
-import { useTrainerRegistration } from "../../../hooks/useTrainerRegistration";
-
 import { EffectBackground } from "@/components/background";
 import { Button, Footer, BrandLogo, FormField } from "@/components/common";
 import { ProfileImageUpload, LocationStep } from "@/components/custom/shared";
 import { UPLOAD_CONFIG } from "@/config/upload";
 import { usePrefillFromSession } from "@/hooks";
+
+import { useTrainerRegistration } from "../../../hooks/useTrainerRegistration";
 
 const TrainerRegistration = () => {
   const { formData, errors, loading, handleChange, handleSubmit } =

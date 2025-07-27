@@ -233,10 +233,10 @@ export const SecuritySettings = ({ userData }) => {
                     {hasGoogleProvider
                       ? "Google Account"
                       : hasFacebookProvider
-                      ? "Facebook Account"
-                      : hasPhoneProvider && !hasEmail
-                      ? "Not set - Add for easier login"
-                      : formatEmailDisplay(userData?.user?.email)}
+                        ? "Facebook Account"
+                        : hasPhoneProvider && !hasEmail
+                          ? "Not set - Add for easier login"
+                          : formatEmailDisplay(userData?.user?.email)}
                   </p>
                 </div>
               </div>
@@ -309,12 +309,12 @@ export const SecuritySettings = ({ userData }) => {
                     {hasGoogleProvider
                       ? "Managed by Google"
                       : hasFacebookProvider
-                      ? "Managed by Facebook"
-                      : hasPhoneProvider
-                      ? "Not required for phone login"
-                      : hasPassword
-                      ? "Set"
-                      : "Not Set"}
+                        ? "Managed by Facebook"
+                        : hasPhoneProvider
+                          ? "Not required for phone login"
+                          : hasPassword
+                            ? "Set"
+                            : "Not Set"}
                   </p>
                 </div>
               </div>
@@ -343,10 +343,10 @@ export const SecuritySettings = ({ userData }) => {
                     hasGoogleProvider
                       ? "mdi:google"
                       : hasFacebookProvider
-                      ? "mdi:facebook"
-                      : hasCredentialsProvider
-                      ? "mdi:account-key"
-                      : "mdi:phone"
+                        ? "mdi:facebook"
+                        : hasCredentialsProvider
+                          ? "mdi:account-key"
+                          : "mdi:phone"
                   }
                   className="text-[#FF6B00] w-5 h-5"
                 />
@@ -356,12 +356,12 @@ export const SecuritySettings = ({ userData }) => {
                     {hasGoogleProvider
                       ? "Google OAuth"
                       : hasFacebookProvider
-                      ? "Facebook OAuth"
-                      : hasCredentialsProvider
-                      ? "Email & Password"
-                      : hasPhoneProvider
-                      ? "Phone Number"
-                      : "Not configured"}
+                        ? "Facebook OAuth"
+                        : hasCredentialsProvider
+                          ? "Email & Password"
+                          : hasPhoneProvider
+                            ? "Phone Number"
+                            : "Not configured"}
                   </p>
                 </div>
               </div>
@@ -586,8 +586,8 @@ export const SecuritySettings = ({ userData }) => {
                     {hasGoogleProvider
                       ? `Google: ${formatEmailDisplay(userData?.user?.email)}`
                       : hasEmailCredentials
-                      ? `Current: ${formatEmailDisplay(userData?.user?.email)}`
-                      : "Not set - Add email for easier login"}
+                        ? `Current: ${formatEmailDisplay(userData?.user?.email)}`
+                        : "Not set - Add email for easier login"}
                   </p>
                   {hasEmailCredentials && !userData?.user?.emailVerified && (
                     <p className="text-orange-400 text-xs mt-1">

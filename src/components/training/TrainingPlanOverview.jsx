@@ -2,14 +2,14 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import React, { useState } from "react";
 
-import { DraggableExercise } from "./DraggableExercise";
-import { DraggableTrainingDay } from "./DraggableTrainingDay";
-import { WorkoutReview } from "./WorkoutReview";
-
 import { Button } from "@/components/common/Button";
 import { Modal } from "@/components/common/Modal";
 import AnatomicalViewer from "@/components/custom/dashboard/trainer/pages/exercises/components/AnatomicalViewer";
 import { getMuscleGroupColor } from "@/utils/trainingUtils";
+
+import { DraggableExercise } from "./DraggableExercise";
+import { DraggableTrainingDay } from "./DraggableTrainingDay";
+import { WorkoutReview } from "./WorkoutReview";
 
 // Helper function to get status-based styling
 
@@ -538,10 +538,10 @@ export function TrainingPlanOverview({
                           workoutStatus === "completed"
                             ? "border-emerald-500/40 shadow-emerald-500/10 hover:shadow-emerald-500/25 hover:border-emerald-400/60"
                             : isActiveWorkout
-                            ? "border-blue-500/50 shadow-blue-500/10 hover:shadow-blue-500/25 hover:border-blue-400/70"
-                            : isRestDay
-                            ? "border-purple-500/40 shadow-purple-500/10 hover:shadow-purple-500/25 hover:border-purple-400/60"
-                            : "border-zinc-700/50 hover:border-zinc-600/70 hover:shadow-zinc-600/10"
+                              ? "border-blue-500/50 shadow-blue-500/10 hover:shadow-blue-500/25 hover:border-blue-400/70"
+                              : isRestDay
+                                ? "border-purple-500/40 shadow-purple-500/10 hover:shadow-purple-500/25 hover:border-purple-400/60"
+                                : "border-zinc-700/50 hover:border-zinc-600/70 hover:shadow-zinc-600/10"
                         }`}
                         onClick={(e) => {
                           if (
@@ -570,10 +570,10 @@ export function TrainingPlanOverview({
                                   workoutStatus === "completed"
                                     ? "bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/30"
                                     : isActiveWorkout
-                                    ? "bg-gradient-to-br from-blue-500 to-cyan-600 shadow-blue-500/30 animate-pulse"
-                                    : isRestDay
-                                    ? "bg-gradient-to-br from-purple-500 to-violet-600 shadow-purple-500/30"
-                                    : "bg-gradient-to-br from-zinc-600 to-zinc-700 shadow-zinc-600/30"
+                                      ? "bg-gradient-to-br from-blue-500 to-cyan-600 shadow-blue-500/30 animate-pulse"
+                                      : isRestDay
+                                        ? "bg-gradient-to-br from-purple-500 to-violet-600 shadow-purple-500/30"
+                                        : "bg-gradient-to-br from-zinc-600 to-zinc-700 shadow-zinc-600/30"
                                 }`}
                               >
                                 {workoutStatus === "completed" ? (
@@ -1038,9 +1038,39 @@ export function TrainingPlanOverview({
                                             {exercise.name}
                                           </h4>
                                           <div className="flex items-center gap-2">
-                                            <div className="bg-zinc-800 px-3 py-1 rounded-full text-sm text-zinc-300">
+                                            <div
+                                              className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 ${
+                                                exerciseProgress.percentage ===
+                                                100
+                                                  ? "bg-emerald-900/30 text-emerald-300 border border-emerald-700/50"
+                                                  : exerciseProgress.percentage >
+                                                      0
+                                                    ? "bg-blue-900/30 text-blue-300 border border-blue-700/50"
+                                                    : "bg-zinc-800 text-zinc-400"
+                                              }`}
+                                            >
                                               {exerciseProgress.completed}/
                                               {exerciseProgress.total} sets
+                                              {exerciseProgress.percentage ===
+                                                100 && (
+                                                <Icon
+                                                  icon="mdi:check-circle"
+                                                  width={14}
+                                                  height={14}
+                                                  className="text-emerald-400"
+                                                />
+                                              )}
+                                              {exerciseProgress.percentage >
+                                                0 &&
+                                                exerciseProgress.percentage <
+                                                  100 && (
+                                                  <Icon
+                                                    icon="mdi:clock-outline"
+                                                    width={14}
+                                                    height={14}
+                                                    className="text-blue-400"
+                                                  />
+                                                )}
                                             </div>
                                             <div
                                               className={`w-3 h-3 rounded-full ${
@@ -1048,9 +1078,9 @@ export function TrainingPlanOverview({
                                                 100
                                                   ? "bg-emerald-500"
                                                   : exerciseProgress.percentage >
-                                                    0
-                                                  ? "bg-blue-500"
-                                                  : "bg-zinc-600"
+                                                      0
+                                                    ? "bg-blue-500"
+                                                    : "bg-zinc-600"
                                               }`}
                                             />
                                             {/* Show individual set completion status */}
@@ -1169,8 +1199,8 @@ export function TrainingPlanOverview({
                                                 "number"
                                                   ? exercise.sets
                                                   : Array.isArray(exercise.sets)
-                                                  ? exercise.sets.length
-                                                  : 0}
+                                                    ? exercise.sets.length
+                                                    : 0}
                                               </div>
                                               <button
                                                 type="button"
@@ -1339,15 +1369,39 @@ export function TrainingPlanOverview({
                                           )}
                                         </div>
 
-                                        {/* Progress bar for exercise */}
+                                        {/* Enhanced Progress bar for exercise */}
                                         <div className="mt-3">
-                                          <div className="w-full bg-zinc-700 rounded-full h-2">
-                                            <div
-                                              className={`h-full rounded-full transition-all duration-300 relative overflow-hidden ${
+                                          <div className="flex items-center justify-between mb-1">
+                                            <span className="text-xs text-zinc-400">
+                                              Exercise Progress
+                                            </span>
+                                            <span
+                                              className={`text-xs font-medium ${
                                                 exerciseProgress.percentage ===
                                                 100
-                                                  ? "bg-emerald-500"
-                                                  : "bg-blue-500"
+                                                  ? "text-emerald-400"
+                                                  : exerciseProgress.percentage >
+                                                      0
+                                                    ? "text-blue-400"
+                                                    : "text-zinc-500"
+                                              }`}
+                                            >
+                                              {Math.round(
+                                                exerciseProgress.percentage
+                                              )}
+                                              %
+                                            </span>
+                                          </div>
+                                          <div className="w-full bg-zinc-700 rounded-full h-3 shadow-inner">
+                                            <div
+                                              className={`h-full rounded-full transition-all duration-500 ease-out relative overflow-hidden ${
+                                                exerciseProgress.percentage ===
+                                                100
+                                                  ? "bg-gradient-to-r from-emerald-500 to-emerald-400 shadow-sm shadow-emerald-500/25"
+                                                  : exerciseProgress.percentage >
+                                                      0
+                                                    ? "bg-gradient-to-r from-blue-500 to-blue-400 shadow-sm shadow-blue-500/25"
+                                                    : "bg-zinc-600"
                                               }`}
                                               style={{
                                                 width: `${
@@ -1361,7 +1415,12 @@ export function TrainingPlanOverview({
                                                       )
                                                 }%`,
                                               }}
-                                            />
+                                            >
+                                              {exerciseProgress.percentage >
+                                                0 && (
+                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+                                              )}
+                                            </div>
                                           </div>
 
                                           {/* Show completed sets details */}
