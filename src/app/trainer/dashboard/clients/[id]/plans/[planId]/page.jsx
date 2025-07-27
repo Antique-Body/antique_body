@@ -57,7 +57,6 @@ export default function TrackPlanPage({ params }) {
     completeDayWorkout: _completeDayWorkout,
     getTotalSessionStats,
     updateWorkoutDataAfterExerciseChange,
-    updateWorkoutDataAfterRemoveExercise,
     addNewDayWorkoutData,
     updateWorkoutDataAfterRepsChange,
   } = workoutSession;

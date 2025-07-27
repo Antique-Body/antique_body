@@ -39,13 +39,7 @@ export const CustomMealModal = ({
   const [aiSetManualInput, setAiSetManualInput] = useState(null);
 
   // Fetch custom meal history when modal opens
-  useEffect(() => {
-    if (isOpen && mealName) {
-      fetchCustomMealHistory();
-    }
-  }, [isOpen, mealName]);
-
-  const fetchCustomMealHistory = async () => {
+  const fetchCustomMealHistory = useCallback(async () => {
     setHistoryLoading(true);
     try {
       const mealType = mealName?.toLowerCase();
@@ -62,7 +56,13 @@ export const CustomMealModal = ({
     } finally {
       setHistoryLoading(false);
     }
-  };
+  }, [mealName]);
+
+  useEffect(() => {
+    if (isOpen && mealName) {
+      fetchCustomMealHistory();
+    }
+  }, [isOpen, mealName, fetchCustomMealHistory]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

@@ -7,7 +7,6 @@ import { Card } from "./Card";
 
 import AnatomicalViewer from "@/components/custom/dashboard/trainer/pages/exercises/components/AnatomicalViewer";
 import {
-  formatRepsDisplay,
   getRepsPlaceholder,
   toggleRepsUnit,
 } from "@/utils/exerciseUtils";

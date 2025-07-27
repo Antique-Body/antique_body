@@ -81,128 +81,134 @@ export const useDietTracker = () => {
   );
 
   // Complete a meal
-  const completeMeal = useCallback(async (mealLogId) => {
-    try {
-      setValidationError(null);
+  const completeMeal = useCallback(
+    async (mealLogId) => {
+      try {
+        setValidationError(null);
 
-      const response = await fetch("/api/users/client/diet-tracker/meals", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          action: "complete",
-          mealLogId,
-        }),
-      });
+        const response = await fetch("/api/users/client/diet-tracker/meals", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            action: "complete",
+            mealLogId,
+          }),
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (!response.ok) {
-        if (response.status === 403) {
-          // Day validation error
-          setValidationError(data.error);
-          return;
+        if (!response.ok) {
+          if (response.status === 403) {
+            // Day validation error
+            setValidationError(data.error);
+            return;
+          }
+          throw new Error(data.error || "Failed to complete meal");
         }
-        throw new Error(data.error || "Failed to complete meal");
+
+        // Update local state
+        setDailyLogs((prevLogs) =>
+          prevLogs.map((log) => {
+            const updatedMealLogs = log.mealLogs.map((meal) =>
+              meal.id === mealLogId
+                ? {
+                    ...meal,
+                    isCompleted: true,
+                    completedAt: new Date().toISOString(),
+                  }
+                : meal
+            );
+
+            // Recalculate completed meals count
+            const completedMeals = updatedMealLogs.filter(
+              (meal) => meal.isCompleted
+            ).length;
+
+            return {
+              ...log,
+              mealLogs: updatedMealLogs,
+              completedMeals,
+            };
+          })
+        );
+
+        // Refresh next meal
+        await fetchNextMeal();
+
+        return data;
+      } catch (err) {
+        console.error("Error completing meal:", err);
+        setError(err.message);
+        throw err;
       }
-
-      // Update local state
-      setDailyLogs((prevLogs) =>
-        prevLogs.map((log) => {
-          const updatedMealLogs = log.mealLogs.map((meal) =>
-            meal.id === mealLogId
-              ? {
-                  ...meal,
-                  isCompleted: true,
-                  completedAt: new Date().toISOString(),
-                }
-              : meal
-          );
-
-          // Recalculate completed meals count
-          const completedMeals = updatedMealLogs.filter(
-            (meal) => meal.isCompleted
-          ).length;
-
-          return {
-            ...log,
-            mealLogs: updatedMealLogs,
-            completedMeals,
-          };
-        })
-      );
-
-      // Refresh next meal
-      await fetchNextMeal();
-
-      return data;
-    } catch (err) {
-      console.error("Error completing meal:", err);
-      setError(err.message);
-      throw err;
-    }
-  }, []);
+    },
+    [fetchNextMeal]
+  );
 
   // Uncomplete a meal
-  const uncompleteMeal = useCallback(async (mealLogId) => {
-    try {
-      setValidationError(null);
+  const uncompleteMeal = useCallback(
+    async (mealLogId) => {
+      try {
+        setValidationError(null);
 
-      const response = await fetch("/api/users/client/diet-tracker/meals", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          action: "uncomplete",
-          mealLogId,
-        }),
-      });
+        const response = await fetch("/api/users/client/diet-tracker/meals", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            action: "uncomplete",
+            mealLogId,
+          }),
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (!response.ok) {
-        if (response.status === 403) {
-          // Day validation error
-          setValidationError(data.error);
-          return;
+        if (!response.ok) {
+          if (response.status === 403) {
+            // Day validation error
+            setValidationError(data.error);
+            return;
+          }
+          throw new Error(data.error || "Failed to uncomplete meal");
         }
-        throw new Error(data.error || "Failed to uncomplete meal");
+
+        // Update local state
+        setDailyLogs((prevLogs) =>
+          prevLogs.map((log) => {
+            const updatedMealLogs = log.mealLogs.map((meal) =>
+              meal.id === mealLogId
+                ? { ...meal, isCompleted: false, completedAt: null }
+                : meal
+            );
+
+            // Recalculate completed meals count
+            const completedMeals = updatedMealLogs.filter(
+              (meal) => meal.isCompleted
+            ).length;
+
+            return {
+              ...log,
+              mealLogs: updatedMealLogs,
+              completedMeals,
+            };
+          })
+        );
+
+        // Refresh next meal
+        await fetchNextMeal();
+
+        return data;
+      } catch (err) {
+        console.error("Error uncompleting meal:", err);
+        setError(err.message);
+        throw err;
       }
-
-      // Update local state
-      setDailyLogs((prevLogs) =>
-        prevLogs.map((log) => {
-          const updatedMealLogs = log.mealLogs.map((meal) =>
-            meal.id === mealLogId
-              ? { ...meal, isCompleted: false, completedAt: null }
-              : meal
-          );
-
-          // Recalculate completed meals count
-          const completedMeals = updatedMealLogs.filter(
-            (meal) => meal.isCompleted
-          ).length;
-
-          return {
-            ...log,
-            mealLogs: updatedMealLogs,
-            completedMeals,
-          };
-        })
-      );
-
-      // Refresh next meal
-      await fetchNextMeal();
-
-      return data;
-    } catch (err) {
-      console.error("Error uncompleting meal:", err);
-      setError(err.message);
-      throw err;
-    }
-  }, []);
+    },
+    [fetchNextMeal]
+  );
 
   // Change meal option
   const changeMealOption = useCallback(async (mealLogId, newOption) => {

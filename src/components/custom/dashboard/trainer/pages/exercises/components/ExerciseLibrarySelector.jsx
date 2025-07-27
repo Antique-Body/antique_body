@@ -28,7 +28,6 @@ export const ExerciseLibrarySelector = ({
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
-  const [error, setError] = useState(null); // Add error state
 
   // Determine which exercises to display
   const displayExercises = useStaticData ? filteredStaticExercises : exercises;
@@ -63,7 +62,6 @@ export const ExerciseLibrarySelector = ({
   useEffect(() => {
     if (!useStaticData) {
       setLoading(true);
-      setError(null); // Reset error state before fetching
       const controller = new AbortController();
       fetch(
         `/api/users/trainer/exercises?search=${encodeURIComponent(search)}`,
@@ -79,9 +77,6 @@ export const ExerciseLibrarySelector = ({
         })
         .catch((err) => {
           if (err.name !== "AbortError") {
-            setError(
-              err.message || "An error occurred while fetching exercises."
-            );
             setLoading(false);
           }
         });

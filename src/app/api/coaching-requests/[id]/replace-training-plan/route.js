@@ -58,10 +58,7 @@ export async function POST(request, { params }) {
     }
     const {
       id: _id,
-      trainerInfoId,
-      createdAt,
-      updatedAt,
-      deletedAt,
+
       ...planData
     } = plan;
     // Transaction: complete old plan and assign new one atomically

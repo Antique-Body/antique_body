@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@iconify/react";
+import Image from "next/image";
 import React, { useState, useEffect } from "react";
 
 import { AIImageScanner } from "./AIImageScanner";
@@ -179,10 +180,13 @@ export const FoodImageAnalyzer = ({
               <div className="relative h-64 w-full bg-zinc-800 rounded-lg overflow-hidden">
                 {previewUrl && (
                   <>
-                    <img
+                    <Image
                       src={previewUrl}
                       alt="Food preview"
                       className="w-full h-full object-cover"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      priority
                     />
                     <AIImageScanner isScanning={isAnalyzing} />
                   </>
