@@ -7,10 +7,7 @@ import { BackButton } from "@/components/common/BackButton";
 import { useTrainingPlanForm } from "@/hooks/useTrainingPlanForm";
 
 import { NavigationButtons } from "./components/NavigationButtons";
-import { BasicInfo } from "./steps/BasicInfo";
-import { Features } from "./steps/Features";
-import { Preview } from "./steps/Preview";
-import { Schedule } from "./steps/Schedule";
+import { BasicInfo, Features, Preview, Schedule } from "./steps";
 
 const STEPS = [
   { id: "basic", label: "Basic Info", icon: "mdi:information" },

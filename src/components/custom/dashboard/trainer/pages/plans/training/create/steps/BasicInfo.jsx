@@ -2,7 +2,6 @@
 
 import { Icon } from "@iconify/react";
 import clsx from "clsx";
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState, useEffect, useCallback } from "react";
 
@@ -16,12 +15,7 @@ import { updateFormData } from "@/lib/utils";
 import { SESSION_FORMATS } from "src/enums/sessionFormats";
 import { TRAINING_LEVELS } from "src/enums/trainingLevels";
 
-import { CoverImageUploadSkeleton } from "../components/CoverImageUpload";
-
-const CoverImageUploadDynamic = dynamic(
-  () => import("../components/CoverImageUpload"),
-  { loading: () => <CoverImageUploadSkeleton /> }
-);
+import { CoverImageUpload } from "../components";
 
 export const BasicInfo = ({ data, onChange, prefillForm, templates }) => {
   const [previewImage, setPreviewImage] = useState(null);
@@ -250,7 +244,7 @@ export const BasicInfo = ({ data, onChange, prefillForm, templates }) => {
       {/* Template Browse Banner */}
       {templates && templates.length > 0 && (
         <InfoBanner
-          icon="mdi:template"
+          icon="mdi:information"
           title="Quick Start with Templates"
           subtitle="Use pre-built plan templates to save time"
           variant="primary"
@@ -356,7 +350,7 @@ export const BasicInfo = ({ data, onChange, prefillForm, templates }) => {
             clients. Recommended size: 1920×1080px (16:9 ratio).
           </p>
           <div className="flex flex-col items-center justify-center">
-            <CoverImageUploadDynamic
+            <CoverImageUpload
               previewImage={previewImage}
               imageError={imageError}
               handleImageChange={handleImageChange}
