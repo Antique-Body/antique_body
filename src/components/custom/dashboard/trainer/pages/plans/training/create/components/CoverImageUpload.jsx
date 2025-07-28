@@ -41,10 +41,7 @@ export default function CoverImageUpload({
                   htmlFor="coverImage"
                   className="cursor-pointer px-3 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] rounded-lg text-white font-bold hover:from-[#FF7900] hover:to-[#FF9B00] transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl hover:shadow-[#FF6B00]/25 transform hover:scale-105"
                 >
-                  <Icon
-                    icon="mdi:camera-plus"
-                    className="w-4 h-4"
-                  />
+                  <Icon icon="mdi:camera-plus" className="w-4 h-4" />
                   <span className="text-sm">Change Cover</span>
                 </label>
               </div>

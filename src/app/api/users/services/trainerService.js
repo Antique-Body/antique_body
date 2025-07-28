@@ -1,7 +1,7 @@
+import prisma from "@/lib/prisma";
+
 import { exerciseService } from "./exerciseService";
 import { mealService } from "./mealService";
-
-import prisma from "@/lib/prisma";
 
 // Helper za dinamički where za lokaciju
 function buildLocationWhere(location) {

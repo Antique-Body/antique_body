@@ -1,52 +1,31 @@
-// This is your Prisma schema file
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
 }
 
-enum UserRole {
-  trainer
-  client
-  user
-  admin
-}
-
-enum CertificationStatus {
-  pending
-  accepted
-  rejected
-  expired
-}
-
-// Simple User model for authentication
 model User {
-  id               String    @id @default(cuid())
-  email            String?   @unique
-  phone            String?   @unique
-  password         String?
-  role             UserRole?
-  language         String    @default("en")
-  emailVerified    DateTime?
-  phoneVerified    DateTime?
-  resetToken       String?
-  resetTokenExpiry DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-
-  // Relacije
-  accounts          Account[]
-  trainerInfo       TrainerInfo?
-  clientInfo        ClientInfo?
+  id                 String              @id @default(cuid())
+  email              String?             @unique
+  phone              String?             @unique
+  password           String?
+  role               UserRole?
+  language           String              @default("en")
+  emailVerified      DateTime?
+  phoneVerified      DateTime?
+  resetToken         String?
+  resetTokenExpiry   DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  accounts           Account[]
+  clientInfo         ClientInfo?
   emailVerifications EmailVerification[]
   phoneVerifications PhoneVerification[]
-  sentMessages      Message[] @relation("SentMessages")
-  receivedMessages  Message[] @relation("ReceivedMessages")
+  trainerInfo        TrainerInfo?
 
   @@index([email])
   @@index([phone])
@@ -54,22 +33,20 @@ model User {
   @@index([resetToken])
 }
 
-// NextAuth models - Only Account is needed for OAuth providers
 model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@index([userId])
@@ -112,9 +89,9 @@ model Location {
   country         String
   lat             Float?
   lon             Float?
-  trainerProfiles TrainerProfile[]
   clientProfiles  ClientProfile[]
   gyms            Gym[]
+  trainerProfiles TrainerProfile[]
 
   @@index([city])
   @@index([country])
@@ -126,34 +103,30 @@ model Gym {
   address    String?
   lat        Float
   lon        Float
-  placeId    String?      @unique // Google place_id
+  placeId    String?      @unique
   locationId String?
   location   Location?    @relation(fields: [locationId], references: [id])
   trainers   TrainerGym[]
 }
 
-// Main TrainerInfo container
 model TrainerInfo {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relacije
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  trainerProfile    TrainerProfile?
-  trainerSettings   TrainerSettings?
-  exercises         Exercise[]
-  meals             Meal[]
-  trainingPlans     TrainingPlan[]
-  nutritionPlans    NutritionPlan[]
-  coachingRequests  CoachingRequest[]
+  id                       String                    @id @default(cuid())
+  userId                   String                    @unique
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  assignedTrainingPlans    AssignedTrainingPlan[]
+  coachingRequests         CoachingRequest[]
   coachingRequestCooldowns CoachingRequestCooldown[]
-  assignedTrainingPlans AssignedTrainingPlan[]
-  conversations     Conversation[]
+  exercises                Exercise[]
+  meals                    Meal[]
+  nutritionPlans           NutritionPlan[]
+  user                     User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainerProfile           TrainerProfile?
+  trainerSettings          TrainerSettings?
+  trainingPlans            TrainingPlan[]
+  assignedDietPlans        DietPlanAssignment[]
 }
 
-// TrainerProfile now belongs to TrainerInfo
 model TrainerProfile {
   id                  String                @id @default(cuid())
   trainerInfoId       String                @unique
@@ -163,126 +136,113 @@ model TrainerProfile {
   gender              String?
   trainerSince        Int?
   profileImage        String?
-  description         String?               @db.Text
+  description         String?
   paidAds             DateTime?
-  specialties         TrainerSpecialty[]
-  languages           TrainerLanguage[]
   trainingEnvironment String?
-  trainingTypes       TrainerType[]
-  certifications      Certification[]
   locationId          String?
-  location            Location?             @relation(fields: [locationId], references: [id])
   contactEmail        String?
   contactPhone        String?
   sessionDuration     Int?
   cancellationPolicy  Int?
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
-  trainerGyms         TrainerGym[]
-  trainerInfo         TrainerInfo           @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  certifications      Certification[]
   availabilities      TrainerAvailability[]
   galleryImages       TrainerGalleryImage[]
+  trainerGyms         TrainerGym[]
+  languages           TrainerLanguage[]
+  location            Location?             @relation(fields: [locationId], references: [id])
+  trainerInfo         TrainerInfo           @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  specialties         TrainerSpecialty[]
+  trainingTypes       TrainerType[]
 
   @@index([trainingEnvironment])
 }
 
-// TrainerSettings for trainer preferences and configurations
 model TrainerSettings {
-  id                 String   @id @default(cuid())
-  trainerInfoId      String   @unique
-  notifications      Boolean  @default(true)
-  emailNotifications Boolean  @default(true)
-  smsNotifications   Boolean  @default(false)
-  autoAcceptBookings Boolean  @default(false)
-  requireDeposit     Boolean  @default(false)
+  id                 String      @id @default(cuid())
+  trainerInfoId      String      @unique
+  notifications      Boolean     @default(true)
+  emailNotifications Boolean     @default(true)
+  smsNotifications   Boolean     @default(false)
+  autoAcceptBookings Boolean     @default(false)
+  requireDeposit     Boolean     @default(false)
   depositAmount      Int?
-  timezone           String   @default("UTC")
+  timezone           String      @default("UTC")
   workingHours       Json?
   blackoutDates      Json?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-
-  trainerInfo TrainerInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  trainerInfo        TrainerInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
 }
 
 model TrainerSpecialty {
-  id               String   @id @default(cuid())
+  id               String         @id @default(cuid())
   trainerProfileId String
   name             String
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  // Relations
-  trainerProfile TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  trainerProfile   TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
 }
 
 model TrainerLanguage {
-  id               String   @id @default(cuid())
+  id               String         @id @default(cuid())
   trainerProfileId String
   name             String
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  // Relations
-  trainerProfile TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  trainerProfile   TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
 }
 
 model TrainerType {
-  id               String   @id @default(cuid())
+  id               String         @id @default(cuid())
   trainerProfileId String
   name             String
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  // Relations
-  trainerProfile TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  trainerProfile   TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
 }
 
 model Certification {
-  id               String              @id @default(cuid())
+  id               String                  @id @default(cuid())
   trainerProfileId String
   name             String
   issuer           String?
   expiryDate       DateTime?
-  status           CertificationStatus @default(pending)
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
-  hidden           Boolean             @default(false)
-
-  trainerProfile TrainerProfile          @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
-  documents      CertificationDocument[]
+  status           CertificationStatus     @default(pending)
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+  hidden           Boolean                 @default(false)
+  trainerProfile   TrainerProfile          @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
+  documents        CertificationDocument[]
 }
 
 model CertificationDocument {
-  id              String   @id @default(cuid())
+  id              String        @id @default(cuid())
   certificationId String
   url             String
   originalName    String?
   mimetype        String?
-  createdAt       DateTime @default(now())
-
-  certification Certification @relation(fields: [certificationId], references: [id], onDelete: Cascade)
+  createdAt       DateTime      @default(now())
+  certification   Certification @relation(fields: [certificationId], references: [id], onDelete: Cascade)
 }
 
-// Main ClientInfo container
 model ClientInfo {
-  id            String   @id @default(cuid())
-  userId        String   @unique
-  totalSessions Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  // Relacije
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  clientProfile     ClientProfile?
-  clientSettings    ClientSettings?
-  coachingRequests  CoachingRequest[]
+  id                       String                    @id @default(cuid())
+  userId                   String                    @unique
+  totalSessions            Int                       @default(0)
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  assignedTrainingPlans    AssignedTrainingPlan[]
+  user                     User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientProfile            ClientProfile?
+  clientSettings           ClientSettings?
+  coachingRequests         CoachingRequest[]
   coachingRequestCooldowns CoachingRequestCooldown[]
-  assignedTrainingPlans AssignedTrainingPlan[]
-  conversations     Conversation[]
+  dietPlanAssignments      DietPlanAssignment[]
+  customMeals              CustomMeal[]
 }
 
-// ClientProfile now belongs to ClientInfo
 model ClientProfile {
   id                  String           @id @default(cuid())
   clientInfoId        String           @unique
@@ -293,74 +253,68 @@ model ClientProfile {
   height              Int?
   weight              Int?
   experienceLevel     String
-  previousActivities  String?          @db.Text
+  previousActivities  String?
   primaryGoal         String?
   secondaryGoal       String?
-  goalDescription     String?          @db.Text
+  goalDescription     String?
   contactEmail        String?
   contactPhone        String?
   locationId          String?
-  location            Location?        @relation(fields: [locationId], references: [id])
   profileImage        String?
-  description         String?          @db.Text
-  medicalConditions   String?          @db.Text
-  allergies           String?          @db.Text
+  description         String?
+  medicalConditions   String?
+  allergies           String?
   createdAt           DateTime         @default(now())
   updatedAt           DateTime         @updatedAt
-  clientInfo          ClientInfo       @relation(fields: [clientInfoId], references: [id], onDelete: Cascade)
-  languages           ClientLanguage[]
   preferredActivities ClientActivity[]
+  languages           ClientLanguage[]
+  clientInfo          ClientInfo       @relation(fields: [clientInfoId], references: [id], onDelete: Cascade)
+  location            Location?        @relation(fields: [locationId], references: [id])
 }
 
-// ClientSettings for client preferences and configurations
 model ClientSettings {
-  id                 String   @id @default(cuid())
-  clientInfoId       String   @unique
-  notifications      Boolean  @default(true)
-  emailNotifications Boolean  @default(true)
-  smsNotifications   Boolean  @default(false)
-  reminderTime       Int      @default(24)
-  privacyLevel       String   @default("public")
-  shareProgress      Boolean  @default(true)
-  timezone           String   @default("UTC")
-  preferredLanguage  String   @default("en")
-  measurementUnit    String   @default("metric")
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-
-  clientInfo ClientInfo @relation(fields: [clientInfoId], references: [id], onDelete: Cascade)
+  id                 String     @id @default(cuid())
+  clientInfoId       String     @unique
+  notifications      Boolean    @default(true)
+  emailNotifications Boolean    @default(true)
+  smsNotifications   Boolean    @default(false)
+  reminderTime       Int        @default(24)
+  privacyLevel       String     @default("public")
+  shareProgress      Boolean    @default(true)
+  timezone           String     @default("UTC")
+  preferredLanguage  String     @default("en")
+  measurementUnit    String     @default("metric")
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  clientInfo         ClientInfo @relation(fields: [clientInfoId], references: [id], onDelete: Cascade)
 }
 
 model ClientLanguage {
-  id              String   @id @default(cuid())
+  id              String        @id @default(cuid())
   clientProfileId String
   name            String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  // Relations
-  clientProfile ClientProfile @relation(fields: [clientProfileId], references: [id], onDelete: Cascade)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  clientProfile   ClientProfile @relation(fields: [clientProfileId], references: [id], onDelete: Cascade)
 }
 
 model ClientActivity {
-  id              String   @id @default(cuid())
+  id              String        @id @default(cuid())
   clientProfileId String
   name            String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  // Relations
-  clientProfile ClientProfile @relation(fields: [clientProfileId], references: [id], onDelete: Cascade)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  clientProfile   ClientProfile @relation(fields: [clientProfileId], references: [id], onDelete: Cascade)
 }
 
 model TrainerGym {
   id        String         @id @default(cuid())
   trainerId String
   gymId     String
-  trainer   TrainerProfile @relation(fields: [trainerId], references: [id], onDelete: Cascade)
-  gym       Gym            @relation(fields: [gymId], references: [id], onDelete: Cascade)
   createdAt DateTime       @default(now())
   updatedAt DateTime       @default(now())
+  gym       Gym            @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  trainer   TrainerProfile @relation(fields: [trainerId], references: [id], onDelete: Cascade)
 
   @@unique([trainerId, gymId])
   @@index([gymId])
@@ -369,8 +323,8 @@ model TrainerGym {
 model TrainerAvailability {
   id               String         @id @default(cuid())
   trainerProfileId String
-  weekday          String // e.g. Monday, Tuesday, ...
-  timeSlot         String // e.g. Morning, Afternoon, Evening, Night
+  weekday          String
+  timeSlot         String
   trainerProfile   TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
 
   @@index([trainerProfileId])
@@ -378,25 +332,23 @@ model TrainerAvailability {
   @@index([timeSlot])
 }
 
-// Exercise models
 model Exercise {
-  id            String   @id @default(cuid())
+  id            String                @id @default(cuid())
   trainerInfoId String
   name          String
-  location      String // "gym", "home", "outdoor"
-  equipment     Boolean  @default(true)
-  type          String // "strength", "bodyweight", "cardio", "flexibility", "balance"
-  level         String // "beginner", "intermediate", "advanced"
-  description   String   @db.Text
-  instructions  String   @db.Text
-  videoUrl      String? // URL to video
-  imageUrl      String? // URL to image
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  trainerInfo  TrainerInfo           @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
-  muscleGroups ExerciseMuscleGroup[]
-  exerciseInfo ExerciseInfo?
+  location      String
+  equipment     Boolean               @default(true)
+  type          String
+  level         String
+  description   String
+  instructions  String
+  videoUrl      String?
+  imageUrl      String?
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  trainerInfo   TrainerInfo           @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  exerciseInfo  ExerciseInfo?
+  muscleGroups  ExerciseMuscleGroup[]
 
   @@index([trainerInfoId])
   @@index([type])
@@ -415,11 +367,10 @@ model Exercise {
 model ExerciseMuscleGroup {
   id         String   @id @default(cuid())
   exerciseId String
-  name       String // "chest", "back", "shoulders", etc.
+  name       String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-
-  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 
   @@index([exerciseId])
   @@index([name])
@@ -433,48 +384,44 @@ model ExerciseInfo {
   totalRatings  Int      @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-
-  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  exercise      Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 }
 
 model TrainerGalleryImage {
-  id               String   @id @default(cuid())
+  id               String         @id @default(cuid())
   trainerProfileId String
   url              String
-  description      String?  @db.Text
+  description      String?
   order            Int
-  isHighlighted    Boolean  @default(false)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  trainerProfile TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
+  isHighlighted    Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  trainerProfile   TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
 
   @@index([trainerProfileId])
   @@index([trainerProfileId, order])
 }
 
-// Meal models
 model Meal {
-  id              String   @id @default(cuid())
+  id              String      @id @default(cuid())
   trainerId       String
   name            String
-  mealType        String // "breakfast", "lunch", "dinner", "snack", "dessert"
-  difficulty      String // "easy", "medium", "hard"
-  preparationTime Int // in minutes
-  calories        Float    @default(0)
-  protein         Float    @default(0)
-  carbs           Float    @default(0)
-  fat             Float    @default(0)
-  dietary         Json // ["vegetarian", "vegan", "gluten-free", etc.]
-  cuisine         String   @default("other") // "italian", "mexican", "asian", etc.
-  ingredients     String   @db.Text
-  recipe          String   @db.Text
+  mealType        String
+  difficulty      String
+  preparationTime Int
+  calories        Float       @default(0)
+  protein         Float       @default(0)
+  carbs           Float       @default(0)
+  fat             Float       @default(0)
+  dietary         Json
+  cuisine         String      @default("other")
+  ingredients     String
+  recipe          String
   imageUrl        String?
-  videoUrl        String? // URL to video
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  trainerInfo TrainerInfo @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  videoUrl        String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  trainerInfo     TrainerInfo @relation(fields: [trainerId], references: [id], onDelete: Cascade)
 
   @@index([trainerId])
   @@index([mealType])
@@ -489,35 +436,34 @@ model Meal {
 }
 
 model TrainingPlan {
-  id              String  @id @default(cuid())
-  trainerInfoId   String
-  title           String
-  description     String?
-  coverImage      String?
-  price           Float?
-  duration        Int?
-  durationType    String? // "weeks", "days", etc.
-  keyFeatures     Json?
-  trainingType    String?
-  timeline        Json?
-  features        Json?
-  sessionsPerWeek Int?
-  sessionFormat   Json?
-  difficultyLevel String?
-  schedule        Json? // Dodano polje za raspored sesija
-
+  id                    String                 @id @default(cuid())
+  trainerInfoId         String
+  title                 String
+  description           String?
+  coverImage            String?
+  price                 Float?
+  duration              Int?
+  durationType          String?
+  keyFeatures           Json?
+  trainingType          String?
+  timeline              Json?
+  features              Json?
+  sessionsPerWeek       Int?
+  sessionFormat         Json?
+  difficultyLevel       String?
+  schedule              Json?
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
   deletedAt             DateTime?
-  clientCount           Int? // Dodano polje za broj klijenata
-  trainerInfo           TrainerInfo            @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  clientCount           Int?
   assignedTrainingPlans AssignedTrainingPlan[]
+  trainerInfo           TrainerInfo            @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
 
   @@index([trainerInfoId])
 }
 
 model NutritionPlan {
-  id                        String  @id @default(cuid())
+  id                        String      @id @default(cuid())
   trainerInfoId             String
   title                     String
   description               String?
@@ -535,40 +481,28 @@ model NutritionPlan {
   days                      Json?
   recommendedFrequency      String?
   adaptability              String?
-
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  deletedAt   DateTime?
-  clientCount Int? // Dodano polje za broj klijenata
-  trainerInfo TrainerInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
-
+  createdAt                 DateTime    @default(now())
+  updatedAt                 DateTime    @updatedAt
+  deletedAt                 DateTime?
+  clientCount               Int?
+  trainerInfo               TrainerInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  dietPlanAssignments       DietPlanAssignment[]
+  
   @@index([trainerInfoId])
-}
-
-// Coaching Request System
-enum CoachingRequestStatus {
-  pending
-  accepted
-  rejected
-  cancelled
 }
 
 model CoachingRequest {
   id              String                @id @default(cuid())
   clientId        String
   trainerId       String
-  note            String?               @db.Text
+  note            String?
   status          CoachingRequestStatus @default(pending)
-  rejectionReason String?               @db.Text
+  rejectionReason String?
   createdAt       DateTime              @default(now())
   updatedAt       DateTime              @default(now()) @updatedAt
   respondedAt     DateTime?
-
-  // Relations
-  client       ClientInfo    @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  trainer      TrainerInfo   @relation(fields: [trainerId], references: [id], onDelete: Cascade)
-  messages     Message[]
-  conversation Conversation?
+  client          ClientInfo            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  trainer         TrainerInfo           @relation(fields: [trainerId], references: [id], onDelete: Cascade)
 
   @@index([clientId])
   @@index([trainerId])
@@ -576,19 +510,15 @@ model CoachingRequest {
   @@index([createdAt])
 }
 
-// Coaching Request Cooldown System
 model CoachingRequestCooldown {
-  id        String   @id @default(cuid())
+  id        String      @id @default(cuid())
   clientId  String
   trainerId String
-  removedAt DateTime @default(now())
-  expiresAt DateTime // 24 hours after removal
+  removedAt DateTime    @default(now())
+  expiresAt DateTime
+  client    ClientInfo  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  trainer   TrainerInfo @relation(fields: [trainerId], references: [id], onDelete: Cascade)
 
-  // Relations
-  client  ClientInfo  @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  trainer TrainerInfo @relation(fields: [trainerId], references: [id], onDelete: Cascade)
-
-  // Ensure unique cooldown per client-trainer pair
   @@unique([clientId, trainerId])
   @@index([clientId])
   @@index([trainerId])
@@ -596,72 +526,172 @@ model CoachingRequestCooldown {
   @@index([removedAt])
 }
 
+
+// Diet Tracking System
+model DietPlanAssignment {
+  id              String   @id @default(cuid())
+  clientId        String
+  nutritionPlanId String
+  assignedById    String   // trainer who assigned the plan
+  startDate       DateTime @default(now())
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  client          ClientInfo @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  nutritionPlan   NutritionPlan @relation(fields: [nutritionPlanId], references: [id], onDelete: Cascade)
+  assignedBy      TrainerInfo @relation(fields: [assignedById], references: [id], onDelete: Cascade)
+  dailyLogs       DailyDietLog[]
+  
+  @@index([clientId])
+  @@index([nutritionPlanId])
+  @@index([assignedById])
+  @@index([isActive])
+  @@index([startDate])
+}
+
+model DailyDietLog {
+  id                  String   @id @default(cuid())
+  dietPlanAssignmentId String
+  date                DateTime @db.Date
+  dayNumber           Int      // Which day of the plan (1, 2, 3, etc.)
+  totalCalories       Float    @default(0)
+  totalProtein        Float    @default(0)
+  totalCarbs          Float    @default(0)
+  totalFat            Float    @default(0)
+  completedMeals      Int      @default(0)
+  totalMeals          Int      @default(0)
+  isCompleted         Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  // Relations
+  dietPlanAssignment  DietPlanAssignment @relation(fields: [dietPlanAssignmentId], references: [id], onDelete: Cascade)
+  mealLogs            MealLog[]
+  snackLogs           SnackLog[]
+  
+  @@unique([dietPlanAssignmentId, date])
+  @@index([dietPlanAssignmentId])
+  @@index([date])
+  @@index([dayNumber])
+  @@index([isCompleted])
+}
+
+model MealLog {
+  id              String   @id @default(cuid())
+  dailyDietLogId  String
+  mealName        String   // "Breakfast", "Lunch", "Dinner", "Snack"
+  mealTime        String   // "08:00", "13:00", etc.
+  selectedOption  Json     // The meal option that was selected
+  isCompleted     Boolean  @default(false)
+  completedAt     DateTime?
+  calories        Float    @default(0)
+  protein         Float    @default(0)
+  carbs           Float    @default(0)
+  fat             Float    @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  dailyDietLog    DailyDietLog @relation(fields: [dailyDietLogId], references: [id], onDelete: Cascade)
+  
+  @@index([dailyDietLogId])
+  @@index([mealName])
+  @@index([isCompleted])
+  @@index([completedAt])
+}
+
+// Snack Log for extra meals/snacks outside of planned meals
+model SnackLog {
+  id              String   @id @default(cuid())
+  dailyDietLogId  String
+  name            String   // Name of the snack/food
+  description     String?  // Optional description
+  mealType        String   // "snack", "drink", "dessert", "supplement", "other"
+  calories        Float    @default(0)
+  protein         Float    @default(0)
+  carbs           Float    @default(0)
+  fat             Float    @default(0)
+  ingredients     Json     // Array of ingredient strings
+  loggedAt        DateTime @default(now())
+  loggedTime      String   // Time when logged (HH:MM format)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  dailyDietLog    DailyDietLog @relation(fields: [dailyDietLogId], references: [id], onDelete: Cascade)
+  
+  @@index([dailyDietLogId])
+  @@index([mealType])
+  @@index([loggedAt])
+  @@index([loggedTime])
+}
+
+// Custom Meal History System
+model CustomMeal {
+  id              String   @id @default(cuid())
+  clientId        String
+  name            String
+  description     String?
+  mealType        String   // "breakfast", "lunch", "dinner", "snack"
+  calories        Float    @default(0)
+  protein         Float    @default(0)
+  carbs           Float    @default(0)
+  fat             Float    @default(0)
+  ingredients     Json     // Array of ingredient strings
+  usageCount      Int      @default(1)
+  lastUsed        DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  client          ClientInfo @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  @@index([clientId])
+  @@index([mealType])
+  @@index([lastUsed])
+  @@index([usageCount])
+  @@index([clientId, mealType])
+  @@index([clientId, lastUsed])
+}
+
+
 model AssignedTrainingPlan {
-  id             String    @id @default(cuid())
+  id             String       @id @default(cuid())
   clientId       String
   trainerId      String
   originalPlanId String
   planData       Json
-  status         String    @default("active") // active, completed, cancelled
-  assignedAt     DateTime  @default(now())
+  status         String       @default("active")
+  assignedAt     DateTime     @default(now())
   completedAt    DateTime?
-
-  client       ClientInfo   @relation(fields: [clientId], references: [id])
-  trainer      TrainerInfo  @relation(fields: [trainerId], references: [id])
-  originalPlan TrainingPlan @relation(fields: [originalPlanId], references: [id])
+  client         ClientInfo   @relation(fields: [clientId], references: [id])
+  originalPlan   TrainingPlan @relation(fields: [originalPlanId], references: [id])
+  trainer        TrainerInfo  @relation(fields: [trainerId], references: [id])
 
   @@index([clientId])
   @@index([trainerId])
   @@index([status])
 }
 
-model Message {
-  id               String   @id @default(cuid())
-  senderId         String
-  receiverId       String
-  coachingRequestId String
-  content          String   @db.Text
-  messageType      String   @default("text") // text, image, file
-  fileUrl          String?
-  fileName         String?
-  isRead           Boolean  @default(false)
-  editedAt         DateTime?
-  deletedAt        DateTime?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  // Relations
-  sender           User             @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver         User             @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
-  coachingRequest  CoachingRequest  @relation(fields: [coachingRequestId], references: [id], onDelete: Cascade)
-
-  @@index([senderId])
-  @@index([receiverId])
-  @@index([coachingRequestId])
-  @@index([createdAt])
-  @@index([coachingRequestId, createdAt])
+enum UserRole {
+  trainer
+  client
+  user
+  admin
 }
 
-model Conversation {
-  id               String   @id @default(cuid())
-  coachingRequestId String  @unique
-  clientId         String
-  trainerId        String
-  lastMessageId    String?
-  lastMessageAt    DateTime?
-  clientUnreadCount Int     @default(0)
-  trainerUnreadCount Int    @default(0)
-  isActive         Boolean  @default(true)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+enum CertificationStatus {
+  pending
+  accepted
+  rejected
+  expired
+}
 
-  // Relations
-  coachingRequest  CoachingRequest @relation(fields: [coachingRequestId], references: [id], onDelete: Cascade)
-  client           ClientInfo      @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  trainer          TrainerInfo     @relation(fields: [trainerId], references: [id], onDelete: Cascade)
-
-  @@index([clientId])
-  @@index([trainerId])
-  @@index([lastMessageAt])
-  @@index([isActive])
+enum CoachingRequestStatus {
+  pending
+  accepted
+  rejected
+  cancelled
 }

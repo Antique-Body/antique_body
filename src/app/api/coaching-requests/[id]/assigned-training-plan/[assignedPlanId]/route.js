@@ -1,88 +1,85 @@
+import Ajv from "ajv";
 import { NextResponse } from "next/server";
 
 import { auth } from "#/auth";
 import prisma from "@/lib/prisma";
 
-export async function GET(request, { params }) {
-  try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-    const { id, assignedPlanId } = params;
-    
-    if (!id || !assignedPlanId) {
-      return NextResponse.json(
-        { success: false, error: "Request ID and assignedPlanId are required" },
-        { status: 400 }
-      );
-    }
-
-    // Fetch coaching request to verify access
-    const coachingRequest = await prisma.coachingRequest.findUnique({
-      where: { id },
-      select: {
-        client: { select: { userId: true } },
-        trainer: { select: { userId: true } },
-        clientId: true,
-        trainerId: true,
+const planDataSchema = {
+  type: "object",
+  properties: {
+    title: { type: "string" },
+    description: { type: "string" },
+    schedule: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          day: { anyOf: [{ type: "string" }, { type: "number" }] },
+          name: { type: "string" },
+          type: { type: "string" },
+          duration: { type: "number" },
+          description: { type: "string" },
+          workoutStatus: { type: "string" },
+          workoutStartedAt: { type: ["string", "null"] },
+          workoutCompletedAt: { type: ["string", "null"] },
+          workoutEndedAt: { type: ["string", "null"] },
+          workoutDuration: { type: ["number", "null"] },
+          workoutNotes: { type: "string" },
+          workoutWasCompleted: { type: "boolean" },
+          exercises: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                name: { type: "string" },
+                reps: { type: ["number", "null"] },
+                rest: { type: ["number", "null"] },
+                sets: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      weight: { type: ["number", "null"] },
+                      reps: { type: ["number", "null"] },
+                      completed: { type: "boolean" },
+                      notes: { type: "string" },
+                    },
+                    required: ["reps", "completed"],
+                  },
+                },
+                type: { type: "string" },
+                level: { type: "string" },
+                imageUrl: { type: "string" },
+                location: { type: "string" },
+                equipment: { type: ["boolean", "null"] },
+                instructions: { type: "string" },
+                muscleGroups: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                    },
+                    required: ["name"],
+                  },
+                },
+                exerciseNotes: { type: "string" },
+                exerciseCompleted: { type: "boolean" },
+              },
+              required: ["name", "type", "sets"],
+            },
+          },
+        },
+        required: ["day", "name", "type", "duration", "exercises"],
       },
-    });
+    },
+    lastUpdated: { type: ["string", "null"] },
+  },
+  required: ["title", "description", "schedule"],
+};
+const ajv = new Ajv();
 
-    if (!coachingRequest) {
-      return NextResponse.json(
-        { success: false, error: "Coaching request not found" },
-        { status: 404 }
-      );
-    }
-
-    // Only the trainer or client can view
-    if (
-      session.user.id !== coachingRequest.trainer.userId &&
-      session.user.id !== coachingRequest.client.userId
-    ) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 403 }
-      );
-    }
-
-    // Get assigned plan with full planData
-    const assignedPlan = await prisma.assignedTrainingPlan.findUnique({
-      where: { id: assignedPlanId },
-    });
-
-    if (!assignedPlan) {
-      return NextResponse.json(
-        { success: false, error: "Assigned plan not found" },
-        { status: 404 }
-      );
-    }
-
-    // Verify the plan belongs to this coaching request
-    if (
-      assignedPlan.clientId !== coachingRequest.clientId ||
-      assignedPlan.trainerId !== coachingRequest.trainerId
-    ) {
-      return NextResponse.json(
-        { success: false, error: "Plan not associated with this coaching request" },
-        { status: 403 }
-      );
-    }
-
-    return NextResponse.json({ success: true, data: assignedPlan });
-  } catch (error) {
-    console.error("Error fetching assigned plan:", error);
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
-  }
-}
-
+// PATCH: Edit assigned training plan (update planData JSON)
 export async function PATCH(request, { params }) {
   try {
     const session = await auth();
@@ -93,18 +90,14 @@ export async function PATCH(request, { params }) {
       );
     }
     const { id, assignedPlanId } = params;
-    const { status } = await request.json();
-    if (!id || !assignedPlanId) {
-      return NextResponse.json(
-        { success: false, error: "Request ID and assignedPlanId are required" },
-        { status: 400 }
-      );
-    }
-    if (!status || !["active", "inactive", "completed"].includes(status)) {
+    const body = await request.json();
+    // Validate planData
+    if (!ajv.validate(planDataSchema, body.planData)) {
       return NextResponse.json(
         {
           success: false,
-          error: "Valid status is required (active, inactive, completed)",
+          error: "Invalid planData format",
+          details: ajv.errors,
         },
         { status: 400 }
       );
@@ -119,7 +112,7 @@ export async function PATCH(request, { params }) {
         { status: 404 }
       );
     }
-    // Check if the coach is the owner
+    // Check if trainer is the owner
     const coachingRequest = await prisma.coachingRequest.findUnique({
       where: { id },
     });
@@ -132,22 +125,18 @@ export async function PATCH(request, { params }) {
         { status: 403 }
       );
     }
-    // Update status
-    const updateData = { status };
-    if (status === "completed") {
-      updateData.completedAt = new Date();
-    } else if (status === "active") {
-      updateData.completedAt = null;
-    }
+    // Update planData
     const updated = await prisma.assignedTrainingPlan.update({
       where: { id: assignedPlanId },
-      data: updateData,
+      data: {
+        planData: body.planData,
+      },
     });
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {
-    console.error("Error updating assigned plan status:", error);
+    console.error("Error editing assigned plan:", error);
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: "Internal server error" },
       { status: 500 }
     );
   }

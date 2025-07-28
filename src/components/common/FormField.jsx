@@ -114,7 +114,7 @@ export const FormField = ({
   };
 
   // Base input class with conditional styling
-  const inputClass = `w-full ${getPadding()} rounded-lg ${getBgStyle()} border ${
+  const inputClass = `w-full min-w-0 ${getPadding()} rounded-lg ${getBgStyle()} border ${
     error
       ? "border-red-500 focus:border-red-500"
       : "border-[rgba(255,107,0,0.2)] focus:border-[#FF6B00]"
@@ -622,7 +622,9 @@ export const FormField = ({
               <div
                 key={index}
                 className={`px-4 py-2 cursor-pointer hover:bg-[rgba(255,107,0,0.1)] transition-colors duration-200 ${
-                  value === option.value ? "bg-[rgba(255,107,0,0.15)] text-[#FF6B00]" : ""
+                  value === option.value
+                    ? "bg-[rgba(255,107,0,0.15)] text-[#FF6B00]"
+                    : ""
                 }`}
                 onClick={() => {
                   if (onSelectOption) onSelectOption(option);

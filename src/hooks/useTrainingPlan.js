@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
 import isEqual from "lodash/isEqual";
-import { ErrorMessage } from "@/components/common/ErrorMessage";
+import { useState, useEffect, useCallback } from "react";
+
+import logger from "@/lib/logger";
 
 export function useTrainingPlan(id, planId) {
   const [plan, setPlan] = useState(null);
@@ -11,7 +12,7 @@ export function useTrainingPlan(id, planId) {
   const [isSaving, setIsSaving] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
   const [isNavigationBlocked, setIsNavigationBlocked] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  // Removed unused errorMessage and setErrorMessage state
 
   // Check for unsaved changes
   useEffect(() => {
@@ -47,17 +48,38 @@ export function useTrainingPlan(id, planId) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(
-        `/api/coaching-requests/${id}/assigned-training-plan/${planId}`
-      );
+      // Try the new API endpoint first
+      const res = await fetch(`/api/users/trainer/assigned-plans/${planId}`);
       const data = await res.json();
-      if (!res.ok || !data.success)
+      if (!res.ok || !data.success) {
         throw new Error(data.error || "Failed to fetch plan");
-      if (!data.data.planData) throw new Error("Plan data not found");
+      }
+      if (!data.data.planData) {
+        throw new Error("Plan data not found");
+      }
       setPlan(data.data.planData);
       setLastSavedPlan(data.data.planData);
     } catch (err) {
-      setError(err.message || "Failed to load plan");
+      // Fallback to old API if new one fails
+      try {
+        logger.logApiFallback("fetchPlan", err, true, {
+          planId,
+          clientId: id,
+          endpoint: `/api/users/trainer/assigned-plans/${planId}`,
+          fallbackEndpoint: `/api/coaching-requests/${id}/assigned-training-plan/${planId}`,
+        });
+        const res = await fetch(
+          `/api/coaching-requests/${id}/assigned-training-plan/${planId}`
+        );
+        const data = await res.json();
+        if (!res.ok || !data.success)
+          throw new Error(data.error || "Failed to fetch plan");
+        if (!data.data.planData) throw new Error("Plan data not found");
+        setPlan(data.data.planData);
+        setLastSavedPlan(data.data.planData);
+      } catch (fallbackErr) {
+        setError(fallbackErr.message || "Failed to load plan");
+      }
     } finally {
       setLoading(false);
     }
@@ -113,8 +135,9 @@ export function useTrainingPlan(id, planId) {
   const handleSavePlan = async () => {
     setIsSaving(true);
     try {
+      // Try the new API endpoint first
       const res = await fetch(
-        `/api/coaching-requests/${id}/assigned-training-plan/${planId}/edit`,
+        `/api/users/trainer/assigned-plans/${planId}/edit`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -122,16 +145,37 @@ export function useTrainingPlan(id, planId) {
         }
       );
       const data = await res.json();
-      if (!res.ok || !data.success)
+      if (!res.ok || !data.success) {
         throw new Error(data.error || "Failed to save");
+      }
       setLastSavedPlan(plan);
       setShowSaveBar(false);
-      setIsNavigationBlocked(false);
-      setErrorMessage(""); // Clear error on success
     } catch (err) {
-      setIsShaking(true);
-      setTimeout(() => setIsShaking(false), 800);
-      setErrorMessage(err.message || "Failed to save plan");
+      // Fallback to old API if new one fails
+      try {
+        logger.logApiFallback("savePlan", err, true, {
+          planId,
+          clientId: id,
+          endpoint: `/api/users/trainer/assigned-plans/${planId}/edit`,
+          fallbackEndpoint: `/api/coaching-requests/${id}/assigned-training-plan/${planId}/edit`,
+        });
+        const res = await fetch(
+          `/api/coaching-requests/${id}/assigned-training-plan/${planId}/edit`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ planData: plan }),
+          }
+        );
+        const data = await res.json();
+        if (!res.ok || !data.success)
+          throw new Error(data.error || "Failed to save");
+        setLastSavedPlan(plan);
+        setShowSaveBar(false);
+      } catch (fallbackErr) {
+        console.error("Save failed:", fallbackErr);
+        throw fallbackErr;
+      }
     } finally {
       setIsSaving(false);
     }
@@ -263,7 +307,7 @@ export function useTrainingPlan(id, planId) {
     isSaving,
     isShaking,
     isNavigationBlocked,
-    errorMessage,
+    // Removed unused errorMessage and setErrorMessage state
 
     // Actions
     handleSavePlan,

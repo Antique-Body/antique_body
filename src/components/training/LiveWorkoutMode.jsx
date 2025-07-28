@@ -191,8 +191,8 @@ export function LiveWorkoutMode({
                       idx === currentDayIndex
                         ? "bg-blue-600/20 border-blue-500 text-blue-300"
                         : isAccessible
-                        ? "bg-zinc-800/50 border-zinc-700 text-zinc-300 hover:bg-zinc-700/50 hover:border-zinc-600"
-                        : "bg-zinc-900/30 border-zinc-800/50 text-zinc-500 opacity-60 cursor-not-allowed"
+                          ? "bg-zinc-800/50 border-zinc-700 text-zinc-300 hover:bg-zinc-700/50 hover:border-zinc-600"
+                          : "bg-zinc-900/30 border-zinc-800/50 text-zinc-500 opacity-60 cursor-not-allowed"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -203,10 +203,10 @@ export function LiveWorkoutMode({
                             dayStatus === "completed"
                               ? "bg-green-500 text-white"
                               : dayStatus === "in_progress"
-                              ? "bg-blue-500 text-white animate-pulse"
-                              : dayStatus === "unlocked"
-                              ? "bg-yellow-500 text-black"
-                              : "bg-zinc-600 text-zinc-300"
+                                ? "bg-blue-500 text-white animate-pulse"
+                                : dayStatus === "unlocked"
+                                  ? "bg-yellow-500 text-black"
+                                  : "bg-zinc-600 text-zinc-300"
                           }`}
                         >
                           {dayStatus === "completed" ? (
@@ -223,19 +223,19 @@ export function LiveWorkoutMode({
                             dayStatus === "completed"
                               ? "bg-green-500/20 text-green-300"
                               : dayStatus === "in_progress"
-                              ? "bg-blue-500/20 text-blue-300"
-                              : dayStatus === "unlocked"
-                              ? "bg-yellow-500/20 text-yellow-300"
-                              : "bg-zinc-600/20 text-zinc-400"
+                                ? "bg-blue-500/20 text-blue-300"
+                                : dayStatus === "unlocked"
+                                  ? "bg-yellow-500/20 text-yellow-300"
+                                  : "bg-zinc-600/20 text-zinc-400"
                           }`}
                         >
                           {dayStatus === "completed"
                             ? "DONE"
                             : dayStatus === "in_progress"
-                            ? "ACTIVE"
-                            : dayStatus === "unlocked"
-                            ? "READY"
-                            : "LOCKED"}
+                              ? "ACTIVE"
+                              : dayStatus === "unlocked"
+                                ? "READY"
+                                : "LOCKED"}
                         </span>
                       </div>
                     </div>
@@ -365,8 +365,8 @@ export function LiveWorkoutMode({
                       {currentExercise?.duration
                         ? `${currentExercise.duration}min`
                         : currentExercise?.rest
-                        ? `${currentExercise.rest}s rest`
-                        : "No limit"}
+                          ? `${currentExercise.rest}s rest`
+                          : "No limit"}
                     </span>
                   </div>
                 </div>
@@ -809,17 +809,59 @@ export function LiveWorkoutMode({
                       {/* Set Inputs */}
                       <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                          <label
-                            className="block text-zinc-400 text-sm mb-1 font-medium"
-                            htmlFor={`weight-${currentDayIndex}-${currentExerciseIndex}-${setIdx}`}
-                          >
-                            Weight (kg)
-                          </label>
+                          <div className="flex items-center justify-between mb-1">
+                            <label
+                              className="block text-zinc-400 text-sm font-medium"
+                              htmlFor={`weight-${currentDayIndex}-${currentExerciseIndex}-${setIdx}`}
+                            >
+                              {setData.inputMode === "time"
+                                ? "Time (sec)"
+                                : "Weight (kg)"}
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newMode =
+                                  setData.inputMode === "time"
+                                    ? "weight"
+                                    : "time";
+                                onUpdateSetData(
+                                  currentDayIndex,
+                                  currentExerciseIndex,
+                                  setIdx,
+                                  "inputMode",
+                                  newMode
+                                );
+                                // Clear the value when switching modes
+                                onUpdateSetData(
+                                  currentDayIndex,
+                                  currentExerciseIndex,
+                                  setIdx,
+                                  "weight",
+                                  null
+                                );
+                              }}
+                              className="text-xs px-2 py-1 rounded-md bg-zinc-700 hover:bg-zinc-600 text-zinc-300 hover:text-white transition-colors flex items-center gap-1"
+                              title={`Switch to ${setData.inputMode === "time" ? "weight" : "time"} mode`}
+                              disabled={isDayCompleted}
+                            >
+                              <Icon
+                                icon={
+                                  setData.inputMode === "time"
+                                    ? "mdi:weight"
+                                    : "mdi:timer"
+                                }
+                                width={12}
+                                height={12}
+                              />
+                              {setData.inputMode === "time" ? "kg" : "sec"}
+                            </button>
+                          </div>
                           <input
                             id={`weight-${currentDayIndex}-${currentExerciseIndex}-${setIdx}`}
                             type="number"
                             min="0"
-                            step="0.5"
+                            step={setData.inputMode === "time" ? "1" : "0.5"}
                             value={setData.weight || ""}
                             onChange={(e) => {
                               const value = e.target.value;
@@ -839,7 +881,9 @@ export function LiveWorkoutMode({
                             }}
                             disabled={isDayCompleted}
                             className="w-full bg-zinc-800/50 border border-zinc-600/50 rounded-xl px-4 py-3 text-white text-lg font-semibold backdrop-blur focus:border-blue-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                            placeholder="0"
+                            placeholder={
+                              setData.inputMode === "time" ? "0" : "0"
+                            }
                           />
                         </div>
                         <div>
@@ -1148,8 +1192,8 @@ export function LiveWorkoutMode({
                           idx === currentExerciseIndex
                             ? "bg-blue-600 text-white"
                             : exerciseProgress.percentage === 100
-                            ? "bg-green-600 text-white"
-                            : "bg-zinc-700 text-zinc-300"
+                              ? "bg-green-600 text-white"
+                              : "bg-zinc-700 text-zinc-300"
                         }`}
                       >
                         {exerciseProgress.percentage === 100 ? (
@@ -1166,8 +1210,8 @@ export function LiveWorkoutMode({
                           {Array.isArray(exerciseWorkoutData?.sets)
                             ? exerciseWorkoutData.sets.length
                             : Array.isArray(exercise.sets)
-                            ? exercise.sets.length
-                            : exercise.sets || 0}{" "}
+                              ? exercise.sets.length
+                              : exercise.sets || 0}{" "}
                           sets × {exercise.reps}{" "}
                           {exercise.repsUnit === "seconds" ? "seconds" : "reps"}
                         </div>

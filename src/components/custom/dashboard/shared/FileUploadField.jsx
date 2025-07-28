@@ -174,15 +174,15 @@ export const FileUploadField = ({
                       videoUrl.includes("youtube")
                         ? "mdi:youtube"
                         : videoUrl.includes("vimeo")
-                        ? "mdi:vimeo"
-                        : "mdi:link"
+                          ? "mdi:vimeo"
+                          : "mdi:link"
                     }
                     className={`w-4 h-4 ${
                       videoUrl.includes("youtube")
                         ? "text-red-500"
                         : videoUrl.includes("vimeo")
-                        ? "text-blue-400"
-                        : "text-zinc-400"
+                          ? "text-blue-400"
+                          : "text-zinc-400"
                     }`}
                   />
                 </div>
@@ -285,29 +285,29 @@ export const FileUploadField = ({
                           type === "image"
                             ? "mdi:image"
                             : isYouTubeVideo(preview)
-                            ? "mdi:youtube"
-                            : preview.includes("vimeo.com")
-                            ? "mdi:vimeo"
-                            : "mdi:video"
+                              ? "mdi:youtube"
+                              : preview.includes("vimeo.com")
+                                ? "mdi:vimeo"
+                                : "mdi:video"
                         }
                         className={`w-4 h-4 ${
                           type === "image"
                             ? "text-blue-400"
                             : isYouTubeVideo(preview)
-                            ? "text-red-500"
-                            : preview.includes("vimeo.com")
-                            ? "text-blue-400"
-                            : "text-green-400"
+                              ? "text-red-500"
+                              : preview.includes("vimeo.com")
+                                ? "text-blue-400"
+                                : "text-green-400"
                         }`}
                       />
                       <span className="text-xs text-zinc-300 truncate max-w-[150px]">
                         {type === "image"
                           ? "Image Preview"
                           : isYouTubeVideo(preview)
-                          ? "YouTube Video"
-                          : preview.includes("vimeo.com")
-                          ? "Vimeo Video"
-                          : "Video Preview"}
+                            ? "YouTube Video"
+                            : preview.includes("vimeo.com")
+                              ? "Vimeo Video"
+                              : "Video Preview"}
                       </span>
                     </div>
                     <Button
@@ -423,23 +423,23 @@ export const FileUploadField = ({
                           isYouTubeVideo(preview)
                             ? "mdi:youtube"
                             : preview.includes("vimeo.com")
-                            ? "mdi:vimeo"
-                            : "mdi:video"
+                              ? "mdi:vimeo"
+                              : "mdi:video"
                         }
                         className={`w-4 h-4 ${
                           isYouTubeVideo(preview)
                             ? "text-red-500"
                             : preview.includes("vimeo.com")
-                            ? "text-blue-400"
-                            : "text-green-400"
+                              ? "text-blue-400"
+                              : "text-green-400"
                         }`}
                       />
                       <span className="text-xs text-zinc-300 truncate max-w-[150px]">
                         {isYouTubeVideo(preview)
                           ? "YouTube Video"
                           : preview.includes("vimeo.com")
-                          ? "Vimeo Video"
-                          : "Video Preview"}
+                            ? "Vimeo Video"
+                            : "Video Preview"}
                       </span>
                     </div>
                     <Button

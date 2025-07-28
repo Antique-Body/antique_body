@@ -418,8 +418,8 @@ export function WorkoutReview({
             const exerciseSets = Array.isArray(exercise.sets)
               ? exercise.sets
               : typeof exercise.sets === "object" && exercise.sets !== null
-              ? [] // If it's an object but not an array, treat as empty
-              : [];
+                ? [] // If it's an object but not an array, treat as empty
+                : [];
 
             return (
               <div

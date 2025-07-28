@@ -13,3 +13,4 @@ export { useVerificationCode } from "./useVerificationCode";
 export { useNutritionPlanForm } from "./useNutritionPlanForm";
 export { useChat, useConversations } from "./useChat";
 export { useGlobalPresence, useChatPresence } from "./usePresence";
+export { useAIFoodAnalysis } from "./useAIFoodAnalysis";

@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
 import debounce from "lodash/debounce";
+import { useState, useEffect, useCallback } from "react";
 
 export function useWorkoutSession(plan, planId, clientId) {
   // Live tracking state
@@ -74,6 +74,183 @@ export function useWorkoutSession(plan, planId, clientId) {
     return data;
   }, []);
 
+  // Save workout progress to planData
+  const saveWorkoutProgress = useCallback(
+    async (planId, clientId) => {
+      try {
+        // The API expects planData structure, not just workoutData
+        // We need to merge workoutData into the plan structure
+        if (!plan) {
+          throw new Error("No plan data available for saving");
+        }
+
+        // Create planData with embedded workout progress
+        const planDataWithProgress = {
+          ...plan,
+          schedule:
+            plan.schedule?.map((day, dayIdx) => {
+              const dayWorkoutData = workoutData[dayIdx];
+
+              if (!dayWorkoutData) {
+                return day; // No workout data for this day
+              }
+
+              return {
+                ...day,
+                // Save day-level workout status
+                workoutStatus: dayWorkoutData.status,
+                workoutStartedAt: dayWorkoutData.startedAt,
+                workoutCompletedAt: dayWorkoutData.completedAt,
+                workoutEndedAt: dayWorkoutData.endedAt,
+                workoutDuration: dayWorkoutData.totalTimeSpent || 0,
+                workoutNotes: dayWorkoutData.workoutSummary?.userNotes || "",
+                workoutWasCompleted:
+                  dayWorkoutData.workoutSummary?.wasCompleted || false,
+
+                // Save exercise-level data by embedding sets into exercises
+                exercises:
+                  day.exercises?.map((exercise, exIdx) => {
+                    const exerciseWorkoutData =
+                      dayWorkoutData.exercises?.[exIdx];
+
+                    if (!exerciseWorkoutData) {
+                      return exercise; // No workout data for this exercise
+                    }
+
+                    return {
+                      ...exercise,
+                      // Embed workout sets data
+                      sets: exerciseWorkoutData.sets || [],
+                      exerciseNotes: exerciseWorkoutData.exerciseNotes || "",
+                      exerciseCompleted: exerciseWorkoutData.completed || false,
+                    };
+                  }) || [],
+              };
+            }) || [],
+        };
+
+        const response = await fetch(
+          `/api/coaching-requests/${clientId}/assigned-training-plan/${planId}/progress`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ planData: planDataWithProgress }),
+          }
+        );
+
+        let result;
+        try {
+          result = await response.json();
+        } catch (jsonError) {
+          throw new Error(
+            `Invalid response from server: ${
+              jsonError && jsonError.message ? jsonError.message : jsonError
+            }`
+          );
+        }
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || `API returned ${response.status}`);
+        }
+
+        return { success: true, message: "Progress saved successfully!" };
+      } catch (error) {
+        return {
+          success: false,
+          message: error.message || "Failed to save progress",
+        };
+      }
+    },
+    [plan, workoutData]
+  );
+
+  // Load workout progress from planData
+  const loadWorkoutProgress = useCallback(async (planId, clientId) => {
+    try {
+      const response = await fetch(
+        `/api/coaching-requests/${clientId}/assigned-training-plan/${planId}/progress`
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+
+        if (result.success && result.data && result.data.schedule) {
+          const planData = result.data;
+          const extractedWorkoutData = {};
+
+          planData.schedule.forEach((day, dayIdx) => {
+            // Extract day-level workout data
+            const dayStatus =
+              day.workoutStatus || (dayIdx === 0 ? "unlocked" : "locked");
+
+            extractedWorkoutData[dayIdx] = {
+              status: dayStatus,
+              startedAt: day.workoutStartedAt || null,
+              completedAt: day.workoutCompletedAt || null,
+              endedAt: day.workoutEndedAt || null,
+              totalTimeSpent: day.workoutDuration || 0,
+              attempts: day.workoutAttempts || 0,
+              bestPerformance: day.workoutBestPerformance || null,
+              workoutSummary:
+                day.workoutNotes || day.workoutWasCompleted
+                  ? {
+                      userNotes: day.workoutNotes || "",
+                      completedAt: day.workoutCompletedAt || null,
+                      endedAt: day.workoutEndedAt || null,
+                      duration: day.workoutDuration || 0,
+                      wasCompleted: day.workoutWasCompleted || false,
+                    }
+                  : null,
+              exercises: {},
+            };
+
+            // Extract exercise-level workout data from sets
+            if (day.exercises) {
+              day.exercises.forEach((exercise, exIdx) => {
+                // Check if exercise has workout sets data (completed sets, notes, etc.)
+                const exerciseSets = exercise.sets;
+                const hasWorkoutData =
+                  (Array.isArray(exerciseSets) &&
+                    exerciseSets.some(
+                      (set) =>
+                        set.completed ||
+                        set.weight ||
+                        set.notes ||
+                        set.completedAt
+                    )) ||
+                  exercise.exerciseNotes ||
+                  exercise.exerciseCompleted;
+
+                if (hasWorkoutData) {
+                  extractedWorkoutData[dayIdx].exercises[exIdx] = {
+                    sets: Array.isArray(exerciseSets) ? exerciseSets : [],
+                    exerciseNotes: exercise.exerciseNotes || "",
+                    completed: exercise.exerciseCompleted || false,
+                  };
+                }
+              });
+            }
+          });
+
+          // Ensure day unlocking logic - if a day is completed, unlock the next day
+          planData.schedule.forEach((day, dayIdx) => {
+            if (
+              day.workoutStatus === "completed" &&
+              extractedWorkoutData[dayIdx + 1]
+            ) {
+              extractedWorkoutData[dayIdx + 1].status = "unlocked";
+            }
+          });
+
+          return extractedWorkoutData;
+        }
+      }
+    } catch (err) {
+      console.error("Error loading workout progress:", err);
+    }
+    return null;
+  }, []);
+
   // Initialize workout data when plan changes
   useEffect(() => {
     if (
@@ -135,6 +312,18 @@ export function useWorkoutSession(plan, planId, clientId) {
             }
           });
         }
+
+        // ADDITIONAL CHECK: Also check plan.schedule for in_progress workouts
+        // This ensures workout state is restored even if loadWorkoutProgress fails
+        if (plan.schedule) {
+          plan.schedule.forEach((day, dayIdx) => {
+            if (day.workoutStatus === "in_progress" && day.workoutStartedAt) {
+              setCurrentDayIndex(dayIdx);
+              setIsWorkoutStarted(true);
+              setSessionStartTime(new Date(day.workoutStartedAt));
+            }
+          });
+        }
       } catch (err) {
         console.error(
           "Error during workout data initialization or progress loading:",
@@ -145,7 +334,7 @@ export function useWorkoutSession(plan, planId, clientId) {
 
       // Existing progress is loaded above if planId and clientId are provided.
     }
-  }, [plan, initializeWorkoutData, planId, clientId]);
+  }, [plan, initializeWorkoutData, planId, clientId, loadWorkoutProgress]);
 
   // Rest timer effect
   useEffect(() => {
@@ -178,7 +367,7 @@ export function useWorkoutSession(plan, planId, clientId) {
       debouncedSave.cancel();
     };
     // Only run when workoutData changes during an active workout
-  }, [workoutData, isWorkoutStarted, planId, clientId]);
+  }, [workoutData, isWorkoutStarted, planId, clientId, saveWorkoutProgress]);
 
   // Helper functions
   const formatTime = (seconds) => {
@@ -412,179 +601,6 @@ export function useWorkoutSession(plan, planId, clientId) {
       totalWorkoutSessions: prev.totalWorkoutSessions + 1,
       planStartedAt: prev.planStartedAt || now.toISOString(),
     }));
-  };
-
-  // Save workout progress to planData
-  const saveWorkoutProgress = async (planId, clientId) => {
-    try {
-      // The API expects planData structure, not just workoutData
-      // We need to merge workoutData into the plan structure
-      if (!plan) {
-        throw new Error("No plan data available for saving");
-      }
-
-      // Create planData with embedded workout progress
-      const planDataWithProgress = {
-        ...plan,
-        schedule:
-          plan.schedule?.map((day, dayIdx) => {
-            const dayWorkoutData = workoutData[dayIdx];
-
-            if (!dayWorkoutData) {
-              return day; // No workout data for this day
-            }
-
-            return {
-              ...day,
-              // Save day-level workout status
-              workoutStatus: dayWorkoutData.status,
-              workoutStartedAt: dayWorkoutData.startedAt,
-              workoutCompletedAt: dayWorkoutData.completedAt,
-              workoutEndedAt: dayWorkoutData.endedAt,
-              workoutDuration: dayWorkoutData.totalTimeSpent || 0,
-              workoutNotes: dayWorkoutData.workoutSummary?.userNotes || "",
-              workoutWasCompleted:
-                dayWorkoutData.workoutSummary?.wasCompleted || false,
-
-              // Save exercise-level data by embedding sets into exercises
-              exercises:
-                day.exercises?.map((exercise, exIdx) => {
-                  const exerciseWorkoutData = dayWorkoutData.exercises?.[exIdx];
-
-                  if (!exerciseWorkoutData) {
-                    return exercise; // No workout data for this exercise
-                  }
-
-                  return {
-                    ...exercise,
-                    // Embed workout sets data
-                    sets: exerciseWorkoutData.sets || [],
-                    exerciseNotes: exerciseWorkoutData.exerciseNotes || "",
-                    exerciseCompleted: exerciseWorkoutData.completed || false,
-                  };
-                }) || [],
-            };
-          }) || [],
-      };
-
-      const response = await fetch(
-        `/api/coaching-requests/${clientId}/assigned-training-plan/${planId}/progress`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ planData: planDataWithProgress }),
-        }
-      );
-
-      let result;
-      try {
-        result = await response.json();
-      } catch (jsonError) {
-        throw new Error(
-          `Invalid response from server: ${
-            jsonError && jsonError.message ? jsonError.message : jsonError
-          }`
-        );
-      }
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || `API returned ${response.status}`);
-      }
-
-      return { success: true, message: "Progress saved successfully!" };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message || "Failed to save progress",
-      };
-    }
-  };
-
-  // Load workout progress from planData
-  const loadWorkoutProgress = async (planId, clientId) => {
-    try {
-      const response = await fetch(
-        `/api/coaching-requests/${clientId}/assigned-training-plan/${planId}/progress`
-      );
-
-      if (response.ok) {
-        const result = await response.json();
-
-        if (result.success && result.data && result.data.schedule) {
-          const planData = result.data;
-          const extractedWorkoutData = {};
-
-          planData.schedule.forEach((day, dayIdx) => {
-            // Extract day-level workout data
-            const dayStatus =
-              day.workoutStatus || (dayIdx === 0 ? "unlocked" : "locked");
-
-            extractedWorkoutData[dayIdx] = {
-              status: dayStatus,
-              startedAt: day.workoutStartedAt || null,
-              completedAt: day.workoutCompletedAt || null,
-              endedAt: day.workoutEndedAt || null,
-              totalTimeSpent: day.workoutDuration || 0,
-              attempts: day.workoutAttempts || 0,
-              bestPerformance: day.workoutBestPerformance || null,
-              workoutSummary:
-                day.workoutNotes || day.workoutWasCompleted
-                  ? {
-                      userNotes: day.workoutNotes || "",
-                      completedAt: day.workoutCompletedAt || null,
-                      endedAt: day.workoutEndedAt || null,
-                      duration: day.workoutDuration || 0,
-                      wasCompleted: day.workoutWasCompleted || false,
-                    }
-                  : null,
-              exercises: {},
-            };
-
-            // Extract exercise-level workout data from sets
-            if (day.exercises) {
-              day.exercises.forEach((exercise, exIdx) => {
-                // Check if exercise has workout sets data (completed sets, notes, etc.)
-                const exerciseSets = exercise.sets;
-                const hasWorkoutData =
-                  (Array.isArray(exerciseSets) &&
-                    exerciseSets.some(
-                      (set) =>
-                        set.completed ||
-                        set.weight ||
-                        set.notes ||
-                        set.completedAt
-                    )) ||
-                  exercise.exerciseNotes ||
-                  exercise.exerciseCompleted;
-
-                if (hasWorkoutData) {
-                  extractedWorkoutData[dayIdx].exercises[exIdx] = {
-                    sets: Array.isArray(exerciseSets) ? exerciseSets : [],
-                    exerciseNotes: exercise.exerciseNotes || "",
-                    completed: exercise.exerciseCompleted || false,
-                  };
-                }
-              });
-            }
-          });
-
-          // Ensure day unlocking logic - if a day is completed, unlock the next day
-          planData.schedule.forEach((day, dayIdx) => {
-            if (
-              day.workoutStatus === "completed" &&
-              extractedWorkoutData[dayIdx + 1]
-            ) {
-              extractedWorkoutData[dayIdx + 1].status = "unlocked";
-            }
-          });
-
-          return extractedWorkoutData;
-        }
-      }
-    } catch (err) {
-      console.error("Error loading workout progress:", err);
-    }
-    return null;
   };
 
   // New: Complete current day and unlock next with enhanced tracking

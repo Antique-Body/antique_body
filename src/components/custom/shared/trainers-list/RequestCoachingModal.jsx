@@ -253,8 +253,8 @@ export default function RequestCoachingModal({
               !canRequestMore
                 ? "from-orange-900/20 to-orange-950/30 ring-orange-500/30"
                 : hasRequested
-                ? "from-green-900/20 to-green-950/30 ring-green-500/30"
-                : "from-blue-900/20 to-blue-950/30 ring-blue-500/30"
+                  ? "from-green-900/20 to-green-950/30 ring-green-500/30"
+                  : "from-blue-900/20 to-blue-950/30 ring-blue-500/30"
             }`}
           >
             <div className="flex items-start gap-4">
@@ -263,8 +263,8 @@ export default function RequestCoachingModal({
                   !canRequestMore
                     ? "bg-orange-500/10"
                     : hasRequested
-                    ? "bg-green-500/10"
-                    : "bg-blue-500/10"
+                      ? "bg-green-500/10"
+                      : "bg-blue-500/10"
                 }`}
               >
                 <Icon
@@ -273,8 +273,8 @@ export default function RequestCoachingModal({
                     !canRequestMore
                       ? "text-orange-400"
                       : hasRequested
-                      ? "text-green-400"
-                      : "text-blue-400"
+                        ? "text-green-400"
+                        : "text-blue-400"
                   }
                   width={24}
                   height={24}
@@ -286,8 +286,8 @@ export default function RequestCoachingModal({
                     !canRequestMore
                       ? "text-orange-400"
                       : hasRequested
-                      ? "text-green-400"
-                      : "text-blue-400"
+                        ? "text-green-400"
+                        : "text-blue-400"
                   }`}
                 >
                   Requests: {requestedCount}/{maxRequests}
@@ -296,10 +296,10 @@ export default function RequestCoachingModal({
                   {!canRequestMore
                     ? "You've reached the maximum number of trainer requests. You can remove existing requests to add new ones."
                     : hasRequested
-                    ? "You have already requested this trainer. They will respond soon."
-                    : `You can request ${
-                        maxRequests - requestedCount
-                      } more trainers.`}
+                      ? "You have already requested this trainer. They will respond soon."
+                      : `You can request ${
+                          maxRequests - requestedCount
+                        } more trainers.`}
                 </p>
               </div>
             </div>

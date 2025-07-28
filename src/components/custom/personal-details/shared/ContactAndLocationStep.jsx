@@ -1,8 +1,6 @@
 "use client";
 import { Icon } from "@iconify/react";
 
-import { FormSection } from "./";
-
 import { FormField } from "@/components/common";
 import { usePrefillFromSession } from "@/hooks";
 import {
@@ -11,6 +9,8 @@ import {
   searchCountries,
   geocodePlaceId,
 } from "@/lib/googlePlaces";
+
+import { FormSection } from "./";
 
 export const ContactAndLocationStep = ({
   formData,

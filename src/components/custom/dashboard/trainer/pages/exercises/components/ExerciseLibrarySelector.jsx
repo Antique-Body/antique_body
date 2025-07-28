@@ -4,11 +4,12 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 
+import { Button, FormField, InfoBanner } from "@/components/common";
+import { formatMuscleDisplayName } from "@/utils/muscleMapper";
+
 import { AnatomicalViewer } from "./AnatomicalViewer";
 import exerciseLibrary from "./exerciseLibrary.json";
 
-import { Button, FormField, InfoBanner } from "@/components/common";
-import { formatMuscleDisplayName } from "@/utils/muscleMapper";
 export const ExerciseLibrarySelector = ({
   searchLoading = false,
   onSelectExercise,
@@ -28,7 +29,7 @@ export const ExerciseLibrarySelector = ({
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
-  const [error, setError] = useState(null); // Add error state
+  // Removed unused error and setError state
 
   // Determine which exercises to display
   const displayExercises = useStaticData ? filteredStaticExercises : exercises;
@@ -63,7 +64,7 @@ export const ExerciseLibrarySelector = ({
   useEffect(() => {
     if (!useStaticData) {
       setLoading(true);
-      setError(null); // Reset error state before fetching
+      // Reset error state before fetching
       const controller = new AbortController();
       fetch(
         `/api/users/trainer/exercises?search=${encodeURIComponent(search)}`,
@@ -79,9 +80,9 @@ export const ExerciseLibrarySelector = ({
         })
         .catch((err) => {
           if (err.name !== "AbortError") {
-            setError(
-              err.message || "An error occurred while fetching exercises."
-            );
+            // setError(
+            //   err.message || "An error occurred while fetching exercises."
+            // );
             setLoading(false);
           }
         });
@@ -235,14 +236,14 @@ export const ExerciseLibrarySelector = ({
                               exercise.type === "strength"
                                 ? "bg-purple-900/60 text-purple-200 border-purple-700/40"
                                 : exercise.type === "bodyweight"
-                                ? "bg-green-900/60 text-green-200 border-green-700/40"
-                                : exercise.type === "cardio"
-                                ? "bg-blue-900/60 text-blue-200 border-blue-700/40"
-                                : exercise.type === "flexibility"
-                                ? "bg-violet-900/60 text-violet-200 border-violet-700/40"
-                                : exercise.type === "balance"
-                                ? "bg-pink-900/60 text-pink-200 border-pink-700/40"
-                                : "bg-gray-900/60 text-gray-200 border-gray-700/40"
+                                  ? "bg-green-900/60 text-green-200 border-green-700/40"
+                                  : exercise.type === "cardio"
+                                    ? "bg-blue-900/60 text-blue-200 border-blue-700/40"
+                                    : exercise.type === "flexibility"
+                                      ? "bg-violet-900/60 text-violet-200 border-violet-700/40"
+                                      : exercise.type === "balance"
+                                        ? "bg-pink-900/60 text-pink-200 border-pink-700/40"
+                                        : "bg-gray-900/60 text-gray-200 border-gray-700/40"
                             }`}
                           >
                             {exercise.type.charAt(0).toUpperCase() +
@@ -253,8 +254,8 @@ export const ExerciseLibrarySelector = ({
                               exercise.level === "beginner"
                                 ? "bg-green-900/60 text-green-200 border-green-700/40"
                                 : exercise.level === "intermediate"
-                                ? "bg-orange-900/60 text-orange-200 border-orange-700/40"
-                                : "bg-red-900/60 text-red-200 border-red-700/40"
+                                  ? "bg-orange-900/60 text-orange-200 border-orange-700/40"
+                                  : "bg-red-900/60 text-red-200 border-red-700/40"
                             }`}
                           >
                             {exercise.level.charAt(0).toUpperCase() +

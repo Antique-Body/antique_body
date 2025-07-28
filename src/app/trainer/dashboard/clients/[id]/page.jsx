@@ -82,7 +82,6 @@ export default function ClientDashboard({ params }) {
 
       const data = await response.json();
       setPlans(data);
-      console.log("PLANS", data);
     } catch (err) {
       console.error("Error fetching plans:", err);
       // Handle error appropriately
@@ -1597,6 +1596,7 @@ function TrainingPlanCard({
   const [planDetails, setPlanDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [viewResultsLoading, setViewResultsLoading] = useState(false);
 
   const handleViewPlan = async () => {
     if (!planDetails && !isLoading) {
@@ -1652,8 +1652,8 @@ function TrainingPlanCard({
         plan.status === "completed"
           ? "bg-green-500/10 border-green-500/30"
           : plan.status === "active"
-          ? "bg-blue-500/10 border-blue-500/30 ring-2 ring-blue-500/20"
-          : "bg-white/5 border-white/10 hover:border-white/20"
+            ? "bg-blue-500/10 border-blue-500/30 ring-2 ring-blue-500/20"
+            : "bg-white/5 border-white/10 hover:border-white/20"
       }`}
     >
       {/* Main Card Content */}
@@ -1667,8 +1667,8 @@ function TrainingPlanCard({
                 plan.status === "completed"
                   ? "bg-green-600 shadow-lg shadow-green-600/30"
                   : plan.status === "active"
-                  ? "bg-blue-600 shadow-lg shadow-blue-600/30"
-                  : "bg-orange-600 shadow-lg shadow-orange-600/30"
+                    ? "bg-blue-600 shadow-lg shadow-blue-600/30"
+                    : "bg-orange-600 shadow-lg shadow-orange-600/30"
               }`}
             >
               <Icon
@@ -1676,8 +1676,8 @@ function TrainingPlanCard({
                   plan.status === "completed"
                     ? "mdi:check"
                     : plan.status === "active"
-                    ? "mdi:play"
-                    : "mdi:pause"
+                      ? "mdi:play"
+                      : "mdi:pause"
                 }
                 className="text-white"
                 width={18}
@@ -1719,11 +1719,12 @@ function TrainingPlanCard({
                 <div className="flex items-center gap-4 text-xs text-slate-400">
                   <span className="flex items-center gap-1">
                     <Icon icon="mdi:check-circle" width={12} height={12} />
-                    {stats.completedDays}/{stats.totalDays} days
+                    {stats?.completedDays || 0}/{stats?.totalDays || 0} days
                   </span>
                   <span className="flex items-center gap-1">
                     <Icon icon="mdi:dumbbell" width={12} height={12} />
-                    {stats.completedExercises}/{stats.totalExercises} exercises
+                    {stats?.completedExercises || 0}/
+                    {stats?.totalExercises || 0} exercises
                   </span>
                 </div>
               )}
@@ -1749,6 +1750,35 @@ function TrainingPlanCard({
               <Icon icon="mdi:eye" width={16} height={16} />
               <span className="hidden sm:inline ml-1">View</span>
             </Button>
+
+            {plan.status === "completed" && (
+              <Button
+                variant="secondary"
+                size="sm"
+                className="px-3 py-2 bg-green-600/20 border-green-500/30 text-green-300 hover:bg-green-600/30"
+                disabled={viewResultsLoading}
+                onClick={async () => {
+                  setViewResultsLoading(true);
+                  try {
+                    window.location.href = `/trainer/dashboard/clients/${client.id}/plans/${plan.id}?mode=review`;
+                  } finally {
+                    // Optionally keep loading true until navigation
+                  }
+                }}
+              >
+                {viewResultsLoading ? (
+                  <span className="flex items-center">
+                    <span className="w-3 h-3 border-2 border-green-300 border-t-transparent rounded-full animate-spin mr-2"></span>
+                    Loading...
+                  </span>
+                ) : (
+                  <>
+                    <Icon icon="mdi:chart-line" width={16} height={16} />
+                    <span className="hidden sm:inline ml-1">View Results</span>
+                  </>
+                )}
+              </Button>
+            )}
 
             {plan.status !== "completed" && plan.status !== "active" && (
               <Button
@@ -1797,20 +1827,23 @@ function TrainingPlanCard({
                   <div>
                     <div className="text-slate-400">Days Completed</div>
                     <div className="text-white font-semibold">
-                      {stats.completedDays}/{stats.totalDays}
+                      {stats?.completedDays || 0}/{stats?.totalDays || 0}
                     </div>
                   </div>
                   <div>
                     <div className="text-slate-400">Exercises Done</div>
                     <div className="text-white font-semibold">
-                      {stats.completedExercises}/{stats.totalExercises}
+                      {stats?.completedExercises || 0}/
+                      {stats?.totalExercises || 0}
                     </div>
                   </div>
                   <div>
                     <div className="text-slate-400">Completion Rate</div>
                     <div className="text-green-400 font-semibold">
                       {Math.round(
-                        (stats.completedDays / stats.totalDays) * 100
+                        ((stats?.completedDays || 0) /
+                          (stats?.totalDays || 1)) *
+                          100
                       )}
                       %
                     </div>

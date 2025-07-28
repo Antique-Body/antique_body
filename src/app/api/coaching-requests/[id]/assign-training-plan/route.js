@@ -83,6 +83,20 @@ export async function POST(request, context) {
         status: "active",
       },
     });
+
+    // Update clientCount in the original plan (optional - the API will calculate dynamically anyway)
+    const activeAssignments = await prisma.assignedTrainingPlan.count({
+      where: {
+        originalPlanId: plan.id,
+        status: "active",
+      },
+    });
+
+    await prisma.trainingPlan.update({
+      where: { id: plan.id },
+      data: { clientCount: activeAssignments },
+    });
+
     return NextResponse.json(
       { success: true, data: assigned },
       { status: 201 }

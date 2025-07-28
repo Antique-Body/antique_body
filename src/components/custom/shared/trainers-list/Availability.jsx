@@ -150,8 +150,8 @@ export const Availability = ({ trainer }) => {
                   selectedDate && selectedDate.getDate() === date.getDate()
                     ? "border-[#FF6B00] bg-[#FF6B00] text-white"
                     : hasAvailability
-                    ? "border border-[#444] bg-[rgba(30,30,30,0.8)] text-white hover:border-[#FF6B00]"
-                    : "border border-[#333] bg-[rgba(20,20,20,0.5)] text-gray-500 cursor-not-allowed"
+                      ? "border border-[#444] bg-[rgba(30,30,30,0.8)] text-white hover:border-[#FF6B00]"
+                      : "border border-[#333] bg-[rgba(20,20,20,0.5)] text-gray-500 cursor-not-allowed"
                 }`}
               >
                 <span className="mb-1 text-xs font-medium">
@@ -185,8 +185,8 @@ export const Availability = ({ trainer }) => {
                   !slot.available
                     ? "cursor-not-allowed border border-[#333] bg-[rgba(20,20,20,0.5)] text-gray-500"
                     : selectedTime === slot.time
-                    ? "border border-[#FF6B00] bg-[rgba(255,107,0,0.2)] text-white"
-                    : "border border-[#444] bg-[rgba(30,30,30,0.8)] text-white hover:-translate-y-1 hover:border-[#FF6B00]"
+                      ? "border border-[#FF6B00] bg-[rgba(255,107,0,0.2)] text-white"
+                      : "border border-[#444] bg-[rgba(30,30,30,0.8)] text-white hover:-translate-y-1 hover:border-[#FF6B00]"
                 }`}
               >
                 {slot.time}

@@ -2,12 +2,12 @@
 import { Icon } from "@iconify/react";
 import { signIn } from "next-auth/react";
 
-import { PhoneInput } from "./PhoneInput";
-import { VerificationCodeInput } from "./VerificationCodeInput";
-
 import { Button, ErrorMessage, FormField } from "@/components/common";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthForm } from "@/hooks";
+
+import { PhoneInput } from "./PhoneInput";
+import { VerificationCodeInput } from "./VerificationCodeInput";
 
 export const AuthForm = ({
   onSubmit,

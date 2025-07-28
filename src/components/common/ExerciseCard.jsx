@@ -2,15 +2,11 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import React from "react";
 
+import AnatomicalViewer from "@/components/custom/dashboard/trainer/pages/exercises/components/AnatomicalViewer";
+import { getRepsPlaceholder, toggleRepsUnit } from "@/utils/exerciseUtils";
+
 import { Button } from "./Button";
 import { Card } from "./Card";
-
-import AnatomicalViewer from "@/components/custom/dashboard/trainer/pages/exercises/components/AnatomicalViewer";
-import {
-  formatRepsDisplay,
-  getRepsPlaceholder,
-  toggleRepsUnit,
-} from "@/utils/exerciseUtils";
 
 /**
  * Mobile-first responsive exercise card component
@@ -43,8 +39,8 @@ export const ExerciseCard = ({
   const setsCount = Array.isArray(exercise.sets)
     ? exercise.sets.length
     : typeof exercise.sets === "number"
-    ? exercise.sets
-    : 3;
+      ? exercise.sets
+      : 3;
 
   return (
     <Card
