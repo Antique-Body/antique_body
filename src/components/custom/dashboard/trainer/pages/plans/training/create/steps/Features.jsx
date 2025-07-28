@@ -1,10 +1,9 @@
 "use client";
 
 import { Icon } from "@iconify/react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 import { Button } from "@/components/common/Button";
-import { Card } from "@/components/common/Card";
 import { FormField } from "@/components/common/FormField";
 import { TRAINING_FEATURE_OPTIONS } from "@/enums";
 
