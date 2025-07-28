@@ -130,6 +130,105 @@ export const useNutritionPlanForm = (initialData = null) => {
     }
   };
 
+  // Add function to get validation errors
+  const getValidationErrors = (step) => {
+    const errors = [];
+
+    switch (step) {
+      case 0: // Basic Info
+        const { title, description, price, duration } = formData;
+        if (!title || title.trim() === "") {
+          errors.push("Title is required");
+        }
+        if (!description || description.trim() === "") {
+          errors.push("Description is required");
+        }
+        if (
+          !price ||
+          price.toString().trim() === "" ||
+          isNaN(Number(price)) ||
+          Number(price) < 0
+        ) {
+          errors.push("Valid price is required");
+        }
+        if (
+          !duration ||
+          duration.toString().trim() === "" ||
+          !Number.isInteger(Number(duration)) ||
+          Number(duration) <= 0
+        ) {
+          errors.push("Valid duration is required");
+        }
+        if (!formData.targetGoal || formData.targetGoal.trim() === "") {
+          errors.push("Target goal is required");
+        }
+        break;
+
+      case 1: // Meal Planning
+        if (formData.days.length === 0) {
+          errors.push("At least one day is required");
+        } else {
+          const validDays = formData.days.filter(
+            (day) => day.meals.length > 0 || day.isRestDay
+          );
+          if (validDays.length === 0) {
+            errors.push(
+              "At least one day must have meals or be marked as a cheat day"
+            );
+          }
+        }
+        break;
+
+      case 2: // Features
+        // Check key features
+        if (
+          !Array.isArray(formData.keyFeatures) ||
+          formData.keyFeatures.length === 0
+        ) {
+          errors.push("At least one key feature is required");
+        } else {
+          const validFeatures = formData.keyFeatures.filter(
+            (feature) => feature && feature.trim() !== ""
+          );
+          if (validFeatures.length === 0) {
+            errors.push("At least one key feature must be filled");
+          }
+        }
+
+        // Check timeline
+        if (
+          !Array.isArray(formData.timeline) ||
+          formData.timeline.length === 0
+        ) {
+          errors.push("At least one timeline item is required");
+        } else {
+          const validTimeline = formData.timeline.filter(
+            (item) =>
+              item &&
+              item.week &&
+              item.week.trim() !== "" &&
+              item.title &&
+              item.title.trim() !== ""
+          );
+          if (validTimeline.length === 0) {
+            errors.push(
+              "At least one timeline item must have title and week filled"
+            );
+          }
+        }
+        break;
+
+      case 3: // Preview
+        // Always valid
+        break;
+
+      default:
+        break;
+    }
+
+    return errors;
+  };
+
   const handleSubmit = async () => {
     if (isSubmitting) {
       return;
@@ -281,5 +380,6 @@ export const useNutritionPlanForm = (initialData = null) => {
     error,
     prefillForm,
     templates: NUTRITION_PLAN_TEMPLATES,
+    getValidationErrors,
   };
 };
