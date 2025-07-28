@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "#/auth";
 import { publishMessage } from "@/lib/ably";
 import prisma from "@/lib/prisma";
+import { parseChatId, isValidChatId } from "@/utils/chatUtils";
 
 export async function GET(request, { params }) {
   try {
@@ -18,15 +19,15 @@ export async function GET(request, { params }) {
     const limit = parseInt(searchParams.get("limit") || "50");
     const offset = (page - 1) * limit;
 
-    // Parse chat ID format: "chat:trainerId+clientId"
-    if (!chatId.startsWith("chat:")) {
+    // Validate chat ID format
+    if (!isValidChatId(chatId)) {
       return NextResponse.json(
         { error: "Invalid chat ID format" },
         { status: 400 }
       );
     }
 
-    const [trainerId, clientId] = chatId.replace("chat:", "").split("+");
+    const { trainerId, clientId } = parseChatId(chatId);
     
     if (!trainerId || !clientId) {
       return NextResponse.json(
@@ -154,15 +155,15 @@ export async function POST(request, { params }) {
       );
     }
 
-    // Parse chat ID format: "chat:trainerId+clientId"
-    if (!chatId.startsWith("chat:")) {
+    // Validate chat ID format
+    if (!isValidChatId(chatId)) {
       return NextResponse.json(
         { error: "Invalid chat ID format" },
         { status: 400 }
       );
     }
 
-    const [trainerId, clientId] = chatId.replace("chat:", "").split("+");
+    const { trainerId, clientId } = parseChatId(chatId);
     
     if (!trainerId || !clientId) {
       return NextResponse.json(

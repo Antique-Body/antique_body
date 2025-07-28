@@ -533,7 +533,7 @@ model CoachingRequestCooldown {
 // Messaging System Models
 model Conversation {
   id                 String    @id @default(cuid())
-  chatId             String    @unique // Format: "chat:trainerId+clientId"
+  chatId             String    @unique // Format: concatenated trainerId+clientId (sorted)
   clientId           String
   trainerId          String
   lastMessageAt      DateTime?

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { auth } from "#/auth";
 import prisma from "@/lib/prisma";
+import { generateChatId } from "@/utils/chatUtils";
 
 export async function GET() {
   try {
@@ -123,7 +124,7 @@ export async function GET() {
       );
 
       availableChats = availableClients.map((client) => ({
-        id: `chat:${user.trainerInfo.id}+${client.id}`,
+        id: generateChatId(user.trainerInfo.id, client.id),
         participantId: client.user.id,
         name: client.clientProfile 
           ? `${client.clientProfile.firstName} ${client.clientProfile.lastName || ""}`.trim() 
@@ -161,7 +162,7 @@ export async function GET() {
       );
 
       availableChats = availableTrainers.map((trainer) => ({
-        id: `chat:${trainer.id}+${user.clientInfo.id}`,
+        id: generateChatId(trainer.id, user.clientInfo.id),
         participantId: trainer.user.id,
         name: trainer.trainerProfile 
           ? `${trainer.trainerProfile.firstName} ${trainer.trainerProfile.lastName || ""}`.trim() 

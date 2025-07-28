@@ -2,6 +2,7 @@ export { useAuthForm } from "./useAuthForm";
 export { useCertificateFiles } from "./useCertificateFiles";
 export { useClientEditProfileForm } from "./useClientEditProfileForm";
 export { useClientRegistration } from "./useClientRegistration";
+export { useCurrentUser } from "./useCurrentUser";
 export { useExercises } from "./useExercises";
 export { useMeals } from "./useMeals";
 export { usePhoneInput } from "./usePhoneInput";

@@ -149,7 +149,6 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
   } = useChatPresence(conversation?.id);
 
   useEffect(() => {
-    console.log("conversation", conversation);
     if (conversation && !conversation.isNewChat) {
       fetchMessages();
       markAsRead();
@@ -343,7 +342,6 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
 };
 
 export const RealTimeChatInterface = ({ conversationId }) => {
-  console.log("conversationId", conversationId);
   const [activeConversation, setActiveConversation] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
@@ -358,8 +356,6 @@ export const RealTimeChatInterface = ({ conversationId }) => {
 
   // If conversationId is provided, find and set that conversation
   useEffect(() => {
-    console.log("conversationId", conversationId);
-    console.log("conversations", conversations);
     if (conversationId && conversations.length > 0) {
       const conversation = conversations.find(conv => conv.id === conversationId);
       if (conversation) {
