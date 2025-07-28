@@ -26,3 +26,12 @@ export function formatDate(dateString) {
     year: "numeric",
   });
 }
+
+export function formatTime(time) {
+  if (!time) return "";
+  const [hours, minutes] = time.split(":");
+  const hour = parseInt(hours);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 || 12;
+  return `${displayHour}:${minutes} ${ampm}`;
+}

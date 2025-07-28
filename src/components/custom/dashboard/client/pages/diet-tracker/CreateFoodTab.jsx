@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react";
 import { useState, useImperativeHandle, forwardRef, useMemo } from "react";
 
 import { FormField } from "@/components/common/FormField";
+import { formatTime } from "@/utils/dateUtils";
 
 const CreateFoodTab = forwardRef(
   (
@@ -121,15 +122,6 @@ const CreateFoodTab = forwardRef(
       { value: "supplement", label: "Supplement", icon: "mdi:pill" },
       { value: "other", label: "Other", icon: "mdi:food" },
     ];
-
-    const formatTime = (time) => {
-      if (!time) return "";
-      const [hours, minutes] = time.split(":");
-      const hour = parseInt(hours);
-      const ampm = hour >= 12 ? "PM" : "AM";
-      const displayHour = hour % 12 || 12;
-      return `${displayHour}:${minutes} ${ampm}`;
-    };
 
     return (
       <div className="space-y-6 max-w-full">

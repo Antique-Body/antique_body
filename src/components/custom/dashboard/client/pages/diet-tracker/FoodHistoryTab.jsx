@@ -1,7 +1,7 @@
 "use client";
 
 import { Icon } from "@iconify/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import { Button } from "@/components/common/Button";
 
@@ -22,7 +22,7 @@ export const FoodHistoryTab = ({
     fetchHistory();
   }, []);
 
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     setHistoryLoading(true);
     try {
       let data;
@@ -51,7 +51,7 @@ export const FoodHistoryTab = ({
     } finally {
       setHistoryLoading(false);
     }
-  };
+  }, [fetchHistoryFn, mealName]);
 
   const handleUseHistoryItem = async (item) => {
     try {
