@@ -109,6 +109,8 @@ export const useChat = (chatId) => {
 
   // Fetch initial messages
   const fetchMessages = useCallback(async () => {
+    console.log("fetchMessages");
+    console.log("chatId", chatId);
     if (!chatId || !currentUserId) {
       return;
     }
@@ -117,6 +119,7 @@ export const useChat = (chatId) => {
     setError(null);
 
     try {
+      console.log("chatId", chatId);
       const response = await fetch(`/api/messages/direct/${chatId}`);
       
       if (!response.ok) {

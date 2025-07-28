@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import React, { useState, useEffect, useRef } from "react";
 
@@ -12,13 +13,24 @@ import { useGlobalPresence, useChatPresence } from "@/hooks/usePresence";
 
 import { TypingIndicator } from "./TypingIndicator";
 
-const ConversationItem = ({ conversation, isSelected, onClick, isOnline }) => (
-  <div
-    className={`cursor-pointer border-b border-[#333] p-4 transition-colors hover:bg-[#1a1a1a] ${
-      isSelected ? "bg-[#1a1a1a]" : ""
-    }`}
-    onClick={() => onClick(conversation)}
-  >
+const ConversationItem = ({ conversation, isSelected, _onClick, isOnline }) => {
+  const router = useRouter();
+  const { data: session } = useSession();
+  
+  const handleClick = () => {
+    // Navigate to the conversation page
+    const userRole = session?.user?.role || 'client';
+    const basePath = userRole === 'trainer' ? '/trainer/dashboard/messages' : '/client/dashboard/messages';
+    router.push(`${basePath}/${conversation.id}`);
+  };
+
+  return (
+    <div
+      className={`cursor-pointer border-b border-[#333] p-4 transition-colors hover:bg-[#1a1a1a] ${
+        isSelected ? "bg-[#1a1a1a]" : ""
+      }`}
+      onClick={handleClick}
+    >
     <div className="flex items-center">
       {/* Avatar with online indicator */}
       <div className="relative">
@@ -64,7 +76,8 @@ const ConversationItem = ({ conversation, isSelected, onClick, isOnline }) => (
       </div>
     </div>
   </div>
-);
+  );
+};
 
 const MessageBubble = ({ message }) => {
   const formatTime = (dateString) => {
@@ -136,6 +149,7 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
   } = useChatPresence(conversation?.id);
 
   useEffect(() => {
+    console.log("conversation", conversation);
     if (conversation && !conversation.isNewChat) {
       fetchMessages();
       markAsRead();
@@ -328,7 +342,8 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
   );
 };
 
-export const RealTimeChatInterface = () => {
+export const RealTimeChatInterface = ({ conversationId }) => {
+  console.log("conversationId", conversationId);
   const [activeConversation, setActiveConversation] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
@@ -340,6 +355,19 @@ export const RealTimeChatInterface = () => {
   useEffect(() => {
     fetchConversations();
   }, [fetchConversations]);
+
+  // If conversationId is provided, find and set that conversation
+  useEffect(() => {
+    console.log("conversationId", conversationId);
+    console.log("conversations", conversations);
+    if (conversationId && conversations.length > 0) {
+      const conversation = conversations.find(conv => conv.id === conversationId);
+      if (conversation) {
+        setActiveConversation(conversation);
+        setShowMobileChat(true);
+      }
+    }
+  }, [conversationId, conversations]);
 
   const handleRefreshConversations = () => {
     fetchConversations();
@@ -356,7 +384,7 @@ export const RealTimeChatInterface = () => {
     const matchesFilter =
       filter === "all" ||
       (filter === "unread" && conversation.unreadCount > 0) ||
-      (filter === "active" && conversation.coachingRequestStatus === "accepted");
+      (filter === "active" && !conversation.isNewChat);
 
     return matchesSearch && matchesFilter;
   });
