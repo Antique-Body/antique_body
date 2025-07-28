@@ -28,6 +28,7 @@
     "studio:staging": "npx prisma studio --port 5556"
   },
   "dependencies": {
+    "@anthropic-ai/claude-code": "^1.0.61",
     "@auth/prisma-adapter": "^2.10.0",
     "@google-cloud/storage": "^7.16.0",
     "@iconify/react": "^6.0.0",
