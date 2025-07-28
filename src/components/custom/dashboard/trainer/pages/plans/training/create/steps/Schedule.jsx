@@ -20,73 +20,73 @@ const SESSION_TYPES = [
     id: "strength",
     label: "Strength",
     icon: "game-icons:muscle-up",
-    color: "from-red-500/40 to-orange-500/40 border-orange-500/50",
-    iconColor: "text-orange-400",
-    bgColor: "bg-orange-500/20",
+    color: "from-[#2A2A2A]/80 to-[#1A1A1A]/80 border-[#FF6B00]/30",
+    iconColor: "text-[#FF6B00]",
+    bgColor: "bg-[#FF6B00]/10",
   },
   {
     id: "cardio",
     label: "Cardio",
     icon: "mdi:heart-pulse",
-    color: "from-green-500/40 to-emerald-500/40 border-emerald-500/50",
-    iconColor: "text-emerald-400",
-    bgColor: "bg-emerald-500/20",
+    color: "from-[#2A2A2A]/80 to-[#1A1A1A]/80 border-[#FF6B00]/30",
+    iconColor: "text-[#FF6B00]",
+    bgColor: "bg-[#FF6B00]/10",
   },
   {
     id: "hiit",
     label: "HIIT",
     icon: "material-symbols:timer",
-    color: "from-blue-500/40 to-cyan-500/40 border-cyan-500/50",
-    iconColor: "text-cyan-400",
-    bgColor: "bg-cyan-500/20",
+    color: "from-[#2A2A2A]/80 to-[#1A1A1A]/80 border-[#FF6B00]/30",
+    iconColor: "text-[#FF6B00]",
+    bgColor: "bg-[#FF6B00]/10",
   },
   {
     id: "flexibility",
     label: "Flexibility",
     icon: "mdi:yoga",
-    color: "from-purple-500/40 to-violet-500/40 border-violet-500/50",
-    iconColor: "text-violet-400",
-    bgColor: "bg-violet-500/20",
+    color: "from-[#2A2A2A]/80 to-[#1A1A1A]/80 border-[#FF6B00]/30",
+    iconColor: "text-[#FF6B00]",
+    bgColor: "bg-[#FF6B00]/10",
   },
   {
     id: "mobility",
     label: "Mobility",
     icon: "material-symbols:sports-martial-arts",
-    color: "from-pink-500/40 to-rose-500/40 border-rose-500/50",
-    iconColor: "text-rose-400",
-    bgColor: "bg-rose-500/20",
+    color: "from-[#2A2A2A]/80 to-[#1A1A1A]/80 border-[#FF6B00]/30",
+    iconColor: "text-[#FF6B00]",
+    bgColor: "bg-[#FF6B00]/10",
   },
   {
     id: "endurance",
     label: "Endurance",
     icon: "mdi:run-fast",
-    color: "from-yellow-500/40 to-amber-500/40 border-amber-500/50",
-    iconColor: "text-amber-400",
-    bgColor: "bg-amber-500/20",
+    color: "from-[#2A2A2A]/80 to-[#1A1A1A]/80 border-[#FF6B00]/30",
+    iconColor: "text-[#FF6B00]",
+    bgColor: "bg-[#FF6B00]/10",
   },
   {
     id: "power",
     label: "Power",
     icon: "mdi:lightning-bolt",
-    color: "from-indigo-500/40 to-blue-500/40 border-blue-500/50",
-    iconColor: "text-blue-400",
-    bgColor: "bg-blue-500/20",
+    color: "from-[#2A2A2A]/80 to-[#1A1A1A]/80 border-[#FF6B00]/30",
+    iconColor: "text-[#FF6B00]",
+    bgColor: "bg-[#FF6B00]/10",
   },
   {
     id: "speed",
     label: "Speed",
     icon: "material-symbols:speed",
-    color: "from-teal-500/40 to-cyan-500/40 border-cyan-500/50",
-    iconColor: "text-cyan-400",
-    bgColor: "bg-cyan-500/20",
+    color: "from-[#2A2A2A]/80 to-[#1A1A1A]/80 border-[#FF6B00]/30",
+    iconColor: "text-[#FF6B00]",
+    bgColor: "bg-[#FF6B00]/10",
   },
   {
     id: "rest",
     label: "Rest Day",
     icon: "mdi:sleep",
-    color: "from-gray-500/40 to-slate-500/40 border-slate-500/50",
-    iconColor: "text-slate-400",
-    bgColor: "bg-slate-500/20",
+    color: "from-[#333333]/80 to-[#222222]/80 border-[#666]/30",
+    iconColor: "text-[#999]",
+    bgColor: "bg-[#444]/10",
   },
 ];
 
@@ -190,7 +190,7 @@ function SessionDndWrapper({ id, index, moveSession, children }) {
         zIndex: isDragging ? 1000 : 1,
       }}
       data-handler-id={handlerId}
-      className={`${isOver && canDrop ? "ring-2 ring-orange-400/50" : ""}`}
+      className={`${isOver && canDrop ? "ring-2 ring-[#FF6B00]/50" : ""}`}
     >
       {children}
     </div>
@@ -624,7 +624,7 @@ export const Schedule = ({ data, onChange }) => {
                     {/* Session Header */}
                     <div
                       className={`p-3 sm:p-4 flex items-center justify-between bg-gradient-to-r from-black/20 to-black/10 cursor-pointer select-none transition-all duration-150 active:bg-black/30 ${
-                        isExpanded ? "ring-2 ring-orange-400/30" : ""
+                        isExpanded ? "ring-2 ring-[#FF6B00]/30" : ""
                       }`}
                       onClick={() =>
                         !session.isRestDay &&
@@ -779,7 +779,7 @@ export const Schedule = ({ data, onChange }) => {
                                       )
                                     }
                                     placeholder="e.g., Upper Body Strength"
-                                    className="w-full bg-white/10 border border-white/30 rounded-xl text-white px-4 py-3 sm:py-4 backdrop-blur-sm focus:outline-none focus:border-white/60 focus:bg-white/15 transition-all placeholder-gray-300 text-base sm:text-lg font-medium"
+                                    className="w-full bg-[#2A2A2A]/80 border border-[#444]/60 rounded-xl text-white px-4 py-3 sm:py-4 backdrop-blur-sm focus:outline-none focus:border-[#FF6B00] focus:bg-[#333] transition-all placeholder-gray-300 text-base sm:text-lg font-medium"
                                   />
                                 </div>
                                 <div className="space-y-2">
@@ -801,7 +801,7 @@ export const Schedule = ({ data, onChange }) => {
                                       )
                                     }
                                     min="1"
-                                    className="w-full bg-white/10 border border-white/30 rounded-xl text-white px-4 py-3 sm:py-4 backdrop-blur-sm focus:outline-none focus:border-white/60 focus:bg-white/15 transition-all text-base sm:text-lg font-medium text-center"
+                                    className="w-full bg-[#2A2A2A]/80 border border-[#444]/60 rounded-xl text-white px-4 py-3 sm:py-4 backdrop-blur-sm focus:outline-none focus:border-[#FF6B00] focus:bg-[#333] transition-all text-base sm:text-lg font-medium text-center"
                                   />
                                 </div>
                               </div>
@@ -1045,7 +1045,7 @@ export const Schedule = ({ data, onChange }) => {
                                                         )
                                                       )
                                                     }
-                                                    className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-lg text-white text-center font-semibold text-base sm:text-lg py-2 sm:py-3 focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm"
+                                                    className="w-full bg-[#2A2A2A]/80 border border-[#444]/60 rounded-lg text-white text-center font-semibold text-base sm:text-lg py-2 sm:py-3 focus:outline-none focus:border-[#FF6B00] focus:bg-[#333] transition-all backdrop-blur-sm"
                                                   />
                                                 </div>
                                                 <div className="space-y-2">
@@ -1107,7 +1107,7 @@ export const Schedule = ({ data, onChange }) => {
                                                         )
                                                       )
                                                     }
-                                                    className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-lg text-white text-center font-semibold text-base sm:text-lg py-2 sm:py-3 focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm"
+                                                    className="w-full bg-[#2A2A2A]/80 border border-[#444]/60 rounded-lg text-white text-center font-semibold text-base sm:text-lg py-2 sm:py-3 focus:outline-none focus:border-[#FF6B00] focus:bg-[#333] transition-all backdrop-blur-sm"
                                                     placeholder={
                                                       exercise.repsUnit ===
                                                       "reps"
@@ -1134,7 +1134,7 @@ export const Schedule = ({ data, onChange }) => {
                                                         )
                                                       )
                                                     }
-                                                    className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-lg text-white text-center font-semibold text-base sm:text-lg py-2 sm:py-3 focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm"
+                                                    className="w-full bg-[#2A2A2A]/80 border border-[#444]/60 rounded-lg text-white text-center font-semibold text-base sm:text-lg py-2 sm:py-3 focus:outline-none focus:border-[#FF6B00] focus:bg-[#333] transition-all backdrop-blur-sm"
                                                   />
                                                 </div>
                                               </div>
@@ -1160,7 +1160,7 @@ export const Schedule = ({ data, onChange }) => {
                                                   }
                                                   placeholder="Add instructions for this exercise..."
                                                   rows={3}
-                                                  className="bg-[#4a4a4a]/60 border border-[#666]/40 rounded-lg text-gray-300 text-sm sm:text-base leading-relaxed resize-none w-full px-3 py-2 focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm placeholder-gray-400"
+                                                  className="bg-[#2A2A2A]/60 border border-[#444]/40 rounded-lg text-gray-300 text-sm sm:text-base leading-relaxed resize-none w-full px-3 py-2 focus:outline-none focus:border-[#FF6B00] focus:bg-[#333] transition-all backdrop-blur-sm placeholder-gray-400"
                                                 />
                                               </div>
 
@@ -1185,7 +1185,7 @@ export const Schedule = ({ data, onChange }) => {
                                                   }
                                                   placeholder="Add specific instructions, form cues, or modifications..."
                                                   rows={3}
-                                                  className="w-full bg-[#4a4a4a]/80 border border-[#666]/60 rounded-lg resize-none text-white text-sm sm:text-base focus:outline-none focus:border-[#FF6B00] focus:bg-[#4a4a4a] transition-all backdrop-blur-sm placeholder-gray-400 px-3 py-2"
+                                                  className="w-full bg-[#2A2A2A]/80 border border-[#444]/60 rounded-lg resize-none text-white text-sm sm:text-base focus:outline-none focus:border-[#FF6B00] focus:bg-[#333] transition-all backdrop-blur-sm placeholder-gray-400 px-3 py-2"
                                                 />
                                               </div>
 
@@ -1212,7 +1212,7 @@ export const Schedule = ({ data, onChange }) => {
                                                           "-" +
                                                           idx
                                                         }
-                                                        className="px-3 py-1.5 bg-gradient-to-r from-[#FF6B00]/20 to-[#FF8500]/20 border border-[#FF6B00]/40 rounded-full text-xs sm:text-sm font-medium text-[#FF6B00] capitalize"
+                                                        className="px-3 py-1.5 bg-[#2A2A2A]/80 border border-[#FF6B00]/30 rounded-full text-xs sm:text-sm font-medium text-[#FF6B00] capitalize"
                                                       >
                                                         {muscle.name}
                                                       </span>
@@ -1412,7 +1412,7 @@ export const Schedule = ({ data, onChange }) => {
                                       setActiveSession(sessionIndex);
                                       setShowCreateExercise(true);
                                     }}
-                                    className="w-full py-3 text-base font-semibold border-2 border-green-400/60 text-green-300 hover:bg-green-500/20 hover:border-green-400/80 hover:text-green-200 backdrop-blur-sm"
+                                    className="w-full py-3 text-base font-semibold border-2 border-[#444] text-gray-200 hover:bg-[#333]/50 hover:border-[#FF6B00]/30 hover:text-white backdrop-blur-sm"
                                     leftIcon={
                                       <Icon
                                         icon="mdi:plus-circle"

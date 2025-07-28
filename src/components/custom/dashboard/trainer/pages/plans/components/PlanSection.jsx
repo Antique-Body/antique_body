@@ -1,77 +1,71 @@
+import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
-import PropTypes from "prop-types";
+import { useRouter } from "next/navigation";
 
-import { PlanCard } from ".";
+import { Button } from "@/components/common";
+
+import { PlanCard } from "./PlanCard";
 
 const PlanSection = ({
   plans = [],
   type = "training",
-  icon: Icon,
-  iconBgColor = "bg-blue-500/20",
-  emptyMessage = {},
-  viewMode = "grid",
   containerVariants,
   itemVariants,
   fetchPlans,
-}) => (
-  <motion.div
-    key={type}
-    initial={{ opacity: 0, x: type === "nutrition" ? -20 : 20 }}
-    animate={{ opacity: 1, x: 0 }}
-    exit={{ opacity: 0, x: type === "nutrition" ? 20 : -20 }}
-    transition={{ duration: 0.3 }}
-  >
-    <div className="flex items-center gap-3 mb-6">
-      <div className={`p-2 rounded-lg ${iconBgColor}`}>
-        <Icon
-          size={20}
-          className={type === "nutrition" ? "text-green-400" : "text-blue-400"}
-        />
-      </div>
-      <h2 className="text-xl font-bold text-white">
-        {type === "nutrition" ? "Nutrition Plans" : "Training Plans"} (
-        {plans.length})
-      </h2>
-    </div>
+}) => {
+  const isNutrition = type === "nutrition";
+  const iconColor = isNutrition ? "text-green-400" : "text-blue-400";
+  const iconBgColor = isNutrition ? "bg-green-500/20" : "bg-blue-500/20";
+  const router = useRouter();
+  const emptyMessage = {
+    title: isNutrition ? "No nutrition plans found" : "No training plans found",
+    body: isNutrition
+      ? "Start creating nutrition plans to help your clients achieve their dietary goals"
+      : "Create your first training plan to help clients reach their fitness goals",
+  };
+
+  const handleCreatePlan = () => {
+    router.push(`/trainer/dashboard/plans/${type}/create?fromTab=${type}`);
+  };
+
+  return (
     <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className={`grid gap-4 ${
-        viewMode === "grid" ? "grid-cols-2 md:grid-cols-3" : "grid-cols-1"
-      }`}
+      key={type}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
     >
-      {plans.map((plan, idx) => (
-        <motion.div key={plan.id} variants={itemVariants}>
-          <PlanCard
-            id={plan.id}
-            title={plan.title}
-            description={plan.description}
-            coverImage={plan.coverImage}
-            createdAt={plan.createdAt}
-            type={type}
-            duration={
-              plan.duration
-                ? `${plan.duration} ${plan.durationType || "weeks"}`
-                : "Not specified"
-            }
-            clientCount={plan.clientCount || 0}
-            price={plan.price}
-            editUrl={`/trainer/dashboard/plans/${plan.type}/edit/${plan.id}`}
-            weeklySchedule={plan.weeklySchedule}
-            index={idx}
-            viewMode={viewMode}
-            onDelete={fetchPlans}
+      <div className="flex items-center gap-3 mb-6">
+        <div className={`p-2 rounded-lg ${iconBgColor}`}>
+          <Icon
+            icon={isNutrition ? "mdi:food-apple" : "mdi:dumbbell"}
+            className={`${iconColor} w-5 h-5`}
           />
-        </motion.div>
-      ))}
-      {plans.length === 0 && (
-        <motion.div
-          variants={itemVariants}
-          className="col-span-full bg-gradient-to-r from-[#1a1a1a] to-[#222] rounded-2xl border border-[#333] p-8 text-center"
-        >
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#222] flex items-center justify-center">
-            <Icon size={24} className="text-gray-400" />
+        </div>
+        <div className="flex items-center gap-4 justify-between w-full">
+          <h2 className="text-xl font-bold text-white">
+            {isNutrition ? "Nutrition Plans" : "Training Plans"} ({plans.length}
+            )
+          </h2>
+          <Button
+            onClick={handleCreatePlan}
+            variant="orangeFilled"
+            className="whitespace-nowrap px-6 py-2.5 flex items-center gap-2 bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] shadow-lg shadow-[#FF6B00]/25"
+          >
+            <Icon icon="mdi:plus" className="w-5 h-5" />
+            Create {type === "nutrition" ? "Nutrition" : "Training"} Plan
+          </Button>
+        </div>
+      </div>
+
+      {plans.length === 0 ? (
+        <div className="text-center py-12 bg-gradient-to-r from-[#1a1a1a] to-[#222] rounded-xl border border-[#333] shadow-lg">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#222] flex items-center justify-center">
+            <Icon
+              icon={isNutrition ? "mdi:food-apple" : "mdi:dumbbell"}
+              className={`${iconColor} w-8 h-8`}
+            />
           </div>
           <h3 className="text-lg font-semibold text-white mb-2">
             {emptyMessage.title}
@@ -79,26 +73,41 @@ const PlanSection = ({
           <p className="text-gray-400 mb-6 max-w-md mx-auto">
             {emptyMessage.body}
           </p>
+        </div>
+      ) : (
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="space-y-4"
+        >
+          {plans.map((plan, idx) => (
+            <motion.div key={plan.id} variants={itemVariants}>
+              <PlanCard
+                id={plan.id}
+                title={plan.title}
+                description={plan.description}
+                coverImage={plan.coverImage}
+                createdAt={plan.createdAt}
+                type={type}
+                duration={
+                  plan.duration
+                    ? `${plan.duration} ${plan.durationType || "weeks"}`
+                    : "Not specified"
+                }
+                clientCount={plan.clientCount || 0}
+                price={plan.price}
+                editUrl={`/trainer/dashboard/plans/${plan.type}/edit/${plan.id}`}
+                weeklySchedule={plan.weeklySchedule}
+                index={idx}
+                onDelete={fetchPlans}
+              />
+            </motion.div>
+          ))}
         </motion.div>
       )}
     </motion.div>
-  </motion.div>
-);
-
-PlanSection.propTypes = {
-  plans: PropTypes.array.isRequired,
-  type: PropTypes.string.isRequired,
-  icon: PropTypes.elementType.isRequired,
-  iconBgColor: PropTypes.string,
-  emptyMessage: PropTypes.shape({
-    title: PropTypes.string,
-    body: PropTypes.string,
-  }),
-  viewMode: PropTypes.string,
-  containerVariants: PropTypes.object,
-  itemVariants: PropTypes.object,
-  onDelete: PropTypes.func,
-  fetchPlans: PropTypes.func,
+  );
 };
 
 export default PlanSection;

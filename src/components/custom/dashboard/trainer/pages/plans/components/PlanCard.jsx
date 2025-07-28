@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -12,15 +13,6 @@ import {
 } from "@/app/api/users/services/planService";
 import { Card, ErrorMessage } from "@/components/common";
 import { Button } from "@/components/common/Button";
-import {
-  ClockIcon,
-  CopyIcon,
-  DollarIcon,
-  EditIcon,
-  TrashIcon,
-  UsersIcon,
-  ViewIcon,
-} from "@/components/common/Icons";
 import { Modal } from "@/components/common/Modal";
 
 import { PlanPreviewModal } from "./PlanPreviewModal";
@@ -42,11 +34,8 @@ export const PlanCard = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [loadingPlanDetails, setLoadingPlanDetails] = useState(false);
   const [detailedPlanData, setDetailedPlanData] = useState(null);
   const [deleteError, setDeleteError] = useState("");
-  const [isCopyRotating, setIsCopyRotating] = useState(false);
-  const [isEditRotating, setIsEditRotating] = useState(false);
   const copyTimeoutRef = useRef(null);
   const editTimeoutRef = useRef(null);
   const router = useRouter();
@@ -76,37 +65,21 @@ export const PlanCard = ({
   const cardVariants = {
     hidden: {
       opacity: 0,
-      y: 20,
+      y: 10,
     },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.4,
-        delay: index * 0.1,
+        duration: 0.3,
+        delay: index * 0.05,
         ease: "easeOut",
       },
     },
-    hover: {
-      y: -5,
-      transition: {
-        duration: 0.2,
-        ease: "easeOut",
-      },
-    },
-  };
-
-  const handleCardClick = (e) => {
-    // Don't open modal if clicking on one of the buttons
-    if (e.target.closest("button")) {
-      return;
-    }
-    handleViewClick();
   };
 
   const fetchPlanDetailsHandler = async () => {
     try {
-      setLoadingPlanDetails(true);
       const planData = await fetchPlanDetails(id, type);
       // Transform the data to match what PlanPreviewModal expects
       const transformedData = {
@@ -158,8 +131,6 @@ export const PlanCard = ({
         schedule: [],
         editUrl,
       };
-    } finally {
-      setLoadingPlanDetails(false);
     }
   };
 
@@ -170,17 +141,13 @@ export const PlanCard = ({
   };
 
   const handleCopyClick = () => {
-    setIsCopyRotating(true);
     // Navigate to the same edit page but with a query param to indicate it's a copy operation
     router.push(
       `${editUrl}?mode=copy&title=${encodeURIComponent(`Copy of ${title}`)}`
     );
-    // Reset rotation after a short delay and store timeout ID for cleanup
-    copyTimeoutRef.current = setTimeout(() => setIsCopyRotating(false), 1000);
   };
 
   const handleTrackClick = async () => {
-    setIsEditRotating(true);
     try {
       // Fetch active assignments for this specific plan
       const response = await fetch(
@@ -235,9 +202,6 @@ export const PlanCard = ({
       router.push(
         `/trainer/dashboard/clients?planId=${id}&type=${type}&action=assign`
       );
-    } finally {
-      // Reset rotation after a short delay and store timeout ID for cleanup
-      editTimeoutRef.current = setTimeout(() => setIsEditRotating(false), 1000);
     }
   };
 
@@ -273,185 +237,125 @@ export const PlanCard = ({
 
   return (
     <>
+      {deleteError && <ErrorMessage error={deleteError} />}
       <motion.div
         variants={cardVariants}
         initial="hidden"
         animate="visible"
-        whileHover="hover"
-        className="h-full cursor-pointer"
-        onClick={handleCardClick}
+        className="relative"
       >
-        {deleteError && <ErrorMessage error={deleteError} />}
         <Card
           variant="darkStrong"
-          width="100%"
-          className="flex h-full flex-col overflow-hidden hover:border-[#FF6B00] transition-all duration-300 !p-0"
+          onClick={handleViewClick}
+          className="flex cursor-pointer !p-0 flex-col sm:flex-row overflow-hidden hover:border-[#FF6B00] transition-all duration-300"
         >
-          <div className="relative h-32 sm:h-40 overflow-hidden">
-            {coverImage && (
-              <div className="absolute inset-0 transition-transform duration-300 group-hover:scale-105">
-                <Image
-                  src={coverImage}
-                  alt={title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                />
+          {/* Left side with image - Only on larger screens */}
+          {coverImage && (
+            <div className="relative w-full sm:w-48 h-32 sm:h-auto overflow-hidden">
+              <Image
+                src={coverImage}
+                alt={title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 100vw, 192px"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#111] to-transparent opacity-80"></div>
+              <div className="absolute top-2 left-2">
+                <span
+                  className={`px-2 py-1 text-xs font-medium rounded-md ${
+                    isNutrition
+                      ? "bg-green-900/80 text-green-100"
+                      : "bg-blue-900/80 text-blue-100"
+                  }`}
+                >
+                  {isNutrition ? "Nutrition" : "Training"}
+                </span>
               </div>
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#111] to-transparent opacity-80"></div>
-
-            <div className="absolute bottom-3 left-3 flex items-center space-x-2">
-              <span
-                className={`px-2 py-1 text-xs font-medium rounded-md ${
-                  isNutrition
-                    ? "bg-green-900/80 text-green-100"
-                    : "bg-blue-900/80 text-blue-100"
-                }`}
-              >
-                {isNutrition ? "Nutrition" : "Training"}
-              </span>
-
               {price && (
-                <span className="flex items-center px-2 py-1 text-xs font-medium rounded-md bg-[#FF6B00]/20 text-[#FF6B00]">
-                  <DollarIcon size={12} className="mr-1" />${price}
+                <div className="absolute top-2 right-2">
+                  <span className="px-2 py-1 text-xs font-medium rounded-md bg-[#FF6B00]/20 text-[#FF6B00]">
+                    ${price}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Content Section */}
+          <div className="flex-1 p-4">
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="text-lg font-bold text-white">{title}</h3>
+              {clientCount > 0 && (
+                <span className="bg-green-900/30 text-green-400 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <Icon icon="mdi:account-group" className="w-3 h-3" />
+                  {clientCount}
                 </span>
               )}
             </div>
-          </div>
 
-          <div className="flex flex-1 flex-col p-2 sm:p-4">
-            <h3 className="mb-1 sm:mb-2 text-lg sm:text-xl font-bold text-white line-clamp-1">
-              {title}
-            </h3>
-            <p className="mb-2 sm:mb-3 text-sm text-gray-400 line-clamp-2">
+            <p className="text-gray-400 text-sm mb-3 line-clamp-2">
               {description}
             </p>
 
-            <div className="mt-auto space-y-2 sm:space-y-4">
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-400">
-                <div className="flex items-center gap-1">
-                  <ClockIcon size={16} className="text-gray-500" />
-                  <span>{duration || "Not specified"}</span>
-                </div>
-
-                <div className="flex items-center gap-1">
-                  <UsersIcon size={16} className="text-gray-500" />
-                  <span
-                    className={`font-medium ${
-                      clientCount > 0 ? "text-green-400" : "text-gray-500"
-                    }`}
-                  >
-                    {clientCount} {clientCount === 1 ? "client" : "clients"}
-                  </span>
-                  {clientCount > 0 && (
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse ml-1"></div>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-1 ml-auto">
-                  <span className="text-xs">{formattedDate}</span>
-                </div>
+            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 mb-4">
+              <div className="flex items-center gap-1">
+                <Icon icon="mdi:clock-outline" className="w-4 h-4" />
+                <span>{duration || "Not specified"}</span>
               </div>
+              <div className="flex items-center gap-1">
+                <Icon icon="mdi:calendar" className="w-4 h-4" />
+                <span>{formattedDate}</span>
+              </div>
+            </div>
 
-              <div
-                className="grid grid-cols-2 gap-2 w-full"
-                onClick={(e) => e.stopPropagation()}
+            {/* Actions */}
+            <div className="flex flex-wrap gap-2 mt-auto">
+              <Button
+                onClick={handleTrackClick}
+                variant={clientCount > 0 ? "primary" : "darkOutline"}
+                size="small"
+                leftIcon={
+                  <Icon
+                    icon={
+                      clientCount > 0 ? "mdi:chart-line" : "mdi:account-plus"
+                    }
+                    className="w-4 h-4"
+                  />
+                }
+                className={`text-xs px-3 py-1.5 ${clientCount > 0 ? "bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] hover:from-[#FF5500] hover:to-[#FF7700] shadow-lg shadow-[#FF6B00]/25" : ""}`}
               >
-                <Button
-                  variant="darkOutline"
-                  size="small"
-                  leftIcon={<ViewIcon size={14} />}
-                  onClick={handleViewClick}
-                  loading={loadingPlanDetails}
-                  className="hover:border-blue-400 hover:text-blue-300 hover:scale-105 hover:shadow-md transition-all duration-200 text-xs px-3 py-2 h-9 font-medium"
-                >
-                  {loadingPlanDetails ? "Loading..." : "View"}
-                </Button>
-                <Button
-                  onClick={handleTrackClick}
-                  variant="primary"
-                  size="small"
-                  leftIcon={
-                    <EditIcon
-                      size={14}
-                      className={`transition-transform duration-300 ${
-                        isEditRotating ? "animate-rotate-once" : ""
-                      }`}
-                    />
-                  }
-                  className={`${
-                    clientCount > 0
-                      ? "bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] hover:from-[#FF5500] hover:to-[#FF7700] shadow-lg shadow-[#FF6B00]/25"
-                      : "bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600"
-                  } hover:scale-105 hover:shadow-lg transition-all duration-200 text-xs px-3 py-2 h-9 font-medium border-0 relative`}
-                  disabled={clientCount === 0}
-                  title={
-                    clientCount === 0
-                      ? "No clients assigned to this plan"
-                      : `Track progress for ${clientCount} ${
-                          clientCount === 1 ? "client" : "clients"
-                        }`
-                  }
-                >
-                  {clientCount > 0 ? "Track" : "Assign"}
-                  {clientCount > 1 && (
-                    <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-sm">
-                      {clientCount}
-                    </span>
-                  )}
-                </Button>
-              </div>
+                {clientCount > 0 ? "Track" : "Assign"}
+              </Button>
 
-              {/* Additional Actions */}
-              <div
-                className="flex justify-center gap-1 mt-2"
-                onClick={(e) => e.stopPropagation()}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }
-                }}
-                aria-label="Plan action buttons"
+              <Button
+                variant="ghost"
+                size="small"
+                leftIcon={<Icon icon="mdi:pencil" className="w-4 h-4" />}
+                onClick={handleEditClick}
+                className="text-xs px-3 py-1.5 text-gray-400 hover:text-blue-300 hover:bg-blue-900/20"
               >
-                <Button
-                  variant="ghost"
-                  size="small"
-                  leftIcon={<EditIcon size={12} />}
-                  onClick={handleEditClick}
-                  className="hover:bg-zinc-800 hover:text-blue-400 transition-all duration-200 text-xs px-2 py-1 h-7 text-zinc-500"
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="small"
-                  leftIcon={
-                    <CopyIcon
-                      size={12}
-                      className={`transition-transform duration-300 ${
-                        isCopyRotating ? "animate-rotate-once" : ""
-                      }`}
-                    />
-                  }
-                  onClick={handleCopyClick}
-                  className="hover:bg-zinc-800 hover:text-[#FF6B00] transition-all duration-200 text-xs px-2 py-1 h-7 text-zinc-500"
-                >
-                  Copy
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="small"
-                  leftIcon={<TrashIcon size={12} />}
-                  onClick={handleDeleteClick}
-                  className="hover:bg-zinc-800 hover:text-red-400 transition-all duration-200 text-xs px-2 py-1 h-7 text-zinc-500"
-                >
-                  Delete
-                </Button>
-              </div>
+                Edit
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="small"
+                leftIcon={<Icon icon="mdi:content-copy" className="w-4 h-4" />}
+                onClick={handleCopyClick}
+                className="text-xs px-3 py-1.5 text-gray-400 hover:text-[#FF6B00] hover:bg-[#FF6B00]/10"
+              >
+                Copy
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="small"
+                leftIcon={<Icon icon="mdi:trash" className="w-4 h-4" />}
+                onClick={handleDeleteClick}
+                className="text-xs px-3 py-1.5 text-gray-400 hover:text-red-400 hover:bg-red-900/20"
+              >
+                Delete
+              </Button>
             </div>
           </div>
         </Card>
@@ -471,22 +375,22 @@ export const PlanCard = ({
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={confirmDelete}
-        title={t("plans.delete_title", "Obriši plan")}
+        title={t("plans.delete_title", "Delete Plan")}
         message={
           <span>
             {t(
               "plans.delete_message",
-              "Jesi li siguran da želiš obrisati plan"
+              "Are you sure you want to delete the plan"
             )}{" "}
             <span className="font-semibold">{title}</span>?
           </span>
         }
         confirmButtonText={
           deleting
-            ? t("plans.deleting", "Brišem...")
-            : t("plans.delete_confirm", "Da, obriši")
+            ? t("plans.deleting", "Deleting...")
+            : t("plans.delete_confirm", "Yes, delete")
         }
-        cancelButtonText={t("common.cancel", "Ne")}
+        cancelButtonText={t("common.cancel", "No")}
         primaryButtonDisabled={deleting}
         primaryButtonAction={confirmDelete}
         secondaryButtonAction={() => setShowDeleteModal(false)}
