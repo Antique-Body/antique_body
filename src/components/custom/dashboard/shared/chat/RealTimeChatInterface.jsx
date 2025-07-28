@@ -10,6 +10,7 @@ import { FormField } from "@/components/common/FormField";
 import { MessageIcon } from "@/components/common/Icons";
 import { useChat, useConversations } from "@/hooks/useChat";
 import { useGlobalPresence, useChatPresence } from "@/hooks/usePresence";
+import { isValidChatId } from "@/utils/chatUtils";
 
 import { TypingIndicator } from "./TypingIndicator";
 
@@ -346,29 +347,126 @@ export const RealTimeChatInterface = ({ conversationId }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [showMobileChat, setShowMobileChat] = useState(false);
+  const [invalidChatId, setInvalidChatId] = useState(false);
+  const [validatedChatIds, setValidatedChatIds] = useState(new Set()); // Cache validated chat IDs
 
   const { conversations, loading, error, fetchConversations } = useConversations();
   const { isUserOnline } = useGlobalPresence();
 
   useEffect(() => {
     fetchConversations();
+    
+    // Cleanup function to clear validation cache when component unmounts
+    return () => {
+      setValidatedChatIds(new Set());
+    };
   }, [fetchConversations]);
 
   // If conversationId is provided, find and set that conversation
   useEffect(() => {
-    if (conversationId && conversations.length > 0) {
-      const conversation = conversations.find(conv => conv.id === conversationId);
-      if (conversation) {
-        setActiveConversation(conversation);
-        setShowMobileChat(true);
+    const handleConversationId = async () => {
+      if (conversationId) {
+        // Validate chat ID format
+        if (!isValidChatId(conversationId)) {
+          setInvalidChatId(true);
+          setActiveConversation(null);
+          setShowMobileChat(false);
+          return;
+        }
+        
+        setInvalidChatId(false);
+        
+        const conversation = conversations.find(conv => conv.id === conversationId);
+        if (conversation) {
+          // Existing conversation found - no validation needed
+          setActiveConversation(conversation);
+          setShowMobileChat(true);
+        } else {
+          // New conversation - need to validate and get participant info
+          let participantName = "New Conversation";
+          let participantAvatar = null;
+          
+          // Try to get participant info from session storage first
+          let participantInfoFound = false;
+          try {
+            const tempConversationData = sessionStorage.getItem('tempConversation');
+            if (tempConversationData) {
+              const participantInfo = JSON.parse(tempConversationData);
+              
+              // Verify this is for the current chat ID and not expired (5 minutes)
+              const isExpired = Date.now() - participantInfo.timestamp > 5 * 60 * 1000;
+              const isForCurrentChat = participantInfo.chatId === conversationId;
+              
+              if (!isExpired && isForCurrentChat) {
+                participantName = participantInfo.name || "New Conversation";
+                participantAvatar = participantInfo.avatar || null;
+                participantInfoFound = true;
+                
+                // Clear the session storage after using it
+                sessionStorage.removeItem('tempConversation');
+              }
+            }
+          } catch (error) {
+            console.error("Error parsing participant info from session storage:", error);
+          }
+
+          // Only do server validation if session storage didn't work and we haven't validated this chat ID
+          if (!participantInfoFound && !validatedChatIds.has(conversationId)) {
+            try {
+              const response = await fetch('/api/messages/validate-chat', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ chatId: conversationId }),
+              });
+
+              if (response.ok) {
+                const data = await response.json();
+                if (data.hasAccess && data.participantInfo) {
+                  participantName = data.participantInfo.name;
+                  participantAvatar = data.participantInfo.avatar;
+                  participantInfoFound = true;
+                  
+                  // Cache this validation result
+                  setValidatedChatIds(prev => new Set([...prev, conversationId]));
+                }
+              }
+            } catch (error) {
+              console.error("Error validating chat access:", error);
+            }
+          }
+          
+          // Only allow creating temp conversations if participant info is provided
+          if (participantName !== "New Conversation") {
+            const tempConversation = {
+              id: conversationId,
+              participantId: null,
+              name: participantName,
+              avatar: participantAvatar,
+              lastMessageAt: null,
+              unreadCount: 0,
+              isNewChat: true,
+            };
+            setActiveConversation(tempConversation);
+            setShowMobileChat(true);
+          } else {
+            setInvalidChatId(true);
+            setActiveConversation(null);
+            setShowMobileChat(false);
+          }
+        }
       }
-    }
-  }, [conversationId, conversations]);
+    };
+
+    handleConversationId();
+  }, [conversationId, conversations, validatedChatIds]);
 
   const handleRefreshConversations = () => {
     fetchConversations();
     setActiveConversation(null);
     setShowMobileChat(false);
+    setValidatedChatIds(new Set()); // Clear validation cache on refresh
   };
 
   // Filter conversations based on search query and filter type
@@ -446,7 +544,13 @@ export const RealTimeChatInterface = ({ conversationId }) => {
             <div className="p-4 text-center text-red-400">Error: {error}</div>
           )}
 
-          {!loading && !error && filteredConversations.length === 0 && (
+          {invalidChatId && (
+            <div className="p-4 text-center text-red-400">
+              Invalid conversation ID. Please use a valid conversation link.
+            </div>
+          )}
+
+          {!loading && !error && !invalidChatId && filteredConversations.length === 0 && (
             <div className="p-4 text-center text-gray-400">
               {conversations.length === 0 
                 ? "No conversations found. Accept a coaching request to start chatting."

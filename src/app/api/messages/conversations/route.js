@@ -93,25 +93,35 @@ export async function GET() {
       });
     }
 
-    // Get all available users to chat with
+    // Get available users to chat with (only those with coaching requests or existing conversations)
     let availableChats = [];
     
     if (user.role === "trainer" && user.trainerInfo) {
-      // Get all clients that the trainer can chat with
-      const allClients = await prisma.clientInfo.findMany({
+      // Get clients that the trainer has coaching requests with
+      const coachingRequestClients = await prisma.coachingRequest.findMany({
+        where: {
+          trainerId: user.trainerInfo.id,
+          status: {
+            in: ["pending", "accepted"]
+          }
+        },
         include: {
-          user: {
-            select: {
-              id: true,
-              email: true,
-              phone: true,
-            },
-          },
-          clientProfile: {
-            select: {
-              firstName: true,
-              lastName: true,
-              profileImage: true,
+          client: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  email: true,
+                  phone: true,
+                },
+              },
+              clientProfile: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  profileImage: true,
+                },
+              },
             },
           },
         },
@@ -119,9 +129,9 @@ export async function GET() {
 
       // Filter out clients that already have conversations
       const existingClientIds = conversations.map(conv => conv.clientId);
-      const availableClients = allClients.filter(client => 
-        !existingClientIds.includes(client.id)
-      );
+      const availableClients = coachingRequestClients
+        .map(cr => cr.client)
+        .filter(client => !existingClientIds.includes(client.id));
 
       availableChats = availableClients.map((client) => ({
         id: generateChatId(user.trainerInfo.id, client.id),
@@ -135,21 +145,31 @@ export async function GET() {
         isNewChat: true,
       }));
     } else if (user.role === "client" && user.clientInfo) {
-      // Get all trainers that the client can chat with
-      const allTrainers = await prisma.trainerInfo.findMany({
+      // Get trainers that the client has coaching requests with
+      const coachingRequestTrainers = await prisma.coachingRequest.findMany({
+        where: {
+          clientId: user.clientInfo.id,
+          status: {
+            in: ["pending", "accepted"]
+          }
+        },
         include: {
-          user: {
-            select: {
-              id: true,
-              email: true,
-              phone: true,
-            },
-          },
-          trainerProfile: {
-            select: {
-              firstName: true,
-              lastName: true,
-              profileImage: true,
+          trainer: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  email: true,
+                  phone: true,
+                },
+              },
+              trainerProfile: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  profileImage: true,
+                },
+              },
             },
           },
         },
@@ -157,9 +177,9 @@ export async function GET() {
 
       // Filter out trainers that already have conversations
       const existingTrainerIds = conversations.map(conv => conv.trainerId);
-      const availableTrainers = allTrainers.filter(trainer => 
-        !existingTrainerIds.includes(trainer.id)
-      );
+      const availableTrainers = coachingRequestTrainers
+        .map(cr => cr.trainer)
+        .filter(trainer => !existingTrainerIds.includes(trainer.id));
 
       availableChats = availableTrainers.map((trainer) => ({
         id: generateChatId(trainer.id, user.clientInfo.id),

@@ -99,6 +99,18 @@ export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
 
 
 
+    // Store participant info in session storage for secure access
+    const participantInfo = {
+      name: trainer.name || "Unknown Trainer",
+      avatar: trainer.profileImage || null,
+      id: trainer.id,
+      chatId: chatId,
+      timestamp: Date.now() // Add timestamp for security
+    };
+    
+    // Store in session storage (cleared when browser/tab closes)
+    sessionStorage.setItem('tempConversation', JSON.stringify(participantInfo));
+    
     // Navigate to the appropriate messages page
     const basePath = role === "client" ? "/client/dashboard/messages" : "/trainer/dashboard/messages";
     router.push(`${basePath}/${encodeURIComponent(chatId)}`);
