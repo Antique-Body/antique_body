@@ -263,7 +263,6 @@ export const Schedule = ({ data, onChange }) => {
     const key = `${sessionIndex}-${exerciseIndex}`;
     return activeMedia[key] || "image";
   };
-
   // Helper function to set active media for a specific exercise
   const setActiveMediaForExercise = (
     sessionIndex,

@@ -47,6 +47,7 @@ export const SortControls = forwardRef(
       onClearFilters = () => {},
       actionButton = null,
       itemLabel = "items",
+      showSortControls = true,
     },
     ref
   ) => {
@@ -521,7 +522,7 @@ export const SortControls = forwardRef(
                     >
                       <button
                         onClick={onClearFilters}
-                        className={`text-xs sm:text-sm ${colors.accentClass} hover:underline flex items-center`}
+                        className={`text-xs sm:text-sm mt-1 ${colors.accentClass} hover:underline flex items-center`}
                         type="button"
                       >
                         Clear all
@@ -724,39 +725,41 @@ export const SortControls = forwardRef(
               {actionButton}
 
               {/* Desktop sort controls */}
-              <div className="hidden sm:flex items-center gap-3">
-                <span className="text-zinc-400 text-sm">Sort by:</span>
-                <select
-                  value={sortOption}
-                  onChange={(e) => setSortOption(e.target.value)}
-                  className={`bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 ${colors.focusRing}`}
-                >
-                  {sortOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+              {showSortControls && (
+                <div className="hidden sm:flex items-center gap-3">
+                  <span className="text-zinc-400 text-sm">Sort by:</span>
+                  <select
+                    value={sortOption}
+                    onChange={(e) => setSortOption(e.target.value)}
+                    className={`bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 ${colors.focusRing}`}
+                  >
+                    {sortOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
 
-                <Button
-                  variant="secondary"
-                  size="small"
-                  onClick={toggleSortOrder}
-                  className="bg-zinc-800 border border-zinc-700 rounded-lg p-1.5 hover:bg-zinc-700 transition-colors"
-                  aria-label={
-                    sortOrder === "asc" ? "Sort descending" : "Sort ascending"
-                  }
-                >
-                  <Icon
-                    icon={
-                      sortOrder === "asc"
-                        ? "mdi:sort-ascending"
-                        : "mdi:sort-descending"
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    onClick={toggleSortOrder}
+                    className="bg-zinc-800 border border-zinc-700 rounded-lg p-1.5 hover:bg-zinc-700 transition-colors"
+                    aria-label={
+                      sortOrder === "asc" ? "Sort descending" : "Sort ascending"
                     }
-                    className="w-5 h-5 text-zinc-300"
-                  />
-                </Button>
-              </div>
+                  >
+                    <Icon
+                      icon={
+                        sortOrder === "asc"
+                          ? "mdi:sort-ascending"
+                          : "mdi:sort-descending"
+                      }
+                      className="w-5 h-5 text-zinc-300"
+                    />
+                  </Button>
+                </div>
+              )}
 
               {/* Mobile sort dropdown */}
               <div className="relative flex-1 sm:hidden" ref={dropdownRef}>

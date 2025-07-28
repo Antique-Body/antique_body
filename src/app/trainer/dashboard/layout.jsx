@@ -5,19 +5,18 @@ import React, { useEffect, useState, useMemo, createContext } from "react";
 
 import { FullScreenLoader } from "@/components";
 import { EffectBackground } from "@/components/background";
-import {
-  SidebarDashboard,
-  UserEditProfile,
-  UserSettings,
-} from "@/components/custom/dashboard/shared";
+import { SidebarDashboard } from "@/components/custom/dashboard/shared";
 import { TrainerProfileModal } from "@/components/custom/dashboard/trainer/components";
 import {
   getNavigationConfig,
+  getBottomNavigationConfig,
   updateNavigationBadges,
 } from "@/config/navigation";
 
 // Move function outside of component
 function getActiveTabFromPath(path) {
+  if (path.includes("/edit")) return "edit";
+  if (path.includes("/settings")) return "settings";
   if (path.includes("/newclients")) return "newClients";
   if (path.includes("/clients")) return "clients";
   if (path.includes("/upcoming-trainings")) return "upcomingTrainings";
@@ -40,10 +39,7 @@ export default function TrainerDashboardLayout({ children }) {
   const [trainerData, setTrainerData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [profileSaveError, setProfileSaveError] = useState("");
 
   // State for badge counts
   const [badgeCounts, setBadgeCounts] = useState({
@@ -133,6 +129,13 @@ export default function TrainerDashboardLayout({ children }) {
       case "meals":
         router.push("/trainer/dashboard/meals");
         break;
+      case "edit":
+        router.push("/trainer/dashboard/edit");
+        break;
+      case "settings":
+        router.push("/trainer/dashboard/settings");
+        break;
+      // No need for logout case as it's handled in the SidebarDashboard component
       default:
         router.push("/trainer/dashboard/newclients");
     }
@@ -143,20 +146,9 @@ export default function TrainerDashboardLayout({ children }) {
     setShowDetailModal(true);
   };
 
-  // Handle edit click
-  const handleEditClick = () => {
-    setShowEditModal(true);
-  };
-
-  // Handle settings click
-  const handleSettingsClick = () => {
-    setShowSettingsModal(true);
-  };
-
-  // Handle profile save
-  const handleProfileSave = async () => {
+  // Refresh trainer data after profile update
+  const _refreshTrainerData = async () => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
       setLoading(true);
       const res = await fetch("/api/users/trainer?mode=basic");
       if (res.ok) {
@@ -165,15 +157,11 @@ export default function TrainerDashboardLayout({ children }) {
       } else if (res.status === 401) {
         // Silently handle unauthorized errors - session might not be updated yet
       }
-      // Osvježi badge counts nakon save-a
+      // Refresh badge counts after update
       await refreshBadgeCounts();
-      setShowEditModal(false);
-      setShowSettingsModal(false);
       setShowDetailModal(false);
-      setProfileSaveError("");
-    } catch {
-      // Minimalan error UI
-      setProfileSaveError("Greška pri spremanju profila. Pokušajte ponovo.");
+    } catch (error) {
+      console.error("Error refreshing trainer data:", error);
     } finally {
       setLoading(false);
     }
@@ -184,6 +172,12 @@ export default function TrainerDashboardLayout({ children }) {
     const navigation = getNavigationConfig("trainer");
     return updateNavigationBadges(navigation, badgeCounts);
   }, [badgeCounts]);
+
+  // Get bottom navigation items
+  const bottomNavigationItems = useMemo(
+    () => getBottomNavigationConfig("trainer"),
+    []
+  );
 
   // Function to refresh badge counts (can be called from child components)
   const refreshBadgeCounts = async () => {
@@ -216,11 +210,10 @@ export default function TrainerDashboardLayout({ children }) {
           userData={trainerData?.data || {}} // fallback
           loading={loading}
           navigationItems={navigationItemsWithBadges}
+          bottomNavigationItems={bottomNavigationItems}
           activeItem={activeTab}
           onNavigationChange={handleTabChange}
           onProfileClick={handleProfileClick}
-          onEditClick={handleEditClick}
-          onSettingsClick={handleSettingsClick}
           onCollapseChange={setSidebarCollapsed}
         />
         {/* Main Content */}
@@ -244,44 +237,13 @@ export default function TrainerDashboardLayout({ children }) {
             </div>
           </div>
         </div>
+
         {/* Profile Detail Modal */}
         <TrainerProfileModal
           trainerData={trainerData?.data || {}}
           isOpen={showDetailModal}
           onClose={() => setShowDetailModal(false)}
         />
-        {/* Edit Profile Modal */}
-        {showEditModal && trainerData && (
-          <>
-            <UserEditProfile
-              profileType="trainer"
-              userData={trainerData?.data || {}}
-              onClose={() => setShowEditModal(false)}
-              onSave={handleProfileSave}
-            />
-            {profileSaveError && (
-              <div className="text-center text-red-400 py-2">
-                {profileSaveError}
-              </div>
-            )}
-          </>
-        )}
-        {/* Settings Modal */}
-        {showSettingsModal && trainerData && (
-          <>
-            <UserSettings
-              profileType="trainer"
-              userData={trainerData?.data || {}}
-              onClose={() => setShowSettingsModal(false)}
-              onSave={handleProfileSave}
-            />
-            {profileSaveError && (
-              <div className="text-center text-red-400 py-2">
-                {profileSaveError}
-              </div>
-            )}
-          </>
-        )}
       </div>
     </BadgeContext.Provider>
   );

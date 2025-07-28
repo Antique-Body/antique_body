@@ -124,6 +124,7 @@ model TrainerInfo {
   trainerProfile           TrainerProfile?
   trainerSettings          TrainerSettings?
   trainingPlans            TrainingPlan[]
+  assignedDietPlans        DietPlanAssignment[]
 }
 
 model TrainerProfile {
@@ -238,6 +239,8 @@ model ClientInfo {
   clientSettings           ClientSettings?
   coachingRequests         CoachingRequest[]
   coachingRequestCooldowns CoachingRequestCooldown[]
+  dietPlanAssignments      DietPlanAssignment[]
+  customMeals              CustomMeal[]
 }
 
 model ClientProfile {
@@ -483,7 +486,8 @@ model NutritionPlan {
   deletedAt                 DateTime?
   clientCount               Int?
   trainerInfo               TrainerInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
-
+  dietPlanAssignments       DietPlanAssignment[]
+  
   @@index([trainerInfoId])
 }
 
@@ -521,6 +525,137 @@ model CoachingRequestCooldown {
   @@index([expiresAt])
   @@index([removedAt])
 }
+
+
+// Diet Tracking System
+model DietPlanAssignment {
+  id              String   @id @default(cuid())
+  clientId        String
+  nutritionPlanId String
+  assignedById    String   // trainer who assigned the plan
+  startDate       DateTime @default(now())
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  client          ClientInfo @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  nutritionPlan   NutritionPlan @relation(fields: [nutritionPlanId], references: [id], onDelete: Cascade)
+  assignedBy      TrainerInfo @relation(fields: [assignedById], references: [id], onDelete: Cascade)
+  dailyLogs       DailyDietLog[]
+  
+  @@index([clientId])
+  @@index([nutritionPlanId])
+  @@index([assignedById])
+  @@index([isActive])
+  @@index([startDate])
+}
+
+model DailyDietLog {
+  id                  String   @id @default(cuid())
+  dietPlanAssignmentId String
+  date                DateTime @db.Date
+  dayNumber           Int      // Which day of the plan (1, 2, 3, etc.)
+  totalCalories       Float    @default(0)
+  totalProtein        Float    @default(0)
+  totalCarbs          Float    @default(0)
+  totalFat            Float    @default(0)
+  completedMeals      Int      @default(0)
+  totalMeals          Int      @default(0)
+  isCompleted         Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  // Relations
+  dietPlanAssignment  DietPlanAssignment @relation(fields: [dietPlanAssignmentId], references: [id], onDelete: Cascade)
+  mealLogs            MealLog[]
+  snackLogs           SnackLog[]
+  
+  @@unique([dietPlanAssignmentId, date])
+  @@index([dietPlanAssignmentId])
+  @@index([date])
+  @@index([dayNumber])
+  @@index([isCompleted])
+}
+
+model MealLog {
+  id              String   @id @default(cuid())
+  dailyDietLogId  String
+  mealName        String   // "Breakfast", "Lunch", "Dinner", "Snack"
+  mealTime        String   // "08:00", "13:00", etc.
+  selectedOption  Json     // The meal option that was selected
+  isCompleted     Boolean  @default(false)
+  completedAt     DateTime?
+  calories        Float    @default(0)
+  protein         Float    @default(0)
+  carbs           Float    @default(0)
+  fat             Float    @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  dailyDietLog    DailyDietLog @relation(fields: [dailyDietLogId], references: [id], onDelete: Cascade)
+  
+  @@index([dailyDietLogId])
+  @@index([mealName])
+  @@index([isCompleted])
+  @@index([completedAt])
+}
+
+// Snack Log for extra meals/snacks outside of planned meals
+model SnackLog {
+  id              String   @id @default(cuid())
+  dailyDietLogId  String
+  name            String   // Name of the snack/food
+  description     String?  // Optional description
+  mealType        String   // "snack", "drink", "dessert", "supplement", "other"
+  calories        Float    @default(0)
+  protein         Float    @default(0)
+  carbs           Float    @default(0)
+  fat             Float    @default(0)
+  ingredients     Json     // Array of ingredient strings
+  loggedAt        DateTime @default(now())
+  loggedTime      String   // Time when logged (HH:MM format)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  dailyDietLog    DailyDietLog @relation(fields: [dailyDietLogId], references: [id], onDelete: Cascade)
+  
+  @@index([dailyDietLogId])
+  @@index([mealType])
+  @@index([loggedAt])
+  @@index([loggedTime])
+}
+
+// Custom Meal History System
+model CustomMeal {
+  id              String   @id @default(cuid())
+  clientId        String
+  name            String
+  description     String?
+  mealType        String   // "breakfast", "lunch", "dinner", "snack"
+  calories        Float    @default(0)
+  protein         Float    @default(0)
+  carbs           Float    @default(0)
+  fat             Float    @default(0)
+  ingredients     Json     // Array of ingredient strings
+  usageCount      Int      @default(1)
+  lastUsed        DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  client          ClientInfo @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  @@index([clientId])
+  @@index([mealType])
+  @@index([lastUsed])
+  @@index([usageCount])
+  @@index([clientId, mealType])
+  @@index([clientId, lastUsed])
+}
+
 
 model AssignedTrainingPlan {
   id             String       @id @default(cuid())
