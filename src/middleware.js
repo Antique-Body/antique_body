@@ -100,6 +100,7 @@ function getOnboardingRedirect(role, token, pathname) {
         "/trainer/dashboard/meals",
         "/trainer/edit-profile",
         "/trainer/dashboard/clients/:id/plans/:planId",
+        "/trainer/dashboard/clients/:id/nutrition/:planId",
       ],
       fallback: "/trainer/dashboard",
     },

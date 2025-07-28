@@ -1029,6 +1029,7 @@ export const MealModal = ({ isOpen, onClose, mode = "view", meal, onSave }) => {
         primaryButtonAction={mode === "view" ? onClose : handleSubmit}
         secondaryButtonAction={onClose}
         primaryButtonDisabled={isUploading || isSubmitting}
+        footerButtons={true}
       >
         {modalContent}
       </Modal>

@@ -31,8 +31,12 @@ export default function ClientDashboard({ params }) {
   const [assignError, setAssignError] = useState(null);
   const [planPreviewOpen, setPlanPreviewOpen] = useState(false);
   const [planPreviewData, setPlanPreviewData] = useState(null);
+  const [nutritionPreviewOpen, setNutritionPreviewOpen] = useState(false);
+  const [nutritionPreviewData, setNutritionPreviewData] = useState(null);
   const [startingPlanId, setStartingPlanId] = useState(null);
   const [startPlanError, setStartPlanError] = useState(null);
+  const [trackingNutritionPlanId, setTrackingNutritionPlanId] = useState(null);
+  const [nutritionTrackError, setNutritionTrackError] = useState(null);
   // Unwrap params using React.use() for Next.js 15 compatibility
   const unwrappedParams = React.use(params);
   const clientId = unwrappedParams.id;
@@ -49,16 +53,31 @@ export default function ClientDashboard({ params }) {
 
       const data = await response.json();
       if (data.success) {
-        // Dohvati i assigned planove
-        const assignedPlansRes = await fetch(
+        // Dohvati i assigned training planove
+        const assignedTrainingPlansRes = await fetch(
           `/api/coaching-requests/${clientId}/assigned-training-plans`
         );
-        let assignedPlans = [];
-        if (assignedPlansRes.ok) {
-          const assignedData = await assignedPlansRes.json();
-          assignedPlans = assignedData.data || [];
+        let assignedTrainingPlans = [];
+        if (assignedTrainingPlansRes.ok) {
+          const assignedTrainingData = await assignedTrainingPlansRes.json();
+          assignedTrainingPlans = assignedTrainingData.data || [];
         }
-        setClient({ ...data.data, assignedTrainingPlans: assignedPlans });
+
+        // Dohvati i assigned nutrition planove
+        const assignedNutritionPlansRes = await fetch(
+          `/api/coaching-requests/${clientId}/assigned-nutrition-plans`
+        );
+        let assignedNutritionPlans = [];
+        if (assignedNutritionPlansRes.ok) {
+          const assignedNutritionData = await assignedNutritionPlansRes.json();
+          assignedNutritionPlans = assignedNutritionData.data || [];
+        }
+
+        setClient({ 
+          ...data.data, 
+          assignedTrainingPlans: assignedTrainingPlans,
+          assignedNutritionPlans: assignedNutritionPlans 
+        });
       } else {
         throw new Error(data.error || "Failed to fetch client data");
       }
@@ -99,34 +118,42 @@ export default function ClientDashboard({ params }) {
 
   // Handle plan assignment
   const handleAssignPlanToClient = async () => {
-    if (!selectedPlan) return;
+    if (!selectedPlan || !assignType) return;
 
     try {
       setAssigning(true);
       setAssignError(null);
-      // Novi API poziv za assignanje plana
-      const response = await fetch(
-        `/api/coaching-requests/${client.id}/assign-training-plan`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ planId: String(selectedPlan.id) }),
-        }
-      );
+      
+      // Determine API endpoint based on plan type
+      const endpoint = assignType === "training" 
+        ? `/api/coaching-requests/${client.id}/assign-training-plan`
+        : `/api/coaching-requests/${client.id}/assign-nutrition-plan`;
+      
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planId: String(selectedPlan.id) }),
+      });
+      
       const data = await response.json();
+      
+      // Handle different error messages for training vs nutrition plans
+      const planTypeName = assignType === "training" ? "training" : "nutrition";
       if (
         data.error ===
-        "Client already has an active training plan. Complete it before assigning a new one."
+        `Client already has an active ${planTypeName} plan. Complete it before assigning a new one.`
       ) {
         setAssignError(
-          "Assigning a new plan will end the current plan for this client. " +
+          `Assigning a new ${planTypeName} plan will end the current ${planTypeName} plan for this client. ` +
             "Click 'End Current & Assign New Plan' to proceed."
         );
         return;
       }
+      
       if (!response.ok || !data.success) {
-        throw new Error(data.error || "Failed to assign plan");
+        throw new Error(data.error || `Failed to assign ${planTypeName} plan`);
       }
+      
       setShowAssignModal(false);
       setSelectedPlan(null);
       setAssignType(null);
@@ -145,6 +172,40 @@ export default function ClientDashboard({ params }) {
     setSelectedPlan(null);
     setAssignType(null);
     setPlans([]);
+  };
+
+  // Handle nutrition plan preview
+  const handleViewNutritionPlan = (plan) => {
+    // For assigned plans, the actual plan data is in planData property
+    const planDataToShow = plan.planData || plan;
+    setNutritionPreviewData(planDataToShow);
+    setNutritionPreviewOpen(true);
+  };
+
+  // Handler for tracking nutrition plan
+  const handleTrackNutritionPlan = async (planId) => {
+    if (!client?.id || !planId) return;
+    setTrackingNutritionPlanId(planId);
+    setNutritionTrackError(null);
+    try {
+      const res = await fetch(
+        `/api/coaching-requests/${client.id}/assigned-nutrition-plan/${planId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "tracking" }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to start tracking nutrition plan");
+      }
+      fetchClientData();
+    } catch (err) {
+      setNutritionTrackError(err.message || "Failed to start tracking nutrition plan");
+    } finally {
+      setTrackingNutritionPlanId(null);
+    }
   };
 
   // State za prikaz gumba End & Assign
@@ -373,6 +434,7 @@ export default function ClientDashboard({ params }) {
             profile={profile}
             onAssignPlan={handleAssignPlan}
             assignedTrainingPlans={client.assignedTrainingPlans || []}
+            assignedNutritionPlans={client.assignedNutritionPlans || []}
             setActiveTab={setActiveTab}
           />
         )}
@@ -390,7 +452,16 @@ export default function ClientDashboard({ params }) {
             startPlanError={startPlanError}
           />
         )}
-        {activeTab === "nutrition" && <NutritionTab client={client} />}
+        {activeTab === "nutrition" && (
+          <NutritionTab 
+            clientId={clientId}
+            assignedNutritionPlans={client.assignedNutritionPlans || []}
+            onViewNutritionPlan={handleViewNutritionPlan}
+            onTrackNutritionPlan={handleTrackNutritionPlan}
+            trackingNutritionPlanId={trackingNutritionPlanId}
+            nutritionTrackError={nutritionTrackError}
+          />
+        )}
         {activeTab === "messages" && <MessagesTab client={client} />}
       </div>
 
@@ -738,7 +809,16 @@ export default function ClientDashboard({ params }) {
         isOpen={planPreviewOpen}
         onClose={() => setPlanPreviewOpen(false)}
         days={planPreviewData?.days}
-        type="training"
+        type={assignType || "training"}
+      />
+      
+      {/* Nutrition Plan Preview Modal */}
+      <PlanPreviewModal
+        plan={nutritionPreviewData}
+        isOpen={nutritionPreviewOpen}
+        onClose={() => setNutritionPreviewOpen(false)}
+        days={nutritionPreviewData?.days}
+        type="nutrition"
       />
       <style jsx>{`
         .animate-fade-in {
@@ -772,6 +852,7 @@ function OverviewTab({
   profile,
   onAssignPlan,
   assignedTrainingPlans,
+  assignedNutritionPlans,
   setActiveTab,
 }) {
   const getExperienceText = (level) => {
@@ -802,8 +883,13 @@ function OverviewTab({
           .replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
-  // Pronađi aktivni plan
-  const activePlan = assignedTrainingPlans?.find(
+  // Pronađi aktivni training plan
+  const activeTrainingPlan = assignedTrainingPlans?.find(
+    (plan) => plan.status === "active"
+  );
+
+  // Pronađi aktivni nutrition plan
+  const activeNutritionPlan = assignedNutritionPlans?.find(
     (plan) => plan.status === "active"
   );
 
@@ -904,7 +990,7 @@ function OverviewTab({
           </div>
         </Card>
 
-        {/* Current Plan */}
+        {/* Current Plans */}
         <Card variant="dark" className="overflow-visible">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -914,19 +1000,30 @@ function OverviewTab({
                 width={24}
                 height={24}
               />
-              <h3 className="text-xl font-semibold text-white">Current Plan</h3>
+              <h3 className="text-xl font-semibold text-white">Current Plans</h3>
             </div>
-            <Button
-              variant="primary"
-              size="small"
-              leftIcon={<Icon icon="mdi:plus" width={16} height={16} />}
-              onClick={() => onAssignPlan("training")}
-            >
-              {activePlan ? "Replace Plan" : "Assign Plan"}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="primary"
+                size="small"
+                leftIcon={<Icon icon="mdi:dumbbell" width={16} height={16} />}
+                onClick={() => onAssignPlan("training")}
+              >
+                Assign Training Plan
+              </Button>
+              <Button
+                variant="success"
+                size="small"
+                leftIcon={<Icon icon="mdi:food-apple" width={16} height={16} />}
+                onClick={() => onAssignPlan("nutrition")}
+              >
+                Assign Meal Plan
+              </Button>
+            </div>
           </div>
           <div className="space-y-3">
-            {activePlan ? (
+            {/* Training Plan */}
+            {activeTrainingPlan ? (
               <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg border border-zinc-700">
                 <div className="flex items-center gap-3">
                   <Icon
@@ -937,11 +1034,11 @@ function OverviewTab({
                   />
                   <div>
                     <p className="text-white font-medium">
-                      {activePlan.planData?.title || "Untitled Plan"}
+                      {activeTrainingPlan.planData?.title || "Untitled Training Plan"}
                     </p>
                     <p className="text-zinc-400 text-sm">
-                      {activePlan.planData?.duration ?? "?"}{" "}
-                      {activePlan.planData?.durationType ?? ""} • Active
+                      Training Plan • {activeTrainingPlan.planData?.duration ?? "?"}{" "}
+                      {activeTrainingPlan.planData?.durationType ?? ""} • Active
                     </p>
                   </div>
                 </div>
@@ -955,8 +1052,43 @@ function OverviewTab({
                   </Button>
                 </div>
               </div>
-            ) : (
-              <div className="text-center py-6">
+            ) : null}
+
+            {/* Nutrition Plan */}
+            {activeNutritionPlan ? (
+              <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg border border-zinc-700">
+                <div className="flex items-center gap-3">
+                  <Icon
+                    icon="mdi:food-apple"
+                    className="text-green-400"
+                    width={20}
+                    height={20}
+                  />
+                  <div>
+                    <p className="text-white font-medium">
+                      {activeNutritionPlan.planData?.title || "Untitled Nutrition Plan"}
+                    </p>
+                    <p className="text-zinc-400 text-sm">
+                      Nutrition Plan • {activeNutritionPlan.planData?.duration ?? "?"}{" "}
+                      {activeNutritionPlan.planData?.durationType ?? ""} • Active
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    onClick={() => setActiveTab("nutrition")}
+                  >
+                    <Icon icon="mdi:eye" width={16} height={16} />
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+
+            {/* No Plans State */}
+            {!activeTrainingPlan && !activeNutritionPlan && (
+              <div className="text-center py-8">
                 <Icon
                   icon="mdi:clipboard-outline"
                   className="text-zinc-600 mx-auto mb-2"
@@ -965,6 +1097,9 @@ function OverviewTab({
                 />
                 <p className="text-zinc-400 text-sm">
                   No active plans assigned
+                </p>
+                <p className="text-zinc-500 text-xs mt-1">
+                  Use the buttons above to assign training or nutrition plans
                 </p>
               </div>
             )}
@@ -1995,522 +2130,6 @@ function WorkoutsTab({
   );
 }
 
-// Nutrition Tab Component
-function NutritionTab({}) {
-  return (
-    <div className="space-y-6">
-      {/* Header Actions */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-white">
-          Nutrition Management
-        </h2>
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            leftIcon={<Icon icon="mdi:calculator" width={20} height={20} />}
-          >
-            Macro Calculator
-          </Button>
-          <Button
-            variant="primary"
-            leftIcon={<Icon icon="mdi:plus" width={20} height={20} />}
-          >
-            Create Meal Plan
-          </Button>
-        </div>
-      </div>
-
-      {/* Daily Nutrition Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card variant="dark" className="overflow-visible">
-          <div className="flex items-center gap-2 mb-2">
-            <Icon
-              icon="mdi:fire"
-              className="text-[#3E92CC]"
-              width={20}
-              height={20}
-            />
-            <span className="text-zinc-400 text-sm">Calories</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-2xl font-bold text-white">1,845</p>
-              <p className="text-zinc-400 text-xs">/ 2,200 goal</p>
-            </div>
-            <div className="w-12 h-12">
-              <div className="relative w-full h-full">
-                <div className="absolute inset-0 rounded-full border-4 border-zinc-700"></div>
-                <div
-                  className="absolute inset-0 rounded-full border-4 border-orange-400 border-t-transparent"
-                  style={{ transform: "rotate(270deg)" }}
-                ></div>
-              </div>
-            </div>
-          </div>
-          <p className="text-orange-400 text-sm mt-1">355 remaining</p>
-        </Card>
-        <Card variant="dark" className="overflow-visible">
-          <div className="flex items-center gap-2 mb-2">
-            <Icon
-              icon="mdi:food-drumstick"
-              className="text-[#3E92CC]"
-              width={20}
-              height={20}
-            />
-            <span className="text-zinc-400 text-sm">Protein</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-2xl font-bold text-white">125g</p>
-              <p className="text-zinc-400 text-xs">/ 150g goal</p>
-            </div>
-            <div className="w-12 h-12">
-              <div className="relative w-full h-full">
-                <div className="absolute inset-0 rounded-full border-4 border-zinc-700"></div>
-                <div
-                  className="absolute inset-0 rounded-full border-4 border-blue-400 border-t-transparent"
-                  style={{ transform: "rotate(225deg)" }}
-                ></div>
-              </div>
-            </div>
-          </div>
-          <p className="text-blue-400 text-sm mt-1">25g remaining</p>
-        </Card>
-        <Card variant="dark" className="overflow-visible">
-          <div className="flex items-center gap-2 mb-2">
-            <Icon
-              icon="mdi:grain"
-              className="text-[#3E92CC]"
-              width={20}
-              height={20}
-            />
-            <span className="text-zinc-400 text-sm">Carbs</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-2xl font-bold text-white">180g</p>
-              <p className="text-zinc-400 text-xs">/ 200g goal</p>
-            </div>
-            <div className="w-12 h-12">
-              <div className="relative w-full h-full">
-                <div className="absolute inset-0 rounded-full border-4 border-zinc-700"></div>
-                <div
-                  className="absolute inset-0 rounded-full border-4 border-green-400 border-t-transparent"
-                  style={{ transform: "rotate(324deg)" }}
-                ></div>
-              </div>
-            </div>
-          </div>
-          <p className="text-green-400 text-sm mt-1">20g remaining</p>
-        </Card>
-        <Card variant="dark" className="overflow-visible">
-          <div className="flex items-center gap-2 mb-2">
-            <Icon
-              icon="mdi:water"
-              className="text-[#3E92CC]"
-              width={20}
-              height={20}
-            />
-            <span className="text-zinc-400 text-sm">Water</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-2xl font-bold text-white">2.1L</p>
-              <p className="text-zinc-400 text-xs">/ 3.0L goal</p>
-            </div>
-            <div className="w-12 h-12">
-              <div className="relative w-full h-full">
-                <div className="absolute inset-0 rounded-full border-4 border-zinc-700"></div>
-                <div
-                  className="absolute inset-0 rounded-full border-4 border-cyan-400 border-t-transparent"
-                  style={{ transform: "rotate(252deg)" }}
-                ></div>
-              </div>
-            </div>
-          </div>
-          <p className="text-cyan-400 text-sm mt-1">0.9L remaining</p>
-        </Card>
-      </div>
-
-      {/* Current Meal Plan */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Icon
-              icon="mdi:food-apple"
-              className="text-[#3E92CC]"
-              width={24}
-              height={24}
-            />
-            <h3 className="text-xl font-semibold text-white">
-              Current Meal Plan
-            </h3>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="secondary" size="small">
-              <Icon icon="mdi:pencil" width={16} height={16} />
-              Edit
-            </Button>
-            <Button variant="primary" size="small">
-              <Icon icon="mdi:eye" width={16} height={16} />
-              View Full Plan
-            </Button>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-400">Plan Name</span>
-              <span className="text-white font-medium">
-                Muscle Gain Nutrition
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-400">Duration</span>
-              <span className="text-white">8 weeks</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-400">Daily Calories</span>
-              <span className="text-white">2,200 kcal</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-400">Meal Frequency</span>
-              <span className="text-white">5 meals/day</span>
-            </div>
-          </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-400">Progress</span>
-              <span className="text-green-400">Week 2/8 (25%)</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-400">Adherence</span>
-              <span className="text-blue-400">87%</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-400">Target Goal</span>
-              <span className="text-white">Muscle Gain</span>
-            </div>
-            <div className="w-full bg-zinc-700 rounded-full h-2">
-              <div
-                className="bg-green-400 h-2 rounded-full"
-                style={{ width: "25%" }}
-              ></div>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Today's Meals */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Icon
-              icon="mdi:clock"
-              className="text-[#3E92CC]"
-              width={24}
-              height={24}
-            />
-            <h3 className="text-xl font-semibold text-white">Today's Meals</h3>
-          </div>
-          <Button variant="primary" size="small">
-            <Icon icon="mdi:plus" width={16} height={16} />
-            Log Meal
-          </Button>
-        </div>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center gap-3">
-              <Icon
-                icon="mdi:check-circle"
-                className="text-green-400"
-                width={20}
-                height={20}
-              />
-              <div>
-                <h4 className="text-white font-medium">Breakfast</h4>
-                <p className="text-zinc-400 text-sm">
-                  Protein Pancakes & Greek Yogurt
-                </p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-white font-medium">485 kcal</p>
-              <p className="text-zinc-400 text-sm">38g protein</p>
-            </div>
-          </div>
-          <div className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center gap-3">
-              <Icon
-                icon="mdi:check-circle"
-                className="text-green-400"
-                width={20}
-                height={20}
-              />
-              <div>
-                <h4 className="text-white font-medium">Lunch</h4>
-                <p className="text-zinc-400 text-sm">Grilled Chicken Salad</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-white font-medium">420 kcal</p>
-              <p className="text-zinc-400 text-sm">35g protein</p>
-            </div>
-          </div>
-          <div className="flex items-center justify-between p-4 bg-orange-900/20 rounded-lg border border-orange-700/30">
-            <div className="flex items-center gap-3">
-              <Icon
-                icon="mdi:clock"
-                className="text-orange-400"
-                width={20}
-                height={20}
-              />
-              <div>
-                <h4 className="text-white font-medium">Snack</h4>
-                <p className="text-zinc-400 text-sm">Protein Shake & Banana</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-white font-medium">280 kcal</p>
-              <p className="text-zinc-400 text-sm">25g protein</p>
-            </div>
-          </div>
-          <div className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center gap-3">
-              <Icon
-                icon="mdi:circle-outline"
-                className="text-zinc-500"
-                width={20}
-                height={20}
-              />
-              <div>
-                <h4 className="text-zinc-300 font-medium">Dinner</h4>
-                <p className="text-zinc-500 text-sm">Salmon & Sweet Potato</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-zinc-400 font-medium">520 kcal</p>
-              <p className="text-zinc-500 text-sm">42g protein</p>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Meal Library */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Icon
-              icon="mdi:library"
-              className="text-[#3E92CC]"
-              width={24}
-              height={24}
-            />
-            <h3 className="text-xl font-semibold text-white">Meal Library</h3>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="secondary" size="small">
-              <Icon icon="mdi:filter" width={16} height={16} />
-              Filter
-            </Button>
-            <Button variant="primary" size="small">
-              <Icon icon="mdi:plus" width={16} height={16} />
-              Add Meal
-            </Button>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors">
-            <div className="flex items-center gap-2 mb-2">
-              <Icon
-                icon="mdi:egg"
-                className="text-yellow-400"
-                width={20}
-                height={20}
-              />
-              <h4 className="text-white font-medium">Protein Pancakes</h4>
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">High protein breakfast</p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>485 kcal</span>
-              <span>38g protein</span>
-            </div>
-          </div>
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors">
-            <div className="flex items-center gap-2 mb-2">
-              <Icon
-                icon="mdi:food-drumstick"
-                className="text-orange-400"
-                width={20}
-                height={20}
-              />
-              <h4 className="text-white font-medium">Grilled Chicken</h4>
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">Lean protein source</p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>420 kcal</span>
-              <span>35g protein</span>
-            </div>
-          </div>
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors">
-            <div className="flex items-center gap-2 mb-2">
-              <Icon
-                icon="mdi:fish"
-                className="text-blue-400"
-                width={20}
-                height={20}
-              />
-              <h4 className="text-white font-medium">Salmon Bowl</h4>
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">Omega-3 rich meal</p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>520 kcal</span>
-              <span>42g protein</span>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Supplements */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Icon
-              icon="mdi:pill"
-              className="text-[#3E92CC]"
-              width={24}
-              height={24}
-            />
-            <h3 className="text-xl font-semibold text-white">Supplements</h3>
-          </div>
-          <Button variant="primary" size="small">
-            <Icon icon="mdi:plus" width={16} height={16} />
-            Add Supplement
-          </Button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-white font-medium">Whey Protein</h4>
-              <Icon
-                icon="mdi:check-circle"
-                className="text-green-400"
-                width={20}
-                height={20}
-              />
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">25g per serving</p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>Post-workout</span>
-              <span>Daily</span>
-            </div>
-          </div>
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-white font-medium">Creatine</h4>
-              <Icon
-                icon="mdi:clock"
-                className="text-orange-400"
-                width={20}
-                height={20}
-              />
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">5g per serving</p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>Pre-workout</span>
-              <span>Daily</span>
-            </div>
-          </div>
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-white font-medium">Multivitamin</h4>
-              <Icon
-                icon="mdi:check-circle"
-                className="text-green-400"
-                width={20}
-                height={20}
-              />
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">1 tablet</p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>Morning</span>
-              <span>Daily</span>
-            </div>
-          </div>
-          <div className="p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-white font-medium">Omega-3</h4>
-              <Icon
-                icon="mdi:circle-outline"
-                className="text-zinc-500"
-                width={20}
-                height={20}
-              />
-            </div>
-            <p className="text-zinc-400 text-sm mb-2">1000mg</p>
-            <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>With meals</span>
-              <span>2x daily</span>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Nutrition Analytics */}
-      <Card variant="dark" className="overflow-visible">
-        <div className="flex items-center gap-2 mb-4">
-          <Icon
-            icon="mdi:chart-pie"
-            className="text-[#3E92CC]"
-            width={24}
-            height={24}
-          />
-          <h3 className="text-xl font-semibold text-white">
-            Nutrition Analytics
-          </h3>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
-            <Icon
-              icon="mdi:trending-up"
-              className="text-green-400 mx-auto mb-2"
-              width={24}
-              height={24}
-            />
-            <p className="text-2xl font-bold text-white">87%</p>
-            <p className="text-zinc-400 text-sm">Adherence Rate</p>
-          </div>
-          <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
-            <Icon
-              icon="mdi:calendar-check"
-              className="text-blue-400 mx-auto mb-2"
-              width={24}
-              height={24}
-            />
-            <p className="text-2xl font-bold text-white">14</p>
-            <p className="text-zinc-400 text-sm">Days Tracked</p>
-          </div>
-          <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
-            <Icon
-              icon="mdi:target"
-              className="text-orange-400 mx-auto mb-2"
-              width={24}
-              height={24}
-            />
-            <p className="text-2xl font-bold text-white">+1.2kg</p>
-            <p className="text-zinc-400 text-sm">Weight Change</p>
-          </div>
-        </div>
-        <div className="h-48 flex items-center justify-center">
-          <p className="text-zinc-400">
-            Nutrition analytics chart coming soon...
-          </p>
-        </div>
-      </Card>
-    </div>
-  );
-}
-
 // Messages Tab Component
 function MessagesTab({}) {
   const [messages, setMessages] = React.useState([
@@ -2758,6 +2377,321 @@ function MessagesTab({}) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// Nutrition Tab Component
+function NutritionTab({ 
+  clientId,
+  assignedNutritionPlans, 
+  onViewNutritionPlan, 
+  onTrackNutritionPlan,
+  trackingNutritionPlanId,
+  nutritionTrackError 
+}) {
+  return (
+    <div className="max-w-5xl mx-auto space-y-6">
+      {/* Header Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h2 className="text-xl font-semibold text-white">Nutrition Plans</h2>
+        <Link href="/trainer/dashboard/plans/nutrition">
+          <Button
+            variant="success"
+            leftIcon={<Icon icon="mdi:plus" width={18} height={18} />}
+            className="w-full sm:w-auto"
+          >
+            Create New Nutrition Plan
+          </Button>
+        </Link>
+      </div>
+
+      {/* Nutrition Plans History */}
+      <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-white/10">
+        <div className="flex items-center gap-2 mb-6">
+          <Icon
+            icon="mdi:history"
+            className="text-green-400"
+            width={20}
+            height={20}
+          />
+          <h3 className="text-lg font-semibold text-white">
+            Assigned Nutrition Plans History
+          </h3>
+        </div>
+
+        {nutritionTrackError && (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4">
+            <div className="text-red-400 text-sm">{nutritionTrackError}</div>
+          </div>
+        )}
+
+        <div className="space-y-4">
+          {assignedNutritionPlans && assignedNutritionPlans.length > 0 ? (
+            assignedNutritionPlans.map((plan) => (
+              <NutritionPlanCard
+                key={plan.id}
+                plan={plan}
+                clientId={clientId}
+                onViewPlan={onViewNutritionPlan}
+                onTrackPlan={onTrackNutritionPlan}
+                trackingPlanId={trackingNutritionPlanId}
+              />
+            ))
+          ) : (
+            <div className="text-center py-12">
+              <Icon
+                icon="mdi:food-outline"
+                className="text-zinc-600 mx-auto mb-3"
+                width={48}
+                height={48}
+              />
+              <p className="text-zinc-400 mb-2">No nutrition plans assigned yet</p>
+              <p className="text-zinc-500 text-sm">
+                Create and assign nutrition plans to help your client with their dietary goals.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Current Nutrition Overview */}
+      {assignedNutritionPlans?.find(plan => plan.status === "active" || plan.status === "tracking") && (
+        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-white/10">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <Icon
+                icon="mdi:chart-line"
+                className="text-green-400"
+                width={20}
+                height={20}
+              />
+              <h3 className="text-lg font-semibold text-white">
+                Current Nutrition Progress
+              </h3>
+            </div>
+            {assignedNutritionPlans?.find(plan => plan.status === "tracking") && (
+              <div className="flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/30 rounded-full">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-green-400 text-sm font-medium">Tracking Active</span>
+              </div>
+            )}
+          </div>
+          
+          {/* Daily Nutrition Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card variant="dark" className="overflow-visible">
+              <div className="flex items-center gap-2 mb-2">
+                <Icon
+                  icon="mdi:fire"
+                  className="text-orange-400"
+                  width={20}
+                  height={20}
+                />
+                <span className="text-zinc-400 text-sm">Calories</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-2xl font-bold text-white">
+                    {assignedNutritionPlans?.find(plan => plan.status === "active" || plan.status === "tracking")?.planData?.nutritionInfo?.calories || "-"}
+                  </p>
+                  <p className="text-zinc-400 text-xs">per day</p>
+                </div>
+              </div>
+            </Card>
+            
+            <Card variant="dark" className="overflow-visible">
+              <div className="flex items-center gap-2 mb-2">
+                <Icon
+                  icon="mdi:food-drumstick"
+                  className="text-blue-400"
+                  width={20}
+                  height={20}
+                />
+                <span className="text-zinc-400 text-sm">Protein</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-2xl font-bold text-white">
+                    {assignedNutritionPlans?.find(plan => plan.status === "active" || plan.status === "tracking")?.planData?.nutritionInfo?.protein || "-"}g
+                  </p>
+                  <p className="text-zinc-400 text-xs">grams</p>
+                </div>
+              </div>
+            </Card>
+            
+            <Card variant="dark" className="overflow-visible">
+              <div className="flex items-center gap-2 mb-2">
+                <Icon
+                  icon="mdi:grain"
+                  className="text-yellow-400"
+                  width={20}
+                  height={20}
+                />
+                <span className="text-zinc-400 text-sm">Carbs</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-2xl font-bold text-white">
+                    {assignedNutritionPlans?.find(plan => plan.status === "active" || plan.status === "tracking")?.planData?.nutritionInfo?.carbs || "-"}g
+                  </p>
+                  <p className="text-zinc-400 text-xs">grams</p>
+                </div>
+              </div>
+            </Card>
+            
+            <Card variant="dark" className="overflow-visible">
+              <div className="flex items-center gap-2 mb-2">
+                <Icon
+                  icon="mdi:water"
+                  className="text-green-400"
+                  width={20}
+                  height={20}
+                />
+                <span className="text-zinc-400 text-sm">Fats</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-2xl font-bold text-white">
+                    {assignedNutritionPlans?.find(plan => plan.status === "active" || plan.status === "tracking")?.planData?.nutritionInfo?.fats || "-"}g
+                  </p>
+                  <p className="text-zinc-400 text-xs">grams</p>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Nutrition Plan Timeline */}
+          {assignedNutritionPlans?.find(plan => plan.status === "tracking") && (
+            <div className="mt-6 p-4 bg-zinc-800/30 rounded-lg border border-zinc-700">
+              <div className="flex items-center gap-2 mb-3">
+                <Icon
+                  icon="mdi:timeline"
+                  className="text-green-400"
+                  width={16}
+                  height={16}
+                />
+                <h4 className="text-white font-medium">Tracking Progress</h4>
+              </div>
+              <div className="text-zinc-400 text-sm">
+                <p>• Nutrition plan is actively being tracked</p>
+                <p>• Monitor client's daily nutrition intake</p>
+                <p>• Review meal compliance and progress weekly</p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Nutrition Plan Card Component
+function NutritionPlanCard({ plan, clientId, onViewPlan, onTrackPlan, trackingPlanId }) {
+  const formatDate = (dateString) => 
+    new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "active":
+        return "text-green-400 bg-green-400/10 border-green-400/30";
+      case "completed":
+        return "text-blue-400 bg-blue-400/10 border-blue-400/30";
+      case "paused":
+        return "text-yellow-400 bg-yellow-400/10 border-yellow-400/30";
+      default:
+        return "text-zinc-400 bg-zinc-400/10 border-zinc-400/30";
+    }
+  };
+
+  return (
+    <div className="border border-zinc-700 rounded-xl p-4 sm:p-6 bg-zinc-800/30">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0">
+            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+              <Icon icon="mdi:food-apple" className="text-white" width={24} height={24} />
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 mb-2">
+              <h4 className="text-lg font-semibold text-white truncate">
+                {plan.planData?.title || "Untitled Nutrition Plan"}
+              </h4>
+              <span
+                className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+                  plan.status
+                )}`}
+              >
+                {plan.status?.charAt(0).toUpperCase() + plan.status?.slice(1) || "Unknown"}
+              </span>
+            </div>
+            <p className="text-zinc-400 text-sm mb-3">
+              {plan.planData?.description || "No description available"}
+            </p>
+            <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-400">
+              <div className="flex items-center gap-1">
+                <Icon icon="mdi:calendar" width={16} height={16} />
+                <span>Assigned: {formatDate(plan.assignedAt)}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Icon icon="mdi:clock" width={16} height={16} />
+                <span>
+                  {plan.planData?.duration} {plan.planData?.durationType}
+                </span>
+              </div>
+              {plan.planData?.targetGoal && (
+                <div className="flex items-center gap-1">
+                  <Icon icon="mdi:target" width={16} height={16} />
+                  <span>{plan.planData.targetGoal}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="secondary"
+            size="small"
+            leftIcon={<Icon icon="mdi:eye" width={16} height={16} />}
+            onClick={() => onViewPlan && onViewPlan(plan)}
+          >
+            View Details
+          </Button>
+          {plan.status === "active" && onTrackPlan && (
+            <Button
+              variant="success"
+              size="small"
+              leftIcon={
+                trackingPlanId === plan.id ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                ) : (
+                  <Icon icon="mdi:chart-line" width={16} height={16} />
+                )
+              }
+              onClick={() => onTrackPlan(plan.id)}
+              disabled={trackingPlanId === plan.id}
+            >
+              {trackingPlanId === plan.id ? "Tracking..." : "Track Progress"}
+            </Button>
+          )}
+          {(plan.status === "active" || plan.status === "tracking") && (
+            <Link href={`/trainer/dashboard/clients/${clientId}/nutrition/${plan.id}`}>
+              <Button
+                variant="primary"
+                size="small"
+                leftIcon={<Icon icon="mdi:food-apple" width={16} height={16} />}
+              >
+                Open Tracking
+              </Button>
+            </Link>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

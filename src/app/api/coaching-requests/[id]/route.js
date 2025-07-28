@@ -79,7 +79,7 @@ const planDataSchema = {
 };
 const ajv = new Ajv();
 
-export async function GET(request, { params }) {
+export async function GET(request, context) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -89,7 +89,7 @@ export async function GET(request, { params }) {
       );
     }
 
-    const { id } = params;
+    const { id } = await context.params;
 
     if (!id) {
       return NextResponse.json(
@@ -167,7 +167,7 @@ export async function GET(request, { params }) {
   }
 }
 
-export async function PATCH(request, { params }) {
+export async function PATCH(request, context) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -177,7 +177,7 @@ export async function PATCH(request, { params }) {
       );
     }
 
-    const { id } = params;
+    const { id } = await context.params;
     const { status, rejectionReason } = await request.json();
 
     if (!id) {
@@ -287,7 +287,7 @@ export async function PATCH(request, { params }) {
   }
 }
 
-export async function DELETE(request, { params }) {
+export async function DELETE(request, context) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -297,7 +297,7 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    const { id } = params;
+    const { id } = await context.params;
 
     if (!id) {
       return NextResponse.json(
@@ -378,7 +378,7 @@ export async function DELETE(request, { params }) {
 
 // POST: Assign training plan to client (creates AssignedTrainingPlan)
 // NOTE: If multiple POST handlers are needed, split into separate files/endpoints.
-export async function POST(request, { params }) {
+export async function POST(request, context) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -387,7 +387,7 @@ export async function POST(request, { params }) {
         { status: 401 }
       );
     }
-    const { id } = params; // coaching request id
+    const { id } = await context.params; // coaching request id
     const body = await request.json();
     const { planId } = body;
     if (!planId) {

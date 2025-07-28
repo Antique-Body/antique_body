@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "#/auth";
 import prisma from "@/lib/prisma";
 
-// GET: Get all assigned training plans for client (by coaching request)
+// GET: Get all assigned nutrition plans for client (by coaching request)
 export async function GET(request, { params }) {
   try {
     const session = await auth();
@@ -38,8 +38,8 @@ export async function GET(request, { params }) {
         { status: 403 }
       );
     }
-    // Get all assigned plans for this client and trainer
-    const assignedPlans = await prisma.assignedTrainingPlan.findMany({
+    // Get all assigned nutrition plans for this client and trainer
+    const assignedPlans = await prisma.assignedNutritionPlan.findMany({
       where: {
         clientId: coachingRequest.clientId,
         trainerId: coachingRequest.trainerId,
@@ -48,7 +48,7 @@ export async function GET(request, { params }) {
     });
     return NextResponse.json({ success: true, data: assignedPlans });
   } catch (error) {
-    console.error("Error fetching assigned training plans:", error);
+    console.error("Error fetching assigned nutrition plans:", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }

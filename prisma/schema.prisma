@@ -115,6 +115,7 @@ model TrainerInfo {
   createdAt                DateTime                  @default(now())
   updatedAt                DateTime                  @updatedAt
   assignedTrainingPlans    AssignedTrainingPlan[]
+  assignedNutritionPlans   AssignedNutritionPlan[]
   coachingRequests         CoachingRequest[]
   coachingRequestCooldowns CoachingRequestCooldown[]
   exercises                Exercise[]
@@ -233,6 +234,7 @@ model ClientInfo {
   createdAt                DateTime                  @default(now())
   updatedAt                DateTime                  @updatedAt
   assignedTrainingPlans    AssignedTrainingPlan[]
+  assignedNutritionPlans   AssignedNutritionPlan[]
   user                     User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
   clientProfile            ClientProfile?
   clientSettings           ClientSettings?
@@ -482,6 +484,7 @@ model NutritionPlan {
   updatedAt                 DateTime    @updatedAt
   deletedAt                 DateTime?
   clientCount               Int?
+  assignedNutritionPlans    AssignedNutritionPlan[]
   trainerInfo               TrainerInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
 
   @@index([trainerInfoId])
@@ -538,6 +541,41 @@ model AssignedTrainingPlan {
   @@index([clientId])
   @@index([trainerId])
   @@index([status])
+}
+
+model AssignedNutritionPlan {
+  id                    String                 @id @default(cuid())
+  clientId              String
+  trainerId             String
+  originalPlanId        String
+  planData              Json
+  status                String                 @default("active")
+  assignedAt            DateTime               @default(now())
+  completedAt           DateTime?
+  client                ClientInfo             @relation(fields: [clientId], references: [id])
+  originalPlan          NutritionPlan          @relation(fields: [originalPlanId], references: [id])
+  trainer               TrainerInfo            @relation(fields: [trainerId], references: [id])
+  nutritionTrackingData NutritionTrackingData[]
+
+  @@index([clientId])
+  @@index([trainerId])
+  @@index([status])
+}
+
+model NutritionTrackingData {
+  id                     String                @id @default(cuid())
+  assignedNutritionPlanId String
+  date                   String
+  meals                  Json?
+  notes                  String?
+  supplementation        String?
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+  assignedNutritionPlan  AssignedNutritionPlan @relation(fields: [assignedNutritionPlanId], references: [id], onDelete: Cascade)
+
+  @@unique([assignedNutritionPlanId, date])
+  @@index([assignedNutritionPlanId])
+  @@index([date])
 }
 
 enum UserRole {
