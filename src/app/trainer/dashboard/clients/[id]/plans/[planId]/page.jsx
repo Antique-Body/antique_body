@@ -7,9 +7,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-import { FullScreenLoader } from "@/components";
+import { FullScreenLoader, ContextualSaveBar } from "@/components";
 import { Button } from "@/components/common/Button";
-import ContextualSaveBar from "@/components/common/ContextualSaveBar";
 import { Modal } from "@/components/common/Modal";
 import { ExerciseLibrarySelector } from "@/components/custom/dashboard/trainer/pages/exercises/components";
 import { VideoModal } from "@/components/modals/VideoModal";

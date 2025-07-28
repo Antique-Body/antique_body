@@ -719,12 +719,6 @@ export async function deleteSnackLog(snackLogId) {
       throw new Error("Snack log not found");
     }
 
-    // Skip date validation - allow deletion of any snack regardless of date
-    // This is a temporary fix until we can properly diagnose the date comparison issue
-
-    console.log(`Deleting snack log: ${snackLogId}`);
-    console.log(`Snack date: ${snackLog.dailyDietLog.date}`);
-
     // Delete the snack log
     await prisma.snackLog.delete({
       where: { id: snackLogId },

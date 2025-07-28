@@ -17,3 +17,4 @@ export { InfoBanner } from "./InfoBanner";
 export { Accordion } from "./Accordion";
 export { ToggleSwitch } from "./ToggleSwitch";
 export { WorkInProgress } from "./WorkInProgress";
+export { ContextualSaveBar } from "./ContextualSaveBar";
