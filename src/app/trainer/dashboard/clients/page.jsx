@@ -1,57 +1,50 @@
 "use client";
 import { Icon } from "@iconify/react";
-import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 
 import { Button } from "@/components/common/Button";
 import { InfoBanner } from "@/components/common/InfoBanner";
-import { ACTIVITY_TYPES } from "@/enums/activityTypes";
-import { EXPERIENCE_LEVELS } from "@/enums/experienceLevels";
-import { FITNESS_GOALS } from "@/enums/fitnessGoals";
-import { getGenderStyles } from "@/lib/utils";
-
-// Utility function to get gender icon and background class
-function getGenderIconAndClass(gender) {
-  const g = (gender || "").toLowerCase();
-  if (g === "male") {
-    return {
-      icon: "mdi:gender-male",
-      bgClass: "bg-gradient-to-br from-blue-500 to-blue-600",
-      pillClass: "bg-blue-900/30 text-blue-400",
-    };
-  } else if (g === "female") {
-    return {
-      icon: "mdi:gender-female",
-      bgClass: "bg-gradient-to-br from-pink-500 to-pink-600",
-      pillClass: "bg-pink-900/30 text-pink-400",
-    };
-  } else {
-    return {
-      icon: "mdi:help",
-      bgClass: "bg-gradient-to-br from-slate-500 to-slate-600",
-      pillClass: "bg-slate-900/30 text-slate-400",
-    };
-  }
-}
+import { ClientsGrid } from "@/components/custom/dashboard/trainer/pages/clients/components";
+import { SortControls } from "@/components/custom/shared/SortControls";
 
 export default function ClientsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [clients, setClients] = useState([]);
+  const [allClients, setAllClients] = useState([]); // Store all clients for local filtering
+  const [filteredClients, setFilteredClients] = useState([]); // Store filtered results
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalClients, setTotalClients] = useState(0);
+  const [sortOption, setSortOption] = useState("name");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const searchInputRef = useRef(null);
+
+  // Pagination settings
+  const CLIENTS_PER_PAGE = 12;
 
   // Get tracking parameters
   const planId = searchParams.get("planId");
   const planType = searchParams.get("type");
 
-  // Fetch accepted clients
-  const fetchAcceptedClients = async () => {
+  // Fetch all accepted clients (without pagination for local filtering)
+  // Fetch all accepted clients (without pagination for local filtering)
+  const fetchAllClients = useCallback(async () => {
     try {
       setLoading(true);
+      const queryParams = new URLSearchParams({
+        role: "trainer",
+        status: "accepted",
+        limit: 1000, // Get all clients for local filtering
+        sort: sortOption,
+        order: sortOrder,
+      });
+
       const response = await fetch(
-        "/api/coaching-requests?role=trainer&status=accepted"
+        `/api/coaching-requests?${queryParams.toString()}`
       );
 
       if (!response.ok) {
@@ -60,7 +53,9 @@ export default function ClientsPage() {
 
       const data = await response.json();
       if (data.success) {
-        setClients(data.data);
+        setAllClients(data.data);
+        setFilteredClients(data.data);
+        setTotalClients(data.data.length);
       } else {
         throw new Error(data.error || "Failed to fetch clients");
       }
@@ -70,15 +65,103 @@ export default function ClientsPage() {
     } finally {
       setLoading(false);
     }
+  }, [sortOption, sortOrder]);
+
+  // Function to sort clients
+  const sortClients = (clientsToSort, option, order) =>
+    [...clientsToSort].sort((a, b) => {
+      let comparison = 0;
+
+      switch (option) {
+        case "name":
+          const aName = `${a.client?.clientProfile?.firstName || ""} ${
+            a.client?.clientProfile?.lastName || ""
+          }`;
+          const bName = `${b.client?.clientProfile?.firstName || ""} ${
+            b.client?.clientProfile?.lastName || ""
+          }`;
+          comparison = aName.localeCompare(bName);
+          break;
+        case "createdAt":
+          comparison = new Date(a.createdAt) - new Date(b.createdAt);
+          break;
+        case "lastActive":
+          const aLastActive =
+            a.client?.clientProfile?.lastActive || a.createdAt;
+          const bLastActive =
+            b.client?.clientProfile?.lastActive || b.createdAt;
+          comparison = new Date(aLastActive) - new Date(bLastActive);
+          break;
+        default:
+          comparison = 0;
+      }
+
+      return order === "asc" ? comparison : -comparison;
+    });
+
+  // Handle local filtering and sorting
+  useEffect(() => {
+    if (!allClients.length) return;
+
+    let results = [...allClients];
+
+    // Apply search filter
+    if (searchQuery) {
+      const searchTermLower = searchQuery.toLowerCase();
+      results = results.filter((clientRequest) => {
+        const client = clientRequest.client?.clientProfile;
+        if (!client) return false;
+
+        const fullName = `${client.firstName || ""} ${
+          client.lastName || ""
+        }`.toLowerCase();
+        const email = clientRequest.client?.email?.toLowerCase() || "";
+
+        return (
+          fullName.includes(searchTermLower) || email.includes(searchTermLower)
+        );
+      });
+    }
+
+    // Sort results
+    results = sortClients(results, sortOption, sortOrder);
+
+    setFilteredClients(results);
+    setTotalClients(results.length);
+
+    // Calculate pagination
+    const totalPages = Math.ceil(results.length / CLIENTS_PER_PAGE);
+    setTotalPages(totalPages);
+
+    // Reset to first page if current page is beyond total pages
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [searchQuery, sortOption, sortOrder, allClients, currentPage]);
+
+  // Get clients for current page
+  const getCurrentPageClients = () => {
+    const startIndex = (currentPage - 1) * CLIENTS_PER_PAGE;
+    const endIndex = startIndex + CLIENTS_PER_PAGE;
+    return filteredClients.slice(startIndex, endIndex);
   };
 
+  // Handle sort changes - refetch all data
   useEffect(() => {
-    fetchAcceptedClients();
-  }, []);
+    fetchAllClients();
+  }, [sortOption, sortOrder, fetchAllClients]);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchAllClients();
+  }, [fetchAllClients]);
 
   const handleViewClient = (clientRequest) => {
     if (planId) {
       // If tracking a specific plan, navigate to the assigned plan page
+      router.push(
+        `/trainer/dashboard/clients/${clientRequest.id}/plans/${planId}?type=${planType}`
+      );
       router.push(
         `/trainer/dashboard/clients/${clientRequest.id}/plans/${planId}?type=${planType}`
       );
@@ -88,47 +171,25 @@ export default function ClientsPage() {
     }
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
-  const getExperienceText = (level) => {
-    if (!level) return "Experience Not Specified";
-
-    const experienceLevel = EXPERIENCE_LEVELS.find(
-      (exp) => exp.value === level
-    );
-    return experienceLevel ? experienceLevel.label : level;
+  const handleClearFilters = () => {
+    setSearchQuery("");
+    setCurrentPage(1);
+    // Focus will be maintained since we're not refetching
+    setTimeout(() => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+    }, 0);
   };
 
-  const getFitnessGoalText = (goalId) => {
-    if (!goalId) return "Goal Not Specified";
-
-    const fitnessGoal = FITNESS_GOALS.find((goal) => goal.id === goalId);
-    return fitnessGoal ? fitnessGoal.label : goalId;
-  };
-
-  const mapActivityToLabel = (activityName) => {
-    if (!activityName) return "Activity Not Specified";
-
-    const activity = ACTIVITY_TYPES.find(
-      (a) =>
-        a.id === activityName ||
-        (a.label && a.label.toLowerCase() === activityName.toLowerCase())
-    );
-    return activity
-      ? activity.label
-      : activityName
-          .replace(/_/g, " ")
-          .replace(/\b\w/g, (l) => l.toUpperCase());
-  };
-
-  if (loading) {
+  if (loading && allClients.length === 0) {
     return (
       <div className="px-4 py-5">
         <div className="flex h-64 w-full items-center justify-center">
@@ -158,8 +219,9 @@ export default function ClientsPage() {
             <p className="mt-2 text-zinc-400">{error}</p>
             <Button
               variant="primary"
-              onClick={fetchAcceptedClients}
+              onClick={() => fetchAllClients()}
               leftIcon={<Icon icon="mdi:refresh" width={20} height={20} />}
+              className="mt-4"
             >
               Try Again
             </Button>
@@ -169,32 +231,39 @@ export default function ClientsPage() {
     );
   }
 
+  // Get current page clients
+  const currentClients = getCurrentPageClients();
+
   return (
     <div className="px-4 py-5">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white mb-2">
           {planId ? "Track Plan Progress" : "My Clients"}
+          {planId ? "Track Plan Progress" : "My Clients"}
         </h1>
         <p className="text-zinc-400">
           {planId
             ? "Select a client to track their progress with this plan"
             : "Manage your accepted clients and their fitness journeys"}
+          {planId
+            ? "Select a client to track their progress with this plan"
+            : "Manage your accepted clients and their fitness journeys"}
         </p>
         {planId && (
-          <div className="mt-3 p-3 bg-orange-900/20 border border-orange-500/30 rounded-lg flex items-center gap-3">
+          <div className="mt-3 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg flex items-center gap-3">
             <Icon
               icon="mdi:information"
-              className="text-orange-400"
+              className="text-blue-400"
               width={20}
               height={20}
             />
             <div>
-              <p className="text-orange-200 text-sm font-medium">
+              <p className="text-blue-200 text-sm font-medium">
                 Plan Tracking Mode:{" "}
                 {planType === "nutrition" ? "Nutrition Plan" : "Training Plan"}
               </p>
-              <p className="text-orange-300/80 text-xs">
+              <p className="text-blue-300/80 text-xs">
                 Click on a client to view their progress with the selected plan
               </p>
             </div>
@@ -206,290 +275,54 @@ export default function ClientsPage() {
       <div className="mb-6">
         <InfoBanner
           icon="mdi:account-group"
-          title={`Active Clients (${clients.length})`}
+          title={`Active Clients (${totalClients})`}
           subtitle={
-            clients.length === 0
+            totalClients === 0
               ? "No active clients yet. Accept client requests to start coaching!"
-              : `You are currently coaching ${clients.length} client${
-                  clients.length === 1 ? "" : "s"
+              : `You are currently coaching ${totalClients} client${
+                  totalClients === 1 ? "" : "s"
                 }.`
           }
-          variant="success"
+          variant="info"
         />
       </div>
 
-      {/* Clients List */}
-      {clients.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {clients.map((clientRequest) => {
-            const client = clientRequest.client;
-            const profile = client.clientProfile;
-            const clientGender = profile?.gender;
-            const genderStyles = getGenderStyles(clientGender);
-            const isMale = clientGender?.toLowerCase() === "male";
-            const isFemale = clientGender?.toLowerCase() === "female";
+      {/* Sort Controls */}
+      <SortControls
+        ref={searchInputRef}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        searchPlaceholder="Search clients by name or email..."
+        sortOption={sortOption}
+        setSortOption={setSortOption}
+        sortOrder={sortOrder}
+        setSortOrder={setSortOrder}
+        itemCount={totalClients}
+        itemLabel="clients"
+        enableLocation={false}
+        sortOptions={[
+          { value: "name", label: "Name" },
+          { value: "createdAt", label: "Date Added" },
+          { value: "lastActive", label: "Last Active" },
+        ]}
+        onClearFilters={handleClearFilters}
+        className="mb-6"
+        showSortControls={false}
+        variant="blue"
+      />
 
-            return (
-              <div
-                key={clientRequest.id}
-                className={`relative group w-full ${genderStyles.background} border ${genderStyles.border} rounded-xl shadow-lg ${genderStyles.shadow} transition-all duration-300 hover:-translate-y-0.5 backdrop-blur-sm overflow-hidden cursor-pointer`}
-                role="button"
-                tabIndex={0}
-                onClick={() => handleViewClient(clientRequest)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    handleViewClient(clientRequest);
-                  }
-                }}
-              >
-                {/* Gender Accent Strip */}
-                {(isMale || isFemale) && (
-                  <div
-                    className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${genderStyles.accent} opacity-70`}
-                  />
-                )}
-
-                <div className="p-4">
-                  <div className="flex items-start gap-4">
-                    {/* Profile Image */}
-                    <div className="relative group">
-                      <div className="h-20 w-20 overflow-hidden rounded-xl ring-2 ring-[#3E92CC]/20 transition-all duration-300 group-hover:ring-[#3E92CC]/50">
-                        {profile.profileImage ? (
-                          <Image
-                            src={profile.profileImage}
-                            alt={`${profile.firstName} profile`}
-                            className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110"
-                            width={80}
-                            height={80}
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#3E92CC] to-[#2D7EB8]">
-                            <Icon
-                              icon="mdi:account"
-                              width={32}
-                              height={32}
-                              color="white"
-                            />
-                          </div>
-                        )}
-                      </div>
-                      {/* Gender Badge */}
-                      {profile.gender &&
-                        (() => {
-                          const { icon, bgClass } = getGenderIconAndClass(
-                            profile.gender
-                          );
-                          return (
-                            <div
-                              className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border border-slate-800 shadow-lg ${bgClass}`}
-                            >
-                              <Icon
-                                icon={icon}
-                                width={12}
-                                height={12}
-                                className="text-white"
-                              />
-                            </div>
-                          );
-                        })()}
-                    </div>
-
-                    {/* Client Info */}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-xl font-semibold text-white">
-                          {profile.firstName} {profile.lastName}
-                        </h3>
-                        <Icon
-                          icon="mdi:arrow-right"
-                          className="text-[#3E92CC] opacity-0 group-hover:opacity-100 transition-opacity"
-                          width={20}
-                          height={20}
-                        />
-                      </div>
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        <span className="px-2 py-1 bg-green-900/30 text-green-400 text-xs rounded-full">
-                          Active Client
-                        </span>
-                        <span className="px-2 py-1 bg-blue-900/30 text-blue-400 text-xs rounded-full">
-                          {getExperienceText(profile.experienceLevel)}
-                        </span>
-                        {profile.location && (
-                          <span className="px-2 py-1 bg-emerald-900/30 text-emerald-400 text-xs rounded-full flex items-center gap-1">
-                            <Icon
-                              icon="mdi:map-marker"
-                              width={12}
-                              height={12}
-                            />
-                            {profile.location.city}
-                          </span>
-                        )}
-                        {/* Gender Pill */}
-                        {profile.gender &&
-                          (() => {
-                            const { icon, pillClass } = getGenderIconAndClass(
-                              profile.gender
-                            );
-                            return (
-                              <span
-                                className={`px-2 py-1 text-xs rounded-full flex items-center gap-1 ${pillClass}`}
-                              >
-                                <Icon icon={icon} width={12} height={12} />
-                                {profile.gender}
-                              </span>
-                            );
-                          })()}
-                      </div>
-
-                      {/* Quick Stats */}
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className="bg-zinc-800/50 rounded-lg p-2">
-                          <div className="flex items-center gap-1.5">
-                            <Icon
-                              icon="mdi:target"
-                              className="text-[#3E92CC]"
-                              width={16}
-                              height={16}
-                            />
-                            <span className="text-zinc-400 text-xs">Goal</span>
-                          </div>
-                          <p className="text-white text-sm mt-0.5 truncate">
-                            {getFitnessGoalText(profile.primaryGoal)}
-                          </p>
-                        </div>
-                        <div className="bg-zinc-800/50 rounded-lg p-2">
-                          <div className="flex items-center gap-1.5">
-                            <Icon
-                              icon="mdi:calendar-check"
-                              className="text-[#3E92CC]"
-                              width={16}
-                              height={16}
-                            />
-                            <span className="text-zinc-400 text-xs">
-                              Client Since
-                            </span>
-                          </div>
-                          <p className="text-white text-sm mt-0.5">
-                            {formatDate(clientRequest.respondedAt)}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Preferred Activities */}
-                      {profile.preferredActivities.length > 0 && (
-                        <div className="mb-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Icon
-                              icon="mdi:dumbbell"
-                              className="text-[#3E92CC]"
-                              width={16}
-                              height={16}
-                            />
-                            <span className="text-zinc-400 text-xs">
-                              Activities
-                            </span>
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            {profile.preferredActivities
-                              .slice(0, 3)
-                              .map((activity) => (
-                                <span
-                                  key={activity.id}
-                                  className="px-2 py-1 bg-blue-900/30 text-blue-400 text-xs rounded-full"
-                                >
-                                  {mapActivityToLabel(activity.name)}
-                                </span>
-                              ))}
-                            {profile.preferredActivities.length > 3 && (
-                              <span className="px-2 py-1 bg-zinc-700 text-zinc-400 text-xs rounded-full">
-                                +{profile.preferredActivities.length - 3} more
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Medical Alerts */}
-                      {(profile.medicalConditions || profile.allergies) && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {profile.medicalConditions && (
-                            <span className="px-2 py-1 bg-amber-900/30 text-amber-400 text-xs rounded-full flex items-center gap-1">
-                              <Icon
-                                icon="mdi:medical-bag"
-                                width={12}
-                                height={12}
-                              />
-                              Medical Info
-                            </span>
-                          )}
-                          {profile.allergies && (
-                            <span className="px-2 py-1 bg-red-900/30 text-red-400 text-xs rounded-full flex items-center gap-1">
-                              <Icon icon="mdi:alert" width={12} height={12} />
-                              Allergies
-                            </span>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Action Buttons */}
-                      <div className="flex gap-2">
-                        <Button
-                          variant="primary"
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleViewClient(clientRequest);
-                          }}
-                          leftIcon={
-                            <Icon
-                              icon={planId ? "mdi:chart-line" : "mdi:eye"}
-                              width={16}
-                              height={16}
-                            />
-                          }
-                        >
-                          {planId ? "Track Plan" : "View Dashboard"}
-                        </Button>
-                        <div className="group relative">
-                          <Button
-                            variant="success"
-                            size="small"
-                            disabled
-                            leftIcon={
-                              <Icon icon="mdi:message" width={16} height={16} />
-                            }
-                          >
-                            Message
-                          </Button>
-                          <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-max bg-zinc-800 text-xs text-green-400 rounded px-2 py-1 opacity-0 group-hover:opacity-100 pointer-events-none z-10 shadow-lg border border-zinc-700">
-                            Messaging feature coming soon!
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="text-center py-12">
-          <Icon
-            icon="mdi:account-group-outline"
-            className="text-zinc-600 mx-auto mb-4"
-            width={64}
-            height={64}
-          />
-          <p className="text-xl font-medium text-zinc-400 mb-2">
-            No Active Clients
-          </p>
-          <p className="text-zinc-500">
-            Accept client requests from the "New Clients" tab to start coaching!
-          </p>
-        </div>
-      )}
+      {/* Clients Grid with Pagination */}
+      <ClientsGrid
+        clients={currentClients}
+        handleViewClient={handleViewClient}
+        isPlanTracking={!!planId}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        handlePageChange={handlePageChange}
+        handleSearchClear={handleClearFilters}
+        searchQuery={searchQuery}
+        loading={loading}
+      />
     </div>
   );
 }

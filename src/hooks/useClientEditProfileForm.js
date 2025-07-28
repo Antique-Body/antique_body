@@ -111,6 +111,7 @@ export function useClientEditProfileForm() {
   // Handlers
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
+
     if (name.startsWith("location.")) {
       setClientData((prev) => ({
         ...prev,
@@ -119,6 +120,14 @@ export function useClientEditProfileForm() {
           [name.replace("location.", "")]: value,
         },
       }));
+    } else if (name === "height" || name === "weight") {
+      // Convert height and weight to numbers or null
+      const numValue = value
+        ? isNaN(parseInt(value, 10))
+          ? null
+          : parseInt(value, 10)
+        : null;
+      setClientData((prev) => ({ ...prev, [name]: numValue }));
     } else {
       setClientData((prev) => ({ ...prev, [name]: value }));
     }

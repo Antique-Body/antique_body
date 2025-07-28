@@ -174,6 +174,7 @@ export async function GET(request) {
     const status = searchParams.get("status"); // filter by status
     const page = parseInt(searchParams.get("page")) || 1;
     const limit = parseInt(searchParams.get("limit")) || 20;
+    const search = searchParams.get("search"); // search query for client/trainer name
     const skip = (page - 1) * limit;
 
     let requests = [];
@@ -231,10 +232,38 @@ export async function GET(request) {
         );
       }
 
-      const whereClause = {
+      // Base where clause for trainer requests
+      let whereClause = {
         trainerId: trainerInfo.id,
         ...(status && { status: status }),
       };
+
+      // If search is provided, add client name search condition
+      if (search && search.trim() !== "") {
+        const searchTerms = search
+          .trim()
+          .toLowerCase()
+          .split(/\s+/)
+          .filter((term) => term.length > 0);
+
+        whereClause = {
+          ...whereClause,
+          client: {
+            clientProfile: {
+              OR: [
+                ...searchTerms.map((term) => ({
+                  OR: [
+                    { firstName: { contains: term } },
+                    { lastName: { contains: term } },
+                    { firstName: { contains: term, mode: "insensitive" } },
+                    { lastName: { contains: term, mode: "insensitive" } },
+                  ],
+                })),
+              ],
+            },
+          },
+        };
+      }
 
       totalCount = await prisma.coachingRequest.count({ where: whereClause });
       requests = await prisma.coachingRequest.findMany({
@@ -271,7 +300,7 @@ export async function GET(request) {
       data: requests,
       pagination: {
         total: totalCount,
-        pages: limit ? Math.ceil(totalCount / limit) : 1,
+        pages: Math.ceil(totalCount / limit),
         currentPage: page,
         limit: limit,
       },
