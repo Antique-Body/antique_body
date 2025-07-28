@@ -15,13 +15,17 @@ export const NewMealCard = ({
   isDayEditable,
   onLogMeal,
   onViewDetail,
-  onCustomMeal,
   onDeleteMeal,
 }) => {
   const [selectedOption, setSelectedOption] = useState(
     mealLog?.selectedOption || meal.options?.[0] || null
   );
   const [isLogging, setIsLogging] = useState(false);
+  const [showPortionControl, setShowPortionControl] = useState(false);
+  const [portionMultiplier, setPortionMultiplier] = useState(1);
+  const [customMealName, setCustomMealName] = useState("");
+  const [customMealDescription, setCustomMealDescription] = useState("");
+  const [showCustomMealInput, setShowCustomMealInput] = useState(false);
 
   const formatTime = (time) => {
     if (!time) return "";
@@ -32,12 +36,26 @@ export const NewMealCard = ({
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
-  const handleLogMeal = async () => {
-    if (!selectedOption || !isEditable) return;
+  const handleCustomMealLog = async () => {
+    if (!customMealName.trim() || !isEditable) return;
 
     setIsLogging(true);
     try {
-      await onLogMeal(meal, selectedOption, mealLog);
+      const customMeal = {
+        name: customMealName,
+        description: customMealDescription,
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        isCustom: true,
+        portionMultiplier: 1,
+      };
+
+      await onLogMeal(meal, customMeal, mealLog);
+      setShowCustomMealInput(false);
+      setCustomMealName("");
+      setCustomMealDescription("");
     } finally {
       setIsLogging(false);
     }
@@ -114,10 +132,10 @@ export const NewMealCard = ({
               isCompleted
                 ? "bg-green-500/20 text-green-400"
                 : isNextMeal
-                ? "bg-[#FF6B00]/20 text-[#FF6B00]"
-                : !isEditable && isDayEditable
-                ? "bg-zinc-700/30 text-zinc-500"
-                : "bg-zinc-700/50 text-zinc-400"
+                  ? "bg-[#FF6B00]/20 text-[#FF6B00]"
+                  : !isEditable && isDayEditable
+                    ? "bg-zinc-700/30 text-zinc-500"
+                    : "bg-zinc-700/50 text-zinc-400"
             }`}
           >
             <Icon icon={getMealIcon(meal.name)} className="w-6 h-6" />
@@ -128,8 +146,8 @@ export const NewMealCard = ({
                 isNextMeal
                   ? "text-[#FF6B00]"
                   : !isEditable && isDayEditable
-                  ? "text-zinc-500"
-                  : "text-white"
+                    ? "text-zinc-500"
+                    : "text-white"
               }`}
             >
               {meal.name}
@@ -171,9 +189,17 @@ export const NewMealCard = ({
                           Custom
                         </span>
                       )}
+                      {mealLog.selectedOption.portionMultiplier &&
+                        mealLog.selectedOption.portionMultiplier !== 1 && (
+                          <span className="text-xs bg-blue-500/15 text-blue-400 px-1.5 py-0.5 rounded">
+                            {mealLog.selectedOption.portionMultiplier}x
+                          </span>
+                        )}
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 text-xs text-green-300 flex-wrap">
-                      <span>{mealLog.selectedOption.calories || 0} cal</span>
+                      <span>
+                        {Math.round(mealLog.selectedOption.calories || 0)} cal
+                      </span>
                       <span>
                         {mealLog.selectedOption.protein || 0}g protein
                       </span>
@@ -184,6 +210,11 @@ export const NewMealCard = ({
                         {mealLog.selectedOption.fat || 0}g fat
                       </span>
                     </div>
+                    {mealLog.selectedOption.description && (
+                      <p className="text-xs text-green-400 mt-1">
+                        {mealLog.selectedOption.description}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -203,152 +234,467 @@ export const NewMealCard = ({
           </div>
         )}
 
-        {/* Trainer Suggestions (for incomplete meals) */}
-        {!isCompleted && meal.options && (
-          <div className="space-y-3">
-            {/* Subtle header for trainer suggestions */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <h4
-                  className={`text-xs font-medium ${
-                    !isEditable && isDayEditable
-                      ? "text-zinc-500"
-                      : "text-zinc-400"
-                  }`}
+        {/* Custom Meal Input */}
+        {showCustomMealInput && (
+          <div className="mb-4 p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+            <h4 className="text-purple-400 font-medium mb-3">
+              Add Custom Meal
+            </h4>
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={customMealName}
+                onChange={(e) => setCustomMealName(e.target.value)}
+                placeholder="What did you eat?"
+                className="w-full px-3 py-2 bg-zinc-700/30 border border-zinc-600/50 rounded-lg text-white focus:border-purple-500 focus:outline-none"
+              />
+              <textarea
+                value={customMealDescription}
+                onChange={(e) => setCustomMealDescription(e.target.value)}
+                placeholder="Optional: Describe what you ate and how much..."
+                rows={2}
+                className="w-full px-3 py-2 bg-zinc-700/30 border border-zinc-600/50 rounded-lg text-white focus:border-purple-500 focus:outline-none resize-none"
+              />
+              <div className="flex gap-2">
+                <Button
+                  variant="purpleFilled"
+                  size="small"
+                  onClick={handleCustomMealLog}
+                  disabled={!customMealName.trim() || isLogging}
                 >
-                  {meal.options.length} suggested options
-                </h4>
+                  {isLogging ? "Logging..." : "Log Custom Meal"}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="small"
+                  onClick={() => setShowCustomMealInput(false)}
+                >
+                  Cancel
+                </Button>
               </div>
-              {!isEditable && isDayEditable && (
-                <div className="flex items-center gap-1 text-zinc-600 text-xs">
-                  <Icon icon="mdi:lock" className="w-3 h-3" />
-                  <span>Complete previous first</span>
-                </div>
-              )}
-            </div>
-
-            {/* Compact Options List */}
-            <div className="space-y-2">
-              {meal.options.map((option, index) => {
-                const isSelected = selectedOption?.name === option.name;
-
-                return (
-                  <div
-                    key={index}
-                    className={`relative border rounded-lg p-3 transition-all duration-200 ${
-                      !isEditable && isDayEditable
-                        ? "border-zinc-700/15 bg-zinc-800/5 cursor-not-allowed"
-                        : isSelected
-                        ? "border-[#FF6B00]/50 bg-[#FF6B00]/3 ring-1 ring-[#FF6B00]/15 cursor-pointer"
-                        : "border-zinc-700/30 bg-zinc-800/15 hover:border-zinc-600/30 hover:bg-zinc-800/25 cursor-pointer"
-                    }`}
-                    onClick={() => isEditable && setSelectedOption(option)}
-                  >
-                    {/* Selection Indicator */}
-                    {isSelected && isEditable && (
-                      <div className="absolute top-2 right-2">
-                        <div className="w-3 h-3 bg-[#FF6B00] rounded-full flex items-center justify-center">
-                          <Icon
-                            icon="mdi:check"
-                            className="w-2 h-2 text-white"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex items-center gap-3">
-                      {/* Option Image */}
-                      {option.imageUrl && (
-                        <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
-                          <Image
-                            src={option.imageUrl}
-                            alt={option.name}
-                            width={40}
-                            height={40}
-                            className={`w-full h-full object-cover ${
-                              !isEditable && isDayEditable ? "opacity-40" : ""
-                            }`}
-                          />
-                        </div>
-                      )}
-
-                      {/* Option Info */}
-                      <div className="flex-1 min-w-0">
-                        <h5
-                          className={`font-medium text-sm mb-1 truncate ${
-                            !isEditable && isDayEditable
-                              ? "text-zinc-500"
-                              : "text-white"
-                          }`}
-                        >
-                          {option.name}
-                        </h5>
-
-                        {/* Compact Nutrition Preview */}
-                        <div className="flex items-center gap-2 sm:gap-3 text-xs flex-wrap">
-                          <span
-                            className={
-                              !isEditable && isDayEditable
-                                ? "text-zinc-600"
-                                : "text-zinc-400"
-                            }
-                          >
-                            {option.calories || 0} cal
-                          </span>
-                          <span
-                            className={
-                              !isEditable && isDayEditable
-                                ? "text-zinc-600"
-                                : "text-zinc-400"
-                            }
-                          >
-                            {option.protein || 0}g protein
-                          </span>
-                          <span
-                            className={`hidden sm:inline ${
-                              !isEditable && isDayEditable
-                                ? "text-zinc-600"
-                                : "text-zinc-400"
-                            }`}
-                          >
-                            {option.carbs || 0}g carbs
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* View Details Button */}
-                      <Button
-                        variant="ghost"
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onViewDetail(meal, option);
-                        }}
-                        className={`text-xs px-1.5 py-1 h-6 ${
-                          !isEditable && isDayEditable
-                            ? "text-zinc-600 hover:text-zinc-500"
-                            : "text-zinc-400 hover:text-white"
-                        }`}
-                      >
-                        <Icon icon="mdi:eye" className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
             </div>
           </div>
         )}
 
+        {/* Portion Control */}
+        {showPortionControl && selectedOption && (
+          <div className="mb-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+            <h4 className="text-blue-400 font-medium mb-3">Adjust Portion</h4>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <label className="text-zinc-300 text-sm">Portion:</label>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="small"
+                    onClick={() =>
+                      setPortionMultiplier(
+                        Math.max(0.25, portionMultiplier - 0.25)
+                      )
+                    }
+                    disabled={portionMultiplier <= 0.25}
+                  >
+                    <Icon icon="mdi:minus" className="w-4 h-4" />
+                  </Button>
+                  <span className="text-white font-medium min-w-[3rem] text-center">
+                    {portionMultiplier}x
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="small"
+                    onClick={() =>
+                      setPortionMultiplier(portionMultiplier + 0.25)
+                    }
+                  >
+                    <Icon icon="mdi:plus" className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 gap-2 text-xs">
+                <div className="text-center p-2 bg-zinc-700/30 rounded">
+                  <div className="text-orange-400 font-bold">
+                    {Math.round(
+                      (selectedOption.calories || 0) * portionMultiplier
+                    )}
+                  </div>
+                  <div className="text-zinc-400">cal</div>
+                </div>
+                <div className="text-center p-2 bg-zinc-700/30 rounded">
+                  <div className="text-blue-400 font-bold">
+                    {Math.round(
+                      (selectedOption.protein || 0) * portionMultiplier * 10
+                    ) / 10}
+                    g
+                  </div>
+                  <div className="text-zinc-400">protein</div>
+                </div>
+                <div className="text-center p-2 bg-zinc-700/30 rounded">
+                  <div className="text-yellow-400 font-bold">
+                    {Math.round(
+                      (selectedOption.carbs || 0) * portionMultiplier * 10
+                    ) / 10}
+                    g
+                  </div>
+                  <div className="text-zinc-400">carbs</div>
+                </div>
+                <div className="text-center p-2 bg-zinc-700/30 rounded">
+                  <div className="text-green-400 font-bold">
+                    {Math.round(
+                      (selectedOption.fat || 0) * portionMultiplier * 10
+                    ) / 10}
+                    g
+                  </div>
+                  <div className="text-zinc-400">fat</div>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="greenFilled"
+                  size="small"
+                  onClick={() => {
+                    const customMeal = {
+                      name: `Custom ${meal.name}`,
+                      description: "Quickly logged meal",
+                      calories: 0,
+                      protein: 0,
+                      carbs: 0,
+                      fat: 0,
+                      isCustom: true,
+                      portionMultiplier: portionMultiplier,
+                    };
+                    onLogMeal(meal, customMeal, null);
+                    setShowPortionControl(false);
+                  }}
+                  disabled={isLogging}
+                  className="flex-1"
+                >
+                  {isLogging ? "Logging..." : "Log with Portion"}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="small"
+                  onClick={() => setShowPortionControl(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Trainer Suggestions (for incomplete meals) */}
+        {!isCompleted &&
+          meal.options &&
+          meal.options.length > 0 &&
+          !showCustomMealInput && (
+            <div className="space-y-3">
+              {/* Subtle header for trainer suggestions */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <h4
+                    className={`text-xs font-medium ${
+                      !isEditable && isDayEditable
+                        ? "text-zinc-500"
+                        : "text-zinc-400"
+                    }`}
+                  >
+                    {meal.options.length} suggested options
+                  </h4>
+                </div>
+                {!isEditable && isDayEditable && (
+                  <div className="flex items-center gap-1 text-zinc-600 text-xs">
+                    <Icon icon="mdi:lock" className="w-3 h-3" />
+                    <span>Complete previous first</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Compact Options List */}
+              <div className="space-y-2">
+                {meal.options.map((option, index) => {
+                  const isSelected = selectedOption?.name === option.name;
+
+                  return (
+                    <div
+                      key={index}
+                      className={`relative border rounded-lg p-3 transition-all duration-200 ${
+                        !isEditable && isDayEditable
+                          ? "border-zinc-700/15 bg-zinc-800/5 cursor-not-allowed"
+                          : isSelected
+                            ? "border-[#FF6B00]/50 bg-[#FF6B00]/3 ring-1 ring-[#FF6B00]/15 cursor-pointer"
+                            : "border-zinc-700/30 bg-zinc-800/15 hover:border-zinc-600/30 hover:bg-zinc-800/25 cursor-pointer"
+                      }`}
+                      onClick={() => isEditable && setSelectedOption(option)}
+                    >
+                      {/* Selection Indicator */}
+                      {isSelected && isEditable && (
+                        <div className="absolute top-2 right-2">
+                          <div className="w-3 h-3 bg-[#FF6B00] rounded-full flex items-center justify-center">
+                            <Icon
+                              icon="mdi:check"
+                              className="w-2 h-2 text-white"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex items-center gap-3">
+                        {/* Option Image */}
+                        {option.imageUrl && (
+                          <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                            <Image
+                              src={option.imageUrl}
+                              alt={option.name}
+                              width={40}
+                              height={40}
+                              className={`w-full h-full object-cover ${
+                                !isEditable && isDayEditable ? "opacity-40" : ""
+                              }`}
+                            />
+                          </div>
+                        )}
+
+                        {/* Option Info */}
+                        <div className="flex-1 min-w-0">
+                          <h5
+                            className={`font-medium text-sm mb-1 truncate ${
+                              !isEditable && isDayEditable
+                                ? "text-zinc-500"
+                                : "text-white"
+                            }`}
+                          >
+                            {option.name}
+                          </h5>
+
+                          {/* Show description for text-based meals */}
+                          {option.isTextBased && option.description && (
+                            <p className="text-xs text-zinc-400 mb-1 line-clamp-2">
+                              {option.description}
+                            </p>
+                          )}
+
+                          {/* Compact Nutrition Preview */}
+                          <div className="flex items-center gap-2 sm:gap-3 text-xs flex-wrap">
+                            <span
+                              className={
+                                !isEditable && isDayEditable
+                                  ? "text-zinc-600"
+                                  : "text-zinc-400"
+                              }
+                            >
+                              {option.calories || 0} cal
+                            </span>
+                            <span
+                              className={
+                                !isEditable && isDayEditable
+                                  ? "text-zinc-600"
+                                  : "text-zinc-400"
+                              }
+                            >
+                              {option.protein || 0}g protein
+                            </span>
+                            <span
+                              className={`hidden sm:inline ${
+                                !isEditable && isDayEditable
+                                  ? "text-zinc-600"
+                                  : "text-zinc-400"
+                              }`}
+                            >
+                              {option.carbs || 0}g carbs
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Quick Log Button */}
+                        {isEditable && (
+                          <Button
+                            variant="ghost"
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onLogMeal(meal, option, null);
+                            }}
+                            className="text-green-400 hover:text-green-300 hover:bg-green-500/10 h-8 px-2"
+                            title="Log this meal"
+                          >
+                            <Icon icon="mdi:check" className="w-4 h-4" />
+                          </Button>
+                        )}
+
+                        {/* View Details Button */}
+                        <Button
+                          variant="ghost"
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onViewDetail(meal, option);
+                          }}
+                          className={`text-xs px-1.5 py-1 h-6 ${
+                            !isEditable && isDayEditable
+                              ? "text-zinc-600 hover:text-zinc-500"
+                              : "text-zinc-400 hover:text-white"
+                          }`}
+                        >
+                          <Icon icon="mdi:eye" className="w-3 h-3" />
+                        </Button>
+                      </div>
+
+                      {/* Log This Meal Button - Full width below option */}
+                      {isEditable && (
+                        <div className="mt-3 pt-3 border-t border-zinc-700/30">
+                          <div className="flex gap-2">
+                            <Button
+                              variant="greenFilled"
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onLogMeal(meal, option, null);
+                              }}
+                              className="flex-1 h-8 text-xs"
+                            >
+                              <Icon
+                                icon="mdi:check-circle"
+                                className="w-3 h-3 mr-1"
+                              />
+                              Log This Meal
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowPortionControl(true);
+                              }}
+                              className="h-8 px-2 text-xs"
+                              title="Adjust portion"
+                            >
+                              <Icon icon="mdi:scale" className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+        {/* Add Custom Meal Button - Always visible when editable */}
+        {isEditable && !showCustomMealInput && (
+          <div className="mt-4">
+            <Button
+              variant="secondary"
+              size="medium"
+              onClick={() => setShowCustomMealInput(true)}
+              className="w-full h-10 bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20 hover:text-purple-300"
+            >
+              <Icon icon="mdi:plus-circle" className="w-4 h-4 mr-2" />
+              Add Custom Meal
+            </Button>
+          </div>
+        )}
+
+        {/* Add Custom Meal Button - For completed meals or when no options */}
+        {isEditable &&
+          !showCustomMealInput &&
+          (isCompleted || !meal.options || meal.options.length === 0) && (
+            <div className="mt-4">
+              <Button
+                variant="secondary"
+                size="medium"
+                onClick={() => setShowCustomMealInput(true)}
+                className="w-full h-10 bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20 hover:text-purple-300"
+              >
+                <Icon icon="mdi:plus-circle" className="w-4 h-4 mr-2" />
+                Add Custom Meal
+              </Button>
+            </div>
+          )}
+
+        {/* Log Any Meal Button - When no trainer suggestions */}
+        {isEditable &&
+          !showCustomMealInput &&
+          (!meal.options || meal.options.length === 0) && (
+            <div className="mt-3">
+              <Button
+                variant="orangeFilled"
+                size="medium"
+                onClick={() => setShowCustomMealInput(true)}
+                className="w-full h-10"
+              >
+                <Icon icon="mdi:food" className="w-4 h-4 mr-2" />
+                Log What You Ate
+              </Button>
+            </div>
+          )}
+
+        {/* Quick Log Button - Always available for custom logging */}
+        {isEditable && !showCustomMealInput && (
+          <div className="mt-3">
+            <Button
+              variant="secondary"
+              size="medium"
+              onClick={() => setShowCustomMealInput(true)}
+              className="w-full h-10 bg-orange-500/10 border-orange-500/30 text-orange-400 hover:bg-orange-500/20 hover:text-orange-300"
+            >
+              <Icon icon="mdi:food" className="w-4 h-4 mr-2" />
+              Log What You Ate
+            </Button>
+          </div>
+        )}
+
+        {/* Quick Log Button - For any meal */}
+        {isEditable && !showCustomMealInput && (
+          <div className="mt-3">
+            <Button
+              variant="greenFilled"
+              size="medium"
+              onClick={() => {
+                const customMeal = {
+                  name: `Custom ${meal.name}`,
+                  description: "Quickly logged meal",
+                  calories: 0,
+                  protein: 0,
+                  carbs: 0,
+                  fat: 0,
+                  isCustom: true,
+                  portionMultiplier: 1,
+                };
+                onLogMeal(meal, customMeal, null);
+              }}
+              className="w-full h-10"
+            >
+              <Icon icon="mdi:check-circle" className="w-4 h-4 mr-2" />
+              Quick Log Meal
+            </Button>
+          </div>
+        )}
+
+        {/* Add More Food Button - When meal is completed */}
+        {isEditable && !showCustomMealInput && isCompleted && (
+          <div className="mt-3">
+            <Button
+              variant="secondary"
+              size="medium"
+              onClick={() => setShowCustomMealInput(true)}
+              className="w-full h-10 bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20 hover:text-blue-300"
+            >
+              <Icon icon="mdi:plus" className="w-4 h-4 mr-2" />
+              Add More Food
+            </Button>
+          </div>
+        )}
+
         {/* Action Buttons */}
-        {!isCompleted && (
+        {!isCompleted && !showCustomMealInput && (
           <div className="mt-4 flex flex-col sm:flex-row gap-3">
             {/* LOG MEAL Button */}
             {isEditable && selectedOption && (
               <Button
                 variant="orangeFilled"
                 size="large"
-                onClick={handleLogMeal}
+                onClick={() => setShowPortionControl(true)}
                 disabled={isLogging}
                 className="flex-1 h-12"
               >
@@ -371,7 +717,7 @@ export const NewMealCard = ({
               <Button
                 variant="secondary"
                 size="large"
-                onClick={() => onCustomMeal(meal, mealLog)}
+                onClick={() => setShowCustomMealInput(true)}
                 className="h-12 px-6 sm:flex-shrink-0"
               >
                 <Icon icon="mdi:plus-circle" className="w-5 h-5 mr-2" />

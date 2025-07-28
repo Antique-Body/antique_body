@@ -41,7 +41,6 @@ const initialFormData = {
   adaptability: "",
 
   // Additional nutrition-specific fields
-  mealTypes: [],
   supplementRecommendations: "",
   cookingTime: "",
 };
@@ -179,7 +178,6 @@ export const useNutritionPlanForm = (initialData = null) => {
         timeline: formData.timeline.filter(
           (t) => t.week.trim() && t.title.trim()
         ),
-        mealTypes: formData.mealTypes,
         supplementRecommendations: formData.supplementRecommendations,
         cookingTime: formData.cookingTime,
         targetGoal: formData.targetGoal,

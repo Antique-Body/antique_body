@@ -47,7 +47,7 @@ export async function POST(request, context) {
     }
 
     // Get existing tracking data
-    let existingData = await prisma.nutritionTrackingData.findUnique({
+    const existingData = await prisma.nutritionTrackingData.findUnique({
       where: {
         assignedNutritionPlanId_date: {
           assignedNutritionPlanId: planId,
@@ -57,7 +57,7 @@ export async function POST(request, context) {
     });
 
     const mealKey = `${mealIndex}-${optionIndex}`;
-    let meals = existingData?.meals || {};
+    const meals = { ...(existingData?.meals || {}) };
 
     // If setAsActiveOnly is true, mark all other meals as completed and this one as tracking
     if (setAsActiveOnly && status === 'tracking') {

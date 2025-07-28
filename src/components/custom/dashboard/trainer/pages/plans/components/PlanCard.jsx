@@ -46,7 +46,6 @@ export const PlanCard = ({
   const [detailedPlanData, setDetailedPlanData] = useState(null);
   const [deleteError, setDeleteError] = useState("");
   const [isCopyRotating, setIsCopyRotating] = useState(false);
-  const [isEditRotating, setIsEditRotating] = useState(false);
   const copyTimeoutRef = useRef(null);
   const editTimeoutRef = useRef(null);
   const router = useRouter();
@@ -179,67 +178,6 @@ export const PlanCard = ({
     copyTimeoutRef.current = setTimeout(() => setIsCopyRotating(false), 1000);
   };
 
-  const handleTrackClick = async () => {
-    setIsEditRotating(true);
-    try {
-      // Fetch active assignments for this specific plan
-      const response = await fetch(
-        `/api/users/trainer/plans/${id}/assignments`
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("API Error Response:", errorText);
-
-        // If unauthorized, redirect to login
-        if (response.status === 401) {
-          router.push("/auth/login");
-          return;
-        }
-
-        throw new Error(
-          `Failed to fetch plan assignments: ${response.status} ${response.statusText}`
-        );
-      }
-
-      const data = await response.json();
-
-      if (!data.success)
-        throw new Error(data.error || "Failed to fetch plan assignments");
-
-      const assignments = data.data || [];
-
-      if (assignments.length === 0) {
-        // No assigned plans found - navigate to client selection page to assign the plan
-        router.push(
-          `/trainer/dashboard/clients?planId=${id}&type=${type}&action=assign`
-        );
-      } else if (assignments.length === 1) {
-        // Only one client has this plan - navigate directly to their plan page
-        const assignment = assignments[0];
-        // Use assignedPlanId directly with the new API - no need for coachingRequestId
-        router.push(
-          `/trainer/dashboard/assigned-plans/${assignment.assignedPlanId}?type=${type}`
-        );
-      } else {
-        // Multiple clients have this plan - navigate to tracking overview page
-        router.push(
-          `/trainer/dashboard/plans/${id}/track?type=${type}&assignments=${encodeURIComponent(
-            JSON.stringify(assignments)
-          )}`
-        );
-      }
-    } catch (error) {
-      console.error("Error in handleTrackClick:", error);
-      // Fallback to original behavior - go to clients page for assignment
-      router.push(
-        `/trainer/dashboard/clients?planId=${id}&type=${type}&action=assign`
-      );
-    } finally {
-      // Reset rotation after a short delay and store timeout ID for cleanup
-      editTimeoutRef.current = setTimeout(() => setIsEditRotating(false), 1000);
-    }
-  };
 
   const handleEditClick = () => {
     // Use the correct edit URL based on plan type
@@ -367,39 +305,6 @@ export const PlanCard = ({
                   className="hover:border-blue-400 hover:text-blue-300 hover:scale-105 hover:shadow-md transition-all duration-200 text-xs px-3 py-2 h-9 font-medium"
                 >
                   {loadingPlanDetails ? "Loading..." : "View"}
-                </Button>
-                <Button
-                  onClick={handleTrackClick}
-                  variant="primary"
-                  size="small"
-                  leftIcon={
-                    <EditIcon
-                      size={14}
-                      className={`transition-transform duration-300 ${
-                        isEditRotating ? "animate-rotate-once" : ""
-                      }`}
-                    />
-                  }
-                  className={`${
-                    clientCount > 0
-                      ? "bg-gradient-to-r from-[#FF6B00] to-[#FF8A00] hover:from-[#FF5500] hover:to-[#FF7700] shadow-lg shadow-[#FF6B00]/25"
-                      : "bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600"
-                  } hover:scale-105 hover:shadow-lg transition-all duration-200 text-xs px-3 py-2 h-9 font-medium border-0 relative`}
-                  disabled={clientCount === 0}
-                  title={
-                    clientCount === 0
-                      ? "No clients assigned to this plan"
-                      : `Track progress for ${clientCount} ${
-                          clientCount === 1 ? "client" : "clients"
-                        }`
-                  }
-                >
-                  {clientCount > 0 ? "Track" : "Assign"}
-                  {clientCount > 1 && (
-                    <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-sm">
-                      {clientCount}
-                    </span>
-                  )}
                 </Button>
               </div>
 

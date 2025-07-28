@@ -35,8 +35,6 @@ export default function ClientDashboard({ params }) {
   const [nutritionPreviewData, setNutritionPreviewData] = useState(null);
   const [startingPlanId, setStartingPlanId] = useState(null);
   const [startPlanError, setStartPlanError] = useState(null);
-  const [trackingNutritionPlanId, setTrackingNutritionPlanId] = useState(null);
-  const [nutritionTrackError, setNutritionTrackError] = useState(null);
   // Unwrap params using React.use() for Next.js 15 compatibility
   const unwrappedParams = React.use(params);
   const clientId = unwrappedParams.id;
@@ -73,10 +71,10 @@ export default function ClientDashboard({ params }) {
           assignedNutritionPlans = assignedNutritionData.data || [];
         }
 
-        setClient({ 
-          ...data.data, 
+        setClient({
+          ...data.data,
           assignedTrainingPlans: assignedTrainingPlans,
-          assignedNutritionPlans: assignedNutritionPlans 
+          assignedNutritionPlans: assignedNutritionPlans,
         });
       } else {
         throw new Error(data.error || "Failed to fetch client data");
@@ -123,20 +121,21 @@ export default function ClientDashboard({ params }) {
     try {
       setAssigning(true);
       setAssignError(null);
-      
+
       // Determine API endpoint based on plan type
-      const endpoint = assignType === "training" 
-        ? `/api/coaching-requests/${client.id}/assign-training-plan`
-        : `/api/coaching-requests/${client.id}/assign-nutrition-plan`;
-      
+      const endpoint =
+        assignType === "training"
+          ? `/api/coaching-requests/${client.id}/assign-training-plan`
+          : `/api/coaching-requests/${client.id}/assign-nutrition-plan`;
+
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ planId: String(selectedPlan.id) }),
       });
-      
+
       const data = await response.json();
-      
+
       // Handle different error messages for training vs nutrition plans
       const planTypeName = assignType === "training" ? "training" : "nutrition";
       if (
@@ -149,11 +148,11 @@ export default function ClientDashboard({ params }) {
         );
         return;
       }
-      
+
       if (!response.ok || !data.success) {
         throw new Error(data.error || `Failed to assign ${planTypeName} plan`);
       }
-      
+
       setShowAssignModal(false);
       setSelectedPlan(null);
       setAssignType(null);
@@ -182,31 +181,6 @@ export default function ClientDashboard({ params }) {
     setNutritionPreviewOpen(true);
   };
 
-  // Handler for tracking nutrition plan
-  const handleTrackNutritionPlan = async (planId) => {
-    if (!client?.id || !planId) return;
-    setTrackingNutritionPlanId(planId);
-    setNutritionTrackError(null);
-    try {
-      const res = await fetch(
-        `/api/coaching-requests/${client.id}/assigned-nutrition-plan/${planId}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: "tracking" }),
-        }
-      );
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || "Failed to start tracking nutrition plan");
-      }
-      fetchClientData();
-    } catch (err) {
-      setNutritionTrackError(err.message || "Failed to start tracking nutrition plan");
-    } finally {
-      setTrackingNutritionPlanId(null);
-    }
-  };
 
   // State za prikaz gumba End & Assign
 
@@ -453,13 +427,10 @@ export default function ClientDashboard({ params }) {
           />
         )}
         {activeTab === "nutrition" && (
-          <NutritionTab 
+          <NutritionTab
             clientId={clientId}
             assignedNutritionPlans={client.assignedNutritionPlans || []}
             onViewNutritionPlan={handleViewNutritionPlan}
-            onTrackNutritionPlan={handleTrackNutritionPlan}
-            trackingNutritionPlanId={trackingNutritionPlanId}
-            nutritionTrackError={nutritionTrackError}
           />
         )}
         {activeTab === "messages" && <MessagesTab client={client} />}
@@ -811,7 +782,7 @@ export default function ClientDashboard({ params }) {
         days={planPreviewData?.days}
         type={assignType || "training"}
       />
-      
+
       {/* Nutrition Plan Preview Modal */}
       <PlanPreviewModal
         plan={nutritionPreviewData}
@@ -1000,7 +971,9 @@ function OverviewTab({
                 width={24}
                 height={24}
               />
-              <h3 className="text-xl font-semibold text-white">Current Plans</h3>
+              <h3 className="text-xl font-semibold text-white">
+                Current Plans
+              </h3>
             </div>
             <div className="flex items-center gap-2">
               <Button
@@ -1034,10 +1007,12 @@ function OverviewTab({
                   />
                   <div>
                     <p className="text-white font-medium">
-                      {activeTrainingPlan.planData?.title || "Untitled Training Plan"}
+                      {activeTrainingPlan.planData?.title ||
+                        "Untitled Training Plan"}
                     </p>
                     <p className="text-zinc-400 text-sm">
-                      Training Plan • {activeTrainingPlan.planData?.duration ?? "?"}{" "}
+                      Training Plan •{" "}
+                      {activeTrainingPlan.planData?.duration ?? "?"}{" "}
                       {activeTrainingPlan.planData?.durationType ?? ""} • Active
                     </p>
                   </div>
@@ -1066,11 +1041,14 @@ function OverviewTab({
                   />
                   <div>
                     <p className="text-white font-medium">
-                      {activeNutritionPlan.planData?.title || "Untitled Nutrition Plan"}
+                      {activeNutritionPlan.planData?.title ||
+                        "Untitled Nutrition Plan"}
                     </p>
                     <p className="text-zinc-400 text-sm">
-                      Nutrition Plan • {activeNutritionPlan.planData?.duration ?? "?"}{" "}
-                      {activeNutritionPlan.planData?.durationType ?? ""} • Active
+                      Nutrition Plan •{" "}
+                      {activeNutritionPlan.planData?.duration ?? "?"}{" "}
+                      {activeNutritionPlan.planData?.durationType ?? ""} •
+                      Active
                     </p>
                   </div>
                 </div>
@@ -2382,13 +2360,10 @@ function MessagesTab({}) {
 }
 
 // Nutrition Tab Component
-function NutritionTab({ 
+function NutritionTab({
   clientId,
-  assignedNutritionPlans, 
-  onViewNutritionPlan, 
-  onTrackNutritionPlan,
-  trackingNutritionPlanId,
-  nutritionTrackError 
+  assignedNutritionPlans,
+  onViewNutritionPlan,
 }) {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -2420,11 +2395,6 @@ function NutritionTab({
           </h3>
         </div>
 
-        {nutritionTrackError && (
-          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4">
-            <div className="text-red-400 text-sm">{nutritionTrackError}</div>
-          </div>
-        )}
 
         <div className="space-y-4">
           {assignedNutritionPlans && assignedNutritionPlans.length > 0 ? (
@@ -2434,8 +2404,6 @@ function NutritionTab({
                 plan={plan}
                 clientId={clientId}
                 onViewPlan={onViewNutritionPlan}
-                onTrackPlan={onTrackNutritionPlan}
-                trackingPlanId={trackingNutritionPlanId}
               />
             ))
           ) : (
@@ -2446,9 +2414,12 @@ function NutritionTab({
                 width={48}
                 height={48}
               />
-              <p className="text-zinc-400 mb-2">No nutrition plans assigned yet</p>
+              <p className="text-zinc-400 mb-2">
+                No nutrition plans assigned yet
+              </p>
               <p className="text-zinc-500 text-sm">
-                Create and assign nutrition plans to help your client with their dietary goals.
+                Create and assign nutrition plans to help your client with their
+                dietary goals.
               </p>
             </div>
           )}
@@ -2456,7 +2427,9 @@ function NutritionTab({
       </div>
 
       {/* Current Nutrition Overview */}
-      {assignedNutritionPlans?.find(plan => plan.status === "active" || plan.status === "tracking") && (
+      {assignedNutritionPlans?.find(
+        (plan) => plan.status === "active" || plan.status === "tracking"
+      ) && (
         <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-white/10">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
@@ -2470,14 +2443,18 @@ function NutritionTab({
                 Current Nutrition Progress
               </h3>
             </div>
-            {assignedNutritionPlans?.find(plan => plan.status === "tracking") && (
+            {assignedNutritionPlans?.find(
+              (plan) => plan.status === "tracking"
+            ) && (
               <div className="flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/30 rounded-full">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span className="text-green-400 text-sm font-medium">Tracking Active</span>
+                <span className="text-green-400 text-sm font-medium">
+                  Tracking Active
+                </span>
               </div>
             )}
           </div>
-          
+
           {/* Daily Nutrition Overview */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card variant="dark" className="overflow-visible">
@@ -2493,13 +2470,16 @@ function NutritionTab({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-2xl font-bold text-white">
-                    {assignedNutritionPlans?.find(plan => plan.status === "active" || plan.status === "tracking")?.planData?.nutritionInfo?.calories || "-"}
+                    {assignedNutritionPlans?.find(
+                      (plan) =>
+                        plan.status === "active" || plan.status === "tracking"
+                    )?.planData?.nutritionInfo?.calories || "-"}
                   </p>
                   <p className="text-zinc-400 text-xs">per day</p>
                 </div>
               </div>
             </Card>
-            
+
             <Card variant="dark" className="overflow-visible">
               <div className="flex items-center gap-2 mb-2">
                 <Icon
@@ -2513,13 +2493,17 @@ function NutritionTab({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-2xl font-bold text-white">
-                    {assignedNutritionPlans?.find(plan => plan.status === "active" || plan.status === "tracking")?.planData?.nutritionInfo?.protein || "-"}g
+                    {assignedNutritionPlans?.find(
+                      (plan) =>
+                        plan.status === "active" || plan.status === "tracking"
+                    )?.planData?.nutritionInfo?.protein || "-"}
+                    g
                   </p>
                   <p className="text-zinc-400 text-xs">grams</p>
                 </div>
               </div>
             </Card>
-            
+
             <Card variant="dark" className="overflow-visible">
               <div className="flex items-center gap-2 mb-2">
                 <Icon
@@ -2533,13 +2517,17 @@ function NutritionTab({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-2xl font-bold text-white">
-                    {assignedNutritionPlans?.find(plan => plan.status === "active" || plan.status === "tracking")?.planData?.nutritionInfo?.carbs || "-"}g
+                    {assignedNutritionPlans?.find(
+                      (plan) =>
+                        plan.status === "active" || plan.status === "tracking"
+                    )?.planData?.nutritionInfo?.carbs || "-"}
+                    g
                   </p>
                   <p className="text-zinc-400 text-xs">grams</p>
                 </div>
               </div>
             </Card>
-            
+
             <Card variant="dark" className="overflow-visible">
               <div className="flex items-center gap-2 mb-2">
                 <Icon
@@ -2553,7 +2541,11 @@ function NutritionTab({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-2xl font-bold text-white">
-                    {assignedNutritionPlans?.find(plan => plan.status === "active" || plan.status === "tracking")?.planData?.nutritionInfo?.fats || "-"}g
+                    {assignedNutritionPlans?.find(
+                      (plan) =>
+                        plan.status === "active" || plan.status === "tracking"
+                    )?.planData?.nutritionInfo?.fats || "-"}
+                    g
                   </p>
                   <p className="text-zinc-400 text-xs">grams</p>
                 </div>
@@ -2562,7 +2554,9 @@ function NutritionTab({
           </div>
 
           {/* Nutrition Plan Timeline */}
-          {assignedNutritionPlans?.find(plan => plan.status === "tracking") && (
+          {assignedNutritionPlans?.find(
+            (plan) => plan.status === "tracking"
+          ) && (
             <div className="mt-6 p-4 bg-zinc-800/30 rounded-lg border border-zinc-700">
               <div className="flex items-center gap-2 mb-3">
                 <Icon
@@ -2587,8 +2581,12 @@ function NutritionTab({
 }
 
 // Nutrition Plan Card Component
-function NutritionPlanCard({ plan, clientId, onViewPlan, onTrackPlan, trackingPlanId }) {
-  const formatDate = (dateString) => 
+function NutritionPlanCard({
+  plan,
+  clientId,
+  onViewPlan,
+}) {
+  const formatDate = (dateString) =>
     new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
@@ -2614,7 +2612,12 @@ function NutritionPlanCard({ plan, clientId, onViewPlan, onTrackPlan, trackingPl
         <div className="flex items-start gap-4">
           <div className="flex-shrink-0">
             <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
-              <Icon icon="mdi:food-apple" className="text-white" width={24} height={24} />
+              <Icon
+                icon="mdi:food-apple"
+                className="text-white"
+                width={24}
+                height={24}
+              />
             </div>
           </div>
           <div className="flex-1 min-w-0">
@@ -2627,7 +2630,8 @@ function NutritionPlanCard({ plan, clientId, onViewPlan, onTrackPlan, trackingPl
                   plan.status
                 )}`}
               >
-                {plan.status?.charAt(0).toUpperCase() + plan.status?.slice(1) || "Unknown"}
+                {plan.status?.charAt(0).toUpperCase() + plan.status?.slice(1) ||
+                  "Unknown"}
               </span>
             </div>
             <p className="text-zinc-400 text-sm mb-3">
@@ -2662,25 +2666,10 @@ function NutritionPlanCard({ plan, clientId, onViewPlan, onTrackPlan, trackingPl
           >
             View Details
           </Button>
-          {plan.status === "active" && onTrackPlan && (
-            <Button
-              variant="success"
-              size="small"
-              leftIcon={
-                trackingPlanId === plan.id ? (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                ) : (
-                  <Icon icon="mdi:chart-line" width={16} height={16} />
-                )
-              }
-              onClick={() => onTrackPlan(plan.id)}
-              disabled={trackingPlanId === plan.id}
-            >
-              {trackingPlanId === plan.id ? "Tracking..." : "Track Progress"}
-            </Button>
-          )}
           {(plan.status === "active" || plan.status === "tracking") && (
-            <Link href={`/trainer/dashboard/clients/${clientId}/nutrition/${plan.id}`}>
+            <Link
+              href={`/trainer/dashboard/clients/${clientId}/nutrition/${plan.id}`}
+            >
               <Button
                 variant="primary"
                 size="small"

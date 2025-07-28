@@ -477,6 +477,7 @@ model NutritionPlan {
   timeline                  Json?
   nutritionInfo             Json?
   mealTypes                 Json?
+  dietaryPreferences        Json?
   supplementRecommendations String?
   cookingTime               String?
   targetGoal                String?

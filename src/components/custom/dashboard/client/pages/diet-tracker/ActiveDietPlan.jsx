@@ -12,7 +12,7 @@ import { MealDetailModal } from "./MealDetailModal";
 import { NewMealCard } from "./NewMealCard";
 import { NutritionSummary } from "./NutritionSummary";
 import { PlanHeader } from "./PlanHeader";
-
+import { TrainerRecommendations } from "./TrainerRecommendations";
 
 export const ActiveDietPlan = ({
   activePlan,
@@ -22,6 +22,7 @@ export const ActiveDietPlan = ({
   onCompleteMeal,
   onUncompleteMeal,
   onChangeMealOption,
+  onLogMeal,
   onAddSnack,
   onDeleteSnack,
   getCompletionRate,
@@ -98,26 +99,31 @@ export const ActiveDietPlan = ({
   }, [selectedDayLog?.mealLogs, selectedDayData?.meals]);
 
   // Check if day is editable (only current day)
-  const isDayEditable = selectedDay === currentDay;
+  const isDayEditable = () => {
+    if (!activePlan?.startDate) return false;
 
-  // Get next meal info for current day
+    const startDate = new Date(activePlan.startDate);
+    const today = new Date();
+    const diffTime = today - startDate;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    return selectedDay === diffDays + 1;
+  };
+
+  const dayIsEditable = isDayEditable();
+
+  // Get next meal info
   const getNextMealInfo = () => {
-    if (!isDayEditable || !selectedDayData?.meals) return null;
+    if (!nextMeal) return null;
 
-    // Find first incomplete meal
-    for (let i = 0; i < selectedDayData.meals.length; i++) {
-      const meal = selectedDayData.meals[i];
-      const mealLog = selectedDayLog?.mealLogs?.find(
-        (log) => log.mealName === meal.name
-      );
+    const nextMealDay = nextMeal.dayNumber;
+    const nextMealIndex = nextMeal.mealIndex;
 
-      if (!mealLog?.isCompleted) {
-        return {
-          mealIndex: i,
-          meal,
-          mealLog,
-        };
-      }
+    if (nextMealDay === selectedDay) {
+      return {
+        mealIndex: nextMealIndex,
+        mealName: nextMeal.mealName,
+      };
     }
 
     return null;
@@ -125,45 +131,26 @@ export const ActiveDietPlan = ({
 
   const nextMealInfo = getNextMealInfo();
 
-  // Check if meal is editable (must complete meals in order)
+  // Check if a specific meal is editable
   const isMealEditable = (mealIndex) => {
-    if (!isDayEditable) return false;
+    if (!dayIsEditable) return false;
 
-    // For current day, allow editing if it's the next meal or already completed
-    if (nextMealInfo?.mealIndex === mealIndex) return true;
+    if (!nextMealInfo) return true;
 
-    // Also allow editing of already completed meals (to uncomplete them)
-    const meal = selectedDayData?.meals?.[mealIndex];
-    const mealLog = selectedDayLog?.mealLogs?.find(
-      (log) => log.mealName === meal?.name
-    );
-    return mealLog?.isCompleted || false;
+    // If there's a next meal, only allow editing up to that meal
+    return mealIndex <= nextMealInfo.mealIndex;
   };
 
-  // Handle meal completion
+  // Handle meal logging
   const handleLogMeal = async (meal, option, mealLog) => {
     try {
-      if (mealLog?.isCompleted) {
-        // If meal is already completed, uncomplete it
-        await onUncompleteMeal(mealLog.id);
-      } else {
-        // If meal is not completed, complete it
-        if (mealLog) {
-          // First change the meal option if different
-          if (mealLog.selectedOption?.name !== option.name) {
-            await onChangeMealOption(mealLog.id, option);
-          }
-
-          // Then complete the meal
-          await onCompleteMeal(mealLog.id);
-        }
-      }
+      await onLogMeal(meal, option, mealLog);
     } catch (error) {
       console.error("Error logging meal:", error);
     }
   };
 
-  // Handle meal detail view
+  // Handle viewing meal details
   const handleViewMealDetail = (meal, option) => {
     setSelectedMealDetail({ meal, option });
     setShowMealDetail(true);
@@ -171,69 +158,18 @@ export const ActiveDietPlan = ({
 
   // Handle custom meal
   const handleCustomMeal = (meal, mealLog) => {
-    setCustomMealContext({
-      meal,
-      mealLog,
-      dayNumber: selectedDay,
-      date: (() => {
-        const startDate = new Date(activePlan.startDate);
-        const dayDate = new Date(startDate);
-        dayDate.setDate(dayDate.getDate() + selectedDay - 1);
-        return dayDate.toISOString().split("T")[0];
-      })(),
-    });
+    setCustomMealContext({ meal, mealLog });
     setShowCustomMeal(true);
   };
 
   // Handle custom meal save
   const handleCustomMealSave = async (customMealData) => {
     try {
-      // Create custom meal option
-      const customOption = {
-        name: customMealData.name,
-        description: customMealData.description,
-        calories: customMealData.calories,
-        protein: customMealData.protein,
-        carbs: customMealData.carbs,
-        fat: customMealData.fat,
-        ingredients: customMealData.ingredients || [],
-        imageUrl: null,
-        isCustom: true,
-      };
-
-      // If we have a meal log, change its option and complete it
-      if (customMealContext?.mealLog) {
-        // Change meal option to custom
-        await onChangeMealOption(customMealContext.mealLog.id, customOption);
-
-        // Complete the meal
-        await onCompleteMeal(customMealContext.mealLog.id);
-      }
-
-      // Save to custom meal history
-      try {
-        await fetch("/api/users/client/diet-tracker/custom-meals", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: customMealData.name,
-            description: customMealData.description,
-            mealType: customMealContext?.meal?.name?.toLowerCase() || "meal",
-            calories: customMealData.calories,
-            protein: customMealData.protein,
-            carbs: customMealData.carbs,
-            fat: customMealData.fat,
-            ingredients: customMealData.ingredients || [],
-          }),
-        });
-      } catch (historyError) {
-        console.error("Error saving to history:", historyError);
-        // Don't fail the whole operation if history save fails
-      }
-
-      // Close modal
+      const date = getSelectedDayDate().toISOString().split("T")[0];
+      await onAddSnack(date, {
+        ...customMealData,
+        mealType: "snack",
+      });
       setShowCustomMeal(false);
       setCustomMealContext(null);
     } catch (error) {
@@ -247,21 +183,22 @@ export const ActiveDietPlan = ({
       await onAddSnack(date, snackData);
       setShowAddSnack(false);
     } catch (error) {
-      console.error("Error adding snack:", error);
+      console.error("Error saving snack:", error);
     }
   };
 
-  // Handle meal deletion
+  // Handle delete meal
   const handleDeleteMeal = async (mealLog) => {
     try {
-      // "Delete" means uncomplete the meal
-      await onUncompleteMeal(mealLog.id);
+      if (mealLog.isCompleted) {
+        await onUncompleteMeal(mealLog.id);
+      }
     } catch (error) {
       console.error("Error deleting meal:", error);
     }
   };
 
-  // Handle snack deletion
+  // Handle delete snack
   const handleDeleteSnack = async (snackLog) => {
     try {
       await onDeleteSnack(snackLog.id);
@@ -270,39 +207,31 @@ export const ActiveDietPlan = ({
     }
   };
 
-  // Calculate daily nutrition totals (including snacks)
+  // Calculate daily nutrition totals
   const getDailyNutrition = () => {
-    if (!selectedDayLog) {
-      return { calories: 0, protein: 0, carbs: 0, fat: 0 };
-    }
+    // Calculate nutrition from meal logs
+    const mealNutrition = selectedDayLog?.mealLogs
+      ?.filter((meal) => meal.isCompleted)
+      ?.reduce(
+        (total, meal) => ({
+          calories: total.calories + (meal.calories || 0),
+          protein: total.protein + (meal.protein || 0),
+          carbs: total.carbs + (meal.carbs || 0),
+          fat: total.fat + (meal.fat || 0),
+        }),
+        { calories: 0, protein: 0, carbs: 0, fat: 0 }
+      ) || { calories: 0, protein: 0, carbs: 0, fat: 0 };
 
-    // Get nutrition from completed meals
-    const mealNutrition = selectedDayLog.mealLogs
-      ? selectedDayLog.mealLogs
-          .filter((meal) => meal.isCompleted)
-          .reduce(
-            (total, meal) => ({
-              calories: total.calories + (meal.calories || 0),
-              protein: total.protein + (meal.protein || 0),
-              carbs: total.carbs + (meal.carbs || 0),
-              fat: total.fat + (meal.fat || 0),
-            }),
-            { calories: 0, protein: 0, carbs: 0, fat: 0 }
-          )
-      : { calories: 0, protein: 0, carbs: 0, fat: 0 };
-
-    // Get nutrition from snacks
-    const snackNutrition = selectedDayLog.snackLogs
-      ? selectedDayLog.snackLogs.reduce(
-          (total, snack) => ({
-            calories: total.calories + (snack.calories || 0),
-            protein: total.protein + (snack.protein || 0),
-            carbs: total.carbs + (snack.carbs || 0),
-            fat: total.fat + (snack.fat || 0),
-          }),
-          { calories: 0, protein: 0, carbs: 0, fat: 0 }
-        )
-      : { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    // Calculate nutrition from snack logs
+    const snackNutrition = selectedDayLog?.snackLogs?.reduce(
+      (total, snack) => ({
+        calories: total.calories + (snack.calories || 0),
+        protein: total.protein + (snack.protein || 0),
+        carbs: total.carbs + (snack.carbs || 0),
+        fat: total.fat + (snack.fat || 0),
+      }),
+      { calories: 0, protein: 0, carbs: 0, fat: 0 }
+    ) || { calories: 0, protein: 0, carbs: 0, fat: 0 };
 
     // Combine meal and snack nutrition
     return {
@@ -364,7 +293,7 @@ export const ActiveDietPlan = ({
           </div>
 
           {/* Add Snack Button */}
-          {isDayEditable && (
+          {dayIsEditable && (
             <div className="flex justify-end">
               <Button
                 variant="secondary"
@@ -393,7 +322,7 @@ export const ActiveDietPlan = ({
               </p>
 
               {/* Allow adding snacks even on rest days */}
-              {isDayEditable && (
+              {dayIsEditable && (
                 <div className="mt-6">
                   <Button
                     variant="secondary"
@@ -417,44 +346,35 @@ export const ActiveDietPlan = ({
                   );
 
                   const isNextMeal = nextMealInfo?.mealIndex === index;
-                  const isEditable = isMealEditable(index);
-                  const isCompleted = mealLog?.isCompleted || false;
 
                   return (
                     <NewMealCard
-                      key={`${meal.name}-${index}`}
+                      key={index}
                       meal={meal}
                       mealLog={mealLog}
                       isNextMeal={isNextMeal}
-                      isEditable={isEditable}
-                      isCompleted={isCompleted}
-                      isDayEditable={isDayEditable}
+                      isEditable={isMealEditable(index)}
                       onLogMeal={handleLogMeal}
                       onViewDetail={handleViewMealDetail}
                       onCustomMeal={handleCustomMeal}
                       onDeleteMeal={handleDeleteMeal}
+                      onChangeMealOption={onChangeMealOption}
                     />
                   );
                 })}
               </div>
 
-              {/* Extra Snacks/Meals Section */}
-              {snacks.length > 0 && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Icon
-                      icon="mdi:food-apple"
-                      className="w-5 h-5 text-[#FF6B00]"
-                    />
-                    <h3 className="text-lg font-semibold text-white">
-                      Extra Snacks & Meals
-                    </h3>
-                    <span className="text-sm text-zinc-400">
-                      ({snacks.length} items)
-                    </span>
-                  </div>
+              {/* Quick Log Button for the entire day */}
 
-                  <div className="grid gap-4">
+              {/* Quick Log Buttons for each meal */}
+
+              {/* Snacks Section */}
+              {snacks.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-4">
+                    Snacks & Extras
+                  </h3>
+                  <div className="space-y-3">
                     {snacks.map((snackLog) => (
                       <div
                         key={snackLog.id}
@@ -490,7 +410,7 @@ export const ActiveDietPlan = ({
                           </div>
 
                           {/* Delete Snack Button */}
-                          {isDayEditable && (
+                          {dayIsEditable && (
                             <Button
                               variant="ghost"
                               size="small"
@@ -510,8 +430,15 @@ export const ActiveDietPlan = ({
           )}
         </div>
 
-        {/* Nutrition Summary */}
-        <div className="xl:col-span-1">
+        {/* Sidebar */}
+        <div className="xl:col-span-1 space-y-6">
+          {/* Trainer Recommendations */}
+          <TrainerRecommendations
+            assignedPlanId={activePlan.id}
+            selectedDate={getSelectedDayDate().toISOString().split("T")[0]}
+          />
+
+          {/* Nutrition Summary */}
           <NutritionSummary
             dailyNutrition={dailyNutrition}
             targetNutrition={activePlan.nutritionPlan.nutritionInfo}

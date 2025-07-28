@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-
 import { auth } from "#/auth";
 import { mockNutritionPlan as mockPlanData } from "@/components/custom/dashboard/client/pages/diet-tracker/mockNutritionPlan";
 import prisma from "@/lib/prisma";
@@ -12,7 +11,6 @@ import {
   getDietPlanStats,
   getNextMeal,
 } from "../../services/dietTrackerService";
-// Import the mock nutrition plan directly
 
 // GET: Get current diet plan and progress for client
 export async function GET(req) {
@@ -65,17 +63,47 @@ export async function GET(req) {
       return NextResponse.json({ nextMeal });
     }
 
-    // Default: Get current active diet plan
+    // Check for assigned nutrition plans first
+    const assignedNutritionPlan = await prisma.assignedNutritionPlan.findFirst({
+      where: {
+        clientId: clientInfo.id,
+        status: "active",
+      },
+      include: {
+        originalPlan: true,
+        trainer: {
+          include: {
+            trainerProfile: true,
+          },
+        },
+      },
+      orderBy: {
+        assignedAt: "desc",
+      },
+    });
+
+    // Check for active diet plan assignment
     const activePlan = await getActiveDietPlan(clientInfo.id);
 
-    if (!activePlan) {
-      // Check if there's a mock plan available (for demo purposes)
-      // In a real app, this would be assigned by a trainer
+    if (assignedNutritionPlan && !activePlan) {
+      // Client has an assigned plan but no active diet tracker
       return NextResponse.json({
         hasActivePlan: false,
+        hasAssignedPlan: true,
+        assignedPlan: assignedNutritionPlan,
+        message:
+          "Your trainer has assigned you a nutrition plan. Would you like to start tracking it?",
+      });
+    }
+
+    if (!activePlan && !assignedNutritionPlan) {
+      // No active plan and no assigned plan
+      return NextResponse.json({
+        hasActivePlan: false,
+        hasAssignedPlan: false,
         mockPlanAvailable: true,
         message:
-          "A trainer has assigned you a new nutrition plan. Are you ready to start?",
+          "No nutrition plan assigned yet. Contact your trainer to get started.",
       });
     }
 
@@ -109,7 +137,12 @@ export async function POST(req) {
     }
 
     const body = await req.json();
-    const { action, dietPlanAssignmentId, useMockPlan } = body;
+    const {
+      action,
+      dietPlanAssignmentId,
+      useMockPlan,
+      assignedNutritionPlanId,
+    } = body;
 
     // Get client info
     const clientInfo = await prisma.clientInfo.findUnique({
@@ -124,7 +157,33 @@ export async function POST(req) {
     }
 
     if (action === "start-plan") {
-      if (useMockPlan) {
+      if (assignedNutritionPlanId) {
+        // Start plan from assigned nutrition plan
+        const assignedPlan = await prisma.assignedNutritionPlan.findUnique({
+          where: { id: assignedNutritionPlanId },
+          include: { originalPlan: true },
+        });
+
+        if (!assignedPlan) {
+          return NextResponse.json(
+            { error: "Assigned nutrition plan not found" },
+            { status: 404 }
+          );
+        }
+
+        // Create diet plan assignment from the assigned nutrition plan
+        const assignment = await prisma.dietPlanAssignment.create({
+          data: {
+            clientId: clientInfo.id,
+            nutritionPlanId: assignedPlan.originalPlanId,
+            assignedById: assignedPlan.trainerId,
+          },
+        });
+
+        // Start the diet plan
+        const result = await startDietPlan(assignment.id);
+        return NextResponse.json(result);
+      } else if (useMockPlan) {
         // For demo purposes, create a mock plan assignment
         // In a real app, this would be created by a trainer
 
@@ -255,6 +314,90 @@ export async function POST(req) {
           success: true,
           message: "Meal option changed successfully",
           data: result,
+        });
+      } catch (validationError) {
+        // Check if this is a day validation error
+        if (
+          validationError.message.includes("Cannot") &&
+          (validationError.message.includes("past days") ||
+            validationError.message.includes("future days"))
+        ) {
+          return NextResponse.json(
+            { error: validationError.message },
+            { status: 403 } // Forbidden - day is not editable
+          );
+        }
+
+        // Re-throw other errors to be caught by outer catch
+        throw validationError;
+      }
+    }
+
+    if (action === "log-meal") {
+      const { mealName, mealTime, selectedOption, date } = body;
+
+      if (!mealName || !selectedOption || !date) {
+        return NextResponse.json(
+          { error: "Meal name, selected option, and date are required" },
+          { status: 400 }
+        );
+      }
+
+      try {
+        // Get the active diet plan assignment
+        const activeAssignment = await prisma.dietPlanAssignment.findFirst({
+          where: {
+            clientId: clientInfo.id,
+            isActive: true,
+          },
+        });
+
+        if (!activeAssignment) {
+          return NextResponse.json(
+            { error: "No active diet plan found" },
+            { status: 404 }
+          );
+        }
+
+        // Get or create daily log for the specified date
+        let dailyLog = await prisma.dailyDietLog.findFirst({
+          where: {
+            dietPlanAssignmentId: activeAssignment.id,
+            date: new Date(date),
+          },
+        });
+
+        if (!dailyLog) {
+          dailyLog = await prisma.dailyDietLog.create({
+            data: {
+              dietPlanAssignmentId: activeAssignment.id,
+              date: new Date(date),
+            },
+          });
+        }
+
+        // Create meal log with the selected option and portion information
+        const mealLog = await prisma.mealLog.create({
+          data: {
+            dailyDietLogId: dailyLog.id,
+            mealName,
+            mealTime: mealTime || "",
+            selectedOption: selectedOption,
+            calories: selectedOption.calories || 0,
+            protein: selectedOption.protein || 0,
+            carbs: selectedOption.carbs || 0,
+            fat: selectedOption.fat || 0,
+            isCompleted: true,
+            completedAt: new Date(),
+            portionMultiplier: selectedOption.portionMultiplier || 1,
+            isCustom: selectedOption.isCustom || false,
+          },
+        });
+
+        return NextResponse.json({
+          success: true,
+          message: "Meal logged successfully",
+          data: mealLog,
         });
       } catch (validationError) {
         // Check if this is a day validation error

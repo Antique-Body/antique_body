@@ -17,6 +17,21 @@ const isYouTubeUrl = (url) => {
   return /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//.test(url);
 };
 
+// Dietary preferences options
+const DIETARY_PREFERENCES = [
+  { id: "vegan", label: "Vegan", icon: "mdi:leaf", color: "text-green-400" },
+  { id: "vegetarian", label: "Vegetarian", icon: "mdi:carrot", color: "text-green-500" },
+  { id: "keto", label: "Keto", icon: "mdi:food-steak", color: "text-purple-400" },
+  { id: "paleo", label: "Paleo", icon: "mdi:food-drumstick", color: "text-orange-400" },
+  { id: "mediterranean", label: "Mediterranean", icon: "mdi:fish", color: "text-blue-400" },
+  { id: "glutenFree", label: "Gluten Free", icon: "mdi:wheat-off", color: "text-yellow-400" },
+  { id: "dairyFree", label: "Dairy Free", icon: "mdi:cow-off", color: "text-red-400" },
+  { id: "lowCarb", label: "Low Carb", icon: "mdi:bread-slice-outline", color: "text-indigo-400" },
+  { id: "highProtein", label: "High Protein", icon: "mdi:food-drumstick", color: "text-pink-400" },
+  { id: "intermittentFasting", label: "Intermittent Fasting", icon: "mdi:clock", color: "text-cyan-400" },
+];
+
+
 export const MealPlanning = ({ data, onChange }) => {
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [showAddDayPopover, setShowAddDayPopover] = useState(false);
@@ -401,13 +416,16 @@ export const MealPlanning = ({ data, onChange }) => {
           id: generateId(),
           name: mealData.name,
           description: mealData.recipe,
-          ingredients: mealData.ingredients.split(",").map((i) => i.trim()),
+          ingredients: typeof mealData.ingredients === 'string' 
+            ? mealData.ingredients.split(",").map((i) => i.trim())
+            : mealData.ingredients,
           calories: mealData.calories,
           protein: mealData.protein,
           carbs: mealData.carbs,
           fat: mealData.fat,
           imageUrl: mealData.imageUrl,
-          videoUrl: mealData.videoUrl, // Fixed: was mealData.video
+          videoUrl: mealData.videoUrl,
+          dietary: mealData.dietary || [],
         };
 
         const updatedMeals = [...selectedDay.meals];
@@ -448,13 +466,16 @@ export const MealPlanning = ({ data, onChange }) => {
       id: generateId(),
       name: libraryMeal.name,
       description: libraryMeal.recipe,
-      ingredients: libraryMeal.ingredients.split(",").map((i) => i.trim()),
+      ingredients: typeof libraryMeal.ingredients === 'string' 
+        ? libraryMeal.ingredients.split(",").map((i) => i.trim())
+        : libraryMeal.ingredients,
       calories: libraryMeal.calories,
       protein: libraryMeal.protein,
       carbs: libraryMeal.carbs,
       fat: libraryMeal.fat,
       imageUrl: libraryMeal.imageUrl,
       videoUrl: libraryMeal.videoUrl,
+      dietary: libraryMeal.dietary || [],
     };
 
     const updatedMeals = [...selectedDay.meals];
@@ -566,6 +587,27 @@ export const MealPlanning = ({ data, onChange }) => {
     }
   }, [selectedDay]);
 
+
+  // Handle dietary preferences for individual meal options
+  const toggleMealOptionDietaryPreference = (mealIndex, optionIndex, prefId) => {
+    if (!selectedDay) return;
+
+    const updatedMeals = [...selectedDay.meals];
+    const currentDietary = updatedMeals[mealIndex].options[optionIndex].dietary || [];
+    const isSelected = currentDietary.includes(prefId);
+    
+    const newDietary = isSelected 
+      ? currentDietary.filter(id => id !== prefId)
+      : [...currentDietary, prefId];
+    
+    updatedMeals[mealIndex].options[optionIndex] = {
+      ...updatedMeals[mealIndex].options[optionIndex],
+      dietary: newDietary,
+    };
+
+    updateDay(selectedDayIndex, "meals", updatedMeals);
+  };
+
   if (!selectedDay) {
     return (
       <div className="space-y-4 sm:space-y-6 px-2 sm:px-4">
@@ -610,11 +652,12 @@ export const MealPlanning = ({ data, onChange }) => {
         </p>
       </motion.div>
 
+
       {/* Day Selector */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
+        transition={{ delay: 0.05 }}
         className="bg-[#1a1a1a] rounded-lg border border-[#333] p-3 sm:p-5"
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
@@ -788,7 +831,7 @@ export const MealPlanning = ({ data, onChange }) => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        transition={{ delay: 0.1 }}
         className="bg-gradient-to-br from-[#1a1a1a] via-[#1e1e1e] to-[#222] rounded-xl border border-[#333] overflow-hidden"
       >
         {/* Day Header - Always Visible */}
@@ -1190,6 +1233,33 @@ export const MealPlanning = ({ data, onChange }) => {
                                                         placeholder="Enter meal preparation instructions"
                                                         rows={2}
                                                       />
+
+                                                      {/* Dietary Preferences for this meal option */}
+                                                      <div>
+                                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                          Dietary Preferences
+                                                        </label>
+                                                        <div className="flex flex-wrap gap-2">
+                                                          {DIETARY_PREFERENCES.map((pref) => {
+                                                            const isSelected = (option.dietary || []).includes(pref.id);
+                                                            return (
+                                                              <button
+                                                                key={pref.id}
+                                                                type="button"
+                                                                onClick={() => toggleMealOptionDietaryPreference(mealIndex, optionIndex, pref.id)}
+                                                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                                                  isSelected
+                                                                    ? "bg-[#FF6B00] text-white shadow-lg"
+                                                                    : "bg-[#242424] text-gray-300 hover:bg-[#2a2a2a] hover:text-white"
+                                                                }`}
+                                                              >
+                                                                <Icon icon={pref.icon} className={`w-4 h-4 ${isSelected ? "text-white" : pref.color}`} />
+                                                                {pref.label}
+                                                              </button>
+                                                            );
+                                                          })}
+                                                        </div>
+                                                      </div>
                                                     </div>
                                                   </div>
 
@@ -1547,6 +1617,33 @@ export const MealPlanning = ({ data, onChange }) => {
                                                         placeholder="Enter meal preparation instructions"
                                                         rows={2}
                                                       />
+
+                                                      {/* Dietary Preferences for this meal option */}
+                                                      <div>
+                                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                          Dietary Preferences
+                                                        </label>
+                                                        <div className="flex flex-wrap gap-2">
+                                                          {DIETARY_PREFERENCES.map((pref) => {
+                                                            const isSelected = (option.dietary || []).includes(pref.id);
+                                                            return (
+                                                              <button
+                                                                key={pref.id}
+                                                                type="button"
+                                                                onClick={() => toggleMealOptionDietaryPreference(mealIndex, optionIndex, pref.id)}
+                                                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                                                  isSelected
+                                                                    ? "bg-[#FF6B00] text-white shadow-lg"
+                                                                    : "bg-[#242424] text-gray-300 hover:bg-[#2a2a2a] hover:text-white"
+                                                                }`}
+                                                              >
+                                                                <Icon icon={pref.icon} className={`w-4 h-4 ${isSelected ? "text-white" : pref.color}`} />
+                                                                {pref.label}
+                                                              </button>
+                                                            );
+                                                          })}
+                                                        </div>
+                                                      </div>
                                                     </div>
                                                   </div>
 

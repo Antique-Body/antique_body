@@ -4,6 +4,8 @@ export const useDietTracker = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hasActivePlan, setHasActivePlan] = useState(false);
+  const [hasAssignedPlan, setHasAssignedPlan] = useState(false);
+  const [assignedPlan, setAssignedPlan] = useState(null);
   const [activePlan, setActivePlan] = useState(null);
   const [dailyLogs, setDailyLogs] = useState([]);
   const [nextMeal, setNextMeal] = useState(null);
@@ -25,6 +27,8 @@ export const useDietTracker = () => {
       }
 
       setHasActivePlan(data.hasActivePlan);
+      setHasAssignedPlan(data.hasAssignedPlan || false);
+      setAssignedPlan(data.assignedPlan || null);
       setMockPlanAvailable(data.mockPlanAvailable || false);
 
       if (data.hasActivePlan) {
@@ -42,7 +46,11 @@ export const useDietTracker = () => {
 
   // Start diet plan
   const startDietPlan = useCallback(
-    async (useMockPlan = false, dietPlanAssignmentId = null) => {
+    async (
+      useMockPlan = false,
+      dietPlanAssignmentId = null,
+      assignedNutritionPlanId = null
+    ) => {
       try {
         setLoading(true);
         setError(null);
@@ -56,6 +64,7 @@ export const useDietTracker = () => {
             action: "start-plan",
             useMockPlan,
             dietPlanAssignmentId,
+            assignedNutritionPlanId,
           }),
         });
 
@@ -80,6 +89,14 @@ export const useDietTracker = () => {
     [fetchDietTrackerData]
   );
 
+  // Start assigned nutrition plan
+  const startAssignedPlan = useCallback(
+    async (assignedNutritionPlanId) => {
+      return startDietPlan(false, null, assignedNutritionPlanId);
+    },
+    [startDietPlan]
+  );
+
   // Fetch next meal
   const fetchNextMeal = useCallback(async () => {
     try {
@@ -96,20 +113,19 @@ export const useDietTracker = () => {
     }
   }, []);
 
-  // Complete a meal
+  // Complete meal
   const completeMeal = useCallback(
     async (mealLogId) => {
       try {
-        setValidationError(null);
-
-        const response = await fetch("/api/users/client/diet-tracker/meals", {
-          method: "PATCH",
+        const response = await fetch("/api/users/client/diet-tracker", {
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            action: "complete",
+            action: "complete-meal",
             mealLogId,
+            isCompleted: true,
           }),
         });
 
@@ -119,39 +135,14 @@ export const useDietTracker = () => {
           if (response.status === 403) {
             // Day validation error
             setValidationError(data.error);
-            return;
+            throw new Error(data.error);
           }
           throw new Error(data.error || "Failed to complete meal");
         }
 
-        // Update local state
-        setDailyLogs((prevLogs) =>
-          prevLogs.map((log) => {
-            const updatedMealLogs = log.mealLogs.map((meal) =>
-              meal.id === mealLogId
-                ? {
-                    ...meal,
-                    isCompleted: true,
-                    completedAt: new Date().toISOString(),
-                  }
-                : meal
-            );
-
-            // Recalculate completed meals count
-            const completedMeals = updatedMealLogs.filter(
-              (meal) => meal.isCompleted
-            ).length;
-
-            return {
-              ...log,
-              mealLogs: updatedMealLogs,
-              completedMeals,
-            };
-          })
-        );
-
-        // Refresh next meal
-        await fetchNextMeal();
+        // Refresh data
+        await fetchDietTrackerData();
+        setValidationError(null);
 
         return data;
       } catch (err) {
@@ -160,23 +151,22 @@ export const useDietTracker = () => {
         throw err;
       }
     },
-    [fetchNextMeal]
+    [fetchDietTrackerData]
   );
 
-  // Uncomplete a meal
+  // Uncomplete meal
   const uncompleteMeal = useCallback(
     async (mealLogId) => {
       try {
-        setValidationError(null);
-
-        const response = await fetch("/api/users/client/diet-tracker/meals", {
-          method: "PATCH",
+        const response = await fetch("/api/users/client/diet-tracker", {
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            action: "uncomplete",
+            action: "complete-meal",
             mealLogId,
+            isCompleted: false,
           }),
         });
 
@@ -186,35 +176,14 @@ export const useDietTracker = () => {
           if (response.status === 403) {
             // Day validation error
             setValidationError(data.error);
-            return;
+            throw new Error(data.error);
           }
           throw new Error(data.error || "Failed to uncomplete meal");
         }
 
-        // Update local state
-        setDailyLogs((prevLogs) =>
-          prevLogs.map((log) => {
-            const updatedMealLogs = log.mealLogs.map((meal) =>
-              meal.id === mealLogId
-                ? { ...meal, isCompleted: false, completedAt: null }
-                : meal
-            );
-
-            // Recalculate completed meals count
-            const completedMeals = updatedMealLogs.filter(
-              (meal) => meal.isCompleted
-            ).length;
-
-            return {
-              ...log,
-              mealLogs: updatedMealLogs,
-              completedMeals,
-            };
-          })
-        );
-
-        // Refresh next meal
-        await fetchNextMeal();
+        // Refresh data
+        await fetchDietTrackerData();
+        setValidationError(null);
 
         return data;
       } catch (err) {
@@ -223,91 +192,109 @@ export const useDietTracker = () => {
         throw err;
       }
     },
-    [fetchNextMeal]
+    [fetchDietTrackerData]
   );
 
   // Change meal option
-  const changeMealOption = useCallback(async (mealLogId, newOption) => {
-    try {
-      setValidationError(null);
+  const changeMealOption = useCallback(
+    async (mealLogId, newOption) => {
+      try {
+        const response = await fetch("/api/users/client/diet-tracker", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            action: "change-meal-option",
+            mealLogId,
+            newOption,
+          }),
+        });
 
-      const response = await fetch("/api/users/client/diet-tracker/meals", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          action: "change-option",
-          mealLogId,
-          newOption,
-        }),
-      });
+        const data = await response.json();
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 403) {
-          // Day validation error
-          setValidationError(data.error);
-          return;
+        if (!response.ok) {
+          if (response.status === 403) {
+            // Day validation error
+            setValidationError(data.error);
+            throw new Error(data.error);
+          }
+          throw new Error(data.error || "Failed to change meal option");
         }
-        throw new Error(data.error || "Failed to change meal option");
+
+        // Refresh data
+        await fetchDietTrackerData();
+        setValidationError(null);
+
+        return data;
+      } catch (err) {
+        console.error("Error changing meal option:", err);
+        setError(err.message);
+        throw err;
       }
+    },
+    [fetchDietTrackerData]
+  );
 
-      // Update local state
-      setDailyLogs((prevLogs) =>
-        prevLogs.map((log) => ({
-          ...log,
-          mealLogs: log.mealLogs.map((meal) =>
-            meal.id === mealLogId
-              ? {
-                  ...meal,
-                  selectedOption: newOption,
-                  calories: newOption.calories || 0,
-                  protein: newOption.protein || 0,
-                  carbs: newOption.carbs || 0,
-                  fat: newOption.fat || 0,
-                }
-              : meal
-          ),
-        }))
-      );
+  // Log meal with portion control and custom meals
+  const logMeal = useCallback(
+    async (meal, selectedOption, mealLog) => {
+      try {
+        if (mealLog) {
+          // If meal log exists, toggle completion
+          if (mealLog.isCompleted) {
+            return await uncompleteMeal(mealLog.id);
+          } else {
+            return await completeMeal(mealLog.id);
+          }
+        }
 
-      return data;
-    } catch (err) {
-      console.error("Error changing meal option:", err);
-      setError(err.message);
-      throw err;
-    }
-  }, []);
+        // Log new meal
+        const response = await fetch("/api/users/client/diet-tracker", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            action: "log-meal",
+            mealName: meal.name,
+            mealTime: meal.time,
+            selectedOption,
+            date: new Date().toISOString().split("T")[0],
+          }),
+        });
 
-  // Get custom meal history
-  const getCustomMealHistory = useCallback(async (mealType, limit = 10) => {
-    try {
-      const response = await fetch(
-        `/api/users/client/diet-tracker/custom-meals?mealType=${mealType}&limit=${limit}`
-      );
-      const data = await response.json();
+        const data = await response.json();
 
-      if (response.ok) {
-        return data.data || [];
+        if (!response.ok) {
+          if (response.status === 403) {
+            // Day validation error
+            setValidationError(data.error);
+            throw new Error(data.error);
+          }
+          throw new Error(data.error || "Failed to log meal");
+        }
+
+        // Refresh data
+        await fetchDietTrackerData();
+        setValidationError(null);
+
+        return data;
+      } catch (err) {
+        console.error("Error logging meal:", err);
+        setError(err.message);
+        throw err;
       }
+    },
+    [fetchDietTrackerData, completeMeal, uncompleteMeal]
+  );
 
-      throw new Error(data.error || "Failed to fetch custom meal history");
-    } catch (err) {
-      console.error("Error fetching custom meal history:", err);
-      return null;
-    }
-  }, []);
-
-  // Add custom meal/snack to a specific day
+  // Add custom meal to day
   const addCustomMealToDay = useCallback(
     async (date, customMealData) => {
       try {
-        setValidationError(null);
-
         if (!activePlan) {
-          throw new Error("No active diet plan found");
+          throw new Error("No active plan found");
         }
 
         const response = await fetch("/api/users/client/diet-tracker/meals", {
@@ -325,41 +312,11 @@ export const useDietTracker = () => {
         const data = await response.json();
 
         if (!response.ok) {
-          if (response.status === 403) {
-            // Day validation error
-            setValidationError(data.error);
-            return;
-          }
           throw new Error(data.error || "Failed to add custom meal");
         }
 
-        // Update local state instead of full refresh
-        const newSnackLog = data.data;
-        const targetDate = new Date(date);
-
-        setDailyLogs((prevLogs) =>
-          prevLogs.map((log) => {
-            const logDate = new Date(log.date);
-            logDate.setHours(0, 0, 0, 0);
-            targetDate.setHours(0, 0, 0, 0);
-
-            if (logDate.getTime() === targetDate.getTime()) {
-              return {
-                ...log,
-                snackLogs: [...(log.snackLogs || []), newSnackLog],
-                snackCount: (log.snackCount || 0) + 1,
-                // Update nutrition totals
-                totalCalories:
-                  (log.totalCalories || 0) + (newSnackLog.calories || 0),
-                totalProtein:
-                  (log.totalProtein || 0) + (newSnackLog.protein || 0),
-                totalCarbs: (log.totalCarbs || 0) + (newSnackLog.carbs || 0),
-                totalFat: (log.totalFat || 0) + (newSnackLog.fat || 0),
-              };
-            }
-            return log;
-          })
-        );
+        // Refresh data
+        await fetchDietTrackerData();
 
         return data;
       } catch (err) {
@@ -368,80 +325,38 @@ export const useDietTracker = () => {
         throw err;
       }
     },
-    [activePlan]
+    [activePlan, fetchDietTrackerData]
   );
 
-  // Delete a snack
-  const deleteSnack = useCallback(async (snackLogId) => {
-    try {
-      setValidationError(null);
-
-      const response = await fetch(
-        `/api/users/client/diet-tracker/meals?snackLogId=${snackLogId}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 403) {
-          // Day validation error
-          setValidationError(data.error);
-          return;
-        }
-        throw new Error(data.error || "Failed to delete snack");
-      }
-
-      // Update local state instead of full refresh
-      setDailyLogs((prevLogs) =>
-        prevLogs.map((log) => {
-          if (
-            log.snackLogs &&
-            log.snackLogs.some((snack) => snack.id === snackLogId)
-          ) {
-            const deletedSnack = log.snackLogs.find(
-              (snack) => snack.id === snackLogId
-            );
-            const updatedSnackLogs = log.snackLogs.filter(
-              (snack) => snack.id !== snackLogId
-            );
-
-            return {
-              ...log,
-              snackLogs: updatedSnackLogs,
-              snackCount: Math.max(0, (log.snackCount || 0) - 1),
-              // Update nutrition totals
-              totalCalories: Math.max(
-                0,
-                (log.totalCalories || 0) - (deletedSnack?.calories || 0)
-              ),
-              totalProtein: Math.max(
-                0,
-                (log.totalProtein || 0) - (deletedSnack?.protein || 0)
-              ),
-              totalCarbs: Math.max(
-                0,
-                (log.totalCarbs || 0) - (deletedSnack?.carbs || 0)
-              ),
-              totalFat: Math.max(
-                0,
-                (log.totalFat || 0) - (deletedSnack?.fat || 0)
-              ),
-            };
+  // Delete snack
+  const deleteSnack = useCallback(
+    async (snackLogId) => {
+      try {
+        const response = await fetch(
+          `/api/users/client/diet-tracker/snacks/${snackLogId}`,
+          {
+            method: "DELETE",
           }
-          return log;
-        })
-      );
+        );
 
-      return data;
-    } catch (err) {
-      console.error("Error deleting snack:", err);
-      setError(err.message);
-      throw err;
-    }
-  }, []);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to delete snack");
+        }
+
+        // Refresh data
+        await fetchDietTrackerData();
+
+        return data;
+      } catch (err) {
+        console.error("Error deleting snack:", err);
+        setError(err.message);
+        throw err;
+      }
+    },
+    [fetchDietTrackerData]
+  );
 
   // Fetch diet plan stats
   const fetchStats = useCallback(async () => {
@@ -497,73 +412,69 @@ export const useDietTracker = () => {
   }, [dailyLogs]);
 
   const getLogByDate = useCallback(
-    (date) =>
-      dailyLogs.find((log) => {
+    (date) => {
+      return dailyLogs.find((log) => {
         // Handle both string and Date object formats
         const logDate =
           typeof log.date === "string"
             ? log.date.split("T")[0]
             : new Date(log.date).toISOString().split("T")[0];
-        const targetDate =
-          typeof date === "string"
-            ? date.split("T")[0]
-            : new Date(date).toISOString().split("T")[0];
-        return logDate === targetDate;
-      }),
+        return logDate === date;
+      });
+    },
     [dailyLogs]
   );
 
   const getCompletionRate = useCallback(() => {
-    if (dailyLogs.length === 0) return 0;
+    if (!dailyLogs.length) return 0;
 
-    const totalMeals = dailyLogs.reduce((sum, log) => sum + log.totalMeals, 0);
+    const totalMeals = dailyLogs.reduce(
+      (total, log) => total + (log.totalMeals || 0),
+      0
+    );
     const completedMeals = dailyLogs.reduce(
-      (sum, log) => sum + log.completedMeals,
+      (total, log) => total + (log.completedMeals || 0),
       0
     );
 
     return totalMeals > 0 ? (completedMeals / totalMeals) * 100 : 0;
   }, [dailyLogs]);
 
-  // Clear validation error
   const clearValidationError = useCallback(() => {
     setValidationError(null);
   }, []);
 
-  // Initialize data on mount
+  // Initialize data
   useEffect(() => {
     fetchDietTrackerData();
   }, [fetchDietTrackerData]);
 
   return {
-    // State
     loading,
     error,
     hasActivePlan,
+    hasAssignedPlan,
+    assignedPlan,
     activePlan,
     dailyLogs,
     nextMeal,
     stats,
     mockPlanAvailable,
     validationError,
-
-    // Actions
     startDietPlan,
+    startAssignedPlan,
     completeMeal,
     uncompleteMeal,
     changeMealOption,
-    fetchDietTrackerData,
-    fetchNextMeal,
-    fetchStats,
-    getMealsForDate,
-    getCustomMealHistory,
+    logMeal,
     addCustomMealToDay,
     deleteSnack,
-    clearValidationError,
-
-    // Helpers
-    getTodayLog,
-    getLogByDate,
     getCompletionRate,
+    getLogByDate,
+    getTodayLog,
+    getMealsForDate,
+    fetchStats,
+    clearValidationError,
+    fetchDietTrackerData,
   };
 };

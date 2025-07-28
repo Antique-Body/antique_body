@@ -3,12 +3,59 @@ import { Icon } from "@iconify/react";
 import Link from "next/link";
 import React, { useEffect, useState, useCallback } from "react";
 
+import { ContextualSaveBar } from "@/components/common";
 import { Button } from "@/components/common/Button";
 import { Card } from "@/components/common/Card";
-import ContextualSaveBar from "@/components/common/ContextualSaveBar";
 import { Modal } from "@/components/common/Modal";
+import { NutritionPlanFeatures } from "@/components/custom/dashboard/trainer/components/NutritionPlanFeatures";
 import { MealLibrarySelector } from "@/components/custom/dashboard/trainer/pages/meals/components/MealLibrarySelector";
 import { MealModal } from "@/components/custom/dashboard/trainer/pages/meals/components/MealModal";
+
+// Dietary preferences options
+const DIETARY_PREFERENCES = {
+  vegan: { label: "Vegan", icon: "mdi:leaf", color: "text-green-400" },
+  vegetarian: {
+    label: "Vegetarian",
+    icon: "mdi:carrot",
+    color: "text-green-500",
+  },
+  keto: { label: "Keto", icon: "mdi:food-steak", color: "text-purple-400" },
+  paleo: {
+    label: "Paleo",
+    icon: "mdi:food-drumstick",
+    color: "text-orange-400",
+  },
+  mediterranean: {
+    label: "Mediterranean",
+    icon: "mdi:fish",
+    color: "text-blue-400",
+  },
+  glutenFree: {
+    label: "Gluten Free",
+    icon: "mdi:wheat-off",
+    color: "text-yellow-400",
+  },
+  dairyFree: {
+    label: "Dairy Free",
+    icon: "mdi:cow-off",
+    color: "text-red-400",
+  },
+  lowCarb: {
+    label: "Low Carb",
+    icon: "mdi:bread-slice-outline",
+    color: "text-indigo-400",
+  },
+  highProtein: {
+    label: "High Protein",
+    icon: "mdi:food-drumstick",
+    color: "text-pink-400",
+  },
+  intermittentFasting: {
+    label: "Intermittent Fasting",
+    icon: "mdi:clock",
+    color: "text-cyan-400",
+  },
+};
 
 export default function NutritionTrackingPage({ params }) {
   const [client, setClient] = useState(null);
@@ -16,7 +63,6 @@ export default function NutritionTrackingPage({ params }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeDay, setActiveDay] = useState(0);
-  const [trackingData, setTrackingData] = useState({});
   const [showMealModal, setShowMealModal] = useState(false);
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [selectedDate, setSelectedDate] = useState(
@@ -41,11 +87,37 @@ export default function NutritionTrackingPage({ params }) {
     time: "",
     notes: "",
   });
+  // Add state for client progress
+  const [clientProgress, setClientProgress] = useState(null);
+  const [loadingClientProgress, setLoadingClientProgress] = useState(false);
 
   // Unwrap params using React.use() for Next.js 15 compatibility
   const unwrappedParams = React.use(params);
   const clientId = unwrappedParams.id;
   const planId = unwrappedParams.planId;
+
+  // Fetch client progress
+  const fetchClientProgress = useCallback(async () => {
+    try {
+      setLoadingClientProgress(true);
+      const response = await fetch(
+        `/api/coaching-requests/${clientId}/nutrition-tracking/${planId}/client-progress?date=${selectedDate}`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch client progress");
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setClientProgress(data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching client progress:", err);
+    } finally {
+      setLoadingClientProgress(false);
+    }
+  }, [clientId, planId, selectedDate]);
 
   // Fetch client and nutrition plan data
   const fetchData = useCallback(async () => {
@@ -79,36 +151,12 @@ export default function NutritionTrackingPage({ params }) {
       }
 
       setNutritionPlan(planData.data);
-
-      // Fetch tracking data
-      await fetchTrackingData();
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
   }, [clientId, planId]);
-
-  // Fetch tracking data for the selected date
-  const fetchTrackingData = async (date = selectedDate) => {
-    try {
-      const response = await fetch(
-        `/api/coaching-requests/${clientId}/nutrition-tracking/${planId}?date=${date}`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setTrackingData(data.data || {});
-        // Load notes and supplementation data
-        const todayData = data.data?.[date];
-        if (todayData) {
-          setNotes(todayData.notes || "");
-          setSupplementationRecommendations(todayData.supplementation || "");
-        }
-      }
-    } catch {
-      // Handle error silently
-    }
-  };
 
   // Save trainer notes
   const handleSaveNotes = async () => {
@@ -254,6 +302,34 @@ export default function NutritionTrackingPage({ params }) {
     setShowAddMealModal(false);
   };
 
+  // Handle dietary preferences toggle
+  const toggleDietaryPreference = (mealIndex, optionIndex, prefId) => {
+    const updatedPlan = { ...nutritionPlan };
+    if (
+      updatedPlan.planData?.days?.[activeDay]?.meals?.[mealIndex]?.options?.[
+        optionIndex
+      ]
+    ) {
+      const option =
+        updatedPlan.planData.days[activeDay].meals[mealIndex].options[
+          optionIndex
+        ];
+      const currentDietary = option.dietary || [];
+      const isSelected = currentDietary.includes(prefId);
+
+      if (isSelected) {
+        // Remove dietary preference
+        option.dietary = currentDietary.filter((id) => id !== prefId);
+      } else {
+        // Add dietary preference
+        option.dietary = [...currentDietary, prefId];
+      }
+
+      setNutritionPlan(updatedPlan);
+      setHasUnsavedChanges(true);
+    }
+  };
+
   // Sort meals by time - only when saved
   const sortMealsByTime = (meals) => {
     if (!hasUnsavedChanges) {
@@ -388,8 +464,8 @@ export default function NutritionTrackingPage({ params }) {
   }, [fetchData]);
 
   useEffect(() => {
-    fetchTrackingData();
-  }, [selectedDate]);
+    fetchClientProgress();
+  }, [fetchClientProgress]);
 
   if (loading) {
     return (
@@ -397,7 +473,7 @@ export default function NutritionTrackingPage({ params }) {
         <div className="flex h-screen w-full items-center justify-center">
           <div className="flex flex-col items-center">
             <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#3E92CC] border-t-transparent" />
-            <p className="mt-4 text-zinc-400">Loading nutrition tracking...</p>
+            <p className="mt-4 text-zinc-400">Loading nutrition plan...</p>
           </div>
         </div>
       </div>
@@ -416,7 +492,7 @@ export default function NutritionTrackingPage({ params }) {
               height={48}
             />
             <p className="mt-4 text-lg font-medium text-white">
-              Failed to load nutrition tracking
+              Failed to load nutrition plan
             </p>
             <p className="mt-2 text-zinc-400">{error}</p>
             <Button
@@ -457,7 +533,6 @@ export default function NutritionTrackingPage({ params }) {
 
   const planData = nutritionPlan.planData;
   const currentDay = planData?.days?.[activeDay];
-  const todayTracking = trackingData[selectedDate] || {};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900">
@@ -502,7 +577,7 @@ export default function NutritionTrackingPage({ params }) {
                 </h1>
                 <p className="text-zinc-400">
                   {client.client?.clientProfile?.firstName}{" "}
-                  {client.client?.clientProfile?.lastName} • Nutrition Tracking
+                  {client.client?.clientProfile?.lastName} • Nutrition Plan
                 </p>
               </div>
             </div>
@@ -528,7 +603,7 @@ export default function NutritionTrackingPage({ params }) {
                     height={24}
                   />
                   <h3 className="text-xl font-semibold text-white">
-                    Daily Tracking
+                    Date Selection
                   </h3>
                 </div>
                 <input
@@ -538,6 +613,195 @@ export default function NutritionTrackingPage({ params }) {
                   className="px-4 py-2 bg-zinc-700/50 border border-zinc-600 rounded-xl text-white focus:border-[#3E92CC] focus:outline-none focus:ring-2 focus:ring-[#3E92CC]/20 transition-all"
                 />
               </div>
+            </Card>
+
+            {/* Client Progress Section */}
+            <Card
+              variant="dark"
+              className="overflow-visible border-0 bg-zinc-800/50 backdrop-blur-sm"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <Icon
+                  icon="mdi:account-check"
+                  className="text-green-400"
+                  width={28}
+                  height={28}
+                />
+                <h3 className="text-xl font-semibold text-white">
+                  Client's Actual Progress
+                </h3>
+                {loadingClientProgress && (
+                  <div className="w-5 h-5 border-2 border-[#3E92CC] border-t-transparent rounded-full animate-spin" />
+                )}
+              </div>
+
+              {clientProgress ? (
+                clientProgress.hasActiveTracking ? (
+                  <div className="space-y-6">
+                    {/* Progress Summary */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
+                        <div className="text-2xl font-bold text-green-400">
+                          {Math.round(clientProgress.completionRate)}%
+                        </div>
+                        <div className="text-zinc-400 text-sm">Completion</div>
+                      </div>
+                      <div className="text-center p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+                        <div className="text-2xl font-bold text-blue-400">
+                          {clientProgress.completedMeals}/
+                          {clientProgress.totalMeals}
+                        </div>
+                        <div className="text-zinc-400 text-sm">
+                          Meals Completed
+                        </div>
+                      </div>
+                      <div className="text-center p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl">
+                        <div className="text-2xl font-bold text-orange-400">
+                          {Math.round(clientProgress.totalNutrition.calories)}
+                        </div>
+                        <div className="text-zinc-400 text-sm">
+                          Calories Consumed
+                        </div>
+                      </div>
+                      <div className="text-center p-4 bg-purple-500/10 border border-purple-500/20 rounded-xl">
+                        <div className="text-2xl font-bold text-purple-400">
+                          {clientProgress.snacks.length}
+                        </div>
+                        <div className="text-zinc-400 text-sm">
+                          Snacks Added
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Completed Meals */}
+                    {clientProgress.meals.length > 0 && (
+                      <div>
+                        <h4 className="text-lg font-semibold text-white mb-4">
+                          Completed Meals
+                        </h4>
+                        <div className="space-y-3">
+                          {clientProgress.meals.map((meal) => (
+                            <div
+                              key={meal.id}
+                              className={`p-4 rounded-xl border ${
+                                meal.isCompleted
+                                  ? "bg-green-500/10 border-green-500/30"
+                                  : "bg-zinc-800/30 border-zinc-700/50"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    className={`w-3 h-3 rounded-full ${
+                                      meal.isCompleted
+                                        ? "bg-green-400"
+                                        : "bg-zinc-600"
+                                    }`}
+                                  />
+                                  <div>
+                                    <div className="text-white font-medium">
+                                      {meal.name}
+                                    </div>
+                                    <div className="text-zinc-400 text-sm">
+                                      {meal.time} •{" "}
+                                      {meal.selectedOption?.name ||
+                                        "Default option"}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <div className="text-white font-medium">
+                                    {Math.round(meal.nutrition.calories)} cal
+                                  </div>
+                                  <div className="text-zinc-400 text-xs">
+                                    {meal.nutrition.protein}g P •{" "}
+                                    {meal.nutrition.carbs}g C •{" "}
+                                    {meal.nutrition.fat}g F
+                                  </div>
+                                </div>
+                              </div>
+                              {meal.completedAt && (
+                                <div className="text-zinc-500 text-xs mt-2">
+                                  Completed at{" "}
+                                  {new Date(
+                                    meal.completedAt
+                                  ).toLocaleTimeString()}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Snacks */}
+                    {clientProgress.snacks.length > 0 && (
+                      <div>
+                        <h4 className="text-lg font-semibold text-white mb-4">
+                          Snacks & Extras
+                        </h4>
+                        <div className="space-y-3">
+                          {clientProgress.snacks.map((snack) => (
+                            <div
+                              key={snack.id}
+                              className="p-4 bg-zinc-800/30 border border-zinc-700/50 rounded-xl"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className="text-white font-medium">
+                                    {snack.name}
+                                  </div>
+                                  <div className="text-zinc-400 text-sm">
+                                    {snack.loggedTime} • {snack.mealType}
+                                  </div>
+                                  {snack.description && (
+                                    <div className="text-zinc-500 text-sm mt-1">
+                                      {snack.description}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="text-right">
+                                  <div className="text-white font-medium">
+                                    {Math.round(snack.nutrition.calories)} cal
+                                  </div>
+                                  <div className="text-zinc-400 text-xs">
+                                    {snack.nutrition.protein}g P •{" "}
+                                    {snack.nutrition.carbs}g C •{" "}
+                                    {snack.nutrition.fat}g F
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Icon
+                      icon="mdi:account-clock"
+                      className="text-zinc-500 mx-auto mb-4"
+                      width={48}
+                      height={48}
+                    />
+                    <h4 className="text-zinc-300 text-lg font-medium mb-2">
+                      Client hasn't started tracking yet
+                    </h4>
+                    <p className="text-zinc-400 text-sm">
+                      {clientProgress.message ||
+                        "The client needs to start tracking this nutrition plan in their diet tracker."}
+                    </p>
+                  </div>
+                )
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-8 h-8 border-2 border-[#3E92CC] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                  <p className="text-zinc-400 text-sm">
+                    Loading client progress...
+                  </p>
+                </div>
+              )}
             </Card>
 
             {/* Daily Macros Overview */}
@@ -650,43 +914,56 @@ export default function NutritionTrackingPage({ params }) {
                     <div className="flex items-center gap-2">
                       <input
                         type="text"
-                        placeholder="Add meals..."
-                        className="px-4 py-2 bg-zinc-700/30 border border-zinc-600/50 rounded-lg text-white focus:border-[#3E92CC] focus:outline-none placeholder-zinc-400"
+                        placeholder="Add meal name (e.g., Breakfast, Lunch, Snack)..."
+                        className="px-4 py-2 bg-zinc-700/30 border border-zinc-600/50 rounded-lg text-white focus:border-[#3E92CC] focus:outline-none placeholder-zinc-400 flex-1"
                         onKeyPress={(e) => {
                           if (e.key === "Enter") {
-                            const updatedPlan = { ...nutritionPlan };
-                            if (
-                              updatedPlan.planData?.days?.[activeDay]?.meals
-                            ) {
-                              const newMeal = {
-                                name: e.target.value || "New Meal",
-                                time: "",
-                                notes: "",
-                                options: [],
-                              };
-                              updatedPlan.planData.days[activeDay].meals.push(
-                                newMeal
-                              );
-                              setNutritionPlan(updatedPlan);
-                              setHasUnsavedChanges(true);
+                            const mealName = e.target.value.trim();
+                            if (mealName) {
+                              const updatedPlan = { ...nutritionPlan };
+                              if (
+                                updatedPlan.planData?.days?.[activeDay]?.meals
+                              ) {
+                                const newMeal = {
+                                  name: mealName,
+                                  time: "",
+                                  notes: "",
+                                  options: [
+                                    {
+                                      name: mealName,
+                                      description: "",
+                                      calories: 0,
+                                      protein: 0,
+                                      carbs: 0,
+                                      fat: 0,
+                                      isTextBased: true,
+                                    },
+                                  ],
+                                };
+                                updatedPlan.planData.days[activeDay].meals.push(
+                                  newMeal
+                                );
+                                setNutritionPlan(updatedPlan);
+                                setHasUnsavedChanges(true);
 
-                              // Scroll to the newly added meal
-                              setTimeout(() => {
-                                const mealElements =
-                                  document.querySelectorAll(
-                                    "[data-meal-index]"
-                                  );
-                                const lastMealElement =
-                                  mealElements[mealElements.length - 1];
-                                if (lastMealElement) {
-                                  lastMealElement.scrollIntoView({
-                                    behavior: "smooth",
-                                    block: "center",
-                                  });
-                                }
-                              }, 100);
+                                // Scroll to the newly added meal
+                                setTimeout(() => {
+                                  const mealElements =
+                                    document.querySelectorAll(
+                                      "[data-meal-index]"
+                                    );
+                                  const lastMealElement =
+                                    mealElements[mealElements.length - 1];
+                                  if (lastMealElement) {
+                                    lastMealElement.scrollIntoView({
+                                      behavior: "smooth",
+                                      block: "center",
+                                    });
+                                  }
+                                }, 100);
 
-                              e.target.value = "";
+                                e.target.value = "";
+                              }
                             }
                           }
                         }}
@@ -695,13 +972,29 @@ export default function NutritionTrackingPage({ params }) {
                         variant="primary"
                         size="small"
                         onClick={() => {
+                          const input = document.querySelector(
+                            'input[placeholder*="Add meal name"]'
+                          );
+                          const mealName = input?.value?.trim() || "New Meal";
+                          if (input) input.value = "";
+
                           const updatedPlan = { ...nutritionPlan };
                           if (updatedPlan.planData?.days?.[activeDay]?.meals) {
                             const newMeal = {
-                              name: "New Meal",
+                              name: mealName,
                               time: "",
                               notes: "",
-                              options: [],
+                              options: [
+                                {
+                                  name: mealName,
+                                  description: "",
+                                  calories: 0,
+                                  protein: 0,
+                                  carbs: 0,
+                                  fat: 0,
+                                  isTextBased: true,
+                                },
+                              ],
                             };
                             updatedPlan.planData.days[activeDay].meals.push(
                               newMeal
@@ -874,384 +1167,449 @@ export default function NutritionTrackingPage({ params }) {
                                 >
                                   Create New Meal
                                 </Button>
+                                <Button
+                                  variant="danger"
+                                  size="small"
+                                  onClick={() => {
+                                    const updatedPlan = { ...nutritionPlan };
+                                    if (
+                                      updatedPlan.planData?.days?.[activeDay]
+                                        ?.meals
+                                    ) {
+                                      updatedPlan.planData.days[
+                                        activeDay
+                                      ].meals.splice(mealIndex, 1);
+                                      setNutritionPlan(updatedPlan);
+                                      setHasUnsavedChanges(true);
+                                    }
+                                  }}
+                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                >
+                                  <Icon
+                                    icon="mdi:delete"
+                                    width={16}
+                                    height={16}
+                                  />
+                                </Button>
                               </div>
                             </div>
 
                             {meal.options && meal.options.length > 0 ? (
                               <div className="space-y-4">
-                                {meal.options.map((option, optionIndex) => {
-                                  const mealKey = `${mealIndex}-${optionIndex}`;
-                                  const mealStatus =
-                                    todayTracking.meals?.[mealKey]?.status;
-                                  const isCompleted =
-                                    mealStatus === "completed";
+                                {meal.options.map((option, optionIndex) => (
+                                  <div
+                                    key={optionIndex}
+                                    className="p-6 rounded-xl border transition-all duration-200 bg-zinc-800/50 border-zinc-700/50 hover:border-zinc-600"
+                                  >
+                                    <div className="flex items-start gap-4">
+                                      {option.imageUrl && (
+                                        <div className="flex-shrink-0">
+                                          <img
+                                            src={option.imageUrl}
+                                            alt={option.name}
+                                            className="w-24 h-24 object-cover rounded-xl"
+                                          />
+                                        </div>
+                                      )}
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-start justify-between mb-3">
+                                          <div className="flex items-center gap-3">
+                                            <input
+                                              type="text"
+                                              value={option.name || ""}
+                                              onChange={(e) => {
+                                                const updatedPlan = {
+                                                  ...nutritionPlan,
+                                                };
+                                                if (
+                                                  updatedPlan.planData?.days?.[
+                                                    activeDay
+                                                  ]?.meals?.[mealIndex]
+                                                    ?.options?.[optionIndex]
+                                                ) {
+                                                  updatedPlan.planData.days[
+                                                    activeDay
+                                                  ].meals[mealIndex].options[
+                                                    optionIndex
+                                                  ].name = e.target.value;
+                                                  setNutritionPlan(updatedPlan);
+                                                  setHasUnsavedChanges(true);
+                                                }
+                                              }}
+                                              className="bg-transparent border-none text-white text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-[#3E92CC]/20 rounded px-2 py-1"
+                                              placeholder="Meal name..."
+                                            />
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <Button
+                                              variant="secondary"
+                                              size="small"
+                                              onClick={() => {
+                                                setSelectedMeal({
+                                                  meal,
+                                                  option,
+                                                  mealIndex,
+                                                  optionIndex,
+                                                });
+                                                setShowMealModal(true);
+                                              }}
+                                              className="text-zinc-400 hover:text-white"
+                                            >
+                                              <Icon
+                                                icon="mdi:eye"
+                                                width={16}
+                                                height={16}
+                                              />
+                                            </Button>
+                                            <Button
+                                              variant="warning"
+                                              size="small"
+                                              onClick={() =>
+                                                handleReplaceMeal({
+                                                  meal,
+                                                  option,
+                                                  mealIndex,
+                                                  optionIndex,
+                                                })
+                                              }
+                                              className="text-zinc-400 hover:text-white"
+                                            >
+                                              <Icon
+                                                icon="mdi:swap-horizontal"
+                                                width={16}
+                                                height={16}
+                                              />
+                                            </Button>
+                                            <Button
+                                              variant="danger"
+                                              size="small"
+                                              onClick={() => {
+                                                const updatedPlan = {
+                                                  ...nutritionPlan,
+                                                };
+                                                if (
+                                                  updatedPlan.planData?.days?.[
+                                                    activeDay
+                                                  ]?.meals?.[mealIndex]?.options
+                                                ) {
+                                                  updatedPlan.planData.days[
+                                                    activeDay
+                                                  ].meals[
+                                                    mealIndex
+                                                  ].options.splice(
+                                                    optionIndex,
+                                                    1
+                                                  );
+                                                  setNutritionPlan(updatedPlan);
+                                                  setHasUnsavedChanges(true);
+                                                }
+                                              }}
+                                              className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                            >
+                                              <Icon
+                                                icon="mdi:delete"
+                                                width={16}
+                                                height={16}
+                                              />
+                                            </Button>
+                                          </div>
+                                        </div>
 
-                                  return (
-                                    <div
-                                      key={optionIndex}
-                                      className={`p-6 rounded-xl border transition-all duration-200 ${
-                                        isCompleted
-                                          ? "bg-green-500/10 border-green-500/30"
-                                          : "bg-zinc-800/50 border-zinc-700/50 hover:border-zinc-600"
-                                      }`}
-                                    >
-                                      <div className="flex items-start gap-4">
-                                        {option.imageUrl && (
-                                          <div className="flex-shrink-0">
-                                            <img
-                                              src={option.imageUrl}
-                                              alt={option.name}
-                                              className="w-24 h-24 object-cover rounded-xl"
+                                        <div className="grid grid-cols-4 gap-4 mb-4">
+                                          <div className="text-center p-3 bg-zinc-700/30 rounded-lg">
+                                            <input
+                                              type="number"
+                                              value={option.calories || ""}
+                                              onChange={(e) => {
+                                                const updatedPlan = {
+                                                  ...nutritionPlan,
+                                                };
+                                                if (
+                                                  updatedPlan.planData?.days?.[
+                                                    activeDay
+                                                  ]?.meals?.[mealIndex]
+                                                    ?.options?.[optionIndex]
+                                                ) {
+                                                  updatedPlan.planData.days[
+                                                    activeDay
+                                                  ].meals[mealIndex].options[
+                                                    optionIndex
+                                                  ].calories =
+                                                    parseInt(e.target.value) ||
+                                                    0;
+                                                  setNutritionPlan(updatedPlan);
+                                                  setHasUnsavedChanges(true);
+                                                }
+                                              }}
+                                              className="w-full bg-transparent border-none text-orange-400 text-lg font-bold text-center focus:outline-none focus:ring-2 focus:ring-[#3E92CC]/20 rounded"
+                                              placeholder="0"
+                                            />
+                                            <div className="text-zinc-400 text-xs">
+                                              cal
+                                            </div>
+                                          </div>
+                                          <div className="text-center p-3 bg-zinc-700/30 rounded-lg">
+                                            <input
+                                              type="number"
+                                              value={option.protein || ""}
+                                              onChange={(e) => {
+                                                const updatedPlan = {
+                                                  ...nutritionPlan,
+                                                };
+                                                if (
+                                                  updatedPlan.planData?.days?.[
+                                                    activeDay
+                                                  ]?.meals?.[mealIndex]
+                                                    ?.options?.[optionIndex]
+                                                ) {
+                                                  updatedPlan.planData.days[
+                                                    activeDay
+                                                  ].meals[mealIndex].options[
+                                                    optionIndex
+                                                  ].protein =
+                                                    parseInt(e.target.value) ||
+                                                    0;
+                                                  setNutritionPlan(updatedPlan);
+                                                  setHasUnsavedChanges(true);
+                                                }
+                                              }}
+                                              className="w-full bg-transparent border-none text-blue-400 text-lg font-bold text-center focus:outline-none focus:ring-2 focus:ring-[#3E92CC]/20 rounded"
+                                              placeholder="0"
+                                            />
+                                            <div className="text-zinc-400 text-xs">
+                                              protein
+                                            </div>
+                                          </div>
+                                          <div className="text-center p-3 bg-zinc-700/30 rounded-lg">
+                                            <input
+                                              type="number"
+                                              value={option.carbs || ""}
+                                              onChange={(e) => {
+                                                const updatedPlan = {
+                                                  ...nutritionPlan,
+                                                };
+                                                if (
+                                                  updatedPlan.planData?.days?.[
+                                                    activeDay
+                                                  ]?.meals?.[mealIndex]
+                                                    ?.options?.[optionIndex]
+                                                ) {
+                                                  updatedPlan.planData.days[
+                                                    activeDay
+                                                  ].meals[mealIndex].options[
+                                                    optionIndex
+                                                  ].carbs =
+                                                    parseInt(e.target.value) ||
+                                                    0;
+                                                  setNutritionPlan(updatedPlan);
+                                                  setHasUnsavedChanges(true);
+                                                }
+                                              }}
+                                              className="w-full bg-transparent border-none text-yellow-400 text-lg font-bold text-center focus:outline-none focus:ring-2 focus:ring-[#3E92CC]/20 rounded"
+                                              placeholder="0"
+                                            />
+                                            <div className="text-zinc-400 text-xs">
+                                              carbs
+                                            </div>
+                                          </div>
+                                          <div className="text-center p-3 bg-zinc-700/30 rounded-lg">
+                                            <input
+                                              type="number"
+                                              value={option.fat || ""}
+                                              onChange={(e) => {
+                                                const updatedPlan = {
+                                                  ...nutritionPlan,
+                                                };
+                                                if (
+                                                  updatedPlan.planData?.days?.[
+                                                    activeDay
+                                                  ]?.meals?.[mealIndex]
+                                                    ?.options?.[optionIndex]
+                                                ) {
+                                                  updatedPlan.planData.days[
+                                                    activeDay
+                                                  ].meals[mealIndex].options[
+                                                    optionIndex
+                                                  ].fat =
+                                                    parseInt(e.target.value) ||
+                                                    0;
+                                                  setNutritionPlan(updatedPlan);
+                                                  setHasUnsavedChanges(true);
+                                                }
+                                              }}
+                                              className="w-full bg-transparent border-none text-green-400 text-lg font-bold text-center focus:outline-none focus:ring-2 focus:ring-[#3E92CC]/20 rounded"
+                                              placeholder="0"
+                                            />
+                                            <div className="text-zinc-400 text-xs">
+                                              fat
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        <textarea
+                                          value={option.description || ""}
+                                          onChange={(e) => {
+                                            const updatedPlan = {
+                                              ...nutritionPlan,
+                                            };
+                                            if (
+                                              updatedPlan.planData?.days?.[
+                                                activeDay
+                                              ]?.meals?.[mealIndex]?.options?.[
+                                                optionIndex
+                                              ]
+                                            ) {
+                                              updatedPlan.planData.days[
+                                                activeDay
+                                              ].meals[mealIndex].options[
+                                                optionIndex
+                                              ].description = e.target.value;
+                                              setNutritionPlan(updatedPlan);
+                                              setHasUnsavedChanges(true);
+                                            }
+                                          }}
+                                          className="w-full bg-transparent border-none text-zinc-400 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#3E92CC]/20 rounded resize-none"
+                                          placeholder={
+                                            option.isTextBased
+                                              ? "Describe what to eat and how to prepare it (e.g., '2 eggs scrambled with spinach, 1 slice whole grain toast, 1/2 avocado')"
+                                              : "Description..."
+                                          }
+                                          rows={option.isTextBased ? 4 : 3}
+                                        />
+
+                                        {option.recommendation && (
+                                          <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                                            <div className="flex items-center gap-2 mb-2">
+                                              <Icon
+                                                icon="mdi:lightbulb"
+                                                className="text-yellow-400"
+                                                width={16}
+                                                height={16}
+                                              />
+                                              <span className="text-yellow-400 text-sm font-medium">
+                                                Trainer Recommendation
+                                              </span>
+                                            </div>
+                                            <textarea
+                                              value={
+                                                option.recommendation || ""
+                                              }
+                                              onChange={(e) => {
+                                                const updatedPlan = {
+                                                  ...nutritionPlan,
+                                                };
+                                                if (
+                                                  updatedPlan.planData?.days?.[
+                                                    activeDay
+                                                  ]?.meals?.[mealIndex]
+                                                    ?.options?.[optionIndex]
+                                                ) {
+                                                  updatedPlan.planData.days[
+                                                    activeDay
+                                                  ].meals[mealIndex].options[
+                                                    optionIndex
+                                                  ].recommendation =
+                                                    e.target.value;
+                                                  setNutritionPlan(updatedPlan);
+                                                  setHasUnsavedChanges(true);
+                                                }
+                                              }}
+                                              className="w-full bg-transparent border-none text-zinc-400 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#3E92CC]/20 rounded resize-none"
+                                              placeholder="Add trainer recommendation..."
+                                              rows={3}
                                             />
                                           </div>
                                         )}
-                                        <div className="flex-1 min-w-0">
-                                          <div className="flex items-start justify-between mb-3">
-                                            <div className="flex items-center gap-3">
-                                              <input
-                                                type="text"
-                                                value={option.name || ""}
-                                                onChange={(e) => {
-                                                  const updatedPlan = {
-                                                    ...nutritionPlan,
-                                                  };
-                                                  if (
-                                                    updatedPlan.planData
-                                                      ?.days?.[activeDay]
-                                                      ?.meals?.[mealIndex]
-                                                      ?.options?.[optionIndex]
-                                                  ) {
-                                                    updatedPlan.planData.days[
-                                                      activeDay
-                                                    ].meals[mealIndex].options[
-                                                      optionIndex
-                                                    ].name = e.target.value;
-                                                    setNutritionPlan(
-                                                      updatedPlan
-                                                    );
-                                                    setHasUnsavedChanges(true);
-                                                  }
-                                                }}
-                                                className="bg-transparent border-none text-white text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-[#3E92CC]/20 rounded px-2 py-1"
-                                                placeholder="Meal name..."
-                                              />
-                                              {isCompleted && (
-                                                <div className="flex items-center gap-1 px-3 py-1 bg-green-500/20 rounded-full">
-                                                  <Icon
-                                                    icon="mdi:check-circle"
-                                                    className="text-green-400"
-                                                    width={16}
-                                                    height={16}
-                                                  />
-                                                  <span className="text-green-400 text-xs font-medium">
-                                                    Completed
-                                                  </span>
-                                                </div>
+
+                                        {option.ingredients &&
+                                          Array.isArray(option.ingredients) && (
+                                            <textarea
+                                              value={option.ingredients.join(
+                                                ", "
                                               )}
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                              <Button
-                                                variant="secondary"
-                                                size="small"
-                                                onClick={() => {
-                                                  setSelectedMeal({
-                                                    meal,
-                                                    option,
-                                                    mealIndex,
-                                                    optionIndex,
-                                                  });
-                                                  setShowMealModal(true);
-                                                }}
-                                                className="text-zinc-400 hover:text-white"
-                                              >
-                                                <Icon
-                                                  icon="mdi:eye"
-                                                  width={16}
-                                                  height={16}
-                                                />
-                                              </Button>
-                                              <Button
-                                                variant="warning"
-                                                size="small"
-                                                onClick={() =>
-                                                  handleReplaceMeal({
-                                                    meal,
-                                                    option,
-                                                    mealIndex,
-                                                    optionIndex,
-                                                  })
+                                              onChange={(e) => {
+                                                const updatedPlan = {
+                                                  ...nutritionPlan,
+                                                };
+                                                if (
+                                                  updatedPlan.planData?.days?.[
+                                                    activeDay
+                                                  ]?.meals?.[mealIndex]
+                                                    ?.options?.[optionIndex]
+                                                ) {
+                                                  updatedPlan.planData.days[
+                                                    activeDay
+                                                  ].meals[mealIndex].options[
+                                                    optionIndex
+                                                  ].ingredients = e.target.value
+                                                    .split(",")
+                                                    .map((item) => item.trim())
+                                                    .filter((item) => item);
+                                                  setNutritionPlan(updatedPlan);
+                                                  setHasUnsavedChanges(true);
                                                 }
-                                                className="text-zinc-400 hover:text-white"
-                                              >
-                                                <Icon
-                                                  icon="mdi:swap-horizontal"
-                                                  width={16}
-                                                  height={16}
-                                                />
-                                              </Button>
-                                            </div>
-                                          </div>
-
-                                          <div className="grid grid-cols-4 gap-4 mb-4">
-                                            <div className="text-center p-3 bg-zinc-700/30 rounded-lg">
-                                              <input
-                                                type="number"
-                                                value={option.calories || ""}
-                                                onChange={(e) => {
-                                                  const updatedPlan = {
-                                                    ...nutritionPlan,
-                                                  };
-                                                  if (
-                                                    updatedPlan.planData
-                                                      ?.days?.[activeDay]
-                                                      ?.meals?.[mealIndex]
-                                                      ?.options?.[optionIndex]
-                                                  ) {
-                                                    updatedPlan.planData.days[
-                                                      activeDay
-                                                    ].meals[mealIndex].options[
-                                                      optionIndex
-                                                    ].calories =
-                                                      parseInt(
-                                                        e.target.value
-                                                      ) || 0;
-                                                    setNutritionPlan(
-                                                      updatedPlan
-                                                    );
-                                                    setHasUnsavedChanges(true);
-                                                  }
-                                                }}
-                                                className="w-full bg-transparent border-none text-orange-400 text-lg font-bold text-center focus:outline-none focus:ring-2 focus:ring-[#3E92CC]/20 rounded"
-                                                placeholder="0"
-                                              />
-                                              <div className="text-zinc-400 text-xs">
-                                                cal
-                                              </div>
-                                            </div>
-                                            <div className="text-center p-3 bg-zinc-700/30 rounded-lg">
-                                              <input
-                                                type="number"
-                                                value={option.protein || ""}
-                                                onChange={(e) => {
-                                                  const updatedPlan = {
-                                                    ...nutritionPlan,
-                                                  };
-                                                  if (
-                                                    updatedPlan.planData
-                                                      ?.days?.[activeDay]
-                                                      ?.meals?.[mealIndex]
-                                                      ?.options?.[optionIndex]
-                                                  ) {
-                                                    updatedPlan.planData.days[
-                                                      activeDay
-                                                    ].meals[mealIndex].options[
-                                                      optionIndex
-                                                    ].protein =
-                                                      parseInt(
-                                                        e.target.value
-                                                      ) || 0;
-                                                    setNutritionPlan(
-                                                      updatedPlan
-                                                    );
-                                                    setHasUnsavedChanges(true);
-                                                  }
-                                                }}
-                                                className="w-full bg-transparent border-none text-blue-400 text-lg font-bold text-center focus:outline-none focus:ring-2 focus:ring-[#3E92CC]/20 rounded"
-                                                placeholder="0"
-                                              />
-                                              <div className="text-zinc-400 text-xs">
-                                                protein
-                                              </div>
-                                            </div>
-                                            <div className="text-center p-3 bg-zinc-700/30 rounded-lg">
-                                              <input
-                                                type="number"
-                                                value={option.carbs || ""}
-                                                onChange={(e) => {
-                                                  const updatedPlan = {
-                                                    ...nutritionPlan,
-                                                  };
-                                                  if (
-                                                    updatedPlan.planData
-                                                      ?.days?.[activeDay]
-                                                      ?.meals?.[mealIndex]
-                                                      ?.options?.[optionIndex]
-                                                  ) {
-                                                    updatedPlan.planData.days[
-                                                      activeDay
-                                                    ].meals[mealIndex].options[
-                                                      optionIndex
-                                                    ].carbs =
-                                                      parseInt(
-                                                        e.target.value
-                                                      ) || 0;
-                                                    setNutritionPlan(
-                                                      updatedPlan
-                                                    );
-                                                    setHasUnsavedChanges(true);
-                                                  }
-                                                }}
-                                                className="w-full bg-transparent border-none text-yellow-400 text-lg font-bold text-center focus:outline-none focus:ring-2 focus:ring-[#3E92CC]/20 rounded"
-                                                placeholder="0"
-                                              />
-                                              <div className="text-zinc-400 text-xs">
-                                                carbs
-                                              </div>
-                                            </div>
-                                            <div className="text-center p-3 bg-zinc-700/30 rounded-lg">
-                                              <input
-                                                type="number"
-                                                value={option.fat || ""}
-                                                onChange={(e) => {
-                                                  const updatedPlan = {
-                                                    ...nutritionPlan,
-                                                  };
-                                                  if (
-                                                    updatedPlan.planData
-                                                      ?.days?.[activeDay]
-                                                      ?.meals?.[mealIndex]
-                                                      ?.options?.[optionIndex]
-                                                  ) {
-                                                    updatedPlan.planData.days[
-                                                      activeDay
-                                                    ].meals[mealIndex].options[
-                                                      optionIndex
-                                                    ].fat =
-                                                      parseInt(
-                                                        e.target.value
-                                                      ) || 0;
-                                                    setNutritionPlan(
-                                                      updatedPlan
-                                                    );
-                                                    setHasUnsavedChanges(true);
-                                                  }
-                                                }}
-                                                className="w-full bg-transparent border-none text-green-400 text-lg font-bold text-center focus:outline-none focus:ring-2 focus:ring-[#3E92CC]/20 rounded"
-                                                placeholder="0"
-                                              />
-                                              <div className="text-zinc-400 text-xs">
-                                                fat
-                                              </div>
-                                            </div>
-                                          </div>
-
-                                          <textarea
-                                            value={option.description || ""}
-                                            onChange={(e) => {
-                                              const updatedPlan = {
-                                                ...nutritionPlan,
-                                              };
-                                              if (
-                                                updatedPlan.planData?.days?.[
-                                                  activeDay
-                                                ]?.meals?.[mealIndex]
-                                                  ?.options?.[optionIndex]
-                                              ) {
-                                                updatedPlan.planData.days[
-                                                  activeDay
-                                                ].meals[mealIndex].options[
-                                                  optionIndex
-                                                ].description = e.target.value;
-                                                setNutritionPlan(updatedPlan);
-                                                setHasUnsavedChanges(true);
-                                              }
-                                            }}
-                                            className="w-full bg-transparent border-none text-zinc-400 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#3E92CC]/20 rounded resize-none"
-                                            placeholder="Description..."
-                                            rows={3}
-                                          />
-
-                                          {option.recommendation && (
-                                            <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                                              <div className="flex items-center gap-2 mb-2">
-                                                <Icon
-                                                  icon="mdi:lightbulb"
-                                                  className="text-yellow-400"
-                                                  width={16}
-                                                  height={16}
-                                                />
-                                                <span className="text-yellow-400 text-sm font-medium">
-                                                  Trainer Recommendation
-                                                </span>
-                                              </div>
-                                              <textarea
-                                                value={
-                                                  option.recommendation || ""
-                                                }
-                                                onChange={(e) => {
-                                                  const updatedPlan = {
-                                                    ...nutritionPlan,
-                                                  };
-                                                  if (
-                                                    updatedPlan.planData
-                                                      ?.days?.[activeDay]
-                                                      ?.meals?.[mealIndex]
-                                                      ?.options?.[optionIndex]
-                                                  ) {
-                                                    updatedPlan.planData.days[
-                                                      activeDay
-                                                    ].meals[mealIndex].options[
-                                                      optionIndex
-                                                    ].recommendation =
-                                                      e.target.value;
-                                                    setNutritionPlan(
-                                                      updatedPlan
-                                                    );
-                                                    setHasUnsavedChanges(true);
-                                                  }
-                                                }}
-                                                className="w-full bg-transparent border-none text-zinc-400 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#3E92CC]/20 rounded resize-none"
-                                                placeholder="Add trainer recommendation..."
-                                                rows={3}
-                                              />
-                                            </div>
+                                              }}
+                                              className="w-full bg-transparent border-none text-zinc-400 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#3E92CC]/20 rounded resize-none"
+                                              placeholder="Ingredients (comma-separated)"
+                                              rows={2}
+                                            />
                                           )}
 
-                                          {option.ingredients &&
-                                            Array.isArray(
-                                              option.ingredients
-                                            ) && (
-                                              <textarea
-                                                value={option.ingredients.join(
-                                                  ", "
-                                                )}
-                                                onChange={(e) => {
-                                                  const updatedPlan = {
-                                                    ...nutritionPlan,
-                                                  };
-                                                  if (
-                                                    updatedPlan.planData
-                                                      ?.days?.[activeDay]
-                                                      ?.meals?.[mealIndex]
-                                                      ?.options?.[optionIndex]
-                                                  ) {
-                                                    updatedPlan.planData.days[
-                                                      activeDay
-                                                    ].meals[mealIndex].options[
-                                                      optionIndex
-                                                    ].ingredients =
-                                                      e.target.value
-                                                        .split(",")
-                                                        .map((item) =>
-                                                          item.trim()
-                                                        )
-                                                        .filter((item) => item);
-                                                    setNutritionPlan(
-                                                      updatedPlan
-                                                    );
-                                                    setHasUnsavedChanges(true);
+                                        {/* Dietary Preferences */}
+                                        <div className="mt-4">
+                                          <div className="flex items-center gap-2 mb-2">
+                                            <Icon
+                                              icon="mdi:food-variant"
+                                              className="text-[#FF6B00]"
+                                              width={16}
+                                              height={16}
+                                            />
+                                            <span className="text-zinc-300 text-sm font-medium">
+                                              Dietary Preferences
+                                            </span>
+                                          </div>
+                                          <div className="flex flex-wrap gap-2">
+                                            {Object.entries(
+                                              DIETARY_PREFERENCES
+                                            ).map(([prefId, prefConfig]) => {
+                                              const isSelected = (
+                                                option.dietary || []
+                                              ).includes(prefId);
+                                              return (
+                                                <button
+                                                  key={prefId}
+                                                  type="button"
+                                                  onClick={() =>
+                                                    toggleDietaryPreference(
+                                                      mealIndex,
+                                                      optionIndex,
+                                                      prefId
+                                                    )
                                                   }
-                                                }}
-                                                className="w-full bg-transparent border-none text-zinc-400 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#3E92CC]/20 rounded resize-none"
-                                                placeholder="Ingredients (comma-separated)"
-                                                rows={2}
-                                              />
-                                            )}
+                                                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 ${
+                                                    isSelected
+                                                      ? "bg-[#FF6B00] text-white shadow-lg"
+                                                      : "bg-zinc-700/50 text-zinc-300 hover:bg-zinc-600/50 hover:text-white border border-zinc-600/50"
+                                                  }`}
+                                                >
+                                                  <Icon
+                                                    icon={prefConfig.icon}
+                                                    className={`w-4 h-4 ${isSelected ? "text-white" : prefConfig.color}`}
+                                                    width={14}
+                                                    height={14}
+                                                  />
+                                                  <span>
+                                                    {prefConfig.label}
+                                                  </span>
+                                                </button>
+                                              );
+                                            })}
+                                          </div>
                                         </div>
                                       </div>
                                     </div>
-                                  );
-                                })}
+                                  </div>
+                                ))}
                               </div>
                             ) : (
                               <div className="text-center py-8 border-2 border-dashed border-zinc-600/50 rounded-xl bg-zinc-800/20">
@@ -1351,69 +1709,8 @@ export default function NutritionTrackingPage({ params }) {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Progress Summary */}
-            <Card
-              variant="dark"
-              className="overflow-visible border-0 bg-zinc-800/50 backdrop-blur-sm"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <Icon
-                  icon="mdi:chart-line"
-                  className="text-[#3E92CC]"
-                  width={28}
-                  height={28}
-                />
-                <h3 className="text-xl font-semibold text-white">
-                  Progress Summary
-                </h3>
-              </div>
-              <div className="space-y-4">
-                {(() => {
-                  const todayMeals = todayTracking.meals || {};
-                  const completedCount = Object.values(todayMeals).filter(
-                    (meal) => meal.status === "completed"
-                  ).length;
-                  const totalMeals =
-                    currentDay?.meals?.reduce(
-                      (acc, meal) => acc + (meal.options?.length || 0),
-                      0
-                    ) || 0;
-
-                  return (
-                    <>
-                      <div className="p-4 bg-zinc-700/30 rounded-xl">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-zinc-400 text-sm">
-                            Completed Today
-                          </span>
-                          <span className="text-green-400 font-semibold">
-                            {completedCount}/{totalMeals}
-                          </span>
-                        </div>
-                        <div className="w-full bg-zinc-700 rounded-full h-2">
-                          <div
-                            className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full transition-all duration-300"
-                            style={{
-                              width: `${totalMeals > 0 ? (completedCount / totalMeals) * 100 : 0}%`,
-                            }}
-                          />
-                        </div>
-                      </div>
-                      <div className="p-4 bg-zinc-700/30 rounded-xl">
-                        <div className="flex justify-between items-center">
-                          <span className="text-zinc-400 text-sm">
-                            Plan Duration
-                          </span>
-                          <span className="text-white font-semibold">
-                            {planData?.duration} {planData?.durationType}
-                          </span>
-                        </div>
-                      </div>
-                    </>
-                  );
-                })()}
-              </div>
-            </Card>
+            {/* Nutrition Plan Features */}
+            <NutritionPlanFeatures planData={planData} />
 
             {/* Trainer Notes */}
             <Card
@@ -1439,41 +1736,53 @@ export default function NutritionTrackingPage({ params }) {
               />
             </Card>
 
-            {/* Dietary Preferences */}
+            {/* Client Dietary Preferences */}
             <Card
               variant="dark"
               className="overflow-visible border-0 bg-zinc-800/50 backdrop-blur-sm"
             >
               <div className="flex items-center gap-3 mb-6">
                 <Icon
-                  icon="mdi:food-variant"
+                  icon="mdi:account-heart"
                   className="text-[#3E92CC]"
                   width={28}
                   height={28}
                 />
                 <h3 className="text-xl font-semibold text-white">
-                  Dietary Preferences
+                  Client Dietary Preferences
                 </h3>
               </div>
               <div className="space-y-3">
                 {(() => {
                   const clientProfile = client?.client?.clientProfile;
-                  const dietaryPreferences = clientProfile?.dietaryPreferences || [];
-                  
+                  const dietaryPreferences =
+                    clientProfile?.dietaryPreferences || [];
+
                   if (dietaryPreferences.length === 0) {
                     return (
                       <div className="text-center py-6 bg-zinc-700/20 rounded-xl border-2 border-dashed border-zinc-600/50">
-                        <Icon icon="mdi:silverware" className="text-zinc-500 mx-auto mb-2" width={24} height={24} />
-                        <p className="text-zinc-400 text-sm">No dietary preferences specified</p>
+                        <Icon
+                          icon="mdi:silverware"
+                          className="text-zinc-500 mx-auto mb-2"
+                          width={24}
+                          height={24}
+                        />
+                        <p className="text-zinc-400 text-sm">
+                          No dietary preferences specified
+                        </p>
                       </div>
                     );
                   }
-                  
+
                   return dietaryPreferences.map((preference, index) => (
-                    <div key={index} className="flex items-center gap-3 p-3 bg-zinc-700/30 rounded-lg">
+                    <div
+                      key={index}
+                      className="flex items-center gap-3 p-3 bg-zinc-700/30 rounded-lg"
+                    >
                       <div className="w-2 h-2 bg-[#3E92CC] rounded-full flex-shrink-0" />
                       <span className="text-white text-sm font-medium">
-                        {preference.charAt(0).toUpperCase() + preference.slice(1).replace(/([A-Z])/g, ' $1')}
+                        {preference.charAt(0).toUpperCase() +
+                          preference.slice(1).replace(/([A-Z])/g, " $1")}
                       </span>
                     </div>
                   ));
