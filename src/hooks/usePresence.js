@@ -127,7 +127,7 @@ export const useGlobalPresence = () => {
   };
 };
 
-export const useChatPresence = (coachingRequestId) => {
+export const useChatPresence = (chatId) => {
   const [presenceMembers, setPresenceMembers] = useState([]);
   const [typingUsers, setTypingUsers] = useState([]);
   const channelRef = useRef(null);
@@ -137,7 +137,7 @@ export const useChatPresence = (coachingRequestId) => {
   // Initialize chat presence
   useEffect(() => {
     const initializeChatPresence = async () => {
-      if (!coachingRequestId) return;
+      if (!chatId) return;
 
       try {
         // Get current user
@@ -154,7 +154,7 @@ export const useChatPresence = (coachingRequestId) => {
          });
 
         // Get chat channel
-        const channelName = `chat:${coachingRequestId}`;
+        const channelName = `chat:${chatId}`;
         channelRef.current = ably.channels.get(channelName);
         
         // Subscribe to presence events
@@ -196,7 +196,7 @@ export const useChatPresence = (coachingRequestId) => {
           name: user.trainerInfo?.trainerProfile?.firstName || user.clientInfo?.clientProfile?.firstName || 'Unknown User'
         };
         
-        await joinChatPresence(coachingRequestId, userData);
+        await joinChatPresence(chatId, userData);
 
       } catch (error) {
         console.error("Failed to initialize chat presence:", error);
@@ -211,14 +211,14 @@ export const useChatPresence = (coachingRequestId) => {
         channelRef.current.presence.unsubscribe();
       }
     };
-  }, [coachingRequestId]);
+  }, [chatId]);
 
   // Set typing status
   const setTypingStatus = useCallback(async (isTyping) => {
-    if (!coachingRequestId) return;
+    if (!chatId) return;
 
     try {
-      await updateTypingStatus(coachingRequestId, isTyping);
+      await updateTypingStatus(chatId, isTyping);
       
       // Auto-clear typing after 3 seconds of inactivity
       if (isTyping) {
@@ -227,13 +227,13 @@ export const useChatPresence = (coachingRequestId) => {
         }
         
         typingTimeoutRef.current = setTimeout(() => {
-          updateTypingStatus(coachingRequestId, false);
+          updateTypingStatus(chatId, false);
         }, 3000);
       }
     } catch (error) {
       console.error("Failed to update typing status:", error);
     }
-  }, [coachingRequestId]);
+  }, [chatId]);
 
   // Check if someone is typing (excluding current user)
   const isOtherUserTyping = typingUsers.length > 0;

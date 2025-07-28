@@ -17,11 +17,11 @@ export const getAblyClient = (clientId = null) => {
   return ably;
 };
 
-export const getChannelName = (coachingRequestId) => `chat:${coachingRequestId}`;
+export const getChannelName = (channelName) => `chat:${channelName}`;
 
-export const publishMessage = async (coachingRequestId, message) => {
+export const publishMessage = async (channelName, message) => {
   const client = getAblyClient();
-  const channel = client.channels.get(getChannelName(coachingRequestId));
+  const channel = client.channels.get(getChannelName(channelName));
   
   try {
     await channel.publish('message', message);
@@ -32,9 +32,9 @@ export const publishMessage = async (coachingRequestId, message) => {
   }
 };
 
-export const subscribeToMessages = (coachingRequestId, callback) => {
+export const subscribeToMessages = (channelName, callback) => {
   const client = getAblyClient();
-  const channel = client.channels.get(getChannelName(coachingRequestId));
+  const channel = client.channels.get(getChannelName(channelName));
   
   channel.subscribe('message', callback);
   
@@ -112,9 +112,9 @@ export const updateGlobalPresence = async (data, userId = null) => {
 };
 
 // Chat presence functions
-export const joinChatPresence = async (coachingRequestId, user) => {
+export const joinChatPresence = async (channelName, user) => {
   const client = getAblyClient(user.id);
-  const channel = client.channels.get(getChannelName(coachingRequestId));
+  const channel = client.channels.get(getChannelName(channelName));
   
   try {
     await channel.presence.enter({
@@ -130,9 +130,9 @@ export const joinChatPresence = async (coachingRequestId, user) => {
   }
 };
 
-export const updateTypingStatus = async (coachingRequestId, isTyping, userId = null) => {
+export const updateTypingStatus = async (channelName, isTyping, userId = null) => {
   const client = getAblyClient(userId);
-  const channel = client.channels.get(getChannelName(coachingRequestId));
+  const channel = client.channels.get(getChannelName(channelName));
   
   try {
     await channel.presence.update({

@@ -188,7 +188,9 @@ export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
             <Button variant="orangeFilled" className="px-3 py-1.5 text-sm">
               Book Session
             </Button>
-            <Button variant="secondary" className="px-3 py-1.5 text-sm">
+            <Button onClick={() => {
+              console.log("message");
+            }} variant="secondary" className="px-3 py-1.5 text-sm">
               Message
             </Button>
             <Button

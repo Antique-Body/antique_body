@@ -1,15 +1,16 @@
 "use client";
 
 import Image from "next/image";
+import { useSession } from "next-auth/react";
 import React, { useState, useEffect, useRef } from "react";
-
-import { TypingIndicator } from "./TypingIndicator";
 
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { MessageIcon } from "@/components/common/Icons";
 import { useChat, useConversations } from "@/hooks/useChat";
 import { useGlobalPresence, useChatPresence } from "@/hooks/usePresence";
+
+import { TypingIndicator } from "./TypingIndicator";
 
 const ConversationItem = ({ conversation, isSelected, onClick, isOnline }) => (
   <div
@@ -52,9 +53,7 @@ const ConversationItem = ({ conversation, isSelected, onClick, isOnline }) => (
           <p className="max-w-[150px] truncate text-sm text-gray-400">
             {conversation.isNewChat 
               ? "Start conversation" 
-              : conversation.coachingRequestStatus === "accepted" 
-              ? "Chat active" 
-              : `Status: ${conversation.coachingRequestStatus}`}
+              : "Chat active"}
           </p>
           {conversation.unreadCount > 0 && (
             <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs text-white">
@@ -116,6 +115,7 @@ const MessageBubble = ({ message }) => {
 };
 
 const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isOnline }) => {
+  const { data: session } = useSession();
   const [reply, setReply] = useState("");
   const messagesEndRef = useRef(null);
   
@@ -127,13 +127,13 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
     fetchMessages,
     sendMessage,
     markAsRead,
-  } = useChat(conversation?.coachingRequestId);
+  } = useChat(conversation?.id);
 
   const {
     isOtherUserTyping,
     typingUserNames,
     setTypingStatus,
-  } = useChatPresence(conversation?.coachingRequestId);
+  } = useChatPresence(conversation?.id);
 
   useEffect(() => {
     if (conversation && !conversation.isNewChat) {
@@ -158,7 +158,7 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
       if (conversation.isNewChat) {
         // For new chats, we need to send message and then refresh conversations
         // The API will automatically create the conversation when first message is sent
-        const response = await fetch(`/api/messages/${conversation.coachingRequestId}`, {
+        const response = await fetch(`/api/messages/direct/${conversation.id}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -198,26 +198,13 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
         <h3 className="mb-2 text-xl font-medium">No Conversation Selected</h3>
         <p className="max-w-md text-gray-400">
           Select a conversation from the list to start chatting with your{" "}
-          {conversation?.coachingRequestStatus === "accepted" ? "coach" : "client"}.
+          {session?.user?.role === "trainer" ? "client" : "coach"}.
         </p>
       </div>
     );
   }
 
-  if (conversation.coachingRequestStatus !== "accepted") {
-    return (
-      <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#222]">
-          <MessageIcon size={32} className="text-gray-400" />
-        </div>
-        <h3 className="mb-2 text-xl font-medium">Chat Not Available</h3>
-        <p className="max-w-md text-gray-400">
-          Chat is only available for accepted coaching requests. Current status:{" "}
-          {conversation.coachingRequestStatus}
-        </p>
-      </div>
-    );
-  }
+
 
   return (
     <div className="flex h-full flex-col">

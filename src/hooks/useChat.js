@@ -3,7 +3,7 @@
 import Ably from "ably";
 import { useState, useEffect, useCallback, useRef } from "react";
 
-export const useChat = (coachingRequestId) => {
+export const useChat = (chatId) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -33,11 +33,11 @@ export const useChat = (coachingRequestId) => {
   useEffect(() => {
     setMessages([]);
     setError(null);
-  }, [coachingRequestId]);
+  }, [chatId]);
 
   // Initialize Ably connection
   useEffect(() => {
-    if (!coachingRequestId || !currentUserId) {
+    if (!chatId || !currentUserId) {
       return;
     }
 
@@ -51,14 +51,14 @@ export const useChat = (coachingRequestId) => {
 
         ablyRef.current = ably;
 
-        const channelName = `chat:${coachingRequestId}`;
+        const channelName = `chat:${chatId}`;
         const channel = ably.channels.get(channelName);
         channelRef.current = channel;
         
         // Create a specific callback function to avoid duplicates
         const messageCallback = (message) => {
           // Only add messages for the current conversation
-          if (message.data.coachingRequestId === coachingRequestId) {
+          if (message.data.chatId === chatId) {
             setMessages((prev) => {
               // Check if message already exists to prevent duplicates
               const messageExists = prev.some(msg => msg.id === message.data.id);
@@ -105,11 +105,11 @@ export const useChat = (coachingRequestId) => {
         ablyRef.current.close();
       }
     };
-  }, [coachingRequestId, currentUserId]);
+  }, [chatId, currentUserId]);
 
   // Fetch initial messages
   const fetchMessages = useCallback(async () => {
-    if (!coachingRequestId || !currentUserId) {
+    if (!chatId || !currentUserId) {
       return;
     }
 
@@ -117,7 +117,7 @@ export const useChat = (coachingRequestId) => {
     setError(null);
 
     try {
-      const response = await fetch(`/api/messages/${coachingRequestId}`);
+      const response = await fetch(`/api/messages/direct/${chatId}`);
       
       if (!response.ok) {
         throw new Error("Failed to fetch messages");
@@ -138,11 +138,11 @@ export const useChat = (coachingRequestId) => {
     } finally {
       setLoading(false);
     }
-  }, [coachingRequestId, currentUserId]);
+  }, [chatId, currentUserId]);
 
   // Send a message
   const sendMessage = useCallback(async (content, messageType = "text", fileData = null) => {
-    if (!coachingRequestId || !content.trim()) return;
+    if (!chatId || !content.trim()) return;
 
     setSending(true);
     setError(null);
@@ -157,7 +157,7 @@ export const useChat = (coachingRequestId) => {
         }),
       };
 
-      const response = await fetch(`/api/messages/${coachingRequestId}`, {
+      const response = await fetch(`/api/messages/direct/${chatId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -182,19 +182,19 @@ export const useChat = (coachingRequestId) => {
     } finally {
       setSending(false);
     }
-  }, [coachingRequestId]);
+  }, [chatId]);
 
   // Mark messages as read (called when conversation is opened)
   const markAsRead = useCallback(async () => {
-    if (!coachingRequestId) return;
+    if (!chatId) return;
 
     try {
       // The GET request to fetch messages automatically marks them as read
-      await fetch(`/api/messages/${coachingRequestId}`);
+      await fetch(`/api/messages/direct/${chatId}`);
     } catch (err) {
       console.error("Error marking messages as read:", err);
     }
-  }, [coachingRequestId]);
+  }, [chatId]);
 
   return {
     messages,

@@ -507,8 +507,6 @@ model CoachingRequest {
   respondedAt     DateTime?
   client          ClientInfo            @relation(fields: [clientId], references: [id], onDelete: Cascade)
   trainer         TrainerInfo           @relation(fields: [trainerId], references: [id], onDelete: Cascade)
-  conversation    Conversation?
-  messages        Message[]
 
   @@index([clientId])
   @@index([trainerId])
@@ -535,7 +533,7 @@ model CoachingRequestCooldown {
 // Messaging System Models
 model Conversation {
   id                 String    @id @default(cuid())
-  coachingRequestId  String    @unique
+  chatId             String    @unique // Format: "chat:trainerId+clientId"
   clientId           String
   trainerId          String
   lastMessageAt      DateTime?
@@ -546,7 +544,6 @@ model Conversation {
   updatedAt          DateTime  @updatedAt
 
   // Relations
-  coachingRequest CoachingRequest @relation(fields: [coachingRequestId], references: [id], onDelete: Cascade)
   client          ClientInfo      @relation(fields: [clientId], references: [id], onDelete: Cascade)
   trainer         TrainerInfo     @relation(fields: [trainerId], references: [id], onDelete: Cascade)
 
@@ -564,7 +561,7 @@ model Message {
   fileName          String?
   senderId          String
   receiverId        String
-  coachingRequestId String
+  chatId            String
   isRead            Boolean   @default(false)
   deletedAt         DateTime?
   createdAt         DateTime  @default(now())
@@ -574,11 +571,10 @@ model Message {
   // Relations
   sender          User            @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
   receiver        User            @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
-  coachingRequest CoachingRequest @relation(fields: [coachingRequestId], references: [id], onDelete: Cascade)
 
   @@index([senderId])
   @@index([receiverId])
-  @@index([coachingRequestId])
+  @@index([chatId])
   @@index([isRead])
   @@index([createdAt])
   @@index([deletedAt])

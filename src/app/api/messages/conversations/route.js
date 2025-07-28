@@ -54,12 +54,6 @@ export async function GET() {
               },
             },
           },
-          coachingRequest: {
-            select: {
-              id: true,
-              status: true,
-            },
-          },
         },
         orderBy: {
           lastMessageAt: "desc",
@@ -91,12 +85,6 @@ export async function GET() {
               },
             },
           },
-          coachingRequest: {
-            select: {
-              id: true,
-              status: true,
-            },
-          },
         },
         orderBy: {
           lastMessageAt: "desc",
@@ -104,93 +92,85 @@ export async function GET() {
       });
     }
 
-    // Get accepted coaching requests that don't have conversations yet
+    // Get all available users to chat with
     let availableChats = [];
     
     if (user.role === "trainer" && user.trainerInfo) {
-      const acceptedRequests = await prisma.coachingRequest.findMany({
-        where: {
-          trainerId: user.trainerInfo.id,
-          status: "accepted",
-          conversation: null, // No conversation exists yet
-        },
+      // Get all clients that the trainer can chat with
+      const allClients = await prisma.clientInfo.findMany({
         include: {
-          client: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  email: true,
-                  phone: true,
-                },
-              },
-              clientProfile: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                  profileImage: true,
-                },
-              },
+          user: {
+            select: {
+              id: true,
+              email: true,
+              phone: true,
+            },
+          },
+          clientProfile: {
+            select: {
+              firstName: true,
+              lastName: true,
+              profileImage: true,
             },
           },
         },
       });
 
-             availableChats = acceptedRequests.map((request) => ({
-         id: `new-${request.id}`,
-         coachingRequestId: request.id,
-         participantId: request.client.user.id,
-         name: request.client.clientProfile 
-           ? `${request.client.clientProfile.firstName} ${request.client.clientProfile.lastName || ""}`.trim() 
-           : "Unknown Client",
-         avatar: request.client.clientProfile?.profileImage || null,
-         lastMessageAt: null,
-         unreadCount: 0,
-         coachingRequestStatus: request.status,
-         isNewChat: true,
-       }));
+      // Filter out clients that already have conversations
+      const existingClientIds = conversations.map(conv => conv.clientId);
+      const availableClients = allClients.filter(client => 
+        !existingClientIds.includes(client.id)
+      );
+
+      availableChats = availableClients.map((client) => ({
+        id: `chat:${user.trainerInfo.id}+${client.id}`,
+        participantId: client.user.id,
+        name: client.clientProfile 
+          ? `${client.clientProfile.firstName} ${client.clientProfile.lastName || ""}`.trim() 
+          : "Unknown Client",
+        avatar: client.clientProfile?.profileImage || null,
+        lastMessageAt: null,
+        unreadCount: 0,
+        isNewChat: true,
+      }));
     } else if (user.role === "client" && user.clientInfo) {
-      const acceptedRequests = await prisma.coachingRequest.findMany({
-        where: {
-          clientId: user.clientInfo.id,
-          status: "accepted",
-          conversation: null, // No conversation exists yet
-        },
+      // Get all trainers that the client can chat with
+      const allTrainers = await prisma.trainerInfo.findMany({
         include: {
-          trainer: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  email: true,
-                  phone: true,
-                },
-              },
-              trainerProfile: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                  profileImage: true,
-                },
-              },
+          user: {
+            select: {
+              id: true,
+              email: true,
+              phone: true,
+            },
+          },
+          trainerProfile: {
+            select: {
+              firstName: true,
+              lastName: true,
+              profileImage: true,
             },
           },
         },
       });
 
-             availableChats = acceptedRequests.map((request) => ({
-         id: `new-${request.id}`,
-         coachingRequestId: request.id,
-         participantId: request.trainer.user.id,
-         name: request.trainer.trainerProfile 
-           ? `${request.trainer.trainerProfile.firstName} ${request.trainer.trainerProfile.lastName || ""}`.trim() 
-           : "Unknown Trainer",
-         avatar: request.trainer.trainerProfile?.profileImage || null,
-         lastMessageAt: null,
-         unreadCount: 0,
-         coachingRequestStatus: request.status,
-         isNewChat: true,
-       }));
+      // Filter out trainers that already have conversations
+      const existingTrainerIds = conversations.map(conv => conv.trainerId);
+      const availableTrainers = allTrainers.filter(trainer => 
+        !existingTrainerIds.includes(trainer.id)
+      );
+
+      availableChats = availableTrainers.map((trainer) => ({
+        id: `chat:${trainer.id}+${user.clientInfo.id}`,
+        participantId: trainer.user.id,
+        name: trainer.trainerProfile 
+          ? `${trainer.trainerProfile.firstName} ${trainer.trainerProfile.lastName || ""}`.trim() 
+          : "Unknown Trainer",
+        avatar: trainer.trainerProfile?.profileImage || null,
+        lastMessageAt: null,
+        unreadCount: 0,
+        isNewChat: true,
+      }));
     }
 
     // Format existing conversations
@@ -202,14 +182,12 @@ export async function GET() {
         : participant.trainerProfile;
 
       return {
-        id: conv.id,
-        coachingRequestId: conv.coachingRequestId,
+        id: conv.chatId,
         participantId: participant.user.id,
         name: profile ? `${profile.firstName} ${profile.lastName || ""}`.trim() : "Unknown User",
         avatar: profile?.profileImage || null,
         lastMessageAt: conv.lastMessageAt,
         unreadCount: isTrainer ? conv.trainerUnreadCount : conv.clientUnreadCount,
-        coachingRequestStatus: conv.coachingRequest.status,
         isNewChat: false,
       };
     });
