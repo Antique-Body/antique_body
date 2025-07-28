@@ -1,11 +1,10 @@
 "use client";
 
 import { Icon } from "@iconify/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { Button } from "@/components/common/Button";
 import {
-  DietPlanAssignmentCard,
   ActiveDietPlan,
   LoadingState,
   ErrorState,
@@ -22,9 +21,8 @@ export default function DietTrackerPage() {
     nextMeal,
     loading,
     error,
-    mockPlanAvailable,
     validationError,
-    startDietPlan,
+    isCustomMealInput,
     startAssignedPlan,
     completeMeal,
     uncompleteMeal,
@@ -35,7 +33,39 @@ export default function DietTrackerPage() {
     getCompletionRate,
     getLogByDate,
     clearValidationError,
+    fetchDietTrackerData,
   } = useDietTracker();
+
+  // Refresh data when component mounts
+  useEffect(() => {
+    fetchDietTrackerData();
+  }, [fetchDietTrackerData]);
+
+  // Debug logging
+  useEffect(() => {
+    console.log("Diet tracker state:", {
+      hasActivePlan,
+      hasAssignedPlan,
+      assignedPlan: assignedPlan
+        ? {
+            id: assignedPlan.id,
+            customMealInputEnabled: assignedPlan.customMealInputEnabled,
+            status: assignedPlan.status,
+            planData: assignedPlan.planData,
+          }
+        : null,
+      isCustomMealInput,
+      loading,
+      error,
+    });
+  }, [
+    hasActivePlan,
+    hasAssignedPlan,
+    assignedPlan,
+    isCustomMealInput,
+    loading,
+    error,
+  ]);
 
   // Loading state
   if (loading) {
@@ -55,16 +85,51 @@ export default function DietTrackerPage() {
           assignedPlan={assignedPlan}
           onStartPlan={() => startAssignedPlan(assignedPlan.id)}
           loading={loading}
+          isCustomMealInput={isCustomMealInput}
         />
       </div>
     );
   }
 
-  // No active plan and no assigned plan - show assignment card
-  if (!hasActivePlan && !hasAssignedPlan && mockPlanAvailable) {
+  // Has assigned custom meal input plan and active plan
+  if (hasAssignedPlan && hasActivePlan && assignedPlan && isCustomMealInput) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-6">
-        <DietPlanAssignmentCard onStartPlan={startDietPlan} loading={loading} />
+        <AssignedPlanCard
+          assignedPlan={assignedPlan}
+          onStartPlan={() => startAssignedPlan(assignedPlan.id)}
+          loading={loading}
+          isCustomMealInput={isCustomMealInput}
+        />
+      </div>
+    );
+  }
+
+  // No active plan and no assigned plan - show message about needing trainer
+  if (!hasActivePlan && !hasAssignedPlan) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        <div className="text-center py-12">
+          <div className="mb-8">
+            <div className="w-24 h-24 bg-gradient-to-br from-zinc-600 to-zinc-700 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Icon
+                icon="mdi:account-tie"
+                className="text-white"
+                width={32}
+                height={32}
+              />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-4">
+              No Nutrition Plan Assigned
+            </h2>
+            <p className="text-zinc-400 text-lg mb-6">
+              You need a trainer to assign you a personalized nutrition plan.
+            </p>
+            <p className="text-zinc-500">
+              Contact your trainer to get started with your nutrition journey.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -106,7 +171,12 @@ export default function DietTrackerPage() {
 }
 
 // Component for assigned plan card
-function AssignedPlanCard({ assignedPlan, onStartPlan, loading }) {
+function AssignedPlanCard({
+  assignedPlan,
+  onStartPlan,
+  loading,
+  isCustomMealInput,
+}) {
   const [isStarting, setIsStarting] = useState(false);
 
   const handleStartPlan = async () => {
@@ -125,10 +195,14 @@ function AssignedPlanCard({ assignedPlan, onStartPlan, loading }) {
       {/* Header */}
       <div className="text-center">
         <h1 className="text-3xl font-bold text-white mb-2">
-          Your Nutrition Journey
+          {isCustomMealInput
+            ? "Custom Meal Tracking"
+            : "Your Nutrition Journey"}
         </h1>
         <p className="text-zinc-400 text-lg">
-          Your trainer has prepared a personalized nutrition plan for you
+          {isCustomMealInput
+            ? "Your trainer has enabled custom meal input for you"
+            : "Your trainer has prepared a personalized nutrition plan for you"}
         </p>
       </div>
 
@@ -137,9 +211,15 @@ function AssignedPlanCard({ assignedPlan, onStartPlan, loading }) {
         <div className="flex items-start gap-6">
           {/* Plan Image */}
           <div className="flex-shrink-0">
-            <div className="w-24 h-24 bg-gradient-to-br from-[#3E92CC] to-[#2E7DCC] rounded-2xl flex items-center justify-center shadow-lg">
+            <div
+              className={`w-24 h-24 rounded-2xl flex items-center justify-center shadow-lg ${
+                isCustomMealInput
+                  ? "bg-gradient-to-br from-green-500 to-green-600"
+                  : "bg-gradient-to-br from-[#3E92CC] to-[#2E7DCC]"
+              }`}
+            >
               <Icon
-                icon="mdi:food-apple"
+                icon={isCustomMealInput ? "mdi:pencil-plus" : "mdi:food-apple"}
                 className="text-white"
                 width={32}
                 height={32}
@@ -151,7 +231,9 @@ function AssignedPlanCard({ assignedPlan, onStartPlan, loading }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-4">
               <h2 className="text-2xl font-bold text-white">
-                {assignedPlan.originalPlan.title || "Nutrition Plan"}
+                {isCustomMealInput
+                  ? "Custom Meal Input"
+                  : assignedPlan.originalPlan?.title || "Nutrition Plan"}
               </h2>
               <span className="px-3 py-1 bg-[#3E92CC]/20 text-[#3E92CC] text-sm font-medium rounded-full">
                 Assigned by Trainer
@@ -159,8 +241,10 @@ function AssignedPlanCard({ assignedPlan, onStartPlan, loading }) {
             </div>
 
             <p className="text-zinc-400 mb-6">
-              {assignedPlan.originalPlan.description ||
-                "Your trainer has created a personalized nutrition plan tailored to your goals and preferences."}
+              {isCustomMealInput
+                ? "Track your daily meals with custom input. Log what you eat and monitor your nutrition progress."
+                : assignedPlan.originalPlan?.description ||
+                  "Your trainer has created a personalized nutrition plan tailored to your goals and preferences."}
             </p>
 
             {/* Trainer Info */}
@@ -184,33 +268,68 @@ function AssignedPlanCard({ assignedPlan, onStartPlan, loading }) {
               </div>
             )}
 
-            {/* Plan Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="text-center p-4 bg-zinc-800/30 rounded-xl">
-                <div className="text-2xl font-bold text-orange-400">
-                  {assignedPlan.originalPlan.nutritionInfo?.calories || 0}
+            {/* Plan Stats - Only show for regular plans */}
+            {!isCustomMealInput && assignedPlan.originalPlan?.nutritionInfo && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="text-center p-4 bg-zinc-800/30 rounded-xl">
+                  <div className="text-2xl font-bold text-orange-400">
+                    {assignedPlan.originalPlan.nutritionInfo?.calories || 0}
+                  </div>
+                  <div className="text-zinc-400 text-sm">Daily Calories</div>
                 </div>
-                <div className="text-zinc-400 text-sm">Daily Calories</div>
-              </div>
-              <div className="text-center p-4 bg-zinc-800/30 rounded-xl">
-                <div className="text-2xl font-bold text-blue-400">
-                  {assignedPlan.originalPlan.nutritionInfo?.protein || 0}g
+                <div className="text-center p-4 bg-zinc-800/30 rounded-xl">
+                  <div className="text-2xl font-bold text-blue-400">
+                    {assignedPlan.originalPlan.nutritionInfo?.protein || 0}g
+                  </div>
+                  <div className="text-zinc-400 text-sm">Protein</div>
                 </div>
-                <div className="text-zinc-400 text-sm">Protein</div>
-              </div>
-              <div className="text-center p-4 bg-zinc-800/30 rounded-xl">
-                <div className="text-2xl font-bold text-yellow-400">
-                  {assignedPlan.originalPlan.nutritionInfo?.carbs || 0}g
+                <div className="text-center p-4 bg-zinc-800/30 rounded-xl">
+                  <div className="text-2xl font-bold text-yellow-400">
+                    {assignedPlan.originalPlan.nutritionInfo?.carbs || 0}g
+                  </div>
+                  <div className="text-zinc-400 text-sm">Carbs</div>
                 </div>
-                <div className="text-zinc-400 text-sm">Carbs</div>
-              </div>
-              <div className="text-center p-4 bg-zinc-800/30 rounded-xl">
-                <div className="text-2xl font-bold text-green-400">
-                  {assignedPlan.originalPlan.nutritionInfo?.fats || 0}g
+                <div className="text-center p-4 bg-zinc-800/30 rounded-xl">
+                  <div className="text-2xl font-bold text-green-400">
+                    {assignedPlan.originalPlan.nutritionInfo?.fats || 0}g
+                  </div>
+                  <div className="text-zinc-400 text-sm">Fats</div>
                 </div>
-                <div className="text-zinc-400 text-sm">Fats</div>
               </div>
-            </div>
+            )}
+
+            {/* Custom Meal Input Features */}
+            {isCustomMealInput && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="text-center p-4 bg-zinc-800/30 rounded-xl">
+                  <Icon
+                    icon="mdi:pencil-plus"
+                    className="text-green-400 mx-auto mb-2"
+                    width={24}
+                    height={24}
+                  />
+                  <div className="text-zinc-400 text-sm">Custom Input</div>
+                </div>
+                <div className="text-center p-4 bg-zinc-800/30 rounded-xl">
+                  <Icon
+                    icon="mdi:chart-line"
+                    className="text-blue-400 mx-auto mb-2"
+                    width={24}
+                    height={24}
+                  />
+                  <div className="text-zinc-400 text-sm">Track Progress</div>
+                </div>
+                <div className="text-center p-4 bg-zinc-800/30 rounded-xl">
+                  <Icon
+                    icon="mdi:food-apple"
+                    className="text-orange-400 mx-auto mb-2"
+                    width={24}
+                    height={24}
+                  />
+                  <div className="text-zinc-400 text-sm">Nutrition Goals</div>
+                </div>
+              </div>
+            )}
 
             {/* Action Button */}
             <div className="flex items-center gap-4">
@@ -228,8 +347,13 @@ function AssignedPlanCard({ assignedPlan, onStartPlan, loading }) {
                   </>
                 ) : (
                   <>
-                    <Icon icon="mdi:play" className="w-5 h-5 mr-2" />
-                    Start Tracking This Plan
+                    <Icon
+                      icon={isCustomMealInput ? "mdi:pencil-plus" : "mdi:play"}
+                      className="w-5 h-5 mr-2"
+                    />
+                    {isCustomMealInput
+                      ? "Start Custom Tracking"
+                      : "Start Tracking This Plan"}
                   </>
                 )}
               </Button>

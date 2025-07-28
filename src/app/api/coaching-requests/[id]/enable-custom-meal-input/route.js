@@ -12,33 +12,30 @@ export async function POST(request, context) {
         { status: 401 }
       );
     }
+
     const { id } = await context.params; // coaching request id
-    const body = await request.json();
-    const { planId } = body;
-    if (!planId) {
-      return NextResponse.json(
-        { success: false, error: "Missing planId" },
-        { status: 400 }
-      );
-    }
+
     // Get coaching request
     const coachingRequest = await prisma.coachingRequest.findUnique({
       where: { id },
       include: { client: true, trainer: true },
     });
+
     if (!coachingRequest) {
       return NextResponse.json(
         { success: false, error: "Coaching request not found" },
         { status: 404 }
       );
     }
-    // Only trainer can assign
+
+    // Only trainer can enable custom meal input
     if (coachingRequest.trainer.userId !== session.user.id) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 403 }
       );
     }
+
     // Check if client already has active assigned nutrition plan
     const existing = await prisma.assignedNutritionPlan.findFirst({
       where: {
@@ -46,6 +43,7 @@ export async function POST(request, context) {
         status: "active",
       },
     });
+
     if (existing) {
       // Mark all tracking data for the existing plan as completed
       const existingTrackingData = await prisma.nutritionTrackingData.findMany({
@@ -77,7 +75,7 @@ export async function POST(request, context) {
 
       await Promise.all(updatePromises);
 
-      // Complete the existing plan before assigning a new one
+      // Complete the existing plan before enabling custom meal input
       await prisma.assignedNutritionPlan.update({
         where: { id: existing.id },
         data: {
@@ -86,54 +84,79 @@ export async function POST(request, context) {
         },
       });
     }
-    // Get original plan
-    const plan = await prisma.nutritionPlan.findUnique({
-      where: { id: planId },
-    });
-    if (!plan) {
-      return NextResponse.json(
-        { success: false, error: "Nutrition plan not found" },
-        { status: 404 }
-      );
-    }
-    // Copy plan data as JSON
-    const planData = JSON.parse(JSON.stringify(plan));
-    delete planData.id;
-    delete planData.trainerInfoId;
-    delete planData.createdAt;
-    delete planData.updatedAt;
-    delete planData.deletedAt;
-    // Assign plan
+
+    // Create new assigned nutrition plan with custom meal input enabled
     const assigned = await prisma.assignedNutritionPlan.create({
       data: {
-        clientId: coachingRequest.clientId,
-        trainerId: coachingRequest.trainerId,
-        originalPlanId: plan.id,
-        planData,
+        client: { connect: { id: coachingRequest.clientId } },
+        trainer: { connect: { id: coachingRequest.trainerId } },
+        planData: {
+          title: "Custom Meal Input",
+          description: "Track your daily meals with custom input",
+          type: "custom",
+          customMealInputEnabled: true,
+          days: [], // Empty days array for custom meal input
+        },
         status: "active",
-        customMealInputEnabled: false,
+        customMealInputEnabled: true,
       },
     });
 
-    // Update clientCount in the original plan
-    const activeAssignments = await prisma.assignedNutritionPlan.count({
+    // Make sure this is the latest assigned plan for the client (deactivate others if needed)
+    await prisma.assignedNutritionPlan.updateMany({
       where: {
-        originalPlanId: plan.id,
+        client: { id: coachingRequest.clientId },
+        id: { not: assigned.id },
         status: "active",
+      },
+      data: {
+        status: "completed",
+        completedAt: new Date(),
       },
     });
 
-    await prisma.nutritionPlan.update({
-      where: { id: plan.id },
-      data: { clientCount: activeAssignments },
+    // Create DietPlanAssignment for the client so they can start tracking immediately
+    const dietPlanAssignment = await prisma.dietPlanAssignment.create({
+      data: {
+        clientId: coachingRequest.clientId,
+        nutritionPlanId: null, // No specific nutrition plan for custom input
+        assignedById: coachingRequest.trainerId,
+        isActive: true,
+      },
+    });
+
+    // Fetch the created plan with all relations for debugging
+    const createdPlan = await prisma.assignedNutritionPlan.findUnique({
+      where: { id: assigned.id },
+      include: {
+        client: true,
+        trainer: {
+          include: {
+            trainerProfile: true,
+          },
+        },
+      },
+    });
+
+    console.log("Created custom meal input plan:", {
+      planId: assigned.id,
+      clientId: coachingRequest.clientId,
+      trainerId: coachingRequest.trainerId,
+      customMealInputEnabled: assigned.customMealInputEnabled,
+      status: assigned.status,
+      dietPlanAssignmentId: dietPlanAssignment.id,
     });
 
     return NextResponse.json(
-      { success: true, data: assigned },
+      {
+        success: true,
+        data: createdPlan,
+        message: "Custom meal input enabled successfully",
+      },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error assigning nutrition plan:", error);
+    console.error("Error enabling custom meal input:", error);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }

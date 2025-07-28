@@ -10,8 +10,8 @@ export const useDietTracker = () => {
   const [dailyLogs, setDailyLogs] = useState([]);
   const [nextMeal, setNextMeal] = useState(null);
   const [stats, setStats] = useState(null);
-  const [mockPlanAvailable, setMockPlanAvailable] = useState(false);
   const [validationError, setValidationError] = useState(null);
+  const [isCustomMealInput, setIsCustomMealInput] = useState(false);
 
   // Fetch diet tracker data
   const fetchDietTrackerData = useCallback(async () => {
@@ -29,7 +29,7 @@ export const useDietTracker = () => {
       setHasActivePlan(data.hasActivePlan);
       setHasAssignedPlan(data.hasAssignedPlan || false);
       setAssignedPlan(data.assignedPlan || null);
-      setMockPlanAvailable(data.mockPlanAvailable || false);
+      setIsCustomMealInput(data.isCustomMealInput || false);
 
       if (data.hasActivePlan) {
         setActivePlan(data.activePlan);
@@ -459,7 +459,6 @@ export const useDietTracker = () => {
     dailyLogs,
     nextMeal,
     stats,
-    mockPlanAvailable,
     validationError,
     startDietPlan,
     startAssignedPlan,

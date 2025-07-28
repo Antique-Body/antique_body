@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
 import { auth } from "#/auth";
-import { mockNutritionPlan as mockPlanData } from "@/components/custom/dashboard/client/pages/diet-tracker/mockNutritionPlan";
 import prisma from "@/lib/prisma";
 
 import {
@@ -85,14 +84,51 @@ export async function GET(req) {
     // Check for active diet plan assignment
     const activePlan = await getActiveDietPlan(clientInfo.id);
 
+    // If there's an active plan, check if it's a custom meal input plan
+    if (activePlan) {
+      // Check if this active plan corresponds to a custom meal input assigned plan
+      const customAssignedPlan = await prisma.assignedNutritionPlan.findFirst({
+        where: {
+          clientId: clientInfo.id,
+          status: "active",
+          customMealInputEnabled: true,
+        },
+        include: {
+          originalPlan: true,
+          trainer: {
+            include: {
+              trainerProfile: true,
+            },
+          },
+        },
+      });
+
+      if (customAssignedPlan) {
+        // Return the custom meal input plan as assigned plan
+        return NextResponse.json({
+          hasActivePlan: true,
+          hasAssignedPlan: true,
+          assignedPlan: customAssignedPlan,
+          isCustomMealInput: true,
+          activePlan,
+          dailyLogs: await getAllDailyLogs(activePlan.id),
+          nextMeal: await getNextMeal(activePlan.id),
+          message:
+            "Your trainer has enabled custom meal input for you. You can now track your meals!",
+        });
+      }
+    }
+
     if (assignedNutritionPlan && !activePlan) {
       // Client has an assigned plan but no active diet tracker
       return NextResponse.json({
         hasActivePlan: false,
         hasAssignedPlan: true,
         assignedPlan: assignedNutritionPlan,
-        message:
-          "Your trainer has assigned you a nutrition plan. Would you like to start tracking it?",
+        isCustomMealInput: assignedNutritionPlan.customMealInputEnabled,
+        message: assignedNutritionPlan.customMealInputEnabled
+          ? "Your trainer has enabled custom meal input for you. Start tracking your meals!"
+          : "Your trainer has assigned you a nutrition plan. Would you like to start tracking it?",
       });
     }
 
@@ -101,7 +137,6 @@ export async function GET(req) {
       return NextResponse.json({
         hasActivePlan: false,
         hasAssignedPlan: false,
-        mockPlanAvailable: true,
         message:
           "No nutrition plan assigned yet. Contact your trainer to get started.",
       });
@@ -171,81 +206,43 @@ export async function POST(req) {
           );
         }
 
-        // Create diet plan assignment from the assigned nutrition plan
-        const assignment = await prisma.dietPlanAssignment.create({
-          data: {
-            clientId: clientInfo.id,
-            nutritionPlanId: assignedPlan.originalPlanId,
-            assignedById: assignedPlan.trainerId,
-          },
-        });
-
-        // Start the diet plan
-        const result = await startDietPlan(assignment.id);
-        return NextResponse.json(result);
-      } else if (useMockPlan) {
-        // For demo purposes, create a mock plan assignment
-        // In a real app, this would be created by a trainer
-
-        // First, get a trainer to assign the plan (use the first trainer)
-        const trainer = await prisma.trainerInfo.findFirst();
-        if (!trainer) {
-          return NextResponse.json(
-            { error: "No trainer available" },
-            { status: 404 }
-          );
-        }
-
-        // Check if mock nutrition plan already exists
-        let existingNutritionPlan = await prisma.nutritionPlan.findFirst({
-          where: { trainerInfoId: trainer.id },
-        });
-
-        // If no plan exists, create one using our mock data
-        if (!existingNutritionPlan) {
-          existingNutritionPlan = await prisma.nutritionPlan.create({
+        // Check if this is a custom meal input plan
+        if (assignedPlan.customMealInputEnabled) {
+          // Create a diet plan assignment for custom meal input
+          const assignment = await prisma.dietPlanAssignment.create({
             data: {
-              title: mockPlanData.title,
-              description: mockPlanData.description,
-              coverImage: mockPlanData.coverImage,
-              price: mockPlanData.price,
-              duration: mockPlanData.duration,
-              durationType: mockPlanData.durationType,
-              nutritionInfo: {
-                calories: mockPlanData.dailyCaloriesGoal || 2000,
-                protein: mockPlanData.dailyProteinGoal || 150,
-                carbs: mockPlanData.dailyCarbsGoal || 200,
-                fats: mockPlanData.dailyFatGoal || 80,
-              },
-              days: mockPlanData.days,
-              trainerInfoId: trainer.id,
+              clientId: clientInfo.id,
+              nutritionPlanId: assignedPlan.originalPlanId,
+              assignedById: assignedPlan.trainerId,
+              startDate: new Date(),
             },
           });
-        }
 
-        // Create diet plan assignment
-        const assignment = await prisma.dietPlanAssignment.create({
-          data: {
-            clientId: clientInfo.id,
-            nutritionPlanId: existingNutritionPlan.id,
-            assignedById: trainer.id,
+          return NextResponse.json({
+            message: "Custom meal input plan started successfully",
+            assignmentId: assignment.id,
+          });
+        } else {
+          // Start regular nutrition plan
+          const result = await startDietPlan(assignedPlan.originalPlanId);
+          return NextResponse.json(result);
+        }
+      } else if (useMockPlan) {
+        return NextResponse.json(
+          {
+            error:
+              "Mock plans are no longer supported. Please contact your trainer to get a nutrition plan assigned.",
           },
-        });
-
-        // Start the diet plan
-        const result = await startDietPlan(assignment.id);
-        return NextResponse.json(result);
+          { status: 400 }
+        );
       } else {
-        // Start existing plan
-        if (!dietPlanAssignmentId) {
-          return NextResponse.json(
-            { error: "Diet plan assignment ID required" },
-            { status: 400 }
-          );
-        }
-
-        const result = await startDietPlan(dietPlanAssignmentId);
-        return NextResponse.json(result);
+        return NextResponse.json(
+          {
+            error:
+              "Invalid request. Please contact your trainer to get a nutrition plan assigned.",
+          },
+          { status: 400 }
+        );
       }
     }
 

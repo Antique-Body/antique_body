@@ -535,7 +535,7 @@ model CoachingRequestCooldown {
 model DietPlanAssignment {
   id              String   @id @default(cuid())
   clientId        String
-  nutritionPlanId String
+  nutritionPlanId String?
   assignedById    String   // trainer who assigned the plan
   startDate       DateTime @default(now())
   isActive        Boolean  @default(true)
@@ -544,7 +544,7 @@ model DietPlanAssignment {
   
   // Relations
   client          ClientInfo @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  nutritionPlan   NutritionPlan @relation(fields: [nutritionPlanId], references: [id], onDelete: Cascade)
+  nutritionPlan   NutritionPlan? @relation(fields: [nutritionPlanId], references: [id], onDelete: Cascade)
   assignedBy      TrainerInfo @relation(fields: [assignedById], references: [id], onDelete: Cascade)
   dailyLogs       DailyDietLog[]
   
@@ -683,13 +683,14 @@ model AssignedNutritionPlan {
   id                    String                 @id @default(cuid())
   clientId              String
   trainerId             String
-  originalPlanId        String
-  planData              Json
+  originalPlanId        String?
+  planData              Json?
   status                String                 @default("active")
   assignedAt            DateTime               @default(now())
   completedAt           DateTime?
+  customMealInputEnabled Boolean               @default(false)
   client                ClientInfo             @relation(fields: [clientId], references: [id])
-  originalPlan          NutritionPlan          @relation(fields: [originalPlanId], references: [id])
+  originalPlan          NutritionPlan?         @relation(fields: [originalPlanId], references: [id])
   trainer               TrainerInfo            @relation(fields: [trainerId], references: [id])
   nutritionTrackingData NutritionTrackingData[]
 

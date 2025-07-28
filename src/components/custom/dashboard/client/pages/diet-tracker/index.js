@@ -1,7 +1,6 @@
 export { mockNutritionPlan } from "./mockNutritionPlan";
 
 // Main components
-export { DietPlanAssignmentCard } from "./DietPlanAssignmentCard";
 export { ActiveDietPlan } from "./ActiveDietPlan";
 export { LoadingState } from "./LoadingState";
 export { ErrorState } from "./ErrorState";

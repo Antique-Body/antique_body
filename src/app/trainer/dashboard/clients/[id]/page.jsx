@@ -24,6 +24,7 @@ export default function ClientDashboard({ params }) {
   const [activeTab, setActiveTab] = useState("overview");
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [assignType, setAssignType] = useState(null); // "training" or "nutrition"
+  const [assignOption, setAssignOption] = useState(null); // "existing" or "custom"
   const [plans, setPlans] = useState([]);
   const [plansLoading, setPlansLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
@@ -156,10 +157,49 @@ export default function ClientDashboard({ params }) {
       setShowAssignModal(false);
       setSelectedPlan(null);
       setAssignType(null);
+      setAssignOption(null);
       fetchClientData();
     } catch (err) {
       console.error("Error assigning plan:", err);
       setAssignError(err.message || "Failed to assign plan. Please try again.");
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  // Handle custom meal input assignment
+  const handleEnableCustomMealInput = async () => {
+    try {
+      setAssigning(true);
+      setAssignError(null);
+
+      const response = await fetch(
+        `/api/coaching-requests/${client.id}/enable-custom-meal-input`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to enable custom meal input");
+      }
+
+      setShowAssignModal(false);
+      setSelectedPlan(null);
+      setAssignType(null);
+      setAssignOption(null);
+      fetchClientData();
+
+      // Show success message
+      console.log("Custom meal input enabled successfully");
+    } catch (err) {
+      console.error("Error enabling custom meal input:", err);
+      setAssignError(
+        err.message || "Failed to enable custom meal input. Please try again."
+      );
     } finally {
       setAssigning(false);
     }
@@ -170,6 +210,7 @@ export default function ClientDashboard({ params }) {
     setShowAssignModal(false);
     setSelectedPlan(null);
     setAssignType(null);
+    setAssignOption(null);
     setPlans([]);
   };
 
@@ -180,7 +221,6 @@ export default function ClientDashboard({ params }) {
     setNutritionPreviewData(planDataToShow);
     setNutritionPreviewOpen(true);
   };
-
 
   // State za prikaz gumba End & Assign
 
@@ -486,290 +526,502 @@ export default function ClientDashboard({ params }) {
           <div className="space-y-6">
             <div className="text-center">
               <p className="text-zinc-400 mb-4">
-                Select a {assignType === "training" ? "training" : "nutrition"}{" "}
-                plan to assign to{" "}
-                <span className="text-white font-medium">
-                  {profile.firstName} {profile.lastName}
-                </span>
+                {assignType === "nutrition" ? (
+                  <>
+                    Choose how to assign nutrition tracking to{" "}
+                    <span className="text-white font-medium">
+                      {profile.firstName} {profile.lastName}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    Select a training plan to assign to{" "}
+                    <span className="text-white font-medium">
+                      {profile.firstName} {profile.lastName}
+                    </span>
+                  </>
+                )}
               </p>
             </div>
 
-            {plansLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="flex flex-col items-center">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#3E92CC] border-t-transparent" />
-                  <p className="mt-2 text-zinc-400 text-sm">Loading plans...</p>
-                </div>
-              </div>
-            ) : plans.length === 0 ? (
-              <div className="text-center py-8">
-                <Icon
-                  icon={
-                    assignType === "training"
-                      ? "mdi:dumbbell-off"
-                      : "mdi:food-off"
-                  }
-                  className="text-zinc-600 mx-auto mb-4"
-                  width={48}
-                  height={48}
-                />
-                <p className="text-zinc-400 mb-2">
-                  No {assignType} plans found
-                </p>
-                <p className="text-zinc-500 text-sm">
-                  Create some {assignType} plans first to assign to clients
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
-                {plans.map((plan) => (
-                  <div
-                    key={plan.id}
-                    className={`relative group rounded-xl border-2 cursor-pointer transition-all duration-300 overflow-hidden ${
-                      selectedPlan?.id === plan.id
-                        ? "border-[#3E92CC] bg-[#3E92CC]/5 shadow-lg shadow-[#3E92CC]/20"
-                        : "border-zinc-700 hover:border-zinc-600 bg-zinc-800/50 hover:bg-zinc-800/80"
-                    }`}
-                    onClick={() => setSelectedPlan(plan)}
-                  >
-                    {/* Plan Image */}
-                    {plan.coverImage && (
-                      <div className="relative h-32 w-full overflow-hidden">
-                        <Image
-                          src={plan.coverImage}
-                          alt={plan.title}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+            {/* Nutrition Plan Options */}
+            {assignType === "nutrition" && !assignOption && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Option 1: Assign Existing Plan */}
+                <div
+                  className="relative group rounded-xl border-2 cursor-pointer transition-all duration-300 overflow-hidden border-zinc-700 hover:border-zinc-600 bg-zinc-800/50 hover:bg-zinc-800/80"
+                  onClick={() => {
+                    setAssignOption("existing");
+                    fetchPlans("nutrition");
+                  }}
+                >
+                  <div className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-[#3E92CC] to-[#2E7DCC] rounded-xl flex items-center justify-center">
+                        <Icon
+                          icon="mdi:food-apple"
+                          className="text-white"
+                          width={24}
+                          height={24}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-
-                        {/* Price Badge */}
-                        {plan.price && (
-                          <div className="absolute top-2 right-2 bg-[#3E92CC] text-white px-2 py-1 rounded-full text-xs font-medium">
-                            ${plan.price}
-                          </div>
-                        )}
-
-                        {/* Selection Indicator */}
-                        {selectedPlan?.id === plan.id && (
-                          <div className="absolute top-2 left-2 bg-[#3E92CC] text-white rounded-full p-1">
-                            <Icon icon="mdi:check" width={16} height={16} />
-                          </div>
-                        )}
                       </div>
-                    )}
-
-                    {/* Plan Content */}
-                    <div className="p-4">
-                      <div className="flex items-start justify-between mb-2">
-                        <h4 className="text-white font-semibold text-lg leading-tight">
-                          {plan.title}
-                        </h4>
-                        {!plan.coverImage && selectedPlan?.id === plan.id && (
-                          <Icon
-                            icon="mdi:check-circle"
-                            className="text-[#3E92CC] ml-2 flex-shrink-0"
-                            width={20}
-                            height={20}
-                          />
-                        )}
+                      <div>
+                        <h3 className="text-white font-semibold text-lg">
+                          Assign Existing Plan
+                        </h3>
+                        <p className="text-zinc-400 text-sm">
+                          Choose from your nutrition plans
+                        </p>
                       </div>
-
-                      <p className="text-zinc-400 text-sm mb-3 line-clamp-2">
-                        {plan.description}
-                      </p>
-
-                      {/* Plan Features */}
-                      {plan.keyFeatures && plan.keyFeatures.length > 0 && (
-                        <div className="mb-3">
-                          <div className="flex flex-wrap gap-1">
-                            {plan.keyFeatures
-                              .slice(0, 3)
-                              .map((feature, index) => (
-                                <span
-                                  key={index}
-                                  className="px-2 py-1 bg-blue-900/30 text-blue-400 text-xs rounded-full"
-                                >
-                                  {feature}
-                                </span>
-                              ))}
-                            {plan.keyFeatures.length > 3 && (
-                              <span className="px-2 py-1 bg-zinc-700 text-zinc-400 text-xs rounded-full">
-                                +{plan.keyFeatures.length - 3} more
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Plan Stats */}
-                      <div className="grid grid-cols-3 gap-2 text-xs text-zinc-500">
-                        <div className="flex items-center gap-1">
-                          <Icon icon="mdi:clock" width={12} height={12} />
-                          <span>
-                            {plan.duration} {plan.durationType}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Icon
-                            icon="mdi:account-group"
-                            width={12}
-                            height={12}
-                          />
-                          <span>{plan.clientCount || 0} clients</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Icon icon="mdi:star" width={12} height={12} />
-                          <span>4.8/5</span>
-                        </div>
-                      </div>
-
-                      {/* Nutrition specific info */}
-                      {assignType === "nutrition" && plan.nutritionInfo && (
-                        <div className="mt-3 pt-3 border-t border-zinc-700">
-                          <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className="text-zinc-400">
-                              <span className="text-orange-400">
-                                {plan.nutritionInfo.calories || 0}
-                              </span>{" "}
-                              cal
-                            </div>
-                            <div className="text-zinc-400">
-                              <span className="text-blue-400">
-                                {plan.nutritionInfo.protein || 0}g
-                              </span>{" "}
-                              protein
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Training specific info */}
-                      {assignType === "training" && (
-                        <div className="mt-3 pt-3 border-t border-zinc-700">
-                          <div className="flex items-center justify-between text-xs text-zinc-400">
-                            <span>{plan.sessionsPerWeek || 3}x/week</span>
-                            <span className="capitalize">
-                              {plan.difficultyLevel || "beginner"}
-                            </span>
-                          </div>
-                        </div>
-                      )}
                     </div>
+                    <p className="text-zinc-500 text-sm">
+                      Assign a pre-made nutrition plan with specific meals and
+                      guidelines.
+                    </p>
                   </div>
-                ))}
+                </div>
+
+                {/* Option 2: Enable Custom Meal Input */}
+                <div
+                  className="relative group rounded-xl border-2 cursor-pointer transition-all duration-300 overflow-hidden border-zinc-700 hover:border-zinc-600 bg-zinc-800/50 hover:bg-zinc-800/80"
+                  onClick={async () => {
+                    setAssigning(true);
+                    setAssignError(null);
+                    try {
+                      const response = await fetch(
+                        `/api/coaching-requests/${client.id}/enable-custom-meal-input`,
+                        {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                        }
+                      );
+
+                      const data = await response.json();
+
+                      if (!response.ok || !data.success) {
+                        throw new Error(
+                          data.error || "Failed to enable custom meal input"
+                        );
+                      }
+
+                      setShowAssignModal(false);
+                      setSelectedPlan(null);
+                      setAssignType(null);
+                      setAssignOption(null);
+                      fetchClientData();
+                    } catch (err) {
+                      console.error("Error enabling custom meal input:", err);
+                      setAssignError(
+                        err.message ||
+                          "Failed to enable custom meal input. Please try again."
+                      );
+                    } finally {
+                      setAssigning(false);
+                    }
+                  }}
+                >
+                  <div className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                        <Icon
+                          icon="mdi:pencil-plus"
+                          className="text-white"
+                          width={24}
+                          height={24}
+                        />
+                      </div>
+                      <div>
+                        <h3 className="text-white font-semibold text-lg">
+                          Enable Custom Input
+                        </h3>
+                        <p className="text-zinc-400 text-sm">
+                          Let client track their own meals
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-zinc-500 text-sm">
+                      Give the client the ability to input and track their daily
+                      meals.
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
 
-            {plans.length > 0 && (
-              <div className="space-y-4 pt-4 border-t border-zinc-800">
-                {/* Selected Plan Summary */}
-                {selectedPlan && (
-                  <div className="bg-zinc-800/50 rounded-lg p-4 border border-zinc-700">
-                    <h4 className="text-white font-medium mb-2">
-                      Selected Plan
-                    </h4>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-zinc-300">{selectedPlan.title}</p>
-                        <p className="text-zinc-500 text-sm">
-                          {selectedPlan.duration} {selectedPlan.durationType}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        {selectedPlan.price && (
-                          <p className="text-[#3E92CC] font-bold text-lg">
-                            ${selectedPlan.price}
-                          </p>
-                        )}
-                        <p className="text-zinc-500 text-sm">
-                          {selectedPlan.clientCount || 0} active clients
-                        </p>
-                      </div>
+            {/* Custom Meal Input Confirmation */}
+            {assignType === "nutrition" && assignOption === "custom" && (
+              <div className="bg-zinc-800/50 rounded-lg p-6 border border-zinc-700">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                    <Icon
+                      icon="mdi:pencil-plus"
+                      className="text-white"
+                      width={24}
+                      height={24}
+                    />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-lg">
+                      Enable Custom Meal Input
+                    </h3>
+                    <p className="text-zinc-400 text-sm">
+                      Client will be able to track their own meals
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-3 text-sm text-zinc-400">
+                  <div className="flex items-center gap-2">
+                    <Icon
+                      icon="mdi:check-circle"
+                      className="text-green-400"
+                      width={16}
+                      height={16}
+                    />
+                    <span>Client can input their daily meals</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Icon
+                      icon="mdi:check-circle"
+                      className="text-green-400"
+                      width={16}
+                      height={16}
+                    />
+                    <span>Track calories, protein, carbs, and fat</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Icon
+                      icon="mdi:check-circle"
+                      className="text-green-400"
+                      width={16}
+                      height={16}
+                    />
+                    <span>Monitor progress and adherence</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Training Plan Selection or Nutrition Plan Selection */}
+            {(assignType === "training" ||
+              (assignType === "nutrition" && assignOption === "existing")) && (
+              <>
+                {plansLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="flex flex-col items-center">
+                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#3E92CC] border-t-transparent" />
+                      <p className="mt-2 text-zinc-400 text-sm">
+                        Loading plans...
+                      </p>
                     </div>
+                  </div>
+                ) : plans.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Icon
+                      icon={
+                        assignType === "training"
+                          ? "mdi:dumbbell-off"
+                          : "mdi:food-off"
+                      }
+                      className="text-zinc-600 mx-auto mb-4"
+                      width={48}
+                      height={48}
+                    />
+                    <p className="text-zinc-400 mb-2">
+                      No {assignType} plans found
+                    </p>
+                    <p className="text-zinc-500 text-sm">
+                      Create some {assignType} plans first to assign to clients
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+                    {plans.map((plan) => (
+                      <div
+                        key={plan.id}
+                        className={`relative group rounded-xl border-2 cursor-pointer transition-all duration-300 overflow-hidden ${
+                          selectedPlan?.id === plan.id
+                            ? "border-[#3E92CC] bg-[#3E92CC]/5 shadow-lg shadow-[#3E92CC]/20"
+                            : "border-zinc-700 hover:border-zinc-600 bg-zinc-800/50 hover:bg-zinc-800/80"
+                        }`}
+                        onClick={() => setSelectedPlan(plan)}
+                      >
+                        {/* Plan Image */}
+                        {plan.coverImage && (
+                          <div className="relative h-32 w-full overflow-hidden">
+                            <Image
+                              src={plan.coverImage}
+                              alt={plan.title}
+                              fill
+                              className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+
+                            {/* Price Badge */}
+                            {plan.price && (
+                              <div className="absolute top-2 right-2 bg-[#3E92CC] text-white px-2 py-1 rounded-full text-xs font-medium">
+                                ${plan.price}
+                              </div>
+                            )}
+
+                            {/* Selection Indicator */}
+                            {selectedPlan?.id === plan.id && (
+                              <div className="absolute top-2 left-2 bg-[#3E92CC] text-white rounded-full p-1">
+                                <Icon icon="mdi:check" width={16} height={16} />
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Plan Content */}
+                        <div className="p-4">
+                          <div className="flex items-start justify-between mb-2">
+                            <h4 className="text-white font-semibold text-lg leading-tight">
+                              {plan.title}
+                            </h4>
+                            {!plan.coverImage &&
+                              selectedPlan?.id === plan.id && (
+                                <Icon
+                                  icon="mdi:check-circle"
+                                  className="text-[#3E92CC] ml-2 flex-shrink-0"
+                                  width={20}
+                                  height={20}
+                                />
+                              )}
+                          </div>
+
+                          <p className="text-zinc-400 text-sm mb-3 line-clamp-2">
+                            {plan.description}
+                          </p>
+
+                          {/* Plan Features */}
+                          {plan.keyFeatures && plan.keyFeatures.length > 0 && (
+                            <div className="mb-3">
+                              <div className="flex flex-wrap gap-1">
+                                {plan.keyFeatures
+                                  .slice(0, 3)
+                                  .map((feature, index) => (
+                                    <span
+                                      key={index}
+                                      className="px-2 py-1 bg-blue-900/30 text-blue-400 text-xs rounded-full"
+                                    >
+                                      {feature}
+                                    </span>
+                                  ))}
+                                {plan.keyFeatures.length > 3 && (
+                                  <span className="px-2 py-1 bg-zinc-700 text-zinc-400 text-xs rounded-full">
+                                    +{plan.keyFeatures.length - 3} more
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Plan Stats */}
+                          <div className="grid grid-cols-3 gap-2 text-xs text-zinc-500">
+                            <div className="flex items-center gap-1">
+                              <Icon icon="mdi:clock" width={12} height={12} />
+                              <span>
+                                {plan.duration} {plan.durationType}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Icon
+                                icon="mdi:account-group"
+                                width={12}
+                                height={12}
+                              />
+                              <span>{plan.clientCount || 0} clients</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Icon icon="mdi:star" width={12} height={12} />
+                              <span>4.8/5</span>
+                            </div>
+                          </div>
+
+                          {/* Nutrition specific info */}
+                          {assignType === "nutrition" && plan.nutritionInfo && (
+                            <div className="mt-3 pt-3 border-t border-zinc-700">
+                              <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div className="text-zinc-400">
+                                  <span className="text-orange-400">
+                                    {plan.nutritionInfo.calories || 0}
+                                  </span>{" "}
+                                  cal
+                                </div>
+                                <div className="text-zinc-400">
+                                  <span className="text-blue-400">
+                                    {plan.nutritionInfo.protein || 0}g
+                                  </span>{" "}
+                                  protein
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Training specific info */}
+                          {assignType === "training" && (
+                            <div className="mt-3 pt-3 border-t border-zinc-700">
+                              <div className="flex items-center justify-between text-xs text-zinc-400">
+                                <span>{plan.sessionsPerWeek || 3}x/week</span>
+                                <span className="capitalize">
+                                  {plan.difficultyLevel || "beginner"}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
 
-                {/* Action Buttons */}
-                <div className="flex gap-3">
-                  <Button
-                    variant="secondary"
-                    onClick={handleCloseAssignModal}
-                    fullWidth
-                  >
-                    Cancel
-                  </Button>
-                  {/* Ako postoji aktivni plan, prikazi Replace Current Plan dugme */}
-                  {assignType === "training" &&
-                  client.assignedTrainingPlans?.some(
-                    (plan) => plan.status === "active"
-                  ) ? (
-                    <Button
-                      className="bg-orange-500 hover:bg-orange-600 text-white border-none"
-                      onClick={async () => {
-                        setAssigning(true);
-                        setAssignError(null);
-                        try {
-                          const response = await fetch(
-                            `/api/coaching-requests/${client.id}/replace-training-plan`,
-                            {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({
-                                planId: String(selectedPlan.id),
-                              }),
+                {plans.length > 0 && (
+                  <div className="space-y-4 pt-4 border-t border-zinc-800">
+                    {/* Selected Plan Summary */}
+                    {selectedPlan && (
+                      <div className="bg-zinc-800/50 rounded-lg p-4 border border-zinc-700">
+                        <h4 className="text-white font-medium mb-2">
+                          Selected Plan
+                        </h4>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-zinc-300">
+                              {selectedPlan.title}
+                            </p>
+                            <p className="text-zinc-500 text-sm">
+                              {selectedPlan.duration}{" "}
+                              {selectedPlan.durationType}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            {selectedPlan.price && (
+                              <p className="text-[#3E92CC] font-bold text-lg">
+                                ${selectedPlan.price}
+                              </p>
+                            )}
+                            <p className="text-zinc-500 text-sm">
+                              {selectedPlan.clientCount || 0} active clients
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-3">
+                      <Button
+                        variant="secondary"
+                        onClick={handleCloseAssignModal}
+                        fullWidth
+                      >
+                        Cancel
+                      </Button>
+
+                      {/* Custom Meal Input Button */}
+                      {assignType === "nutrition" &&
+                        assignOption === "custom" && (
+                          <Button
+                            variant="primary"
+                            onClick={handleEnableCustomMealInput}
+                            disabled={assigning}
+                            leftIcon={
+                              assigning ? (
+                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                              ) : (
+                                <Icon
+                                  icon="mdi:pencil-plus"
+                                  width={20}
+                                  height={20}
+                                />
+                              )
                             }
-                          );
-                          const data = await response.json();
-                          if (!response.ok || !data.success) {
-                            throw new Error(
-                              data.error || "Failed to replace plan"
-                            );
+                            fullWidth
+                          >
+                            {assigning ? "Enabling..." : "Enable Custom Input"}
+                          </Button>
+                        )}
+
+                      {/* Training Plan Assignment */}
+                      {assignType === "training" &&
+                      client.assignedTrainingPlans?.some(
+                        (plan) => plan.status === "active"
+                      ) ? (
+                        <Button
+                          className="bg-orange-500 hover:bg-orange-600 text-white border-none"
+                          onClick={async () => {
+                            setAssigning(true);
+                            setAssignError(null);
+                            try {
+                              const response = await fetch(
+                                `/api/coaching-requests/${client.id}/replace-training-plan`,
+                                {
+                                  method: "POST",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                  },
+                                  body: JSON.stringify({
+                                    planId: String(selectedPlan.id),
+                                  }),
+                                }
+                              );
+                              const data = await response.json();
+                              if (!response.ok || !data.success) {
+                                throw new Error(
+                                  data.error || "Failed to replace plan"
+                                );
+                              }
+                              setShowAssignModal(false);
+                              setSelectedPlan(null);
+                              setAssignType(null);
+                              setAssignOption(null);
+                              fetchClientData();
+                            } catch (err) {
+                              setAssignError(
+                                err.message ||
+                                  "Failed to replace plan. Please try again."
+                              );
+                            } finally {
+                              setAssigning(false);
+                            }
+                          }}
+                          disabled={!selectedPlan || assigning}
+                          leftIcon={
+                            assigning ? (
+                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                            ) : (
+                              <Icon icon="mdi:check" width={20} height={20} />
+                            )
                           }
-                          setShowAssignModal(false);
-                          setSelectedPlan(null);
-                          setAssignType(null);
-                          fetchClientData();
-                        } catch (err) {
-                          setAssignError(
-                            err.message ||
-                              "Failed to replace plan. Please try again."
-                          );
-                        } finally {
-                          setAssigning(false);
-                        }
-                      }}
-                      disabled={!selectedPlan || assigning}
-                      leftIcon={
-                        assigning ? (
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                        ) : (
-                          <Icon icon="mdi:check" width={20} height={20} />
+                          fullWidth
+                        >
+                          {assigning ? "Replacing..." : "Replace Current Plan"}
+                        </Button>
+                      ) : (
+                        /* Regular Plan Assignment */
+                        (assignType === "training" ||
+                          (assignType === "nutrition" &&
+                            assignOption === "existing")) && (
+                          <Button
+                            variant="primary"
+                            onClick={handleAssignPlanToClient}
+                            disabled={!selectedPlan || assigning}
+                            leftIcon={
+                              assigning ? (
+                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                              ) : (
+                                <Icon icon="mdi:check" width={20} height={20} />
+                              )
+                            }
+                            fullWidth
+                          >
+                            {assigning ? "Assigning..." : "Assign Plan"}
+                          </Button>
                         )
-                      }
-                      fullWidth
-                    >
-                      {assigning ? "Replacing..." : "Replace Current Plan"}
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="primary"
-                      onClick={handleAssignPlanToClient}
-                      disabled={!selectedPlan || assigning}
-                      leftIcon={
-                        assigning ? (
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                        ) : (
-                          <Icon icon="mdi:check" width={20} height={20} />
-                        )
-                      }
-                      fullWidth
-                    >
-                      {assigning ? "Assigning..." : "Assign Plan"}
-                    </Button>
-                  )}
-                </div>
-              </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </Modal>
@@ -2395,7 +2647,6 @@ function NutritionTab({
           </h3>
         </div>
 
-
         <div className="space-y-4">
           {assignedNutritionPlans && assignedNutritionPlans.length > 0 ? (
             assignedNutritionPlans.map((plan) => (
@@ -2581,11 +2832,7 @@ function NutritionTab({
 }
 
 // Nutrition Plan Card Component
-function NutritionPlanCard({
-  plan,
-  clientId,
-  onViewPlan,
-}) {
+function NutritionPlanCard({ plan, clientId, onViewPlan }) {
   const formatDate = (dateString) =>
     new Date(dateString).toLocaleDateString("en-US", {
       month: "short",

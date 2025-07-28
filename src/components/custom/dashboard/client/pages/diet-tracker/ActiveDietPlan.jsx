@@ -45,6 +45,11 @@ export const ActiveDietPlan = ({
     const diffTime = today - startDate;
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
+    // For custom meal input plans, there are no predefined days
+    if (!activePlan.nutritionPlan?.days) {
+      return Math.max(1, diffDays + 1);
+    }
+
     return Math.max(
       1,
       Math.min(diffDays + 1, activePlan.nutritionPlan.days.length)
@@ -54,10 +59,19 @@ export const ActiveDietPlan = ({
   const currentDay = getCurrentDay();
 
   // Get the selected day's data
-  const selectedDayData = useMemo(
-    () => activePlan?.nutritionPlan?.days?.[selectedDay - 1],
-    [activePlan, selectedDay]
-  );
+  const selectedDayData = useMemo(() => {
+    // For custom meal input plans, return empty meals array
+    if (!activePlan?.nutritionPlan?.days) {
+      return {
+        name: `Day ${selectedDay}`,
+        meals: [],
+        isRestDay: false,
+        description: "Custom meal input day",
+      };
+    }
+
+    return activePlan?.nutritionPlan?.days?.[selectedDay - 1];
+  }, [activePlan, selectedDay]);
 
   // Get daily log for selected day
   const selectedDayLog = useMemo(() => {
@@ -270,7 +284,7 @@ export const ActiveDietPlan = ({
 
       {/* Day Navigation */}
       <DayNavigation
-        days={activePlan.nutritionPlan.days}
+        days={activePlan.nutritionPlan?.days || []}
         selectedDay={selectedDay}
         currentDay={currentDay}
         onSelectDay={setSelectedDay}
@@ -441,7 +455,14 @@ export const ActiveDietPlan = ({
           {/* Nutrition Summary */}
           <NutritionSummary
             dailyNutrition={dailyNutrition}
-            targetNutrition={activePlan.nutritionPlan.nutritionInfo}
+            targetNutrition={
+              activePlan.nutritionPlan?.nutritionInfo || {
+                calories: 2000,
+                protein: 150,
+                carbs: 200,
+                fats: 80,
+              }
+            }
             selectedDay={selectedDay}
             currentDay={currentDay}
             completedMeals={mealCompletionStats.completedMeals}
