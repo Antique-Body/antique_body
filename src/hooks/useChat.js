@@ -218,8 +218,7 @@ export const useChat = (chatId) => {
         throw new Error("Failed to mark messages as read");
       }
 
-      const data = await response.json();
-      console.log(`Marked ${data.markedAsRead} messages as read`);
+      await response.json();
     } catch (err) {
       console.error("Error marking messages as read:", err);
     }
@@ -241,8 +240,7 @@ export const useChat = (chatId) => {
         throw new Error("Failed to delete chat");
       }
 
-      const data = await response.json();
-      console.log("Chat deleted successfully:", data.message);
+      await response.json();
       return { success: true };
     } catch (err) {
       console.error("Error deleting chat:", err);

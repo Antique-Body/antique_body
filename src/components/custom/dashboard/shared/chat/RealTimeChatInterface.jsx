@@ -565,6 +565,7 @@ export const RealTimeChatInterface = ({ conversationId }) => {
     // Reset session storage processed flag when conversation ID changes
     setSessionStorageProcessed(false);
     handleConversationId();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId, validatedChatIds]);
 
   // Handle when conversations are loaded and we have a conversation ID
