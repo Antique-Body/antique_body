@@ -1,11 +1,27 @@
-import Ably from "ably";
-
 let ably = null;
 
-export const getAblyClient = (clientId = null) => {
+// Dynamically import Ably only on client side
+const getAbly = async () => {
+  if (typeof window === 'undefined') {
+    throw new Error('Ably can only be used on the client side');
+  }
+  const { default: Ably } = await import('ably');
+  return Ably;
+};
+
+// Check if Ably API key is configured
+const checkAblyKey = () => {
+  if (!process.env.NEXT_PUBLIC_ABLY_KEY) {
+    throw new Error('NEXT_PUBLIC_ABLY_KEY environment variable is not set. Please add it to your .env.local file.');
+  }
+};
+
+export const getAblyClient = async (clientId = null) => {
   if (!ably) {
+    checkAblyKey();
+    const Ably = await getAbly();
     const config = {
-      key: process.env.NEXT_PUBLIC_ABLY_KEY || "2w4ttQ.tWBjDA:Qs_hl_wWs0fZTk45sNaCux58grBzCSSWSveC8i42FJw"
+      key: process.env.NEXT_PUBLIC_ABLY_KEY
     };
     
     if (clientId) {
@@ -20,7 +36,7 @@ export const getAblyClient = (clientId = null) => {
 export const getChannelName = (channelName) => `chat:${channelName}`;
 
 export const publishMessage = async (channelName, message) => {
-  const client = getAblyClient();
+  const client = await getAblyClient();
   const channel = client.channels.get(getChannelName(channelName));
   
   try {
@@ -32,8 +48,8 @@ export const publishMessage = async (channelName, message) => {
   }
 };
 
-export const subscribeToMessages = (channelName, callback) => {
-  const client = getAblyClient();
+export const subscribeToMessages = async (channelName, callback) => {
+  const client = await getAblyClient();
   const channel = client.channels.get(getChannelName(channelName));
   
   channel.subscribe('message', callback);
@@ -44,7 +60,7 @@ export const subscribeToMessages = (channelName, callback) => {
 };
 
 export const generateAblyToken = async (userId) => {
-  const client = getAblyClient();
+  const client = await getAblyClient();
   
   try {
     const tokenRequest = await client.auth.createTokenRequest({
@@ -64,7 +80,7 @@ export const generateAblyToken = async (userId) => {
 
 // Global presence functions
 export const joinGlobalPresence = async (user) => {
-  const client = getAblyClient(user.id);
+  const client = await getAblyClient(user.id);
   const channel = client.channels.get('presence:global');
   
   try {
@@ -84,7 +100,7 @@ export const joinGlobalPresence = async (user) => {
 
 export const leaveGlobalPresence = async (userId = null) => {
   try {
-    const client = getAblyClient(userId);
+    const client = await getAblyClient(userId);
     
     // Check if client and connection are available
     if (!client || !client.connection) {
@@ -115,7 +131,7 @@ export const leaveGlobalPresence = async (userId = null) => {
 };
 
 export const updateGlobalPresence = async (data, userId = null) => {
-  const client = getAblyClient(userId);
+  const client = await getAblyClient(userId);
   const channel = client.channels.get('presence:global');
   
   try {
@@ -132,7 +148,7 @@ export const updateGlobalPresence = async (data, userId = null) => {
 
 // Chat presence functions
 export const joinChatPresence = async (channelName, user) => {
-  const client = getAblyClient(user.id);
+  const client = await getAblyClient(user.id);
   const channel = client.channels.get(getChannelName(channelName));
   
   try {
@@ -150,7 +166,7 @@ export const joinChatPresence = async (channelName, user) => {
 };
 
 export const updateTypingStatus = async (channelName, isTyping, userId = null) => {
-  const client = getAblyClient(userId);
+  const client = await getAblyClient(userId);
   const channel = client.channels.get(getChannelName(channelName));
   
   try {

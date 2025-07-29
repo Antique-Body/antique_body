@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
 
 import { auth } from "#/auth";
-import { publishMessage } from "@/lib/ably";
+// Server-side Ably import for API routes
+let Ably = null;
+const getServerAbly = async () => {
+  if (!Ably) {
+    Ably = (await import('ably')).default;
+  }
+  return Ably;
+};
 import prisma from "@/lib/prisma";
 import { parseChatId, isValidChatId } from "@/utils/chatUtils";
 
@@ -259,8 +266,12 @@ export async function POST(request, { params }) {
       editedAt: message.editedAt,
     };
 
-    // Publish message to Ably for real-time delivery
-    await publishMessage(chatId, formattedMessage);
+    // Publish message to Ably for real-time delivery (server-side)
+    const Ably = await getServerAbly();
+    const ablyClient = new Ably.Rest({
+      key: process.env.NEXT_PUBLIC_ABLY_KEY
+    });
+    await ablyClient.channels.get(`chat:${chatId}`).publish('message', formattedMessage);
 
     return NextResponse.json({ message: formattedMessage });
   } catch (error) {

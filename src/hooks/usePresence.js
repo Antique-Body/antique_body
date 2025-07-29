@@ -1,6 +1,5 @@
 "use client";
 
-import Ably from "ably";
 import { useState, useEffect, useCallback, useRef } from "react";
 
 import { joinGlobalPresence, leaveGlobalPresence, updateGlobalPresence, joinChatPresence, updateTypingStatus } from "@/lib/ably";
@@ -25,9 +24,10 @@ export const useGlobalPresence = () => {
       const user = await response.json();
       currentUserRef.current = user;
 
-      // Create Ably instance directly with API key (simpler for development)
+      // Dynamically import Ably and create instance
+      const { default: Ably } = await import('ably');
       ablyRef.current = new Ably.Realtime({
-        key: "2w4ttQ.tWBjDA:Qs_hl_wWs0fZTk45sNaCux58grBzCSSWSveC8i42FJw",
+        key: process.env.NEXT_PUBLIC_ABLY_KEY,
         clientId: user.id,
       });
 
@@ -157,9 +157,10 @@ export const useChatPresence = (chatId) => {
         const user = await response.json();
         currentUserRef.current = user;
 
-                 // Create Ably instance directly with API key (simpler for development)
+                 // Dynamically import Ably and create instance
+         const { default: Ably } = await import('ably');
          const ably = new Ably.Realtime({
-           key: "2w4ttQ.tWBjDA:Qs_hl_wWs0fZTk45sNaCux58grBzCSSWSveC8i42FJw",
+           key: process.env.NEXT_PUBLIC_ABLY_KEY,
            clientId: user.id,
          });
 
