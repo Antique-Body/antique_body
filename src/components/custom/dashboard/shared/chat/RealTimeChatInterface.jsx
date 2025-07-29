@@ -349,6 +349,9 @@ export const RealTimeChatInterface = ({ conversationId }) => {
   const [showMobileChat, setShowMobileChat] = useState(false);
   const [invalidChatId, setInvalidChatId] = useState(false);
   const [validatedChatIds, setValidatedChatIds] = useState(new Set()); // Cache validated chat IDs
+  const [sessionStorageProcessed, setSessionStorageProcessed] = useState(false);
+
+
 
   const { conversations, loading, error, fetchConversations } = useConversations();
   const { isUserOnline } = useGlobalPresence();
@@ -376,38 +379,44 @@ export const RealTimeChatInterface = ({ conversationId }) => {
         
         setInvalidChatId(false);
         
-        const conversation = conversations.find(conv => conv.id === conversationId);
+        // Only check for existing conversation if conversations are loaded
+        const conversation = conversations.length > 0 ? conversations.find(conv => conv.id === conversationId) : null;
         if (conversation) {
           // Existing conversation found - no validation needed
           setActiveConversation(conversation);
           setShowMobileChat(true);
         } else {
-          // New conversation - need to validate and get participant info
+          // Conversations are loaded but this one doesn't exist, or conversations not loaded yet
+          // Try session storage for new conversation
           let participantName = "New Conversation";
           let participantAvatar = null;
           
-          // Try to get participant info from session storage first
+          // Try to get participant info from session storage first (only if not already processed)
           let participantInfoFound = false;
-          try {
-            const tempConversationData = sessionStorage.getItem('tempConversation');
-            if (tempConversationData) {
-              const participantInfo = JSON.parse(tempConversationData);
-              
-              // Verify this is for the current chat ID and not expired (5 minutes)
-              const isExpired = Date.now() - participantInfo.timestamp > 5 * 60 * 1000;
-              const isForCurrentChat = participantInfo.chatId === conversationId;
-              
-              if (!isExpired && isForCurrentChat) {
-                participantName = participantInfo.name || "New Conversation";
-                participantAvatar = participantInfo.avatar || null;
-                participantInfoFound = true;
+          if (!sessionStorageProcessed) {
+            try {
+              const tempConversationData = sessionStorage.getItem('tempConversation');
+              if (tempConversationData) {
+                const participantInfo = JSON.parse(tempConversationData);
                 
-                // Clear the session storage after using it
-                sessionStorage.removeItem('tempConversation');
+                // Verify this is for the current chat ID and not expired (5 minutes)
+                const isExpired = Date.now() - participantInfo.timestamp > 5 * 60 * 1000;
+                const isForCurrentChat = participantInfo.chatId === conversationId;
+                
+                if (!isExpired && isForCurrentChat) {
+                  participantName = participantInfo.name || "New Conversation";
+                  participantAvatar = participantInfo.avatar || null;
+                  participantInfoFound = true;
+                  
+                  // Clear the session storage after using it
+                  sessionStorage.removeItem('tempConversation');
+                  // Mark as processed to prevent future accesses
+                  setSessionStorageProcessed(true);
+                }
               }
+            } catch (error) {
+              console.error("Error parsing participant info from session storage:", error);
             }
-          } catch (error) {
-            console.error("Error parsing participant info from session storage:", error);
           }
 
           // Only do server validation if session storage didn't work and we haven't validated this chat ID
@@ -459,8 +468,22 @@ export const RealTimeChatInterface = ({ conversationId }) => {
       }
     };
 
+    // Reset session storage processed flag when conversation ID changes
+    setSessionStorageProcessed(false);
     handleConversationId();
-  }, [conversationId, conversations, validatedChatIds]);
+  }, [conversationId, validatedChatIds]);
+
+  // Handle when conversations are loaded and we have a conversation ID
+  useEffect(() => {
+    if (conversationId && conversations.length > 0 && !activeConversation) {
+      const existingConversation = conversations.find(conv => conv.id === conversationId);
+      if (existingConversation) {
+        setActiveConversation(existingConversation);
+        setShowMobileChat(true);
+        setInvalidChatId(false);
+      }
+    }
+  }, [conversations, conversationId, activeConversation]);
 
   const handleRefreshConversations = () => {
     fetchConversations();
