@@ -77,8 +77,8 @@ export default function DietTrackerPage() {
     return <ErrorState error={error} />;
   }
 
-  // Has assigned plan but no active tracking
-  if (hasAssignedPlan && !hasActivePlan && assignedPlan) {
+  // Has assigned custom meal input plan but no active plan yet
+  if (hasAssignedPlan && assignedPlan && isCustomMealInput && !hasActivePlan) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-6">
         <AssignedPlanCard
@@ -91,8 +91,8 @@ export default function DietTrackerPage() {
     );
   }
 
-  // Has assigned custom meal input plan and active plan
-  if (hasAssignedPlan && hasActivePlan && assignedPlan && isCustomMealInput) {
+  // Has assigned regular plan but no active tracking
+  if (hasAssignedPlan && !hasActivePlan && assignedPlan && !isCustomMealInput) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-6">
         <AssignedPlanCard
@@ -134,7 +134,7 @@ export default function DietTrackerPage() {
     );
   }
 
-  // Active plan interface
+  // Active plan interface (including custom meal input)
   if (hasActivePlan && activePlan) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-6">
@@ -330,6 +330,73 @@ function AssignedPlanCard({
                 </div>
               </div>
             )}
+
+            {/* Plan Description - Only for custom meal input */}
+            {isCustomMealInput && assignedPlan.planData?.description && (
+              <div className="mb-6 p-4 bg-cyan-500/10 border border-cyan-500/30 rounded-xl">
+                <h4 className="text-white font-semibold mb-2 flex items-center gap-2">
+                  <Icon
+                    icon="mdi:file-document-edit"
+                    className="w-4 h-4 text-cyan-400"
+                  />
+                  Trainer's Nutrition Guidelines
+                </h4>
+                <p className="text-zinc-300 text-sm leading-relaxed">
+                  {assignedPlan.planData.description}
+                </p>
+              </div>
+            )}
+
+            {/* Documents Section - Only for custom meal input */}
+            {isCustomMealInput &&
+              assignedPlan.documents &&
+              assignedPlan.documents.length > 0 && (
+                <div className="mb-6 p-4 bg-zinc-800/30 rounded-xl">
+                  <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+                    <Icon
+                      icon="mdi:file-document-multiple"
+                      className="w-4 h-4 text-blue-400"
+                    />
+                    Nutrition Documents
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {assignedPlan.documents.map((doc, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-3 p-3 bg-zinc-700/30 rounded-lg hover:bg-zinc-700/50 transition-colors"
+                      >
+                        <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                          <Icon
+                            icon="mdi:file-document"
+                            className="w-5 h-5 text-blue-400"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white text-sm font-medium truncate">
+                            {doc.name}
+                          </p>
+                          <p className="text-zinc-400 text-xs">
+                            {doc.size
+                              ? `${(doc.size / 1024 / 1024).toFixed(1)} MB`
+                              : "Document"}
+                          </p>
+                        </div>
+                        <a
+                          href={doc.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-colors"
+                        >
+                          <Icon
+                            icon="mdi:download"
+                            className="w-4 h-4 text-blue-400"
+                          />
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
             {/* Action Button */}
             <div className="flex items-center gap-4">

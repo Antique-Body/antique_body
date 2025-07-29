@@ -566,6 +566,7 @@ model DailyDietLog {
   totalFat            Float    @default(0)
   completedMeals      Int      @default(0)
   totalMeals          Int      @default(0)
+  waterIntake         Float    @default(0) // Water intake in liters
   isCompleted         Boolean  @default(false)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
@@ -594,6 +595,10 @@ model MealLog {
   protein         Float    @default(0)
   carbs           Float    @default(0)
   fat             Float    @default(0)
+  portionMultiplier Float  @default(1) // Multiplier for portion size (0.5, 1, 1.5, etc.)
+  isCustom        Boolean  @default(false) // True if this is a custom meal entry
+  isAlternative   Boolean  @default(false) // True if this is an alternative to planned meal
+  plannedMealId   String?  // Reference to the original planned meal if this is an alternative
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   
@@ -689,6 +694,7 @@ model AssignedNutritionPlan {
   assignedAt            DateTime               @default(now())
   completedAt           DateTime?
   customMealInputEnabled Boolean               @default(false)
+  documents             Json?                  // Array of uploaded documents with metadata
   client                ClientInfo             @relation(fields: [clientId], references: [id])
   originalPlan          NutritionPlan?         @relation(fields: [originalPlanId], references: [id])
   trainer               TrainerInfo            @relation(fields: [trainerId], references: [id])

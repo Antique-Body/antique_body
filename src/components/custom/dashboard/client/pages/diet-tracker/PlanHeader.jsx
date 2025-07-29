@@ -3,6 +3,8 @@
 import { Icon } from "@iconify/react";
 import Image from "next/image";
 
+import { DocumentViewer } from "@/components/custom/dashboard/client/DocumentViewer";
+
 export const PlanHeader = ({
   activePlan,
   currentDay,
@@ -123,6 +125,11 @@ export const PlanHeader = ({
           </div>
         </div>
       </div>
+
+      {/* Documents Section - Show if documents exist */}
+      {activePlan?.documents && activePlan.documents.length > 0 && (
+        <DocumentViewer documents={activePlan.documents} />
+      )}
     </div>
   );
 };

@@ -60,7 +60,7 @@ export const TrainerRecommendations = ({ assignedPlanId, selectedDate }) => {
           height={20}
         />
         <h3 className="text-lg font-semibold text-white">
-          Trainer's Recommendations
+          Trainer's Guidelines & Recommendations
         </h3>
       </div>
 
@@ -101,6 +101,26 @@ export const TrainerRecommendations = ({ assignedPlanId, selectedDate }) => {
             </div>
             <p className="text-zinc-300 text-sm leading-relaxed">
               {recommendations.supplementation}
+            </p>
+          </div>
+        )}
+
+        {/* Plan Guidelines */}
+        {recommendations.planGuidelines && (
+          <div className="p-4 bg-cyan-500/10 border border-cyan-500/30 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <Icon
+                icon="mdi:file-document-edit"
+                className="text-cyan-400"
+                width={16}
+                height={16}
+              />
+              <span className="text-cyan-400 text-sm font-medium">
+                Nutrition Guidelines
+              </span>
+            </div>
+            <p className="text-zinc-300 text-sm leading-relaxed">
+              {recommendations.planGuidelines}
             </p>
           </div>
         )}
@@ -166,6 +186,7 @@ export const TrainerRecommendations = ({ assignedPlanId, selectedDate }) => {
         {/* No recommendations message */}
         {!recommendations.notes &&
           !recommendations.supplementation &&
+          !recommendations.planGuidelines &&
           (!recommendations.meals ||
             Object.keys(recommendations.meals).length === 0) && (
             <div className="text-center py-4">

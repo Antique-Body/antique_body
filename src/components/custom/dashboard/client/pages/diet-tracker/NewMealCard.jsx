@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
+import { MealConfirmationModal } from "./MealConfirmationModal";
 
 export const NewMealCard = ({
   meal,
@@ -16,6 +17,7 @@ export const NewMealCard = ({
   onLogMeal,
   onViewDetail,
   onDeleteMeal,
+  onCustomMeal, // Added for custom meal input
 }) => {
   const [selectedOption, setSelectedOption] = useState(
     mealLog?.selectedOption || meal.options?.[0] || null
@@ -26,6 +28,8 @@ export const NewMealCard = ({
   const [customMealName, setCustomMealName] = useState("");
   const [customMealDescription, setCustomMealDescription] = useState("");
   const [showCustomMealInput, setShowCustomMealInput] = useState(false);
+  const [showMealConfirmation, setShowMealConfirmation] = useState(false);
+  const [confirmationMealData, setConfirmationMealData] = useState(null);
 
   const formatTime = (time) => {
     if (!time) return "";
@@ -66,6 +70,30 @@ export const NewMealCard = ({
     await onDeleteMeal(mealLog);
   };
 
+  // Handle meal confirmation modal
+  const handleShowMealConfirmation = (option) => {
+    setConfirmationMealData(option);
+    setShowMealConfirmation(true);
+  };
+
+  const handleConfirmMeal = async (meal, mealData) => {
+    try {
+      await onLogMeal(meal, mealData, null);
+      setShowMealConfirmation(false);
+      setConfirmationMealData(null);
+    } catch (error) {
+      console.error("Error confirming meal:", error);
+      throw error;
+    }
+  };
+
+  // Handle "Log Different Meal" (open MealLoggingModal)
+  const handleLogDifferentMeal = () => {
+    if (onCustomMeal) {
+      onCustomMeal(meal, mealLog);
+    }
+  };
+
   const getMealIcon = (mealName) => {
     const name = mealName.toLowerCase();
     if (name.includes("breakfast")) return "mdi:coffee";
@@ -96,6 +124,9 @@ export const NewMealCard = ({
 
     return baseStyle;
   };
+
+  // Check if this is a custom meal input plan (empty meal with calories: 0)
+  const isCustomMealInput = selectedOption && selectedOption.calories === 0 && selectedOption.name?.includes("Dodaj");
 
   return (
     <div className={getCardStyle()}>
@@ -409,9 +440,48 @@ export const NewMealCard = ({
                 )}
               </div>
 
-              {/* Compact Options List */}
-              <div className="space-y-2">
-                {meal.options.map((option, index) => {
+              {/* Custom Meal Input or Options List */}
+              {isCustomMealInput ? (
+                <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/30 rounded-xl p-6">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <Icon 
+                        icon={getMealIcon(meal.name)} 
+                        className="w-8 h-8 text-white" 
+                      />
+                    </div>
+                    <h4 className="text-xl font-bold text-white mb-2">
+                      {meal.name === "Breakfast" ? "Doručak" :
+                       meal.name === "Lunch" ? "Ručak" :
+                       meal.name === "Dinner" ? "Večera" :
+                       meal.name === "Snack" ? "Užina" : meal.name}
+                    </h4>
+                    <p className="text-zinc-300 text-sm mb-6">
+                      {formatTime(meal.time)} • Dodaj svoj obrok
+                    </p>
+                    
+                    {isEditable ? (
+                      <Button
+                        variant="orangeFilled"
+                        size="large"
+                        onClick={() => onCustomMeal && onCustomMeal(meal, mealLog)}
+                        className="transform hover:scale-105 transition-all duration-200 shadow-lg"
+                      >
+                        <Icon icon="mdi:plus-circle" className="w-5 h-5 mr-2" />
+                        Unesi obrok
+                      </Button>
+                    ) : (
+                      <div className="flex items-center justify-center gap-2 text-zinc-500 text-sm">
+                        <Icon icon="mdi:lock" className="w-4 h-4" />
+                        Završi prethodne obroke prvo
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                  {meal.options.map((option, index) => {
                   const isSelected = selectedOption?.name === option.name;
 
                   return (
@@ -439,9 +509,9 @@ export const NewMealCard = ({
                       )}
 
                       <div className="flex items-center gap-3">
-                        {/* Option Image */}
+                        {/* Option Image with Video Indicator */}
                         {option.imageUrl && (
-                          <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                          <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 relative">
                             <Image
                               src={option.imageUrl}
                               alt={option.name}
@@ -451,25 +521,44 @@ export const NewMealCard = ({
                                 !isEditable && isDayEditable ? "opacity-40" : ""
                               }`}
                             />
+                            {option.videoUrl && (
+                              <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                <Icon icon="mdi:play-circle" className="w-4 h-4 text-white" />
+                              </div>
+                            )}
                           </div>
                         )}
 
                         {/* Option Info */}
                         <div className="flex-1 min-w-0">
-                          <h5
-                            className={`font-medium text-sm mb-1 truncate ${
-                              !isEditable && isDayEditable
-                                ? "text-zinc-500"
-                                : "text-white"
-                            }`}
-                          >
-                            {option.name}
-                          </h5>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h5
+                              className={`font-medium text-sm truncate ${
+                                !isEditable && isDayEditable
+                                  ? "text-zinc-500"
+                                  : "text-white"
+                              }`}
+                            >
+                              {option.name}
+                            </h5>
+                            {option.videoUrl && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleShowMealConfirmation(option);
+                                }}
+                                className="flex items-center gap-1 px-1.5 py-0.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 rounded text-blue-300 hover:text-blue-200 transition-all"
+                                title="Pogledaj video"
+                              >
+                                <Icon icon="mdi:video" className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
 
                           {/* Show description for text-based meals */}
                           {option.isTextBased && option.description && (
-                            <p className="text-xs text-zinc-400 mb-1 line-clamp-2">
-                              {option.description}
+                            <p className="text-xs text-zinc-400 mb-1">
+                              {option.description.length > 80 ? `${option.description.substring(0, 80)}...` : option.description}
                             </p>
                           )}
 
@@ -505,19 +594,20 @@ export const NewMealCard = ({
                           </div>
                         </div>
 
-                        {/* Quick Log Button */}
+                        {/* I ate this button */}
                         {isEditable && (
                           <Button
                             variant="ghost"
                             size="small"
                             onClick={(e) => {
                               e.stopPropagation();
-                              onLogMeal(meal, option, null);
+                              handleShowMealConfirmation(option);
                             }}
-                            className="text-green-400 hover:text-green-300 hover:bg-green-500/10 h-8 px-2"
-                            title="Log this meal"
+                            className="text-green-400 hover:text-green-300 hover:bg-green-500/10 h-8 px-3 text-xs font-medium"
+                            title="Jeo sam ovo"
                           >
-                            <Icon icon="mdi:check" className="w-4 h-4" />
+                            <Icon icon="mdi:check-circle" className="w-3 h-3 mr-1" />
+                            Jeo sam
                           </Button>
                         )}
 
@@ -548,15 +638,15 @@ export const NewMealCard = ({
                               size="small"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                onLogMeal(meal, option, null);
+                                handleShowMealConfirmation(option);
                               }}
                               className="flex-1 h-8 text-xs"
                             >
                               <Icon
-                                icon="mdi:check-circle"
+                                icon="mdi:silverware-fork-knife"
                                 className="w-3 h-3 mr-1"
                               />
-                              Log This Meal
+                              Jeo sam ovo
                             </Button>
                             <Button
                               variant="secondary"
@@ -576,181 +666,47 @@ export const NewMealCard = ({
                     </div>
                   );
                 })}
-              </div>
-            </div>
-          )}
-
-        {/* Add Custom Meal Button - Always visible when editable */}
-        {isEditable && !showCustomMealInput && (
-          <div className="mt-4">
-            <Button
-              variant="secondary"
-              size="medium"
-              onClick={() => setShowCustomMealInput(true)}
-              className="w-full h-10 bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20 hover:text-purple-300"
-            >
-              <Icon icon="mdi:plus-circle" className="w-4 h-4 mr-2" />
-              Add Custom Meal
-            </Button>
-          </div>
-        )}
-
-        {/* Add Custom Meal Button - For completed meals or when no options */}
-        {isEditable &&
-          !showCustomMealInput &&
-          (isCompleted || !meal.options || meal.options.length === 0) && (
-            <div className="mt-4">
-              <Button
-                variant="secondary"
-                size="medium"
-                onClick={() => setShowCustomMealInput(true)}
-                className="w-full h-10 bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20 hover:text-purple-300"
-              >
-                <Icon icon="mdi:plus-circle" className="w-4 h-4 mr-2" />
-                Add Custom Meal
-              </Button>
-            </div>
-          )}
-
-        {/* Log Any Meal Button - When no trainer suggestions */}
-        {isEditable &&
-          !showCustomMealInput &&
-          (!meal.options || meal.options.length === 0) && (
-            <div className="mt-3">
-              <Button
-                variant="orangeFilled"
-                size="medium"
-                onClick={() => setShowCustomMealInput(true)}
-                className="w-full h-10"
-              >
-                <Icon icon="mdi:food" className="w-4 h-4 mr-2" />
-                Log What You Ate
-              </Button>
-            </div>
-          )}
-
-        {/* Quick Log Button - Always available for custom logging */}
-        {isEditable && !showCustomMealInput && (
-          <div className="mt-3">
-            <Button
-              variant="secondary"
-              size="medium"
-              onClick={() => setShowCustomMealInput(true)}
-              className="w-full h-10 bg-orange-500/10 border-orange-500/30 text-orange-400 hover:bg-orange-500/20 hover:text-orange-300"
-            >
-              <Icon icon="mdi:food" className="w-4 h-4 mr-2" />
-              Log What You Ate
-            </Button>
-          </div>
-        )}
-
-        {/* Quick Log Button - For any meal */}
-        {isEditable && !showCustomMealInput && (
-          <div className="mt-3">
-            <Button
-              variant="greenFilled"
-              size="medium"
-              onClick={() => {
-                const customMeal = {
-                  name: `Custom ${meal.name}`,
-                  description: "Quickly logged meal",
-                  calories: 0,
-                  protein: 0,
-                  carbs: 0,
-                  fat: 0,
-                  isCustom: true,
-                  portionMultiplier: 1,
-                };
-                onLogMeal(meal, customMeal, null);
-              }}
-              className="w-full h-10"
-            >
-              <Icon icon="mdi:check-circle" className="w-4 h-4 mr-2" />
-              Quick Log Meal
-            </Button>
-          </div>
-        )}
-
-        {/* Add More Food Button - When meal is completed */}
-        {isEditable && !showCustomMealInput && isCompleted && (
-          <div className="mt-3">
-            <Button
-              variant="secondary"
-              size="medium"
-              onClick={() => setShowCustomMealInput(true)}
-              className="w-full h-10 bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20 hover:text-blue-300"
-            >
-              <Icon icon="mdi:plus" className="w-4 h-4 mr-2" />
-              Add More Food
-            </Button>
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        {!isCompleted && !showCustomMealInput && (
-          <div className="mt-4 flex flex-col sm:flex-row gap-3">
-            {/* LOG MEAL Button */}
-            {isEditable && selectedOption && (
-              <Button
-                variant="orangeFilled"
-                size="large"
-                onClick={() => setShowPortionControl(true)}
-                disabled={isLogging}
-                className="flex-1 h-12"
-              >
-                {isLogging ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-3"></div>
-                    Logging Meal...
-                  </>
-                ) : (
-                  <>
-                    <Icon icon="mdi:check-circle" className="w-5 h-5 mr-3" />
-                    LOG MEAL
-                  </>
-                )}
-              </Button>
-            )}
-
-            {/* Custom Meal Button */}
-            {isEditable && (
-              <Button
-                variant="secondary"
-                size="large"
-                onClick={() => setShowCustomMealInput(true)}
-                className="h-12 px-6 sm:flex-shrink-0"
-              >
-                <Icon icon="mdi:plus-circle" className="w-5 h-5 mr-2" />
-                <span className="hidden sm:inline">Custom Meal</span>
-                <span className="sm:hidden">Custom</span>
-              </Button>
-            )}
-
-            {/* Improved Disabled State Message */}
-            {!isEditable && isDayEditable && (
-              <div className="flex-1 flex items-center justify-center h-12 bg-zinc-800/20 rounded-lg border border-zinc-700/20">
-                <div className="flex items-center gap-2 text-zinc-600 text-center">
-                  <Icon
-                    icon="mdi:clock-outline"
-                    className="w-4 h-4 flex-shrink-0"
-                  />
-                  <span className="text-sm font-medium">
-                    <span className="hidden sm:inline">
-                      Complete previous meals to unlock
-                    </span>
-                    <span className="sm:hidden">Complete previous first</span>
-                  </span>
+                  </div>
+                  
+                  {/* Log Different Meal Button */}
+                  {isEditable && (
+                    <div className="pt-3 border-t border-zinc-700/30">
+                      <Button
+                        variant="secondary"
+                        size="medium"
+                        onClick={handleLogDifferentMeal}
+                        className="w-full h-10 bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20 hover:text-purple-300"
+                      >
+                        <Icon icon="mdi:silverware-fork-knife" className="w-4 h-4 mr-2" />
+                        Logovaj drugi obrok
+                      </Button>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
+
+
 
         {/* Enhanced Next Meal Glow */}
         {isNextMeal && !isCompleted && (
           <div className="absolute inset-0 bg-gradient-to-r from-[#FF6B00]/5 to-[#FF9A00]/5 rounded-xl blur-xl -z-10 animate-pulse"></div>
         )}
       </div>
+
+      {/* Meal Confirmation Modal */}
+      <MealConfirmationModal
+        isOpen={showMealConfirmation}
+        onClose={() => {
+          setShowMealConfirmation(false);
+          setConfirmationMealData(null);
+        }}
+        onConfirm={handleConfirmMeal}
+        meal={meal}
+        option={confirmationMealData}
+        mealTime={meal?.time}
+      />
     </div>
   );
 };

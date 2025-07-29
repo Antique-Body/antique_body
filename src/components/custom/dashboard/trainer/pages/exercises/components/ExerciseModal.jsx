@@ -368,7 +368,7 @@ export const ExerciseModal = ({
       setIsSubmitting(true);
       setIsUploading(false);
 
-      // Pripremi fajlove za upload
+      // Prepare files for upload
       const filesToUpload = {};
       if (imagePreview && imagePreview.startsWith("blob:") && imageFile) {
         filesToUpload.image = imageFile;
@@ -379,7 +379,7 @@ export const ExerciseModal = ({
         setUploadStatus((prev) => ({ ...prev, video: "Uploading video..." }));
       }
 
-      // Prvo uploaduj fajlove, pa tek onda šalji podatke u bazu
+      // First upload files, then send data to database
       let uploadedUrls = {};
       if (Object.keys(filesToUpload).length > 0) {
         setIsUploading(true);
@@ -391,7 +391,7 @@ export const ExerciseModal = ({
         uploadedUrls = await uploadFiles(filesToUpload);
       }
 
-      // Pripremi podatke za backend
+      // Prepare data for backend
       const finalFormData = {
         ...formData,
         id: formData.id || undefined,
@@ -399,7 +399,7 @@ export const ExerciseModal = ({
         videoUrl: uploadedUrls.exerciseVideo || formData.videoUrl,
       };
 
-      // Ako je video bio blob, ali nije uploadovan (npr. greška), nemoj slati blob
+      // If video was blob, but not uploaded (e.g., error), do not send blob
       if (finalFormData.videoUrl?.startsWith("blob:")) {
         finalFormData.videoUrl = "";
       }

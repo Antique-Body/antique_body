@@ -62,6 +62,38 @@ export const UPLOAD_CONFIG = {
     maxSize: 5, // MB
     returnType: "single",
   },
+  nutritionDocuments: {
+    allowedTypes: [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-excel",
+      "text/plain",
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+    ],
+    folder: "nutrition-documents",
+    maxSize: 20, // MB
+    returnType: "array",
+  },
+  files: {
+    allowedTypes: [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-excel",
+      "text/plain",
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+    ],
+    folder: "nutrition-documents",
+    maxSize: 20, // MB
+    returnType: "array",
+  },
 };
 
 /**

@@ -9,6 +9,8 @@ export const NutritionSummary = ({
   currentDay,
   completedMeals,
   totalMeals,
+  waterIntake = 0,
+  waterGoal = 2.5,
 }) => {
   const getProgressPercentage = (current, target) => {
     if (!target || target === 0) return 0;
@@ -33,6 +35,15 @@ export const NutritionSummary = ({
       if (percentage >= 90) return "text-green-400"; // Perfect
       if (percentage >= 70) return "text-[#FF6B00]"; // Good progress
       if (percentage >= 50) return "text-yellow-400"; // Needs more
+      return "text-red-400"; // Too low
+    }
+
+    // For water - more is generally better
+    if (nutrient === "water") {
+      if (percentage >= 100) return "text-green-400"; // Goal met or exceeded
+      if (percentage >= 80) return "text-blue-400"; // Close to goal
+      if (percentage >= 60) return "text-[#FF6B00]"; // Good progress
+      if (percentage >= 40) return "text-yellow-400"; // Needs more
       return "text-red-400"; // Too low
     }
 
@@ -61,6 +72,15 @@ export const NutritionSummary = ({
       if (percentage >= 90) return "from-green-500 to-green-400"; // Perfect
       if (percentage >= 70) return "from-[#FF6B00] to-[#FF9A00]"; // Good
       if (percentage >= 50) return "from-yellow-500 to-yellow-400"; // Needs more
+      return "from-red-500 to-red-400"; // Too low
+    }
+
+    // For water
+    if (nutrient === "water") {
+      if (percentage >= 100) return "from-green-500 to-green-400"; // Goal met
+      if (percentage >= 80) return "from-blue-500 to-blue-400"; // Close to goal
+      if (percentage >= 60) return "from-[#FF6B00] to-[#FF9A00]"; // Good progress
+      if (percentage >= 40) return "from-yellow-500 to-yellow-400"; // Needs more
       return "from-red-500 to-red-400"; // Too low
     }
 
@@ -238,6 +258,14 @@ export const NutritionSummary = ({
       unit: "g",
       icon: "mdi:oil",
       nutrient: "fat",
+    },
+    {
+      label: "Water",
+      current: waterIntake,
+      target: waterGoal,
+      unit: "L",
+      icon: "mdi:water",
+      nutrient: "water",
     },
   ];
 
@@ -448,13 +476,58 @@ export const NutritionSummary = ({
             return null;
           })()}
 
-          {/* Hydration Reminder */}
-          <div className="flex items-start gap-3">
-            <Icon icon="mdi:water" className="w-5 h-5 text-blue-400 mt-0.5" />
-            <p className="text-zinc-300 text-sm">
-              Don't forget to stay hydrated throughout the day!
-            </p>
-          </div>
+          {/* Hydration Status */}
+          {(() => {
+            const hydrationPercentage = getProgressPercentage(waterIntake, waterGoal);
+            
+            let hydrationInsight = {
+              icon: "mdi:water",
+              color: "text-blue-400",
+              message: "Don't forget to stay hydrated throughout the day!",
+            };
+
+            if (hydrationPercentage >= 100) {
+              hydrationInsight = {
+                icon: "mdi:check-circle",
+                color: "text-green-400",
+                message: `Excellent! You've reached your daily water goal of ${waterGoal}L.`,
+              };
+            } else if (hydrationPercentage >= 80) {
+              hydrationInsight = {
+                icon: "mdi:water-check",
+                color: "text-blue-400",
+                message: `Great hydration! You're at ${waterIntake.toFixed(1)}L of your ${waterGoal}L goal.`,
+              };
+            } else if (hydrationPercentage >= 50) {
+              hydrationInsight = {
+                icon: "mdi:water",
+                color: "text-[#FF6B00]",
+                message: `Good start! You've had ${waterIntake.toFixed(1)}L of water today.`,
+              };
+            } else if (waterIntake > 0) {
+              hydrationInsight = {
+                icon: "mdi:water-alert",
+                color: "text-yellow-400",
+                message: `Remember to drink more water - you're at ${waterIntake.toFixed(1)}L of ${waterGoal}L.`,
+              };
+            } else {
+              hydrationInsight = {
+                icon: "mdi:water-off",
+                color: "text-red-400",
+                message: `Start your hydration! Aim for ${waterGoal}L of water today.`,
+              };
+            }
+
+            return (
+              <div className="flex items-start gap-3">
+                <Icon
+                  icon={hydrationInsight.icon}
+                  className={`w-5 h-5 ${hydrationInsight.color} mt-0.5`}
+                />
+                <p className="text-zinc-300 text-sm">{hydrationInsight.message}</p>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>

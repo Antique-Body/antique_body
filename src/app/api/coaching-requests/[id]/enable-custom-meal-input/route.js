@@ -14,6 +14,11 @@ export async function POST(request, context) {
     }
 
     const { id } = await context.params; // coaching request id
+    const body = await request.json();
+    const { documents = [], description = "" } = body;
+
+    console.log("Received documents:", documents);
+    console.log("Received description:", description);
 
     // Get coaching request
     const coachingRequest = await prisma.coachingRequest.findUnique({
@@ -92,13 +97,15 @@ export async function POST(request, context) {
         trainer: { connect: { id: coachingRequest.trainerId } },
         planData: {
           title: "Custom Meal Input",
-          description: "Track your daily meals with custom input",
+          description:
+            description || "Track your daily meals with custom input",
           type: "custom",
           customMealInputEnabled: true,
           days: [], // Empty days array for custom meal input
         },
         status: "active",
         customMealInputEnabled: true,
+        documents: documents.length > 0 ? documents : null, // Save uploaded documents
       },
     });
 
@@ -145,6 +152,8 @@ export async function POST(request, context) {
       customMealInputEnabled: assigned.customMealInputEnabled,
       status: assigned.status,
       dietPlanAssignmentId: dietPlanAssignment.id,
+      documents: assigned.documents,
+      documentsCount: documents.length,
     });
 
     return NextResponse.json(

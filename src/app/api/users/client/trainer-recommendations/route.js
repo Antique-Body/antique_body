@@ -61,6 +61,14 @@ export async function GET(req) {
       );
     }
 
+    // Get the assigned nutrition plan to access planData
+    const assignedNutritionPlan = await prisma.assignedNutritionPlan.findFirst({
+      where: {
+        clientId: clientInfo.id,
+        status: "active",
+      },
+    });
+
     // Get nutrition tracking data for the specific date
     const trackingData = await prisma.nutritionTrackingData.findFirst({
       where: {
@@ -69,12 +77,22 @@ export async function GET(req) {
       },
     });
 
+    // Get plan description from the assigned nutrition plan
+    let planGuidelines = null;
+    if (
+      assignedNutritionPlan?.planData &&
+      typeof assignedNutritionPlan.planData === "object"
+    ) {
+      planGuidelines = assignedNutritionPlan.planData.description || null;
+    }
+
     if (!trackingData) {
       return NextResponse.json({
         success: true,
         data: {
           notes: null,
           supplementation: null,
+          planGuidelines: planGuidelines,
           meals: {},
         },
       });
@@ -85,6 +103,7 @@ export async function GET(req) {
       data: {
         notes: trackingData.notes,
         supplementation: trackingData.supplementation,
+        planGuidelines: planGuidelines,
         meals: trackingData.meals || {},
       },
     });

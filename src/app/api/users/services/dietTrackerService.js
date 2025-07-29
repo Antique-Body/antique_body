@@ -782,5 +782,250 @@ async function saveCustomMealToHistory(
   }
 }
 
+// Water tracking functions
+export async function updateWaterIntake(dietPlanAssignmentId, date, waterAmount) {
+  try {
+    // Validate day editability
+    validateDayEdit(date, "update water intake for");
+
+    // Get or create daily log
+    let dailyLog = await prisma.dailyDietLog.findFirst({
+      where: {
+        dietPlanAssignmentId,
+        date: new Date(date),
+      },
+    });
+
+    if (!dailyLog) {
+      // Calculate day number based on assignment start date
+      const assignment = await prisma.dietPlanAssignment.findUnique({
+        where: { id: dietPlanAssignmentId },
+      });
+
+      if (!assignment) {
+        throw new Error("Diet plan assignment not found");
+      }
+
+      const startDate = new Date(assignment.startDate);
+      const targetDate = new Date(date);
+      startDate.setHours(0, 0, 0, 0);
+      targetDate.setHours(0, 0, 0, 0);
+      
+      const daysDiff = Math.floor((targetDate - startDate) / (1000 * 60 * 60 * 24));
+      const dayNumber = daysDiff + 1;
+
+      dailyLog = await prisma.dailyDietLog.create({
+        data: {
+          dietPlanAssignmentId,
+          date: new Date(date),
+          dayNumber,
+          waterIntake: waterAmount,
+        },
+      });
+    } else {
+      dailyLog = await prisma.dailyDietLog.update({
+        where: { id: dailyLog.id },
+        data: {
+          waterIntake: waterAmount,
+        },
+      });
+    }
+
+    return dailyLog;
+  } catch (error) {
+    console.error("Error updating water intake:", error);
+    throw error;
+  }
+}
+
+// Enhanced custom meal logging with meal categories
+export async function logCustomMeal(
+  clientId,
+  date,
+  mealType,
+  mealData,
+  portionMultiplier = 1
+) {
+  try {
+    // Validate day editability
+    validateDayEdit(date, "log meal for");
+
+    // Get active diet plan assignment
+    const activeAssignment = await prisma.dietPlanAssignment.findFirst({
+      where: {
+        clientId,
+        isActive: true,
+      },
+    });
+
+    if (!activeAssignment) {
+      throw new Error("No active diet plan found");
+    }
+
+    // Get or create daily log
+    let dailyLog = await prisma.dailyDietLog.findFirst({
+      where: {
+        dietPlanAssignmentId: activeAssignment.id,
+        date: new Date(date),
+      },
+    });
+
+    if (!dailyLog) {
+      const startDate = new Date(activeAssignment.startDate);
+      const targetDate = new Date(date);
+      startDate.setHours(0, 0, 0, 0);
+      targetDate.setHours(0, 0, 0, 0);
+      
+      const daysDiff = Math.floor((targetDate - startDate) / (1000 * 60 * 60 * 24));
+      const dayNumber = daysDiff + 1;
+
+      dailyLog = await prisma.dailyDietLog.create({
+        data: {
+          dietPlanAssignmentId: activeAssignment.id,
+          date: new Date(date),
+          dayNumber,
+        },
+      });
+    }
+
+    // Create meal log
+    const mealLog = await prisma.mealLog.create({
+      data: {
+        dailyDietLogId: dailyLog.id,
+        mealName: mealType,
+        mealTime: mealData.time || new Date().toLocaleTimeString("en-US", {
+          hour12: false,
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        selectedOption: mealData,
+        calories: (mealData.calories || 0) * portionMultiplier,
+        protein: (mealData.protein || 0) * portionMultiplier,
+        carbs: (mealData.carbs || 0) * portionMultiplier,
+        fat: (mealData.fat || 0) * portionMultiplier,
+        portionMultiplier,
+        isCustom: true,
+        isCompleted: true,
+        completedAt: new Date(),
+      },
+    });
+
+    // Update daily totals
+    await updateDailyTotals(dailyLog.id);
+
+    return mealLog;
+  } catch (error) {
+    console.error("Error logging custom meal:", error);
+    throw error;
+  }
+}
+
+// Log alternative meal for assigned plan
+export async function logAlternativeMeal(
+  mealLogId,
+  alternativeMealData,
+  portionMultiplier = 1
+) {
+  try {
+    // Get the original meal log
+    const originalMeal = await prisma.mealLog.findUnique({
+      where: { id: mealLogId },
+      include: {
+        dailyDietLog: true,
+      },
+    });
+
+    if (!originalMeal) {
+      throw new Error("Original meal log not found");
+    }
+
+    // Validate day editability
+    validateDayEdit(originalMeal.dailyDietLog.date, "log alternative meal for");
+
+    // Create alternative meal log
+    const alternativeMeal = await prisma.mealLog.create({
+      data: {
+        dailyDietLogId: originalMeal.dailyDietLogId,
+        mealName: originalMeal.mealName,
+        mealTime: originalMeal.mealTime,
+        selectedOption: alternativeMealData,
+        calories: (alternativeMealData.calories || 0) * portionMultiplier,
+        protein: (alternativeMealData.protein || 0) * portionMultiplier,
+        carbs: (alternativeMealData.carbs || 0) * portionMultiplier,
+        fat: (alternativeMealData.fat || 0) * portionMultiplier,
+        portionMultiplier,
+        isCustom: true,
+        isAlternative: true,
+        plannedMealId: mealLogId,
+        isCompleted: true,
+        completedAt: new Date(),
+      },
+    });
+
+    // Mark original meal as having an alternative
+    await prisma.mealLog.update({
+      where: { id: mealLogId },
+      data: {
+        isCompleted: false, // Mark as not completed since alternative was logged
+      },
+    });
+
+    // Update daily totals
+    await updateDailyTotals(originalMeal.dailyDietLog.id);
+
+    return alternativeMeal;
+  } catch (error) {
+    console.error("Error logging alternative meal:", error);
+    throw error;
+  }
+}
+
+// Update portion size for existing meal
+export async function updateMealPortion(mealLogId, newPortionMultiplier) {
+  try {
+    const mealLog = await prisma.mealLog.findUnique({
+      where: { id: mealLogId },
+      include: {
+        dailyDietLog: true,
+      },
+    });
+
+    if (!mealLog) {
+      throw new Error("Meal log not found");
+    }
+
+    // Validate day editability
+    validateDayEdit(mealLog.dailyDietLog.date, "update portion for");
+
+    // Calculate base nutrition values
+    const baseCalories = mealLog.selectedOption.calories || 0;
+    const baseProtein = mealLog.selectedOption.protein || 0;
+    const baseCarbs = mealLog.selectedOption.carbs || 0;
+    const baseFat = mealLog.selectedOption.fat || 0;
+
+    // Update meal log with new portion
+    const updatedMeal = await prisma.mealLog.update({
+      where: { id: mealLogId },
+      data: {
+        portionMultiplier: newPortionMultiplier,
+        calories: baseCalories * newPortionMultiplier,
+        protein: baseProtein * newPortionMultiplier,
+        carbs: baseCarbs * newPortionMultiplier,
+        fat: baseFat * newPortionMultiplier,
+      },
+    });
+
+    // Update daily totals if meal is completed
+    if (updatedMeal.isCompleted) {
+      await updateDailyTotals(mealLog.dailyDietLog.id);
+    }
+
+    return updatedMeal;
+  } catch (error) {
+    console.error("Error updating meal portion:", error);
+    throw error;
+  }
+}
+
 // Export validation helpers for use in API routes
 export { getDayStatus, isDayEditable, validateDayEdit };

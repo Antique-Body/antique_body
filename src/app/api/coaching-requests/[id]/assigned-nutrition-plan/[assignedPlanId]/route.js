@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { auth } from "#/auth";
 import prisma from "@/lib/prisma";
+import { startDietPlan } from "@/app/api/users/services/dietTrackerService";
 
 export async function GET(request, context) {
   try {
@@ -148,6 +149,64 @@ export async function PATCH(request, context) {
         ...(status === "completed" && { completedAt: new Date() }),
       },
     });
+
+    // If status is being set to "active", start the diet plan
+    if (status === "active") {
+      try {
+        // First, create or find existing DietPlanAssignment
+        let dietPlanAssignment = await prisma.dietPlanAssignment.findFirst({
+          where: {
+            clientId: coachingRequest.clientId,
+            nutritionPlanId: assignedPlan.originalPlanId,
+            assignedById: coachingRequest.trainerId,
+          },
+        });
+
+        // If no existing assignment, create one
+        if (!dietPlanAssignment) {
+          dietPlanAssignment = await prisma.dietPlanAssignment.create({
+            data: {
+              clientId: coachingRequest.clientId,
+              nutritionPlanId: assignedPlan.originalPlanId,
+              assignedById: coachingRequest.trainerId,
+              startDate: new Date(),
+              isActive: true,
+            },
+          });
+        } else {
+          // Update existing assignment to be active
+          dietPlanAssignment = await prisma.dietPlanAssignment.update({
+            where: { id: dietPlanAssignment.id },
+            data: {
+              isActive: true,
+              startDate: new Date(),
+            },
+          });
+        }
+
+        // Now start the diet plan using the DietPlanAssignment ID
+        const dietPlanResult = await startDietPlan(dietPlanAssignment.id);
+        return NextResponse.json(
+          { 
+            success: true, 
+            data: updatedPlan,
+            message: "Diet plan started successfully",
+            dailyLogs: dietPlanResult.dailyLogs 
+          },
+          { status: 200 }
+        );
+      } catch (error) {
+        console.error("Error starting diet plan:", error);
+        // Plan status was updated but diet plan start failed
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: "Plan status updated but failed to start diet tracking: " + error.message 
+          },
+          { status: 500 }
+        );
+      }
+    }
 
     return NextResponse.json(
       { success: true, data: updatedPlan },

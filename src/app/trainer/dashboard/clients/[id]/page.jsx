@@ -10,6 +10,7 @@ import { Card } from "@/components/common/Card";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { InfoBanner } from "@/components/common/InfoBanner";
 import { Modal } from "@/components/common/Modal";
+import { DocumentUpload } from "@/components/custom/dashboard/trainer/DocumentUpload";
 import { PlanPreviewModal } from "@/components/custom/dashboard/trainer/pages/plans/components";
 import { ACTIVITY_TYPES } from "@/enums/activityTypes";
 import { EXPERIENCE_LEVELS } from "@/enums/experienceLevels";
@@ -36,6 +37,18 @@ export default function ClientDashboard({ params }) {
   const [nutritionPreviewData, setNutritionPreviewData] = useState(null);
   const [startingPlanId, setStartingPlanId] = useState(null);
   const [startPlanError, setStartPlanError] = useState(null);
+  // const [documents, setDocuments] = useState([]);
+  const [isUploadingDocuments, setIsUploadingDocuments] = useState(false);
+  const [showCustomMealInputModal, setShowCustomMealInputModal] =
+    useState(false);
+  const [customMealInputDescription, setCustomMealInputDescription] =
+    useState("");
+  const [customMealInputDocuments, setCustomMealInputDocuments] = useState([]);
+  const [isUploadingCustomDocuments, setIsUploadingCustomDocuments] =
+    useState(false);
+  const [showCustomMealInputConfig, setShowCustomMealInputConfig] =
+    useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   // Unwrap params using React.use() for Next.js 15 compatibility
   const unwrappedParams = React.use(params);
   const clientId = unwrappedParams.id;
@@ -168,7 +181,7 @@ export default function ClientDashboard({ params }) {
   };
 
   // Handle custom meal input assignment
-  const handleEnableCustomMealInput = async () => {
+  const _handleEnableCustomMealInput = async () => {
     try {
       setAssigning(true);
       setAssignError(null);
@@ -178,6 +191,7 @@ export default function ClientDashboard({ params }) {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ documents: [] }),
         }
       );
 
@@ -187,14 +201,164 @@ export default function ClientDashboard({ params }) {
         throw new Error(data.error || "Failed to enable custom meal input");
       }
 
-      setShowAssignModal(false);
-      setSelectedPlan(null);
-      setAssignType(null);
-      setAssignOption(null);
+      setShowCustomMealInputModal(false);
+      setCustomMealInputDescription("");
+      setCustomMealInputDocuments([]);
       fetchClientData();
 
       // Show success message
-      console.log("Custom meal input enabled successfully");
+      // console.log("Custom meal input enabled successfully");
+    } catch (err) {
+      console.error("Error enabling custom meal input:", err);
+      setAssignError(
+        err.message || "Failed to enable custom meal input. Please try again."
+      );
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  // Handle document upload - store files in state first
+  const handleDocumentUpload = async (files) => {
+    const fileArray = Array.from(files);
+    setSelectedFiles((prev) => [...prev, ...fileArray]);
+  };
+
+  // Handle document removal
+  const handleDocumentRemove = (index) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Upload all selected files when Assign Plan is clicked
+  const _uploadSelectedFiles = async () => {
+    if (selectedFiles.length === 0) return [];
+
+    try {
+      setIsUploadingDocuments(true);
+
+      // Create a single FormData with all files
+      const formData = new FormData();
+      selectedFiles.forEach((file, index) => {
+        // console.log(`Adding file ${index}:`, {
+        //   name: file.name,
+        //   size: file.size,
+        //   type: file.type,
+        // });
+        formData.append(`files[${index}]`, file);
+      });
+
+      // console.log("FormData entries:");
+      // for (const [key, value] of formData.entries()) {
+      //   console.log(key, value);
+      // }
+
+      // console.log(
+      //   "Uploading",
+      //   selectedFiles.length,
+      //   "files in single request..."
+      // );
+
+      // console.log("Making fetch request to /api/upload...");
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      // console.log("Fetch response status:", response.status);
+      // console.log(
+      //   "Fetch response headers:",
+      //   Object.fromEntries(response.headers.entries())
+      // );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Upload error response:", errorData);
+        throw new Error(errorData.error || "Failed to upload documents");
+      }
+
+      const data = await response.json();
+      // console.log("Upload response:", data);
+
+      if (!data.success) {
+        throw new Error(data.error || "Upload failed");
+      }
+
+      // Map the uploaded files to the expected format
+      const uploadedDocs = data.data.map((uploadedFile, index) => ({
+        name: selectedFiles[index].name,
+        url: uploadedFile.url,
+        size: selectedFiles[index].size,
+        mimetype: selectedFiles[index].type,
+        originalName: selectedFiles[index].name,
+      }));
+
+      // console.log("Successfully uploaded", uploadedDocs.length, "documents");
+      return uploadedDocs;
+    } catch (err) {
+      console.error("Error uploading documents:", err);
+      throw new Error(`Failed to upload documents: ${err.message}`);
+    } finally {
+      setIsUploadingDocuments(false);
+    }
+  };
+
+  const handleEnableCustomMealInputWithDetails = async () => {
+    try {
+      // console.log("Starting custom meal input assignment...");
+      // console.log("Selected files:", selectedFiles.length);
+      // console.log("Description:", customMealInputDescription);
+
+      setAssigning(true);
+      setAssignError(null);
+
+      // Upload files first if any are selected
+      let uploadedDocuments = [];
+      if (selectedFiles.length > 0) {
+        // console.log("Uploading files...");
+        try {
+          uploadedDocuments = await _uploadSelectedFiles();
+          // console.log("Files uploaded successfully:", uploadedDocuments.length);
+        } catch (uploadError) {
+          console.error("Error uploading files:", uploadError);
+          throw new Error(`Failed to upload files: ${uploadError.message}`);
+        }
+      }
+
+      // console.log("Making API call to enable custom meal input...");
+      // console.log("Documents to send:", uploadedDocuments);
+      const response = await fetch(
+        `/api/coaching-requests/${client.id}/enable-custom-meal-input`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            documents: uploadedDocuments,
+            description: customMealInputDescription,
+          }),
+        }
+      );
+      // console.log("API response status:", response.status);
+      // console.log("API response data:", data);
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to enable custom meal input");
+      }
+
+      // console.log("Custom meal input enabled successfully, closing modal...");
+
+      // Close modal and reset state
+      setShowAssignModal(false);
+      setShowCustomMealInputConfig(false);
+      setCustomMealInputDescription("");
+      setSelectedFiles([]);
+      setAssignType(null);
+      setAssignOption(null);
+      setAssignError(null);
+
+      // Refresh client data
+      await fetchClientData();
+
+      // console.log("Modal closed and data refreshed");
     } catch (err) {
       console.error("Error enabling custom meal input:", err);
       setAssignError(
@@ -212,6 +376,8 @@ export default function ClientDashboard({ params }) {
     setAssignType(null);
     setAssignOption(null);
     setPlans([]);
+    setSelectedFiles([]); // Clear selected files when closing modal
+    setAssignError(null); // Clear any errors
   };
 
   // Handle nutrition plan preview
@@ -222,11 +388,81 @@ export default function ClientDashboard({ params }) {
     setNutritionPreviewOpen(true);
   };
 
-  // State za prikaz gumba End & Assign
+  // Handle custom document upload
+  const handleCustomDocumentUpload = async (files) => {
+    try {
+      setIsUploadingCustomDocuments(true);
+      const uploadedDocs = [];
+
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to upload document");
+        }
+
+        const data = await response.json();
+        uploadedDocs.push({
+          name: file.name,
+          url: data.url,
+          size: file.size,
+        });
+      }
+
+      setCustomMealInputDocuments((prev) => [...prev, ...uploadedDocs]);
+    } catch (err) {
+      console.error("Error uploading custom documents:", err);
+      setAssignError("Failed to upload documents. Please try again.");
+    } finally {
+      setIsUploadingCustomDocuments(false);
+    }
+  };
+
+  // Handle custom document removal
+  const handleCustomDocumentRemove = (index) => {
+    setCustomMealInputDocuments((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Handle opening custom meal input modal
+  const _handleOpenCustomMealInputModal = () => {
+    // console.log("Opening custom meal input modal");
+    // console.log("Current showCustomMealInputModal:", showCustomMealInputModal);
+    setShowCustomMealInputModal(true);
+  };
+
+  // Handle closing custom meal input modal
+  const handleCloseCustomMealInputModal = () => {
+    setShowCustomMealInputModal(false);
+    setCustomMealInputDescription("");
+    setCustomMealInputDocuments([]);
+    setAssignError(null);
+  };
 
   useEffect(() => {
     fetchClientData();
   }, [clientId, fetchClientData]);
+
+  // Monitor modal state changes
+  useEffect(() => {
+    // console.log(
+    //   "showCustomMealInputModal changed to:",
+    //   showCustomMealInputModal
+    // );
+  }, [showCustomMealInputModal]);
+
+  // Monitor custom meal input config state changes
+  useEffect(() => {
+    // console.log(
+    //   "showCustomMealInputConfig changed to:",
+    //   showCustomMealInputConfig
+    // );
+  }, [showCustomMealInputConfig]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -343,7 +579,7 @@ export default function ClientDashboard({ params }) {
 
   const profile = client.client.clientProfile;
 
-  // Handler for starting a plan
+  // Handler for starting a training plan
   const handleStartPlan = async (planId) => {
     if (!client?.id || !planId) return;
     setStartingPlanId(planId);
@@ -364,6 +600,32 @@ export default function ClientDashboard({ params }) {
       fetchClientData();
     } catch (err) {
       setStartPlanError(err.message || "Failed to start plan");
+    } finally {
+      setStartingPlanId(null);
+    }
+  };
+
+  // Handler for starting a nutrition plan
+  const handleStartNutritionPlan = async (planId) => {
+    if (!client?.id || !planId) return;
+    setStartingPlanId(planId);
+    setStartPlanError(null);
+    try {
+      const res = await fetch(
+        `/api/coaching-requests/${client.id}/assigned-nutrition-plan/${planId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "active" }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to start nutrition plan");
+      }
+      fetchClientData();
+    } catch (err) {
+      setStartPlanError(err.message || "Failed to start nutrition plan");
     } finally {
       setStartingPlanId(null);
     }
@@ -464,6 +726,9 @@ export default function ClientDashboard({ params }) {
             onStartPlan={handleStartPlan}
             startingPlanId={startingPlanId}
             startPlanError={startPlanError}
+            setAssignType={setAssignType}
+            setAssignOption={setAssignOption}
+            setShowAssignModal={setShowAssignModal}
           />
         )}
         {activeTab === "nutrition" && (
@@ -471,6 +736,12 @@ export default function ClientDashboard({ params }) {
             clientId={clientId}
             assignedNutritionPlans={client.assignedNutritionPlans || []}
             onViewNutritionPlan={handleViewNutritionPlan}
+            onStartNutritionPlan={handleStartNutritionPlan}
+            startingPlanId={startingPlanId}
+            startPlanError={startPlanError}
+            setAssignType={setAssignType}
+            setAssignOption={setAssignOption}
+            setShowAssignModal={setShowAssignModal}
           />
         )}
         {activeTab === "messages" && <MessagesTab client={client} />}
@@ -494,9 +765,72 @@ export default function ClientDashboard({ params }) {
               Assign {assignType === "training" ? "Training" : "Nutrition"} Plan
             </div>
           }
-          hideButtons={true}
+          hideButtons={!assignOption}
           className="max-w-4xl"
-          footerButtons={false}
+          footerButtons={true}
+          primaryButtonText={(() => {
+            let text = "";
+            if (assignType === "nutrition" && assignOption === "custom") {
+              text = assigning ? "Enabling..." : "Enable Custom Meal Input";
+            } else {
+              text = assigning ? "Assigning..." : "Assign Plan";
+            }
+
+            // console.log("Button text:", {
+            //   assignType,
+            //   assignOption,
+            //   showCustomMealInputConfig,
+            //   assigning,
+            //   text,
+            // });
+
+            return text;
+          })()}
+          secondaryButtonText="Cancel"
+          primaryButtonAction={
+            assignType === "nutrition" && assignOption === "custom"
+              ? () => {
+                  // console.log("=== FOOTER BUTTON CLICKED ===");
+                  // console.log(
+                  //   "Footer button clicked - enabling custom meal input"
+                  // );
+                  // console.log("Current state:", {
+                  //   assignType,
+                  //   assignOption,
+                  //   showCustomMealInputConfig,
+                  //   customMealInputDescription,
+                  //   selectedFiles: selectedFiles.length,
+                  // });
+                  handleEnableCustomMealInputWithDetails();
+                }
+              : handleAssignPlanToClient
+          }
+          secondaryButtonAction={handleCloseAssignModal}
+          primaryButtonDisabled={(() => {
+            const disabled =
+              assigning ||
+              (assignType === "training" && !selectedPlan) ||
+              (assignType === "nutrition" &&
+                assignOption === "existing" &&
+                !selectedPlan);
+            // Temporarily removed description requirement for testing
+            // (assignType === "nutrition" &&
+            //   assignOption === "custom" &&
+            //   showCustomMealInputConfig &&
+            //   !customMealInputDescription.trim());
+
+            // console.log("Button disabled state:", {
+            //   assigning,
+            //   assignType,
+            //   assignOption,
+            //   showCustomMealInputConfig,
+            //   selectedPlan: !!selectedPlan,
+            //   description: customMealInputDescription.trim(),
+            //   disabled,
+            // });
+
+            return disabled;
+          })()}
         >
           {/* Prikaži info/error poruku odmah ako postoji aktivni plan */}
           {assignType === "training" &&
@@ -584,40 +918,12 @@ export default function ClientDashboard({ params }) {
                 {/* Option 2: Enable Custom Meal Input */}
                 <div
                   className="relative group rounded-xl border-2 cursor-pointer transition-all duration-300 overflow-hidden border-zinc-700 hover:border-zinc-600 bg-zinc-800/50 hover:bg-zinc-800/80"
-                  onClick={async () => {
-                    setAssigning(true);
+                  onClick={() => {
+                    setAssignOption("custom");
+                    setShowCustomMealInputConfig(true);
+                    setCustomMealInputDescription("");
+                    setSelectedFiles([]);
                     setAssignError(null);
-                    try {
-                      const response = await fetch(
-                        `/api/coaching-requests/${client.id}/enable-custom-meal-input`,
-                        {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                        }
-                      );
-
-                      const data = await response.json();
-
-                      if (!response.ok || !data.success) {
-                        throw new Error(
-                          data.error || "Failed to enable custom meal input"
-                        );
-                      }
-
-                      setShowAssignModal(false);
-                      setSelectedPlan(null);
-                      setAssignType(null);
-                      setAssignOption(null);
-                      fetchClientData();
-                    } catch (err) {
-                      console.error("Error enabling custom meal input:", err);
-                      setAssignError(
-                        err.message ||
-                          "Failed to enable custom meal input. Please try again."
-                      );
-                    } finally {
-                      setAssigning(false);
-                    }
                   }}
                 >
                   <div className="p-6">
@@ -697,6 +1003,58 @@ export default function ClientDashboard({ params }) {
                     />
                     <span>Monitor progress and adherence</span>
                   </div>
+                </div>
+
+                {/* Description Section */}
+                <div className="mt-6 pt-6 border-t border-zinc-700">
+                  <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+                    <Icon
+                      icon="mdi:file-document-edit"
+                      className="w-5 h-5 text-blue-400"
+                    />
+                    Plan Description (Required)
+                  </h4>
+                  <p className="text-zinc-400 text-sm mb-4">
+                    Add a description that will help your client understand
+                    their nutrition goals and guidelines.
+                  </p>
+                  <textarea
+                    value={customMealInputDescription}
+                    onChange={(e) => {
+                      // console.log("Description changed:", e.target.value);
+                      setCustomMealInputDescription(e.target.value);
+                    }}
+                    placeholder="Example: Focus on high protein meals (aim for 2000 calories daily), include plenty of vegetables,  consider protein powder post-workout, avoid processed foods..."
+                    rows={4}
+                    className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-white placeholder-zinc-500 focus:border-blue-500 focus:outline-none resize-none"
+                  />
+                </div>
+
+                {/* Document Upload Section */}
+                <div className="mt-6 pt-6 border-t border-zinc-700">
+                  <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+                    <Icon
+                      icon="mdi:file-document-multiple"
+                      className="w-5 h-5 text-blue-400"
+                    />
+                    Nutrition Plan - Documents (Optional)
+                  </h4>
+                  <p className="text-zinc-400 text-sm mb-4">
+                    Upload documents that the client will see with the nutrition
+                    plan (PDF, Word, Excel, images)
+                  </p>
+                  <DocumentUpload
+                    onUpload={handleDocumentUpload}
+                    onRemove={handleDocumentRemove}
+                    documents={selectedFiles.map((file) => ({
+                      originalName: file.name,
+                      mimetype: file.type,
+                      size: file.size,
+                      url: URL.createObjectURL(file),
+                    }))}
+                    isUploading={isUploadingDocuments}
+                    maxFiles={5}
+                  />
                 </div>
               </div>
             )}
@@ -909,102 +1267,78 @@ export default function ClientDashboard({ params }) {
 
                     {/* Action Buttons */}
                     <div className="flex gap-3">
-                      <Button
-                        variant="secondary"
-                        onClick={handleCloseAssignModal}
-                        fullWidth
-                      >
-                        Cancel
-                      </Button>
-
-                      {/* Custom Meal Input Button */}
+                      {/* Custom Meal Input Configuration Button */}
                       {assignType === "nutrition" &&
-                        assignOption === "custom" && (
+                        assignOption === "custom" &&
+                        !showCustomMealInputConfig && (
                           <Button
                             variant="primary"
-                            onClick={handleEnableCustomMealInput}
+                            onClick={() => {
+                              // console.log("Button clicked - showing config");
+                              // console.log(
+                              //   "Current showCustomMealInputConfig:",
+                              //   showCustomMealInputConfig
+                              // );
+                              setShowCustomMealInputConfig(true);
+                              // console.log(
+                              //   "After setting showCustomMealInputConfig to true"
+                              // );
+                              setCustomMealInputDescription("");
+                              setCustomMealInputDocuments([]);
+                              setAssignError(null);
+                            }}
                             disabled={assigning}
                             leftIcon={
-                              assigning ? (
-                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                              ) : (
-                                <Icon
-                                  icon="mdi:pencil-plus"
-                                  width={20}
-                                  height={20}
-                                />
-                              )
+                              <Icon
+                                icon="mdi:pencil-plus"
+                                width={20}
+                                height={20}
+                              />
                             }
                             fullWidth
                           >
-                            {assigning ? "Enabling..." : "Enable Custom Input"}
+                            Enable Custom Meal Input
                           </Button>
                         )}
 
-                      {/* Training Plan Assignment */}
-                      {assignType === "training" &&
-                      client.assignedTrainingPlans?.some(
-                        (plan) => plan.status === "active"
-                      ) ? (
-                        <Button
-                          className="bg-orange-500 hover:bg-orange-600 text-white border-none"
-                          onClick={async () => {
-                            setAssigning(true);
-                            setAssignError(null);
-                            try {
-                              const response = await fetch(
-                                `/api/coaching-requests/${client.id}/replace-training-plan`,
-                                {
-                                  method: "POST",
-                                  headers: {
-                                    "Content-Type": "application/json",
-                                  },
-                                  body: JSON.stringify({
-                                    planId: String(selectedPlan.id),
-                                  }),
-                                }
-                              );
-                              const data = await response.json();
-                              if (!response.ok || !data.success) {
-                                throw new Error(
-                                  data.error || "Failed to replace plan"
-                                );
-                              }
-                              setShowAssignModal(false);
-                              setSelectedPlan(null);
-                              setAssignType(null);
-                              setAssignOption(null);
-                              fetchClientData();
-                            } catch (err) {
-                              setAssignError(
-                                err.message ||
-                                  "Failed to replace plan. Please try again."
-                              );
-                            } finally {
-                              setAssigning(false);
-                            }
-                          }}
-                          disabled={!selectedPlan || assigning}
-                          leftIcon={
-                            assigning ? (
-                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                            ) : (
-                              <Icon icon="mdi:check" width={20} height={20} />
-                            )
-                          }
-                          fullWidth
-                        >
-                          {assigning ? "Replacing..." : "Replace Current Plan"}
-                        </Button>
-                      ) : (
-                        /* Regular Plan Assignment */
-                        (assignType === "training" ||
-                          (assignType === "nutrition" &&
-                            assignOption === "existing")) && (
+                      {/* Debug info */}
+                      {assignType === "nutrition" &&
+                        assignOption === "custom" && (
+                          <div
+                            style={{
+                              color: "white",
+                              fontSize: "12px",
+                              marginTop: "10px",
+                            }}
+                          >
+                            Debug: assignType={assignType}, assignOption=
+                            {assignOption}, showCustomMealInputConfig=
+                            {showCustomMealInputConfig.toString()}
+                          </div>
+                        )}
+
+                      {/* Custom Meal Input Assign Button */}
+                      {assignType === "nutrition" &&
+                        assignOption === "custom" &&
+                        showCustomMealInputConfig && (
                           <Button
                             variant="primary"
-                            onClick={handleAssignPlanToClient}
-                            disabled={!selectedPlan || assigning}
+                            onClick={() => {
+                              // console.log("Custom meal input button clicked!");
+                              // console.log("assigning state:", assigning);
+                              // console.log(
+                              //   "description:",
+                              //   customMealInputDescription
+                              // );
+                              // console.log(
+                              //   "selectedFiles:",
+                              //   selectedFiles.length
+                              // );
+                              handleEnableCustomMealInputWithDetails();
+                            }}
+                            disabled={
+                              assigning || !customMealInputDescription.trim()
+                            }
                             leftIcon={
                               assigning ? (
                                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -1012,12 +1346,14 @@ export default function ClientDashboard({ params }) {
                                 <Icon icon="mdi:check" width={20} height={20} />
                               )
                             }
+                            className="flex-1 bg-green-600 hover:bg-green-700"
                             fullWidth
                           >
-                            {assigning ? "Assigning..." : "Assign Plan"}
+                            {assigning
+                              ? "Enabling..."
+                              : "Enable Custom Meal Input"}
                           </Button>
-                        )
-                      )}
+                        )}
                     </div>
                   </div>
                 )}
@@ -1043,6 +1379,424 @@ export default function ClientDashboard({ params }) {
         days={nutritionPreviewData?.days}
         type="nutrition"
       />
+
+      {/* Custom Meal Input Modal */}
+      {showCustomMealInputModal && (
+        <Modal
+          isOpen={showCustomMealInputModal}
+          onClose={handleCloseCustomMealInputModal}
+          title={
+            <div className="flex items-center gap-2">
+              <Icon
+                icon="mdi:pencil-plus"
+                width={24}
+                height={24}
+                className="text-green-500"
+              />
+              Configure Custom Meal Input
+            </div>
+          }
+          hideButtons={true}
+          className="max-w-4xl z-[9999]"
+          footerButtons={false}
+        >
+          {assignError && <ErrorMessage error={assignError} />}
+
+          <div className="space-y-6">
+            {/* Header */}
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Icon
+                  icon="mdi:pencil-plus"
+                  className="text-white"
+                  width={32}
+                  height={32}
+                />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                Custom Meal Input Setup
+              </h2>
+              <p className="text-zinc-400">
+                Configure custom meal tracking for{" "}
+                <span className="text-white font-medium">
+                  {profile.firstName} {profile.lastName}
+                </span>
+              </p>
+            </div>
+
+            {/* Description Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <Icon
+                  icon="mdi:file-document-edit"
+                  className="w-5 h-5 text-blue-400"
+                />
+                Nutrition Guidelines & Supplementation (Optional)
+              </h3>
+              <p className="text-zinc-400 text-sm">
+                Add detailed nutrition guidelines, supplementation
+                recommendations, and any specific instructions that will help
+                your client understand their nutrition goals and requirements.
+              </p>
+              <textarea
+                value={customMealInputDescription}
+                onChange={(e) => setCustomMealInputDescription(e.target.value)}
+                placeholder="Example: Focus on high protein meals (aim for 2000 calories daily), include plenty of vegetables,  consider protein powder post-workout, avoid processed foods..."
+                rows={4}
+                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-white placeholder-zinc-500 focus:border-blue-500 focus:outline-none resize-none"
+              />
+            </div>
+
+            {/* Document Upload Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <Icon
+                  icon="mdi:file-document-multiple"
+                  className="w-5 h-5 text-blue-400"
+                />
+                Nutrition Documents (Optional)
+              </h3>
+              <p className="text-zinc-400 text-sm">
+                Upload nutrition guides, meal plans, or other documents that
+                will help your client with their nutrition journey.
+              </p>
+              <DocumentUpload
+                onUpload={handleCustomDocumentUpload}
+                onRemove={handleCustomDocumentRemove}
+                documents={customMealInputDocuments}
+                isUploading={isUploadingCustomDocuments}
+                maxFiles={5}
+              />
+            </div>
+
+            {/* Features Preview */}
+            <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/30 rounded-xl p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <Icon
+                  icon="mdi:check-circle"
+                  className="w-5 h-5 text-green-400"
+                />
+                What Your Client Will Get
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Icon
+                      icon="mdi:food-apple"
+                      className="w-4 h-4 text-green-400"
+                    />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-medium text-sm">
+                      Custom Meal Logging
+                    </h4>
+                    <p className="text-zinc-400 text-xs">
+                      Log daily meals with nutrition details
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Icon
+                      icon="mdi:chart-line"
+                      className="w-4 h-4 text-green-400"
+                    />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-medium text-sm">
+                      Progress Tracking
+                    </h4>
+                    <p className="text-zinc-400 text-xs">
+                      Monitor calories, protein, carbs, and fat
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Icon icon="mdi:water" className="w-4 h-4 text-green-400" />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-medium text-sm">
+                      Water Intake
+                    </h4>
+                    <p className="text-zinc-400 text-xs">
+                      Track daily water consumption
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Icon
+                      icon="mdi:file-document"
+                      className="w-4 h-4 text-green-400"
+                    />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-medium text-sm">
+                      Your Documents
+                    </h4>
+                    <p className="text-zinc-400 text-xs">
+                      Access to your nutrition guides
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Custom Meal Input Configuration */}
+            {showCustomMealInputConfig && (
+              <div className="space-y-6 border-t border-zinc-700/50 pt-6">
+                {/* Header with Back Button */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setShowCustomMealInputConfig(false);
+                        setCustomMealInputDescription("");
+                        setCustomMealInputDocuments([]);
+                        setAssignError(null);
+                      }}
+                      leftIcon={
+                        <Icon icon="mdi:arrow-left" width={16} height={16} />
+                      }
+                      className="text-zinc-400 hover:text-white"
+                    >
+                      Back
+                    </Button>
+                    <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                      <Icon
+                        icon="mdi:pencil-plus"
+                        className="text-white"
+                        width={24}
+                        height={24}
+                      />
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <h3 className="text-xl font-bold text-white">
+                      Custom Meal Input Setup
+                    </h3>
+                    <p className="text-zinc-400 text-sm">
+                      Configure for {profile.firstName} {profile.lastName}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Description Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Icon
+                      icon="mdi:file-document-edit"
+                      className="w-5 h-5 text-blue-400"
+                    />
+                    <h4 className="text-lg font-semibold text-white">
+                      Plan Description
+                    </h4>
+                    <span className="text-zinc-500 text-sm">(Optional)</span>
+                  </div>
+                  <p className="text-zinc-400 text-sm">
+                    Add a description that will help your client understand
+                    their nutrition goals and guidelines.
+                  </p>
+                  <textarea
+                    value={customMealInputDescription}
+                    onChange={(e) => {
+                      // console.log("Description changed:", e.target.value);
+                      setCustomMealInputDescription(e.target.value);
+                    }}
+                    placeholder="Example: Focus on high protein meals (aim for 2000 calories daily), include plenty of vegetables,consider protein powder post-workout, avoid processed foods..."
+                    rows={4}
+                    className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-white placeholder-zinc-500 focus:border-blue-500 focus:outline-none resize-none transition-colors"
+                  />
+                </div>
+
+                {/* Document Upload Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Icon
+                      icon="mdi:file-document-multiple"
+                      className="w-5 h-5 text-blue-400"
+                    />
+                    <h4 className="text-lg font-semibold text-white">
+                      Nutrition Documents
+                    </h4>
+                    <span className="text-zinc-500 text-sm">(Optional)</span>
+                  </div>
+                  <p className="text-zinc-400 text-sm">
+                    Upload nutrition guides, meal plans, or other documents that
+                    will help your client with their nutrition journey.
+                  </p>
+
+                  {/* Upload Status */}
+                  {isUploadingCustomDocuments && (
+                    <div className="flex items-center gap-3 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+                      <div className="w-5 h-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
+                      <span className="text-blue-400 text-sm">
+                        Uploading documents...
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Document Upload Component */}
+                  <DocumentUpload
+                    onUpload={handleCustomDocumentUpload}
+                    onRemove={handleCustomDocumentRemove}
+                    documents={customMealInputDocuments}
+                    isUploading={isUploadingCustomDocuments}
+                    maxFiles={5}
+                  />
+
+                  {/* Uploaded Documents Preview */}
+                  {customMealInputDocuments.length > 0 && (
+                    <div className="space-y-3">
+                      <h5 className="text-white font-medium text-sm">
+                        Uploaded Documents:
+                      </h5>
+                      <div className="grid grid-cols-1 gap-2">
+                        {customMealInputDocuments.map((doc, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between p-3 bg-zinc-800/30 border border-zinc-700/50 rounded-lg"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Icon
+                                icon="mdi:file-document"
+                                className="w-5 h-5 text-blue-400"
+                              />
+                              <div>
+                                <p className="text-white text-sm font-medium">
+                                  {doc.name || `Document ${index + 1}`}
+                                </p>
+                                <p className="text-zinc-400 text-xs">
+                                  {doc.size
+                                    ? `${(doc.size / 1024 / 1024).toFixed(1)} MB`
+                                    : ""}
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              onClick={() => handleCustomDocumentRemove(index)}
+                              className="text-red-400 hover:text-red-300 p-1"
+                            >
+                              <Icon icon="mdi:close" width={16} height={16} />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Features Preview */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Icon icon="mdi:star" className="w-5 h-5 text-yellow-400" />
+                    <h4 className="text-lg font-semibold text-white">
+                      What Your Client Will Get
+                    </h4>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-start gap-3 p-4 bg-zinc-800/30 rounded-xl border border-zinc-700/50">
+                      <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Icon
+                          icon="mdi:pencil-plus"
+                          className="w-4 h-4 text-green-400"
+                        />
+                      </div>
+                      <div>
+                        <h5 className="text-white font-medium text-sm">
+                          Custom Meal Input
+                        </h5>
+                        <p className="text-zinc-400 text-xs">
+                          Log daily meals and snacks
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 p-4 bg-zinc-800/30 rounded-xl border border-zinc-700/50">
+                      <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Icon
+                          icon="mdi:chart-line"
+                          className="w-4 h-4 text-blue-400"
+                        />
+                      </div>
+                      <div>
+                        <h5 className="text-white font-medium text-sm">
+                          Progress Tracking
+                        </h5>
+                        <p className="text-zinc-400 text-xs">
+                          Monitor nutrition goals
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 p-4 bg-zinc-800/30 rounded-xl border border-zinc-700/50">
+                      <div className="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Icon
+                          icon="mdi:water"
+                          className="w-4 h-4 text-orange-400"
+                        />
+                      </div>
+                      <div>
+                        <h5 className="text-white font-medium text-sm">
+                          Water Tracking
+                        </h5>
+                        <p className="text-zinc-400 text-xs">
+                          Track daily water consumption
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 p-4 bg-zinc-800/30 rounded-xl border border-zinc-700/50">
+                      <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Icon
+                          icon="mdi:file-document"
+                          className="w-4 h-4 text-green-400"
+                        />
+                      </div>
+                      <div>
+                        <h5 className="text-white font-medium text-sm">
+                          Your Documents
+                        </h5>
+                        <p className="text-zinc-400 text-xs">
+                          Access to your nutrition guides
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Custom Footer Buttons for Configuration */}
+            {showCustomMealInputConfig && (
+              <div className="flex gap-3 pt-6 border-t border-zinc-700/50">
+                <Button
+                  variant="secondary"
+                  onClick={handleCloseAssignModal}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleEnableCustomMealInputWithDetails}
+                  disabled={assigning}
+                  leftIcon={
+                    assigning ? (
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    ) : (
+                      <Icon icon="mdi:check" width={20} height={20} />
+                    )
+                  }
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                >
+                  {assigning ? "Enabling..." : "Enable Custom Meal Input"}
+                </Button>
+              </div>
+            )}
+          </div>
+        </Modal>
+      )}
       <style jsx>{`
         .animate-fade-in {
           animation: fadeIn 0.5s;
@@ -2289,21 +3043,39 @@ function WorkoutsTab({
   onStartPlan,
   startingPlanId,
   startPlanError,
+  setAssignType,
+  setAssignOption,
+  setShowAssignModal,
 }) {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 className="text-xl font-semibold text-white">Training Plans</h2>
-        <Link href="/trainer/dashboard/plans">
+        <div className="flex gap-3">
+          {/* Quick Assign Button */}
           <Button
-            variant="primary"
-            leftIcon={<Icon icon="mdi:plus" width={18} height={18} />}
+            variant="secondary"
+            leftIcon={<Icon icon="mdi:lightning-bolt" width={18} height={18} />}
             className="w-full sm:w-auto"
+            onClick={() => {
+              setAssignType("training");
+              setAssignOption("existing");
+              setShowAssignModal(true);
+            }}
           >
-            Create New Plan
+            Quick Assign
           </Button>
-        </Link>
+          <Link href="/trainer/dashboard/plans">
+            <Button
+              variant="primary"
+              leftIcon={<Icon icon="mdi:plus" width={18} height={18} />}
+              className="w-full sm:w-auto"
+            >
+              Create New Plan
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Training Plans History */}
@@ -2600,8 +3372,8 @@ function MessagesTab({}) {
                 title="Video Call"
               />
               <div className="mt-4 text-center text-zinc-400 text-base">
-                Video poziv je pokrenut. Pošaljite link klijentu ako je
-                potrebno.
+                Video call has been started. Send the link to the client if it
+                is needed.
               </div>
             </div>
           </div>
@@ -2616,21 +3388,55 @@ function NutritionTab({
   clientId,
   assignedNutritionPlans,
   onViewNutritionPlan,
+  onStartNutritionPlan,
+  startingPlanId,
+  startPlanError,
+  setAssignType,
+  setAssignOption,
+  setShowAssignModal,
 }) {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 className="text-xl font-semibold text-white">Nutrition Plans</h2>
-        <Link href="/trainer/dashboard/plans/nutrition">
+        <div className="flex gap-3">
+          {/* Quick Assign Button */}
           <Button
-            variant="success"
-            leftIcon={<Icon icon="mdi:plus" width={18} height={18} />}
+            variant="secondary"
+            leftIcon={<Icon icon="mdi:lightning-bolt" width={18} height={18} />}
             className="w-full sm:w-auto"
+            onClick={() => {
+              setAssignType("nutrition");
+              setAssignOption("existing");
+              setShowAssignModal(true);
+            }}
           >
-            Create New Nutrition Plan
+            Quick Assign
           </Button>
-        </Link>
+          {/* Custom Meal Input Button */}
+          <Button
+            variant="orange"
+            leftIcon={<Icon icon="mdi:pencil-plus" width={18} height={18} />}
+            className="w-full sm:w-auto"
+            onClick={() => {
+              setAssignType("nutrition");
+              setAssignOption("custom");
+              setShowAssignModal(true);
+            }}
+          >
+            Custom Tracking
+          </Button>
+          <Link href="/trainer/dashboard/plans/nutrition">
+            <Button
+              variant="success"
+              leftIcon={<Icon icon="mdi:plus" width={18} height={18} />}
+              className="w-full sm:w-auto"
+            >
+              Create New Plan
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Nutrition Plans History */}
@@ -2647,6 +3453,11 @@ function NutritionTab({
           </h3>
         </div>
 
+        {startPlanError && (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4">
+            <div className="text-red-400 text-sm">{startPlanError}</div>
+          </div>
+        )}
         <div className="space-y-4">
           {assignedNutritionPlans && assignedNutritionPlans.length > 0 ? (
             assignedNutritionPlans.map((plan) => (
@@ -2655,6 +3466,8 @@ function NutritionTab({
                 plan={plan}
                 clientId={clientId}
                 onViewPlan={onViewNutritionPlan}
+                onStartPlan={onStartNutritionPlan}
+                startingPlanId={startingPlanId}
               />
             ))
           ) : (
@@ -2832,7 +3645,13 @@ function NutritionTab({
 }
 
 // Nutrition Plan Card Component
-function NutritionPlanCard({ plan, clientId, onViewPlan }) {
+function NutritionPlanCard({
+  plan,
+  clientId,
+  onViewPlan,
+  onStartPlan,
+  startingPlanId,
+}) {
   const formatDate = (dateString) =>
     new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
@@ -2913,6 +3732,19 @@ function NutritionPlanCard({ plan, clientId, onViewPlan }) {
           >
             View Details
           </Button>
+          {plan.status !== "completed" &&
+            plan.status !== "active" &&
+            plan.status !== "tracking" && (
+              <Button
+                variant="primary"
+                size="small"
+                onClick={() => onStartPlan && onStartPlan(plan.id)}
+                loading={startingPlanId === plan.id}
+                leftIcon={<Icon icon="mdi:play" width={16} height={16} />}
+              >
+                <span className="hidden sm:inline">Start</span> Tracking
+              </Button>
+            )}
           {(plan.status === "active" || plan.status === "tracking") && (
             <Link
               href={`/trainer/dashboard/clients/${clientId}/nutrition/${plan.id}`}

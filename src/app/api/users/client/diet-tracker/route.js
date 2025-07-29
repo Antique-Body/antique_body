@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 
 import { auth } from "#/auth";
-import prisma from "@/lib/prisma";
+import { PrismaClient } from "@prisma/client";
+
+// Create a new prisma instance for this route
+const prisma = new PrismaClient({
+  log: ["query", "info", "warn", "error"],
+});
 
 import {
   getActiveDietPlan,
@@ -9,6 +14,10 @@ import {
   getAllDailyLogs,
   getDietPlanStats,
   getNextMeal,
+  updateWaterIntake,
+  logCustomMeal,
+  logAlternativeMeal,
+  updateMealPortion,
 } from "../../services/dietTrackerService";
 
 // GET: Get current diet plan and progress for client
@@ -81,8 +90,59 @@ export async function GET(req) {
       },
     });
 
+    // If there's a new assigned plan, deactivate old active diet plans (except the current one)
+    if (assignedNutritionPlan) {
+      await prisma.dietPlanAssignment.updateMany({
+        where: {
+          clientId: clientInfo.id,
+          isActive: true,
+          nutritionPlanId: {
+            not: assignedNutritionPlan.originalPlanId,
+          },
+        },
+        data: {
+          isActive: false,
+        },
+      });
+    }
+
     // Check for active diet plan assignment
-    const activePlan = await getActiveDietPlan(clientInfo.id);
+    let activePlan = await getActiveDietPlan(clientInfo.id);
+
+    // If we have an assigned plan but no active DietPlanAssignment, try to find/create one
+    if (assignedNutritionPlan && !activePlan) {
+      // Look for existing inactive DietPlanAssignment for this plan
+      let dietPlanAssignment = await prisma.dietPlanAssignment.findFirst({
+        where: {
+          clientId: clientInfo.id,
+          nutritionPlanId: assignedNutritionPlan.originalPlanId,
+        },
+        include: {
+          nutritionPlan: true,
+          assignedBy: {
+            include: {
+              trainerProfile: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+
+      // If found but inactive, activate it
+      if (dietPlanAssignment && !dietPlanAssignment.isActive) {
+        await prisma.dietPlanAssignment.update({
+          where: { id: dietPlanAssignment.id },
+          data: {
+            isActive: true,
+            startDate: new Date(),
+          },
+        });
+        // Refresh the active plan
+        activePlan = await getActiveDietPlan(clientInfo.id);
+      }
+    }
 
     // If there's an active plan, check if it's a custom meal input plan
     if (activePlan) {
@@ -104,13 +164,16 @@ export async function GET(req) {
       });
 
       if (customAssignedPlan) {
-        // Return the custom meal input plan as assigned plan
+        // Return the custom meal input plan as assigned plan with documents
         return NextResponse.json({
           hasActivePlan: true,
           hasAssignedPlan: true,
           assignedPlan: customAssignedPlan,
           isCustomMealInput: true,
-          activePlan,
+          activePlan: {
+            ...activePlan,
+            documents: customAssignedPlan.documents, // Include documents in active plan
+          },
           dailyLogs: await getAllDailyLogs(activePlan.id),
           nextMeal: await getNextMeal(activePlan.id),
           message:
@@ -121,6 +184,13 @@ export async function GET(req) {
 
     if (assignedNutritionPlan && !activePlan) {
       // Client has an assigned plan but no active diet tracker
+      console.log("DEBUG: Assigned plan found but no active plan:", {
+        assignedPlanId: assignedNutritionPlan.id,
+        originalPlanId: assignedNutritionPlan.originalPlanId,
+        status: assignedNutritionPlan.status,
+        clientId: clientInfo.id,
+      });
+
       return NextResponse.json({
         hasActivePlan: false,
         hasAssignedPlan: true,
@@ -223,8 +293,17 @@ export async function POST(req) {
             assignmentId: assignment.id,
           });
         } else {
-          // Start regular nutrition plan
-          const result = await startDietPlan(assignedPlan.originalPlanId);
+          // Start regular nutrition plan - create diet plan assignment first
+          const assignment = await prisma.dietPlanAssignment.create({
+            data: {
+              clientId: clientInfo.id,
+              nutritionPlanId: assignedPlan.originalPlanId,
+              assignedById: assignedPlan.trainerId,
+              startDate: new Date(),
+            },
+          });
+
+          const result = await startDietPlan(assignment.id);
           return NextResponse.json(result);
         }
       } else if (useMockPlan) {
@@ -326,6 +405,167 @@ export async function POST(req) {
         }
 
         // Re-throw other errors to be caught by outer catch
+        throw validationError;
+      }
+    }
+
+    if (action === "log-custom-meal") {
+      const { mealType, mealData, date, portionMultiplier } = body;
+
+      if (!mealType || !mealData || !date) {
+        return NextResponse.json(
+          { error: "Meal type, meal data, and date are required" },
+          { status: 400 }
+        );
+      }
+
+      try {
+        const result = await logCustomMeal(
+          clientInfo.id,
+          date,
+          mealType,
+          mealData,
+          portionMultiplier || 1
+        );
+
+        return NextResponse.json({
+          success: true,
+          message: "Custom meal logged successfully",
+          data: result,
+        });
+      } catch (validationError) {
+        if (
+          validationError.message.includes("Cannot") &&
+          (validationError.message.includes("past days") ||
+            validationError.message.includes("future days"))
+        ) {
+          return NextResponse.json(
+            { error: validationError.message },
+            { status: 403 }
+          );
+        }
+        throw validationError;
+      }
+    }
+
+    if (action === "log-alternative-meal") {
+      const { mealLogId, alternativeMealData, portionMultiplier } = body;
+
+      if (!mealLogId || !alternativeMealData) {
+        return NextResponse.json(
+          { error: "Meal log ID and alternative meal data are required" },
+          { status: 400 }
+        );
+      }
+
+      try {
+        const result = await logAlternativeMeal(
+          mealLogId,
+          alternativeMealData,
+          portionMultiplier || 1
+        );
+
+        return NextResponse.json({
+          success: true,
+          message: "Alternative meal logged successfully",
+          data: result,
+        });
+      } catch (validationError) {
+        if (
+          validationError.message.includes("Cannot") &&
+          (validationError.message.includes("past days") ||
+            validationError.message.includes("future days"))
+        ) {
+          return NextResponse.json(
+            { error: validationError.message },
+            { status: 403 }
+          );
+        }
+        throw validationError;
+      }
+    }
+
+    if (action === "update-portion") {
+      const { mealLogId, portionMultiplier } = body;
+
+      if (!mealLogId || !portionMultiplier) {
+        return NextResponse.json(
+          { error: "Meal log ID and portion multiplier are required" },
+          { status: 400 }
+        );
+      }
+
+      try {
+        const result = await updateMealPortion(mealLogId, portionMultiplier);
+
+        return NextResponse.json({
+          success: true,
+          message: "Meal portion updated successfully",
+          data: result,
+        });
+      } catch (validationError) {
+        if (
+          validationError.message.includes("Cannot") &&
+          (validationError.message.includes("past days") ||
+            validationError.message.includes("future days"))
+        ) {
+          return NextResponse.json(
+            { error: validationError.message },
+            { status: 403 }
+          );
+        }
+        throw validationError;
+      }
+    }
+
+    if (action === "update-water") {
+      const { date, waterAmount } = body;
+
+      if (!date || waterAmount === undefined) {
+        return NextResponse.json(
+          { error: "Date and water amount are required" },
+          { status: 400 }
+        );
+      }
+
+      try {
+        // Get active diet plan assignment
+        const activeAssignment = await prisma.dietPlanAssignment.findFirst({
+          where: {
+            clientId: clientInfo.id,
+            isActive: true,
+          },
+        });
+
+        if (!activeAssignment) {
+          return NextResponse.json(
+            { error: "No active diet plan found" },
+            { status: 404 }
+          );
+        }
+
+        const result = await updateWaterIntake(
+          activeAssignment.id,
+          date,
+          waterAmount
+        );
+
+        return NextResponse.json({
+          success: true,
+          message: "Water intake updated successfully",
+          data: result,
+        });
+      } catch (validationError) {
+        if (
+          validationError.message.includes("Cannot") &&
+          (validationError.message.includes("past days") ||
+            validationError.message.includes("future days"))
+        ) {
+          return NextResponse.json(
+            { error: validationError.message },
+            { status: 403 }
+          );
+        }
         throw validationError;
       }
     }

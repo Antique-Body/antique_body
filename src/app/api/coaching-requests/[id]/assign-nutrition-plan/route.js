@@ -115,6 +115,16 @@ export async function POST(request, context) {
       },
     });
 
+    // Automatically create DietPlanAssignment for this assigned plan
+    const assignment = await prisma.dietPlanAssignment.create({
+      data: {
+        clientId: coachingRequest.clientId,
+        nutritionPlanId: plan.id,
+        assignedById: coachingRequest.trainerId,
+        startDate: new Date(),
+      },
+    });
+
     // Update clientCount in the original plan
     const activeAssignments = await prisma.assignedNutritionPlan.count({
       where: {
@@ -129,7 +139,7 @@ export async function POST(request, context) {
     });
 
     return NextResponse.json(
-      { success: true, data: assigned },
+      { success: true, data: { assigned, assignment } },
       { status: 201 }
     );
   } catch (error) {

@@ -2,37 +2,27 @@
 
 import { Icon } from "@iconify/react";
 import { useState, useCallback, useRef, useEffect } from "react";
-
 import { Modal } from "@/components/common/Modal";
-
 import { AIFoodScannerTab } from "./AIFoodScannerTab";
 import { CreateFoodTab } from "./CreateFoodTab";
 import { FoodHistoryTab } from "./FoodHistoryTab";
 
-export const CustomMealModal = ({
-  isOpen,
-  onClose,
-  onSave,
+export const MealLoggingModal = ({ 
+  isOpen, 
+  onClose, 
+  onSave, 
   mealName,
   mealTime,
-  isCustomTracking = false, // New prop to indicate if this is custom tracking mode
-  allowMealTypeSelection = false, // New prop to allow meal type selection
+  selectedDate,
+  existingMeals = [] // For showing what's already logged
 }) => {
-  const [activeTab, setActiveTab] = useState("ai-scanner"); // AI Scanner first!
+  const [activeTab, setActiveTab] = useState("ai-scanner");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedMealType, setSelectedMealType] = useState(mealName?.toLowerCase() || "breakfast");
   const [buttonConfig, setButtonConfig] = useState({
     primaryText: null,
     primaryAction: null,
     primaryDisabled: false,
   });
-
-  const mealTypeOptions = [
-    { value: "breakfast", label: "Breakfast", icon: "mdi:coffee", time: "08:00" },
-    { value: "lunch", label: "Lunch", icon: "mdi:food", time: "13:00" },
-    { value: "dinner", label: "Dinner", icon: "mdi:silverware-fork-knife", time: "19:00" },
-    { value: "snack", label: "Snack", icon: "mdi:cookie", time: "15:00" },
-  ];
 
   const createFoodTabRef = useRef(null);
   const aiFoodScannerTabRef = useRef(null);
@@ -60,7 +50,7 @@ export const CustomMealModal = ({
       }
     } else if (activeTab === "create") {
       setButtonConfig({
-        primaryText: isSubmitting ? "Saving..." : "Save Meal",
+        primaryText: isSubmitting ? "Dodavanje..." : "Dodaj obrok",
         primaryAction: () => {
           if (createFoodTabRef.current) {
             createFoodTabRef.current.handleSave();
@@ -80,22 +70,14 @@ export const CustomMealModal = ({
   const handleSave = async (foodData) => {
     try {
       setIsSubmitting(true);
-      
-      // If custom tracking mode, include meal type and current time
-      const mealDataWithType = isCustomTracking ? {
+      await onSave(selectedDate, {
         ...foodData,
-        mealType: selectedMealType,
-        time: mealTime || new Date().toLocaleTimeString("en-US", {
-          hour12: false,
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      } : foodData;
-      
-      await onSave(mealDataWithType);
+        mealType: mealName?.toLowerCase() || "snack",
+        mealTime: mealTime,
+      });
       handleClose();
     } catch (error) {
-      console.error("Error saving food:", error);
+      console.error("Error saving meal:", error);
       setIsSubmitting(false);
     }
   };
@@ -113,7 +95,11 @@ export const CustomMealModal = ({
         ingredients: historyItem.ingredients || [],
       };
 
-      await onSave(foodData);
+      await onSave(selectedDate, {
+        ...foodData,
+        mealType: mealName?.toLowerCase() || "snack",
+        mealTime: mealTime,
+      });
       handleClose();
     } catch (error) {
       console.error("Error using history item:", error);
@@ -168,48 +154,81 @@ export const CustomMealModal = ({
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
+  const getMealDisplayName = (name) => {
+    switch(name?.toLowerCase()) {
+      case 'breakfast': return 'Doručak';
+      case 'lunch': return 'Ručak';
+      case 'dinner': return 'Večera';
+      case 'snack': return 'Užina';
+      default: return name || 'Obrok';
+    }
+  };
+
+  const getMealIcon = (name) => {
+    switch(name?.toLowerCase()) {
+      case 'breakfast': return 'mdi:coffee';
+      case 'lunch': return 'mdi:food';
+      case 'dinner': return 'mdi:silverware-fork-knife';
+      case 'snack': return 'mdi:cookie';
+      default: return 'mdi:food-apple';
+    }
+  };
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
       title={
-        <div className="flex items-center gap-2">
-          <Icon icon="mdi:plus-circle" className="w-5 h-5 text-[#FF6B00]" />
-          <span>Custom {mealName}</span>
-          <span className="text-zinc-400 text-sm font-normal">
-            • {formatTime(mealTime)}
-          </span>
+        <div className="flex items-center gap-3">
+          <Icon 
+            icon={getMealIcon(mealName)} 
+            className="w-6 h-6 text-[#FF6B00]" 
+          />
+          <div>
+            <span className="text-lg font-semibold">
+              {getMealDisplayName(mealName)}
+            </span>
+            {mealTime && (
+              <span className="text-zinc-400 text-sm font-normal ml-2">
+                • {formatTime(mealTime)}
+              </span>
+            )}
+          </div>
         </div>
       }
       size="large"
       primaryButtonText={buttonConfig.primaryText}
       primaryButtonAction={buttonConfig.primaryAction}
       primaryButtonDisabled={buttonConfig.primaryDisabled}
-      secondaryButtonText="Cancel"
+      secondaryButtonText="Otkaži"
       secondaryButtonAction={handleClose}
     >
       <div className="space-y-6 max-w-full overflow-hidden">
-        {/* Meal Type Selection - Only show for custom tracking */}
-        {isCustomTracking && allowMealTypeSelection && (
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-zinc-300">Select Meal Type</h3>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {mealTypeOptions.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => setSelectedMealType(option.value)}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 ${
-                    selectedMealType === option.value
-                      ? "border-[#FF6B00] bg-[#FF6B00]/10 text-[#FF6B00]"
-                      : "border-zinc-700 bg-zinc-800/50 text-zinc-400 hover:border-zinc-600 hover:text-zinc-300"
-                  }`}
-                >
-                  <Icon icon={option.icon} className="w-6 h-6" />
-                  <div className="text-center">
-                    <div className="text-sm font-medium">{option.label}</div>
-                    <div className="text-xs opacity-60">{option.time}</div>
+        {/* Existing Meals Preview */}
+        {existingMeals.length > 0 && (
+          <div className="bg-zinc-800/40 rounded-xl border border-zinc-700/50 p-4">
+            <h4 className="text-sm font-medium text-zinc-300 mb-3 flex items-center gap-2">
+              <Icon icon="mdi:food-variant" className="w-4 h-4" />
+              Već uneseni obroci za {getMealDisplayName(mealName)}
+            </h4>
+            <div className="space-y-2">
+              {existingMeals.map((meal, index) => (
+                <div key={index} className="flex items-center justify-between p-2 bg-zinc-900/50 rounded-lg">
+                  <div className="flex-1">
+                    <div className="font-medium text-white text-sm">
+                      {meal.selectedOption?.name || meal.name}
+                    </div>
+                    <div className="text-xs text-zinc-400">
+                      {Math.round(meal.calories || 0)} cal • {Math.round(meal.protein || 0)}g protein
+                    </div>
                   </div>
-                </button>
+                  <Icon 
+                    icon={meal.isCompleted ? "mdi:check-circle" : "mdi:clock"} 
+                    className={`w-4 h-4 ${
+                      meal.isCompleted ? "text-green-400" : "text-yellow-400"
+                    }`} 
+                  />
+                </div>
               ))}
             </div>
           </div>
@@ -235,7 +254,7 @@ export const CustomMealModal = ({
               )}
             </div>
             <div className="flex flex-col items-start">
-              <span>AI Scanner</span>
+              <span>AI Skener</span>
             </div>
             {activeTab === "ai-scanner" && (
               <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-white/0 via-white/10 to-white/0 opacity-50" />
@@ -251,7 +270,7 @@ export const CustomMealModal = ({
             }`}
           >
             <Icon icon="mdi:plus" className="w-4 h-4" />
-            Create Manual
+            Ručno unesi
           </button>
 
           <button
@@ -263,7 +282,7 @@ export const CustomMealModal = ({
             }`}
           >
             <Icon icon="mdi:history" className="w-4 h-4" />
-            History
+            Istorija
           </button>
         </div>
 
@@ -271,7 +290,7 @@ export const CustomMealModal = ({
         {activeTab === "ai-scanner" && (
           <AIFoodScannerTab
             ref={aiFoodScannerTabRef}
-            mealName={mealName}
+            mealName={getMealDisplayName(mealName)}
             mealTime={mealTime}
             onSave={handleSave}
             isSubmitting={isSubmitting}
@@ -282,7 +301,7 @@ export const CustomMealModal = ({
         {activeTab === "create" && (
           <CreateFoodTab
             ref={createFoodTabRef}
-            mealName={mealName}
+            mealName={getMealDisplayName(mealName)}
             mealTime={mealTime}
             onSave={handleSave}
             initialType={mealName?.toLowerCase()}
@@ -293,7 +312,7 @@ export const CustomMealModal = ({
         {/* History Tab */}
         {activeTab === "history" && (
           <FoodHistoryTab
-            mealName={mealName}
+            mealName={getMealDisplayName(mealName)}
             onUseHistoryItem={handleUseHistoryItem}
             onDeleteHistoryItem={handleDeleteHistoryItem}
             isSubmitting={isSubmitting}

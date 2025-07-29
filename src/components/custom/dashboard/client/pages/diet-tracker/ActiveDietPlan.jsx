@@ -9,17 +9,19 @@ import { AddSnackModal } from "./AddSnackModal";
 import { CustomMealModal } from "./CustomMealModal";
 import { DayNavigation } from "./DayNavigation";
 import { MealDetailModal } from "./MealDetailModal";
+import { MealLoggingModal } from "./MealLoggingModal";
 import { NewMealCard } from "./NewMealCard";
 import { NutritionSummary } from "./NutritionSummary";
 import { PlanHeader } from "./PlanHeader";
 import { TrainerRecommendations } from "./TrainerRecommendations";
+import { WaterIntakeTracker } from "./WaterIntakeTracker";
 
 export const ActiveDietPlan = ({
   activePlan,
   dailyLogs,
   nextMeal,
   validationError,
-  onCompleteMeal,
+  _onCompleteMeal,
   onUncompleteMeal,
   onChangeMealOption,
   onLogMeal,
@@ -33,6 +35,7 @@ export const ActiveDietPlan = ({
   const [selectedMealDetail, setSelectedMealDetail] = useState(null);
   const [showMealDetail, setShowMealDetail] = useState(false);
   const [showCustomMeal, setShowCustomMeal] = useState(false);
+  const [showMealLogging, setShowMealLogging] = useState(false);
   const [customMealContext, setCustomMealContext] = useState(null);
   const [showAddSnack, setShowAddSnack] = useState(false);
 
@@ -60,13 +63,66 @@ export const ActiveDietPlan = ({
 
   // Get the selected day's data
   const selectedDayData = useMemo(() => {
-    // For custom meal input plans, return empty meals array
+    // For custom meal input plans, create standard meal structure
     if (!activePlan?.nutritionPlan?.days) {
       return {
-        name: `Day ${selectedDay}`,
-        meals: [],
+        name: `Dan ${selectedDay}`,
+        meals: [
+          {
+            name: "Breakfast",
+            time: "08:00",
+            options: [
+              {
+                name: "Dodaj doručak",
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fat: 0,
+              },
+            ],
+          },
+          {
+            name: "Lunch",
+            time: "13:00",
+            options: [
+              {
+                name: "Dodaj ručak",
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fat: 0,
+              },
+            ],
+          },
+          {
+            name: "Dinner",
+            time: "19:00",
+            options: [
+              {
+                name: "Dodaj večeru",
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fat: 0,
+              },
+            ],
+          },
+          {
+            name: "Snack",
+            time: "15:00",
+            options: [
+              {
+                name: "Dodaj užinu",
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fat: 0,
+              },
+            ],
+          },
+        ],
         isRestDay: false,
-        description: "Custom meal input day",
+        description: "Custom meal tracking - dodajte svoje obroke",
       };
     }
 
@@ -173,8 +229,16 @@ export const ActiveDietPlan = ({
   // Handle custom meal
   const handleCustomMeal = (meal, mealLog) => {
     setCustomMealContext({ meal, mealLog });
-    setShowCustomMeal(true);
+    // For custom meal input plans, use MealLoggingModal, otherwise use CustomMealModal
+    if (isCustomMealInput) {
+      setShowMealLogging(true);
+    } else {
+      setShowCustomMeal(true);
+    }
   };
+
+  // Check if this is a custom meal input plan
+  const isCustomMealInput = !activePlan?.nutritionPlan?.days;
 
   // Handle custom meal save
   const handleCustomMealSave = async (customMealData) => {
@@ -188,6 +252,38 @@ export const ActiveDietPlan = ({
       setCustomMealContext(null);
     } catch (error) {
       console.error("Error saving custom meal:", error);
+    }
+  };
+
+  // Handle meal logging save
+  const handleMealLoggingSave = async (date, mealData) => {
+    try {
+      // Use log-custom-meal action for custom meal input plans
+      const response = await fetch("/api/users/client/diet-tracker", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "log-custom-meal",
+          mealType: customMealContext?.meal?.name || mealData.mealType,
+          mealData,
+          date,
+          portionMultiplier: 1,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to log meal");
+      }
+
+      // Refresh data
+      window.location.reload(); // Temporary - ideally use proper state management
+      setShowMealLogging(false);
+      setCustomMealContext(null);
+    } catch (error) {
+      console.error("Error logging meal:", error);
+      throw error;
     }
   };
 
@@ -270,8 +366,75 @@ export const ActiveDietPlan = ({
 
   const snacks = getSnackLogs();
 
+  // Handle water update
+  const handleWaterUpdate = async (date, waterAmount) => {
+    try {
+      const response = await fetch("/api/users/client/diet-tracker", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "update-water",
+          date,
+          waterAmount,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update water intake");
+      }
+
+      // Refresh data - ideally should update state properly
+      window.location.reload();
+    } catch (error) {
+      console.error("Error updating water intake:", error);
+      throw error;
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white mb-2">
+            {isCustomMealInput ? "Custom Meal Tracking" : "Your Nutrition Plan"}
+          </h1>
+          <p className="text-zinc-400">
+            {isCustomMealInput
+              ? "Track your daily meals and nutrition progress"
+              : `Day ${selectedDay} of your nutrition journey`}
+          </p>
+        </div>
+
+        {/* Progress indicator for regular plans */}
+        {!isCustomMealInput && (
+          <div className="text-right">
+            <div className="text-2xl font-bold text-white">
+              {getCompletionRate(selectedDay)}%
+            </div>
+            <div className="text-zinc-400 text-sm">Completion</div>
+          </div>
+        )}
+      </div>
+
+      {/* Description for Custom Meal Input */}
+      {isCustomMealInput && activePlan?.planData?.description && (
+        <div className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border border-cyan-500/30 rounded-2xl p-6">
+          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <Icon
+              icon="mdi:file-document-edit"
+              className="w-5 h-5 text-cyan-400"
+            />
+            Trainer's Nutrition Guidelines
+          </h3>
+          <p className="text-zinc-300 leading-relaxed">
+            {activePlan.planData.description}
+          </p>
+        </div>
+      )}
+
       {/* Plan Header */}
       <PlanHeader
         activePlan={activePlan}
@@ -446,6 +609,14 @@ export const ActiveDietPlan = ({
 
         {/* Sidebar */}
         <div className="xl:col-span-1 space-y-6">
+          {/* Water Intake Tracker */}
+          <WaterIntakeTracker
+            currentIntake={selectedDayLog?.waterIntake || 0}
+            dailyGoal={2.5}
+            date={getSelectedDayDate().toISOString().split("T")[0]}
+            onUpdateWater={handleWaterUpdate}
+          />
+
           {/* Trainer Recommendations */}
           <TrainerRecommendations
             assignedPlanId={activePlan.id}
@@ -467,6 +638,8 @@ export const ActiveDietPlan = ({
             currentDay={currentDay}
             completedMeals={mealCompletionStats.completedMeals}
             totalMeals={mealCompletionStats.totalMeals}
+            waterIntake={selectedDayLog?.waterIntake || 0}
+            waterGoal={2.5}
           />
         </div>
       </div>
@@ -498,6 +671,23 @@ export const ActiveDietPlan = ({
         onClose={() => setShowAddSnack(false)}
         onSave={handleSnackSave}
         selectedDate={getSelectedDayDate().toISOString().split("T")[0]}
+      />
+
+      <MealLoggingModal
+        isOpen={showMealLogging}
+        onClose={() => {
+          setShowMealLogging(false);
+          setCustomMealContext(null);
+        }}
+        onSave={handleMealLoggingSave}
+        mealName={customMealContext?.meal?.name}
+        mealTime={customMealContext?.meal?.time}
+        selectedDate={getSelectedDayDate().toISOString().split("T")[0]}
+        existingMeals={
+          selectedDayLog?.mealLogs?.filter(
+            (meal) => meal.mealName === customMealContext?.meal?.name
+          ) || []
+        }
       />
     </div>
   );
