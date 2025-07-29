@@ -27,17 +27,7 @@ export const CustomMealModal = ({
   const createFoodTabRef = useRef(null);
   const aiFoodScannerTabRef = useRef(null);
 
-  // Update button config whenever the active tab changes
-  useEffect(() => {
-    updateButtonConfig();
-  }, [activeTab, isSubmitting]);
-
-  // Callback to trigger button config update when analysis state changes
-  const onAnalysisStateChange = useCallback(() => {
-    updateButtonConfig();
-  }, []);
-
-  const updateButtonConfig = () => {
+  const updateButtonConfig = useCallback(() => {
     if (activeTab === "ai-scanner") {
       if (aiFoodScannerTabRef.current) {
         // Check if we have analysis data
@@ -95,7 +85,17 @@ export const CustomMealModal = ({
         primaryDisabled: false,
       });
     }
-  };
+  }, [activeTab, isSubmitting]);
+
+  // Update button config whenever the active tab changes
+  useEffect(() => {
+    updateButtonConfig();
+  }, [activeTab, isSubmitting, updateButtonConfig]);
+
+  // Callback to trigger button config update when analysis state changes
+  const onAnalysisStateChange = useCallback(() => {
+    updateButtonConfig();
+  }, [updateButtonConfig]);
 
   const handleSave = async (foodData) => {
     try {

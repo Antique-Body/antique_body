@@ -17,11 +17,7 @@ export const FoodHistoryTab = ({
   const [deleteError, setDeleteError] = useState(null);
   const [deletingItemId, setDeletingItemId] = useState(null);
 
-  // Fetch history when component mounts
-  useEffect(() => {
-    fetchHistory();
-  }, []);
-
+  // Define fetchHistory with useCallback to prevent unnecessary re-creation
   const fetchHistory = useCallback(async () => {
     setHistoryLoading(true);
     try {
@@ -52,6 +48,11 @@ export const FoodHistoryTab = ({
       setHistoryLoading(false);
     }
   }, [fetchHistoryFn, mealName]);
+
+  // Fetch history when component mounts
+  useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory]);
 
   const handleUseHistoryItem = async (item) => {
     try {
