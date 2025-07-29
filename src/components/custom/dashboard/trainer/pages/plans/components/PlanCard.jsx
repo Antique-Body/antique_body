@@ -246,8 +246,7 @@ export const PlanCard = ({
       >
         <Card
           variant="darkStrong"
-          onClick={handleViewClick}
-          className="flex cursor-pointer !p-0 flex-col sm:flex-row overflow-hidden hover:border-[#FF6B00] transition-all duration-300"
+          className="flex !p-0 flex-col sm:flex-row overflow-hidden hover:border-[#FF6B00] transition-all duration-300"
         >
           {/* Left side with image - Only on larger screens */}
           {coverImage && (
@@ -310,6 +309,16 @@ export const PlanCard = ({
 
             {/* Actions */}
             <div className="flex flex-wrap gap-2 mt-auto">
+              <Button
+                onClick={handleViewClick}
+                variant="darkOutline"
+                size="small"
+                leftIcon={<Icon icon="mdi:eye" className="w-4 h-4" />}
+                className="text-xs px-3 py-1.5 text-gray-400 hover:text-[#FF6B00] hover:bg-[#FF6B00]/10"
+              >
+                View
+              </Button>
+
               <Button
                 onClick={handleTrackClick}
                 variant={clientCount > 0 ? "primary" : "darkOutline"}

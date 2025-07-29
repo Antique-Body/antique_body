@@ -1,9 +1,7 @@
 "use client";
 
 import { Icon } from "@iconify/react";
-import clsx from "clsx";
 import Image from "next/image";
-import PropTypes from "prop-types";
 import { useState, useEffect, useCallback } from "react";
 
 import { Button } from "@/components/common/Button";
@@ -303,42 +301,41 @@ export const BasicInfo = ({ data, onChange, prefillForm, templates }) => {
               rows={3}
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormField
+              label="Price ($)"
+              name="price"
+              type="number"
+              value={data.price}
+              onChange={handleChange}
+              placeholder="99.99"
+              required
+              prefixIcon="mdi:currency-usd"
+            />
+
+            <div className="grid grid-cols-2 gap-4">
               <FormField
-                label="Price ($)"
-                name="price"
+                label="Duration"
+                name="duration"
                 type="number"
-                value={data.price}
+                value={data.duration}
                 onChange={handleChange}
-                placeholder="99.99"
+                placeholder="8"
                 required
-                prefixIcon="mdi:currency-usd"
+                prefixIcon="mdi:calendar-range"
               />
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  label="Duration"
-                  name="duration"
-                  type="number"
-                  value={data.duration}
-                  onChange={handleChange}
-                  placeholder="8"
-                  required
-                  prefixIcon="mdi:calendar-range"
-                />
-                <FormField
-                  label="Duration Type"
-                  name="durationType"
-                  type="select"
-                  value={data.durationType}
-                  onChange={handleChange}
-                  options={[
-                    { value: "weeks", label: "Weeks" },
-                    { value: "months", label: "Months" },
-                    { value: "days", label: "Days" },
-                  ]}
-                  required
-                />
-              </div>
+              <FormField
+                label="Duration Type"
+                name="durationType"
+                type="select"
+                value={data.durationType}
+                onChange={handleChange}
+                options={[
+                  { value: "weeks", label: "Weeks" },
+                  { value: "months", label: "Months" },
+                  { value: "days", label: "Days" },
+                ]}
+                required
+              />
             </div>
           </div>
         </Card>
@@ -446,21 +443,19 @@ export const BasicInfo = ({ data, onChange, prefillForm, templates }) => {
                 aria-label={`${goal.label}${
                   goal.description ? `: ${goal.description}` : ""
                 }`}
-                className={clsx(
-                  "p-4 rounded-lg border-2 cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-[#FF6B00]",
+                className={`p-4 rounded-lg border-2 cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-[#FF6B00] ${
                   isSelected
                     ? "border-[#FF6B00] bg-[#FF6B00]/10"
                     : "border-[#333] hover:border-[#FF6B00]/50"
-                )}
+                }`}
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className={clsx(
-                      "p-2 rounded-lg",
+                    className={`p-2 rounded-lg ${
                       isSelected
                         ? "bg-[#FF6B00] text-white"
                         : "bg-[#1a1a1a] text-gray-400"
-                    )}
+                    }`}
                   >
                     <Icon icon={goal.icon} className="w-5 h-5" />
                   </div>
@@ -488,28 +483,4 @@ export const BasicInfo = ({ data, onChange, prefillForm, templates }) => {
       {renderTemplateSelector()}
     </div>
   );
-};
-
-BasicInfo.propTypes = {
-  data: PropTypes.shape({
-    coverImage: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.object, // File object
-    ]),
-    title: PropTypes.string,
-    description: PropTypes.string,
-    price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    duration: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    durationType: PropTypes.string,
-    nutritionInfo: PropTypes.shape({
-      calories: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      protein: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      carbs: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      fats: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    }),
-    targetGoal: PropTypes.string,
-  }).isRequired,
-  onChange: PropTypes.func.isRequired,
-  prefillForm: PropTypes.func,
-  templates: PropTypes.array,
 };

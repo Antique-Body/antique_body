@@ -1,7 +1,6 @@
 "use client";
 
 import { Icon } from "@iconify/react";
-import clsx from "clsx";
 import Image from "next/image";
 import { useState, useEffect, useCallback } from "react";
 
@@ -390,21 +389,19 @@ export const BasicInfo = ({ data, onChange, prefillForm, templates }) => {
                     ? `: ${difficultyLevel.description}`
                     : ""
                 }`}
-                className={clsx(
-                  "p-4 rounded-lg border-2 cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-[#FF6B00]",
+                className={`p-4 rounded-lg border-2 cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-[#FF6B00] ${
                   isSelected
                     ? "border-[#FF6B00] bg-[#FF6B00]/10"
                     : "border-[#333] hover:border-[#FF6B00]/50"
-                )}
+                }`}
               >
                 <div className="flex items-center gap-3 mb-2">
                   <div
-                    className={clsx(
-                      "p-2 rounded-lg",
+                    className={`p-2 rounded-lg ${
                       isSelected
                         ? "bg-[#FF6B00] text-white"
                         : "bg-[#1a1a1a] text-gray-400"
-                    )}
+                    }`}
                   >
                     <Icon icon={difficultyLevel.icon} className="w-5 h-5" />
                   </div>
@@ -455,21 +452,19 @@ export const BasicInfo = ({ data, onChange, prefillForm, templates }) => {
                     handleFormatSelect(format.id);
                   }
                 }}
-                className={clsx(
-                  "p-4 rounded-lg border-2 cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-[#FF6B00]",
+                className={`p-4 rounded-lg border-2 cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-[#FF6B00] ${
                   isSelected
                     ? "border-[#FF6B00] bg-[#FF6B00]/10"
                     : "border-[#333] hover:border-[#FF6B00]/50"
-                )}
+                }`}
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className={clsx(
-                      "p-2 rounded-lg",
+                    className={`p-2 rounded-lg ${
                       isSelected
                         ? "bg-[#FF6B00] text-white"
                         : "bg-[#1a1a1a] text-gray-400"
-                    )}
+                    }`}
                   >
                     <Icon icon={format.icon} className="w-5 h-5" />
                   </div>

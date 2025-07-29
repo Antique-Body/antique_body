@@ -1,5 +1,4 @@
 import { Icon } from "@iconify/react";
-import PropTypes from "prop-types";
 
 const DIFFICULTY_STYLES = {
   beginner: "bg-green-900/20 text-green-400",
@@ -48,9 +47,3 @@ export const OverviewTab = ({ description, keyFeatures, difficultyLevel }) => (
     )}
   </div>
 );
-
-OverviewTab.propTypes = {
-  description: PropTypes.string,
-  keyFeatures: PropTypes.arrayOf(PropTypes.string),
-  difficultyLevel: PropTypes.string,
-};

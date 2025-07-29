@@ -1,7 +1,6 @@
 "use client";
 
 import { Icon } from "@iconify/react";
-import clsx from "clsx";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -22,11 +21,7 @@ export const ErrorBoundary = ({ error, reset, className = "" }) => {
 
   return (
     <div
-      className={clsx(
-        "min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden",
-        "bg-gradient-to-br from-black via-zinc-900 to-orange-950/20",
-        className
-      )}
+      className={`min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden bg-gradient-to-br from-black via-zinc-900 to-orange-950/20 ${className}`}
     >
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
@@ -45,10 +40,9 @@ export const ErrorBoundary = ({ error, reset, className = "" }) => {
 
       {/* Main Error Card */}
       <div
-        className={clsx(
-          "relative z-10 max-w-md w-full transform transition-all duration-1000",
+        className={`relative z-10 max-w-md w-full transform transition-all duration-1000 ${
           mounted ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-        )}
+        }`}
       >
         <Card
           className="border-2 border-orange-500/30 !p-0 overflow-hidden backdrop-blur-xl"
@@ -122,14 +116,13 @@ export const ErrorBoundary = ({ error, reset, className = "" }) => {
               <Button
                 onClick={() => setShowDetails((v) => !v)}
                 variant="orangeText"
-                className="w-full h-10 text-sm font-semibold hover:text-orange-300 transition-all duration-200 flex items-center justify-center gap-2 border border-orange-500/20 hover:border-orange-500/40"
+                className={`w-full h-10 text-sm font-semibold hover:text-orange-300 transition-all duration-200 flex items-center justify-center gap-2 border border-orange-500/20 hover:border-orange-500/40`}
               >
                 <Icon
                   icon="material-symbols:keyboard-arrow-down"
-                  className={clsx(
-                    "w-4 h-4 transition-transform duration-200",
+                  className={`w-4 h-4 transition-transform duration-200 ${
                     showDetails && "rotate-180"
-                  )}
+                  }`}
                 />
                 {showDetails
                   ? t("errorBoundary.hideDetails")
@@ -148,10 +141,9 @@ export const ErrorBoundary = ({ error, reset, className = "" }) => {
 
             {/* Error Details Section - Collapsible */}
             <div
-              className={clsx(
-                "transition-all duration-500 overflow-hidden",
+              className={`transition-all duration-500 overflow-hidden ${
                 showDetails ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
-              )}
+              }`}
             >
               <div className="bg-black/50 border border-orange-500/30 rounded-lg p-4 backdrop-blur-sm mt-4">
                 <div className="mb-3">

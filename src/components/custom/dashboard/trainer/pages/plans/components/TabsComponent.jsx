@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import PropTypes from "prop-types";
 
 import { NutritionPlanIcon, TrainingPlanIcon } from "@/components/common/Icons";
 
@@ -68,9 +67,4 @@ export const TabsComponent = ({ activeTab, setActiveTab }) => {
       </div>
     </div>
   );
-};
-
-TabsComponent.propTypes = {
-  activeTab: PropTypes.oneOf(["training", "nutrition"]).isRequired,
-  setActiveTab: PropTypes.func.isRequired,
 };
