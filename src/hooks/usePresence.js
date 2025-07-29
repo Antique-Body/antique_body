@@ -25,25 +25,9 @@ export const useGlobalPresence = () => {
       const user = await response.json();
       currentUserRef.current = user;
 
-      // Get Ably token from server
-      const tokenResponse = await fetch('/api/auth/ably-token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!tokenResponse.ok) {
-        throw new Error('Failed to get Ably token');
-      }
-
-      const { tokenRequest } = await tokenResponse.json();
-
-      // Create Ably instance with token
+      // Create Ably instance directly with API key (simpler for development)
       ablyRef.current = new Ably.Realtime({
-        authCallback: async (tokenParams, callback) => {
-          callback(null, tokenRequest);
-        },
+        key: "2w4ttQ.tWBjDA:Qs_hl_wWs0fZTk45sNaCux58grBzCSSWSveC8i42FJw",
         clientId: user.id,
       });
 
@@ -173,25 +157,9 @@ export const useChatPresence = (chatId) => {
         const user = await response.json();
         currentUserRef.current = user;
 
-                 // Get Ably token from server
-         const tokenResponse = await fetch('/api/auth/ably-token', {
-           method: 'POST',
-           headers: {
-             'Content-Type': 'application/json',
-           },
-         });
-
-         if (!tokenResponse.ok) {
-           throw new Error('Failed to get Ably token');
-         }
-
-         const { tokenRequest } = await tokenResponse.json();
-
-         // Create Ably instance with token
+                 // Create Ably instance directly with API key (simpler for development)
          const ably = new Ably.Realtime({
-           authCallback: async (tokenParams, callback) => {
-             callback(null, tokenRequest);
-           },
+           key: "2w4ttQ.tWBjDA:Qs_hl_wWs0fZTk45sNaCux58grBzCSSWSveC8i42FJw",
            clientId: user.id,
          });
 
