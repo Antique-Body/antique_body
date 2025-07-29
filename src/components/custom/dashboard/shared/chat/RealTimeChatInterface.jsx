@@ -675,7 +675,7 @@ export const RealTimeChatInterface = ({ conversationId }) => {
 
           {invalidChatId && (
             <div className="p-4 text-center text-red-400">
-              Invalid conversation ID. Please use a valid conversation link.
+              Invalid conversation. Please use a valid conversation link.
             </div>
           )}
 

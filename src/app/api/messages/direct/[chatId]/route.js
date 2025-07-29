@@ -212,25 +212,37 @@ export async function POST(request, { params }) {
       },
     });
 
-    // Update or create conversation
-    await prisma.conversation.upsert({
+    // Check if conversation exists (including soft-deleted ones)
+    const existingConversation = await prisma.conversation.findFirst({
       where: { chatId },
-      update: {
-        lastMessageAt: message.createdAt,
-        ...(isTrainer 
-          ? { clientUnreadCount: { increment: 1 } }
-          : { trainerUnreadCount: { increment: 1 } }
-        ),
-      },
-      create: {
-        chatId,
-        clientId,
-        trainerId,
-        lastMessageAt: message.createdAt,
-        clientUnreadCount: isTrainer ? 1 : 0,
-        trainerUnreadCount: isClient ? 1 : 0,
-      },
     });
+
+    if (existingConversation) {
+      // Conversation exists - update it and reactivate if it was soft-deleted
+      await prisma.conversation.update({
+        where: { id: existingConversation.id },
+        data: {
+          lastMessageAt: message.createdAt,
+          deletedAt: null, // Reactivate if it was soft-deleted
+          ...(isTrainer 
+            ? { clientUnreadCount: { increment: 1 } }
+            : { trainerUnreadCount: { increment: 1 } }
+          ),
+        },
+      });
+    } else {
+      // Create new conversation
+      await prisma.conversation.create({
+        data: {
+          chatId,
+          clientId,
+          trainerId,
+          lastMessageAt: message.createdAt,
+          clientUnreadCount: isTrainer ? 1 : 0,
+          trainerUnreadCount: isClient ? 1 : 0,
+        },
+      });
+    }
 
     // Format message for response
     const formattedMessage = {

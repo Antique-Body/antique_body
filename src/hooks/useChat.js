@@ -48,9 +48,25 @@ export const useChat = (chatId) => {
       if (isInitializing || !isMounted) return;
       isInitializing = true;
       try {
+        // Get Ably token from server
+        const tokenResponse = await fetch('/api/auth/ably-token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!tokenResponse.ok) {
+          throw new Error('Failed to get Ably token');
+        }
+
+        const { tokenRequest } = await tokenResponse.json();
+
         // Create new Ably instance for this conversation
         const ably = new Ably.Realtime({
-          key: "2w4ttQ.tWBjDA:Qs_hl_wWs0fZTk45sNaCux58grBzCSSWSveC8i42FJw",
+          authCallback: async (tokenParams, callback) => {
+            callback(null, tokenRequest);
+          },
           clientId: currentUserId,
         });
 
