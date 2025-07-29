@@ -1,16 +1,18 @@
 "use client";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Modal } from "@/components/common/Modal";
+import { useCurrentUser } from "@/hooks";
+import { generateChatId } from "@/utils/chatUtils";
 
 export default function RequestCoachingModal({
   isOpen,
   onClose,
   trainer,
   onSubmitRequest,
-  onSubmitMessage,
   hasRequested = false,
   canRequestMore = true,
   requestedCount = 0,
@@ -21,12 +23,70 @@ export default function RequestCoachingModal({
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [messageStatus, setMessageStatus] = useState(""); // "sending", "sent", "error"
+  
+  const { getClientId, getRole, loading: userLoading } = useCurrentUser();
+  const router = useRouter();
 
   const handleSubmit = async () => {
     if (activeTab === "request") {
       await handleSubmitRequest();
     } else {
-      onSubmitMessage(trainer, message);
+      await handleSubmitMessage();
+    }
+  };
+
+  const handleSubmitMessage = async () => {
+    if (!message.trim() || isSubmitting || userLoading) return;
+
+    setIsSubmitting(true);
+    setMessageStatus("sending");
+    setSubmitError("");
+
+    try {
+      const role = getRole();
+      const clientId = getClientId();
+
+      if (role !== "client" || !clientId || !trainer?.id) {
+        throw new Error("Unable to send message. Please try again.");
+      }
+
+      // Generate chat ID
+      const chatId = generateChatId(trainer.id, clientId);
+
+      // Send the message (this will create the conversation automatically)
+      const response = await fetch(`/api/messages/direct/${chatId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: message.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to send message");
+      }
+
+      setMessageStatus("sent");
+      setMessage("");
+      
+      // Redirect to the chat after a brief delay to show success feedback
+      setTimeout(() => {
+        setMessageStatus("");
+        onClose();
+        // Navigate to the messages page with the chat ID
+        router.push(`/client/dashboard/messages/${encodeURIComponent(chatId)}`);
+      }, 1500);
+
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setSubmitError(error.message);
+      setMessageStatus("error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -77,6 +137,7 @@ export default function RequestCoachingModal({
     setNote("");
     setMessage("");
     setSubmitError("");
+    setMessageStatus("");
     onClose();
   };
 
@@ -84,13 +145,16 @@ export default function RequestCoachingModal({
     if (activeTab === "request") {
       return hasRequested || !canRequestMore || isSubmitting;
     } else {
-      return true; // Messaging is completely disabled
+      return !message.trim() || isSubmitting || userLoading;
     }
   };
 
   const getRequestButtonText = () => {
     if (activeTab === "message") {
-      return "Feature Disabled";
+      if (messageStatus === "sending") return "Sending...";
+      if (messageStatus === "sent") return "Message Sent!";
+      if (isSubmitting) return "Sending...";
+      return "Send Message";
     }
     if (isSubmitting) {
       return "Sending...";
@@ -218,13 +282,16 @@ export default function RequestCoachingModal({
           </button>
           <button
             type="button"
-            onClick={() => {}}
-            disabled={true}
-            className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-zinc-800/30 px-4 py-3 text-sm font-medium text-zinc-500 opacity-40 transition-all duration-300 cursor-not-allowed"
+            onClick={() => setActiveTab("message")}
+            disabled={false}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-300 ${
+              activeTab === "message"
+                ? "bg-gradient-to-br from-[#3E92CC] to-[#2D7EB8] text-white shadow-lg shadow-[#3E92CC]/20"
+                : "text-zinc-400 hover:bg-zinc-700/50 hover:text-white"
+            }`}
           >
-            <Icon icon="mdi:message-text-off" width={18} height={18} />
+            <Icon icon="mdi:message-text" width={18} height={18} />
             Send Message
-            <span className="ml-1 text-xs">(Disabled)</span>
           </button>
         </div>
       </div>
@@ -412,24 +479,41 @@ export default function RequestCoachingModal({
       {/* Message Tab Content */}
       {activeTab === "message" && (
         <div className="space-y-5">
-          <div className="rounded-xl bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 p-5 ring-1 ring-white/10">
-            <div className="flex items-start gap-4">
-              <div className="rounded-full bg-zinc-700/30 p-2">
+          {/* Success Message */}
+          {messageStatus === "sent" && (
+            <div className="rounded-xl bg-gradient-to-br from-green-900/20 to-green-950/30 p-4 ring-1 ring-green-500/30">
+              <div className="flex items-center gap-3">
                 <Icon
-                  icon="mdi:chat-outline"
-                  className="text-zinc-400"
+                  icon="mdi:check-circle"
+                  className="text-green-400"
+                  width={20}
+                  height={20}
+                />
+                <p className="text-green-400 text-sm font-medium">
+                  Message sent successfully! Redirecting to your conversation...
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Info Banner */}
+          <div className="rounded-xl bg-gradient-to-br from-[#3E92CC]/10 to-[#2D7EB8]/5 p-5 ring-1 ring-[#3E92CC]/20">
+            <div className="flex items-start gap-4">
+              <div className="rounded-full bg-[#3E92CC]/10 p-2">
+                <Icon
+                  icon="mdi:information"
+                  className="text-[#3E92CC]"
                   width={24}
                   height={24}
                 />
               </div>
               <div>
                 <p className="text-lg font-semibold text-white">
-                  Feature in Development
+                  Send a direct message
                 </p>
                 <p className="mt-2 text-sm leading-relaxed text-zinc-300">
-                  We're working on adding direct messaging capabilities. In the
-                  meantime, you can request coaching from {trainer.firstName} to
-                  start your fitness journey together.
+                  Start a conversation with {trainer.firstName} by sending them a message. 
+                  This will create a new conversation that you can continue in your messages.
                 </p>
               </div>
             </div>
@@ -438,25 +522,26 @@ export default function RequestCoachingModal({
           <div className="space-y-3">
             <label
               htmlFor="coaching-message"
-              className="block text-sm font-medium text-zinc-400"
+              className="block text-sm font-medium text-zinc-300"
             >
               Your message to {trainer.firstName}
-              <span className="ml-2 text-xs text-zinc-500">(Coming Soon)</span>
             </label>
             <textarea
               id="coaching-message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="This feature will be available soon. For now, please use the Request Coaching tab to get started."
-              className="w-full cursor-not-allowed rounded-xl bg-gradient-to-br from-zinc-800/30 to-zinc-900/30 px-4 py-3 text-zinc-400 placeholder-zinc-500 ring-1 ring-white/5 transition-all duration-300"
+              placeholder="Introduce yourself, ask questions about their training style, or share your fitness goals..."
+              className="w-full rounded-xl bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 px-4 py-3 text-zinc-200 placeholder-zinc-500 ring-1 ring-white/10 transition-all duration-300 focus:outline-none focus:ring-[#3E92CC]/30 disabled:opacity-50"
               rows="6"
               maxLength={1000}
-              disabled={true}
+              disabled={isSubmitting}
             />
             <div className="flex justify-between text-xs">
-              <span className="text-zinc-500">Feature coming soon</span>
+              <span className="text-zinc-500">
+                {message.length}/1000 characters
+              </span>
               <span className="text-zinc-400">
-                Use Request Coaching instead
+                Message will create a new conversation
               </span>
             </div>
           </div>

@@ -41,7 +41,12 @@ export const useChat = (chatId) => {
       return;
     }
 
+    let isInitializing = false;
+    let isMounted = true;
+
     const initializeAbly = async () => {
+      if (isInitializing || !isMounted) return;
+      isInitializing = true;
       try {
         // Create new Ably instance for this conversation
         const ably = new Ably.Realtime({
@@ -82,27 +87,40 @@ export const useChat = (chatId) => {
       } catch (err) {
         console.error("Failed to initialize Ably:", err);
         setError("Failed to connect to chat service");
+      } finally {
+        isInitializing = false;
       }
     };
 
     // Clean up previous connections before initializing new ones
-    if (channelRef.current) {
-      channelRef.current.unsubscribe();
-      channelRef.current = null;
-    }
-    if (ablyRef.current) {
-      ablyRef.current.close();
-      ablyRef.current = null;
+    try {
+      if (channelRef.current) {
+        channelRef.current.unsubscribe();
+        channelRef.current = null;
+      }
+      // if (ablyRef.current && ablyRef.current.connection.state !== 'closed') {
+      //   ablyRef.current.connection.close();
+      //   ablyRef.current = null;
+      // }
+    } catch (err) {
+      console.error("Error during Ably cleanup before initialization:", err);
     }
 
     initializeAbly();
 
     return () => {
-      if (channelRef.current) {
-        channelRef.current.unsubscribe();
-      }
-      if (ablyRef.current) {
-        ablyRef.current.close();
+      isMounted = false;
+      try {
+        if (channelRef.current) {
+          channelRef.current.unsubscribe();
+          channelRef.current = null;
+        }
+        // if (ablyRef.current && ablyRef.current.connection.state !== 'closed') {
+        //   ablyRef.current.connection.close();
+        //   ablyRef.current = null;
+        // }
+      } catch (err) {
+        console.error("Error during Ably cleanup:", err);
       }
     };
   }, [chatId, currentUserId]);

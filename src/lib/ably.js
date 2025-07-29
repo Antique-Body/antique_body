@@ -83,10 +83,29 @@ export const joinGlobalPresence = async (user) => {
 };
 
 export const leaveGlobalPresence = async (userId = null) => {
-  const client = getAblyClient(userId);
-  const channel = client.channels.get('presence:global');
-  
   try {
+    const client = getAblyClient(userId);
+    
+    // Check if client and connection are available
+    if (!client || !client.connection) {
+      console.warn('Ably client or connection not available for leaving presence');
+      return false;
+    }
+    
+    // Check connection state
+    if (client.connection.state === 'closed' || client.connection.state === 'failed') {
+      console.warn('Ably connection is closed or failed, skipping presence leave');
+      return false;
+    }
+    
+    const channel = client.channels.get('presence:global');
+    
+    // Check if channel and presence are available
+    if (!channel || !channel.presence) {
+      console.warn('Presence channel not available for leaving');
+      return false;
+    }
+    
     await channel.presence.leave();
     return true;
   } catch (error) {

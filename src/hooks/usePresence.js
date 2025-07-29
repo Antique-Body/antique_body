@@ -78,12 +78,12 @@ export const useGlobalPresence = () => {
   // Leave presence when component unmounts
   const cleanup = useCallback(async () => {
     try {
-      if (channelRef.current) {
+      if (channelRef.current && channelRef.current.presence) {
         await leaveGlobalPresence();
         channelRef.current.presence.unsubscribe();
       }
-      if (ablyRef.current) {
-        ablyRef.current.close();
+      if (ablyRef.current && ablyRef.current.connection && ablyRef.current.connection.state !== 'closed') {
+        ablyRef.current.connection.close();
       }
     } catch (error) {
       console.error("Failed to cleanup presence:", error);
@@ -107,7 +107,17 @@ export const useGlobalPresence = () => {
 
     // Cleanup on unmount and page unload
     const handleBeforeUnload = () => {
-      cleanup();
+      // During page reload, the connection might already be closing
+      // So we'll just try to leave presence without waiting
+      try {
+        if (channelRef.current && channelRef.current.presence) {
+          leaveGlobalPresence().catch(() => {
+            // Ignore errors during page unload
+          });
+        }
+              } catch {
+          // Ignore errors during page unload
+        }
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);

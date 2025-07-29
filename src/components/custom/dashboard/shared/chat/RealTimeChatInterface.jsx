@@ -12,6 +12,48 @@ import { useChat, useConversations } from "@/hooks/useChat";
 import { useGlobalPresence, useChatPresence } from "@/hooks/usePresence";
 import { isValidChatId } from "@/utils/chatUtils";
 
+// Avatar component with fallback
+const Avatar = ({ src, alt, size = "md", className = "" }) => {
+  const [imageError, setImageError] = useState(false);
+  
+  // Generate initials from name
+  const getInitials = (name) => {
+    if (!name) return "?";
+    const parts = name.trim().split(" ");
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  };
+
+  // Size classes
+  const sizeClasses = {
+    sm: "h-8 w-8 text-xs",
+    md: "h-10 w-10 text-sm",
+    lg: "h-12 w-12 text-base",
+    xl: "h-16 w-16 text-lg"
+  };
+
+  const sizeClass = sizeClasses[size] || sizeClasses.md;
+
+  if (!src || imageError) {
+    return (
+      <div className={`${sizeClass} ${className} rounded-full bg-gradient-to-br from-[#3E92CC] to-[#2D7EB8] flex items-center justify-center font-semibold text-white`}>
+        {getInitials(alt)}
+      </div>
+    );
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      width={parseInt(sizeClass.split(" ")[0].replace("h-", "")) * 4}
+      height={parseInt(sizeClass.split(" ")[0].replace("h-", "")) * 4}
+      className={`${sizeClass} ${className} rounded-full object-cover`}
+      onError={() => setImageError(true)}
+    />
+  );
+};
+
 import { TypingIndicator } from "./TypingIndicator";
 
 const ConversationItem = ({ conversation, isSelected, _onClick, isOnline }) => {
@@ -35,12 +77,10 @@ const ConversationItem = ({ conversation, isSelected, _onClick, isOnline }) => {
     <div className="flex items-center">
       {/* Avatar with online indicator */}
       <div className="relative">
-        <Image
-          src={conversation.avatar || "/assets/images/default-avatar.jpg"}
+        <Avatar
+          src={conversation.avatar}
           alt={conversation.name}
-          width={48}
-          height={48}
-          className="rounded-full object-cover"
+          size="lg"
         />
         {isOnline && (
           <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-[#0f0f0f] bg-green-500"></div>
@@ -231,18 +271,14 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
           ←
         </button>
         <div className="relative mr-3">
-          <div className="h-10 w-10 overflow-hidden rounded-full bg-[#333]">
-            <Image
-              src={conversation.avatar || "/assets/images/default-avatar.jpg"}
-              alt={conversation.name}
-              width={40}
-              height={40}
-              className="object-cover"
-            />
-          </div>
-                  {isOnline && (
-          <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full border border-[#0a0a0a] bg-green-400"></div>
-        )}
+          <Avatar
+            src={conversation.avatar}
+            alt={conversation.name}
+            size="md"
+          />
+          {isOnline && (
+            <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full border border-[#0a0a0a] bg-green-400"></div>
+          )}
         </div>
         <div>
           <h3 className="font-medium">{conversation.name}</h3>
