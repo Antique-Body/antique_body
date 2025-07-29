@@ -1,14 +1,14 @@
 "use client";
 
 import { Icon } from "@iconify/react";
-import { forwardRef, useImperativeHandle } from "react";
+import { forwardRef, useImperativeHandle, useEffect } from "react";
 
 import { useAIFoodAnalysis } from "@/hooks";
 
 import { FoodImageAnalyzer } from "./FoodImageAnalyzer";
 
 export const AIFoodScannerTab = forwardRef(
-  ({ mealName, mealTime, onSave, isSubmitting = false }, ref) => {
+  ({ mealName, mealTime, onSave, onAnalysisStateChange }, ref) => {
     const {
       analysis,
       error,
@@ -19,6 +19,13 @@ export const AIFoodScannerTab = forwardRef(
       setError,
     } = useAIFoodAnalysis();
 
+    // Notify parent when analysis state changes
+    useEffect(() => {
+      if (onAnalysisStateChange) {
+        onAnalysisStateChange();
+      }
+    }, [analysis, isAnalyzing, onAnalysisStateChange]);
+
     // Expose methods to parent component via ref
     useImperativeHandle(ref, () => ({
       handleSave: () => {
@@ -28,7 +35,9 @@ export const AIFoodScannerTab = forwardRef(
         }
         return false;
       },
-      getButtonConfig: () => getButtonConfig(),
+      analyzeFood: analyzeFood, // Expose analyzeFood function
+      hasAnalysis: () => !!analysis, // Expose analysis state
+      isAnalyzing: () => isAnalyzing, // Expose analyzing state
     }));
 
     const handleSave = async () => {
@@ -58,23 +67,6 @@ export const AIFoodScannerTab = forwardRef(
             error.stack
         );
         return false;
-      }
-    };
-
-    // Get appropriate button configuration based on analysis state
-    const getButtonConfig = () => {
-      if (!analysis) {
-        return {
-          primaryText: isAnalyzing ? "Analyzing..." : "Analyze Food",
-          primaryAction: analyzeFood,
-          primaryDisabled: isAnalyzing,
-        };
-      } else {
-        return {
-          primaryText: isSubmitting ? "Saving..." : "Save Food",
-          primaryAction: handleSave,
-          primaryDisabled: isSubmitting,
-        };
       }
     };
 

@@ -32,20 +32,50 @@ export const CustomMealModal = ({
     updateButtonConfig();
   }, [activeTab, isSubmitting]);
 
+  // Callback to trigger button config update when analysis state changes
+  const onAnalysisStateChange = useCallback(() => {
+    updateButtonConfig();
+  }, []);
+
   const updateButtonConfig = () => {
     if (activeTab === "ai-scanner") {
       if (aiFoodScannerTabRef.current) {
-        const config = aiFoodScannerTabRef.current.getButtonConfig();
-        setButtonConfig({
-          primaryText: config.primaryText,
-          primaryAction: config.primaryAction,
-          primaryDisabled: config.primaryDisabled || isSubmitting,
-        });
+        // Check if we have analysis data
+        const hasAnalysis = aiFoodScannerTabRef.current.hasAnalysis?.();
+        const isAnalyzing = aiFoodScannerTabRef.current.isAnalyzing?.();
+
+        if (hasAnalysis) {
+          // Show "Save Meal" button when analysis exists
+          setButtonConfig({
+            primaryText: isSubmitting ? "Saving..." : "Save Meal",
+            primaryAction: () => {
+              if (aiFoodScannerTabRef.current) {
+                aiFoodScannerTabRef.current.handleSave();
+              }
+            },
+            primaryDisabled: isSubmitting,
+          });
+        } else {
+          // Show "Analyze Food" button when no analysis exists
+          setButtonConfig({
+            primaryText: isAnalyzing ? "Analyzing..." : "Analyze Food",
+            primaryAction: () => {
+              if (aiFoodScannerTabRef.current) {
+                aiFoodScannerTabRef.current.analyzeFood();
+              }
+            },
+            primaryDisabled: isAnalyzing || isSubmitting,
+          });
+        }
       } else {
         setButtonConfig({
-          primaryText: null,
-          primaryAction: null,
-          primaryDisabled: true,
+          primaryText: "Analyze Food",
+          primaryAction: () => {
+            if (aiFoodScannerTabRef.current) {
+              aiFoodScannerTabRef.current.analyzeFood();
+            }
+          },
+          primaryDisabled: isSubmitting,
         });
       }
     } else if (activeTab === "create") {
@@ -226,7 +256,7 @@ export const CustomMealModal = ({
             mealName={mealName}
             mealTime={mealTime}
             onSave={handleSave}
-            isSubmitting={isSubmitting}
+            onAnalysisStateChange={onAnalysisStateChange}
           />
         )}
 
