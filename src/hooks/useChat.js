@@ -207,10 +207,46 @@ export const useChat = (chatId) => {
     if (!chatId) return;
 
     try {
-      // The GET request to fetch messages automatically marks them as read
-      await fetch(`/api/messages/direct/${chatId}`);
+      const response = await fetch(`/api/messages/direct/${chatId}/mark-read`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to mark messages as read");
+      }
+
+      const data = await response.json();
+      console.log(`Marked ${data.markedAsRead} messages as read`);
     } catch (err) {
       console.error("Error marking messages as read:", err);
+    }
+  }, [chatId]);
+
+  // Delete chat
+  const deleteChat = useCallback(async () => {
+    if (!chatId) return;
+
+    try {
+      const response = await fetch(`/api/messages/direct/${chatId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete chat");
+      }
+
+      const data = await response.json();
+      console.log("Chat deleted successfully:", data.message);
+      return { success: true };
+    } catch (err) {
+      console.error("Error deleting chat:", err);
+      return { success: false, error: err.message };
     }
   }, [chatId]);
 
@@ -222,6 +258,7 @@ export const useChat = (chatId) => {
     fetchMessages,
     sendMessage,
     markAsRead,
+    deleteChat,
   };
 };
 

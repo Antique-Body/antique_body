@@ -168,9 +168,10 @@ const MessageBubble = ({ message }) => {
   );
 };
 
-const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isOnline }) => {
+const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isOnline, onDeleteChat }) => {
   const { data: session } = useSession();
   const [reply, setReply] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const messagesEndRef = useRef(null);
   
   const {
@@ -181,6 +182,7 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
     fetchMessages,
     sendMessage,
     markAsRead,
+    deleteChat,
   } = useChat(conversation?.id);
 
   const {
@@ -263,28 +265,81 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
   return (
     <div className="flex h-full flex-col">
       {/* Chat header */}
-      <div className="flex items-center border-b border-[#333] p-4">
-        <button
-          onClick={onClose}
-          className="mr-3 rounded p-1 hover:bg-[#333] lg:hidden"
-        >
-          ←
-        </button>
-        <div className="relative mr-3">
-          <Avatar
-            src={conversation.avatar}
-            alt={conversation.name}
-            size="md"
-          />
-          {isOnline && (
-            <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full border border-[#0a0a0a] bg-green-400"></div>
-          )}
+      <div className="flex items-center justify-between border-b border-[#333] p-4">
+        <div className="flex items-center">
+          <button
+            onClick={onClose}
+            className="mr-3 rounded p-1 hover:bg-[#333] lg:hidden"
+          >
+            ←
+          </button>
+          <div className="relative mr-3">
+            <Avatar
+              src={conversation.avatar}
+              alt={conversation.name}
+              size="md"
+            />
+            {isOnline && (
+              <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full border border-[#0a0a0a] bg-green-400"></div>
+            )}
+          </div>
+          <div>
+            <h3 className="font-medium">{conversation.name}</h3>
+            <p className="text-xs text-gray-400">
+              {isOnline ? "Online" : "Offline"}
+            </p>
+          </div>
         </div>
-        <div>
-          <h3 className="font-medium">{conversation.name}</h3>
-          <p className="text-xs text-gray-400">
-            {isOnline ? "Online" : "Offline"}
-          </p>
+        
+        {/* Delete button */}
+        <div className="relative">
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="rounded p-2 text-gray-400 hover:bg-red-500/20 hover:text-red-400 transition-colors"
+            title="Delete conversation"
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+          
+          {/* Delete confirmation modal */}
+          {showDeleteConfirm && (
+            <div className="absolute right-0 top-full mt-2 w-64 rounded-lg border border-[#333] bg-[#1a1a1a] p-4 shadow-lg z-10">
+              <h4 className="mb-2 font-medium text-gray-100">Delete Conversation</h4>
+              <p className="mb-4 text-sm text-gray-400">
+                Are you sure you want to delete this conversation? This action cannot be undone.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={async () => {
+                    try {
+                      const result = await deleteChat();
+                      if (result.success) {
+                        setShowDeleteConfirm(false);
+                        if (onDeleteChat) {
+                          onDeleteChat();
+                        }
+                      } else {
+                        console.error("Failed to delete chat:", result.error);
+                      }
+                    } catch (error) {
+                      console.error("Error deleting chat:", error);
+                    }
+                  }}
+                  className="flex-1 rounded bg-red-500 px-3 py-2 text-sm font-medium text-white hover:bg-red-600 transition-colors"
+                >
+                  Delete
+                </button>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 rounded bg-[#333] px-3 py-2 text-sm font-medium text-gray-300 hover:bg-[#444] transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -300,7 +355,7 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
             <h3 className="mb-2 text-xl font-medium text-gray-100">
               Start a conversation with {conversation.name}
             </h3>
-            <p className="max-w-md text-gray-400">
+            <p className="text-gray-400 text-center">
               This is the beginning of your conversation. Send a message below to get started!
             </p>
           </div>
@@ -342,7 +397,7 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
 
       {/* Reply form */}
       <form onSubmit={handleSendMessage} className="border-t border-[#333] p-4">
-        <div className="flex items-end gap-2">
+        <div className="flex items-start gap-2">
           <div className="flex-grow">
             <FormField
               type="text"
@@ -369,6 +424,7 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
             variant="orangeFilled"
             size="default"
             disabled={reply.trim() === "" || sending}
+            className="mt-[5px]"
           >
             {sending ? "Sending..." : "Send"}
           </Button>
@@ -379,6 +435,8 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
 };
 
 export const RealTimeChatInterface = ({ conversationId }) => {
+  const router = useRouter();
+  const { data: session } = useSession();
   const [activeConversation, setActiveConversation] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
@@ -553,6 +611,18 @@ export const RealTimeChatInterface = ({ conversationId }) => {
     setActiveConversation(null);
   };
 
+  const handleDeleteChat = () => {
+    // Close the chat and refresh conversations
+    setShowMobileChat(false);
+    setActiveConversation(null);
+    fetchConversations();
+    
+    // Redirect to messages page without chat ID
+    const userRole = session?.user?.role || 'client';
+    const basePath = userRole === 'trainer' ? '/trainer/dashboard/messages' : '/client/dashboard/messages';
+    router.push(basePath);
+  };
+
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       {/* Conversations list */}
@@ -640,6 +710,7 @@ export const RealTimeChatInterface = ({ conversationId }) => {
             conversation={activeConversation}
             onClose={handleCloseMobileChat}
             onRefreshConversations={handleRefreshConversations}
+            onDeleteChat={handleDeleteChat}
             isOnline={activeConversation ? isUserOnline(activeConversation.participantId) : false}
           />
         </div>

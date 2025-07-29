@@ -96,9 +96,12 @@ export async function POST(request) {
       }
     }
 
-    // Check if there's an existing conversation
-    const existingConversation = await prisma.conversation.findUnique({
-      where: { chatId },
+    // Check if there's an existing conversation (not deleted)
+    const existingConversation = await prisma.conversation.findFirst({
+      where: { 
+        chatId,
+        deletedAt: null,
+      },
     });
 
     return NextResponse.json({

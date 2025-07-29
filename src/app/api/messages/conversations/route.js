@@ -35,6 +35,7 @@ export async function GET() {
         where: {
           trainerId: user.trainerInfo.id,
           isActive: true,
+          deletedAt: null,
         },
         include: {
           client: {
@@ -66,6 +67,7 @@ export async function GET() {
         where: {
           clientId: user.clientInfo.id,
           isActive: true,
+          deletedAt: null,
         },
         include: {
           trainer: {

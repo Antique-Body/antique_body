@@ -81,35 +81,7 @@ export async function GET(request, { params }) {
       take: limit,
     });
 
-    // Mark messages as read for the current user
-    if (messages.length > 0) {
-      await prisma.message.updateMany({
-        where: {
-          chatId,
-          receiverId: session.user.id,
-          isRead: false,
-        },
-        data: {
-          isRead: true,
-        },
-      });
 
-      // Update conversation unread count
-      const conversation = await prisma.conversation.findUnique({
-        where: { chatId },
-      });
-
-      if (conversation) {
-        const updateData = isTrainer
-          ? { trainerUnreadCount: 0 }
-          : { clientUnreadCount: 0 };
-
-        await prisma.conversation.update({
-          where: { id: conversation.id },
-          data: updateData,
-        });
-      }
-    }
 
     // Format messages for frontend
     const formattedMessages = messages.reverse().map((message) => ({
@@ -283,6 +255,98 @@ export async function POST(request, { params }) {
     console.error("Error sending message:", error);
     return NextResponse.json(
       { error: "Failed to send message" },
+      { status: 500 }
+    );
+  }
+} 
+
+export async function DELETE(request, { params }) {
+  try {
+    const session = await auth();
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { chatId } = params;
+
+    // Validate chat ID format
+    if (!isValidChatId(chatId)) {
+      return NextResponse.json(
+        { error: "Invalid chat ID format" },
+        { status: 400 }
+      );
+    }
+
+    const { trainerId, clientId } = parseChatId(chatId);
+    
+    if (!trainerId || !clientId) {
+      return NextResponse.json(
+        { error: "Invalid chat ID format" },
+        { status: 400 }
+      );
+    }
+
+    // Verify user has access to this chat
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: {
+        trainerInfo: true,
+        clientInfo: true,
+      },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Check if user is either the trainer or client in this chat
+    const isTrainer = user.trainerInfo?.id === trainerId;
+    const isClient = user.clientInfo?.id === clientId;
+
+    if (!isTrainer && !isClient) {
+      return NextResponse.json(
+        { error: "Unauthorized to access this conversation" },
+        { status: 403 }
+      );
+    }
+
+    // Soft delete the conversation
+    const conversation = await prisma.conversation.findUnique({
+      where: { chatId },
+    });
+
+    if (!conversation) {
+      return NextResponse.json(
+        { error: "Conversation not found" },
+        { status: 404 }
+      );
+    }
+
+    // Soft delete the conversation
+    await prisma.conversation.update({
+      where: { id: conversation.id },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+
+    // Soft delete all messages in this conversation
+    await prisma.message.updateMany({
+      where: { chatId },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+
+    return NextResponse.json({ 
+      success: true, 
+      message: "Chat deleted successfully" 
+    });
+  } catch (error) {
+    console.error("Error deleting chat:", error);
+    return NextResponse.json(
+      { error: "Failed to delete chat" },
       { status: 500 }
     );
   }
