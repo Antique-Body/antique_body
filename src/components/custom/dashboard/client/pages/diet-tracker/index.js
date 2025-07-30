@@ -1,10 +1,15 @@
-export { mockNutritionPlan } from "./mockNutritionPlan";
+export { mockNutritionPlan, mockNutritionPlans } from "./mockNutritionPlan";
 
 // Main components
 export { DietPlanAssignmentCard } from "./DietPlanAssignmentCard";
+export { NutritionPlanPicker } from "./NutritionPlanPicker";
+export { NutritionPlanCard } from "./NutritionPlanCard";
+export { PlanDetailsModal } from "./PlanDetailsModal";
 export { ActiveDietPlan } from "./ActiveDietPlan";
 export { LoadingState } from "./LoadingState";
 export { ErrorState } from "./ErrorState";
+export { PlanProgressSummary } from "./PlanProgressSummary";
+export { PlanCompletionCard } from "./PlanCompletionCard";
 
 // Sub-components
 export { PlanHeader } from "./PlanHeader";

@@ -472,19 +472,19 @@ export const NUTRITION_PLAN_CONFIG = [
     timeline: [
       {
         week: "First week",
-        title: "Obese Week",
+        title: "Adaptation Week",
         description:
           "Focus on adapting to the new regime and increasing protein intake.",
       },
     ],
     nutritionInfo: {
-      fats: 0,
-      carbs: 100,
-      protein: 200,
-      calories: 2000,
+      fats: 65,
+      carbs: 250,
+      protein: 180,
+      calories: 2500,
     },
     mealTypes: ["breakfast", "lunch", "dinner", "snack"],
-    supplementRecommendations: "Whey protein",
+    supplementRecommendations: "Whey protein, Creatine, Multivitamin",
     cookingTime: "30-40 min",
     targetGoal: "muscle-gain",
     days: [
@@ -501,6 +501,7 @@ export const NUTRITION_PLAN_CONFIG = [
                 carbs: 45,
                 protein: 38,
                 calories: 485,
+                dietary: ["high-protein", "vegetarian"],
                 imageUrl:
                   "https://images.pexels.com/photos/1099680/pexels-photo-1099680.jpeg",
                 description:
@@ -516,12 +517,19 @@ export const NUTRITION_PLAN_CONFIG = [
                   "almond milk",
                 ],
               },
+            ],
+          },
+          {
+            name: "Lunch",
+            time: "12:30",
+            options: [
               {
                 name: "Lean Beef Power Bowl",
                 fat: 22,
                 carbs: 48,
                 protein: 52,
                 calories: 625,
+                dietary: ["high-protein", "gluten-free"],
                 imageUrl:
                   "https://images.pexels.com/photos/1640773/pexels-photo-1640773.jpeg",
                 description:
@@ -540,9 +548,66 @@ export const NUTRITION_PLAN_CONFIG = [
               },
             ],
           },
+          {
+            name: "Snack",
+            time: "15:30",
+            options: [
+              {
+                name: "Pre-Workout Energy Smoothie",
+                fat: 8,
+                carbs: 38,
+                protein: 28,
+                calories: 325,
+                dietary: ["high-protein", "vegetarian"],
+                imageUrl:
+                  "https://images.pexels.com/photos/1092730/pexels-photo-1092730.jpeg",
+                description:
+                  "1. Add all ingredients to blender. 2. Blend until smooth and creamy. 3. Add ice for desired consistency. 4. Consume 30-45 minutes before workout.",
+                ingredients: [
+                  "Whey protein powder",
+                  "banana",
+                  "oats",
+                  "almond milk",
+                  "espresso shot",
+                  "Greek yogurt",
+                  "honey",
+                  "ice",
+                ],
+              },
+            ],
+          },
+          {
+            name: "Dinner",
+            time: "19:00",
+            options: [
+              {
+                name: "Salmon Power Plate",
+                fat: 28,
+                carbs: 35,
+                protein: 46,
+                calories: 615,
+                dietary: ["high-protein", "gluten-free", "keto"],
+                imageUrl:
+                  "https://images.pexels.com/photos/1109197/pexels-photo-1109197.jpeg",
+                description:
+                  "1. Season and bake salmon at 400°F for 15 minutes. 2. Cook quinoa with garlic. 3. Massage kale with lemon and olive oil. 4. Slice avocado and halve tomatoes. 5. Plate salmon over quinoa and kale. 6. Top with avocado and almonds.",
+                ingredients: [
+                  "Atlantic salmon fillet",
+                  "quinoa",
+                  "kale",
+                  "avocado",
+                  "cherry tomatoes",
+                  "lemon",
+                  "olive oil",
+                  "garlic",
+                  "almonds",
+                ],
+              },
+            ],
+          },
         ],
         isRestDay: false,
-        description: "",
+        description: "High protein day to support muscle growth",
       },
       {
         name: "Day 2",
@@ -552,59 +617,717 @@ export const NUTRITION_PLAN_CONFIG = [
             time: "08:00",
             options: [
               {
-                name: "Post-Workout Protein Pancakes",
-                fat: 12,
-                carbs: 45,
-                protein: 38,
-                calories: 485,
+                name: "Egg White Protein Scramble",
+                fat: 8,
+                carbs: 18,
+                protein: 32,
+                calories: 285,
+                dietary: ["high-protein", "vegetarian", "keto"],
                 imageUrl:
-                  "https://images.pexels.com/photos/1099680/pexels-photo-1099680.jpeg",
+                  "https://images.pexels.com/photos/824635/pexels-photo-824635.jpeg",
                 description:
-                  "1. Blend oats into flour. 2. Mix protein powder, oat flour, baking powder, cinnamon. 3. Combine egg whites, mashed banana, almond milk. 4. Mix wet and dry ingredients. 5. Cook pancakes in non-stick pan. 6. Top with Greek yogurt.",
+                  "1. Spray pan with cooking spray. 2. Sauté vegetables until tender. 3. Pour in egg whites and whole eggs. 4. Scramble until fluffy. 5. Add cheese and herbs. 6. Serve immediately.",
                 ingredients: [
-                  "Protein powder (vanilla)",
-                  "oats",
-                  "egg whites",
-                  "banana",
-                  "Greek yogurt",
-                  "cinnamon",
-                  "baking powder",
-                  "almond milk",
+                  "Egg whites",
+                  "whole eggs",
+                  "spinach",
+                  "mushrooms",
+                  "bell peppers",
+                  "low-fat cheese",
+                  "cooking spray",
+                  "herbs",
                 ],
               },
+            ],
+          },
+          {
+            name: "Lunch",
+            time: "12:30",
+            options: [
               {
-                name: "Lean Beef Power Bowl",
-                fat: 22,
-                carbs: 48,
-                protein: 52,
-                calories: 625,
+                name: "Grilled Chicken Meal Prep",
+                fat: 18,
+                carbs: 42,
+                protein: 48,
+                calories: 545,
+                dietary: ["high-protein", "gluten-free"],
                 imageUrl:
-                  "https://images.pexels.com/photos/1640773/pexels-photo-1640773.jpeg",
+                  "https://images.pexels.com/photos/1059905/pexels-photo-1059905.jpeg",
                 description:
-                  "1. Cook brown rice and quinoa. 2. Roast diced sweet potato. 3. Sauté lean beef with garlic and onion. 4. Steam spinach and bell peppers. 5. Combine all ingredients in bowl. 6. Drizzle with olive oil.",
+                  "1. Season chicken with herbs and spices. 2. Grill chicken breast until cooked through. 3. Steam broccoli and asparagus. 4. Cook jasmine rice. 5. Portion into meal prep containers. 6. Drizzle with lemon and olive oil.",
                 ingredients: [
-                  "Lean ground beef (93/7)",
-                  "brown rice",
-                  "sweet potato",
-                  "spinach",
-                  "quinoa",
-                  "bell peppers",
+                  "Chicken breast",
+                  "jasmine rice",
+                  "broccoli",
+                  "asparagus",
                   "olive oil",
+                  "lemon",
+                  "herbs",
+                  "garlic powder",
+                  "paprika",
+                ],
+              },
+            ],
+          },
+          {
+            name: "Snack",
+            time: "15:30",
+            options: [
+              {
+                name: "Casein Protein Night Bowl",
+                fat: 8,
+                carbs: 28,
+                protein: 30,
+                calories: 295,
+                dietary: ["high-protein", "vegetarian"],
+                imageUrl:
+                  "https://images.pexels.com/photos/1435735/pexels-photo-1435735.jpeg",
+                description:
+                  "1. Mix casein protein with small amount of water to form paste. 2. Fold in Greek yogurt. 3. Add almond butter and vanilla. 4. Top with berries and chia seeds. 5. Consume before bed for overnight recovery.",
+                ingredients: [
+                  "Casein protein powder",
+                  "Greek yogurt",
+                  "almond butter",
+                  "berries",
+                  "chia seeds",
+                  "vanilla extract",
+                  "stevia",
+                ],
+              },
+            ],
+          },
+          {
+            name: "Dinner",
+            time: "19:00",
+            options: [
+              {
+                name: "Lean Steak Performance Meal",
+                fat: 25,
+                carbs: 48,
+                protein: 55,
+                calories: 665,
+                dietary: ["high-protein", "gluten-free", "keto"],
+                imageUrl:
+                  "https://images.pexels.com/photos/361184/pexels-photo-361184.jpeg",
+                description:
+                  "1. Season steak with garlic and rosemary. 2. Grill steak to desired doneness. 3. Roast sweet potato wedges. 4. Sauté green beans and mushrooms. 5. Let steak rest, then slice. 6. Drizzle with balsamic reduction.",
+                ingredients: [
+                  "Sirloin steak (lean cut)",
+                  "sweet potato",
+                  "green beans",
+                  "mushrooms",
                   "garlic",
-                  "onion",
+                  "rosemary",
+                  "olive oil",
+                  "balsamic vinegar",
                 ],
               },
             ],
           },
         ],
         isRestDay: false,
-        description: "",
+        description: "Focus on lean proteins and complex carbs",
       },
       {
         name: "Day 3",
-        meals: [],
+        meals: [
+          {
+            name: "Breakfast",
+            time: "08:00",
+            options: [
+              {
+                name: "Cottage Cheese Power Bowl",
+                fat: 12,
+                carbs: 32,
+                protein: 35,
+                calories: 365,
+                dietary: ["high-protein", "vegetarian", "gluten-free"],
+                imageUrl:
+                  "https://images.pexels.com/photos/1092730/pexels-photo-1092730.jpeg",
+                description:
+                  "1. Place cottage cheese in bowl. 2. Add vanilla extract and cinnamon. 3. Top with granola and berries. 4. Drizzle with honey. 5. Sprinkle chopped walnuts. 6. Serve immediately.",
+                ingredients: [
+                  "Low-fat cottage cheese",
+                  "granola",
+                  "mixed berries",
+                  "honey",
+                  "walnuts",
+                  "cinnamon",
+                  "vanilla extract",
+                ],
+              },
+            ],
+          },
+          {
+            name: "Lunch",
+            time: "12:30",
+            options: [
+              {
+                name: "Chicken Protein Wrap",
+                fat: 15,
+                carbs: 42,
+                protein: 45,
+                calories: 485,
+                dietary: ["high-protein"],
+                imageUrl:
+                  "https://images.pexels.com/photos/1633525/pexels-photo-1633525.jpeg",
+                description:
+                  "1. Slice grilled chicken breast. 2. Spread hummus on tortilla. 3. Layer lettuce, tomatoes, cucumber, onion. 4. Add chicken and feta cheese. 5. Roll tightly, securing with toothpick. 6. Cut in half to serve.",
+                ingredients: [
+                  "Whole wheat tortilla",
+                  "grilled chicken breast",
+                  "hummus",
+                  "lettuce",
+                  "tomatoes",
+                  "cucumber",
+                  "red onion",
+                  "feta cheese",
+                ],
+              },
+            ],
+          },
+          {
+            name: "Snack",
+            time: "15:30",
+            options: [
+              {
+                name: "Post-Workout Recovery Shake",
+                fat: 8,
+                carbs: 48,
+                protein: 35,
+                calories: 425,
+                dietary: ["high-protein", "vegetarian"],
+                imageUrl:
+                  "https://images.pexels.com/photos/1092730/pexels-photo-1092730.jpeg",
+                description:
+                  "1. Add all ingredients to blender. 2. Blend until completely smooth. 3. Consume within 30 minutes post-workout for optimal recovery. 4. Add ice for preferred consistency.",
+                ingredients: [
+                  "Whey protein isolate",
+                  "banana",
+                  "white rice (cooked and cooled)",
+                  "coconut water",
+                  "leucine supplement",
+                  "ice",
+                ],
+              },
+            ],
+          },
+          {
+            name: "Dinner",
+            time: "19:00",
+            options: [
+              {
+                name: "Turkey Meatball Pasta Bowl",
+                fat: 20,
+                carbs: 52,
+                protein: 44,
+                calories: 580,
+                dietary: ["high-protein"],
+                imageUrl:
+                  "https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg",
+                description:
+                  "1. Mix turkey with egg, breadcrumbs, herbs for meatballs. 2. Bake meatballs at 375°F for 20 minutes. 3. Cook whole wheat pasta. 4. Heat marinara sauce. 5. Sauté spinach. 6. Combine all ingredients, top with parmesan.",
+                ingredients: [
+                  "Lean ground turkey",
+                  "whole wheat pasta",
+                  "spinach",
+                  "marinara sauce",
+                  "parmesan",
+                  "egg",
+                  "breadcrumbs",
+                  "Italian herbs",
+                ],
+              },
+            ],
+          },
+        ],
+        isRestDay: false,
+        description: "Carb cycling day with moderate carbs",
+      },
+      {
+        name: "Day 4",
+        meals: [
+          {
+            name: "Breakfast",
+            time: "08:00",
+            options: [
+              {
+                name: "Turkey and Sweet Potato Hash",
+                fat: 15,
+                carbs: 42,
+                protein: 38,
+                calories: 445,
+                dietary: ["high-protein", "gluten-free", "paleo"],
+                imageUrl:
+                  "https://images.pexels.com/photos/1109197/pexels-photo-1109197.jpeg",
+                description:
+                  "1. Dice and roast sweet potato. 2. Cook ground turkey with spices. 3. Sauté peppers and onion. 4. Combine turkey and vegetables. 5. Create wells and crack eggs into them. 6. Cover until eggs are cooked, add spinach.",
+                ingredients: [
+                  "Ground turkey (lean)",
+                  "sweet potato",
+                  "bell peppers",
+                  "onion",
+                  "eggs",
+                  "spinach",
+                  "olive oil",
+                  "paprika",
+                  "cumin",
+                ],
+              },
+            ],
+          },
+          {
+            name: "Lunch",
+            time: "12:30",
+            options: [
+              {
+                name: "Tuna Protein Salad",
+                fat: 12,
+                carbs: 25,
+                protein: 42,
+                calories: 385,
+                dietary: ["high-protein", "gluten-free", "low-carb"],
+                imageUrl:
+                  "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg",
+                description:
+                  "1. Drain tuna and flake. 2. Mix Greek yogurt with lemon and mustard for dressing. 3. Combine mixed greens, cucumber, tomatoes, chickpeas. 4. Top with tuna. 5. Drizzle with yogurt dressing.",
+                ingredients: [
+                  "Canned tuna in water",
+                  "mixed greens",
+                  "chickpeas",
+                  "cucumber",
+                  "tomatoes",
+                  "Greek yogurt",
+                  "lemon juice",
+                  "Dijon mustard",
+                ],
+              },
+            ],
+          },
+          {
+            name: "Snack",
+            time: "15:30",
+            options: [
+              {
+                name: "Greek Yogurt Protein Parfait",
+                fat: 8,
+                carbs: 35,
+                protein: 28,
+                calories: 315,
+                dietary: ["high-protein", "vegetarian", "gluten-free"],
+                imageUrl:
+                  "https://images.pexels.com/photos/1092730/pexels-photo-1092730.jpeg",
+                description:
+                  "1. Mix protein powder into Greek yogurt. 2. Layer yogurt mixture with granola in glass. 3. Add layer of mixed berries. 4. Repeat layers. 5. Top with almonds and chia seeds. 6. Drizzle with honey.",
+                ingredients: [
+                  "Greek yogurt (0% fat)",
+                  "protein powder",
+                  "granola",
+                  "mixed berries",
+                  "honey",
+                  "almonds",
+                  "chia seeds",
+                ],
+              },
+            ],
+          },
+          {
+            name: "Dinner",
+            time: "19:00",
+            options: [
+              {
+                name: "Baked Cod with Quinoa",
+                fat: 12,
+                carbs: 48,
+                protein: 42,
+                calories: 485,
+                dietary: ["high-protein", "gluten-free", "dairy-free"],
+                imageUrl:
+                  "https://images.pexels.com/photos/725993/pexels-photo-725993.jpeg",
+                description:
+                  "1. Season cod with herbs and lemon. 2. Bake cod at 400°F for 12-15 minutes. 3. Cook quinoa. 4. Sauté zucchini and squash with garlic. 5. Add cherry tomatoes at end. 6. Serve cod over quinoa and vegetables.",
+                ingredients: [
+                  "Cod fillet",
+                  "quinoa",
+                  "zucchini",
+                  "yellow squash",
+                  "lemon",
+                  "herbs",
+                  "olive oil",
+                  "garlic",
+                  "cherry tomatoes",
+                ],
+              },
+            ],
+          },
+        ],
+        isRestDay: false,
+        description: "Lean protein focus with healthy fats",
+      },
+      {
+        name: "Day 5",
+        meals: [
+          {
+            name: "Breakfast",
+            time: "08:00",
+            options: [
+              {
+                name: "Protein-Packed Oatmeal",
+                fat: 12,
+                carbs: 48,
+                protein: 32,
+                calories: 395,
+                dietary: ["high-protein", "vegetarian"],
+                imageUrl:
+                  "https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg",
+                description:
+                  "1. Cook oats with almond milk. 2. Stir in protein powder when oats are nearly done. 3. Add peanut butter and cinnamon. 4. Top with sliced banana and chia seeds. 5. Drizzle with small amount of maple syrup.",
+                ingredients: [
+                  "Steel-cut oats",
+                  "protein powder",
+                  "almond milk",
+                  "peanut butter",
+                  "banana",
+                  "chia seeds",
+                  "cinnamon",
+                  "maple syrup",
+                ],
+              },
+            ],
+          },
+          {
+            name: "Lunch",
+            time: "12:30",
+            options: [
+              {
+                name: "Mexican Protein Bowl",
+                fat: 22,
+                carbs: 45,
+                protein: 42,
+                calories: 535,
+                dietary: ["high-protein", "gluten-free"],
+                imageUrl:
+                  "https://images.pexels.com/photos/1640773/pexels-photo-1640773.jpeg",
+                description:
+                  "1. Cook brown rice with cilantro and lime. 2. Grill seasoned chicken breast. 3. Heat black beans with cumin. 4. Roast corn and bell peppers. 5. Assemble bowl with all ingredients. 6. Top with avocado, salsa, and Greek yogurt.",
+                ingredients: [
+                  "Grilled chicken",
+                  "black beans",
+                  "brown rice",
+                  "avocado",
+                  "salsa",
+                  "corn",
+                  "bell peppers",
+                  "lime",
+                  "cilantro",
+                  "Greek yogurt",
+                ],
+              },
+            ],
+          },
+          {
+            name: "Snack",
+            time: "15:30",
+            options: [
+              {
+                name: "Protein Smoothie Bowl",
+                fat: 12,
+                carbs: 42,
+                protein: 32,
+                calories: 395,
+                dietary: ["high-protein", "vegetarian", "gluten-free"],
+                imageUrl:
+                  "https://images.pexels.com/photos/1092730/pexels-photo-1092730.jpeg",
+                description:
+                  "1. Blend protein powder, frozen berries, banana, and yogurt until thick. 2. Pour into bowl. 3. Top with granola, coconut flakes, and hemp seeds. 4. Add fresh fruit if desired. 5. Serve immediately.",
+                ingredients: [
+                  "Vanilla protein powder",
+                  "frozen berries",
+                  "banana",
+                  "Greek yogurt",
+                  "granola",
+                  "coconut flakes",
+                  "hemp seeds",
+                ],
+              },
+            ],
+          },
+          {
+            name: "Dinner",
+            time: "19:00",
+            options: [
+              {
+                name: "Mediterranean Chicken Skewers",
+                fat: 22,
+                carbs: 35,
+                protein: 48,
+                calories: 525,
+                dietary: ["high-protein", "gluten-free", "dairy-free"],
+                imageUrl:
+                  "https://images.pexels.com/photos/1109197/pexels-photo-1109197.jpeg",
+                description:
+                  "1. Cut chicken and vegetables into chunks. 2. Marinate in olive oil, lemon, and herbs. 3. Thread onto skewers alternating chicken and vegetables. 4. Grill 12-15 minutes, turning frequently. 5. Serve with crumbled feta. 6. Garnish with fresh herbs.",
+                ingredients: [
+                  "Chicken thighs",
+                  "red bell peppers",
+                  "zucchini",
+                  "red onion",
+                  "olive oil",
+                  "lemon",
+                  "oregano",
+                  "garlic",
+                  "feta cheese",
+                ],
+              },
+            ],
+          },
+        ],
+        isRestDay: false,
+        description: "High carb day for energy and recovery",
+      },
+      {
+        name: "Day 6",
+        meals: [
+          {
+            name: "Breakfast",
+            time: "08:00",
+            options: [
+              {
+                name: "High-Protein French Toast",
+                fat: 18,
+                carbs: 38,
+                protein: 35,
+                calories: 465,
+                dietary: ["high-protein", "vegetarian"],
+                imageUrl:
+                  "https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg",
+                description:
+                  "1. Whisk eggs, egg whites, protein powder, and almond milk. 2. Add cinnamon and vanilla to mixture. 3. Dip bread slices in egg mixture. 4. Cook in non-stick pan until golden. 5. Top with Greek yogurt and berries. 6. Serve warm.",
+                ingredients: [
+                  "Whole grain bread",
+                  "egg whites",
+                  "whole eggs",
+                  "protein powder",
+                  "almond milk",
+                  "cinnamon",
+                  "vanilla",
+                  "Greek yogurt",
+                  "berries",
+                ],
+              },
+            ],
+          },
+          {
+            name: "Lunch",
+            time: "12:30",
+            options: [
+              {
+                name: "Asian Lettuce Cups with Ground Turkey",
+                fat: 16,
+                carbs: 22,
+                protein: 38,
+                calories: 385,
+                dietary: ["high-protein", "gluten-free", "low-carb"],
+                imageUrl:
+                  "https://images.pexels.com/photos/1633525/pexels-photo-1633525.jpeg",
+                description:
+                  "1. Cook ground turkey until browned and cooked through. 2. Add ginger, garlic, and mushrooms. 3. Stir in diced water chestnuts. 4. Season with soy sauce and sesame oil. 5. Serve in lettuce cups. 6. Garnish with green onions.",
+                ingredients: [
+                  "Ground turkey",
+                  "butter lettuce",
+                  "water chestnuts",
+                  "mushrooms",
+                  "ginger",
+                  "garlic",
+                  "soy sauce",
+                  "sesame oil",
+                  "green onions",
+                ],
+              },
+            ],
+          },
+          {
+            name: "Snack",
+            time: "15:30",
+            options: [
+              {
+                name: "Protein Power Muffins",
+                fat: 12,
+                carbs: 28,
+                protein: 24,
+                calories: 285,
+                dietary: ["high-protein", "vegetarian", "gluten-free"],
+                imageUrl:
+                  "https://images.pexels.com/photos/1099680/pexels-photo-1099680.jpeg",
+                description:
+                  "1. Preheat oven to 350°F. 2. Mix dry ingredients in one bowl. 3. Combine wet ingredients in another bowl. 4. Fold wet into dry ingredients with blueberries. 5. Fill muffin cups and bake 18-20 minutes. 6. Cool before serving.",
+                ingredients: [
+                  "Almond flour",
+                  "protein powder",
+                  "eggs",
+                  "Greek yogurt",
+                  "blueberries",
+                  "baking powder",
+                  "vanilla",
+                  "stevia",
+                  "almond milk",
+                ],
+              },
+            ],
+          },
+          {
+            name: "Dinner",
+            time: "19:00",
+            options: [
+              {
+                name: "Italian Chicken Meatballs with Zucchini Noodles",
+                fat: 28,
+                carbs: 18,
+                protein: 44,
+                calories: 485,
+                dietary: ["high-protein", "gluten-free", "low-carb"],
+                imageUrl:
+                  "https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg",
+                description:
+                  "1. Mix ground chicken with egg, almond flour, and Italian herbs. 2. Form into meatballs and bake at 375°F for 20 minutes. 3. Spiralize zucchini into noodles. 4. Heat marinara sauce. 5. Sauté zucchini noodles briefly. 6. Serve meatballs over noodles with sauce and parmesan.",
+                ingredients: [
+                  "Ground chicken",
+                  "zucchini",
+                  "marinara sauce",
+                  "parmesan cheese",
+                  "basil",
+                  "oregano",
+                  "garlic",
+                  "egg",
+                  "almond flour",
+                ],
+              },
+            ],
+          },
+        ],
+        isRestDay: false,
+        description: "Low carb day to optimize fat burning",
+      },
+      {
+        name: "Day 7",
+        meals: [
+          {
+            name: "Breakfast",
+            time: "08:00",
+            options: [
+              {
+                name: "High-Protein Breakfast Quinoa Bowl",
+                fat: 12,
+                carbs: 52,
+                protein: 28,
+                calories: 425,
+                dietary: ["high-protein", "vegetarian", "gluten-free"],
+                imageUrl:
+                  "https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg",
+                description:
+                  "1. Cook quinoa in almond milk until creamy. 2. Stir in protein powder while warm. 3. Add cinnamon and vanilla. 4. Top with sliced banana and walnuts. 5. Sprinkle with chia seeds. 6. Drizzle with maple syrup if desired.",
+                ingredients: [
+                  "Quinoa",
+                  "almond milk",
+                  "protein powder",
+                  "banana",
+                  "walnuts",
+                  "cinnamon",
+                  "vanilla",
+                  "maple syrup",
+                  "chia seeds",
+                ],
+              },
+            ],
+          },
+          {
+            name: "Lunch",
+            time: "12:30",
+            options: [
+              {
+                name: "Korean BBQ Pork Bowl",
+                fat: 18,
+                carbs: 48,
+                protein: 45,
+                calories: 555,
+                dietary: ["high-protein", "gluten-free", "dairy-free"],
+                imageUrl:
+                  "https://images.pexels.com/photos/1640773/pexels-photo-1640773.jpeg",
+                description:
+                  "1. Marinate sliced pork in soy sauce, ginger, and garlic. 2. Cook brown rice. 3. Stir-fry pork until cooked through. 4. Prepare cucumber salad with sesame oil. 5. Assemble bowl with rice, pork, kimchi, and cucumber. 6. Garnish with sesame seeds.",
+                ingredients: [
+                  "Pork tenderloin",
+                  "brown rice",
+                  "kimchi",
+                  "cucumber",
+                  "sesame oil",
+                  "soy sauce",
+                  "ginger",
+                  "garlic",
+                  "sesame seeds",
+                ],
+              },
+            ],
+          },
+          {
+            name: "Snack",
+            time: "15:30",
+            options: [
+              {
+                name: "Chocolate Protein Energy Balls",
+                fat: 8,
+                carbs: 18,
+                protein: 12,
+                calories: 185,
+                dietary: ["high-protein", "vegetarian", "gluten-free", "vegan"],
+                imageUrl:
+                  "https://images.pexels.com/photos/1435735/pexels-photo-1435735.jpeg",
+                description:
+                  "1. Soak dates in warm water until soft. 2. Blend dates, protein powder, and almond butter. 3. Mix in oats and chia seeds. 4. Add vanilla extract. 5. Roll into balls and coat with coconut. 6. Refrigerate for 30 minutes before serving.",
+                ingredients: [
+                  "Chocolate protein powder",
+                  "dates",
+                  "almond butter",
+                  "oats",
+                  "chia seeds",
+                  "coconut flakes",
+                  "vanilla extract",
+                ],
+              },
+            ],
+          },
+          {
+            name: "Dinner",
+            time: "19:00",
+            options: [
+              {
+                name: "Stuffed Bell Peppers with Turkey",
+                fat: 18,
+                carbs: 35,
+                protein: 38,
+                calories: 465,
+                dietary: ["high-protein", "gluten-free", "dairy-free"],
+                imageUrl:
+                  "https://images.pexels.com/photos/1109197/pexels-photo-1109197.jpeg",
+                description:
+                  "1. Cut tops off bell peppers and remove seeds. 2. Cook ground turkey with onions and garlic. 3. Mix in cauliflower rice and diced tomatoes. 4. Season with Italian herbs. 5. Stuff peppers with mixture. 6. Bake covered at 375°F for 25 minutes.",
+                ingredients: [
+                  "Bell peppers",
+                  "ground turkey",
+                  "cauliflower rice",
+                  "onion",
+                  "tomatoes",
+                  "Italian herbs",
+                  "garlic",
+                  "olive oil",
+                  "nutritional yeast",
+                ],
+              },
+            ],
+          },
+        ],
         isRestDay: true,
-        description: "Cheat day: free meal or dessert.",
+        description: "Recovery day with lighter meals and flexibility",
       },
     ],
     recommendedFrequency: "every day",
@@ -829,6 +1552,19 @@ export const MEAL_CONFIG = {
     "middle-eastern",
     "international",
     "other",
+  ],
+  validDietaryOptions: [
+    "high-protein",
+    "vegetarian",
+    "vegan",
+    "gluten-free",
+    "dairy-free",
+    "keto",
+    "paleo",
+    "low-carb",
+    "low-fat",
+    "high-fiber",
+    "anti-inflammatory",
   ],
 };
 

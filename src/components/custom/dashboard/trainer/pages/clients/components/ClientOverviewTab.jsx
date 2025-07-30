@@ -12,6 +12,7 @@ export function ClientOverviewTab({
   profile,
   onAssignPlan,
   assignedTrainingPlans,
+  assignedNutritionPlans,
   setActiveTab,
 }) {
   const getExperienceText = (level) => {
@@ -42,8 +43,12 @@ export function ClientOverviewTab({
           .replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
-  const activePlan = assignedTrainingPlans?.find(
+  const activeTrainingPlan = assignedTrainingPlans?.find(
     (plan) => plan.status === "active"
+  );
+
+  const activeNutritionPlan = assignedNutritionPlans?.find(
+    (plan) => plan.isActive
   );
 
   return (
@@ -143,67 +148,178 @@ export function ClientOverviewTab({
           </div>
         </Card>
 
-        {/* Current Plan */}
+        {/* Current Plans */}
         <Card variant="dark" className="overflow-visible">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Icon
-                icon="mdi:clipboard-list"
-                className="text-[#3E92CC]"
-                width={24}
-                height={24}
-              />
-              <h3 className="text-xl font-semibold text-white">Current Plan</h3>
-            </div>
-            <Button
-              variant="primary"
-              size="small"
-              leftIcon={<Icon icon="mdi:plus" width={16} height={16} />}
-              onClick={() => onAssignPlan("training")}
-            >
-              {activePlan ? "Replace Plan" : "Assign Plan"}
-            </Button>
+          <div className="flex items-center gap-2 mb-4">
+            <Icon
+              icon="mdi:clipboard-list"
+              className="text-[#3E92CC]"
+              width={24}
+              height={24}
+            />
+            <h3 className="text-xl font-semibold text-white">Current Plans</h3>
           </div>
-          <div className="space-y-3">
-            {activePlan ? (
-              <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg border border-zinc-700">
-                <div className="flex items-center gap-3">
+
+          <div className="space-y-4">
+            {/* Training Plan Section */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
                   <Icon
                     icon="mdi:dumbbell"
                     className="text-orange-400"
-                    width={20}
-                    height={20}
+                    width={18}
+                    height={18}
                   />
-                  <div>
-                    <p className="text-white font-medium">
-                      {activePlan.planData?.title || "Untitled Plan"}
-                    </p>
-                    <p className="text-zinc-400 text-sm">
-                      {activePlan.planData?.duration ?? "?"}{" "}
-                      {activePlan.planData?.durationType ?? ""} • Active
-                    </p>
+                  <h4 className="text-white font-medium">Training Plan</h4>
+                </div>
+                <Button
+                  variant="primary"
+                  size="small"
+                  leftIcon={<Icon icon="mdi:plus" width={16} height={16} />}
+                  onClick={() => onAssignPlan("training")}
+                >
+                  {activeTrainingPlan ? "Replace" : "Assign"}
+                </Button>
+              </div>
+
+              {activeTrainingPlan ? (
+                <div className="flex items-center justify-between p-3 bg-orange-900/20 rounded-lg border border-orange-700/30">
+                  <div className="flex items-center gap-3">
+                    <Icon
+                      icon="mdi:dumbbell"
+                      className="text-orange-400"
+                      width={20}
+                      height={20}
+                    />
+                    <div>
+                      <p className="text-white font-medium">
+                        {activeTrainingPlan.planData?.title || "Untitled Plan"}
+                      </p>
+                      <p className="text-zinc-400 text-sm">
+                        {activeTrainingPlan.planData?.duration ?? "?"}{" "}
+                        {activeTrainingPlan.planData?.durationType ?? ""} •
+                        Active
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="secondary"
+                      size="small"
+                      onClick={() => setActiveTab("workouts")}
+                    >
+                      <Icon icon="mdi:eye" width={16} height={16} />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="secondary"
-                    size="small"
-                    onClick={() => setActiveTab("workouts")}
-                  >
-                    <Icon icon="mdi:eye" width={16} height={16} />
-                  </Button>
+              ) : (
+                <div className="text-center py-4 bg-zinc-800/30 rounded-lg border border-zinc-700/50">
+                  <Icon
+                    icon="mdi:dumbbell-off"
+                    className="text-zinc-600 mx-auto mb-2"
+                    width={24}
+                    height={24}
+                  />
+                  <p className="text-zinc-400 text-sm">
+                    No training plan assigned
+                  </p>
                 </div>
+              )}
+            </div>
+
+            {/* Nutrition Plan Section */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Icon
+                    icon="mdi:food-apple"
+                    className="text-green-400"
+                    width={18}
+                    height={18}
+                  />
+                  <h4 className="text-white font-medium">Nutrition Plan</h4>
+                </div>
+                <Button
+                  variant="success"
+                  size="small"
+                  leftIcon={<Icon icon="mdi:plus" width={16} height={16} />}
+                  onClick={() => onAssignPlan("nutrition")}
+                >
+                  {activeNutritionPlan ? "Replace" : "Assign"}
+                </Button>
               </div>
-            ) : (
-              <div className="text-center py-6">
+
+              {activeNutritionPlan ? (
+                <div className="flex items-center justify-between p-3 bg-green-900/20 rounded-lg border border-green-700/30">
+                  <div className="flex items-center gap-3">
+                    <Icon
+                      icon="mdi:food-apple"
+                      className="text-green-400"
+                      width={20}
+                      height={20}
+                    />
+                    <div>
+                      <p className="text-white font-medium">
+                        {activeNutritionPlan.nutritionPlan?.title ||
+                          "Untitled Plan"}
+                      </p>
+                      <p className="text-zinc-400 text-sm">
+                        {activeNutritionPlan.nutritionPlan?.duration ?? "?"}{" "}
+                        {activeNutritionPlan.nutritionPlan?.durationType ?? ""}{" "}
+                        • Active
+                      </p>
+                      {activeNutritionPlan.nutritionPlan?.nutritionInfo && (
+                        <p className="text-zinc-500 text-xs mt-1">
+                          {activeNutritionPlan.nutritionPlan.nutritionInfo
+                            .calories || 0}{" "}
+                          cal/day •{" "}
+                          {activeNutritionPlan.nutritionPlan.nutritionInfo
+                            .protein || 0}
+                          g protein
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="secondary"
+                      size="small"
+                      onClick={() => setActiveTab("nutrition")}
+                    >
+                      <Icon icon="mdi:eye" width={16} height={16} />
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-4 bg-zinc-800/30 rounded-lg border border-zinc-700/50">
+                  <Icon
+                    icon="mdi:food-off"
+                    className="text-zinc-600 mx-auto mb-2"
+                    width={24}
+                    height={24}
+                  />
+                  <p className="text-zinc-400 text-sm">
+                    No nutrition plan assigned
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Summary when both plans are empty */}
+            {!activeTrainingPlan && !activeNutritionPlan && (
+              <div className="text-center py-6 bg-zinc-800/20 rounded-lg border border-zinc-700/30">
                 <Icon
                   icon="mdi:clipboard-outline"
-                  className="text-zinc-600 mx-auto mb-2"
+                  className="text-zinc-600 mx-auto mb-3"
                   width={32}
                   height={32}
                 />
-                <p className="text-zinc-400 text-sm">
-                  No active plans assigned
+                <p className="text-zinc-400 text-base font-medium mb-1">
+                  No Active Plans
+                </p>
+                <p className="text-zinc-500 text-sm">
+                  Assign training and nutrition plans to get started
                 </p>
               </div>
             )}
@@ -246,39 +362,79 @@ export function ClientOverviewTab({
           </div>
           <div className="space-y-3">
             <Button
-              variant="primary"
+              variant="secondary"
               fullWidth
               onClick={() => onAssignPlan("training")}
-              leftIcon={<Icon icon="mdi:dumbbell" width={20} height={20} />}
+              leftIcon={
+                <Icon
+                  icon="mdi:dumbbell"
+                  width={20}
+                  height={20}
+                  className="group-hover:text-[#FF7800] transition-colors"
+                />
+              }
+              className="!bg-zinc-800/50 !border-zinc-700 hover:!border-[#FF7800] hover:!bg-[#FF7800]/10 hover:!text-[#FF7800] group justify-start gap-3 !p-3"
             >
               Assign Training Plan
             </Button>
             <Button
-              variant="success"
+              variant="secondary"
               fullWidth
               onClick={() => onAssignPlan("nutrition")}
-              leftIcon={<Icon icon="mdi:food-apple" width={20} height={20} />}
+              leftIcon={
+                <Icon
+                  icon="mdi:food-apple"
+                  width={20}
+                  height={20}
+                  className="group-hover:text-[#FF7800] transition-colors"
+                />
+              }
+              className="!bg-zinc-800/50 !border-zinc-700 hover:!border-[#FF7800] hover:!bg-[#FF7800]/10 hover:!text-[#FF7800] group justify-start gap-3 !p-3"
             >
               Assign Meal Plan
             </Button>
             <Button
               variant="secondary"
               fullWidth
-              leftIcon={<Icon icon="mdi:message" width={20} height={20} />}
+              leftIcon={
+                <Icon
+                  icon="mdi:message"
+                  width={20}
+                  height={20}
+                  className="group-hover:text-[#FF7800] transition-colors"
+                />
+              }
+              className="!bg-zinc-800/50 !border-zinc-700 hover:!border-[#FF7800] hover:!bg-[#FF7800]/10 hover:!text-[#FF7800] group justify-start gap-3 !p-3"
             >
               Send Message
             </Button>
             <Button
-              variant="warning"
+              variant="secondary"
               fullWidth
-              leftIcon={<Icon icon="mdi:calendar" width={20} height={20} />}
+              leftIcon={
+                <Icon
+                  icon="mdi:calendar"
+                  width={20}
+                  height={20}
+                  className="group-hover:text-[#FF7800] transition-colors"
+                />
+              }
+              className="!bg-zinc-800/50 !border-zinc-700 hover:!border-[#FF7800] hover:!bg-[#FF7800]/10 hover:!text-[#FF7800] group justify-start gap-3 !p-3"
             >
               Schedule Session
             </Button>
             <Button
-              variant="info"
+              variant="secondary"
               fullWidth
-              leftIcon={<Icon icon="mdi:chart-line" width={20} height={20} />}
+              leftIcon={
+                <Icon
+                  icon="mdi:chart-line"
+                  width={20}
+                  height={20}
+                  className="group-hover:text-[#FF7800] transition-colors"
+                />
+              }
+              className="!bg-zinc-800/50 !border-zinc-700 hover:!border-[#FF7800] hover:!bg-[#FF7800]/10 hover:!text-[#FF7800] group justify-start gap-3 !p-3"
             >
               View Progress
             </Button>

@@ -7,6 +7,9 @@ CREATE TYPE "CertificationStatus" AS ENUM ('pending', 'accepted', 'rejected', 'e
 -- CreateEnum
 CREATE TYPE "CoachingRequestStatus" AS ENUM ('pending', 'accepted', 'rejected', 'cancelled');
 
+-- CreateEnum
+CREATE TYPE "DietPlanAssignmentStatus" AS ENUM ('assigned', 'active', 'completed', 'abandoned', 'expired');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
@@ -470,6 +473,139 @@ CREATE TABLE "CoachingRequestCooldown" (
 );
 
 -- CreateTable
+CREATE TABLE "DietPlanAssignment" (
+    "id" TEXT NOT NULL,
+    "clientId" TEXT NOT NULL,
+    "nutritionPlanId" TEXT NOT NULL,
+    "assignedById" TEXT NOT NULL,
+    "status" "DietPlanAssignmentStatus" NOT NULL DEFAULT 'assigned',
+    "startDate" TIMESTAMP(3),
+    "endDate" TIMESTAMP(3),
+    "completedDate" TIMESTAMP(3),
+    "actualStartDate" TIMESTAMP(3),
+    "actualEndDate" TIMESTAMP(3),
+    "totalDays" INTEGER NOT NULL DEFAULT 0,
+    "completedDays" INTEGER NOT NULL DEFAULT 0,
+    "successRate" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "assignedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "DietPlanAssignment_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "DailyDietLog" (
+    "id" TEXT NOT NULL,
+    "dietPlanAssignmentId" TEXT NOT NULL,
+    "date" DATE NOT NULL,
+    "dayNumber" INTEGER NOT NULL,
+    "totalCalories" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "totalProtein" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "totalCarbs" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "totalFat" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "completedMeals" INTEGER NOT NULL DEFAULT 0,
+    "totalMeals" INTEGER NOT NULL DEFAULT 0,
+    "isCompleted" BOOLEAN NOT NULL DEFAULT false,
+    "completionRate" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "targetCalories" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "targetProtein" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "targetCarbs" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "targetFat" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "calorieVariance" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "proteinVariance" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "DailyDietLog_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "DietProgressSummary" (
+    "id" TEXT NOT NULL,
+    "dietPlanAssignmentId" TEXT NOT NULL,
+    "averageCaloriesPerDay" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "averageProteinPerDay" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "averageCarbsPerDay" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "averageFatPerDay" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "averageCompletionRate" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "totalCaloriesConsumed" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "totalProteinConsumed" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "bestDay" TIMESTAMP(3),
+    "worstDay" TIMESTAMP(3),
+    "consistencyScore" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "adherenceScore" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "overallSuccess" BOOLEAN NOT NULL DEFAULT false,
+    "completedOnTime" BOOLEAN NOT NULL DEFAULT false,
+    "daysAhead" INTEGER NOT NULL DEFAULT 0,
+    "notes" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "DietProgressSummary_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "MealLog" (
+    "id" TEXT NOT NULL,
+    "dailyDietLogId" TEXT NOT NULL,
+    "mealName" TEXT NOT NULL,
+    "mealTime" TEXT NOT NULL,
+    "selectedOption" JSONB NOT NULL,
+    "isCompleted" BOOLEAN NOT NULL DEFAULT false,
+    "completedAt" TIMESTAMP(3),
+    "calories" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "protein" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "carbs" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "fat" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "MealLog_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "SnackLog" (
+    "id" TEXT NOT NULL,
+    "dailyDietLogId" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "mealType" TEXT NOT NULL,
+    "calories" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "protein" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "carbs" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "fat" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "ingredients" JSONB NOT NULL,
+    "loggedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "loggedTime" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "SnackLog_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "CustomMeal" (
+    "id" TEXT NOT NULL,
+    "clientId" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "mealType" TEXT NOT NULL,
+    "calories" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "protein" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "carbs" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "fat" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "ingredients" JSONB NOT NULL,
+    "usageCount" INTEGER NOT NULL DEFAULT 1,
+    "lastUsed" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "CustomMeal_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "AssignedTrainingPlan" (
     "id" TEXT NOT NULL,
     "clientId" TEXT NOT NULL,
@@ -685,6 +821,99 @@ CREATE INDEX "CoachingRequestCooldown_removedAt_idx" ON "CoachingRequestCooldown
 CREATE UNIQUE INDEX "CoachingRequestCooldown_clientId_trainerId_key" ON "CoachingRequestCooldown"("clientId", "trainerId");
 
 -- CreateIndex
+CREATE INDEX "DietPlanAssignment_clientId_idx" ON "DietPlanAssignment"("clientId");
+
+-- CreateIndex
+CREATE INDEX "DietPlanAssignment_nutritionPlanId_idx" ON "DietPlanAssignment"("nutritionPlanId");
+
+-- CreateIndex
+CREATE INDEX "DietPlanAssignment_assignedById_idx" ON "DietPlanAssignment"("assignedById");
+
+-- CreateIndex
+CREATE INDEX "DietPlanAssignment_isActive_idx" ON "DietPlanAssignment"("isActive");
+
+-- CreateIndex
+CREATE INDEX "DietPlanAssignment_status_idx" ON "DietPlanAssignment"("status");
+
+-- CreateIndex
+CREATE INDEX "DietPlanAssignment_startDate_idx" ON "DietPlanAssignment"("startDate");
+
+-- CreateIndex
+CREATE INDEX "DietPlanAssignment_assignedAt_idx" ON "DietPlanAssignment"("assignedAt");
+
+-- CreateIndex
+CREATE INDEX "DailyDietLog_dietPlanAssignmentId_idx" ON "DailyDietLog"("dietPlanAssignmentId");
+
+-- CreateIndex
+CREATE INDEX "DailyDietLog_date_idx" ON "DailyDietLog"("date");
+
+-- CreateIndex
+CREATE INDEX "DailyDietLog_dayNumber_idx" ON "DailyDietLog"("dayNumber");
+
+-- CreateIndex
+CREATE INDEX "DailyDietLog_isCompleted_idx" ON "DailyDietLog"("isCompleted");
+
+-- CreateIndex
+CREATE INDEX "DailyDietLog_completionRate_idx" ON "DailyDietLog"("completionRate");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "DailyDietLog_dietPlanAssignmentId_date_key" ON "DailyDietLog"("dietPlanAssignmentId", "date");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "DietProgressSummary_dietPlanAssignmentId_key" ON "DietProgressSummary"("dietPlanAssignmentId");
+
+-- CreateIndex
+CREATE INDEX "DietProgressSummary_dietPlanAssignmentId_idx" ON "DietProgressSummary"("dietPlanAssignmentId");
+
+-- CreateIndex
+CREATE INDEX "DietProgressSummary_overallSuccess_idx" ON "DietProgressSummary"("overallSuccess");
+
+-- CreateIndex
+CREATE INDEX "DietProgressSummary_adherenceScore_idx" ON "DietProgressSummary"("adherenceScore");
+
+-- CreateIndex
+CREATE INDEX "MealLog_dailyDietLogId_idx" ON "MealLog"("dailyDietLogId");
+
+-- CreateIndex
+CREATE INDEX "MealLog_mealName_idx" ON "MealLog"("mealName");
+
+-- CreateIndex
+CREATE INDEX "MealLog_isCompleted_idx" ON "MealLog"("isCompleted");
+
+-- CreateIndex
+CREATE INDEX "MealLog_completedAt_idx" ON "MealLog"("completedAt");
+
+-- CreateIndex
+CREATE INDEX "SnackLog_dailyDietLogId_idx" ON "SnackLog"("dailyDietLogId");
+
+-- CreateIndex
+CREATE INDEX "SnackLog_mealType_idx" ON "SnackLog"("mealType");
+
+-- CreateIndex
+CREATE INDEX "SnackLog_loggedAt_idx" ON "SnackLog"("loggedAt");
+
+-- CreateIndex
+CREATE INDEX "SnackLog_loggedTime_idx" ON "SnackLog"("loggedTime");
+
+-- CreateIndex
+CREATE INDEX "CustomMeal_clientId_idx" ON "CustomMeal"("clientId");
+
+-- CreateIndex
+CREATE INDEX "CustomMeal_mealType_idx" ON "CustomMeal"("mealType");
+
+-- CreateIndex
+CREATE INDEX "CustomMeal_lastUsed_idx" ON "CustomMeal"("lastUsed");
+
+-- CreateIndex
+CREATE INDEX "CustomMeal_usageCount_idx" ON "CustomMeal"("usageCount");
+
+-- CreateIndex
+CREATE INDEX "CustomMeal_clientId_mealType_idx" ON "CustomMeal"("clientId", "mealType");
+
+-- CreateIndex
+CREATE INDEX "CustomMeal_clientId_lastUsed_idx" ON "CustomMeal"("clientId", "lastUsed");
+
+-- CreateIndex
 CREATE INDEX "AssignedTrainingPlan_clientId_idx" ON "AssignedTrainingPlan"("clientId");
 
 -- CreateIndex
@@ -736,10 +965,10 @@ ALTER TABLE "CertificationDocument" ADD CONSTRAINT "CertificationDocument_certif
 ALTER TABLE "ClientInfo" ADD CONSTRAINT "ClientInfo_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ClientProfile" ADD CONSTRAINT "ClientProfile_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "Location"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "ClientProfile" ADD CONSTRAINT "ClientProfile_clientInfoId_fkey" FOREIGN KEY ("clientInfoId") REFERENCES "ClientInfo"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ClientProfile" ADD CONSTRAINT "ClientProfile_clientInfoId_fkey" FOREIGN KEY ("clientInfoId") REFERENCES "ClientInfo"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ClientProfile" ADD CONSTRAINT "ClientProfile_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "Location"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ClientSettings" ADD CONSTRAINT "ClientSettings_clientInfoId_fkey" FOREIGN KEY ("clientInfoId") REFERENCES "ClientInfo"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -751,10 +980,10 @@ ALTER TABLE "ClientLanguage" ADD CONSTRAINT "ClientLanguage_clientProfileId_fkey
 ALTER TABLE "ClientActivity" ADD CONSTRAINT "ClientActivity_clientProfileId_fkey" FOREIGN KEY ("clientProfileId") REFERENCES "ClientProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "TrainerGym" ADD CONSTRAINT "TrainerGym_trainerId_fkey" FOREIGN KEY ("trainerId") REFERENCES "TrainerProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "TrainerGym" ADD CONSTRAINT "TrainerGym_gymId_fkey" FOREIGN KEY ("gymId") REFERENCES "Gym"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "TrainerGym" ADD CONSTRAINT "TrainerGym_gymId_fkey" FOREIGN KEY ("gymId") REFERENCES "Gym"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "TrainerGym" ADD CONSTRAINT "TrainerGym_trainerId_fkey" FOREIGN KEY ("trainerId") REFERENCES "TrainerProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "TrainerAvailability" ADD CONSTRAINT "TrainerAvailability_trainerProfileId_fkey" FOREIGN KEY ("trainerProfileId") REFERENCES "TrainerProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -793,10 +1022,34 @@ ALTER TABLE "CoachingRequestCooldown" ADD CONSTRAINT "CoachingRequestCooldown_cl
 ALTER TABLE "CoachingRequestCooldown" ADD CONSTRAINT "CoachingRequestCooldown_trainerId_fkey" FOREIGN KEY ("trainerId") REFERENCES "TrainerInfo"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "DietPlanAssignment" ADD CONSTRAINT "DietPlanAssignment_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "ClientInfo"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DietPlanAssignment" ADD CONSTRAINT "DietPlanAssignment_nutritionPlanId_fkey" FOREIGN KEY ("nutritionPlanId") REFERENCES "NutritionPlan"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DietPlanAssignment" ADD CONSTRAINT "DietPlanAssignment_assignedById_fkey" FOREIGN KEY ("assignedById") REFERENCES "TrainerInfo"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DailyDietLog" ADD CONSTRAINT "DailyDietLog_dietPlanAssignmentId_fkey" FOREIGN KEY ("dietPlanAssignmentId") REFERENCES "DietPlanAssignment"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DietProgressSummary" ADD CONSTRAINT "DietProgressSummary_dietPlanAssignmentId_fkey" FOREIGN KEY ("dietPlanAssignmentId") REFERENCES "DietPlanAssignment"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "MealLog" ADD CONSTRAINT "MealLog_dailyDietLogId_fkey" FOREIGN KEY ("dailyDietLogId") REFERENCES "DailyDietLog"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SnackLog" ADD CONSTRAINT "SnackLog_dailyDietLogId_fkey" FOREIGN KEY ("dailyDietLogId") REFERENCES "DailyDietLog"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CustomMeal" ADD CONSTRAINT "CustomMeal_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "ClientInfo"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "AssignedTrainingPlan" ADD CONSTRAINT "AssignedTrainingPlan_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "ClientInfo"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AssignedTrainingPlan" ADD CONSTRAINT "AssignedTrainingPlan_trainerId_fkey" FOREIGN KEY ("trainerId") REFERENCES "TrainerInfo"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "AssignedTrainingPlan" ADD CONSTRAINT "AssignedTrainingPlan_originalPlanId_fkey" FOREIGN KEY ("originalPlanId") REFERENCES "TrainingPlan"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AssignedTrainingPlan" ADD CONSTRAINT "AssignedTrainingPlan_originalPlanId_fkey" FOREIGN KEY ("originalPlanId") REFERENCES "TrainingPlan"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "AssignedTrainingPlan" ADD CONSTRAINT "AssignedTrainingPlan_trainerId_fkey" FOREIGN KEY ("trainerId") REFERENCES "TrainerInfo"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

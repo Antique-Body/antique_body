@@ -529,26 +529,38 @@ model CoachingRequestCooldown {
 
 // Diet Tracking System
 model DietPlanAssignment {
-  id              String   @id @default(cuid())
+  id              String                    @id @default(cuid())
   clientId        String
   nutritionPlanId String
-  assignedById    String   // trainer who assigned the plan
-  startDate       DateTime @default(now())
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  assignedById    String                    // trainer who assigned the plan
+  status          DietPlanAssignmentStatus  @default(assigned)
+  startDate       DateTime?                 // When client starts the plan (null until started)
+  endDate         DateTime?                 // When plan should end (calculated)
+  completedDate   DateTime?                 // When client completed the plan
+  actualStartDate DateTime?                 // When client actually started
+  actualEndDate   DateTime?                 // When client actually finished
+  totalDays       Int                       @default(0)
+  completedDays   Int                       @default(0)
+  successRate     Float                     @default(0)
+  isActive        Boolean                   @default(true)
+  assignedAt      DateTime                  @default(now())
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
   
   // Relations
   client          ClientInfo @relation(fields: [clientId], references: [id], onDelete: Cascade)
   nutritionPlan   NutritionPlan @relation(fields: [nutritionPlanId], references: [id], onDelete: Cascade)
   assignedBy      TrainerInfo @relation(fields: [assignedById], references: [id], onDelete: Cascade)
   dailyLogs       DailyDietLog[]
+  progressSummary DietProgressSummary?
   
   @@index([clientId])
   @@index([nutritionPlanId])
   @@index([assignedById])
   @@index([isActive])
+  @@index([status])
   @@index([startDate])
+  @@index([assignedAt])
 }
 
 model DailyDietLog {
@@ -563,6 +575,13 @@ model DailyDietLog {
   completedMeals      Int      @default(0)
   totalMeals          Int      @default(0)
   isCompleted         Boolean  @default(false)
+  completionRate      Float    @default(0) // Percentage of meals completed
+  targetCalories      Float    @default(0) // Expected calories for this day
+  targetProtein       Float    @default(0) // Expected protein for this day
+  targetCarbs         Float    @default(0) // Expected carbs for this day  
+  targetFat           Float    @default(0) // Expected fat for this day
+  calorieVariance     Float    @default(0) // Difference from target calories
+  proteinVariance     Float    @default(0) // Difference from target protein
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
   
@@ -576,6 +595,37 @@ model DailyDietLog {
   @@index([date])
   @@index([dayNumber])
   @@index([isCompleted])
+  @@index([completionRate])
+}
+
+// Progress Summary for completed or ongoing diet plans
+model DietProgressSummary {
+  id                    String              @id @default(cuid())
+  dietPlanAssignmentId  String              @unique
+  averageCaloriesPerDay Float               @default(0)
+  averageProteinPerDay  Float               @default(0)
+  averageCarbsPerDay    Float               @default(0)
+  averageFatPerDay      Float               @default(0)
+  averageCompletionRate Float               @default(0)
+  totalCaloriesConsumed Float               @default(0)
+  totalProteinConsumed  Float               @default(0)
+  bestDay               DateTime?           // Day with highest completion rate
+  worstDay              DateTime?           // Day with lowest completion rate
+  consistencyScore      Float               @default(0) // How consistent was the client
+  adherenceScore        Float               @default(0) // How well they followed the plan
+  overallSuccess        Boolean             @default(false)
+  completedOnTime       Boolean             @default(false)
+  daysAhead             Int                 @default(0) // Negative means behind
+  notes                 String?             // Optional trainer notes
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  
+  // Relations
+  dietPlanAssignment    DietPlanAssignment  @relation(fields: [dietPlanAssignmentId], references: [id], onDelete: Cascade)
+  
+  @@index([dietPlanAssignmentId])
+  @@index([overallSuccess])
+  @@index([adherenceScore])
 }
 
 model MealLog {
@@ -694,4 +744,12 @@ enum CoachingRequestStatus {
   accepted
   rejected
   cancelled
+}
+
+enum DietPlanAssignmentStatus {
+  assigned    // Trainer assigned but client hasn't started
+  active      // Client is actively following the plan
+  completed   // Client completed the plan successfully
+  abandoned   // Client stopped following the plan
+  expired     // Plan expired without completion
 }

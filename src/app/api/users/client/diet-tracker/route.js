@@ -5,8 +5,10 @@ import { auth } from "#/auth";
 import { mockNutritionPlan as mockPlanData } from "@/components/custom/dashboard/client/pages/diet-tracker/mockNutritionPlan";
 import prisma from "@/lib/prisma";
 
+import { calculatePlanProgress, generateProgressMessage } from "../../services/dietProgressService";
 import {
   getActiveDietPlan,
+  getAssignedDietPlans,
   startDietPlan,
   getAllDailyLogs,
   getDietPlanStats,
@@ -69,8 +71,21 @@ export async function GET(req) {
     const activePlan = await getActiveDietPlan(clientInfo.id);
 
     if (!activePlan) {
-      // Check if there's a mock plan available (for demo purposes)
-      // In a real app, this would be assigned by a trainer
+      // Check if there are any assigned nutrition plans that haven't been started yet
+      const assignedPlans = await getAssignedDietPlans(clientInfo.id);
+
+      if (assignedPlans.length > 0) {
+        // There's an assigned nutrition plan that hasn't been started
+        const latestAssignment = assignedPlans[0];
+        return NextResponse.json({
+          hasActivePlan: false,
+          assignedPlan: latestAssignment,
+          planCount: assignedPlans.length,
+          message: `${latestAssignment.assignedBy.trainerProfile?.firstName || 'Your trainer'} has assigned you a new nutrition plan. Are you ready to start your journey?`,
+        });
+      }
+
+      // No assigned plans, check if there's a mock plan available (for demo purposes)
       return NextResponse.json({
         hasActivePlan: false,
         mockPlanAvailable: true,
@@ -85,11 +100,26 @@ export async function GET(req) {
     // Get next meal
     const nextMeal = await getNextMeal(activePlan.id);
 
+    // Calculate current progress
+    const progress = await calculatePlanProgress(activePlan.id);
+    const progressMessage = generateProgressMessage(progress);
+
+    // Check if plan is completed
+    const today = new Date();
+    const planEndDate = activePlan.endDate ? new Date(activePlan.endDate) : null;
+    const isCompleted = activePlan.status === 'completed';
+    const isPastEndDate = planEndDate && today > planEndDate;
+
     return NextResponse.json({
       hasActivePlan: true,
       activePlan,
       dailyLogs,
       nextMeal,
+      progress,
+      progressMessage,
+      isCompleted,
+      isPastEndDate,
+      completionStatus: isCompleted ? 'completed' : isPastEndDate ? 'expired' : 'active'
     });
   } catch (error) {
     console.error("Error in diet tracker GET:", error);
@@ -109,7 +139,7 @@ export async function POST(req) {
     }
 
     const body = await req.json();
-    const { action, dietPlanAssignmentId, useMockPlan } = body;
+    const { action, dietPlanAssignmentId, useMockPlan, selectedPlan } = body;
 
     // Get client info
     const clientInfo = await prisma.clientInfo.findUnique({
@@ -124,7 +154,13 @@ export async function POST(req) {
     }
 
     if (action === "start-plan") {
-      if (useMockPlan) {
+      const { startDate } = body; // Allow custom start date
+      
+      if (dietPlanAssignmentId) {
+        // Start existing assigned plan
+        const result = await startDietPlan(dietPlanAssignmentId, startDate);
+        return NextResponse.json(result);
+      } else if (useMockPlan) {
         // For demo purposes, create a mock plan assignment
         // In a real app, this would be created by a trainer
 
@@ -137,28 +173,34 @@ export async function POST(req) {
           );
         }
 
-        // Check if mock nutrition plan already exists
+        // Use selected plan data if provided, otherwise use default mock data
+        const planData = selectedPlan || mockPlanData;
+        
+        // Check if this specific nutrition plan already exists
         let existingNutritionPlan = await prisma.nutritionPlan.findFirst({
-          where: { trainerInfoId: trainer.id },
+          where: { 
+            trainerInfoId: trainer.id,
+            title: planData.title 
+          },
         });
 
-        // If no plan exists, create one using our mock data
+        // If no plan exists, create one using the plan data
         if (!existingNutritionPlan) {
           existingNutritionPlan = await prisma.nutritionPlan.create({
             data: {
-              title: mockPlanData.title,
-              description: mockPlanData.description,
-              coverImage: mockPlanData.coverImage,
-              price: mockPlanData.price,
-              duration: mockPlanData.duration,
-              durationType: mockPlanData.durationType,
+              title: planData.title,
+              description: planData.description,
+              coverImage: planData.coverImage,
+              price: planData.price || 100,
+              duration: planData.duration,
+              durationType: planData.durationType,
               nutritionInfo: {
-                calories: mockPlanData.dailyCaloriesGoal || 2000,
-                protein: mockPlanData.dailyProteinGoal || 150,
-                carbs: mockPlanData.dailyCarbsGoal || 200,
-                fats: mockPlanData.dailyFatGoal || 80,
+                calories: planData.nutritionInfo?.calories || planData.dailyCaloriesGoal || 2000,
+                protein: planData.nutritionInfo?.protein || planData.dailyProteinGoal || 150,
+                carbs: planData.nutritionInfo?.carbs || planData.dailyCarbsGoal || 200,
+                fats: planData.nutritionInfo?.fats || planData.dailyFatGoal || 80,
               },
-              days: mockPlanData.days,
+              days: planData.days,
               trainerInfoId: trainer.id,
             },
           });
@@ -177,15 +219,18 @@ export async function POST(req) {
         const result = await startDietPlan(assignment.id);
         return NextResponse.json(result);
       } else {
-        // Start existing plan
-        if (!dietPlanAssignmentId) {
+        // Check if there's an assigned plan to start
+        const assignedPlans = await getAssignedDietPlans(clientInfo.id);
+
+        if (assignedPlans.length === 0) {
           return NextResponse.json(
-            { error: "Diet plan assignment ID required" },
-            { status: 400 }
+            { error: "No assigned nutrition plan found" },
+            { status: 404 }
           );
         }
 
-        const result = await startDietPlan(dietPlanAssignmentId);
+        const latestAssignment = assignedPlans[0];
+        const result = await startDietPlan(latestAssignment.id, startDate);
         return NextResponse.json(result);
       }
     }

@@ -9,7 +9,12 @@ export const useDietTracker = () => {
   const [nextMeal, setNextMeal] = useState(null);
   const [stats, setStats] = useState(null);
   const [mockPlanAvailable, setMockPlanAvailable] = useState(false);
+  const [assignedPlan, setAssignedPlan] = useState(null);
   const [validationError, setValidationError] = useState(null);
+  const [progress, setProgress] = useState(null);
+  const [progressMessage, setProgressMessage] = useState(null);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [completionStatus, setCompletionStatus] = useState(null);
 
   // Fetch diet tracker data
   const fetchDietTrackerData = useCallback(async () => {
@@ -26,11 +31,16 @@ export const useDietTracker = () => {
 
       setHasActivePlan(data.hasActivePlan);
       setMockPlanAvailable(data.mockPlanAvailable || false);
+      setAssignedPlan(data.assignedPlan || null);
 
       if (data.hasActivePlan) {
         setActivePlan(data.activePlan);
         setDailyLogs(data.dailyLogs || []);
         setNextMeal(data.nextMeal);
+        setProgress(data.progress || null);
+        setProgressMessage(data.progressMessage || null);
+        setIsCompleted(data.isCompleted || false);
+        setCompletionStatus(data.completionStatus || null);
       }
     } catch (err) {
       console.error("Error fetching diet tracker data:", err);
@@ -42,7 +52,7 @@ export const useDietTracker = () => {
 
   // Start diet plan
   const startDietPlan = useCallback(
-    async (useMockPlan = false, dietPlanAssignmentId = null) => {
+    async (useMockPlan = false, dietPlanAssignmentId = null, startDate = null, selectedPlan = null) => {
       try {
         setLoading(true);
         setError(null);
@@ -56,6 +66,8 @@ export const useDietTracker = () => {
             action: "start-plan",
             useMockPlan,
             dietPlanAssignmentId,
+            startDate,
+            selectedPlan,
           }),
         });
 
@@ -545,7 +557,12 @@ export const useDietTracker = () => {
     nextMeal,
     stats,
     mockPlanAvailable,
+    assignedPlan,
     validationError,
+    progress,
+    progressMessage,
+    isCompleted,
+    completionStatus,
 
     // Actions
     startDietPlan,

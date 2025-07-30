@@ -1,5 +1,10 @@
 import prisma from "@/lib/prisma";
 
+import { 
+  updateDailyLogProgress, 
+  checkPlanCompletion
+} from "./dietProgressService.js";
+
 /**
  * Diet Tracker Service
  * Handles all diet tracking functionality including plan assignments, daily logs, and meal tracking
@@ -62,6 +67,7 @@ export async function getActiveDietPlan(clientId) {
     const assignment = await prisma.dietPlanAssignment.findFirst({
       where: {
         clientId,
+        status: 'active',
         isActive: true,
       },
       include: {
@@ -71,6 +77,7 @@ export async function getActiveDietPlan(clientId) {
             trainerProfile: true,
           },
         },
+        progressSummary: true,
       },
       orderBy: {
         createdAt: "desc",
@@ -84,8 +91,37 @@ export async function getActiveDietPlan(clientId) {
   }
 }
 
+// Get assigned but not started diet plans for a client
+export async function getAssignedDietPlans(clientId) {
+  try {
+    const assignments = await prisma.dietPlanAssignment.findMany({
+      where: {
+        clientId,
+        status: 'assigned',
+        isActive: true,
+      },
+      include: {
+        nutritionPlan: true,
+        assignedBy: {
+          include: {
+            trainerProfile: true,
+          },
+        },
+      },
+      orderBy: {
+        assignedAt: "desc",
+      },
+    });
+
+    return assignments;
+  } catch (error) {
+    console.error("Error fetching assigned diet plans:", error);
+    throw new Error("Error fetching assigned diet plans");
+  }
+}
+
 // Start a diet plan for a client
-export async function startDietPlan(dietPlanAssignmentId) {
+export async function startDietPlan(dietPlanAssignmentId, startDate = null) {
   try {
     const assignment = await prisma.dietPlanAssignment.findUnique({
       where: { id: dietPlanAssignmentId },
@@ -98,24 +134,45 @@ export async function startDietPlan(dietPlanAssignmentId) {
       throw new Error("Diet plan assignment not found");
     }
 
+    if (assignment.status !== 'assigned') {
+      throw new Error("Diet plan has already been started or is not in assigned status");
+    }
+
     // Get the nutrition plan data
     const nutritionPlan = assignment.nutritionPlan;
     const days = nutritionPlan.days || [];
+    const planStartDate = startDate ? new Date(startDate) : new Date();
+    
+    // Calculate end date
+    const planEndDate = new Date(planStartDate);
+    planEndDate.setDate(planEndDate.getDate() + days.length - 1);
 
     // Use transaction for atomic operation
     const result = await prisma.$transaction(async (tx) => {
       const dailyLogs = [];
+      
       for (let i = 0; i < days.length; i++) {
         const day = days[i];
-        const date = new Date();
-        date.setDate(date.getDate() + i);
+        const currentDate = new Date(planStartDate);
+        currentDate.setDate(currentDate.getDate() + i);
+
+        // Calculate target nutrition for this day
+        const nutritionInfo = nutritionPlan.nutritionInfo || {};
+        const targetCalories = nutritionInfo.calories || 0;
+        const targetProtein = nutritionInfo.protein || 0;
+        const targetCarbs = nutritionInfo.carbs || 0;
+        const targetFats = nutritionInfo.fats || 0;
 
         const dailyLog = await tx.dailyDietLog.create({
           data: {
             dietPlanAssignmentId: assignment.id,
-            date: date, // Use Date object directly
+            date: currentDate,
             dayNumber: i + 1,
             totalMeals: day.meals?.length || 0,
+            targetCalories,
+            targetProtein,
+            targetCarbs,
+            targetFat: targetFats,
           },
         });
 
@@ -140,21 +197,29 @@ export async function startDietPlan(dietPlanAssignmentId) {
         dailyLogs.push(dailyLog);
       }
 
-      // Update assignment start date
-      await tx.dietPlanAssignment.update({
+      // Update assignment to active status
+      const updatedAssignment = await tx.dietPlanAssignment.update({
         where: { id: assignment.id },
         data: {
-          startDate: new Date(),
+          status: 'active',
+          startDate: planStartDate,
+          endDate: planEndDate,
+          actualStartDate: new Date(),
+          totalDays: days.length,
         },
       });
 
-      return dailyLogs;
+      return { dailyLogs, assignment: updatedAssignment };
     });
 
     return {
       success: true,
-      message: "Diet plan started successfully",
-      dailyLogs: result,
+      message: "Diet plan started successfully! Day 1 begins now.",
+      dailyLogs: result.dailyLogs,
+      assignment: result.assignment,
+      planDuration: days.length,
+      startDate: planStartDate,
+      endDate: planEndDate,
     };
   } catch (error) {
     console.error("Error starting diet plan:", error);
@@ -300,10 +365,19 @@ async function updateMealCompletionStatus(mealLogId, isCompleted) {
       },
     });
 
-    // Update daily totals
+    // Update daily totals and progress
     await updateDailyTotals(updatedMealLog.dailyDietLog.id);
-
-    return updatedMealLog;
+    
+    // Update progress calculations
+    await updateDailyLogProgress(updatedMealLog.dailyDietLog.id);
+    
+    // Check if plan should be completed
+    const completionCheck = await checkPlanCompletion(updatedMealLog.dailyDietLog.dietPlanAssignmentId);
+    
+    return {
+      ...updatedMealLog,
+      planCompletion: completionCheck
+    };
   } catch (error) {
     console.error(
       `Error ${isCompleted ? "completing" : "uncompleting"} meal:`,
