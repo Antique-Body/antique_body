@@ -17,13 +17,13 @@ export const useAssignPlan = () => {
     try {
       setPlansLoading(true);
       setError(null);
-      
+
       const response = await fetch(`/api/users/trainer/plans?type=${type}`);
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch plans");
       }
-      
+
       const data = await response.json();
       setPlans(data);
       return data;
@@ -160,20 +160,62 @@ export const useAssignPlan = () => {
     }
   }, []);
 
+  // Remove nutrition plan assignment
+  const removeNutritionPlan = useCallback(
+    async (clientId, assignmentId = null) => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await fetch(
+          `/api/coaching-requests/${clientId}/remove-nutrition-plan`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ assignmentId }),
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || "Failed to remove nutrition plan");
+        }
+
+        return data;
+      } catch (err) {
+        console.error("Error removing nutrition plan:", err);
+        setError(err.message);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
   // Generic assign plan function that chooses the right method
-  const assignPlan = useCallback(async (clientId, planId, type, shouldReplace = false) => {
-    if (type === "training") {
-      return shouldReplace 
-        ? replaceTrainingPlan(clientId, planId)
-        : assignTrainingPlan(clientId, planId);
-    } else if (type === "nutrition") {
-      return shouldReplace
-        ? replaceNutritionPlan(clientId, planId)
-        : assignNutritionPlan(clientId, planId);
-    } else {
-      throw new Error("Invalid plan type. Must be 'training' or 'nutrition'");
-    }
-  }, [assignTrainingPlan, assignNutritionPlan, replaceTrainingPlan, replaceNutritionPlan]);
+  const assignPlan = useCallback(
+    async (clientId, planId, type, shouldReplace = false) => {
+      if (type === "training") {
+        return shouldReplace
+          ? replaceTrainingPlan(clientId, planId)
+          : assignTrainingPlan(clientId, planId);
+      } else if (type === "nutrition") {
+        return shouldReplace
+          ? replaceNutritionPlan(clientId, planId)
+          : assignNutritionPlan(clientId, planId);
+      } else {
+        throw new Error("Invalid plan type. Must be 'training' or 'nutrition'");
+      }
+    },
+    [
+      assignTrainingPlan,
+      assignNutritionPlan,
+      replaceTrainingPlan,
+      replaceNutritionPlan,
+    ]
+  );
 
   // Get assigned nutrition plans for a client
   const getAssignedNutritionPlans = useCallback(async (clientId) => {
@@ -237,6 +279,7 @@ export const useAssignPlan = () => {
     assignNutritionPlan,
     replaceTrainingPlan,
     replaceNutritionPlan,
+    removeNutritionPlan,
     getAssignedNutritionPlans,
 
     // Setters

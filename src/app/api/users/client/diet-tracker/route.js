@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 
-
 import { auth } from "#/auth";
 import { mockNutritionPlan as mockPlanData } from "@/components/custom/dashboard/client/pages/diet-tracker/mockNutritionPlan";
 import prisma from "@/lib/prisma";
 
-import { calculatePlanProgress, generateProgressMessage } from "../../services/dietProgressService";
+import {
+  calculatePlanProgress,
+  generateProgressMessage,
+} from "../../services/dietProgressService";
 import {
   getActiveDietPlan,
   getAssignedDietPlans,
@@ -24,10 +26,55 @@ export async function GET(req) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get client info
-    const clientInfo = await prisma.clientInfo.findUnique({
-      where: { userId: session.user.id },
-    });
+    // Check if this is a trainer viewing a client's data
+    const isTrainerView = req.headers.get("x-trainer-view") === "true";
+    const { searchParams } = new URL(req.url);
+    const targetUserId = searchParams.get("userId");
+
+    // If trainer view, verify the trainer has access to this client
+    let clientInfo;
+
+    if (isTrainerView && targetUserId) {
+      // Verify that the trainer has access to this client
+      const trainerInfo = await prisma.trainerInfo.findUnique({
+        where: { userId: session.user.id },
+      });
+
+      if (!trainerInfo) {
+        return NextResponse.json(
+          { error: "Unauthorized - Not a trainer" },
+          { status: 403 }
+        );
+      }
+
+      // Check if this client is assigned to the trainer
+      const coachingRequest = await prisma.coachingRequest.findFirst({
+        where: {
+          trainerId: trainerInfo.id,
+          client: {
+            userId: targetUserId,
+          },
+          status: "accepted",
+        },
+      });
+
+      if (!coachingRequest) {
+        return NextResponse.json(
+          { error: "Unauthorized - Client not assigned to trainer" },
+          { status: 403 }
+        );
+      }
+
+      // Get client info for the target user
+      clientInfo = await prisma.clientInfo.findUnique({
+        where: { userId: targetUserId },
+      });
+    } else {
+      // Regular client view - get client's own info
+      clientInfo = await prisma.clientInfo.findUnique({
+        where: { userId: session.user.id },
+      });
+    }
 
     if (!clientInfo) {
       return NextResponse.json(
@@ -36,7 +83,6 @@ export async function GET(req) {
       );
     }
 
-    const { searchParams } = new URL(req.url);
     const action = searchParams.get("action");
 
     if (action === "stats") {
@@ -81,7 +127,7 @@ export async function GET(req) {
           hasActivePlan: false,
           assignedPlan: latestAssignment,
           planCount: assignedPlans.length,
-          message: `${latestAssignment.assignedBy.trainerProfile?.firstName || 'Your trainer'} has assigned you a new nutrition plan. Are you ready to start your journey?`,
+          message: `${latestAssignment.assignedBy.trainerProfile?.firstName || "Your trainer"} has assigned you a new nutrition plan. Are you ready to start your journey?`,
         });
       }
 
@@ -106,8 +152,10 @@ export async function GET(req) {
 
     // Check if plan is completed
     const today = new Date();
-    const planEndDate = activePlan.endDate ? new Date(activePlan.endDate) : null;
-    const isCompleted = activePlan.status === 'completed';
+    const planEndDate = activePlan.endDate
+      ? new Date(activePlan.endDate)
+      : null;
+    const isCompleted = activePlan.status === "completed";
     const isPastEndDate = planEndDate && today > planEndDate;
 
     return NextResponse.json({
@@ -119,7 +167,11 @@ export async function GET(req) {
       progressMessage,
       isCompleted,
       isPastEndDate,
-      completionStatus: isCompleted ? 'completed' : isPastEndDate ? 'expired' : 'active'
+      completionStatus: isCompleted
+        ? "completed"
+        : isPastEndDate
+          ? "expired"
+          : "active",
     });
   } catch (error) {
     console.error("Error in diet tracker GET:", error);
@@ -155,7 +207,7 @@ export async function POST(req) {
 
     if (action === "start-plan") {
       const { startDate } = body; // Allow custom start date
-      
+
       if (dietPlanAssignmentId) {
         // Start existing assigned plan
         const result = await startDietPlan(dietPlanAssignmentId, startDate);
@@ -175,12 +227,12 @@ export async function POST(req) {
 
         // Use selected plan data if provided, otherwise use default mock data
         const planData = selectedPlan || mockPlanData;
-        
+
         // Check if this specific nutrition plan already exists
         let existingNutritionPlan = await prisma.nutritionPlan.findFirst({
-          where: { 
+          where: {
             trainerInfoId: trainer.id,
-            title: planData.title 
+            title: planData.title,
           },
         });
 
@@ -195,10 +247,20 @@ export async function POST(req) {
               duration: planData.duration,
               durationType: planData.durationType,
               nutritionInfo: {
-                calories: planData.nutritionInfo?.calories || planData.dailyCaloriesGoal || 2000,
-                protein: planData.nutritionInfo?.protein || planData.dailyProteinGoal || 150,
-                carbs: planData.nutritionInfo?.carbs || planData.dailyCarbsGoal || 200,
-                fats: planData.nutritionInfo?.fats || planData.dailyFatGoal || 80,
+                calories:
+                  planData.nutritionInfo?.calories ||
+                  planData.dailyCaloriesGoal ||
+                  2000,
+                protein:
+                  planData.nutritionInfo?.protein ||
+                  planData.dailyProteinGoal ||
+                  150,
+                carbs:
+                  planData.nutritionInfo?.carbs ||
+                  planData.dailyCarbsGoal ||
+                  200,
+                fats:
+                  planData.nutritionInfo?.fats || planData.dailyFatGoal || 80,
               },
               days: planData.days,
               trainerInfoId: trainer.id,

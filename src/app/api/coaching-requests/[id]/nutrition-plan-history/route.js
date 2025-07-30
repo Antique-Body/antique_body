@@ -39,24 +39,35 @@ export async function GET(request, context) {
       );
     }
 
-    // Get only active nutrition plans with full details
-    const activePlans = await prisma.dietPlanAssignment.findMany({
+    // Get only inactive nutrition plans with simplified data
+    const planHistory = await prisma.dietPlanAssignment.findMany({
       where: {
         clientId: coachingRequest.clientId,
-        isActive: true,
+        isActive: false,
       },
-      include: {
-        nutritionPlan: true,
-        assignedBy: {
-          include: {
-            trainerProfile: true,
+      select: {
+        id: true,
+        status: true,
+        createdAt: true,
+        assignedAt: true,
+        completedDate: true,
+        nutritionPlan: {
+          select: {
+            title: true,
+            duration: true,
+            durationType: true,
           },
         },
-        dailyLogs: {
-          orderBy: {
-            date: "desc",
+        assignedBy: {
+          select: {
+            id: true,
+            trainerProfile: {
+              select: {
+                firstName: true,
+                lastName: true,
+              },
+            },
           },
-          take: 7, // Last 7 days
         },
       },
       orderBy: {
@@ -65,11 +76,11 @@ export async function GET(request, context) {
     });
 
     return NextResponse.json(
-      { success: true, data: activePlans },
+      { success: true, data: planHistory },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error fetching active nutrition plans:", error);
+    console.error("Error fetching nutrition plan history:", error);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }

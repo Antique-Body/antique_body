@@ -1,7 +1,9 @@
 import { Icon } from "@iconify/react";
+import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
 import { Card } from "@/components/common/Card";
+import { Modal } from "@/components/common/Modal";
 import { ACTIVITY_TYPES } from "@/enums/activityTypes";
 import { EXPERIENCE_LEVELS } from "@/enums/experienceLevels";
 import { FITNESS_GOALS } from "@/enums/fitnessGoals";
@@ -14,7 +16,13 @@ export function ClientOverviewTab({
   assignedTrainingPlans,
   assignedNutritionPlans,
   setActiveTab,
+  onRemoveNutritionPlan,
+  clientHasMockPlan,
 }) {
+  const [showConfirmRemoveModal, setShowConfirmRemoveModal] = useState(false);
+  const [removingPlan, setRemovingPlan] = useState(false);
+  const [removeError, setRemoveError] = useState(null);
+
   const getExperienceText = (level) => {
     if (!level) return "Unknown";
     const experienceLevel = EXPERIENCE_LEVELS.find(
@@ -50,6 +58,168 @@ export function ClientOverviewTab({
   const activeNutritionPlan = assignedNutritionPlans?.find(
     (plan) => plan.isActive
   );
+
+  const handleRemoveNutritionPlan = async () => {
+    if (!activeNutritionPlan || !onRemoveNutritionPlan) return;
+
+    try {
+      setRemovingPlan(true);
+      setRemoveError(null);
+      await onRemoveNutritionPlan(activeNutritionPlan.id);
+      setShowConfirmRemoveModal(false);
+    } catch (err) {
+      setRemoveError(err.message || "Failed to remove nutrition plan");
+    } finally {
+      setRemovingPlan(false);
+    }
+  };
+
+  // Nutrition Plan Section
+  const renderNutritionPlanSection = () => {
+    if (activeNutritionPlan) {
+      // Check if the plan was assigned by the current trainer
+      const currentTrainerId = client?.trainerId;
+      const assignedById = activeNutritionPlan.assignedById;
+      const isAssignedByCurrentTrainer = currentTrainerId === assignedById;
+
+      // Render assigned nutrition plan
+      return (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-green-900/20 rounded-lg border border-green-700/30 gap-3">
+          <div className="flex items-start gap-3 min-w-0">
+            <div className="flex-shrink-0 mt-1">
+              <Icon
+                icon="mdi:food-apple"
+                className="text-green-400"
+                width={20}
+                height={20}
+              />
+            </div>
+            <div className="min-w-0">
+              <p className="text-white font-medium truncate">
+                {activeNutritionPlan.nutritionPlan?.title || "Untitled Plan"}
+              </p>
+              <p className="text-zinc-400 text-sm">
+                {activeNutritionPlan.nutritionPlan?.duration ?? "?"}{" "}
+                {activeNutritionPlan.nutritionPlan?.durationType ?? ""} • Active
+              </p>
+              {activeNutritionPlan.nutritionPlan?.nutritionInfo && (
+                <p className="text-zinc-500 text-xs mt-1">
+                  {activeNutritionPlan.nutritionPlan.nutritionInfo.calories ||
+                    0}{" "}
+                  cal/day •{" "}
+                  {activeNutritionPlan.nutritionPlan.nutritionInfo.protein || 0}
+                  g protein
+                </p>
+              )}
+              <div className="flex items-center gap-1 mt-1">
+                {isAssignedByCurrentTrainer ? (
+                  <>
+                    <Icon
+                      icon="mdi:check-circle"
+                      className="text-green-400"
+                      width={14}
+                      height={14}
+                    />
+                    <span className="text-green-400 text-xs">
+                      Assigned by you
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Icon
+                      icon="mdi:account-circle"
+                      className="text-blue-400"
+                      width={14}
+                      height={14}
+                    />
+                    <span className="text-blue-400 text-xs">
+                      Assigned by{" "}
+                      {activeNutritionPlan.assignedBy?.trainerProfile
+                        ?.firstName || "another trainer"}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0 ml-auto sm:ml-0">
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={() => setActiveTab("nutrition")}
+            >
+              <Icon icon="mdi:eye" width={16} height={16} />
+            </Button>
+          </div>
+        </div>
+      );
+    } else if (clientHasMockPlan) {
+      // Render mock nutrition plan info
+      return (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-blue-900/20 rounded-lg border border-blue-700/30 gap-3">
+          <div className="flex items-start gap-3 min-w-0">
+            <div className="flex-shrink-0 mt-1 relative">
+              <Icon
+                icon="mdi:food-apple"
+                className="text-blue-400"
+                width={20}
+                height={20}
+              />
+              <div className="absolute -top-1 -right-1 bg-blue-500 rounded-full w-3 h-3 flex items-center justify-center">
+                <Icon
+                  icon="mdi:information-outline"
+                  className="text-white"
+                  width={10}
+                  height={10}
+                />
+              </div>
+            </div>
+            <div className="min-w-0">
+              <p className="text-white font-medium truncate">
+                Demo Nutrition Plan
+              </p>
+              <p className="text-zinc-400 text-sm">
+                Client is using a demo plan
+              </p>
+              <div className="flex items-center gap-1 mt-1">
+                <Icon
+                  icon="mdi:alert-circle-outline"
+                  className="text-blue-400"
+                  width={14}
+                  height={14}
+                />
+                <span className="text-blue-400 text-xs">
+                  App-provided demo plan
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0 ml-auto sm:ml-0">
+            <Button
+              variant="primary"
+              size="small"
+              onClick={() => onAssignPlan("nutrition")}
+            >
+              Replace with Real Plan
+            </Button>
+          </div>
+        </div>
+      );
+    } else {
+      // No nutrition plan assigned
+      return (
+        <div className="text-center py-4 bg-zinc-800/30 rounded-lg border border-zinc-700/50">
+          <Icon
+            icon="mdi:food-off"
+            className="text-zinc-600 mx-auto mb-2"
+            width={24}
+            height={24}
+          />
+          <p className="text-zinc-400 text-sm">No nutrition plan assigned</p>
+        </div>
+      );
+    }
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -240,89 +410,54 @@ export function ClientOverviewTab({
                   />
                   <h4 className="text-white font-medium">Nutrition Plan</h4>
                 </div>
-                <Button
-                  variant="success"
-                  size="small"
-                  leftIcon={<Icon icon="mdi:plus" width={16} height={16} />}
-                  onClick={() => onAssignPlan("nutrition")}
-                >
-                  {activeNutritionPlan ? "Replace" : "Assign"}
-                </Button>
+                <div className="flex gap-2">
+                  {activeNutritionPlan && onRemoveNutritionPlan && (
+                    <Button
+                      variant="danger"
+                      size="small"
+                      leftIcon={
+                        <Icon icon="mdi:delete" width={16} height={16} />
+                      }
+                      onClick={() => setShowConfirmRemoveModal(true)}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                  <Button
+                    variant="primary"
+                    size="small"
+                    leftIcon={<Icon icon="mdi:plus" width={16} height={16} />}
+                    onClick={() => onAssignPlan("nutrition")}
+                  >
+                    {activeNutritionPlan || clientHasMockPlan
+                      ? "Replace"
+                      : "Assign"}
+                  </Button>
+                </div>
               </div>
 
-              {activeNutritionPlan ? (
-                <div className="flex items-center justify-between p-3 bg-green-900/20 rounded-lg border border-green-700/30">
-                  <div className="flex items-center gap-3">
-                    <Icon
-                      icon="mdi:food-apple"
-                      className="text-green-400"
-                      width={20}
-                      height={20}
-                    />
-                    <div>
-                      <p className="text-white font-medium">
-                        {activeNutritionPlan.nutritionPlan?.title ||
-                          "Untitled Plan"}
-                      </p>
-                      <p className="text-zinc-400 text-sm">
-                        {activeNutritionPlan.nutritionPlan?.duration ?? "?"}{" "}
-                        {activeNutritionPlan.nutritionPlan?.durationType ?? ""}{" "}
-                        • Active
-                      </p>
-                      {activeNutritionPlan.nutritionPlan?.nutritionInfo && (
-                        <p className="text-zinc-500 text-xs mt-1">
-                          {activeNutritionPlan.nutritionPlan.nutritionInfo
-                            .calories || 0}{" "}
-                          cal/day •{" "}
-                          {activeNutritionPlan.nutritionPlan.nutritionInfo
-                            .protein || 0}
-                          g protein
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="secondary"
-                      size="small"
-                      onClick={() => setActiveTab("nutrition")}
-                    >
-                      <Icon icon="mdi:eye" width={16} height={16} />
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-4 bg-zinc-800/30 rounded-lg border border-zinc-700/50">
-                  <Icon
-                    icon="mdi:food-off"
-                    className="text-zinc-600 mx-auto mb-2"
-                    width={24}
-                    height={24}
-                  />
-                  <p className="text-zinc-400 text-sm">
-                    No nutrition plan assigned
-                  </p>
-                </div>
-              )}
+              {renderNutritionPlanSection()}
             </div>
 
             {/* Summary when both plans are empty */}
-            {!activeTrainingPlan && !activeNutritionPlan && (
-              <div className="text-center py-6 bg-zinc-800/20 rounded-lg border border-zinc-700/30">
-                <Icon
-                  icon="mdi:clipboard-outline"
-                  className="text-zinc-600 mx-auto mb-3"
-                  width={32}
-                  height={32}
-                />
-                <p className="text-zinc-400 text-base font-medium mb-1">
-                  No Active Plans
-                </p>
-                <p className="text-zinc-500 text-sm">
-                  Assign training and nutrition plans to get started
-                </p>
-              </div>
-            )}
+            {!activeTrainingPlan &&
+              !activeNutritionPlan &&
+              !clientHasMockPlan && (
+                <div className="text-center py-6 bg-zinc-800/20 rounded-lg border border-zinc-700/30">
+                  <Icon
+                    icon="mdi:clipboard-outline"
+                    className="text-zinc-600 mx-auto mb-3"
+                    width={32}
+                    height={32}
+                  />
+                  <p className="text-zinc-400 text-base font-medium mb-1">
+                    No Active Plans
+                  </p>
+                  <p className="text-zinc-500 text-sm">
+                    Assign training and nutrition plans to get started
+                  </p>
+                </div>
+              )}
           </div>
         </Card>
 
@@ -598,6 +733,47 @@ export function ClientOverviewTab({
           </div>
         </Card>
       </div>
+
+      {/* Confirm Remove Plan Modal */}
+      {showConfirmRemoveModal && (
+        <Modal
+          isOpen={showConfirmRemoveModal}
+          onClose={() => setShowConfirmRemoveModal(false)}
+          title={
+            <div className="flex items-center gap-2">
+              <Icon
+                icon="mdi:alert-circle"
+                width={24}
+                height={24}
+                className="text-red-400"
+              />
+              Remove Nutrition Plan
+            </div>
+          }
+          message={
+            <div className="space-y-4">
+              {removeError && (
+                <div className="bg-red-900/20 rounded-lg p-4 border border-red-700/30">
+                  <p className="text-red-400 text-sm">{removeError}</p>
+                </div>
+              )}
+              <p className="text-white">
+                Are you sure you want to remove the current nutrition plan from
+                this client?
+              </p>
+              <p className="text-zinc-400 text-sm">
+                This will deactivate the plan assignment. The client will no
+                longer have access to this plan.
+              </p>
+            </div>
+          }
+          primaryButtonText={removingPlan ? "Removing..." : "Remove Plan"}
+          secondaryButtonText="Cancel"
+          primaryButtonAction={handleRemoveNutritionPlan}
+          primaryButtonDisabled={removingPlan}
+          hideButtons={false}
+        />
+      )}
     </div>
   );
 }

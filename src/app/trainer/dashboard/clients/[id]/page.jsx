@@ -19,6 +19,7 @@ import {
   ClientMessagesTab,
 } from "@/components/custom/dashboard/trainer/pages/clients/components";
 import { PlanPreviewModal } from "@/components/custom/dashboard/trainer/pages/plans/components";
+import useAssignPlan from "@/hooks/useAssignPlan";
 
 export default function ClientDashboard({ params }) {
   const router = useRouter();
@@ -37,6 +38,11 @@ export default function ClientDashboard({ params }) {
   const [planPreviewData, setPlanPreviewData] = useState(null);
   const [startingPlanId, setStartingPlanId] = useState(null);
   const [startPlanError, setStartPlanError] = useState(null);
+  const [clientHasMockPlan, setClientHasMockPlan] = useState(false);
+
+  // Use the assign plan hook
+  const { removeNutritionPlan } = useAssignPlan();
+
   // Unwrap params using React.use() for Next.js 15 compatibility
   const unwrappedParams = React.use(params);
   const clientId = unwrappedParams.id;
@@ -73,11 +79,36 @@ export default function ClientDashboard({ params }) {
           assignedNutritionPlans = assignedNutritionData.data || [];
         }
 
-        setClient({ 
-          ...data.data, 
+        // Check if client has a mock nutrition plan
+        const clientUserId = data.data.client.userId;
+        const clientDietTrackerRes = await fetch(
+          `/api/users/client/diet-tracker?userId=${clientUserId}`,
+          {
+            headers: {
+              "x-trainer-view": "true", // Special header to allow trainer to view client data
+            },
+          }
+        );
+
+        let hasMockPlan = false;
+        if (clientDietTrackerRes.ok) {
+          const dietTrackerData = await clientDietTrackerRes.json();
+          // If client has no assigned plan but has a mock plan
+          if (
+            !dietTrackerData.hasActivePlan &&
+            dietTrackerData.mockPlanAvailable &&
+            assignedNutritionPlans.length === 0
+          ) {
+            hasMockPlan = true;
+          }
+        }
+
+        setClient({
+          ...data.data,
           assignedTrainingPlans: assignedTrainingPlans,
-          assignedNutritionPlans: assignedNutritionPlans
+          assignedNutritionPlans: assignedNutritionPlans,
         });
+        setClientHasMockPlan(hasMockPlan);
       } else {
         throw new Error(data.error || "Failed to fetch client data");
       }
@@ -123,24 +154,25 @@ export default function ClientDashboard({ params }) {
     try {
       setAssigning(true);
       setAssignError(null);
-      
+
       // Choose the correct API endpoint based on plan type
-      const endpoint = assignType === "training" 
-        ? `/api/coaching-requests/${client.id}/assign-training-plan`
-        : `/api/coaching-requests/${client.id}/assign-nutrition-plan`;
-      
+      const endpoint =
+        assignType === "training"
+          ? `/api/coaching-requests/${client.id}/assign-training-plan`
+          : `/api/coaching-requests/${client.id}/assign-nutrition-plan`;
+
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ planId: String(selectedPlan.id) }),
       });
-      
+
       const data = await response.json();
-      
+
       if (
         data.error &&
-        (data.error.includes("already has an active") || 
-         data.error.includes("Complete it before assigning"))
+        (data.error.includes("already has an active") ||
+          data.error.includes("Complete it before assigning"))
       ) {
         setAssignError(
           "Assigning a new plan will end the current plan for this client. " +
@@ -148,18 +180,20 @@ export default function ClientDashboard({ params }) {
         );
         return;
       }
-      
+
       if (!response.ok || !data.success) {
         throw new Error(data.error || `Failed to assign ${assignType} plan`);
       }
-      
+
       setShowAssignModal(false);
       setSelectedPlan(null);
       setAssignType(null);
       fetchClientData();
     } catch (err) {
       console.error("Error assigning plan:", err);
-      setAssignError(err.message || `Failed to assign ${assignType} plan. Please try again.`);
+      setAssignError(
+        err.message || `Failed to assign ${assignType} plan. Please try again.`
+      );
     } finally {
       setAssigning(false);
     }
@@ -173,7 +207,18 @@ export default function ClientDashboard({ params }) {
     setPlans([]);
   };
 
-  // State za prikaz gumba End & Assign
+  // Handle remove nutrition plan
+  const handleRemoveNutritionPlan = async (assignmentId) => {
+    try {
+      await removeNutritionPlan(client.id, assignmentId);
+      // Refresh client data after removing the plan
+      await fetchClientData();
+      return true;
+    } catch (err) {
+      console.error("Error removing nutrition plan:", err);
+      throw err;
+    }
+  };
 
   useEffect(() => {
     fetchClientData();
@@ -252,6 +297,8 @@ export default function ClientDashboard({ params }) {
             assignedTrainingPlans={client.assignedTrainingPlans || []}
             assignedNutritionPlans={client.assignedNutritionPlans || []}
             setActiveTab={setActiveTab}
+            onRemoveNutritionPlan={handleRemoveNutritionPlan}
+            clientHasMockPlan={clientHasMockPlan}
           />
         )}
         {activeTab === "progress" && <ClientProgressTab client={client} />}
@@ -268,7 +315,14 @@ export default function ClientDashboard({ params }) {
             startPlanError={startPlanError}
           />
         )}
-        {activeTab === "nutrition" && <ClientNutritionTab client={client} onAssignNutritionPlan={handleAssignPlan} />}
+        {activeTab === "nutrition" && (
+          <ClientNutritionTab
+            client={client}
+            onAssignNutritionPlan={handleAssignPlan}
+            onRemoveNutritionPlan={handleRemoveNutritionPlan}
+            clientHasMockPlan={clientHasMockPlan}
+          />
+        )}
         {activeTab === "messages" && <ClientMessagesTab client={client} />}
       </div>
 
@@ -303,41 +357,65 @@ export default function ClientDashboard({ params }) {
               client.assignedNutritionPlans?.some(
                 (plan) => plan.isActive
               ))) && (
-              <>
-                <div className="bg-amber-900/20 rounded-lg p-4 border border-amber-700/30 mb-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Icon
-                      icon="mdi:alert"
-                      className="text-amber-400"
-                      width={20}
-                      height={20}
-                    />
-                    <p className="text-amber-400 font-medium">Current Active Plan</p>
-                  </div>
-                  <p className="text-amber-300/90 text-sm">
-                    {(() => {
-                      if (assignType === "training") {
-                        const activePlan = client.assignedTrainingPlans?.find(
-                          (plan) => plan.status === "active"
-                        );
-                        if (!activePlan) return null;
-                        return `${activePlan.planData.title} • ${activePlan.planData.duration} ${activePlan.planData.durationType}`;
-                      } else if (assignType === "nutrition") {
-                        const activePlan = client.assignedNutritionPlans?.find(
-                          (plan) => plan.isActive
-                        );
-                        if (!activePlan) return null;
-                        return `${activePlan.nutritionPlan.title} • ${activePlan.nutritionPlan.duration} ${activePlan.nutritionPlan.durationType}`;
-                      }
-                      return null;
-                    })()}
-                  </p>
-                  <p className="text-amber-300/90 text-sm mt-1">
-                    Client already has an active {assignType} plan.
+            <>
+              <div className="bg-amber-900/20 rounded-lg p-4 border border-amber-700/30 mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Icon
+                    icon="mdi:alert"
+                    className="text-amber-400"
+                    width={20}
+                    height={20}
+                  />
+                  <p className="text-amber-400 font-medium">
+                    Current Active Plan
                   </p>
                 </div>
-              </>
-            )}
+                <p className="text-amber-300/90 text-sm">
+                  {(() => {
+                    if (assignType === "training") {
+                      const activePlan = client.assignedTrainingPlans?.find(
+                        (plan) => plan.status === "active"
+                      );
+                      if (!activePlan) return null;
+                      return `${activePlan.planData.title} • ${activePlan.planData.duration} ${activePlan.planData.durationType}`;
+                    } else if (assignType === "nutrition") {
+                      const activePlan = client.assignedNutritionPlans?.find(
+                        (plan) => plan.isActive
+                      );
+                      if (!activePlan) return null;
+                      return `${activePlan.nutritionPlan.title} • ${activePlan.nutritionPlan.duration} ${activePlan.nutritionPlan.durationType}`;
+                    }
+                    return null;
+                  })()}
+                </p>
+                <p className="text-amber-300/90 text-sm mt-1">
+                  Client already has an active {assignType} plan.
+                </p>
+              </div>
+            </>
+          )}
+
+          {/* Show info message if client has a mock nutrition plan */}
+          {assignType === "nutrition" && clientHasMockPlan && (
+            <div className="bg-blue-900/20 rounded-lg p-4 border border-blue-700/30 mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Icon
+                  icon="mdi:information"
+                  className="text-blue-400"
+                  width={20}
+                  height={20}
+                />
+                <p className="text-blue-400 font-medium">
+                  Client Using Demo Plan
+                </p>
+              </div>
+              <p className="text-blue-300/90 text-sm">
+                This client is currently using a demo nutrition plan. Assigning
+                a new plan will replace it.
+              </p>
+            </div>
+          )}
+
           {assignError && (
             <div className="bg-red-900/20 rounded-lg p-4 border border-red-700/30 mb-4">
               <div className="flex items-center gap-2">
@@ -569,24 +647,26 @@ export default function ClientDashboard({ params }) {
                     Cancel
                   </Button>
                   {/* If there's an active plan, show Replace Current Plan button */}
-                  {((assignType === "training" &&
+                  {(assignType === "training" &&
                     client.assignedTrainingPlans?.some(
                       (plan) => plan.status === "active"
                     )) ||
-                    (assignType === "nutrition" &&
-                      client.assignedNutritionPlans?.some(
-                        (plan) => plan.isActive
-                      ))) ? (
+                  (assignType === "nutrition" &&
+                    (client.assignedNutritionPlans?.some(
+                      (plan) => plan.isActive
+                    ) ||
+                      clientHasMockPlan)) ? (
                     <Button
                       className="bg-orange-500 hover:bg-orange-600 text-white border-none"
                       onClick={async () => {
                         setAssigning(true);
                         setAssignError(null);
                         try {
-                          const replaceEndpoint = assignType === "training" 
-                            ? `/api/coaching-requests/${client.id}/replace-training-plan`
-                            : `/api/coaching-requests/${client.id}/replace-nutrition-plan`;
-                            
+                          const replaceEndpoint =
+                            assignType === "training"
+                              ? `/api/coaching-requests/${client.id}/replace-training-plan`
+                              : `/api/coaching-requests/${client.id}/replace-nutrition-plan`;
+
                           const response = await fetch(replaceEndpoint, {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
@@ -597,7 +677,8 @@ export default function ClientDashboard({ params }) {
                           const data = await response.json();
                           if (!response.ok || !data.success) {
                             throw new Error(
-                              data.error || `Failed to replace ${assignType} plan`
+                              data.error ||
+                                `Failed to replace ${assignType} plan`
                             );
                           }
                           setShowAssignModal(false);
