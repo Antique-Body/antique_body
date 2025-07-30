@@ -89,7 +89,7 @@ export async function GET(request, { params }) {
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json(
@@ -177,7 +177,7 @@ export async function PATCH(request, { params }) {
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
     const { status, rejectionReason } = await request.json();
 
     if (!id) {
@@ -297,7 +297,7 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json(
@@ -387,7 +387,7 @@ export async function POST(request, { params }) {
         { status: 401 }
       );
     }
-    const { id } = params; // coaching request id
+    const { id } = await params; // coaching request id
     const body = await request.json();
     const { planId } = body;
     if (!planId) {

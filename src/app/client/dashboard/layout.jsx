@@ -77,12 +77,32 @@ export default function ClientDashboardLayout({ children }) {
 
   // Fetch coaching request counts for badges
   useEffect(() => {
+    let isMounted = true;
+
     async function fetchBadgeCounts() {
+      // Don't fetch if component is unmounted or session is not ready
+      if (!isMounted || !_session?.user) {
+        return;
+      }
+
       try {
-        const res = await fetch("/api/coaching-requests/count?role=client");
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+        const res = await fetch("/api/coaching-requests/count?role=client", {
+          signal: controller.signal,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!isMounted) return; // Check if component is still mounted
+
         if (res.ok) {
           const data = await res.json();
-          if (data.success) {
+          if (data.success && isMounted) {
             setBadgeCounts((prev) => ({
               ...prev,
               trainwithcoach: data.data.trainwithcoach || 0,
@@ -92,17 +112,41 @@ export default function ClientDashboardLayout({ children }) {
           // Silently handle unauthorized errors - session might not be updated yet
         }
       } catch (error) {
-        console.error("Error fetching badge counts:", error);
+        if (!isMounted) return;
+
+        // Only log non-abort errors
+        if (error.name !== "AbortError") {
+          console.error("Error fetching badge counts:", error);
+        }
+
+        // Reset badge counts on error to prevent stale data
+        setBadgeCounts((prev) => ({
+          ...prev,
+          trainwithcoach: 0,
+        }));
       }
     }
 
-    fetchBadgeCounts();
+    // Initial fetch with delay to ensure session is ready
+    const initialTimeout = setTimeout(() => {
+      if (isMounted && _session?.user) {
+        fetchBadgeCounts();
+      }
+    }, 1000);
 
     // Set up polling for real-time updates
-    const interval = setInterval(fetchBadgeCounts, 30000); // Poll every 30 seconds
+    const interval = setInterval(() => {
+      if (isMounted && _session?.user) {
+        fetchBadgeCounts();
+      }
+    }, 30000); // Poll every 30 seconds
 
-    return () => clearInterval(interval);
-  }, []);
+    return () => {
+      isMounted = false;
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
+  }, [_session]);
 
   // Navigate to appropriate route when tab changes
   const handleTabChange = (tabId) => {
@@ -182,8 +226,24 @@ export default function ClientDashboardLayout({ children }) {
 
   // Function to refresh badge counts (can be called from child components)
   const refreshBadgeCounts = async () => {
+    // Don't fetch if session is not ready
+    if (!_session?.user) {
+      return;
+    }
+
     try {
-      const res = await fetch("/api/coaching-requests/count?role=client");
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+      const res = await fetch("/api/coaching-requests/count?role=client", {
+        signal: controller.signal,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      clearTimeout(timeoutId);
+
       if (res.ok) {
         const data = await res.json();
         if (data.success) {
@@ -196,7 +256,16 @@ export default function ClientDashboardLayout({ children }) {
         // Silently handle unauthorized errors - session might not be updated yet
       }
     } catch (error) {
-      console.error("Error refreshing badge counts:", error);
+      // Only log non-abort errors
+      if (error.name !== "AbortError") {
+        console.error("Error refreshing badge counts:", error);
+      }
+
+      // Reset badge counts on error to prevent stale data
+      setBadgeCounts((prev) => ({
+        ...prev,
+        trainwithcoach: 0,
+      }));
     }
   };
 

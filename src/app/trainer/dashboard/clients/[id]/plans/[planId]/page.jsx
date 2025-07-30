@@ -7,9 +7,14 @@ import React, { useState, useRef, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-import { FullScreenLoader, ContextualSaveBar } from "@/components";
+import { ContextualSaveBar } from "@/components";
 import { Button } from "@/components/common/Button";
 import { Modal } from "@/components/common/Modal";
+import {
+  PlanLoadingState,
+  PlanErrorState,
+  PlanNotFoundState,
+} from "@/components/custom/dashboard/trainer/pages/clients/components";
 import { ExerciseLibrarySelector } from "@/components/custom/dashboard/trainer/pages/exercises/components";
 import { VideoModal } from "@/components/modals/VideoModal";
 import { LiveWorkoutMode } from "@/components/training/LiveWorkoutMode";
@@ -722,59 +727,22 @@ export default function TrackPlanPage({ params }) {
 
   // Loading state
   if (loading) {
-    return <FullScreenLoader text="Loading Training Plan" />;
+    return <PlanLoadingState message="Loading Training Plan" />;
   }
 
   // Error state
   if (trainingPlan.error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 flex items-center justify-center">
-        <div className="text-center bg-zinc-900/80 backdrop-blur rounded-2xl p-8 border border-red-500/20">
-          <Icon
-            icon="mdi:alert-circle"
-            width={48}
-            height={48}
-            className="text-red-400 mx-auto mb-4"
-          />
-          <h3 className="text-xl font-semibold text-white mb-2">
-            Unable to Load Plan
-          </h3>
-          <p className="text-red-400 mb-4">{trainingPlan.error}</p>
-          <Button
-            onClick={trainingPlan.retryFetchPlan}
-            variant="secondary"
-            className="bg-red-600/20 border-red-500/30 text-red-300 hover:bg-red-600/30"
-          >
-            Try Again
-          </Button>
-        </div>
-      </div>
+      <PlanErrorState
+        error={trainingPlan.error}
+        onRetry={trainingPlan.retryFetchPlan}
+      />
     );
   }
 
   // No plan state
   if (!plan) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 flex items-center justify-center">
-        <div className="text-center bg-zinc-900/80 backdrop-blur rounded-2xl p-8 border border-zinc-700/50">
-          <Icon
-            icon="mdi:file-search"
-            width={48}
-            height={48}
-            className="text-zinc-400 mx-auto mb-4"
-          />
-          <h3 className="text-xl font-semibold text-white mb-2">
-            Plan Not Found
-          </h3>
-          <p className="text-zinc-400 mb-4">
-            The training plan you're looking for doesn't exist.
-          </p>
-          <Button onClick={() => router.back()} variant="secondary">
-            Go Back
-          </Button>
-        </div>
-      </div>
-    );
+    return <PlanNotFoundState onGoBack={() => router.back()} />;
   }
 
   const sessionStats = getTotalSessionStats();

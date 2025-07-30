@@ -3,9 +3,12 @@ import { Icon } from "@iconify/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef, useCallback } from "react";
 
-import { Button } from "@/components/common/Button";
 import { InfoBanner } from "@/components/common/InfoBanner";
-import { ClientsGrid } from "@/components/custom/dashboard/trainer/pages/clients/components";
+import {
+  ClientsGrid,
+  ClientsLoadingState,
+  ClientsErrorState,
+} from "@/components/custom/dashboard/trainer/pages/clients/components";
 import { SortControls } from "@/components/custom/shared/SortControls";
 
 export default function ClientsPage() {
@@ -190,45 +193,11 @@ export default function ClientsPage() {
   };
 
   if (loading && allClients.length === 0) {
-    return (
-      <div className="px-4 py-5">
-        <div className="flex h-64 w-full items-center justify-center">
-          <div className="flex flex-col items-center">
-            <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#3E92CC] border-t-transparent" />
-            <p className="mt-4 text-zinc-400">Loading clients...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <ClientsLoadingState message="Loading clients..." />;
   }
 
   if (error) {
-    return (
-      <div className="px-4 py-5">
-        <div className="flex h-64 w-full items-center justify-center">
-          <div className="flex flex-col items-center text-center">
-            <Icon
-              icon="mdi:alert-circle"
-              className="text-red-500"
-              width={48}
-              height={48}
-            />
-            <p className="mt-4 text-lg font-medium text-white">
-              Failed to load clients
-            </p>
-            <p className="mt-2 text-zinc-400">{error}</p>
-            <Button
-              variant="primary"
-              onClick={() => fetchAllClients()}
-              leftIcon={<Icon icon="mdi:refresh" width={20} height={20} />}
-              className="mt-4"
-            >
-              Try Again
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
+    return <ClientsErrorState error={error} onRetry={fetchAllClients} />;
   }
 
   // Get current page clients

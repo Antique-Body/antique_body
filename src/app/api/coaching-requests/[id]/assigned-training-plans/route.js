@@ -13,7 +13,7 @@ export async function GET(request, { params }) {
         { status: 401 }
       );
     }
-    const { id } = params; // coaching request id
+    const { id } = await params; // coaching request id
     // Get coaching request
     const coachingRequest = await prisma.coachingRequest.findUnique({
       where: { id },
