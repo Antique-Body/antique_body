@@ -47,7 +47,7 @@ function filterAllowedFields(data, allowedFields) {
 // GET: Fetch single plan by id and type
 export async function GET(req, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const { searchParams } = new URL(req.url);
     const type = searchParams.get("type") || "training";
     const session = await auth();
@@ -90,7 +90,7 @@ export async function GET(req, { params }) {
 // PATCH: Update plan by id
 export async function PATCH(req, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
     const session = await auth();
     if (!session?.user?.id) {
@@ -135,7 +135,7 @@ export async function PATCH(req, { params }) {
 // DELETE: Soft delete plan by id
 export async function DELETE(req, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const { searchParams } = new URL(req.url);
     const type = searchParams.get("type") || "training";
     const session = await auth();
