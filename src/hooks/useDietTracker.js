@@ -15,6 +15,8 @@ export const useDietTracker = () => {
   const [progressMessage, setProgressMessage] = useState(null);
   const [isCompleted, setIsCompleted] = useState(false);
   const [completionStatus, setCompletionStatus] = useState(null);
+
+  // Water tracking state
   const [dailyWaterIntake, setDailyWaterIntake] = useState(0);
   const [isWaterLoading, setIsWaterLoading] = useState(false);
 
@@ -80,7 +82,6 @@ export const useDietTracker = () => {
         setProgressMessage(data.progressMessage || null);
         setIsCompleted(data.isCompleted || false);
         setCompletionStatus(data.completionStatus || null);
-        setDailyWaterIntake(data.activePlan?.dailyWaterIntake || 0);
       } else {
         console.log("No active plan found");
         // Clear active plan data
@@ -91,7 +92,6 @@ export const useDietTracker = () => {
         setProgressMessage(null);
         setIsCompleted(false);
         setCompletionStatus(null);
-        setDailyWaterIntake(0);
       }
     } catch (err) {
       console.error("Error fetching diet tracker data:", err);
@@ -1053,69 +1053,106 @@ export const useDietTracker = () => {
     return totalMeals > 0 ? (completedMeals / totalMeals) * 100 : 0;
   }, [dailyLogs]);
 
-  // Add water intake
-  const addWater = useCallback(async (amountMl) => {
-    if (!activePlan) {
-      throw new Error("No active diet plan found");
-    }
-
+  // Water tracking functions
+  const fetchWaterIntake = useCallback(async () => {
+    console.log("🌊 [WATER] Fetching water intake data");
     try {
       setIsWaterLoading(true);
-      setError(null);
 
-      const response = await fetch("/api/users/client/diet-tracker", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          action: "update-water-intake",
-          dietPlanAssignmentId: activePlan.id,
-          amountMl,
-        }),
-      });
+      // For now, we'll simulate fetching water data
+      // This will be replaced with actual API call later
+      const mockWaterData = {
+        dailyIntake: 1200, // ml
+        goal: 4000, // ml
+        lastUpdated: new Date().toISOString(),
+      };
 
-      const data = await response.json();
+      console.log("🌊 [WATER] Mock water data received:", mockWaterData);
+      setDailyWaterIntake(mockWaterData.dailyIntake);
 
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to add water intake");
-      }
-
-      // Update local state
-      setDailyWaterIntake(data.data.dailyWaterIntake);
-
-      return data;
+      return mockWaterData;
     } catch (err) {
-      console.error("Error adding water intake:", err);
+      console.error("🌊 [WATER] Error fetching water intake:", err);
+      setError(err.message);
+    } finally {
+      setIsWaterLoading(false);
+    }
+  }, []);
+
+  const addWater = useCallback(
+    async (amount) => {
+      console.log("🌊 [WATER] Adding water:", amount, "ml");
+      try {
+        setIsWaterLoading(true);
+
+        // For now, we'll simulate adding water locally
+        // This will be replaced with actual API call later
+        const newTotal = dailyWaterIntake + amount;
+        console.log("🌊 [WATER] New total water intake:", newTotal, "ml");
+
+        setDailyWaterIntake(newTotal);
+
+        // Simulate API call delay
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        console.log("🌊 [WATER] Water added successfully");
+        return { success: true, newTotal };
+      } catch (err) {
+        console.error("🌊 [WATER] Error adding water:", err);
+        setError(err.message);
+        throw err;
+      } finally {
+        setIsWaterLoading(false);
+      }
+    },
+    [dailyWaterIntake]
+  );
+
+  const getWaterStats = useCallback(() => {
+    console.log("🌊 [WATER] Getting water stats");
+    const goal = 4000; // ml
+    const percentage = (dailyWaterIntake / goal) * 100;
+
+    const stats = {
+      current: dailyWaterIntake,
+      goal,
+      percentage: Math.round(percentage),
+      remaining: Math.max(0, goal - dailyWaterIntake),
+      isGoalReached: dailyWaterIntake >= goal,
+    };
+
+    console.log("🌊 [WATER] Water stats:", stats);
+    return stats;
+  }, [dailyWaterIntake]);
+
+  const resetWaterIntake = useCallback(async () => {
+    console.log("🌊 [WATER] Resetting water intake");
+    try {
+      setIsWaterLoading(true);
+
+      // For now, we'll simulate resetting water locally
+      // This will be replaced with actual API call later
+      setDailyWaterIntake(0);
+
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      console.log("🌊 [WATER] Water intake reset successfully");
+      return { success: true };
+    } catch (err) {
+      console.error("🌊 [WATER] Error resetting water intake:", err);
       setError(err.message);
       throw err;
     } finally {
       setIsWaterLoading(false);
     }
-  }, [activePlan]);
-
-  // Fetch water intake
-  const fetchWaterIntake = useCallback(async () => {
-    if (!activePlan) return;
-
-    try {
-      const response = await fetch(
-        "/api/users/client/diet-tracker?action=water-intake"
-      );
-      const data = await response.json();
-
-      if (response.ok) {
-        setDailyWaterIntake(data.dailyWaterIntake);
-      }
-    } catch (err) {
-      console.error("Error fetching water intake:", err);
-    }
-  }, [activePlan]);
+  }, []);
 
   // Initialize data on mount
   useEffect(() => {
     fetchDietTrackerData();
-  }, [fetchDietTrackerData]);
+    fetchWaterIntake(); // Also fetch water data on mount
+  }, [fetchDietTrackerData, fetchWaterIntake]);
 
   return {
     // State
@@ -1133,6 +1170,8 @@ export const useDietTracker = () => {
     progressMessage,
     isCompleted,
     completionStatus,
+
+    // Water tracking state
     dailyWaterIntake,
     isWaterLoading,
 
@@ -1149,8 +1188,12 @@ export const useDietTracker = () => {
     addCustomMealToDay,
     deleteSnack,
     clearValidationError,
+
+    // Water tracking actions
     addWater,
     fetchWaterIntake,
+    getWaterStats,
+    resetWaterIntake,
 
     // Helpers
     getTodayLog,

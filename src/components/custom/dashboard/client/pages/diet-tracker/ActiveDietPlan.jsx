@@ -29,6 +29,9 @@ export const ActiveDietPlan = ({
   dailyWaterIntake,
   onWaterAdd,
   isWaterLoading,
+  onFetchWaterIntake,
+  onGetWaterStats,
+  onResetWaterIntake,
 }) => {
   const [selectedDay, setSelectedDay] = useState(1);
   const [selectedMealDetail, setSelectedMealDetail] = useState(null);
@@ -533,6 +536,9 @@ export const ActiveDietPlan = ({
             dailyWaterIntake={dailyWaterIntake}
             onWaterAdd={onWaterAdd}
             isWaterLoading={isWaterLoading}
+            onFetchWaterIntake={onFetchWaterIntake}
+            onGetWaterStats={onGetWaterStats}
+            onResetWaterIntake={onResetWaterIntake}
           />
         </div>
       </div>

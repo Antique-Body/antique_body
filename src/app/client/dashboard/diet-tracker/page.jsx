@@ -14,7 +14,7 @@ import { useDietTracker } from "@/hooks/useDietTracker";
 
 export default function DietTrackerPage() {
   const [viewMode, setViewMode] = useState("tracker"); // "tracker", "progress", "completion"
-  
+
   const {
     hasActivePlan,
     activePlan,
@@ -41,6 +41,9 @@ export default function DietTrackerPage() {
     getLogByDate,
     clearValidationError,
     addWater,
+    fetchWaterIntake,
+    getWaterStats,
+    resetWaterIntake,
   } = useDietTracker();
 
   // Loading state
@@ -57,9 +60,9 @@ export default function DietTrackerPage() {
   if (!hasActivePlan && (assignedPlan || mockPlanAvailable)) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-6">
-        <DietPlanAssignmentCard 
-          onStartPlan={startDietPlan} 
-          loading={loading} 
+        <DietPlanAssignmentCard
+          onStartPlan={startDietPlan}
+          loading={loading}
           assignedPlan={assignedPlan}
         />
       </div>
@@ -88,8 +91,18 @@ export default function DietTrackerPage() {
             onClick={() => setViewMode(isCompleted ? "completion" : "tracker")}
             className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
             Back to {isCompleted ? "Completion" : "Tracker"}
           </button>
@@ -152,6 +165,9 @@ export default function DietTrackerPage() {
           getCompletionRate={getCompletionRate}
           getLogByDate={getLogByDate}
           clearValidationError={clearValidationError}
+          onFetchWaterIntake={fetchWaterIntake}
+          onGetWaterStats={getWaterStats}
+          onResetWaterIntake={resetWaterIntake}
         />
       </div>
     );

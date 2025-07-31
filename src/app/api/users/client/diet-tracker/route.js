@@ -15,8 +15,6 @@ import {
   getAllDailyLogs,
   getDietPlanStats,
   getNextMeal,
-  updateWaterIntake,
-  getWaterIntake,
 } from "../../services/dietTrackerService";
 // Import the mock nutrition plan directly
 
@@ -166,20 +164,6 @@ export async function GET(req) {
 
       const nextMeal = await getNextMeal(activePlan.id);
       return NextResponse.json({ nextMeal });
-    }
-
-    if (action === "water-intake") {
-      // Get water intake for active plan
-      const activePlan = await getActiveDietPlan(clientInfo.id);
-      if (!activePlan) {
-        return NextResponse.json(
-          { error: "No active diet plan found" },
-          { status: 404 }
-        );
-      }
-
-      const waterIntake = await getWaterIntake(activePlan.id);
-      return NextResponse.json(waterIntake);
     }
 
     // Default: Get current active diet plan
@@ -524,47 +508,6 @@ export async function POST(req) {
 
         // Re-throw other errors to be caught by outer catch
         throw validationError;
-      }
-    }
-
-    if (action === "update-water-intake") {
-      const { dietPlanAssignmentId, amountMl } = body;
-
-      if (!dietPlanAssignmentId || !amountMl) {
-        return NextResponse.json(
-          { error: "Diet plan assignment ID and amount are required" },
-          { status: 400 }
-        );
-      }
-
-      if (amountMl <= 0 || amountMl > 2000) {
-        return NextResponse.json(
-          { error: "Amount must be between 1ml and 2000ml" },
-          { status: 400 }
-        );
-      }
-
-      try {
-        const result = await updateWaterIntake(dietPlanAssignmentId, amountMl);
-        return NextResponse.json({
-          success: true,
-          message: `Added ${amountMl}ml to your daily water intake`,
-          data: result,
-        });
-      } catch (error) {
-        if (error.message.includes("not found")) {
-          return NextResponse.json(
-            { error: "Diet plan not found" },
-            { status: 404 }
-          );
-        }
-        if (error.message.includes("not active")) {
-          return NextResponse.json(
-            { error: "Diet plan is not active" },
-            { status: 403 }
-          );
-        }
-        throw error;
       }
     }
 
