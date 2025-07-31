@@ -48,53 +48,55 @@ export async function POST(request) {
     }
 
     // Get participant information
-    let participantInfo = null;
-
-    if (isTrainer) {
-      // Current user is trainer, get client info
-      const client = await prisma.clientInfo.findUnique({
-        where: { id: clientId },
-        include: {
-          clientProfile: {
-            select: {
-              firstName: true,
-              lastName: true,
-              profileImage: true,
+    const participantInfo = await (async () => {
+      if (isTrainer) {
+        // Current user is trainer, get client info
+        const client = await prisma.clientInfo.findUnique({
+          where: { id: clientId },
+          include: {
+            clientProfile: {
+              select: {
+                firstName: true,
+                lastName: true,
+                profileImage: true,
+              },
             },
           },
-        },
-      });
+        });
 
-      if (client?.clientProfile) {
-        participantInfo = {
-          name: `${client.clientProfile.firstName} ${client.clientProfile.lastName || ""}`.trim(),
-          avatar: client.clientProfile.profileImage,
-          id: client.id,
-        };
-      }
-    } else if (isClient) {
-      // Current user is client, get trainer info
-      const trainer = await prisma.trainerInfo.findUnique({
-        where: { id: trainerId },
-        include: {
-          trainerProfile: {
-            select: {
-              firstName: true,
-              lastName: true,
-              profileImage: true,
+        if (client?.clientProfile) {
+          return {
+            name: `${client.clientProfile.firstName} ${client.clientProfile.lastName || ""}`.trim(),
+            avatar: client.clientProfile.profileImage,
+            id: client.id,
+          };
+        }
+      } else if (isClient) {
+        // Current user is client, get trainer info
+        const trainer = await prisma.trainerInfo.findUnique({
+          where: { id: trainerId },
+          include: {
+            trainerProfile: {
+              select: {
+                firstName: true,
+                lastName: true,
+                profileImage: true,
+              },
             },
           },
-        },
-      });
+        });
 
-      if (trainer?.trainerProfile) {
-        participantInfo = {
-          name: `${trainer.trainerProfile.firstName} ${trainer.trainerProfile.lastName || ""}`.trim(),
-          avatar: trainer.trainerProfile.profileImage,
-          id: trainer.id,
-        };
+        if (trainer?.trainerProfile) {
+          return {
+            name: `${trainer.trainerProfile.firstName} ${trainer.trainerProfile.lastName || ""}`.trim(),
+            avatar: trainer.trainerProfile.profileImage,
+            id: trainer.id,
+          };
+        }
       }
-    }
+      
+      return null;
+    })();
 
     // Check if there's an existing conversation (not deleted)
     const existingConversation = await prisma.conversation.findFirst({

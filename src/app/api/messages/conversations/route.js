@@ -29,171 +29,173 @@ export async function GET() {
 
     let conversations = [];
 
-    if (user.role === "trainer" && user.trainerInfo) {
-      // Get conversations for trainer
-      conversations = await prisma.conversation.findMany({
-        where: {
-          trainerId: user.trainerInfo.id,
-          isActive: true,
-          deletedAt: null,
-        },
-        include: {
-          client: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  email: true,
-                  phone: true,
+    // Dynamic query configuration based on user role
+    const isTrainer = user.role === "trainer" && user.trainerInfo;
+    const isClient = user.role === "client" && user.clientInfo;
+    
+    if (isTrainer || isClient) {
+      const whereClause = isTrainer 
+        ? { trainerId: user.trainerInfo.id }
+        : { clientId: user.clientInfo.id };
+      
+      const includeClause = isTrainer
+        ? {
+            client: {
+              select: {
+                id: true,
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    phone: true,
+                  },
                 },
-              },
-              clientProfile: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                  profileImage: true,
+                clientProfile: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                    profileImage: true,
+                  },
                 },
               },
             },
-          },
+          }
+        : {
+            trainer: {
+              select: {
+                id: true,
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    phone: true,
+                  },
+                },
+                trainerProfile: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                    profileImage: true,
+                  },
+                },
+              },
+            },
+          };
+
+      conversations = await prisma.conversation.findMany({
+        where: {
+          ...whereClause,
+          isActive: true,
+          deletedAt: null,
+        },
+        select: {
+          id: true,
+          chatId: true,
+          clientId: true,
+          trainerId: true,
+          lastMessageAt: true,
+          clientUnreadCount: true,
+          trainerUnreadCount: true,
+          ...includeClause,
         },
         orderBy: {
           lastMessageAt: "desc",
         },
-      });
-    } else if (user.role === "client" && user.clientInfo) {
-      // Get conversations for client
-      conversations = await prisma.conversation.findMany({
-        where: {
-          clientId: user.clientInfo.id,
-          isActive: true,
-          deletedAt: null,
-        },
-        include: {
-          trainer: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  email: true,
-                  phone: true,
-                },
-              },
-              trainerProfile: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                  profileImage: true,
-                },
-              },
-            },
-          },
-        },
-        orderBy: {
-          lastMessageAt: "desc",
-        },
+        take: 50, // Add pagination limit
       });
     }
 
     // Get available users to chat with (only those with coaching requests or existing conversations)
     let availableChats = [];
     
-    if (user.role === "trainer" && user.trainerInfo) {
-      // Get clients that the trainer has coaching requests with
-      const coachingRequestClients = await prisma.coachingRequest.findMany({
+    if (isTrainer || isClient) {
+      const coachingRequestWhere = isTrainer
+        ? { trainerId: user.trainerInfo.id }
+        : { clientId: user.clientInfo.id };
+      
+      const coachingRequestSelect = isTrainer
+        ? {
+            client: {
+              select: {
+                id: true,
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    phone: true,
+                  },
+                },
+                clientProfile: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                    profileImage: true,
+                  },
+                },
+              },
+            },
+          }
+        : {
+            trainer: {
+              select: {
+                id: true,
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    phone: true,
+                  },
+                },
+                trainerProfile: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                    profileImage: true,
+                  },
+                },
+              },
+            },
+          };
+
+      const coachingRequests = await prisma.coachingRequest.findMany({
         where: {
-          trainerId: user.trainerInfo.id,
+          ...coachingRequestWhere,
           status: {
             in: ["pending", "accepted"]
           }
         },
-        include: {
-          client: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  email: true,
-                  phone: true,
-                },
-              },
-              clientProfile: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                  profileImage: true,
-                },
-              },
-            },
-          },
-        },
+        select: coachingRequestSelect,
+        take: 50, // Add pagination limit
       });
 
-      // Filter out clients that already have conversations
-      const existingClientIds = conversations.map(conv => conv.clientId);
-      const availableClients = coachingRequestClients
-        .map(cr => cr.client)
-        .filter(client => !existingClientIds.includes(client.id));
+      // Filter out users that already have conversations
+      const existingIds = conversations.map(conv => 
+        isTrainer ? conv.clientId : conv.trainerId
+      ).filter(Boolean); // Remove any null/undefined values
+      
+      const availableUsers = coachingRequests
+        .map(cr => isTrainer ? cr.client : cr.trainer)
+        .filter(user => user && !existingIds.includes(user.id));
 
-      availableChats = availableClients.map((client) => ({
-        id: generateChatId(user.trainerInfo.id, client.id),
-        participantId: client.user.id,
-        name: client.clientProfile 
-          ? `${client.clientProfile.firstName} ${client.clientProfile.lastName || ""}`.trim() 
-          : "Unknown Client",
-        avatar: client.clientProfile?.profileImage || null,
-        lastMessageAt: null,
-        unreadCount: 0,
-        isNewChat: true,
-      }));
-    } else if (user.role === "client" && user.clientInfo) {
-      // Get trainers that the client has coaching requests with
-      const coachingRequestTrainers = await prisma.coachingRequest.findMany({
-        where: {
-          clientId: user.clientInfo.id,
-          status: {
-            in: ["pending", "accepted"]
-          }
-        },
-        include: {
-          trainer: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  email: true,
-                  phone: true,
-                },
-              },
-              trainerProfile: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                  profileImage: true,
-                },
-              },
-            },
-          },
-        },
+      availableChats = availableUsers.map((participant) => {
+        const profile = isTrainer ? participant.clientProfile : participant.trainerProfile;
+        const participantId = isTrainer ? user.trainerInfo.id : user.clientInfo.id;
+        
+        return {
+          id: generateChatId(
+            isTrainer ? participantId : participant.id,
+            isTrainer ? participant.id : participantId
+          ),
+          participantId: participant.user.id,
+          name: profile 
+            ? `${profile.firstName} ${profile.lastName || ""}`.trim() 
+            : `Unknown ${isTrainer ? 'Client' : 'Trainer'}`,
+          avatar: profile?.profileImage || null,
+          lastMessageAt: null,
+          unreadCount: 0,
+          isNewChat: true,
+        };
       });
-
-      // Filter out trainers that already have conversations
-      const existingTrainerIds = conversations.map(conv => conv.trainerId);
-      const availableTrainers = coachingRequestTrainers
-        .map(cr => cr.trainer)
-        .filter(trainer => !existingTrainerIds.includes(trainer.id));
-
-      availableChats = availableTrainers.map((trainer) => ({
-        id: generateChatId(trainer.id, user.clientInfo.id),
-        participantId: trainer.user.id,
-        name: trainer.trainerProfile 
-          ? `${trainer.trainerProfile.firstName} ${trainer.trainerProfile.lastName || ""}`.trim() 
-          : "Unknown Trainer",
-        avatar: trainer.trainerProfile?.profileImage || null,
-        lastMessageAt: null,
-        unreadCount: 0,
-        isNewChat: true,
-      }));
     }
 
     // Format existing conversations
@@ -228,6 +230,17 @@ export async function GET() {
       return 0;
     });
 
+    // Debug logging (remove in production)
+    if (process.env.NODE_ENV === "development") {
+      console.log("Debug - Conversations:", {
+        existingCount: formattedConversations.length,
+        availableCount: availableChats.length,
+        totalCount: allConversations.length,
+        existingIds: conversations.map(conv => isTrainer ? conv.clientId : conv.trainerId),
+        availableChatIds: availableChats.map(chat => chat.id)
+      });
+    }
+
     return NextResponse.json({ conversations: allConversations });
   } catch (error) {
     console.error("Error fetching conversations:", error);
@@ -235,7 +248,7 @@ export async function GET() {
     return NextResponse.json(
       { 
         error: "Failed to fetch conversations", 
-        details: error.message,
+        details: process.env.NODE_ENV === "development" ? error.message : undefined,
         stack: process.env.NODE_ENV === "development" ? error.stack : undefined 
       },
       { status: 500 }

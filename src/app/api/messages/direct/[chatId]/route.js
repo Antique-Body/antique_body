@@ -82,16 +82,14 @@ export async function GET(request, { params }) {
         },
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: "asc",
       },
       skip: offset,
       take: limit,
     });
 
-
-
     // Format messages for frontend
-    const formattedMessages = messages.reverse().map((message) => ({
+    const formattedMessages = messages.map((message) => ({
       id: message.id,
       content: message.content,
       messageType: message.messageType,
@@ -130,6 +128,15 @@ export async function POST(request, { params }) {
     if (!content || content.trim() === "") {
       return NextResponse.json(
         { error: "Message content is required" },
+        { status: 400 }
+      );
+    }
+
+    // Validate message content length
+    const MAX_MESSAGE_LENGTH = 500;
+    if (content.length > MAX_MESSAGE_LENGTH) {
+      return NextResponse.json(
+        { error: `Message content cannot exceed ${MAX_MESSAGE_LENGTH} characters` },
         { status: 400 }
       );
     }
@@ -198,58 +205,64 @@ export async function POST(request, { params }) {
       ? client.user.id 
       : trainer.user.id;
 
-    // Create message
-    const message = await prisma.message.create({
-      data: {
-        content: content.trim(),
-        messageType,
-        fileUrl,
-        fileName,
-        senderId: session.user.id,
-        receiverId,
-        chatId,
-      },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            role: true,
+    // Create message and update/create conversation in a single transaction
+    const { message } = await prisma.$transaction(async (tx) => {
+      // Create message
+      const message = await tx.message.create({
+        data: {
+          content: content.trim(),
+          messageType,
+          fileUrl,
+          fileName,
+          senderId: session.user.id,
+          receiverId,
+          chatId,
+        },
+        include: {
+          sender: {
+            select: {
+              id: true,
+              role: true,
+            },
           },
         },
-      },
-    });
-
-    // Check if conversation exists (including soft-deleted ones)
-    const existingConversation = await prisma.conversation.findFirst({
-      where: { chatId },
-    });
-
-    if (existingConversation) {
-      // Conversation exists - update it and reactivate if it was soft-deleted
-      await prisma.conversation.update({
-        where: { id: existingConversation.id },
-        data: {
-          lastMessageAt: message.createdAt,
-          deletedAt: null, // Reactivate if it was soft-deleted
-          ...(isTrainer 
-            ? { clientUnreadCount: { increment: 1 } }
-            : { trainerUnreadCount: { increment: 1 } }
-          ),
-        },
       });
-    } else {
-      // Create new conversation
-      await prisma.conversation.create({
-        data: {
-          chatId,
-          clientId,
-          trainerId,
-          lastMessageAt: message.createdAt,
-          clientUnreadCount: isTrainer ? 1 : 0,
-          trainerUnreadCount: isClient ? 1 : 0,
-        },
+
+      // Check if conversation exists (including soft-deleted ones)
+      const existingConversation = await tx.conversation.findFirst({
+        where: { chatId },
       });
-    }
+
+      let conversation;
+      if (existingConversation) {
+        // Conversation exists - update it and reactivate if it was soft-deleted
+        conversation = await tx.conversation.update({
+          where: { id: existingConversation.id },
+          data: {
+            lastMessageAt: message.createdAt,
+            deletedAt: null, // Reactivate if it was soft-deleted
+            ...(isTrainer 
+              ? { clientUnreadCount: { increment: 1 } }
+              : { trainerUnreadCount: { increment: 1 } }
+            ),
+          },
+        });
+      } else {
+        // Create new conversation
+        conversation = await tx.conversation.create({
+          data: {
+            chatId,
+            clientId,
+            trainerId,
+            lastMessageAt: message.createdAt,
+            clientUnreadCount: isTrainer ? 1 : 0,
+            trainerUnreadCount: isClient ? 1 : 0,
+          },
+        });
+      }
+
+      return { message, conversation };
+    });
 
     // Format message for response
     const formattedMessage = {

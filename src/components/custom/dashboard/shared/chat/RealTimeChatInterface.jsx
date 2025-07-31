@@ -67,12 +67,22 @@ const ConversationItem = ({ conversation, isSelected, _onClick, isOnline }) => {
     router.push(`${basePath}/${conversation.id}`);
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleClick();
+    }
+  };
+
   return (
     <div
       className={`cursor-pointer border-b border-[#333] p-4 transition-colors hover:bg-[#1a1a1a] ${
         isSelected ? "bg-[#1a1a1a]" : ""
       }`}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
     >
     <div className="flex items-center">
       {/* Avatar with online indicator */}
@@ -268,6 +278,7 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
       <div className="flex items-center justify-between border-b border-[#333] p-4">
         <div className="flex items-center">
           <button
+            type="button"
             onClick={onClose}
             className="mr-3 rounded p-1 hover:bg-[#333] lg:hidden"
           >
@@ -294,6 +305,7 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
         {/* Delete button */}
         <div className="relative">
           <button
+            type="button"
             onClick={() => setShowDeleteConfirm(true)}
             className="rounded p-2 text-gray-400 hover:bg-red-500/20 hover:text-red-400 transition-colors"
             title="Delete conversation"
@@ -312,6 +324,7 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
               </p>
               <div className="flex gap-2">
                 <button
+                  type="button"
                   onClick={async () => {
                     try {
                       const result = await deleteChat();
@@ -332,6 +345,7 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
                   Delete
                 </button>
                 <button
+                  type="button"
                   onClick={() => setShowDeleteConfirm(false)}
                   className="flex-1 rounded bg-[#333] px-3 py-2 text-sm font-medium text-gray-300 hover:bg-[#444] transition-colors"
                 >

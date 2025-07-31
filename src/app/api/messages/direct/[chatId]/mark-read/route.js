@@ -55,37 +55,42 @@ export async function POST(request, { params }) {
       );
     }
 
-    // Mark messages as read for the current user
-    const updatedMessages = await prisma.message.updateMany({
-      where: {
-        chatId,
-        receiverId: session.user.id,
-        isRead: false,
-      },
-      data: {
-        isRead: true,
-      },
-    });
-
-    // Update conversation unread count
-    const conversation = await prisma.conversation.findUnique({
-      where: { chatId },
-    });
-
-    if (conversation) {
-      const updateData = isTrainer
-        ? { trainerUnreadCount: 0 }
-        : { clientUnreadCount: 0 };
-
-      await prisma.conversation.update({
-        where: { id: conversation.id },
-        data: updateData,
+    // Mark messages as read and update conversation unread count in a single transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Mark messages as read for the current user
+      const updatedMessages = await tx.message.updateMany({
+        where: {
+          chatId,
+          receiverId: session.user.id,
+          isRead: false,
+        },
+        data: {
+          isRead: true,
+        },
       });
-    }
+
+      // Update conversation unread count
+      const conversation = await tx.conversation.findUnique({
+        where: { chatId },
+      });
+
+      if (conversation) {
+        const updateData = isTrainer
+          ? { trainerUnreadCount: 0 }
+          : { clientUnreadCount: 0 };
+
+        await tx.conversation.update({
+          where: { id: conversation.id },
+          data: updateData,
+        });
+      }
+
+      return { updatedMessages, conversation };
+    });
 
     return NextResponse.json({ 
       success: true, 
-      markedAsRead: updatedMessages.count 
+      markedAsRead: result.updatedMessages.count 
     });
   } catch (error) {
     console.error("Error marking messages as read:", error);
