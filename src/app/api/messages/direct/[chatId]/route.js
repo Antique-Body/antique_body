@@ -281,9 +281,9 @@ export async function POST(request, { params }) {
 
     // Publish message to Ably for real-time delivery (server-side)
     const Ably = await getServerAbly();
-    const ablyClient = new Ably.Rest({
-      key: process.env.NEXT_PUBLIC_ABLY_KEY
-    });
+          const ablyClient = new Ably.Rest({
+        key: process.env.ABLY_API_KEY
+      });
     await ablyClient.channels.get(`chat:${chatId}`).publish('message', formattedMessage);
 
     return NextResponse.json({ message: formattedMessage });

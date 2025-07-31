@@ -24,10 +24,27 @@ export const useGlobalPresence = () => {
       const user = await response.json();
       currentUserRef.current = user;
 
-      // Dynamically import Ably and create instance
+      // Fetch token from backend
+      const tokenResponse = await fetch('/api/auth/ably-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ clientId: user.id }),
+      });
+
+      if (!tokenResponse.ok) {
+        throw new Error('Failed to get Ably token');
+      }
+
+      const { tokenRequest } = await tokenResponse.json();
+
+      // Dynamically import Ably and create instance with token
       const { default: Ably } = await import('ably');
       ablyRef.current = new Ably.Realtime({
-        key: process.env.NEXT_PUBLIC_ABLY_KEY,
+        authCallback: async (tokenParams, callback) => {
+          callback(null, tokenRequest);
+        },
         clientId: user.id,
       });
 
@@ -157,12 +174,29 @@ export const useChatPresence = (chatId) => {
         const user = await response.json();
         currentUserRef.current = user;
 
-                 // Dynamically import Ably and create instance
-         const { default: Ably } = await import('ably');
-         const ably = new Ably.Realtime({
-           key: process.env.NEXT_PUBLIC_ABLY_KEY,
-           clientId: user.id,
-         });
+        // Fetch token from backend
+        const tokenResponse = await fetch('/api/auth/ably-token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ clientId: user.id }),
+        });
+
+        if (!tokenResponse.ok) {
+          throw new Error('Failed to get Ably token');
+        }
+
+        const { tokenRequest } = await tokenResponse.json();
+
+        // Dynamically import Ably and create instance with token
+        const { default: Ably } = await import('ably');
+        const ably = new Ably.Realtime({
+          authCallback: async (tokenParams, callback) => {
+            callback(null, tokenRequest);
+          },
+          clientId: user.id,
+        });
 
         // Get chat channel
         const channelName = `chat:${chatId}`;

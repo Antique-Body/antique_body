@@ -9,19 +9,53 @@ const getAbly = async () => {
   return Ably;
 };
 
-// Check if Ably API key is configured
-const checkAblyKey = () => {
-  if (!process.env.NEXT_PUBLIC_ABLY_KEY) {
-    throw new Error('NEXT_PUBLIC_ABLY_KEY environment variable is not set. Please add it to your .env.local file.');
+
+/**
+ * Cleanup function to properly close Ably client connection and reset singleton
+ */
+export const cleanupAblyClient = async () => {
+  if (ably) {
+    try {
+      // Close the connection if it's not already closed
+      if (ably.connection && ably.connection.state !== 'closed') {
+        await ably.close();
+      }
+    } catch (error) {
+      console.warn('Error during Ably client cleanup:', error);
+    } finally {
+      // Reset the singleton instance regardless of cleanup success
+      ably = null;
+    }
   }
 };
 
-export const getAblyClient = async (clientId = null) => {
+export const getAblyClient = async (clientId = null, forceRecreate = false) => {
+  // Cleanup existing client if forceRecreate is true or if clientId changes
+  if (forceRecreate || (ably && clientId && ably.auth.clientId !== clientId)) {
+    await cleanupAblyClient();
+  }
+  
   if (!ably) {
-    checkAblyKey();
+    // Fetch token from backend
+    const tokenResponse = await fetch('/api/auth/ably-token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ clientId }),
+    });
+
+    if (!tokenResponse.ok) {
+      throw new Error('Failed to get Ably token');
+    }
+
+    const { tokenRequest } = await tokenResponse.json();
+
     const Ably = await getAbly();
     const config = {
-      key: process.env.NEXT_PUBLIC_ABLY_KEY
+      authCallback: async (tokenParams, callback) => {
+        callback(null, tokenRequest);
+      }
     };
     
     if (clientId) {
@@ -41,10 +75,10 @@ export const publishMessage = async (channelName, message) => {
   
   try {
     await channel.publish('message', message);
-    return true;
+    return { success: true, error: null };
   } catch (error) {
     console.error('Failed to publish message:', error);
-    return false;
+    return { success: false, error: error.message };
   }
 };
 
@@ -148,10 +182,29 @@ export const updateGlobalPresence = async (data, userId = null) => {
 
 // Chat presence functions
 export const joinChatPresence = async (channelName, user) => {
-  const client = await getAblyClient(user.id);
-  const channel = client.channels.get(getChannelName(channelName));
-  
   try {
+    const client = await getAblyClient(user.id);
+    
+    // Check if client and connection are available
+    if (!client || !client.connection) {
+      console.warn('Ably client or connection not available for joining chat presence');
+      return false;
+    }
+    
+    // Check connection state
+    if (client.connection.state === 'closed' || client.connection.state === 'failed') {
+      console.warn('Ably connection is closed or failed, skipping chat presence join');
+      return false;
+    }
+    
+    const channel = client.channels.get(getChannelName(channelName));
+    
+    // Check if channel and presence are available
+    if (!channel || !channel.presence) {
+      console.warn('Chat presence channel not available for joining');
+      return false;
+    }
+    
     await channel.presence.enter({
       userId: user.id,
       name: user.name || 'Unknown User',
@@ -166,10 +219,29 @@ export const joinChatPresence = async (channelName, user) => {
 };
 
 export const updateTypingStatus = async (channelName, isTyping, userId = null) => {
-  const client = await getAblyClient(userId);
-  const channel = client.channels.get(getChannelName(channelName));
-  
   try {
+    const client = await getAblyClient(userId);
+    
+    // Check if client and connection are available
+    if (!client || !client.connection) {
+      console.warn('Ably client or connection not available for updating typing status');
+      return false;
+    }
+    
+    // Check connection state
+    if (client.connection.state === 'closed' || client.connection.state === 'failed') {
+      console.warn('Ably connection is closed or failed, skipping typing status update');
+      return false;
+    }
+    
+    const channel = client.channels.get(getChannelName(channelName));
+    
+    // Check if channel and presence are available
+    if (!channel || !channel.presence) {
+      console.warn('Chat presence channel not available for typing status update');
+      return false;
+    }
+    
     await channel.presence.update({
       typing: isTyping,
       lastSeen: new Date().toISOString()

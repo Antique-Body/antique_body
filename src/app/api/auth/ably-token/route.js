@@ -1,9 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
-import { auth } from "#/auth";
-import { generateAblyToken } from "@/lib/ably";
+import { auth } from '#/auth';
 
-export async function POST() {
+// Server-side Ably import for API routes
+let Ably = null;
+const getServerAbly = async () => {
+  if (!Ably) {
+    Ably = (await import('ably')).default;
+  }
+  return Ably;
+};
+
+export async function POST(request) {
   try {
     const session = await auth();
     
@@ -11,9 +19,37 @@ export async function POST() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const tokenRequest = await generateAblyToken(session.user.id);
+    const { clientId } = await request.json();
     
-    return NextResponse.json({ tokenRequest });
+    if (!clientId) {
+      return NextResponse.json({ error: "Client ID is required" }, { status: 400 });
+    }
+
+    // Verify the clientId matches the authenticated user
+    if (clientId !== session.user.id) {
+      return NextResponse.json({ error: "Invalid client ID" }, { status: 403 });
+    }
+
+    const Ably = await getServerAbly();
+    
+    // Initialize Ably with server-side API key
+    const ably = new Ably.Rest({
+      key: process.env.ABLY_API_KEY
+    });
+
+    // Generate token request with appropriate capabilities
+    const tokenRequest = await ably.auth.createTokenRequest({
+      clientId: clientId,
+      capability: {
+        'chat:*': ['subscribe', 'publish', 'presence'],
+        'presence:global': ['subscribe', 'publish', 'presence']
+      }
+    });
+
+    return NextResponse.json({
+      tokenRequest,
+      clientId
+    });
   } catch (error) {
     console.error("Error generating Ably token:", error);
     return NextResponse.json(
