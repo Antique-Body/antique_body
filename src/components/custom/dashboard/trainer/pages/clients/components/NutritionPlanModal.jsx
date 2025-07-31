@@ -8,12 +8,14 @@ import { Button } from "@/components/common/Button";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { Modal } from "@/components/common/Modal";
 
-import { DetailsTabNutrition } from "../../plans/components/planPreviewModal/DetailsTabNutrition";
-import { OverviewTab } from "../../plans/components/planPreviewModal/OverviewTab";
-import { ScheduleTab } from "../../plans/components/planPreviewModal/ScheduleTab";
-import { StatsTab } from "../../plans/components/planPreviewModal/StatsTab";
-import { usePlanPDF } from "../../plans/components/planPreviewModal/usePlanPDF";
-import { WeeklyScheduleTab } from "../../plans/components/planPreviewModal/WeeklyScheduleTab";
+import {
+  OverviewTab,
+  ScheduleTab,
+  StatsTab,
+  usePlanPDF,
+  WeeklyScheduleTab,
+  DetailsTabNutrition,
+} from "../../plans/components/planPreviewConponents";
 
 export const NutritionPlanModal = ({ plan, isOpen, onClose, days }) => {
   const [activeTab, setActiveTab] = useState("overview");
