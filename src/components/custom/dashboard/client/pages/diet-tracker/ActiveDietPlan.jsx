@@ -13,7 +13,6 @@ import { NewMealCard } from "./NewMealCard";
 import { NutritionSummary } from "./NutritionSummary";
 import { PlanHeader } from "./PlanHeader";
 
-
 export const ActiveDietPlan = ({
   activePlan,
   dailyLogs,
@@ -27,6 +26,9 @@ export const ActiveDietPlan = ({
   getCompletionRate,
   getLogByDate,
   clearValidationError,
+  dailyWaterIntake,
+  onWaterAdd,
+  isWaterLoading,
 }) => {
   const [selectedDay, setSelectedDay] = useState(1);
   const [selectedMealDetail, setSelectedMealDetail] = useState(null);
@@ -140,22 +142,32 @@ export const ActiveDietPlan = ({
     return mealLog?.isCompleted || false;
   };
 
-  // Handle meal completion
-  const handleLogMeal = async (meal, option, mealLog) => {
+  // Handle meal completion with portion control
+  const handleLogMeal = async (meal, option) => {
     try {
-      if (mealLog?.isCompleted) {
-        // If meal is already completed, uncomplete it
-        await onUncompleteMeal(mealLog.id);
-      } else {
-        // If meal is not completed, complete it
-        if (mealLog) {
-          // First change the meal option if different
-          if (mealLog.selectedOption?.name !== option.name) {
-            await onChangeMealOption(mealLog.id, option);
-          }
+      // Find existing meal log or create a new one
+      const existingMealLog = selectedDayLog?.mealLogs?.find(
+        (log) => log.mealName === meal.name
+      );
 
-          // Then complete the meal
-          await onCompleteMeal(mealLog.id);
+      if (existingMealLog) {
+        // First change the meal option if different
+        if (
+          existingMealLog.selectedOption?.name !== option.name ||
+          existingMealLog.selectedOption?.portionMultiplier !==
+            option.portionMultiplier
+        ) {
+          await onChangeMealOption(existingMealLog.id, option);
+        }
+
+        // Then complete the meal
+        const result = await onCompleteMeal(existingMealLog.id);
+
+        // Check if plan was completed as a result of this action
+        if (result?.data?.planCompletion?.completed) {
+          // Plan was completed, show a message or redirect
+          console.log("Plan completed successfully!");
+          // You could show a toast message or modal here
         }
       }
     } catch (error) {
@@ -429,7 +441,6 @@ export const ActiveDietPlan = ({
                       isEditable={isEditable}
                       isCompleted={isCompleted}
                       isDayEditable={isDayEditable}
-                      onLogMeal={handleLogMeal}
                       onViewDetail={handleViewMealDetail}
                       onCustomMeal={handleCustomMeal}
                       onDeleteMeal={handleDeleteMeal}
@@ -519,6 +530,9 @@ export const ActiveDietPlan = ({
             currentDay={currentDay}
             completedMeals={mealCompletionStats.completedMeals}
             totalMeals={mealCompletionStats.totalMeals}
+            dailyWaterIntake={dailyWaterIntake}
+            onWaterAdd={onWaterAdd}
+            isWaterLoading={isWaterLoading}
           />
         </div>
       </div>
@@ -532,6 +546,7 @@ export const ActiveDietPlan = ({
         }}
         meal={selectedMealDetail?.meal}
         option={selectedMealDetail?.option}
+        onLogMeal={handleLogMeal}
       />
 
       <CustomMealModal

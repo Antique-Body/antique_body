@@ -2,7 +2,6 @@
 
 import { Icon } from "@iconify/react";
 import Image from "next/image";
-import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
 
@@ -13,16 +12,10 @@ export const NewMealCard = ({
   isEditable,
   isCompleted,
   isDayEditable,
-  onLogMeal,
   onViewDetail,
   onCustomMeal,
   onDeleteMeal,
 }) => {
-  const [selectedOption, setSelectedOption] = useState(
-    mealLog?.selectedOption || meal.options?.[0] || null
-  );
-  const [isLogging, setIsLogging] = useState(false);
-
   const formatTime = (time) => {
     if (!time) return "";
     const [hours, minutes] = time.split(":");
@@ -32,15 +25,9 @@ export const NewMealCard = ({
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
-  const handleLogMeal = async () => {
-    if (!selectedOption || !isEditable) return;
-
-    setIsLogging(true);
-    try {
-      await onLogMeal(meal, selectedOption, mealLog);
-    } finally {
-      setIsLogging(false);
-    }
+  const handleViewMealDetail = (option) => {
+    if (!isEditable) return;
+    onViewDetail(meal, option);
   };
 
   const handleDeleteMeal = async () => {
@@ -114,10 +101,10 @@ export const NewMealCard = ({
               isCompleted
                 ? "bg-green-500/20 text-green-400"
                 : isNextMeal
-                ? "bg-[#FF6B00]/20 text-[#FF6B00]"
-                : !isEditable && isDayEditable
-                ? "bg-zinc-700/30 text-zinc-500"
-                : "bg-zinc-700/50 text-zinc-400"
+                  ? "bg-[#FF6B00]/20 text-[#FF6B00]"
+                  : !isEditable && isDayEditable
+                    ? "bg-zinc-700/30 text-zinc-500"
+                    : "bg-zinc-700/50 text-zinc-400"
             }`}
           >
             <Icon icon={getMealIcon(meal.name)} className="w-6 h-6" />
@@ -128,8 +115,8 @@ export const NewMealCard = ({
                 isNextMeal
                   ? "text-[#FF6B00]"
                   : !isEditable && isDayEditable
-                  ? "text-zinc-500"
-                  : "text-white"
+                    ? "text-zinc-500"
+                    : "text-white"
               }`}
             >
               {meal.name}
@@ -227,115 +214,84 @@ export const NewMealCard = ({
               )}
             </div>
 
-            {/* Compact Options List */}
+            {/* Clickable Options List */}
             <div className="space-y-2">
-              {meal.options.map((option, index) => {
-                const isSelected = selectedOption?.name === option.name;
-
-                return (
-                  <div
-                    key={index}
-                    className={`relative border rounded-lg p-3 transition-all duration-200 ${
-                      !isEditable && isDayEditable
-                        ? "border-zinc-700/15 bg-zinc-800/5 cursor-not-allowed"
-                        : isSelected
-                        ? "border-[#FF6B00]/50 bg-[#FF6B00]/3 ring-1 ring-[#FF6B00]/15 cursor-pointer"
-                        : "border-zinc-700/30 bg-zinc-800/15 hover:border-zinc-600/30 hover:bg-zinc-800/25 cursor-pointer"
-                    }`}
-                    onClick={() => isEditable && setSelectedOption(option)}
-                  >
-                    {/* Selection Indicator */}
-                    {isSelected && isEditable && (
-                      <div className="absolute top-2 right-2">
-                        <div className="w-3 h-3 bg-[#FF6B00] rounded-full flex items-center justify-center">
-                          <Icon
-                            icon="mdi:check"
-                            className="w-2 h-2 text-white"
-                          />
-                        </div>
+              {meal.options.map((option, index) => (
+                <div
+                  key={index}
+                  className={`relative bg-zinc-800/15 p-3 rounded-lg transition-all duration-200 ${
+                    !isEditable && isDayEditable
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-[#FF6B00]/3 hover:border-[#FF6B00]/50 hover:ring-1 hover:ring-[#FF6B00]/15 cursor-pointer"
+                  }`}
+                  onClick={() => {
+                    if (isEditable) {
+                      handleViewMealDetail(option);
+                    }
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    {/* Option Image */}
+                    {option.imageUrl && (
+                      <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                        <Image
+                          src={option.imageUrl}
+                          alt={option.name}
+                          width={40}
+                          height={40}
+                          className={`w-full h-full object-cover ${
+                            !isEditable && isDayEditable ? "opacity-40" : ""
+                          }`}
+                        />
                       </div>
                     )}
 
-                    <div className="flex items-center gap-3">
-                      {/* Option Image */}
-                      {option.imageUrl && (
-                        <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
-                          <Image
-                            src={option.imageUrl}
-                            alt={option.name}
-                            width={40}
-                            height={40}
-                            className={`w-full h-full object-cover ${
-                              !isEditable && isDayEditable ? "opacity-40" : ""
-                            }`}
-                          />
-                        </div>
-                      )}
-
-                      {/* Option Info */}
-                      <div className="flex-1 min-w-0">
-                        <h5
-                          className={`font-medium text-sm mb-1 truncate ${
-                            !isEditable && isDayEditable
-                              ? "text-zinc-500"
-                              : "text-white"
-                          }`}
-                        >
-                          {option.name}
-                        </h5>
-
-                        {/* Compact Nutrition Preview */}
-                        <div className="flex items-center gap-2 sm:gap-3 text-xs flex-wrap">
-                          <span
-                            className={
-                              !isEditable && isDayEditable
-                                ? "text-zinc-600"
-                                : "text-zinc-400"
-                            }
-                          >
-                            {option.calories || 0} cal
-                          </span>
-                          <span
-                            className={
-                              !isEditable && isDayEditable
-                                ? "text-zinc-600"
-                                : "text-zinc-400"
-                            }
-                          >
-                            {option.protein || 0}g protein
-                          </span>
-                          <span
-                            className={`hidden sm:inline ${
-                              !isEditable && isDayEditable
-                                ? "text-zinc-600"
-                                : "text-zinc-400"
-                            }`}
-                          >
-                            {option.carbs || 0}g carbs
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* View Details Button */}
-                      <Button
-                        variant="ghost"
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onViewDetail(meal, option);
-                        }}
-                        className={`text-xs px-1.5 py-1 h-6 ${
+                    {/* Option Info */}
+                    <div className="flex-1 min-w-0">
+                      <h5
+                        className={`font-medium text-sm mb-1 truncate ${
                           !isEditable && isDayEditable
-                            ? "text-zinc-600 hover:text-zinc-500"
-                            : "text-zinc-400 hover:text-white"
+                            ? "text-zinc-500"
+                            : "text-white"
                         }`}
                       >
-                        <Icon icon="mdi:eye" className="w-3 h-3" />
-                      </Button>
+                        {option.name}
+                      </h5>
+
+                      {/* Compact Nutrition Preview */}
+                      <div className="flex items-center gap-2 sm:gap-3 text-xs flex-wrap">
+                        <span
+                          className={
+                            !isEditable && isDayEditable
+                              ? "text-zinc-600"
+                              : "text-zinc-400"
+                          }
+                        >
+                          {option.calories || 0} cal
+                        </span>
+                        <span
+                          className={
+                            !isEditable && isDayEditable
+                              ? "text-zinc-600"
+                              : "text-zinc-400"
+                          }
+                        >
+                          {option.protein || 0}g protein
+                        </span>
+                        <span
+                          className={`hidden sm:inline ${
+                            !isEditable && isDayEditable
+                              ? "text-zinc-600"
+                              : "text-zinc-400"
+                          }`}
+                        >
+                          {option.carbs || 0}g carbs
+                        </span>
+                      </div>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -343,40 +299,16 @@ export const NewMealCard = ({
         {/* Action Buttons */}
         {!isCompleted && (
           <div className="mt-4 flex flex-col sm:flex-row gap-3">
-            {/* LOG MEAL Button */}
-            {isEditable && selectedOption && (
-              <Button
-                variant="orangeFilled"
-                size="large"
-                onClick={handleLogMeal}
-                disabled={isLogging}
-                className="flex-1 h-12"
-              >
-                {isLogging ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-3"></div>
-                    Logging Meal...
-                  </>
-                ) : (
-                  <>
-                    <Icon icon="mdi:check-circle" className="w-5 h-5 mr-3" />
-                    LOG MEAL
-                  </>
-                )}
-              </Button>
-            )}
-
             {/* Custom Meal Button */}
             {isEditable && (
               <Button
                 variant="secondary"
                 size="large"
                 onClick={() => onCustomMeal(meal, mealLog)}
-                className="h-12 px-6 sm:flex-shrink-0"
+                className="h-12 px-6 w-full"
               >
                 <Icon icon="mdi:plus-circle" className="w-5 h-5 mr-2" />
-                <span className="hidden sm:inline">Custom Meal</span>
-                <span className="sm:hidden">Custom</span>
+                Custom Meal
               </Button>
             )}
 

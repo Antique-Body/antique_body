@@ -1,4 +1,5 @@
 import { Icon } from "@iconify/react";
+import Link from "next/link";
 import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
@@ -150,71 +151,23 @@ export function ClientOverviewTab({
             >
               <Icon icon="mdi:eye" width={16} height={16} />
             </Button>
-          </div>
-        </div>
-      );
-    } else if (clientHasMockPlan) {
-      // Render mock nutrition plan info
-      return (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-blue-900/20 rounded-lg border border-blue-700/30 gap-3">
-          <div className="flex items-start gap-3 min-w-0">
-            <div className="flex-shrink-0 mt-1 relative">
-              <Icon
-                icon="mdi:food-apple"
-                className="text-blue-400"
-                width={20}
-                height={20}
-              />
-              <div className="absolute -top-1 -right-1 bg-blue-500 rounded-full w-3 h-3 flex items-center justify-center">
-                <Icon
-                  icon="mdi:information-outline"
-                  className="text-white"
-                  width={10}
-                  height={10}
-                />
-              </div>
-            </div>
-            <div className="min-w-0">
-              <p className="text-white font-medium truncate">
-                Demo Nutrition Plan
-              </p>
-              <p className="text-zinc-400 text-sm">
-                Client is using a demo plan
-              </p>
-              <div className="flex items-center gap-1 mt-1">
-                <Icon
-                  icon="mdi:alert-circle-outline"
-                  className="text-blue-400"
-                  width={14}
-                  height={14}
-                />
-                <span className="text-blue-400 text-xs">
-                  App-provided demo plan
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 flex-shrink-0 ml-auto sm:ml-0">
-            <Button
-              variant="primary"
-              size="small"
-              onClick={() => onAssignPlan("nutrition")}
-            >
-              Replace with Real Plan
-            </Button>
+            {activeNutritionPlan.startDate && (
+              <Link href={`/trainer/dashboard/clients/${client.id}/nutrition/${activeNutritionPlan.id}`}>
+                <Button
+                  variant="success"
+                  size="small"
+                >
+                  <Icon icon="mdi:chart-line" width={16} height={16} />
+                  <span className="hidden sm:inline ml-1">Track</span>
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       );
     } else {
-      // No nutrition plan assigned
       return (
         <div className="text-center py-4 bg-zinc-800/30 rounded-lg border border-zinc-700/50">
-          <Icon
-            icon="mdi:food-off"
-            className="text-zinc-600 mx-auto mb-2"
-            width={24}
-            height={24}
-          />
           <p className="text-zinc-400 text-sm">No nutrition plan assigned</p>
         </div>
       );
@@ -349,7 +302,7 @@ export function ClientOverviewTab({
                   leftIcon={<Icon icon="mdi:plus" width={16} height={16} />}
                   onClick={() => onAssignPlan("training")}
                 >
-                  {activeTrainingPlan ? "Replace" : "Assign"}
+                  {!activeTrainingPlan ? "Replace" : "Assign"}
                 </Button>
               </div>
 
@@ -429,9 +382,7 @@ export function ClientOverviewTab({
                     leftIcon={<Icon icon="mdi:plus" width={16} height={16} />}
                     onClick={() => onAssignPlan("nutrition")}
                   >
-                    {activeNutritionPlan || clientHasMockPlan
-                      ? "Replace"
-                      : "Assign"}
+                    {activeNutritionPlan ? "Replace" : "Assign"}
                   </Button>
                 </div>
               </div>

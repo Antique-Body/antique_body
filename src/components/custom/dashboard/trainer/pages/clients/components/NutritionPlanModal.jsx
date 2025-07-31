@@ -12,14 +12,14 @@ import { DetailsTabNutrition } from "../../plans/components/planPreviewModal/Det
 import { OverviewTab } from "../../plans/components/planPreviewModal/OverviewTab";
 import { ScheduleTab } from "../../plans/components/planPreviewModal/ScheduleTab";
 import { StatsTab } from "../../plans/components/planPreviewModal/StatsTab";
-import { WeeklyScheduleTab } from "../../plans/components/planPreviewModal/WeeklyScheduleTab";
 import { usePlanPDF } from "../../plans/components/planPreviewModal/usePlanPDF";
+import { WeeklyScheduleTab } from "../../plans/components/planPreviewModal/WeeklyScheduleTab";
 
 export const NutritionPlanModal = ({ plan, isOpen, onClose, days }) => {
   const [activeTab, setActiveTab] = useState("overview");
   const [activeDay, setActiveDay] = useState(null);
-  const [navError, setNavError] = useState("");
-  const router = useRouter();
+  const [navError, _setNavError] = useState("");
+  const _router = useRouter();
   const type = "nutrition"; // This is always a nutrition plan
 
   const {

@@ -15,6 +15,8 @@ import {
   getAllDailyLogs,
   getDietPlanStats,
   getNextMeal,
+  updateWaterIntake,
+  getWaterIntake,
 } from "../../services/dietTrackerService";
 // Import the mock nutrition plan directly
 
@@ -102,7 +104,60 @@ export async function GET(req) {
     if (action === "next-meal") {
       // Get next upcoming meal
       const activePlan = await getActiveDietPlan(clientInfo.id);
+      console.log(
+        `next-meal action: Active plan found: ${activePlan ? "yes" : "no"}`
+      );
+
       if (!activePlan) {
+        // Check for any plans that might have been incorrectly marked as inactive
+        const anyPlan = await prisma.dietPlanAssignment.findFirst({
+          where: {
+            clientId: clientInfo.id,
+            isActive: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
+
+        console.log(
+          `next-meal action: Found any active plan: ${anyPlan ? "yes" : "no"}`
+        );
+
+        if (anyPlan) {
+          // Found a plan that's marked as active but not with 'active' status
+          // This is likely a bug, so let's fix it and return it as the active plan
+          console.log(
+            `next-meal action: Fixing plan status from ${anyPlan.status} to active`
+          );
+
+          const fixedPlan = await prisma.dietPlanAssignment.update({
+            where: { id: anyPlan.id },
+            data: {
+              status: "active",
+            },
+          });
+
+          // Get next meal for the fixed plan
+          const nextMeal = await getNextMeal(fixedPlan.id);
+          return NextResponse.json({
+            nextMeal,
+            planFixed: true,
+          });
+        }
+
+        // Check if there are any assigned plans that might need to be started
+        const assignedPlans = await getAssignedDietPlans(clientInfo.id);
+
+        if (assignedPlans.length > 0) {
+          // There's an assigned plan that could be started
+          return NextResponse.json({
+            nextMeal: null,
+            hasAssignedPlan: true,
+            assignedPlan: assignedPlans[0],
+          });
+        }
+
         return NextResponse.json(
           { error: "No active diet plan found" },
           { status: 404 }
@@ -113,12 +168,32 @@ export async function GET(req) {
       return NextResponse.json({ nextMeal });
     }
 
+    if (action === "water-intake") {
+      // Get water intake for active plan
+      const activePlan = await getActiveDietPlan(clientInfo.id);
+      if (!activePlan) {
+        return NextResponse.json(
+          { error: "No active diet plan found" },
+          { status: 404 }
+        );
+      }
+
+      const waterIntake = await getWaterIntake(activePlan.id);
+      return NextResponse.json(waterIntake);
+    }
+
     // Default: Get current active diet plan
     const activePlan = await getActiveDietPlan(clientInfo.id);
+    console.log(
+      `GET diet-tracker: Active plan found: ${activePlan ? "yes" : "no"}`
+    );
 
     if (!activePlan) {
       // Check if there are any assigned nutrition plans that haven't been started yet
       const assignedPlans = await getAssignedDietPlans(clientInfo.id);
+      console.log(
+        `GET diet-tracker: Found ${assignedPlans.length} assigned plans`
+      );
 
       if (assignedPlans.length > 0) {
         // There's an assigned nutrition plan that hasn't been started
@@ -128,6 +203,77 @@ export async function GET(req) {
           assignedPlan: latestAssignment,
           planCount: assignedPlans.length,
           message: `${latestAssignment.assignedBy.trainerProfile?.firstName || "Your trainer"} has assigned you a new nutrition plan. Are you ready to start your journey?`,
+        });
+      }
+
+      // Check for any plans that might have been incorrectly marked as inactive
+      const anyPlan = await prisma.dietPlanAssignment.findFirst({
+        where: {
+          clientId: clientInfo.id,
+          isActive: true,
+        },
+        include: {
+          nutritionPlan: true,
+          assignedBy: {
+            include: {
+              trainerProfile: true,
+            },
+          },
+          progressSummary: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+
+      console.log(
+        `GET diet-tracker: Found any active plan: ${anyPlan ? "yes" : "no"}`
+      );
+
+      if (anyPlan) {
+        // Found a plan that's marked as active but not with 'active' status
+        // This is likely a bug, so let's fix it and return it as the active plan
+        console.log(
+          `GET diet-tracker: Fixing plan status from ${anyPlan.status} to active`
+        );
+
+        const fixedPlan = await prisma.dietPlanAssignment.update({
+          where: { id: anyPlan.id },
+          data: {
+            status: "active",
+          },
+          include: {
+            nutritionPlan: true,
+            assignedBy: {
+              include: {
+                trainerProfile: true,
+              },
+            },
+            progressSummary: true,
+          },
+        });
+
+        // Get all daily logs for the fixed plan
+        const dailyLogs = await getAllDailyLogs(fixedPlan.id);
+
+        // Get next meal
+        const nextMeal = await getNextMeal(fixedPlan.id);
+
+        // Calculate current progress
+        const progress = await calculatePlanProgress(fixedPlan.id);
+        const progressMessage = generateProgressMessage(progress);
+
+        // Return the fixed plan
+        return NextResponse.json({
+          hasActivePlan: true,
+          activePlan: fixedPlan,
+          dailyLogs,
+          nextMeal,
+          progress,
+          progressMessage,
+          isCompleted: false,
+          isPastEndDate: false,
+          completionStatus: "active",
         });
       }
 
@@ -378,6 +524,47 @@ export async function POST(req) {
 
         // Re-throw other errors to be caught by outer catch
         throw validationError;
+      }
+    }
+
+    if (action === "update-water-intake") {
+      const { dietPlanAssignmentId, amountMl } = body;
+
+      if (!dietPlanAssignmentId || !amountMl) {
+        return NextResponse.json(
+          { error: "Diet plan assignment ID and amount are required" },
+          { status: 400 }
+        );
+      }
+
+      if (amountMl <= 0 || amountMl > 2000) {
+        return NextResponse.json(
+          { error: "Amount must be between 1ml and 2000ml" },
+          { status: 400 }
+        );
+      }
+
+      try {
+        const result = await updateWaterIntake(dietPlanAssignmentId, amountMl);
+        return NextResponse.json({
+          success: true,
+          message: `Added ${amountMl}ml to your daily water intake`,
+          data: result,
+        });
+      } catch (error) {
+        if (error.message.includes("not found")) {
+          return NextResponse.json(
+            { error: "Diet plan not found" },
+            { status: 404 }
+          );
+        }
+        if (error.message.includes("not active")) {
+          return NextResponse.json(
+            { error: "Diet plan is not active" },
+            { status: 403 }
+          );
+        }
+        throw error;
       }
     }
 

@@ -28,6 +28,8 @@ export default function DietTrackerPage() {
     progress,
     progressMessage,
     isCompleted,
+    dailyWaterIntake,
+    isWaterLoading,
     // completionStatus, // Currently unused but may be needed later
     startDietPlan,
     completeMeal,
@@ -38,6 +40,7 @@ export default function DietTrackerPage() {
     getCompletionRate,
     getLogByDate,
     clearValidationError,
+    addWater,
   } = useDietTracker();
 
   // Loading state
@@ -138,11 +141,14 @@ export default function DietTrackerPage() {
           progress={progress}
           progressMessage={progressMessage}
           isCompleted={isCompleted}
+          dailyWaterIntake={dailyWaterIntake}
+          isWaterLoading={isWaterLoading}
           onCompleteMeal={completeMeal}
           onUncompleteMeal={uncompleteMeal}
           onChangeMealOption={changeMealOption}
           onAddSnack={addCustomMealToDay}
           onDeleteSnack={deleteSnack}
+          onWaterAdd={addWater}
           getCompletionRate={getCompletionRate}
           getLogByDate={getLogByDate}
           clearValidationError={clearValidationError}

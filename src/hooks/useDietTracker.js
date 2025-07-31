@@ -15,6 +15,43 @@ export const useDietTracker = () => {
   const [progressMessage, setProgressMessage] = useState(null);
   const [isCompleted, setIsCompleted] = useState(false);
   const [completionStatus, setCompletionStatus] = useState(null);
+  const [dailyWaterIntake, setDailyWaterIntake] = useState(0);
+  const [isWaterLoading, setIsWaterLoading] = useState(false);
+
+  // Helper functions - moved to the top to avoid reference errors
+  const getTodayLog = useCallback(() => {
+    const today = new Date().toISOString().split("T")[0];
+    return dailyLogs.find((log) => {
+      // Handle both string and Date object formats
+      const logDate =
+        typeof log.date === "string"
+          ? log.date.split("T")[0]
+          : new Date(log.date).toISOString().split("T")[0];
+      return logDate === today;
+    });
+  }, [dailyLogs]);
+
+  const getLogByDate = useCallback(
+    (date) =>
+      dailyLogs.find((log) => {
+        // Handle both string and Date object formats
+        const logDate =
+          typeof log.date === "string"
+            ? log.date.split("T")[0]
+            : new Date(log.date).toISOString().split("T")[0];
+        const targetDate =
+          typeof date === "string"
+            ? date.split("T")[0]
+            : new Date(date).toISOString().split("T")[0];
+        return logDate === targetDate;
+      }),
+    [dailyLogs]
+  );
+
+  // Clear validation error
+  const clearValidationError = useCallback(() => {
+    setValidationError(null);
+  }, []);
 
   // Fetch diet tracker data
   const fetchDietTrackerData = useCallback(async () => {
@@ -22,6 +59,7 @@ export const useDietTracker = () => {
       setLoading(true);
       setError(null);
 
+      console.log("Fetching diet tracker data");
       const response = await fetch("/api/users/client/diet-tracker");
       const data = await response.json();
 
@@ -34,6 +72,7 @@ export const useDietTracker = () => {
       setAssignedPlan(data.assignedPlan || null);
 
       if (data.hasActivePlan) {
+        console.log("Setting active plan data");
         setActivePlan(data.activePlan);
         setDailyLogs(data.dailyLogs || []);
         setNextMeal(data.nextMeal);
@@ -41,6 +80,18 @@ export const useDietTracker = () => {
         setProgressMessage(data.progressMessage || null);
         setIsCompleted(data.isCompleted || false);
         setCompletionStatus(data.completionStatus || null);
+        setDailyWaterIntake(data.activePlan?.dailyWaterIntake || 0);
+      } else {
+        console.log("No active plan found");
+        // Clear active plan data
+        setActivePlan(null);
+        setDailyLogs([]);
+        setNextMeal(null);
+        setProgress(null);
+        setProgressMessage(null);
+        setIsCompleted(false);
+        setCompletionStatus(null);
+        setDailyWaterIntake(0);
       }
     } catch (err) {
       console.error("Error fetching diet tracker data:", err);
@@ -52,7 +103,12 @@ export const useDietTracker = () => {
 
   // Start diet plan
   const startDietPlan = useCallback(
-    async (useMockPlan = false, dietPlanAssignmentId = null, startDate = null, selectedPlan = null) => {
+    async (
+      useMockPlan = false,
+      dietPlanAssignmentId = null,
+      startDate = null,
+      selectedPlan = null
+    ) => {
       try {
         setLoading(true);
         setError(null);
@@ -77,7 +133,8 @@ export const useDietTracker = () => {
           throw new Error(data.error || "Failed to start diet plan");
         }
 
-        // Refresh data after starting plan
+        // Refresh data after starting plan - this is one case where we need a full refresh
+        // since we're starting a new plan and need all the data
         await fetchDietTrackerData();
 
         return data;
@@ -102,11 +159,31 @@ export const useDietTracker = () => {
 
       if (response.ok) {
         setNextMeal(data.nextMeal);
+
+        // Check if there's an assigned plan that hasn't been started yet
+        if (data.hasAssignedPlan && data.assignedPlan) {
+          setAssignedPlan(data.assignedPlan);
+          setHasActivePlan(false);
+        }
+
+        // Check if a plan was fixed (was inactive but should be active)
+        if (data.planFixed && !hasActivePlan) {
+          console.log("Plan was fixed, refreshing data");
+          // Refresh all data to get the fixed plan
+          await fetchDietTrackerData();
+        }
+      } else if (response.status === 404) {
+        // If no active plan is found, don't clear the next meal
+        // This prevents losing the active plan state on refresh
+        console.warn(
+          "No active plan found when fetching next meal, maintaining current state"
+        );
+        // Don't update the state, keep the current meal
       }
     } catch (err) {
       console.error("Error fetching next meal:", err);
     }
-  }, []);
+  }, [fetchDietTrackerData, hasActivePlan]);
 
   // Complete a meal
   const completeMeal = useCallback(
@@ -137,8 +214,8 @@ export const useDietTracker = () => {
         }
 
         // Update local state
-        setDailyLogs((prevLogs) =>
-          prevLogs.map((log) => {
+        setDailyLogs((prevLogs) => {
+          const updatedLogs = prevLogs.map((log) => {
             const updatedMealLogs = log.mealLogs.map((meal) =>
               meal.id === mealLogId
                 ? {
@@ -158,12 +235,130 @@ export const useDietTracker = () => {
               ...log,
               mealLogs: updatedMealLogs,
               completedMeals,
+              completionRate:
+                log.totalMeals > 0
+                  ? (completedMeals / log.totalMeals) * 100
+                  : 0,
+              isCompleted: completedMeals / log.totalMeals >= 0.5, // Mark as completed if >= 50%
             };
-          })
-        );
+          });
 
-        // Refresh next meal
-        await fetchNextMeal();
+          // Update next meal locally if possible
+          if (!data.data?.planCompletion?.completed) {
+            // Find the next incomplete meal from the updated logs
+            const today = new Date().toISOString().split("T")[0];
+
+            // Find today's log in the updated logs
+            const todayLog = updatedLogs.find((log) => {
+              const logDate =
+                typeof log.date === "string"
+                  ? log.date.split("T")[0]
+                  : new Date(log.date).toISOString().split("T")[0];
+              return logDate === today;
+            });
+
+            if (todayLog) {
+              const incompleteMeals = todayLog.mealLogs.filter(
+                (meal) => !meal.isCompleted
+              );
+              if (incompleteMeals.length > 0) {
+                // Sort by meal time
+                incompleteMeals.sort((a, b) =>
+                  a.mealTime.localeCompare(b.mealTime)
+                );
+                setNextMeal({
+                  ...incompleteMeals[0],
+                  dayNumber: todayLog.dayNumber,
+                  date: todayLog.date,
+                });
+              } else {
+                // No more incomplete meals today, find next day with meals
+                const futureLogs = updatedLogs
+                  .filter((log) => {
+                    const logDate =
+                      typeof log.date === "string"
+                        ? new Date(log.date)
+                        : new Date(log.date);
+                    return logDate > new Date(today);
+                  })
+                  .sort((a, b) => {
+                    const dateA =
+                      typeof a.date === "string"
+                        ? new Date(a.date)
+                        : new Date(a.date);
+                    const dateB =
+                      typeof b.date === "string"
+                        ? new Date(b.date)
+                        : new Date(b.date);
+                    return dateA - dateB;
+                  });
+
+                if (
+                  futureLogs.length > 0 &&
+                  futureLogs[0].mealLogs.length > 0
+                ) {
+                  const nextDayMeals = futureLogs[0].mealLogs.sort((a, b) =>
+                    a.mealTime.localeCompare(b.mealTime)
+                  );
+                  setNextMeal({
+                    ...nextDayMeals[0],
+                    dayNumber: futureLogs[0].dayNumber,
+                    date: futureLogs[0].date,
+                  });
+                }
+              }
+            }
+          }
+
+          return updatedLogs;
+        });
+
+        // Check if the plan was completed as a result of this meal completion
+        if (data.data?.planCompletion?.completed) {
+          console.log("Plan was completed, refreshing data");
+          // If plan was completed, refresh all data to get updated status
+          await fetchDietTrackerData();
+        } else {
+          // If we couldn't update next meal locally, fallback to API
+          if (!nextMeal) {
+            try {
+              const nextMealResponse = await fetch(
+                "/api/users/client/diet-tracker?action=next-meal"
+              );
+              const nextMealData = await nextMealResponse.json();
+
+              if (nextMealResponse.ok) {
+                setNextMeal(nextMealData.nextMeal);
+              }
+            } catch (err) {
+              console.error("Error fetching next meal:", err);
+            }
+          }
+        }
+
+        // Update progress based on completed meals
+        setDailyLogs((currentLogs) => {
+          const completedMeals = currentLogs.reduce(
+            (sum, log) => sum + log.completedMeals,
+            0
+          );
+          const totalMeals = currentLogs.reduce(
+            (sum, log) => sum + log.totalMeals,
+            0
+          );
+          const completionRate =
+            totalMeals > 0 ? (completedMeals / totalMeals) * 100 : 0;
+
+          // Update progress state
+          if (progress) {
+            setProgress({
+              ...progress,
+              averageCompletionRate: completionRate,
+            });
+          }
+
+          return currentLogs;
+        });
 
         return data;
       } catch (err) {
@@ -172,7 +367,7 @@ export const useDietTracker = () => {
         throw err;
       }
     },
-    [fetchNextMeal]
+    [fetchDietTrackerData, progress, nextMeal]
   );
 
   // Uncomplete a meal
@@ -204,8 +399,8 @@ export const useDietTracker = () => {
         }
 
         // Update local state
-        setDailyLogs((prevLogs) =>
-          prevLogs.map((log) => {
+        setDailyLogs((prevLogs) => {
+          const updatedLogs = prevLogs.map((log) => {
             const updatedMealLogs = log.mealLogs.map((meal) =>
               meal.id === mealLogId
                 ? { ...meal, isCompleted: false, completedAt: null }
@@ -221,12 +416,122 @@ export const useDietTracker = () => {
               ...log,
               mealLogs: updatedMealLogs,
               completedMeals,
+              completionRate:
+                log.totalMeals > 0
+                  ? (completedMeals / log.totalMeals) * 100
+                  : 0,
+              isCompleted: completedMeals / log.totalMeals >= 0.5, // Mark as completed if >= 50%
             };
-          })
-        );
+          });
 
-        // Refresh next meal
-        await fetchNextMeal();
+          // Find the uncompleted meal in the updated logs
+          let mealInfo = null;
+          let mealLog = null;
+
+          for (const log of updatedLogs) {
+            const foundMeal = log.mealLogs.find(
+              (meal) => meal.id === mealLogId
+            );
+            if (foundMeal) {
+              mealInfo = foundMeal;
+              mealLog = log;
+              break;
+            }
+          }
+
+          // Update next meal locally if possible
+          if (!data.data?.planCompletion?.completed && mealInfo && mealLog) {
+            const today = new Date().toISOString().split("T")[0];
+            const mealDate =
+              typeof mealLog.date === "string"
+                ? mealLog.date.split("T")[0]
+                : new Date(mealLog.date).toISOString().split("T")[0];
+
+            // If the meal is from today, set it as the next meal
+            if (mealDate === today) {
+              setNextMeal({
+                ...mealInfo,
+                dayNumber: mealLog.dayNumber,
+                date: mealLog.date,
+              });
+            } else {
+              // Otherwise, find the next incomplete meal
+              const todayLog = updatedLogs.find((log) => {
+                const logDate =
+                  typeof log.date === "string"
+                    ? log.date.split("T")[0]
+                    : new Date(log.date).toISOString().split("T")[0];
+                return logDate === today;
+              });
+
+              if (todayLog) {
+                const incompleteMeals = todayLog.mealLogs.filter(
+                  (meal) => !meal.isCompleted
+                );
+                if (incompleteMeals.length > 0) {
+                  // Sort by meal time
+                  incompleteMeals.sort((a, b) =>
+                    a.mealTime.localeCompare(b.mealTime)
+                  );
+                  setNextMeal({
+                    ...incompleteMeals[0],
+                    dayNumber: todayLog.dayNumber,
+                    date: todayLog.date,
+                  });
+                }
+              }
+            }
+          }
+
+          return updatedLogs;
+        });
+
+        // Check if the plan status changed as a result of this meal action
+        if (data.data?.planCompletion?.completed) {
+          console.log("Plan status changed, refreshing data");
+          // If plan status changed, refresh all data to get updated status
+          await fetchDietTrackerData();
+        } else {
+          // If we couldn't update next meal locally, fallback to API
+          if (!nextMeal) {
+            try {
+              const nextMealResponse = await fetch(
+                "/api/users/client/diet-tracker?action=next-meal"
+              );
+              const nextMealData = await nextMealResponse.json();
+
+              if (nextMealResponse.ok) {
+                setNextMeal(nextMealData.nextMeal);
+              }
+            } catch (err) {
+              console.error("Error fetching next meal:", err);
+            }
+          }
+        }
+
+        // Update progress based on completed meals
+        setDailyLogs((currentLogs) => {
+          const completedMeals = currentLogs.reduce(
+            (sum, log) => sum + log.completedMeals,
+            0
+          );
+          const totalMeals = currentLogs.reduce(
+            (sum, log) => sum + log.totalMeals,
+            0
+          );
+          const completionRate =
+            totalMeals > 0 ? (completedMeals / totalMeals) * 100 : 0;
+
+          // Update progress state
+          if (progress) {
+            setProgress({
+              ...progress,
+              averageCompletionRate: completionRate,
+            });
+          }
+
+          return currentLogs;
+        });
 
         return data;
       } catch (err) {
@@ -235,63 +540,134 @@ export const useDietTracker = () => {
         throw err;
       }
     },
-    [fetchNextMeal]
+    [fetchDietTrackerData, progress, nextMeal]
   );
 
   // Change meal option
-  const changeMealOption = useCallback(async (mealLogId, newOption) => {
-    try {
-      setValidationError(null);
+  const changeMealOption = useCallback(
+    async (mealLogId, newOption) => {
+      try {
+        setValidationError(null);
 
-      const response = await fetch("/api/users/client/diet-tracker/meals", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          action: "change-option",
-          mealLogId,
-          newOption,
-        }),
-      });
+        const response = await fetch("/api/users/client/diet-tracker/meals", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            action: "change-option",
+            mealLogId,
+            newOption,
+          }),
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (!response.ok) {
-        if (response.status === 403) {
-          // Day validation error
-          setValidationError(data.error);
-          return;
+        if (!response.ok) {
+          if (response.status === 403) {
+            // Day validation error
+            setValidationError(data.error);
+            return;
+          }
+          throw new Error(data.error || "Failed to change meal option");
         }
-        throw new Error(data.error || "Failed to change meal option");
+
+        // Update local state
+        setDailyLogs((prevLogs) =>
+          prevLogs.map((log) => {
+            const updatedMealLogs = log.mealLogs.map((meal) =>
+              meal.id === mealLogId
+                ? {
+                    ...meal,
+                    selectedOption: newOption,
+                    calories: newOption.calories || 0,
+                    protein: newOption.protein || 0,
+                    carbs: newOption.carbs || 0,
+                    fat: newOption.fat || 0,
+                  }
+                : meal
+            );
+
+            // Recalculate nutrition totals for the day
+            const mealCalories = updatedMealLogs.reduce(
+              (sum, meal) => sum + (meal.calories || 0),
+              0
+            );
+            const snackCalories = (log.snackLogs || []).reduce(
+              (sum, snack) => sum + (snack.calories || 0),
+              0
+            );
+            const totalCalories = mealCalories + snackCalories;
+
+            const mealProtein = updatedMealLogs.reduce(
+              (sum, meal) => sum + (meal.protein || 0),
+              0
+            );
+            const snackProtein = (log.snackLogs || []).reduce(
+              (sum, snack) => sum + (snack.protein || 0),
+              0
+            );
+            const totalProtein = mealProtein + snackProtein;
+
+            const mealCarbs = updatedMealLogs.reduce(
+              (sum, meal) => sum + (meal.carbs || 0),
+              0
+            );
+            const snackCarbs = (log.snackLogs || []).reduce(
+              (sum, snack) => sum + (snack.carbs || 0),
+              0
+            );
+            const totalCarbs = mealCarbs + snackCarbs;
+
+            const mealFat = updatedMealLogs.reduce(
+              (sum, meal) => sum + (meal.fat || 0),
+              0
+            );
+            const snackFat = (log.snackLogs || []).reduce(
+              (sum, snack) => sum + (snack.fat || 0),
+              0
+            );
+            const totalFat = mealFat + snackFat;
+
+            return {
+              ...log,
+              mealLogs: updatedMealLogs,
+              totalCalories,
+              totalProtein,
+              totalCarbs,
+              totalFat,
+            };
+          })
+        );
+
+        // Check if the plan status changed as a result of this meal action
+        if (data.data?.planCompletion?.completed) {
+          console.log("Plan status changed, refreshing data");
+          // If plan status changed, refresh all data to get updated status
+          await fetchDietTrackerData();
+        }
+
+        // Update next meal if this is the current next meal
+        if (nextMeal && nextMeal.id === mealLogId) {
+          setNextMeal({
+            ...nextMeal,
+            selectedOption: newOption,
+            calories: newOption.calories || 0,
+            protein: newOption.protein || 0,
+            carbs: newOption.carbs || 0,
+            fat: newOption.fat || 0,
+          });
+        }
+
+        return data;
+      } catch (err) {
+        console.error("Error changing meal option:", err);
+        setError(err.message);
+        throw err;
       }
-
-      // Update local state
-      setDailyLogs((prevLogs) =>
-        prevLogs.map((log) => ({
-          ...log,
-          mealLogs: log.mealLogs.map((meal) =>
-            meal.id === mealLogId
-              ? {
-                  ...meal,
-                  selectedOption: newOption,
-                  calories: newOption.calories || 0,
-                  protein: newOption.protein || 0,
-                  carbs: newOption.carbs || 0,
-                  fat: newOption.fat || 0,
-                }
-              : meal
-          ),
-        }))
-      );
-
-      return data;
-    } catch (err) {
-      console.error("Error changing meal option:", err);
-      setError(err.message);
-      throw err;
-    }
-  }, []);
+    },
+    [fetchDietTrackerData, nextMeal]
+  );
 
   // Get custom meal history
   const getCustomMealHistory = useCallback(async (mealType, limit = 10) => {
@@ -356,22 +732,57 @@ export const useDietTracker = () => {
             targetDate.setHours(0, 0, 0, 0);
 
             if (logDate.getTime() === targetDate.getTime()) {
+              // Calculate new nutrition totals
+              const newTotalCalories =
+                (log.totalCalories || 0) + (newSnackLog.calories || 0);
+              const newTotalProtein =
+                (log.totalProtein || 0) + (newSnackLog.protein || 0);
+              const newTotalCarbs =
+                (log.totalCarbs || 0) + (newSnackLog.carbs || 0);
+              const newTotalFat = (log.totalFat || 0) + (newSnackLog.fat || 0);
+
               return {
                 ...log,
                 snackLogs: [...(log.snackLogs || []), newSnackLog],
                 snackCount: (log.snackCount || 0) + 1,
                 // Update nutrition totals
-                totalCalories:
-                  (log.totalCalories || 0) + (newSnackLog.calories || 0),
-                totalProtein:
-                  (log.totalProtein || 0) + (newSnackLog.protein || 0),
-                totalCarbs: (log.totalCarbs || 0) + (newSnackLog.carbs || 0),
-                totalFat: (log.totalFat || 0) + (newSnackLog.fat || 0),
+                totalCalories: newTotalCalories,
+                totalProtein: newTotalProtein,
+                totalCarbs: newTotalCarbs,
+                totalFat: newTotalFat,
               };
             }
             return log;
           })
         );
+
+        // Update progress based on new nutrition values
+        if (progress) {
+          // Calculate new average values
+          const totalCalories =
+            dailyLogs.reduce((sum, log) => sum + log.totalCalories, 0) +
+            (newSnackLog.calories || 0);
+          const totalProtein =
+            dailyLogs.reduce((sum, log) => sum + log.totalProtein, 0) +
+            (newSnackLog.protein || 0);
+          const totalCarbs =
+            dailyLogs.reduce((sum, log) => sum + log.totalCarbs, 0) +
+            (newSnackLog.carbs || 0);
+          const totalFat =
+            dailyLogs.reduce((sum, log) => sum + log.totalFat, 0) +
+            (newSnackLog.fat || 0);
+          const dayCount = dailyLogs.length;
+
+          if (dayCount > 0) {
+            setProgress({
+              ...progress,
+              averageCaloriesPerDay: totalCalories / dayCount,
+              averageProteinPerDay: totalProtein / dayCount,
+              averageCarbsPerDay: totalCarbs / dayCount,
+              averageFatPerDay: totalFat / dayCount,
+            });
+          }
+        }
 
         return data;
       } catch (err) {
@@ -380,84 +791,197 @@ export const useDietTracker = () => {
         throw err;
       }
     },
-    [activePlan]
+    [activePlan, dailyLogs, progress]
   );
 
   // Delete a snack
-  const deleteSnack = useCallback(async (snackLogId) => {
-    try {
-      setValidationError(null);
+  const deleteSnack = useCallback(
+    async (snackLogId) => {
+      try {
+        setValidationError(null);
 
-      const response = await fetch(
-        `/api/users/client/diet-tracker/meals?snackLogId=${snackLogId}`,
-        {
-          method: "DELETE",
+        const response = await fetch(
+          `/api/users/client/diet-tracker/meals?snackLogId=${snackLogId}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          if (response.status === 403) {
+            // Day validation error
+            setValidationError(data.error);
+            return;
+          }
+          throw new Error(data.error || "Failed to delete snack");
         }
-      );
 
-      const data = await response.json();
+        // Find the snack before deleting it to calculate nutrition changes
+        let deletedSnack = null;
+        let affectedLogIndex = -1;
 
-      if (!response.ok) {
-        if (response.status === 403) {
-          // Day validation error
-          setValidationError(data.error);
-          return;
-        }
-        throw new Error(data.error || "Failed to delete snack");
-      }
-
-      // Update local state instead of full refresh
-      setDailyLogs((prevLogs) =>
-        prevLogs.map((log) => {
+        dailyLogs.forEach((log, index) => {
           if (
             log.snackLogs &&
             log.snackLogs.some((snack) => snack.id === snackLogId)
           ) {
-            const deletedSnack = log.snackLogs.find(
+            deletedSnack = log.snackLogs.find(
               (snack) => snack.id === snackLogId
             );
-            const updatedSnackLogs = log.snackLogs.filter(
-              (snack) => snack.id !== snackLogId
-            );
+            affectedLogIndex = index;
+          }
+        });
 
-            return {
-              ...log,
-              snackLogs: updatedSnackLogs,
-              snackCount: Math.max(0, (log.snackCount || 0) - 1),
-              // Update nutrition totals
-              totalCalories: Math.max(
+        if (!deletedSnack) {
+          console.warn(`Snack with ID ${snackLogId} not found in local state`);
+          // Fallback to full refresh if we can't find the snack
+          await fetchDietTrackerData();
+          return data;
+        }
+
+        // Update local state
+        setDailyLogs((prevLogs) =>
+          prevLogs.map((log, index) => {
+            if (index === affectedLogIndex) {
+              const updatedSnackLogs = log.snackLogs.filter(
+                (snack) => snack.id !== snackLogId
+              );
+
+              // Calculate new nutrition totals
+              const newTotalCalories = Math.max(
                 0,
                 (log.totalCalories || 0) - (deletedSnack?.calories || 0)
-              ),
-              totalProtein: Math.max(
+              );
+              const newTotalProtein = Math.max(
                 0,
                 (log.totalProtein || 0) - (deletedSnack?.protein || 0)
-              ),
-              totalCarbs: Math.max(
+              );
+              const newTotalCarbs = Math.max(
                 0,
                 (log.totalCarbs || 0) - (deletedSnack?.carbs || 0)
-              ),
-              totalFat: Math.max(
+              );
+              const newTotalFat = Math.max(
                 0,
                 (log.totalFat || 0) - (deletedSnack?.fat || 0)
-              ),
-            };
-          }
-          return log;
-        })
-      );
+              );
 
-      return data;
-    } catch (err) {
-      console.error("Error deleting snack:", err);
-      setError(err.message);
-      throw err;
-    }
-  }, []);
+              return {
+                ...log,
+                snackLogs: updatedSnackLogs,
+                snackCount: Math.max(0, (log.snackCount || 0) - 1),
+                // Update nutrition totals
+                totalCalories: newTotalCalories,
+                totalProtein: newTotalProtein,
+                totalCarbs: newTotalCarbs,
+                totalFat: newTotalFat,
+              };
+            }
+            return log;
+          })
+        );
+
+        // Update progress based on new nutrition values
+        if (progress && deletedSnack) {
+          // Calculate new average values
+          const totalCalories =
+            dailyLogs.reduce((sum, log) => sum + log.totalCalories, 0) -
+            (deletedSnack.calories || 0);
+          const totalProtein =
+            dailyLogs.reduce((sum, log) => sum + log.totalProtein, 0) -
+            (deletedSnack.protein || 0);
+          const totalCarbs =
+            dailyLogs.reduce((sum, log) => sum + log.totalCarbs, 0) -
+            (deletedSnack.carbs || 0);
+          const totalFat =
+            dailyLogs.reduce((sum, log) => sum + log.totalFat, 0) -
+            (deletedSnack.fat || 0);
+          const dayCount = dailyLogs.length;
+
+          if (dayCount > 0) {
+            setProgress({
+              ...progress,
+              averageCaloriesPerDay: totalCalories / dayCount,
+              averageProteinPerDay: totalProtein / dayCount,
+              averageCarbsPerDay: totalCarbs / dayCount,
+              averageFatPerDay: totalFat / dayCount,
+            });
+          }
+        }
+
+        return data;
+      } catch (err) {
+        console.error("Error deleting snack:", err);
+        setError(err.message);
+        throw err;
+      }
+    },
+    [dailyLogs, fetchDietTrackerData, progress]
+  );
 
   // Fetch diet plan stats
   const fetchStats = useCallback(async () => {
     try {
+      // First try to calculate stats locally if we have all the data
+      if (activePlan && dailyLogs.length > 0) {
+        console.log("Calculating stats locally");
+
+        const totalDays = dailyLogs.length;
+        const completedDays = dailyLogs.filter((log) => log.isCompleted).length;
+
+        const totalMeals = dailyLogs.reduce(
+          (sum, log) => sum + log.totalMeals,
+          0
+        );
+        const completedMeals = dailyLogs.reduce(
+          (sum, log) => sum + log.completedMeals,
+          0
+        );
+
+        const totalCalories = dailyLogs.reduce(
+          (sum, log) => sum + log.totalCalories,
+          0
+        );
+        const totalProtein = dailyLogs.reduce(
+          (sum, log) => sum + log.totalProtein,
+          0
+        );
+        const totalCarbs = dailyLogs.reduce(
+          (sum, log) => sum + log.totalCarbs,
+          0
+        );
+        const totalFat = dailyLogs.reduce((sum, log) => sum + log.totalFat, 0);
+
+        const averageCalories = totalDays > 0 ? totalCalories / totalDays : 0;
+        const averageProtein = totalDays > 0 ? totalProtein / totalDays : 0;
+        const averageCarbs = totalDays > 0 ? totalCarbs / totalDays : 0;
+        const averageFat = totalDays > 0 ? totalFat / totalDays : 0;
+
+        const localStats = {
+          totalDays,
+          completedDays,
+          totalMeals,
+          completedMeals,
+          adherenceRate:
+            totalMeals > 0 ? (completedMeals / totalMeals) * 100 : 0,
+          dayCompletionRate:
+            totalDays > 0 ? (completedDays / totalDays) * 100 : 0,
+          averageNutrition: {
+            calories: Math.round(averageCalories),
+            protein: Math.round(averageProtein * 10) / 10,
+            carbs: Math.round(averageCarbs * 10) / 10,
+            fat: Math.round(averageFat * 10) / 10,
+          },
+          nutritionPlan: activePlan.nutritionPlan,
+          startDate: activePlan.startDate,
+        };
+
+        setStats(localStats);
+        return;
+      }
+
+      // Fall back to API if we don't have enough local data
       const response = await fetch(
         "/api/users/client/diet-tracker?action=stats"
       );
@@ -469,13 +993,34 @@ export const useDietTracker = () => {
     } catch (err) {
       console.error("Error fetching stats:", err);
     }
-  }, []);
+  }, [activePlan, dailyLogs]);
 
   // Get meals for a specific date
   const getMealsForDate = useCallback(
     async (date) => {
       if (!activePlan) return null;
 
+      // First try to get meals from local state
+      const formattedDate =
+        typeof date === "string"
+          ? date.split("T")[0]
+          : new Date(date).toISOString().split("T")[0];
+
+      // Find log directly without using getLogByDate
+      const localDailyLog = dailyLogs.find((log) => {
+        const logDate =
+          typeof log.date === "string"
+            ? log.date.split("T")[0]
+            : new Date(log.date).toISOString().split("T")[0];
+        return logDate === formattedDate;
+      });
+
+      if (localDailyLog) {
+        console.log(`Using local data for meals on ${formattedDate}`);
+        return localDailyLog;
+      }
+
+      // If not in local state, fetch from API
       try {
         const response = await fetch(
           `/api/users/client/diet-tracker/meals?date=${date}&dietPlanAssignmentId=${activePlan.id}`
@@ -492,39 +1037,10 @@ export const useDietTracker = () => {
         throw err;
       }
     },
-    [activePlan]
+    [activePlan, dailyLogs]
   );
 
-  // Helper functions
-  const getTodayLog = useCallback(() => {
-    const today = new Date().toISOString().split("T")[0];
-    return dailyLogs.find((log) => {
-      // Handle both string and Date object formats
-      const logDate =
-        typeof log.date === "string"
-          ? log.date.split("T")[0]
-          : new Date(log.date).toISOString().split("T")[0];
-      return logDate === today;
-    });
-  }, [dailyLogs]);
-
-  const getLogByDate = useCallback(
-    (date) =>
-      dailyLogs.find((log) => {
-        // Handle both string and Date object formats
-        const logDate =
-          typeof log.date === "string"
-            ? log.date.split("T")[0]
-            : new Date(log.date).toISOString().split("T")[0];
-        const targetDate =
-          typeof date === "string"
-            ? date.split("T")[0]
-            : new Date(date).toISOString().split("T")[0];
-        return logDate === targetDate;
-      }),
-    [dailyLogs]
-  );
-
+  // Get completion rate
   const getCompletionRate = useCallback(() => {
     if (dailyLogs.length === 0) return 0;
 
@@ -537,10 +1053,64 @@ export const useDietTracker = () => {
     return totalMeals > 0 ? (completedMeals / totalMeals) * 100 : 0;
   }, [dailyLogs]);
 
-  // Clear validation error
-  const clearValidationError = useCallback(() => {
-    setValidationError(null);
-  }, []);
+  // Add water intake
+  const addWater = useCallback(async (amountMl) => {
+    if (!activePlan) {
+      throw new Error("No active diet plan found");
+    }
+
+    try {
+      setIsWaterLoading(true);
+      setError(null);
+
+      const response = await fetch("/api/users/client/diet-tracker", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "update-water-intake",
+          dietPlanAssignmentId: activePlan.id,
+          amountMl,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to add water intake");
+      }
+
+      // Update local state
+      setDailyWaterIntake(data.data.dailyWaterIntake);
+
+      return data;
+    } catch (err) {
+      console.error("Error adding water intake:", err);
+      setError(err.message);
+      throw err;
+    } finally {
+      setIsWaterLoading(false);
+    }
+  }, [activePlan]);
+
+  // Fetch water intake
+  const fetchWaterIntake = useCallback(async () => {
+    if (!activePlan) return;
+
+    try {
+      const response = await fetch(
+        "/api/users/client/diet-tracker?action=water-intake"
+      );
+      const data = await response.json();
+
+      if (response.ok) {
+        setDailyWaterIntake(data.dailyWaterIntake);
+      }
+    } catch (err) {
+      console.error("Error fetching water intake:", err);
+    }
+  }, [activePlan]);
 
   // Initialize data on mount
   useEffect(() => {
@@ -563,6 +1133,8 @@ export const useDietTracker = () => {
     progressMessage,
     isCompleted,
     completionStatus,
+    dailyWaterIntake,
+    isWaterLoading,
 
     // Actions
     startDietPlan,
@@ -577,6 +1149,8 @@ export const useDietTracker = () => {
     addCustomMealToDay,
     deleteSnack,
     clearValidationError,
+    addWater,
+    fetchWaterIntake,
 
     // Helpers
     getTodayLog,

@@ -1,5 +1,6 @@
 import { Icon } from "@iconify/react";
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 
 import { Button } from "@/components/common/Button";
@@ -212,6 +213,17 @@ export function ClientNutritionTab({
                   >
                     View Plan
                   </Button>
+                  {activePlan.isActive && activePlan.startDate && (
+                    <Link href={`/trainer/dashboard/clients/${client.id}/nutrition/${activePlan.id}`}>
+                      <Button
+                        variant="success"
+                        size="small"
+                        leftIcon={<Icon icon="mdi:chart-line" width={16} height={16} />}
+                      >
+                        Track Progress
+                      </Button>
+                    </Link>
+                  )}
                   {onRemoveNutritionPlan && (
                     <Button
                       variant="danger"

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 const PUBLIC_PATHS = [
-  "/",
+  // "/",
   "/auth/login",
   "/auth/register",
   "/trainers-marketplace",
@@ -102,6 +102,7 @@ function getOnboardingRedirect(role, token, pathname) {
         "/trainer/dashboard/edit",
         "/trainer/dashboard/settings",
         "/trainer/dashboard/clients/:id/plans/:planId",
+        "/trainer/dashboard/clients/:id/nutrition/:assignedPlanId",
       ],
       fallback: "/trainer/dashboard",
     },

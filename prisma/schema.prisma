@@ -546,6 +546,8 @@ model DietPlanAssignment {
   assignedAt      DateTime                  @default(now())
   createdAt       DateTime                  @default(now())
   updatedAt       DateTime                  @updatedAt
+  // Water intake tracking
+  dailyWaterIntake Int                      @default(0) // Current daily water intake in ml
   
   // Relations
   client          ClientInfo @relation(fields: [clientId], references: [id], onDelete: Cascade)

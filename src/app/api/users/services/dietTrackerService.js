@@ -1,8 +1,8 @@
 import prisma from "@/lib/prisma";
 
-import { 
-  updateDailyLogProgress, 
-  checkPlanCompletion
+import {
+  updateDailyLogProgress,
+  checkPlanCompletion,
 } from "./dietProgressService.js";
 
 /**
@@ -67,7 +67,7 @@ export async function getActiveDietPlan(clientId) {
     const assignment = await prisma.dietPlanAssignment.findFirst({
       where: {
         clientId,
-        status: 'active',
+        status: "active",
         isActive: true,
       },
       include: {
@@ -97,7 +97,7 @@ export async function getAssignedDietPlans(clientId) {
     const assignments = await prisma.dietPlanAssignment.findMany({
       where: {
         clientId,
-        status: 'assigned',
+        status: "assigned",
         isActive: true,
       },
       include: {
@@ -134,15 +134,17 @@ export async function startDietPlan(dietPlanAssignmentId, startDate = null) {
       throw new Error("Diet plan assignment not found");
     }
 
-    if (assignment.status !== 'assigned') {
-      throw new Error("Diet plan has already been started or is not in assigned status");
+    if (assignment.status !== "assigned") {
+      throw new Error(
+        "Diet plan has already been started or is not in assigned status"
+      );
     }
 
     // Get the nutrition plan data
     const nutritionPlan = assignment.nutritionPlan;
     const days = nutritionPlan.days || [];
     const planStartDate = startDate ? new Date(startDate) : new Date();
-    
+
     // Calculate end date
     const planEndDate = new Date(planStartDate);
     planEndDate.setDate(planEndDate.getDate() + days.length - 1);
@@ -150,7 +152,7 @@ export async function startDietPlan(dietPlanAssignmentId, startDate = null) {
     // Use transaction for atomic operation
     const result = await prisma.$transaction(async (tx) => {
       const dailyLogs = [];
-      
+
       for (let i = 0; i < days.length; i++) {
         const day = days[i];
         const currentDate = new Date(planStartDate);
@@ -201,7 +203,7 @@ export async function startDietPlan(dietPlanAssignmentId, startDate = null) {
       const updatedAssignment = await tx.dietPlanAssignment.update({
         where: { id: assignment.id },
         data: {
-          status: 'active',
+          status: "active",
           startDate: planStartDate,
           endDate: planEndDate,
           actualStartDate: new Date(),
@@ -336,6 +338,10 @@ export async function getAllDailyLogs(dietPlanAssignmentId) {
 // Single function to update meal completion status
 async function updateMealCompletionStatus(mealLogId, isCompleted) {
   try {
+    console.log(
+      `Updating meal ${mealLogId} completion status to ${isCompleted}`
+    );
+
     // First get the meal to check its date
     const mealLog = await prisma.mealLog.findUnique({
       where: { id: mealLogId },
@@ -347,6 +353,10 @@ async function updateMealCompletionStatus(mealLogId, isCompleted) {
     if (!mealLog) {
       throw new Error("Meal log not found");
     }
+
+    console.log(
+      `Found meal log for day ${mealLog.dailyDietLog.dayNumber}, date ${mealLog.dailyDietLog.date}`
+    );
 
     // Validate that the day is editable
     validateDayEdit(
@@ -365,18 +375,53 @@ async function updateMealCompletionStatus(mealLogId, isCompleted) {
       },
     });
 
+    console.log(`Successfully updated meal log: ${updatedMealLog.id}`);
+
     // Update daily totals and progress
     await updateDailyTotals(updatedMealLog.dailyDietLog.id);
-    
+    console.log(
+      `Updated daily totals for log: ${updatedMealLog.dailyDietLog.id}`
+    );
+
     // Update progress calculations
     await updateDailyLogProgress(updatedMealLog.dailyDietLog.id);
-    
-    // Check if plan should be completed
-    const completionCheck = await checkPlanCompletion(updatedMealLog.dailyDietLog.dietPlanAssignmentId);
-    
+    console.log(
+      `Updated daily log progress for log: ${updatedMealLog.dailyDietLog.id}`
+    );
+
+    // Check if plan should be completed - but don't let this affect active plans incorrectly
+    const dietPlanAssignment = await prisma.dietPlanAssignment.findUnique({
+      where: { id: updatedMealLog.dailyDietLog.dietPlanAssignmentId },
+      select: { id: true, status: true, isActive: true },
+    });
+
+    console.log(
+      `Current plan status before completion check: ${dietPlanAssignment.status}, isActive: ${dietPlanAssignment.isActive}`
+    );
+
+    // Only check completion if the plan is still active
+    let completionCheck = { completed: false };
+    if (dietPlanAssignment.status === "active" && dietPlanAssignment.isActive) {
+      completionCheck = await checkPlanCompletion(
+        updatedMealLog.dailyDietLog.dietPlanAssignmentId
+      );
+      console.log(`Plan completion check result:`, completionCheck);
+    }
+
+    // Double check that the plan is still active after completion check
+    const updatedPlan = await prisma.dietPlanAssignment.findUnique({
+      where: { id: updatedMealLog.dailyDietLog.dietPlanAssignmentId },
+      select: { id: true, status: true, isActive: true },
+    });
+
+    console.log(
+      `Plan status after completion check: ${updatedPlan.status}, isActive: ${updatedPlan.isActive}`
+    );
+
+    // Return the updated meal log with plan completion status
     return {
       ...updatedMealLog,
-      planCompletion: completionCheck
+      planCompletion: completionCheck,
     };
   } catch (error) {
     console.error(
@@ -444,6 +489,22 @@ export async function updateDailyTotals(dailyDietLogId) {
 // Get next upcoming meal
 export async function getNextMeal(dietPlanAssignmentId) {
   try {
+    // First verify the diet plan assignment exists and is active
+    const assignment = await prisma.dietPlanAssignment.findUnique({
+      where: {
+        id: dietPlanAssignmentId,
+        isActive: true,
+        status: "active",
+      },
+    });
+
+    if (!assignment) {
+      console.warn(
+        `No active diet plan found with ID: ${dietPlanAssignmentId}`
+      );
+      return null;
+    }
+
     const now = new Date();
     const currentTime = now.toTimeString().slice(0, 5); // HH:MM format
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // Date object for today
@@ -519,6 +580,40 @@ export async function getNextMeal(dietPlanAssignmentId) {
           date: log.date,
         };
       }
+    }
+
+    // If we get here, there are no upcoming meals - check if there are any past incomplete meals
+    const pastLogs = await prisma.dailyDietLog.findMany({
+      where: {
+        dietPlanAssignmentId,
+        date: {
+          lt: today,
+        },
+      },
+      include: {
+        mealLogs: {
+          where: {
+            isCompleted: false,
+          },
+          orderBy: {
+            mealTime: "asc",
+          },
+        },
+      },
+      orderBy: {
+        date: "desc", // Most recent first
+      },
+      take: 1,
+    });
+
+    if (pastLogs.length > 0 && pastLogs[0].mealLogs.length > 0) {
+      // Return the most recent incomplete meal
+      return {
+        ...pastLogs[0].mealLogs[0],
+        dayNumber: pastLogs[0].dayNumber,
+        date: pastLogs[0].date,
+        isPast: true,
+      };
     }
 
     return null; // No upcoming meals
@@ -853,6 +948,84 @@ async function saveCustomMealToHistory(
         lastUsed: new Date(),
       },
     });
+  }
+}
+
+// Update daily water intake for a diet plan assignment
+export async function updateWaterIntake(dietPlanAssignmentId, amountMl) {
+  try {
+    const assignment = await prisma.dietPlanAssignment.findUnique({
+      where: { id: dietPlanAssignmentId },
+    });
+
+    if (!assignment) {
+      throw new Error("Diet plan assignment not found");
+    }
+
+    if (assignment.status !== "active" || !assignment.isActive) {
+      throw new Error("Diet plan is not active");
+    }
+
+    const updatedAssignment = await prisma.dietPlanAssignment.update({
+      where: { id: dietPlanAssignmentId },
+      data: {
+        dailyWaterIntake: assignment.dailyWaterIntake + amountMl,
+      },
+    });
+
+    return {
+      success: true,
+      dailyWaterIntake: updatedAssignment.dailyWaterIntake,
+      amountAdded: amountMl,
+    };
+  } catch (error) {
+    console.error("Error updating water intake:", error);
+    throw error;
+  }
+}
+
+// Reset daily water intake (typically called daily at midnight)
+export async function resetDailyWaterIntake(dietPlanAssignmentId) {
+  try {
+    const updatedAssignment = await prisma.dietPlanAssignment.update({
+      where: { id: dietPlanAssignmentId },
+      data: {
+        dailyWaterIntake: 0,
+      },
+    });
+
+    return {
+      success: true,
+      dailyWaterIntake: updatedAssignment.dailyWaterIntake,
+    };
+  } catch (error) {
+    console.error("Error resetting daily water intake:", error);
+    throw error;
+  }
+}
+
+// Get current water intake for a diet plan assignment
+export async function getWaterIntake(dietPlanAssignmentId) {
+  try {
+    const assignment = await prisma.dietPlanAssignment.findUnique({
+      where: { id: dietPlanAssignmentId },
+      select: {
+        dailyWaterIntake: true,
+      },
+    });
+
+    if (!assignment) {
+      throw new Error("Diet plan assignment not found");
+    }
+
+    return {
+      dailyWaterIntake: assignment.dailyWaterIntake,
+      dailyGoal: 4000, // Hardcoded 4000ml goal as requested
+      percentageComplete: Math.min((assignment.dailyWaterIntake / 4000) * 100, 100),
+    };
+  } catch (error) {
+    console.error("Error getting water intake:", error);
+    throw error;
   }
 }
 

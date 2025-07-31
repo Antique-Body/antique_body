@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@iconify/react";
+import { WaterIntake } from "./WaterIntake";
 
 export const NutritionSummary = ({
   dailyNutrition,
@@ -9,6 +10,9 @@ export const NutritionSummary = ({
   currentDay,
   completedMeals,
   totalMeals,
+  dailyWaterIntake,
+  onWaterAdd,
+  isWaterLoading,
 }) => {
   const getProgressPercentage = (current, target) => {
     if (!target || target === 0) return 0;
@@ -354,6 +358,13 @@ export const NutritionSummary = ({
           })}
         </div>
       </div>
+
+      {/* Water Intake Section */}
+      <WaterIntake 
+        dailyWaterIntake={dailyWaterIntake || 0}
+        onWaterAdd={onWaterAdd}
+        isLoading={isWaterLoading}
+      />
 
       {/* Daily Insights */}
       <div className="bg-zinc-800/40 rounded-lg border border-zinc-700/50 p-4">
