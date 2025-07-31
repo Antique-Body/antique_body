@@ -1,7 +1,6 @@
 "use client";
 
 import { Icon } from "@iconify/react";
-import { motion } from "framer-motion";
 
 export const StepIndicator = ({ steps, currentStep }) => (
   <div className="flex items-center gap-2">
@@ -20,13 +19,9 @@ export const StepIndicator = ({ steps, currentStep }) => (
 
             {/* Completion check mark */}
             {index < currentStep && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center"
-              >
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
                 <Icon icon="mdi:check" className="w-3 h-3 text-white" />
-              </motion.div>
+              </div>
             )}
           </div>
         </div>
@@ -45,11 +40,9 @@ export const StepIndicator = ({ steps, currentStep }) => (
         {/* Connector line */}
         {index < steps.length - 1 && (
           <div className="w-12 h-0.5 bg-[#333] mr-2">
-            <motion.div
-              className="h-full bg-[#FF6B00]"
-              initial={{ width: "0%" }}
-              animate={{ width: index < currentStep ? "100%" : "0%" }}
-              transition={{ duration: 0.3 }}
+            <div
+              className={`h-full bg-[#FF6B00] transition-all duration-300`}
+              style={{ width: index < currentStep ? "100%" : "0%" }}
             />
           </div>
         )}

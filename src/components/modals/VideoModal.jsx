@@ -1,5 +1,4 @@
 import { Icon } from "@iconify/react";
-import PropTypes from "prop-types";
 import React, { useEffect } from "react";
 
 import { getYouTubeEmbedUrl } from "@/utils/trainingUtils";
@@ -202,16 +201,3 @@ export function VideoModal({ isOpen, onClose, videoUrl, exercise }) {
     </div>
   );
 }
-
-VideoModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  videoUrl: PropTypes.string.isRequired,
-  exercise: PropTypes.shape({
-    name: PropTypes.string,
-    sets: PropTypes.oneOfType([PropTypes.number, PropTypes.array]),
-    reps: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    rest: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    // Add more fields as needed based on usage
-  }),
-};

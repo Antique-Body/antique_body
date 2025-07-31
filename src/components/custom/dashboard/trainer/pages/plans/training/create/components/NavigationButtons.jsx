@@ -1,8 +1,6 @@
 "use client";
 
 import { Icon } from "@iconify/react";
-import { motion } from "framer-motion";
-import PropTypes from "prop-types";
 
 import { Button } from "@/components/common/Button";
 
@@ -59,34 +57,34 @@ export const NavigationButtons = ({
   isEdit = false,
   stepLabels = defaultStepLabels,
 }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.2 }}
-    className="mt-8 pt-6 border-t border-[#333]"
-  >
+  <div className="mt-8">
     {/* Mobile-First Layout */}
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      {/* Next/Submit button - Primary action first on mobile */}
-      <motion.div
-        className="order-1 sm:order-2 w-full sm:w-auto"
-        whileHover={{ scale: isLoading ? 1 : 1.02 }}
-        whileTap={{ scale: isLoading ? 1 : 0.98 }}
-      >
+      {/* Back button - Secondary action */}
+      <div className="order-2 sm:order-1 w-full sm:w-auto">
+        <Button
+          variant="outline"
+          onClick={onBack}
+          disabled={isLoading}
+          className="w-full sm:w-auto py-3 px-6 text-base font-medium"
+        >
+          <Icon icon="mdi:arrow-left" className="w-5 h-5 mr-2" />
+          {currentStep === 0 ? "Back to Plans" : "Previous Step"}
+        </Button>
+      </div>
+
+      {/* Next/Submit button - Primary action */}
+      <div className="order-1 sm:order-2 w-full sm:w-auto">
         <Button
           variant="orangeFilled"
           onClick={onNext}
           disabled={isNextDisabled || isLoading}
-          className="w-full sm:w-auto py-3 px-6 text-base font-semibold shadow-lg shadow-[#FF6B00]/25 disabled:shadow-none"
+          className="w-full sm:w-auto py-3 px-6 text-base font-semibold"
+          loading={isLoading}
         >
           {isLastStep ? (
             <>
-              {isLoading ? (
-                <Icon
-                  icon="mdi:loading"
-                  className="w-5 h-5 mr-2 animate-spin"
-                />
-              ) : (
+              {!isLoading && (
                 <Icon icon="mdi:rocket-launch" className="w-5 h-5 mr-2" />
               )}
               {getMainButtonText({ isEdit, isLoading, planType })}
@@ -107,24 +105,7 @@ export const NavigationButtons = ({
               : "Ready to create your plan!"
             : `Next: Step ${currentStep + 2} of ${totalSteps}`}
         </div>
-      </motion.div>
-
-      {/* Back button - Secondary action */}
-      <motion.div
-        className="order-2 sm:order-1 w-full sm:w-auto"
-        whileHover={{ scale: isLoading ? 1 : 1.01 }}
-        whileTap={{ scale: isLoading ? 1 : 0.98 }}
-      >
-        <Button
-          variant="outline"
-          onClick={onBack}
-          disabled={isLoading}
-          className="w-full sm:w-auto py-3 px-6 text-base font-medium border-[#444] hover:border-[#555] hover:bg-[#222] disabled:opacity-50"
-        >
-          <Icon icon="mdi:arrow-left" className="w-5 h-5 mr-2" />
-          {currentStep === 0 ? "Back to Plans" : "Previous Step"}
-        </Button>
-      </motion.div>
+      </div>
     </div>
 
     {/* Desktop Progress Indicator */}
@@ -132,7 +113,7 @@ export const NavigationButtons = ({
       {Array.from({ length: totalSteps }).map((_, index) => (
         <div
           key={index}
-          className={`h-2 rounded-full transition-all duration-300 ${
+          className={`h-2 rounded-full transition-all ${
             index <= currentStep ? "w-8 bg-[#FF6B00]" : "w-6 bg-[#333]"
           }`}
         />
@@ -145,18 +126,5 @@ export const NavigationButtons = ({
         {stepHints[planType] && stepHints[planType][currentStep]}
       </div>
     </div>
-  </motion.div>
+  </div>
 );
-
-NavigationButtons.propTypes = {
-  currentStep: PropTypes.number.isRequired,
-  totalSteps: PropTypes.number.isRequired,
-  onBack: PropTypes.func.isRequired,
-  onNext: PropTypes.func.isRequired,
-  isNextDisabled: PropTypes.bool,
-  isLastStep: PropTypes.bool.isRequired,
-  isLoading: PropTypes.bool,
-  planType: PropTypes.oneOf(["training", "nutrition"]),
-  isEdit: PropTypes.bool,
-  stepLabels: PropTypes.object,
-};

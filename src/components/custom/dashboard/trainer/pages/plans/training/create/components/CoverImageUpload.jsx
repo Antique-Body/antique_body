@@ -5,7 +5,7 @@ import React from "react";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { UPLOAD_CONFIG } from "@/config/upload";
 
-export default function CoverImageUpload({
+export function CoverImageUpload({
   previewImage,
   imageError,
   handleImageChange,

@@ -3,10 +3,11 @@
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import PropTypes from "prop-types";
 import { useState, useEffect } from "react";
 
+import { Accordion } from "@/components/common/Accordion";
 import { Button } from "@/components/common/Button";
+import { SESSION_FORMATS } from "src/enums/sessionFormats";
 
 export const Preview = ({ data }) => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -31,15 +32,15 @@ export const Preview = ({ data }) => {
     ) || 0;
 
   const tabs = [
-    { id: "overview", label: "Overview" },
-    { id: "schedule", label: "Schedule & Timeline" },
-    { id: "weekly", label: "Weekly Schedule" },
+    { id: "overview", label: "Overview", icon: "mdi:information-outline" },
+    { id: "schedule", label: "Schedule", icon: "mdi:calendar-outline" },
+    { id: "features", label: "Features", icon: "mdi:star-outline" },
   ];
 
   return (
     <div className="flex flex-col -mx-4 sm:-mx-5">
       {/* Banner image with gradient overlay */}
-      <div className="relative h-48 sm:h-64 w-full overflow-hidden rounded-2xl mb-6">
+      <div className="relative h-40 sm:h-56 w-full overflow-hidden rounded-xl mb-5">
         {(typeof data.coverImage === "string" && data.coverImage) ||
         (typeof data.coverImage !== "string" && coverImageUrl) ? (
           <Image
@@ -54,26 +55,26 @@ export const Preview = ({ data }) => {
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a1a] to-[#222] flex items-center justify-center">
-            <Icon icon="mdi:image" className="w-16 h-16 text-gray-600" />
+            <Icon icon="mdi:image" className="w-12 h-12 text-gray-600" />
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0.7)] to-[#111]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0.6)] to-[#111]" />
 
         {/* Plan type badge */}
-        <div className="absolute top-4 left-4 z-10">
-          <span className="px-3 py-1.5 text-sm font-medium rounded-md flex items-center gap-2 bg-blue-900/80 text-blue-100">
-            <Icon icon="heroicons:bolt-20-solid" className="w-4 h-4" />
+        <div className="absolute top-3 left-3 z-10">
+          <span className="px-2.5 py-1 text-xs font-medium rounded-md flex items-center gap-1.5 bg-blue-600/90 text-white shadow-lg">
+            <Icon icon="heroicons:bolt-20-solid" className="w-3.5 h-3.5" />
             Training Plan
           </span>
         </div>
 
         {/* Price tag */}
         {data.price && (
-          <div className="absolute top-4 right-4 z-10">
-            <span className="flex items-center px-3 py-1.5 text-sm font-medium rounded-md bg-[#FF6B00] text-white">
+          <div className="absolute top-3 right-3 z-10">
+            <span className="flex items-center px-2.5 py-1 text-xs font-medium rounded-md bg-[#FF6B00]/90 text-white shadow-lg">
               <Icon
                 icon="heroicons:banknotes-20-solid"
-                className="w-4 h-4 mr-1"
+                className="w-3.5 h-3.5 mr-1"
               />
               ${data.price}
             </span>
@@ -81,99 +82,86 @@ export const Preview = ({ data }) => {
         )}
 
         {/* Title overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+        <div className="absolute bottom-0 left-0 right-0 p-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-white mb-1">
             {data.title || "Untitled Plan"}
           </h1>
-          <p className="text-gray-300 line-clamp-2">{data.description}</p>
-          {data.createdAt && (
-            <div className="text-gray-400 text-xs mt-1">
-              Created:{" "}
-              {new Date(data.createdAt).toLocaleDateString("en", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-              })}
-            </div>
-          )}
+          <p className="text-sm text-gray-300 line-clamp-2">
+            {data.description}
+          </p>
         </div>
       </div>
 
       {/* Content container */}
       <div className="px-4 sm:px-5">
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-          <div className="p-4 bg-[#1a1a1a] rounded-lg border border-[#333] text-center">
-            <Icon
-              icon="heroicons:calendar-20-solid"
-              className="w-6 h-6 text-[#FF6B00] mx-auto mb-2"
-            />
-            <div className="text-2xl font-bold text-white mb-1">
-              {data.duration} {data.durationType}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+          <div className="p-3 bg-[#1a1a1a] rounded-lg border border-[#333] flex items-center">
+            <div className="w-8 h-8 rounded-full bg-blue-600/20 flex items-center justify-center mr-3">
+              <Icon
+                icon="heroicons:calendar-20-solid"
+                className="w-4 h-4 text-blue-500"
+              />
             </div>
-            <div className="text-sm text-gray-400">Duration</div>
+            <div>
+              <div className="text-lg font-bold text-white">
+                {data.duration} {data.durationType}
+              </div>
+              <div className="text-xs text-gray-400">Duration</div>
+            </div>
           </div>
-          <div className="p-4 bg-[#1a1a1a] rounded-lg border border-[#333] text-center">
-            <Icon
-              icon="heroicons:clock-20-solid"
-              className="w-6 h-6 text-[#FF6B00] mx-auto mb-2"
-            />
-            <div className="text-2xl font-bold text-white mb-1">
-              {data.sessionsPerWeek}
+          <div className="p-3 bg-[#1a1a1a] rounded-lg border border-[#333] flex items-center">
+            <div className="w-8 h-8 rounded-full bg-blue-600/20 flex items-center justify-center mr-3">
+              <Icon
+                icon="heroicons:clock-20-solid"
+                className="w-4 h-4 text-blue-500"
+              />
             </div>
-            <div className="text-sm text-gray-400">Sessions/Week</div>
+            <div>
+              <div className="text-lg font-bold text-white">
+                {data.sessionsPerWeek || 0}
+              </div>
+              <div className="text-xs text-gray-400">Sessions/Week</div>
+            </div>
           </div>
-          <div className="p-4 bg-[#1a1a1a] rounded-lg border border-[#333] text-center">
-            <Icon
-              icon="mdi:dumbbell"
-              className="w-6 h-6 text-[#FF6B00] mx-auto mb-2"
-            />
-            <div className="text-2xl font-bold text-white mb-1">
-              {data.schedule?.length || 0}
+          <div className="p-3 bg-[#1a1a1a] rounded-lg border border-[#333] flex items-center">
+            <div className="w-8 h-8 rounded-full bg-blue-600/20 flex items-center justify-center mr-3">
+              <Icon icon="mdi:dumbbell" className="w-4 h-4 text-blue-500" />
             </div>
-            <div className="text-sm text-gray-400">Total Sessions</div>
+            <div>
+              <div className="text-lg font-bold text-white">
+                {data.schedule?.length || 0}
+              </div>
+              <div className="text-xs text-gray-400">Total Sessions</div>
+            </div>
           </div>
-          <div className="p-4 bg-[#1a1a1a] rounded-lg border border-[#333] text-center">
-            <Icon
-              icon="mdi:arm-flex"
-              className="w-6 h-6 text-[#FF6B00] mx-auto mb-2"
-            />
-            <div className="text-2xl font-bold text-white mb-1">
-              {getTotalExercises()}
+          <div className="p-3 bg-[#1a1a1a] rounded-lg border border-[#333] flex items-center">
+            <div className="w-8 h-8 rounded-full bg-blue-600/20 flex items-center justify-center mr-3">
+              <Icon icon="mdi:arm-flex" className="w-4 h-4 text-blue-500" />
             </div>
-            <div className="text-sm text-gray-400">Total Exercises</div>
+            <div>
+              <div className="text-lg font-bold text-white">
+                {getTotalExercises()}
+              </div>
+              <div className="text-xs text-gray-400">Total Exercises</div>
+            </div>
           </div>
         </div>
 
-        {/* Tabs navigation */}
-        <div className="border-b border-[#333] mb-6">
-          <div className="flex space-x-6 overflow-x-auto pb-1">
-            {tabs.map((tab) => (
-              <Button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`py-3 relative text-sm font-medium transition-colors whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? "text-[#FF6B00]"
-                    : "text-gray-400 hover:text-white"
-                }`}
-                variant="tab"
-                isActive={activeTab === tab.id}
-              >
-                {tab.label}
-                {activeTab === tab.id && (
-                  <motion.div
-                    layoutId="activeTabLine"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#FF6B00]"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                )}
-              </Button>
-            ))}
-          </div>
+        {/* Improved Tabs navigation */}
+        <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-1 mb-5 flex overflow-x-auto">
+          {tabs.map((tab) => (
+            <Button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-1 py-2.5 relative text-sm font-medium transition-colors whitespace-nowrap rounded-md flex items-center justify-center gap-2`}
+              variant={activeTab === tab.id ? "primary" : "ghost"}
+            >
+              <Icon icon={tab.icon} className="w-4 h-4" />
+              {tab.label}
+            </Button>
+          ))}
         </div>
 
         {/* Tab content */}
@@ -184,88 +172,84 @@ export const Preview = ({ data }) => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="space-y-6"
+              className="space-y-4"
             >
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Left Column */}
-                <div className="space-y-6">
-                  {/* Training Details */}
-                  <div className="p-6 bg-[#1a1a1a] rounded-lg border border-[#333]">
-                    <h3 className="text-lg font-semibold text-white mb-4">
-                      Training Details
-                    </h3>
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <Icon
-                          icon="mdi:target"
-                          className="w-5 h-5 text-[#FF6B00]"
-                        />
-                        <div>
-                          <div className="text-white font-medium">
-                            Training Level
-                          </div>
-                          <div className="text-gray-400 capitalize">
-                            {data.difficultyLevel || "Not specified"}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Icon
-                          icon="mdi:calendar"
-                          className="w-5 h-5 text-[#FF6B00]"
-                        />
-                        <div>
-                          <div className="text-white font-medium">
-                            Sessions per Week
-                          </div>
-                          <div className="text-gray-400">
-                            {data.sessionsPerWeek} sessions
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Icon
-                          icon="mdi:format-list-bulleted"
-                          className="w-5 h-5 text-[#FF6B00]"
-                        />
-                        <div>
-                          <div className="text-white font-medium">
-                            Session Formats
-                          </div>
-                          <div className="text-gray-400">
-                            {data.sessionFormats?.length > 0
-                              ? data.sessionFormats.join(", ")
-                              : "Not specified"}
-                          </div>
-                        </div>
-                      </div>
+              <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4">
+                <h3 className="text-base font-semibold text-white mb-3 flex items-center gap-2">
+                  <Icon icon="mdi:target" className="w-5 h-5 text-blue-500" />
+                  Training Details
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="bg-[#242424] p-3 rounded-lg">
+                    <div className="text-sm text-gray-400 mb-1">
+                      Training Level
+                    </div>
+                    <div className="text-base text-white capitalize">
+                      {data.difficultyLevel || "Not specified"}
+                    </div>
+                  </div>
+                  <div className="bg-[#242424] p-3 rounded-lg">
+                    <div className="text-sm text-gray-400 mb-1">
+                      Sessions per Week
+                    </div>
+                    <div className="text-base text-white">
+                      {data.sessionsPerWeek || 0} sessions
+                    </div>
+                  </div>
+                  <div className="bg-[#242424] p-3 rounded-lg">
+                    <div className="text-sm text-gray-400 mb-1">
+                      Session Format
+                    </div>
+                    <div className="text-base text-white">
+                      {data.sessionFormat
+                        ? SESSION_FORMATS.find(
+                            (f) => f.id === data.sessionFormat
+                          )?.label || "Not specified"
+                        : "Not specified"}
                     </div>
                   </div>
                 </div>
-
-                {/* Right Column */}
-                <div className="space-y-6">
-                  {/* Key Features */}
-                  {data.keyFeatures && data.keyFeatures.length > 0 && (
-                    <div className="p-6 bg-[#1a1a1a] rounded-lg border border-[#333]">
-                      <h3 className="text-lg font-semibold text-white mb-4">
-                        Key Features
-                      </h3>
-                      <div className="space-y-2">
-                        {data.keyFeatures.map((feature, index) => (
-                          <div key={index} className="flex items-start gap-2">
-                            <Icon
-                              icon="heroicons:check-circle-20-solid"
-                              className="w-5 h-5 text-[#FF6B00] mt-0.5 flex-shrink-0"
-                            />
-                            <span className="text-gray-300">{feature}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
               </div>
+
+              {/* Key Features */}
+              {data.keyFeatures && data.keyFeatures.length > 0 && (
+                <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4">
+                  <h3 className="text-base font-semibold text-white mb-3 flex items-center gap-2">
+                    <Icon icon="mdi:star" className="w-5 h-5 text-blue-500" />
+                    Key Features
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {data.keyFeatures.map((feature, index) => (
+                      <div
+                        key={index}
+                        className="flex items-start gap-2 bg-[#242424] p-2.5 rounded-lg"
+                      >
+                        <Icon
+                          icon="heroicons:check-circle-20-solid"
+                          className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0"
+                        />
+                        <span className="text-sm text-gray-300">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Additional Information */}
+              {data.description && (
+                <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4">
+                  <h3 className="text-base font-semibold text-white mb-3 flex items-center gap-2">
+                    <Icon
+                      icon="mdi:information"
+                      className="w-5 h-5 text-blue-500"
+                    />
+                    Plan Description
+                  </h3>
+                  <div className="bg-[#242424] p-3 rounded-lg">
+                    <p className="text-sm text-white">{data.description}</p>
+                  </div>
+                </div>
+              )}
             </motion.div>
           )}
 
@@ -275,124 +259,84 @@ export const Preview = ({ data }) => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="space-y-6"
-            >
-              {data.timeline && data.timeline.length > 0 ? (
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-4">
-                    Timeline Structure
-                  </h3>
-                  <div className="space-y-4">
-                    {data.timeline.map((block, index) => (
-                      <div key={index} className="relative pl-8">
-                        <div className="absolute left-0 top-0 w-6 h-6 rounded-full bg-[#FF6B00]/20 flex items-center justify-center">
-                          <span className="text-xs font-medium text-[#FF6B00]">
-                            {index + 1}
-                          </span>
-                        </div>
-                        {index !== data.timeline.length - 1 && (
-                          <div className="absolute left-3 top-6 w-0.5 h-full max-h-12 bg-[#333]" />
-                        )}
-                        <div>
-                          <h4 className="text-white font-medium">
-                            {block.week}
-                          </h4>
-                          <p className="text-[#FF6B00]">{block.title}</p>
-                          <p className="text-sm text-gray-400 mt-1">
-                            {block.description}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Icon
-                    icon="mdi:calendar-outline"
-                    className="w-12 h-12 text-gray-600 mx-auto mb-4"
-                  />
-                  <p className="text-gray-400">
-                    No timeline structure defined yet.
-                  </p>
-                </div>
-              )}
-            </motion.div>
-          )}
-
-          {/* Weekly Schedule tab */}
-          {activeTab === "weekly" && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="space-y-6"
+              className="space-y-4"
             >
               {data.schedule && data.schedule.length > 0 ? (
                 <div className="space-y-4">
                   {data.schedule.map((session, index) => (
-                    <div
+                    <Accordion
                       key={session.id || index}
-                      className="p-4 bg-[#1a1a1a] rounded-lg border border-[#333]"
+                      title={session.name || `Session ${index + 1}`}
+                      icon="mdi:dumbbell"
+                      iconColor="#3B82F6"
+                      bgColor="#1a1a1a"
+                      borderColor="#333"
+                      defaultOpen={index === 0}
+                      subtitle={`${session.exercises?.length || 0} exercises • ${session.duration || 0} min`}
                     >
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h4 className="text-white font-medium">
-                            {session.name || `Session ${index + 1}`}
-                          </h4>
-                          <p className="text-sm text-gray-400">
-                            Day {index + 1} • {session.duration} minutes
-                          </p>
-                        </div>
-                        <div className="px-3 py-1 rounded-full bg-[#FF6B00]/20 text-[#FF6B00] text-sm">
-                          {session.exercises?.length || 0} exercises
-                        </div>
-                      </div>
                       {session.description && (
-                        <p className="text-gray-400 text-sm mb-4">
+                        <div className="bg-[#242424] p-3 rounded-lg mb-3 text-sm text-gray-300">
                           {session.description}
-                        </p>
+                        </div>
                       )}
-                      {session.exercises && session.exercises.length > 0 && (
-                        <div className="space-y-2">
+
+                      {session.exercises && session.exercises.length > 0 ? (
+                        <div className="space-y-2 pt-2">
                           {session.exercises.map((exercise, exerciseIndex) => (
                             <div
                               key={exercise.id || exerciseIndex}
-                              className="flex items-center justify-between p-3 bg-[#222] rounded-lg"
+                              className="bg-[#242424] rounded-lg p-3"
                             >
-                              <div className="flex items-center gap-3">
-                                <div className="w-6 h-6 rounded-full bg-[#333] flex items-center justify-center text-sm text-white">
-                                  {exerciseIndex + 1}
+                              <div className="flex justify-between items-center">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-6 h-6 rounded-full bg-blue-600/20 flex items-center justify-center text-xs text-white">
+                                    {exerciseIndex + 1}
+                                  </div>
+                                  <span className="text-sm font-medium text-white">
+                                    {exercise.name}
+                                  </span>
                                 </div>
-                                <span className="text-white">
-                                  {exercise.name}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs bg-[#333] px-2 py-0.5 rounded-full text-gray-300">
+                                    {typeof exercise.sets === "number"
+                                      ? exercise.sets
+                                      : Array.isArray(exercise.sets)
+                                        ? exercise.sets.length
+                                        : 0}{" "}
+                                    × {exercise.reps}
+                                  </span>
+                                  <span className="text-xs bg-[#333] px-2 py-0.5 rounded-full text-gray-300">
+                                    {exercise.rest} rest
+                                  </span>
+                                </div>
                               </div>
-                              <div className="flex items-center gap-3 text-sm">
-                                <span className="text-gray-400">
-                                  {typeof exercise.sets === "number"
-                                    ? exercise.sets
-                                    : Array.isArray(exercise.sets)
-                                      ? exercise.sets.length
-                                      : 0}{" "}
-                                  × {exercise.reps}
-                                </span>
-                                <span className="text-gray-400">
-                                  {exercise.rest} rest
-                                </span>
-                              </div>
+
+                              {exercise.notes && (
+                                <div className="mt-2 text-xs text-gray-400 bg-[#2a2a2a] p-2 rounded-md">
+                                  <span className="text-gray-300 font-medium">
+                                    Notes:{" "}
+                                  </span>
+                                  {exercise.notes}
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>
+                      ) : (
+                        <div className="py-3 text-center">
+                          <p className="text-sm text-gray-400">
+                            No exercises added to this session yet.
+                          </p>
+                        </div>
                       )}
-                    </div>
+                    </Accordion>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8">
+                <div className="text-center py-8 bg-[#1a1a1a] rounded-lg border border-[#333]">
                   <Icon
                     icon="mdi:dumbbell"
-                    className="w-12 h-12 text-gray-600 mx-auto mb-4"
+                    className="w-10 h-10 text-gray-600 mx-auto mb-3"
                   />
                   <p className="text-gray-400">No sessions scheduled yet.</p>
                   <p className="text-sm text-gray-500 mt-2">
@@ -402,54 +346,93 @@ export const Preview = ({ data }) => {
               )}
             </motion.div>
           )}
+
+          {/* Features & Timeline tab */}
+          {activeTab === "features" && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-4"
+            >
+              {/* Timeline */}
+              {data.timeline && data.timeline.length > 0 && (
+                <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4">
+                  <h3 className="text-base font-semibold text-white mb-4 flex items-center gap-2">
+                    <Icon
+                      icon="mdi:timeline-clock"
+                      className="w-5 h-5 text-blue-500"
+                    />
+                    Program Timeline
+                  </h3>
+
+                  <div className="space-y-3">
+                    {data.timeline.map((block, index) => (
+                      <div
+                        key={index}
+                        className="bg-[#242424] rounded-lg p-3 border border-[#333] hover:border-blue-500/30 transition-colors"
+                      >
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-medium">
+                            {index + 1}
+                          </div>
+                          <h4 className="text-sm font-medium text-white">
+                            {block.week}
+                          </h4>
+                        </div>
+                        <div className="ml-8">
+                          <p className="text-sm text-blue-400 font-medium mb-1">
+                            {block.title}
+                          </p>
+                          <p className="text-xs text-gray-300">
+                            {block.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Features */}
+              {data.features && Object.keys(data.features).length > 0 && (
+                <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4">
+                  <h3 className="text-base font-semibold text-white mb-3 flex items-center gap-2">
+                    <Icon
+                      icon="mdi:package-variant"
+                      className="w-5 h-5 text-blue-500"
+                    />
+                    Included Services
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {Object.entries(data.features).map(([key, enabled]) => {
+                      if (!enabled) return null;
+
+                      // Convert camelCase to readable text
+                      const label = key
+                        .replace(/([A-Z])/g, " $1")
+                        .replace(/^./, (str) => str.toUpperCase());
+
+                      return (
+                        <div
+                          key={key}
+                          className="flex items-center gap-2 bg-[#242424] p-2.5 rounded-lg"
+                        >
+                          <Icon
+                            icon="heroicons:check-circle-20-solid"
+                            className="w-5 h-5 text-green-500 flex-shrink-0"
+                          />
+                          <span className="text-sm text-gray-300">{label}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
         </div>
       </div>
     </div>
   );
-};
-
-Preview.propTypes = {
-  data: PropTypes.shape({
-    coverImage: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.object, // File or Blob
-    ]),
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string,
-    createdAt: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.instanceOf(Date),
-    ]),
-    price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    duration: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    durationType: PropTypes.string,
-    sessionsPerWeek: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    sessionFormats: PropTypes.arrayOf(PropTypes.string),
-    difficultyLevel: PropTypes.string,
-    keyFeatures: PropTypes.arrayOf(PropTypes.string),
-    timeline: PropTypes.arrayOf(
-      PropTypes.shape({
-        week: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-        title: PropTypes.string,
-        description: PropTypes.string,
-      })
-    ),
-    schedule: PropTypes.arrayOf(
-      PropTypes.shape({
-        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-        name: PropTypes.string,
-        duration: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-        description: PropTypes.string,
-        exercises: PropTypes.arrayOf(
-          PropTypes.shape({
-            id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-            name: PropTypes.string,
-            sets: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-            reps: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-            rest: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-          })
-        ),
-      })
-    ),
-  }).isRequired,
 };
