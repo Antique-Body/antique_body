@@ -135,8 +135,6 @@ export const ClientCard = ({
             >
               Message
             </Button>
-
-
           </div>
         </div>
       </div>

@@ -47,7 +47,7 @@ export async function POST(request) {
       );
     }
 
-    // Check if user is blocked (only check if client is accessing trainer's chat)
+    // Check if chat is blocked (only block clients, allow trainers to access for unblocking)
     if (isClient) {
       const trainer = await prisma.trainerInfo.findUnique({
         where: { id: trainerId },
@@ -55,18 +55,19 @@ export async function POST(request) {
       });
 
       if (trainer) {
-        const block = await prisma.userBlock.findUnique({
+        const chatBlock = await prisma.chatBlock.findUnique({
           where: {
-            blockerId_blockedId: {
+            blockerId_blockedId_chatId: {
               blockerId: trainer.user.id,
               blockedId: session.user.id,
+              chatId: chatId,
             },
           },
         });
 
-        if (block) {
+        if (chatBlock) {
           return NextResponse.json(
-            { error: "You are blocked by this trainer and cannot access this conversation" },
+            { error: "You have been blocked from this conversation" },
             { status: 403 }
           );
         }

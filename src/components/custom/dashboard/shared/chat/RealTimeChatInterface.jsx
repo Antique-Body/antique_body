@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import React, { useState, useEffect, useRef } from "react";
 
@@ -57,21 +57,11 @@ const Avatar = ({ src, alt, size = "md", className = "" }) => {
 
 import { TypingIndicator } from "./TypingIndicator";
 
-const ConversationItem = ({ conversation, isSelected, _onClick, isOnline }) => {
-  const router = useRouter();
-  const { data: session } = useSession();
-  
-  const handleClick = () => {
-    // Navigate to the conversation page
-    const userRole = session?.user?.role || 'client';
-    const basePath = userRole === 'trainer' ? '/trainer/dashboard/messages' : '/client/dashboard/messages';
-    router.push(`${basePath}/${conversation.id}`);
-  };
-
+const ConversationItem = ({ conversation, isSelected, onClick, isOnline }) => {
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      handleClick();
+      onClick?.(conversation);
     }
   };
 
@@ -80,7 +70,7 @@ const ConversationItem = ({ conversation, isSelected, _onClick, isOnline }) => {
       className={`cursor-pointer border-b border-[#333] p-4 transition-colors hover:bg-[#1a1a1a] ${
         isSelected ? "bg-[#1a1a1a]" : ""
       }`}
-      onClick={handleClick}
+      onClick={() => onClick?.(conversation)}
       onKeyDown={handleKeyDown}
       role="button"
       tabIndex={0}
@@ -125,6 +115,7 @@ const ConversationItem = ({ conversation, isSelected, _onClick, isOnline }) => {
             {conversation.isBlocked && (
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-500">
                 <svg className="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <title>Blocked</title>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
                 </svg>
               </span>
@@ -192,11 +183,17 @@ const MessageBubble = ({ message }) => {
 
 const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isOnline, onDeleteChat }) => {
   const { data: session } = useSession();
+  const pathname = usePathname();
+  
+  // Determine if user is trainer based on current path (fallback if session role is not available)
+  const isTrainer = pathname?.includes('/trainer/') || session?.user?.role === 'trainer';
   const [reply, setReply] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showBlockConfirm, setShowBlockConfirm] = useState(false);
   const [showUnblockConfirm, setShowUnblockConfirm] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
+  
+
   const messagesEndRef = useRef(null);
   const { blockChat, unblockChat, checkChatBlockedStatus, loading: blockLoading } = useChatBlock();
   
@@ -230,7 +227,7 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
       // First check if the conversation already has blocked status
       if (conversation.hasOwnProperty('isBlocked')) {
         setIsBlocked(conversation.isBlocked);
-      } else if (!conversation.isNewChat && session?.user?.role === "trainer") {
+      } else if (!conversation.isNewChat && isTrainer) {
         // Fall back to API check for older conversations
         const checkBlockedStatus = async () => {
           try {
@@ -241,9 +238,11 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
           }
         };
         checkBlockedStatus();
+      } else {
+        setIsBlocked(false);
       }
     }
-  }, [conversation, session?.user?.role, checkChatBlockedStatus]);
+  }, [conversation, isTrainer, checkChatBlockedStatus]);
 
   useEffect(() => {
     scrollToBottom();
@@ -344,12 +343,13 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
             </p>
           </div>
         </div>
-        
+
         {/* Action buttons */}
         <div className="flex items-center gap-2">
           {/* Block/Unblock Chat button - only for trainers */}
-          {session?.user?.role === "trainer" && !conversation.isNewChat && (
+          {isTrainer && !conversation.isNewChat && (
             <div className="relative">
+
               {isBlocked ? (
                 <button
                   type="button"
@@ -358,9 +358,19 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
                   title="Unblock chat"
                   disabled={blockLoading}
                 >
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <title>Unblock chat</title>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                    />
                   </svg>
                 </button>
               ) : (
@@ -371,19 +381,31 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
                   title="Block chat"
                   disabled={blockLoading}
                 >
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <title>Block chat</title>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"
+                    />
                   </svg>
                 </button>
               )}
-              
+
               {/* Block confirmation modal */}
               {showBlockConfirm && (
                 <div className="absolute right-0 top-full mt-2 w-64 rounded-lg border border-[#333] bg-[#1a1a1a] p-4 shadow-lg z-10">
                   <h4 className="mb-2 font-medium text-gray-100">Block Chat</h4>
                   <p className="mb-4 text-sm text-gray-400">
-                    This will prevent {conversation.name} from sending you messages in this chat. They can still see your profile and request coaching.
+                    This will prevent {conversation.name} from sending you
+                    messages in this chat. They can still see your profile and
+                    request coaching.
                   </p>
                   <div className="flex gap-2">
                     <button
@@ -392,7 +414,7 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
                         try {
                           // Get the client user ID from the conversation
                           const clientUserId = conversation.participantId;
-                          
+
                           await blockChat(clientUserId, conversation.id);
                           setShowBlockConfirm(false);
                           setIsBlocked(true);
@@ -420,9 +442,12 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
               {/* Unblock confirmation modal */}
               {showUnblockConfirm && (
                 <div className="absolute right-0 top-full mt-2 w-64 rounded-lg border border-[#333] bg-[#1a1a1a] p-4 shadow-lg z-10">
-                  <h4 className="mb-2 font-medium text-gray-100">Unblock Chat</h4>
+                  <h4 className="mb-2 font-medium text-gray-100">
+                    Unblock Chat
+                  </h4>
                   <p className="mb-4 text-sm text-gray-400">
-                    This will allow {conversation.name} to send you messages again.
+                    This will allow {conversation.name} to send you messages
+                    again.
                   </p>
                   <div className="flex gap-2">
                     <button
@@ -430,7 +455,7 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
                       onClick={async () => {
                         try {
                           const clientUserId = conversation.participantId;
-                          
+
                           await unblockChat(clientUserId, conversation.id);
                           setShowUnblockConfirm(false);
                           setIsBlocked(false);
@@ -456,7 +481,7 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
               )}
             </div>
           )}
-          
+
           {/* Delete button */}
           <div className="relative">
             <button
@@ -465,52 +490,65 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
               className="rounded p-2 text-gray-400 hover:bg-red-500/20 hover:text-red-400 transition-colors"
               title="Delete conversation"
             >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <title>Delete conversation</title>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
               </svg>
             </button>
-          
-          {/* Delete confirmation modal */}
-          {showDeleteConfirm && (
-            <div className="absolute right-0 top-full mt-2 w-64 rounded-lg border border-[#333] bg-[#1a1a1a] p-4 shadow-lg z-10">
-              <h4 className="mb-2 font-medium text-gray-100">Delete Conversation</h4>
-              <p className="mb-4 text-sm text-gray-400">
-                Are you sure you want to delete this conversation? This action cannot be undone.
-              </p>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={async () => {
-                    try {
-                      const result = await deleteChat();
-                      if (result.success) {
-                        setShowDeleteConfirm(false);
-                        if (onDeleteChat) {
-                          onDeleteChat();
+
+            {/* Delete confirmation modal */}
+            {showDeleteConfirm && (
+              <div className="absolute right-0 top-full mt-2 w-64 rounded-lg border border-[#333] bg-[#1a1a1a] p-4 shadow-lg z-10">
+                <h4 className="mb-2 font-medium text-gray-100">
+                  Delete Conversation
+                </h4>
+                <p className="mb-4 text-sm text-gray-400">
+                  Are you sure you want to delete this conversation? This action
+                  cannot be undone.
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        const result = await deleteChat();
+                        if (result.success) {
+                          setShowDeleteConfirm(false);
+                          if (onDeleteChat) {
+                            onDeleteChat();
+                          }
+                        } else {
+                          console.error("Failed to delete chat:", result.error);
                         }
-                      } else {
-                        console.error("Failed to delete chat:", result.error);
+                      } catch (error) {
+                        console.error("Error deleting chat:", error);
                       }
-                    } catch (error) {
-                      console.error("Error deleting chat:", error);
-                    }
-                  }}
-                  className="flex-1 rounded bg-red-500 px-3 py-2 text-sm font-medium text-white hover:bg-red-600 transition-colors"
-                >
-                  Delete
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 rounded bg-[#333] px-3 py-2 text-sm font-medium text-gray-300 hover:bg-[#444] transition-colors"
-                >
-                  Cancel
-                </button>
+                    }}
+                    className="flex-1 rounded bg-red-500 px-3 py-2 text-sm font-medium text-white hover:bg-red-600 transition-colors"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="flex-1 rounded bg-[#333] px-3 py-2 text-sm font-medium text-gray-300 hover:bg-[#444] transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -527,15 +565,18 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
               Start a conversation with {conversation.name}
             </h3>
             <p className="text-gray-400 text-center">
-              This is the beginning of your conversation. Send a message below to get started!
+              This is the beginning of your conversation. Send a message below
+              to get started!
             </p>
           </div>
         ) : (
           <>
             {loading && (
-              <div className="py-8 text-center text-gray-400">Loading messages...</div>
+              <div className="py-8 text-center text-gray-400">
+                Loading messages...
+              </div>
             )}
-            
+
             {error && (
               <div className="py-8 text-center text-red-400">
                 Error: {error}
@@ -553,12 +594,12 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
                 {messages.map((message) => (
                   <MessageBubble key={message.id} message={message} />
                 ))}
-                
-                <TypingIndicator 
-                  isTyping={isOtherUserTyping} 
-                  userName={typingUserNames} 
+
+                <TypingIndicator
+                  isTyping={isOtherUserTyping}
+                  userName={typingUserNames}
                 />
-                
+
                 <div ref={messagesEndRef} />
               </>
             )}
@@ -570,14 +611,30 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
       {isBlocked && session?.user?.role === "trainer" ? (
         <div className="border-t border-[#333] p-4 bg-orange-900/20">
           <div className="flex items-center gap-3 text-orange-300">
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <title>Chat blocked</title>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"
+              />
             </svg>
-            <span className="text-sm">You have blocked this chat. Unblock to send messages.</span>
+            <span className="text-sm">
+              You have blocked this chat. Unblock to send messages.
+            </span>
           </div>
         </div>
       ) : (
-        <form onSubmit={handleSendMessage} className="border-t border-[#333] p-4">
+        <form
+          onSubmit={handleSendMessage}
+          className="border-t border-[#333] p-4"
+        >
           <div className="flex items-start gap-2">
             <div className="flex-grow">
               <FormField
@@ -586,7 +643,7 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
                 value={reply}
                 onChange={(e) => {
                   setReply(e.target.value);
-                  
+
                   // Handle typing indicator
                   if (e.target.value.trim()) {
                     setTypingStatus(true);
@@ -618,7 +675,11 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
 
 export const RealTimeChatInterface = ({ conversationId }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session } = useSession();
+  
+  // Determine if user is trainer based on current path (fallback if session role is not available)
+  const isTrainer = pathname?.includes('/trainer/') || session?.user?.role === 'trainer';
   const [activeConversation, setActiveConversation] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
@@ -671,27 +732,65 @@ export const RealTimeChatInterface = ({ conversationId }) => {
           let participantInfoFound = false;
           if (!sessionStorageProcessed) {
             try {
-              const tempConversationData = sessionStorage.getItem('tempConversation');
-              if (tempConversationData) {
-                const participantInfo = JSON.parse(tempConversationData);
-                
-                // Verify this is for the current chat ID and not expired (5 minutes)
-                const isExpired = Date.now() - participantInfo.timestamp > 5 * 60 * 1000;
-                const isForCurrentChat = participantInfo.chatId === conversationId;
-                
-                if (!isExpired && isForCurrentChat) {
-                  participantName = participantInfo.name || "New Conversation";
-                  participantAvatar = participantInfo.avatar || null;
-                  participantInfoFound = true;
+              // Check if sessionStorage is available (privacy mode, quota issues, etc.)
+              if (typeof Storage === "undefined" || typeof sessionStorage === "undefined") {
+                console.warn("SessionStorage is not available in this environment");
+                setSessionStorageProcessed(true); // Skip future attempts
+              } else {
+                const tempConversationData = sessionStorage.getItem('tempConversation');
+                if (tempConversationData) {
+                  let participantInfo;
+                  try {
+                    participantInfo = JSON.parse(tempConversationData);
+                  } catch (parseError) {
+                    console.error("Failed to parse participant info from sessionStorage:", parseError);
+                    // Clear corrupted data
+                    try {
+                      sessionStorage.removeItem('tempConversation');
+                    } catch (removeError) {
+                      console.error("Failed to remove corrupted sessionStorage data:", removeError);
+                    }
+                    setSessionStorageProcessed(true);
+                    return;
+                  }
                   
-                  // Clear the session storage after using it
-                  sessionStorage.removeItem('tempConversation');
-                  // Mark as processed to prevent future accesses
-                  setSessionStorageProcessed(true);
+                  // Verify this is for the current chat ID and not expired (5 minutes)
+                  const isExpired = Date.now() - participantInfo.timestamp > 5 * 60 * 1000;
+                  const isForCurrentChat = participantInfo.chatId === conversationId;
+                  
+                  if (!isExpired && isForCurrentChat) {
+                    participantName = participantInfo.name || "New Conversation";
+                    participantAvatar = participantInfo.avatar || null;
+                    participantInfoFound = true;
+                    
+                    // Clear the session storage after using it
+                    try {
+                      sessionStorage.removeItem('tempConversation');
+                    } catch (removeError) {
+                      console.error("Failed to remove sessionStorage data:", removeError);
+                    }
+                    // Mark as processed to prevent future accesses
+                    setSessionStorageProcessed(true);
+                  }
                 }
               }
             } catch (error) {
-              console.error("Error parsing participant info from session storage:", error);
+              // Handle all other sessionStorage errors (quota exceeded, privacy restrictions, etc.)
+              console.error("SessionStorage access error:", {
+                message: error.message,
+                name: error.name,
+                stack: error.stack
+              });
+              
+              // Mark as processed to prevent repeated failures
+              setSessionStorageProcessed(true);
+              
+              // Optionally notify user if sessionStorage is critical for functionality
+              if (error.name === 'QuotaExceededError') {
+                console.warn("SessionStorage quota exceeded. Some features may not work properly.");
+              } else if (error.message && error.message.includes('privacy')) {
+                console.warn("SessionStorage blocked by privacy settings. Some features may not work properly.");
+              }
             }
           }
 
@@ -802,8 +901,7 @@ export const RealTimeChatInterface = ({ conversationId }) => {
     fetchConversations();
     
     // Redirect to messages page without chat ID
-    const userRole = session?.user?.role || 'client';
-    const basePath = userRole === 'trainer' ? '/trainer/dashboard/messages' : '/client/dashboard/messages';
+    const basePath = isTrainer ? '/trainer/dashboard/messages' : '/client/dashboard/messages';
     router.push(basePath);
   };
 
@@ -846,7 +944,7 @@ export const RealTimeChatInterface = ({ conversationId }) => {
           >
             Active
           </Button>
-          {session?.user?.role === "trainer" && (
+          {isTrainer && (
             <Button
               variant={filter === "blocked" ? "orangeFilled" : "orangeOutline"}
               size="small"

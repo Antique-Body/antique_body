@@ -31,6 +31,14 @@ export async function POST(request) {
     }
 
     const Ably = await getServerAbly();
+
+    if (!process.env.ABLY_API_KEY) {
+      console.error("ABLY_API_KEY environment variable is not set");
+      return NextResponse.json(
+        { error: "Server configuration error" },
+        { status: 500 }
+      );
+    }
     
     // Initialize Ably with server-side API key
     const ably = new Ably.Rest({

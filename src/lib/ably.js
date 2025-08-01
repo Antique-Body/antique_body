@@ -36,25 +36,28 @@ export const getAblyClient = async (clientId = null, forceRecreate = false) => {
   }
   
   if (!ably) {
-    // Fetch token from backend
-    const tokenResponse = await fetch('/api/auth/ably-token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ clientId }),
-    });
-
-    if (!tokenResponse.ok) {
-      throw new Error('Failed to get Ably token');
-    }
-
-    const { tokenRequest } = await tokenResponse.json();
-
     const Ably = await getAbly();
     const config = {
       authCallback: async (tokenParams, callback) => {
-        callback(null, tokenRequest);
+        try {
+          // Fetch a fresh token from backend each time
+          const tokenResponse = await fetch('/api/auth/ably-token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ clientId }),
+          });
+
+          if (!tokenResponse.ok) {
+            throw new Error('Failed to get Ably token');
+          }
+
+          const { tokenRequest } = await tokenResponse.json();
+          callback(null, tokenRequest);
+        } catch (error) {
+          callback(error, null);
+        }
       }
     };
     
