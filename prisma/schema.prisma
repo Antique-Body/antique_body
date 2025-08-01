@@ -28,6 +28,8 @@ model User {
   trainerInfo        TrainerInfo?
   messagesSent       Message[]           @relation("MessageSender")
   messagesReceived   Message[]           @relation("MessageReceiver")
+  chatBlockedBy      ChatBlock[]         @relation("ChatBlocker")
+  chatBlockedUsers   ChatBlock[]         @relation("ChatBlocked")
 
   @@index([email])
   @@index([phone])
@@ -565,6 +567,7 @@ model Message {
   receiverId        String
   chatId            String
   isRead            Boolean   @default(false)
+  blocked           Boolean   @default(false) // Track if message was blocked
   deletedAt         DateTime?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
@@ -580,6 +583,30 @@ model Message {
   @@index([isRead])
   @@index([createdAt])
   @@index([deletedAt])
+  @@index([blocked])
+}
+
+
+
+// Chat Blocking System (only blocks messaging, not full user blocking)
+model ChatBlock {
+  id          String   @id @default(cuid())
+  blockerId   String   // User who is blocking chat (trainer)
+  blockedId   String   // User whose chat is blocked (client)
+  chatId      String   // Specific chat that is blocked
+  reason      String?  // Optional reason for blocking chat
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  blocker User @relation("ChatBlocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked User @relation("ChatBlocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId, chatId])
+  @@index([blockerId])
+  @@index([blockedId])
+  @@index([chatId])
+  @@index([createdAt])
 }
 
 // Diet Tracking System

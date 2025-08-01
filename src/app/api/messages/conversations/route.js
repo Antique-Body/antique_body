@@ -103,6 +103,24 @@ export async function GET() {
         },
         take: 50, // Add pagination limit
       });
+
+      // Add blocked status to conversations for trainers
+      if (isTrainer) {
+        const blockedChatIds = await prisma.chatBlock.findMany({
+          where: { blockerId: session.user.id },
+          select: { chatId: true },
+        });
+        
+        const blockedChatIdSet = new Set(blockedChatIds.map(block => block.chatId));
+        
+        // Add isBlocked flag to conversations instead of filtering them out
+        conversations = conversations.map(conversation => ({
+          ...conversation,
+          isBlocked: blockedChatIdSet.has(conversation.chatId)
+        }));
+      }
+
+
     }
 
     // Get available users to chat with (only those with coaching requests or existing conversations)
@@ -173,9 +191,29 @@ export async function GET() {
         isTrainer ? conv.clientId : conv.trainerId
       ).filter(Boolean); // Remove any null/undefined values
       
-      const availableUsers = coachingRequests
+      let availableUsers = coachingRequests
         .map(cr => isTrainer ? cr.client : cr.trainer)
         .filter(user => user && !existingIds.includes(user.id));
+
+      // Filter out blocked chats from available users for trainers
+      if (isTrainer) {
+        const blockedChatIds = await prisma.chatBlock.findMany({
+          where: { blockerId: session.user.id },
+          select: { chatId: true },
+        });
+        
+        const blockedChatIdSet = new Set(blockedChatIds.map(block => block.chatId));
+        
+        availableUsers = availableUsers.filter(participant => {
+          const chatId = generateChatId(
+            user.trainerInfo.id,
+            participant.id
+          );
+          return !blockedChatIdSet.has(chatId);
+        });
+      }
+
+
 
       availableChats = availableUsers.map((participant) => {
         const profile = isTrainer ? participant.clientProfile : participant.trainerProfile;
@@ -214,6 +252,7 @@ export async function GET() {
         lastMessageAt: conv.lastMessageAt,
         unreadCount: isTrainer ? conv.trainerUnreadCount : conv.clientUnreadCount,
         isNewChat: false,
+        isBlocked: conv.isBlocked || false,
       };
     });
 

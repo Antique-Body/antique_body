@@ -9,6 +9,7 @@ import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { MessageIcon } from "@/components/common/Icons";
 import { useChat, useConversations } from "@/hooks/useChat";
+import { useChatBlock } from "@/hooks/useChatBlock";
 import { useGlobalPresence, useChatPresence } from "@/hooks/usePresence";
 import { isValidChatId } from "@/utils/chatUtils";
 
@@ -114,15 +115,26 @@ const ConversationItem = ({ conversation, isSelected, _onClick, isOnline }) => {
         </div>
         <div className="mt-1 flex items-center justify-between">
           <p className="max-w-[150px] truncate text-sm text-gray-400">
-            {conversation.isNewChat 
-              ? "Start conversation" 
-              : "Chat active"}
+            {conversation.isBlocked 
+              ? "Blocked chat" 
+              : conversation.isNewChat 
+                ? "Start conversation" 
+                : "Chat active"}
           </p>
-          {conversation.unreadCount > 0 && (
-            <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs text-white">
-              {conversation.unreadCount > 9 ? "9+" : conversation.unreadCount}
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {conversation.isBlocked && (
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-500">
+                <svg className="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
+                </svg>
+              </span>
+            )}
+            {conversation.unreadCount > 0 && (
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs text-white">
+                {conversation.unreadCount > 9 ? "9+" : conversation.unreadCount}
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -182,7 +194,11 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
   const { data: session } = useSession();
   const [reply, setReply] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showBlockConfirm, setShowBlockConfirm] = useState(false);
+  const [showUnblockConfirm, setShowUnblockConfirm] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
   const messagesEndRef = useRef(null);
+  const { blockChat, unblockChat, checkChatBlockedStatus, loading: blockLoading } = useChatBlock();
   
   const {
     messages,
@@ -207,6 +223,27 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
       markAsRead();
     }
   }, [conversation, fetchMessages, markAsRead]);
+
+  // Check if chat is blocked
+  useEffect(() => {
+    if (conversation) {
+      // First check if the conversation already has blocked status
+      if (conversation.hasOwnProperty('isBlocked')) {
+        setIsBlocked(conversation.isBlocked);
+      } else if (!conversation.isNewChat && session?.user?.role === "trainer") {
+        // Fall back to API check for older conversations
+        const checkBlockedStatus = async () => {
+          try {
+            const result = await checkChatBlockedStatus(conversation.participantId, conversation.id);
+            setIsBlocked(result.isBlocked);
+          } catch (error) {
+            console.error("Error checking blocked status:", error);
+          }
+        };
+        checkBlockedStatus();
+      }
+    }
+  }, [conversation, session?.user?.role, checkChatBlockedStatus]);
 
   useEffect(() => {
     scrollToBottom();
@@ -235,7 +272,8 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
         });
 
         if (!response.ok) {
-          throw new Error("Failed to send message");
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to send message");
         }
 
         await response.json();
@@ -252,6 +290,11 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
       }
     } catch (error) {
       console.error("Failed to send message:", error);
+      
+      // Handle blocked chat error specifically
+      if (error.message.includes("blocked")) {
+        setIsBlocked(true);
+      }
     }
   };
 
@@ -302,19 +345,131 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
           </div>
         </div>
         
-        {/* Delete button */}
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setShowDeleteConfirm(true)}
-            className="rounded p-2 text-gray-400 hover:bg-red-500/20 hover:text-red-400 transition-colors"
-            title="Delete conversation"
-          >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <title>Delete conversation</title>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
+        {/* Action buttons */}
+        <div className="flex items-center gap-2">
+          {/* Block/Unblock Chat button - only for trainers */}
+          {session?.user?.role === "trainer" && !conversation.isNewChat && (
+            <div className="relative">
+              {isBlocked ? (
+                <button
+                  type="button"
+                  onClick={() => setShowUnblockConfirm(true)}
+                  className="rounded p-2 text-gray-400 hover:bg-green-500/20 hover:text-green-400 transition-colors"
+                  title="Unblock chat"
+                  disabled={blockLoading}
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <title>Unblock chat</title>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowBlockConfirm(true)}
+                  className="rounded p-2 text-gray-400 hover:bg-orange-500/20 hover:text-orange-400 transition-colors"
+                  title="Block chat"
+                  disabled={blockLoading}
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <title>Block chat</title>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
+                  </svg>
+                </button>
+              )}
+              
+              {/* Block confirmation modal */}
+              {showBlockConfirm && (
+                <div className="absolute right-0 top-full mt-2 w-64 rounded-lg border border-[#333] bg-[#1a1a1a] p-4 shadow-lg z-10">
+                  <h4 className="mb-2 font-medium text-gray-100">Block Chat</h4>
+                  <p className="mb-4 text-sm text-gray-400">
+                    This will prevent {conversation.name} from sending you messages in this chat. They can still see your profile and request coaching.
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          // Get the client user ID from the conversation
+                          const clientUserId = conversation.participantId;
+                          
+                          await blockChat(clientUserId, conversation.id);
+                          setShowBlockConfirm(false);
+                          setIsBlocked(true);
+                          // Optionally refresh conversations or show success message
+                        } catch (error) {
+                          console.error("Error blocking chat:", error);
+                        }
+                      }}
+                      disabled={blockLoading}
+                      className="flex-1 rounded bg-orange-500 px-3 py-2 text-sm font-medium text-white hover:bg-orange-600 transition-colors disabled:opacity-50"
+                    >
+                      {blockLoading ? "Blocking..." : "Block Chat"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowBlockConfirm(false)}
+                      className="flex-1 rounded bg-[#333] px-3 py-2 text-sm font-medium text-gray-300 hover:bg-[#444] transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Unblock confirmation modal */}
+              {showUnblockConfirm && (
+                <div className="absolute right-0 top-full mt-2 w-64 rounded-lg border border-[#333] bg-[#1a1a1a] p-4 shadow-lg z-10">
+                  <h4 className="mb-2 font-medium text-gray-100">Unblock Chat</h4>
+                  <p className="mb-4 text-sm text-gray-400">
+                    This will allow {conversation.name} to send you messages again.
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          const clientUserId = conversation.participantId;
+                          
+                          await unblockChat(clientUserId, conversation.id);
+                          setShowUnblockConfirm(false);
+                          setIsBlocked(false);
+                          // Optionally refresh conversations or show success message
+                        } catch (error) {
+                          console.error("Error unblocking chat:", error);
+                        }
+                      }}
+                      disabled={blockLoading}
+                      className="flex-1 rounded bg-green-500 px-3 py-2 text-sm font-medium text-white hover:bg-green-600 transition-colors disabled:opacity-50"
+                    >
+                      {blockLoading ? "Unblocking..." : "Unblock Chat"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowUnblockConfirm(false)}
+                      className="flex-1 rounded bg-[#333] px-3 py-2 text-sm font-medium text-gray-300 hover:bg-[#444] transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Delete button */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="rounded p-2 text-gray-400 hover:bg-red-500/20 hover:text-red-400 transition-colors"
+              title="Delete conversation"
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <title>Delete conversation</title>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
           
           {/* Delete confirmation modal */}
           {showDeleteConfirm && (
@@ -355,6 +510,7 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
               </div>
             </div>
           )}
+        </div>
         </div>
       </div>
 
@@ -411,40 +567,51 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
       </div>
 
       {/* Reply form */}
-      <form onSubmit={handleSendMessage} className="border-t border-[#333] p-4">
-        <div className="flex items-start gap-2">
-          <div className="flex-grow">
-            <FormField
-              type="text"
-              placeholder={`Message ${conversation.name}...`}
-              value={reply}
-              onChange={(e) => {
-                setReply(e.target.value);
-                
-                // Handle typing indicator
-                if (e.target.value.trim()) {
-                  setTypingStatus(true);
-                } else {
-                  setTypingStatus(false);
-                }
-              }}
-              onFocus={() => setTypingStatus(true)}
-              onBlur={() => setTypingStatus(false)}
-              background="dark"
-              disabled={sending}
-            />
+      {isBlocked && session?.user?.role === "trainer" ? (
+        <div className="border-t border-[#333] p-4 bg-orange-900/20">
+          <div className="flex items-center gap-3 text-orange-300">
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
+            </svg>
+            <span className="text-sm">You have blocked this chat. Unblock to send messages.</span>
           </div>
-          <Button
-            type="submit"
-            variant="orangeFilled"
-            size="default"
-            disabled={reply.trim() === "" || sending}
-            className="mt-[5px]"
-          >
-            {sending ? "Sending..." : "Send"}
-          </Button>
         </div>
-      </form>
+      ) : (
+        <form onSubmit={handleSendMessage} className="border-t border-[#333] p-4">
+          <div className="flex items-start gap-2">
+            <div className="flex-grow">
+              <FormField
+                type="text"
+                placeholder={`Message ${conversation.name}...`}
+                value={reply}
+                onChange={(e) => {
+                  setReply(e.target.value);
+                  
+                  // Handle typing indicator
+                  if (e.target.value.trim()) {
+                    setTypingStatus(true);
+                  } else {
+                    setTypingStatus(false);
+                  }
+                }}
+                onFocus={() => setTypingStatus(true)}
+                onBlur={() => setTypingStatus(false)}
+                background="dark"
+                disabled={sending}
+              />
+            </div>
+            <Button
+              type="submit"
+              variant="orangeFilled"
+              size="default"
+              disabled={reply.trim() === "" || sending}
+              className="mt-[5px]"
+            >
+              {sending ? "Sending..." : "Send"}
+            </Button>
+          </div>
+        </form>
+      )}
     </div>
   );
 };
@@ -611,7 +778,8 @@ export const RealTimeChatInterface = ({ conversationId }) => {
     const matchesFilter =
       filter === "all" ||
       (filter === "unread" && conversation.unreadCount > 0) ||
-      (filter === "active" && !conversation.isNewChat);
+      (filter === "active" && !conversation.isNewChat && !conversation.isBlocked) ||
+      (filter === "blocked" && conversation.isBlocked);
 
     return matchesSearch && matchesFilter;
   });
@@ -653,7 +821,7 @@ export const RealTimeChatInterface = ({ conversationId }) => {
           />
         </div>
 
-        <div className="mb-4 flex">
+        <div className="mb-4 flex flex-wrap gap-2">
           <Button
             variant={filter === "all" ? "orangeFilled" : "orangeOutline"}
             size="small"
@@ -666,7 +834,7 @@ export const RealTimeChatInterface = ({ conversationId }) => {
             variant={filter === "unread" ? "orangeFilled" : "orangeOutline"}
             size="small"
             onClick={() => setFilter("unread")}
-            className="ml-2 flex-1 justify-center"
+            className="flex-1 justify-center"
           >
             Unread
           </Button>
@@ -674,10 +842,20 @@ export const RealTimeChatInterface = ({ conversationId }) => {
             variant={filter === "active" ? "orangeFilled" : "orangeOutline"}
             size="small"
             onClick={() => setFilter("active")}
-            className="ml-2 flex-1 justify-center"
+            className="flex-1 justify-center"
           >
             Active
           </Button>
+          {session?.user?.role === "trainer" && (
+            <Button
+              variant={filter === "blocked" ? "orangeFilled" : "orangeOutline"}
+              size="small"
+              onClick={() => setFilter("blocked")}
+              className="flex-1 justify-center"
+            >
+              Blocked
+            </Button>
+          )}
         </div>
 
         <div className="h-[500px] grow overflow-y-auto rounded-lg bg-[#0f0f0f]">

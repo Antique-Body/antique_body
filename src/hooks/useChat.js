@@ -203,7 +203,8 @@ export const useChat = (chatId) => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to send message");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to send message");
       }
 
       const data = await response.json();
@@ -214,7 +215,7 @@ export const useChat = (chatId) => {
       return data.message;
     } catch (err) {
       console.error("Error sending message:", err);
-      setError("Failed to send message");
+      setError(err.message || "Failed to send message");
       throw err;
     } finally {
       setSending(false);

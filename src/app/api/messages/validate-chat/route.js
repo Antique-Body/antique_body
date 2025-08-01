@@ -47,6 +47,32 @@ export async function POST(request) {
       );
     }
 
+    // Check if user is blocked (only check if client is accessing trainer's chat)
+    if (isClient) {
+      const trainer = await prisma.trainerInfo.findUnique({
+        where: { id: trainerId },
+        include: { user: true },
+      });
+
+      if (trainer) {
+        const block = await prisma.userBlock.findUnique({
+          where: {
+            blockerId_blockedId: {
+              blockerId: trainer.user.id,
+              blockedId: session.user.id,
+            },
+          },
+        });
+
+        if (block) {
+          return NextResponse.json(
+            { error: "You are blocked by this trainer and cannot access this conversation" },
+            { status: 403 }
+          );
+        }
+      }
+    }
+
     // Get participant information
     const participantInfo = await (async () => {
       if (isTrainer) {

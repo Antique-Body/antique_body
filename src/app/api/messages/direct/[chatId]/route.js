@@ -200,6 +200,38 @@ export async function POST(request, { params }) {
       );
     }
 
+    // Check if chat is blocked for both trainer and client
+    const chatBlock = await prisma.chatBlock.findUnique({
+      where: {
+        blockerId_blockedId_chatId: {
+          blockerId: trainer.user.id,
+          blockedId: client.user.id,
+          chatId: chatId,
+        },
+      },
+    });
+
+          if (chatBlock) {
+        if (isClient) {
+          return NextResponse.json(
+            {
+              error: "You have been blocked.",
+              blocked: true
+            },
+            { status: 403 }
+          );
+        } else if (isTrainer) {
+          return NextResponse.json(
+            {
+              error: "You have blocked this chat. Unblock to send messages.",
+              blocked: true,
+              isTrainerBlocked: true
+            },
+            { status: 403 }
+          );
+        }
+      }
+
     // Determine receiver
     const receiverId = isTrainer 
       ? client.user.id 
@@ -290,7 +322,7 @@ export async function POST(request, { params }) {
   } catch (error) {
     console.error("Error sending message:", error);
     return NextResponse.json(
-      { error: "Failed to send message" },
+      { error: error.message || "Failed to send message" },
       { status: 500 }
     );
   }
