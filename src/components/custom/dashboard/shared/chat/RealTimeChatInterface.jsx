@@ -201,6 +201,7 @@ const ChatHistory = ({
   onRefreshConversations = null,
   isOnline,
   onDeleteChat,
+  onUpdateConversation = null,
 }) => {
   const { data: session } = useSession();
   const pathname = usePathname();
@@ -306,10 +307,20 @@ const ChatHistory = ({
         await response.json();
         setReply("");
 
-        // Update the conversation to mark it as no longer new
-        // and trigger a refresh of the conversation list
+        // Update the current conversation to mark it as no longer new
+        if (conversation && onUpdateConversation) {
+          const updatedConversation = {
+            ...conversation,
+            isNewChat: false,
+            lastMessageAt: new Date().toISOString(),
+          };
+          onUpdateConversation(updatedConversation);
+        }
+
+        // Refresh conversations list without clearing active conversation
         if (onRefreshConversations) {
-          onRefreshConversations();
+          // Pass true to keep the active conversation
+          onRefreshConversations(true);
         }
       } else {
         await sendMessage(reply);
@@ -915,11 +926,18 @@ export const RealTimeChatInterface = ({ conversationId }) => {
     }
   }, [conversations, conversationId, activeConversation]);
 
-  const handleRefreshConversations = () => {
+  const handleRefreshConversations = (keepActive = false) => {
     fetchConversations();
-    setActiveConversation(null);
-    setShowMobileChat(false);
+    if (!keepActive) {
+      setActiveConversation(null);
+      setShowMobileChat(false);
+    }
     setValidatedChatIds(new Set()); // Clear validation cache on refresh
+  };
+
+  // Function to update the active conversation
+  const handleUpdateConversation = (updatedConversation) => {
+    setActiveConversation(updatedConversation);
   };
 
   // Filter conversations based on search query and filter type
@@ -1070,6 +1088,7 @@ export const RealTimeChatInterface = ({ conversationId }) => {
             onClose={handleCloseMobileChat}
             onRefreshConversations={handleRefreshConversations}
             onDeleteChat={handleDeleteChat}
+            onUpdateConversation={handleUpdateConversation}
             isOnline={
               activeConversation
                 ? isUserOnline(activeConversation.participantId)
