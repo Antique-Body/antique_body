@@ -15,25 +15,29 @@ export const generateChatId = (trainerId, clientId) => {
 };
 
 /**
- * Parse a chat ID to extract trainer and client IDs
+ * Parse a chat ID to extract the two IDs
  * @param {string} chatId - The chat ID to parse
- * @returns {object} Object containing trainerId and clientId
+ * @returns {object} Object containing the two IDs (need to determine which is trainer/client via DB)
  */
 export const parseChatId = (chatId) => {
   if (!chatId || typeof chatId !== "string") {
     throw new Error("Invalid chat ID");
   }
 
-  // Since we're concatenating IDs directly, we need to determine which is which
-  // This is a simplified approach - in a real app you might want to validate against the database
-  // For now, we'll assume the first part is always the trainer ID and second is client ID
-  // This works because we sort them when generating
-
   // Since CUIDs are 25 characters, we can split at the 25th character
-  const trainerId = chatId.substring(0, 25);
-  const clientId = chatId.substring(25);
+  const firstId = chatId.substring(0, 25);
+  const secondId = chatId.substring(25);
 
-  return { trainerId, clientId };
+  // Return both IDs - the API routes will determine which is trainer/client
+  // by checking the database for both combinations
+  return {
+    firstId,
+    secondId,
+    // For backward compatibility, provide these too
+    // but the actual determination should be done in API routes
+    trainerId: firstId,
+    clientId: secondId,
+  };
 };
 
 /**

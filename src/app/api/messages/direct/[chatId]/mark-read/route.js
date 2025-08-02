@@ -4,6 +4,36 @@ import { auth } from "#/auth";
 import prisma from "@/lib/prisma";
 import { parseChatId, isValidChatId } from "@/utils/chatUtils";
 
+// Helper function to determine the correct trainer and client IDs from chat ID
+async function determineTrainerAndClientIds(chatId) {
+  const { firstId, secondId } = parseChatId(chatId);
+
+  if (!firstId || !secondId) {
+    throw new Error("Invalid chat ID format");
+  }
+
+  // Try both combinations to see which one exists in the database
+  const [trainer1, trainer2, client1, client2] = await Promise.all([
+    prisma.trainerInfo.findUnique({ where: { id: firstId } }),
+    prisma.trainerInfo.findUnique({ where: { id: secondId } }),
+    prisma.clientInfo.findUnique({ where: { id: firstId } }),
+    prisma.clientInfo.findUnique({ where: { id: secondId } }),
+  ]);
+
+  // Check which combination is valid
+  if (trainer1 && client2) {
+    // First ID is trainer, second ID is client
+    return { trainerId: firstId, clientId: secondId };
+  } else if (trainer2 && client1) {
+    // Second ID is trainer, first ID is client
+    return { trainerId: secondId, clientId: firstId };
+  } else {
+    throw new Error(
+      "Invalid chat ID - no valid trainer/client combination found"
+    );
+  }
+}
+
 export async function POST(request, { params }) {
   try {
     const session = await auth();
@@ -22,13 +52,13 @@ export async function POST(request, { params }) {
       );
     }
 
-    const { trainerId, clientId } = parseChatId(chatId);
-
-    if (!trainerId || !clientId) {
-      return NextResponse.json(
-        { error: "Invalid chat ID format" },
-        { status: 400 }
-      );
+    let trainerId, clientId;
+    try {
+      const result = await determineTrainerAndClientIds(chatId);
+      trainerId = result.trainerId;
+      clientId = result.clientId;
+    } catch (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
     // Verify user has access to this chat
@@ -45,8 +75,11 @@ export async function POST(request, { params }) {
     }
 
     // Check if user is either the trainer or client in this chat
-    const isTrainer = user.trainerInfo?.id === trainerId;
-    const isClient = user.clientInfo?.id === clientId;
+    // Since generateChatId sorts IDs alphabetically, we need to check both combinations
+    const isTrainer =
+      user.trainerInfo?.id === trainerId || user.trainerInfo?.id === clientId;
+    const isClient =
+      user.clientInfo?.id === clientId || user.clientInfo?.id === trainerId;
 
     if (!isTrainer && !isClient) {
       return NextResponse.json(

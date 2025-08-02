@@ -65,7 +65,9 @@ export const BlockChatModal = ({
                 <Image
                   src={userToBlock.clientProfile.profileImage}
                   alt="Profile"
-                  className="w-10 h-10 rounded-full object-cover"
+                  width={40}
+                  height={40}
+                  className="rounded-full object-cover"
                 />
               ) : (
                 <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">

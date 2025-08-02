@@ -33,6 +33,9 @@ export async function GET() {
     const isTrainer = user.role === "trainer" && user.trainerInfo;
     const isClient = user.role === "client" && user.clientInfo;
 
+    // Get blocked chat IDs once for trainers (will be reused later)
+    let blockedChatIdSet = new Set();
+
     if (isTrainer || isClient) {
       const whereClause = isTrainer
         ? { trainerId: user.trainerInfo.id }
@@ -111,9 +114,7 @@ export async function GET() {
           select: { chatId: true },
         });
 
-        const blockedChatIdSet = new Set(
-          blockedChatIds.map((block) => block.chatId)
-        );
+        blockedChatIdSet = new Set(blockedChatIds.map((block) => block.chatId));
 
         // Add isBlocked flag to conversations instead of filtering them out
         conversations = conversations.map((conversation) => ({
@@ -195,17 +196,8 @@ export async function GET() {
         .map((cr) => (isTrainer ? cr.client : cr.trainer))
         .filter((user) => user && !existingIds.includes(user.id));
 
-      // Filter out blocked chats from available users for trainers
+      // Filter out blocked chats from available users for trainers (reuse blockedChatIdSet)
       if (isTrainer) {
-        const blockedChatIds = await prisma.chatBlock.findMany({
-          where: { blockerId: session.user.id },
-          select: { chatId: true },
-        });
-
-        const blockedChatIdSet = new Set(
-          blockedChatIds.map((block) => block.chatId)
-        );
-
         availableUsers = availableUsers.filter((participant) => {
           const chatId = generateChatId(user.trainerInfo.id, participant.id);
           return !blockedChatIdSet.has(chatId);
