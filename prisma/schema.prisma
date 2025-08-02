@@ -3,9 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  directUrl  = env("DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -26,6 +26,10 @@ model User {
   emailVerifications EmailVerification[]
   phoneVerifications PhoneVerification[]
   trainerInfo        TrainerInfo?
+  messagesSent       Message[]           @relation("MessageSender")
+  messagesReceived   Message[]           @relation("MessageReceiver")
+  chatBlockedBy      ChatBlock[]         @relation("ChatBlocker")
+  chatBlockedUsers   ChatBlock[]         @relation("ChatBlocked")
 
   @@index([email])
   @@index([phone])
@@ -125,6 +129,7 @@ model TrainerInfo {
   trainerSettings          TrainerSettings?
   trainingPlans            TrainingPlan[]
   assignedDietPlans        DietPlanAssignment[]
+  conversations            Conversation[]
 }
 
 model TrainerProfile {
@@ -241,6 +246,7 @@ model ClientInfo {
   coachingRequestCooldowns CoachingRequestCooldown[]
   dietPlanAssignments      DietPlanAssignment[]
   customMeals              CustomMeal[]
+  conversations            Conversation[]
 }
 
 model ClientProfile {
@@ -463,7 +469,7 @@ model TrainingPlan {
 }
 
 model NutritionPlan {
-  id                        String      @id @default(cuid())
+  id                        String               @id @default(cuid())
   trainerInfoId             String
   title                     String
   description               String?
@@ -481,13 +487,13 @@ model NutritionPlan {
   days                      Json?
   recommendedFrequency      String?
   adaptability              String?
-  createdAt                 DateTime    @default(now())
-  updatedAt                 DateTime    @updatedAt
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
   deletedAt                 DateTime?
   clientCount               Int?
-  trainerInfo               TrainerInfo @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
+  trainerInfo               TrainerInfo          @relation(fields: [trainerInfoId], references: [id], onDelete: Cascade)
   dietPlanAssignments       DietPlanAssignment[]
-  
+
   @@index([trainerInfoId])
 }
 
@@ -526,24 +532,100 @@ model CoachingRequestCooldown {
   @@index([removedAt])
 }
 
+// Messaging System Models
+model Conversation {
+  id                 String    @id @default(cuid())
+  chatId             String    @unique // Format: concatenated trainerId+clientId (sorted)
+  clientId           String
+  trainerId          String
+  lastMessageAt      DateTime?
+  clientUnreadCount  Int       @default(0)
+  trainerUnreadCount Int       @default(0)
+  isActive           Boolean   @default(true)
+  deletedAt          DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  // Relations
+  client          ClientInfo      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  trainer         TrainerInfo     @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([trainerId])
+  @@index([lastMessageAt])
+  @@index([isActive])
+  @@index([deletedAt])
+}
+
+model Message {
+  id                String    @id @default(cuid())
+  content           String
+  messageType       String    @default("text") // text, image, file, etc.
+  fileUrl           String?
+  fileName          String?
+  senderId          String
+  receiverId        String
+  chatId            String
+  isRead            Boolean   @default(false)
+  blocked           Boolean   @default(false) // Track if message was blocked
+  deletedAt         DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  editedAt          DateTime?
+
+  // Relations
+  sender          User            @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver        User            @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([chatId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@index([deletedAt])
+  @@index([blocked])
+}
+
+
+
+// Chat Blocking System (only blocks messaging, not full user blocking)
+model ChatBlock {
+  id          String   @id @default(cuid())
+  blockerId   String   // User who is blocking chat (trainer)
+  blockedId   String   // User whose chat is blocked (client)
+  chatId      String   // Specific chat that is blocked
+  reason      String?  // Optional reason for blocking chat
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  blocker User @relation("ChatBlocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked User @relation("ChatBlocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId, chatId])
+  @@index([blockerId])
+  @@index([blockedId])
+  @@index([chatId])
+  @@index([createdAt])
+}
 
 // Diet Tracking System
 model DietPlanAssignment {
   id              String   @id @default(cuid())
   clientId        String
   nutritionPlanId String
-  assignedById    String   // trainer who assigned the plan
+  assignedById    String // trainer who assigned the plan
   startDate       DateTime @default(now())
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  
+
   // Relations
-  client          ClientInfo @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  nutritionPlan   NutritionPlan @relation(fields: [nutritionPlanId], references: [id], onDelete: Cascade)
-  assignedBy      TrainerInfo @relation(fields: [assignedById], references: [id], onDelete: Cascade)
-  dailyLogs       DailyDietLog[]
-  
+  client        ClientInfo     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  nutritionPlan NutritionPlan  @relation(fields: [nutritionPlanId], references: [id], onDelete: Cascade)
+  assignedBy    TrainerInfo    @relation(fields: [assignedById], references: [id], onDelete: Cascade)
+  dailyLogs     DailyDietLog[]
+
   @@index([clientId])
   @@index([nutritionPlanId])
   @@index([assignedById])
@@ -552,25 +634,25 @@ model DietPlanAssignment {
 }
 
 model DailyDietLog {
-  id                  String   @id @default(cuid())
+  id                   String   @id @default(cuid())
   dietPlanAssignmentId String
-  date                DateTime @db.Date
-  dayNumber           Int      // Which day of the plan (1, 2, 3, etc.)
-  totalCalories       Float    @default(0)
-  totalProtein        Float    @default(0)
-  totalCarbs          Float    @default(0)
-  totalFat            Float    @default(0)
-  completedMeals      Int      @default(0)
-  totalMeals          Int      @default(0)
-  isCompleted         Boolean  @default(false)
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-  
+  date                 DateTime @db.Date
+  dayNumber            Int // Which day of the plan (1, 2, 3, etc.)
+  totalCalories        Float    @default(0)
+  totalProtein         Float    @default(0)
+  totalCarbs           Float    @default(0)
+  totalFat             Float    @default(0)
+  completedMeals       Int      @default(0)
+  totalMeals           Int      @default(0)
+  isCompleted          Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
   // Relations
-  dietPlanAssignment  DietPlanAssignment @relation(fields: [dietPlanAssignmentId], references: [id], onDelete: Cascade)
-  mealLogs            MealLog[]
-  snackLogs           SnackLog[]
-  
+  dietPlanAssignment DietPlanAssignment @relation(fields: [dietPlanAssignmentId], references: [id], onDelete: Cascade)
+  mealLogs           MealLog[]
+  snackLogs          SnackLog[]
+
   @@unique([dietPlanAssignmentId, date])
   @@index([dietPlanAssignmentId])
   @@index([date])
@@ -579,23 +661,23 @@ model DailyDietLog {
 }
 
 model MealLog {
-  id              String   @id @default(cuid())
-  dailyDietLogId  String
-  mealName        String   // "Breakfast", "Lunch", "Dinner", "Snack"
-  mealTime        String   // "08:00", "13:00", etc.
-  selectedOption  Json     // The meal option that was selected
-  isCompleted     Boolean  @default(false)
-  completedAt     DateTime?
-  calories        Float    @default(0)
-  protein         Float    @default(0)
-  carbs           Float    @default(0)
-  fat             Float    @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  id             String    @id @default(cuid())
+  dailyDietLogId String
+  mealName       String // "Breakfast", "Lunch", "Dinner", "Snack"
+  mealTime       String // "08:00", "13:00", etc.
+  selectedOption Json // The meal option that was selected
+  isCompleted    Boolean   @default(false)
+  completedAt    DateTime?
+  calories       Float     @default(0)
+  protein        Float     @default(0)
+  carbs          Float     @default(0)
+  fat            Float     @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
   // Relations
-  dailyDietLog    DailyDietLog @relation(fields: [dailyDietLogId], references: [id], onDelete: Cascade)
-  
+  dailyDietLog DailyDietLog @relation(fields: [dailyDietLogId], references: [id], onDelete: Cascade)
+
   @@index([dailyDietLogId])
   @@index([mealName])
   @@index([isCompleted])
@@ -604,24 +686,24 @@ model MealLog {
 
 // Snack Log for extra meals/snacks outside of planned meals
 model SnackLog {
-  id              String   @id @default(cuid())
-  dailyDietLogId  String
-  name            String   // Name of the snack/food
-  description     String?  // Optional description
-  mealType        String   // "snack", "drink", "dessert", "supplement", "other"
-  calories        Float    @default(0)
-  protein         Float    @default(0)
-  carbs           Float    @default(0)
-  fat             Float    @default(0)
-  ingredients     Json     // Array of ingredient strings
-  loggedAt        DateTime @default(now())
-  loggedTime      String   // Time when logged (HH:MM format)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  id             String   @id @default(cuid())
+  dailyDietLogId String
+  name           String // Name of the snack/food
+  description    String? // Optional description
+  mealType       String // "snack", "drink", "dessert", "supplement", "other"
+  calories       Float    @default(0)
+  protein        Float    @default(0)
+  carbs          Float    @default(0)
+  fat            Float    @default(0)
+  ingredients    Json // Array of ingredient strings
+  loggedAt       DateTime @default(now())
+  loggedTime     String // Time when logged (HH:MM format)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
   // Relations
-  dailyDietLog    DailyDietLog @relation(fields: [dailyDietLogId], references: [id], onDelete: Cascade)
-  
+  dailyDietLog DailyDietLog @relation(fields: [dailyDietLogId], references: [id], onDelete: Cascade)
+
   @@index([dailyDietLogId])
   @@index([mealType])
   @@index([loggedAt])
@@ -630,24 +712,24 @@ model SnackLog {
 
 // Custom Meal History System
 model CustomMeal {
-  id              String   @id @default(cuid())
-  clientId        String
-  name            String
-  description     String?
-  mealType        String   // "breakfast", "lunch", "dinner", "snack"
-  calories        Float    @default(0)
-  protein         Float    @default(0)
-  carbs           Float    @default(0)
-  fat             Float    @default(0)
-  ingredients     Json     // Array of ingredient strings
-  usageCount      Int      @default(1)
-  lastUsed        DateTime @default(now())
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  id          String   @id @default(cuid())
+  clientId    String
+  name        String
+  description String?
+  mealType    String // "breakfast", "lunch", "dinner", "snack"
+  calories    Float    @default(0)
+  protein     Float    @default(0)
+  carbs       Float    @default(0)
+  fat         Float    @default(0)
+  ingredients Json // Array of ingredient strings
+  usageCount  Int      @default(1)
+  lastUsed    DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
   // Relations
-  client          ClientInfo @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  
+  client ClientInfo @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
   @@index([clientId])
   @@index([mealType])
   @@index([lastUsed])
@@ -655,7 +737,6 @@ model CustomMeal {
   @@index([clientId, mealType])
   @@index([clientId, lastUsed])
 }
-
 
 model AssignedTrainingPlan {
   id             String       @id @default(cuid())

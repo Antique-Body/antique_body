@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { auth } from "#/auth";
-import { userService } from "@/app/api/users/services";
+import prisma from "@/lib/prisma";
 
 export async function GET() {
   try {
@@ -11,7 +11,13 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await userService.findUserById(session.user.id);
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: {
+        trainerInfo: true,
+        clientInfo: true,
+      },
+    });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -48,11 +54,15 @@ export async function PATCH(request) {
     }
 
     try {
-      // Update user using the service
-      const updatedUser = await userService.updateUserProfile(
-        session.user.id,
-        data
-      );
+      // Update user directly
+      const updatedUser = await prisma.user.update({
+        where: { id: session.user.id },
+        data,
+        include: {
+          trainerInfo: true,
+          clientInfo: true,
+        },
+      });
 
       return NextResponse.json(updatedUser);
     } catch (error) {

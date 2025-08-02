@@ -1,5 +1,6 @@
 import { Icon } from "@iconify/react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
@@ -12,11 +13,20 @@ import {
   Reviews,
   Gallery,
 } from "@/components/custom/shared/trainers-list";
+import { useCurrentUser } from "@/hooks";
+import { generateChatId } from "@/utils/chatUtils";
 import { mapSpecialtyToLabel } from "@/utils/specialtyMapper";
 
 // This component is the profile modal that appears when "View Profile" is clicked
 export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
   const [activeTab, setActiveTab] = useState("about");
+  const router = useRouter();
+  const {
+    getClientId,
+    getTrainerId,
+    getRole,
+    loading: userLoading,
+  } = useCurrentUser();
 
   const hasHighlightedImages =
     trainer?.galleryImages?.some((img) => img.isHighlighted) || false;
@@ -56,6 +66,59 @@ export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
       const name = typeof specialty === "string" ? specialty : specialty.name;
       return mapSpecialtyToLabel(name);
     });
+  };
+
+  // Handle message button click
+  const handleMessageClick = () => {
+    if (userLoading) return;
+
+    const role = getRole();
+    const clientId = getClientId();
+    const trainerId = getTrainerId();
+
+    if (!role || !trainer?.id) {
+      console.error("Missing user role or trainer ID");
+      return;
+    }
+
+    // Create chat ID based on role
+    let chatId;
+    if (role === "client") {
+      if (!clientId) {
+        console.error("Client ID is undefined");
+        return;
+      }
+      chatId = generateChatId(trainer.id, clientId);
+    } else if (role === "trainer") {
+      if (!trainerId) {
+        console.error("Trainer ID is undefined");
+        return;
+      }
+      chatId = generateChatId(trainerId, trainer.id);
+    } else {
+      console.error("Invalid user role for messaging");
+      return;
+    }
+
+    // Store participant info in session storage for secure access
+    const participantInfo = {
+      name: trainer.name || "Unknown Trainer",
+      avatar: trainer.profileImage || null,
+      id: trainer.id,
+      chatId: chatId,
+      timestamp: Date.now(), // Add timestamp for security
+    };
+
+    // Store in session storage (cleared when browser/tab closes)
+    sessionStorage.setItem("tempConversation", JSON.stringify(participantInfo));
+
+    // Navigate to the appropriate messages page
+    const basePath =
+      role === "client"
+        ? "/client/dashboard/messages"
+        : "/trainer/dashboard/messages";
+    router.push(`${basePath}/${encodeURIComponent(chatId)}`);
+    onClose(); // Close the modal
   };
 
   // Function to render rating stars
@@ -188,7 +251,11 @@ export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
             <Button variant="orangeFilled" className="px-3 py-1.5 text-sm">
               Book Session
             </Button>
-            <Button variant="secondary" className="px-3 py-1.5 text-sm">
+            <Button
+              onClick={handleMessageClick}
+              variant="secondary"
+              className="px-3 py-1.5 text-sm"
+            >
               Message
             </Button>
             <Button

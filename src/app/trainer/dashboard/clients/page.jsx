@@ -165,9 +165,6 @@ export default function ClientsPage() {
       router.push(
         `/trainer/dashboard/clients/${clientRequest.id}/plans/${planId}?type=${planType}`
       );
-      router.push(
-        `/trainer/dashboard/clients/${clientRequest.id}/plans/${planId}?type=${planType}`
-      );
     } else {
       // Normal client dashboard navigation
       router.push(`/trainer/dashboard/clients/${clientRequest.id}`);
