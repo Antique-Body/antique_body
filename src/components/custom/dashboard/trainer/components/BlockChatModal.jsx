@@ -1,4 +1,5 @@
 import { Icon } from "@iconify/react";
+import Image from "next/image";
 import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
@@ -63,7 +64,7 @@ export const BlockChatModal = ({
           <div className="mb-6 p-4 bg-gray-50 rounded-lg">
             <div className="flex items-center gap-3">
               {userToBlock.clientProfile?.profileImage ? (
-                <img
+                <Image
                   src={userToBlock.clientProfile.profileImage}
                   alt="Profile"
                   className="w-10 h-10 rounded-full object-cover"

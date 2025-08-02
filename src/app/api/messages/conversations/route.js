@@ -269,17 +269,6 @@ export async function GET() {
       return 0;
     });
 
-    // Debug logging (remove in production)
-    if (process.env.NODE_ENV === "development") {
-      console.log("Debug - Conversations:", {
-        existingCount: formattedConversations.length,
-        availableCount: availableChats.length,
-        totalCount: allConversations.length,
-        existingIds: conversations.map(conv => isTrainer ? conv.clientId : conv.trainerId),
-        availableChatIds: availableChats.map(chat => chat.id)
-      });
-    }
-
     return NextResponse.json({ conversations: allConversations });
   } catch (error) {
     console.error("Error fetching conversations:", error);
