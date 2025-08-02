@@ -724,6 +724,7 @@ export const RealTimeChatInterface = ({ conversationId }) => {
   const [invalidChatId, setInvalidChatId] = useState(false);
   const [validatedChatIds, setValidatedChatIds] = useState(new Set()); // Cache validated chat IDs
   const [sessionStorageProcessed, setSessionStorageProcessed] = useState(false);
+  const [cachedParticipantData, setCachedParticipantData] = useState({}); // Store participant data by conversation ID
 
   const { conversations, loading, error, fetchConversations } =
     useConversations();
@@ -770,10 +771,19 @@ export const RealTimeChatInterface = ({ conversationId }) => {
           // Try session storage for new conversation
           let participantName = "New Conversation";
           let participantAvatar = null;
-
-          // Try to get participant info from session storage first (only if not already processed)
           let participantInfoFound = false;
-          if (!sessionStorageProcessed) {
+
+          // Check cached participant data first
+          if (cachedParticipantData[conversationId]) {
+            const cached = cachedParticipantData[conversationId];
+            participantName = cached.name || "New Conversation";
+            participantAvatar = cached.avatar || null;
+            participantInfoFound = true;
+          }
+
+          // If no cached data, try to read from sessionStorage
+          if (!participantInfoFound && !sessionStorageProcessed) {
+            // Try to read from sessionStorage
             try {
               // Check if sessionStorage is available (privacy mode, quota issues, etc.)
               if (
@@ -816,21 +826,22 @@ export const RealTimeChatInterface = ({ conversationId }) => {
                     participantInfo.chatId === conversationId;
 
                   if (!isExpired && isForCurrentChat) {
-                    // Check if this conversation already exists in the loaded conversations
-                    // If it does, don't use sessionStorage data (existing conversation will be handled by second useEffect)
-                    const existingConversation = conversations.find(
-                      (conv) => conv.id === conversationId
-                    );
+                    // Store the data in cached state for persistence
+                    setCachedParticipantData((prev) => ({
+                      ...prev,
+                      [conversationId]: {
+                        name: participantInfo.name,
+                        avatar: participantInfo.avatar,
+                      },
+                    }));
 
-                    if (!existingConversation) {
-                      // Only use sessionStorage for truly new conversations
-                      participantName =
-                        participantInfo.name || "New Conversation";
-                      participantAvatar = participantInfo.avatar || null;
-                      participantInfoFound = true;
-                    }
+                    // Use the participant info
+                    participantName =
+                      participantInfo.name || "New Conversation";
+                    participantAvatar = participantInfo.avatar || null;
+                    participantInfoFound = true;
 
-                    // Clear the session storage after using it
+                    // Clear the session storage
                     try {
                       sessionStorage.removeItem("tempConversation");
                     } catch (removeError) {
@@ -839,7 +850,6 @@ export const RealTimeChatInterface = ({ conversationId }) => {
                         removeError
                       );
                     }
-                    // Mark as processed to prevent future accesses
                     setSessionStorageProcessed(true);
                   }
                 }
@@ -897,8 +907,8 @@ export const RealTimeChatInterface = ({ conversationId }) => {
             }
           }
 
-          // Only allow creating temp conversations if participant info is provided
-          if (participantInfoFound) {
+          // Create conversation if we have any participant info
+          if (participantInfoFound || participantName !== "New Conversation") {
             const tempConversation = {
               id: conversationId,
               participantId: null,
@@ -919,27 +929,41 @@ export const RealTimeChatInterface = ({ conversationId }) => {
       }
     };
 
-    // Reset session storage processed flag when conversation ID changes
-    setSessionStorageProcessed(false);
     handleConversationId();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId, validatedChatIds, loading, conversations]);
 
+  // Reset session storage state only when conversation ID changes
+  useEffect(() => {
+    setSessionStorageProcessed(false);
+  }, [conversationId]);
+
   // Handle when conversations are loaded and we have a conversation ID
   useEffect(() => {
     if (conversationId && conversations.length > 0) {
-      const existingConversation = conversations.find(
-        (conv) => conv.id === conversationId
+      const existingRealConversation = conversations.find(
+        (conv) => conv.id === conversationId && !conv.isNewChat
       );
 
-      if (existingConversation) {
-        // Always update to the real conversation if found, even if we have a temporary one
-        setActiveConversation(existingConversation);
-        setShowMobileChat(true);
-        setInvalidChatId(false);
+      if (existingRealConversation) {
+        // Only switch to URL conversation if:
+        // 1. No active conversation currently set (initial load), OR
+        // 2. Active conversation doesn't exist in real conversations (cleanup stale temporary)
+        // Don't switch if user has an active real conversation, even if URL is different
+        const shouldSwitchToUrlConversation =
+          !activeConversation ||
+          !conversations.find(
+            (conv) => conv.id === activeConversation.id && !conv.isNewChat
+          );
+
+        if (shouldSwitchToUrlConversation) {
+          setActiveConversation(existingRealConversation);
+          setShowMobileChat(true);
+          setInvalidChatId(false);
+        }
       }
     }
-  }, [conversations, conversationId, loading]);
+  }, [conversations, conversationId, loading, activeConversation]);
 
   const handleRefreshConversations = (keepActive = false) => {
     fetchConversations();
