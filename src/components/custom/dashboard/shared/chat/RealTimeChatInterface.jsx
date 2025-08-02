@@ -791,7 +791,7 @@ export const RealTimeChatInterface = ({ conversationId }) => {
                 typeof sessionStorage === "undefined"
               ) {
                 console.warn(
-                  "SessionStorage is not available in this environment"
+                  "SessionStorage is not available in this environment "
                 );
                 setSessionStorageProcessed(true); // Skip future attempts
               } else {
