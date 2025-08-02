@@ -757,11 +757,15 @@ export const RealTimeChatInterface = ({ conversationId }) => {
           conversations.length > 0
             ? conversations.find((conv) => conv.id === conversationId)
             : null;
+
         if (conversation) {
           // Existing conversation found - no validation needed
           setActiveConversation(conversation);
           setShowMobileChat(true);
-        } else {
+        } else if (!loading) {
+          // Only create temporary conversation if conversations are fully loaded
+          // and conversation doesn't exist
+
           // Conversations are loaded but this one doesn't exist, or conversations not loaded yet
           // Try session storage for new conversation
           let participantName = "New Conversation";
@@ -812,10 +816,19 @@ export const RealTimeChatInterface = ({ conversationId }) => {
                     participantInfo.chatId === conversationId;
 
                   if (!isExpired && isForCurrentChat) {
-                    participantName =
-                      participantInfo.name || "New Conversation";
-                    participantAvatar = participantInfo.avatar || null;
-                    participantInfoFound = true;
+                    // Check if this conversation already exists in the loaded conversations
+                    // If it does, don't use sessionStorage data (existing conversation will be handled by second useEffect)
+                    const existingConversation = conversations.find(
+                      (conv) => conv.id === conversationId
+                    );
+
+                    if (!existingConversation) {
+                      // Only use sessionStorage for truly new conversations
+                      participantName =
+                        participantInfo.name || "New Conversation";
+                      participantAvatar = participantInfo.avatar || null;
+                      participantInfoFound = true;
+                    }
 
                     // Clear the session storage after using it
                     try {
@@ -885,7 +898,7 @@ export const RealTimeChatInterface = ({ conversationId }) => {
           }
 
           // Only allow creating temp conversations if participant info is provided
-          if (participantName !== "New Conversation") {
+          if (participantInfoFound) {
             const tempConversation = {
               id: conversationId,
               participantId: null,
@@ -910,21 +923,23 @@ export const RealTimeChatInterface = ({ conversationId }) => {
     setSessionStorageProcessed(false);
     handleConversationId();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversationId, validatedChatIds]);
+  }, [conversationId, validatedChatIds, loading, conversations]);
 
   // Handle when conversations are loaded and we have a conversation ID
   useEffect(() => {
-    if (conversationId && conversations.length > 0 && !activeConversation) {
+    if (conversationId && conversations.length > 0) {
       const existingConversation = conversations.find(
         (conv) => conv.id === conversationId
       );
+
       if (existingConversation) {
+        // Always update to the real conversation if found, even if we have a temporary one
         setActiveConversation(existingConversation);
         setShowMobileChat(true);
         setInvalidChatId(false);
       }
     }
-  }, [conversations, conversationId, activeConversation]);
+  }, [conversations, conversationId, loading]);
 
   const handleRefreshConversations = (keepActive = false) => {
     fetchConversations();
