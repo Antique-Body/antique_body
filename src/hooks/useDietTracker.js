@@ -1059,21 +1059,24 @@ export const useDietTracker = () => {
     try {
       setIsWaterLoading(true);
 
-      // For now, we'll simulate fetching water data
-      // This will be replaced with actual API call later
-      const mockWaterData = {
-        dailyIntake: 1200, // ml
-        goal: 4000, // ml
-        lastUpdated: new Date().toISOString(),
-      };
+      const today = new Date().toISOString().split("T")[0];
+      const response = await fetch(
+        `/api/users/client/diet-tracker/water?date=${today}`
+      );
 
-      console.log("🌊 [WATER] Mock water data received:", mockWaterData);
-      setDailyWaterIntake(mockWaterData.dailyIntake);
+      if (!response.ok) {
+        throw new Error("Failed to fetch water intake");
+      }
 
-      return mockWaterData;
+      const data = await response.json();
+      console.log("🌊 [WATER] Water data received:", data);
+      
+      setDailyWaterIntake(data.waterIntake || 0);
+      return data;
     } catch (err) {
       console.error("🌊 [WATER] Error fetching water intake:", err);
-      setError(err.message);
+      // Don't set error for water intake failures, just use default
+      setDailyWaterIntake(0);
     } finally {
       setIsWaterLoading(false);
     }
@@ -1085,18 +1088,31 @@ export const useDietTracker = () => {
       try {
         setIsWaterLoading(true);
 
-        // For now, we'll simulate adding water locally
-        // This will be replaced with actual API call later
-        const newTotal = dailyWaterIntake + amount;
-        console.log("🌊 [WATER] New total water intake:", newTotal, "ml");
+        const today = new Date().toISOString().split("T")[0];
+        const response = await fetch(
+          "/api/users/client/diet-tracker/water",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              amount,
+              date: today,
+            }),
+          }
+        );
 
-        setDailyWaterIntake(newTotal);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to add water intake");
+        }
 
-        // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        console.log("🌊 [WATER] Water added successfully");
-        return { success: true, newTotal };
+        const data = await response.json();
+        console.log("🌊 [WATER] Water added successfully:", data);
+        
+        setDailyWaterIntake(data.waterIntake);
+        return { success: true, newTotal: data.waterIntake };
       } catch (err) {
         console.error("🌊 [WATER] Error adding water:", err);
         setError(err.message);
@@ -1130,14 +1146,27 @@ export const useDietTracker = () => {
     try {
       setIsWaterLoading(true);
 
-      // For now, we'll simulate resetting water locally
-      // This will be replaced with actual API call later
-      setDailyWaterIntake(0);
+      const today = new Date().toISOString().split("T")[0];
+      const response = await fetch(
+        "/api/users/client/diet-tracker/water",
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            date: today,
+          }),
+        }
+      );
 
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to reset water intake");
+      }
 
       console.log("🌊 [WATER] Water intake reset successfully");
+      setDailyWaterIntake(0);
       return { success: true };
     } catch (err) {
       console.error("🌊 [WATER] Error resetting water intake:", err);
@@ -1151,8 +1180,14 @@ export const useDietTracker = () => {
   // Initialize data on mount
   useEffect(() => {
     fetchDietTrackerData();
-    fetchWaterIntake(); // Also fetch water data on mount
-  }, [fetchDietTrackerData, fetchWaterIntake]);
+  }, [fetchDietTrackerData]);
+
+  // Fetch water intake only after we have the plan data
+  useEffect(() => {
+    if (hasActivePlan && activePlan) {
+      fetchWaterIntake();
+    }
+  }, [hasActivePlan, activePlan, fetchWaterIntake]);
 
   return {
     // State

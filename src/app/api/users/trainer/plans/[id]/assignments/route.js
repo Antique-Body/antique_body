@@ -36,6 +36,8 @@ export async function GET(request, { params }) {
       },
     });
 
+    let isNutritionPlan = false;
+    
     if (!plan) {
       plan = await prisma.nutritionPlan.findFirst({
         where: {
@@ -43,6 +45,7 @@ export async function GET(request, { params }) {
           trainerInfoId: trainerInfo.id,
         },
       });
+      isNutritionPlan = true;
     }
 
     if (!plan) {
@@ -53,13 +56,27 @@ export async function GET(request, { params }) {
     }
 
     // Get all active assignments for this plan
-    const assignments = await prisma.assignedTrainingPlan.findMany({
-      where: {
-        originalPlanId: planId,
-        status: "active",
-      },
-      orderBy: { assignedAt: "desc" },
-    });
+    let assignments = [];
+    
+    if (isNutritionPlan) {
+      // Get nutrition plan assignments
+      assignments = await prisma.dietPlanAssignment.findMany({
+        where: {
+          nutritionPlanId: planId,
+          isActive: true,
+        },
+        orderBy: { assignedAt: "desc" },
+      });
+    } else {
+      // Get training plan assignments
+      assignments = await prisma.assignedTrainingPlan.findMany({
+        where: {
+          originalPlanId: planId,
+          status: "active",
+        },
+        orderBy: { assignedAt: "desc" },
+      });
+    }
 
     // Get client details for each assignment
     const formattedAssignments = await Promise.all(
@@ -76,22 +93,44 @@ export async function GET(request, { params }) {
           return null; // Skip if no client found
         }
 
-        // Find the coaching request (optional, for coachingRequestId)
+        // Find the coaching request
         const coachingRequest = await prisma.coachingRequest.findFirst({
           where: {
             clientId: assignment.clientId,
-            trainerId: assignment.trainerId,
-            // Remove status filter to find any coaching request
+            trainerId: isNutritionPlan ? assignment.assignedById : assignment.trainerId,
+            status: "accepted",
           },
         });
+
+        // Get additional client info
+        const profile = client.clientProfile;
+        const age = profile.dateOfBirth 
+          ? new Date().getFullYear() - new Date(profile.dateOfBirth).getFullYear()
+          : null;
 
         return {
           assignedPlanId: assignment.id,
           clientId: assignment.clientId,
-          clientName: `${client.clientProfile.firstName} ${client.clientProfile.lastName}`,
-          status: assignment.status,
+          clientName: `${profile.firstName} ${profile.lastName}`,
+          clientProfile: {
+            firstName: profile.firstName,
+            lastName: profile.lastName,
+            age: age,
+            gender: profile.gender,
+            profileImage: profile.profileImage,
+            experienceLevel: profile.experienceLevel,
+            primaryGoal: profile.primaryGoal,
+          },
+          status: isNutritionPlan ? assignment.status : assignment.status,
           assignedAt: assignment.assignedAt,
+          startDate: isNutritionPlan ? assignment.startDate : null,
+          progressInfo: isNutritionPlan ? {
+            completedDays: assignment.completedDays || 0,
+            totalDays: assignment.totalDays || 0,
+            successRate: assignment.successRate || 0,
+          } : null,
           coachingRequestId: coachingRequest?.id || null,
+          planType: isNutritionPlan ? "nutrition" : "training",
         };
       })
     );

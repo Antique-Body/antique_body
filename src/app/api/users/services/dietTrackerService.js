@@ -722,10 +722,21 @@ export async function changeMealOption(mealLogId, newOption) {
     // Validate that the day is editable
     validateDayEdit(mealLog.dailyDietLog.date, "change meal option for");
 
+    // Preserve all options while updating the selected one
+    const currentSelectedOption = mealLog.selectedOption || {};
+    const allOptions = currentSelectedOption.allOptions || [newOption];
+    const selectedIndex = allOptions.findIndex(opt => 
+      opt.name === newOption.name && opt.calories === newOption.calories
+    );
+
     const updatedMealLog = await prisma.mealLog.update({
       where: { id: mealLogId },
       data: {
-        selectedOption: newOption,
+        selectedOption: {
+          allOptions: allOptions,
+          selectedIndex: selectedIndex >= 0 ? selectedIndex : 0,
+          currentOption: newOption,
+        },
         calories: newOption.calories || 0,
         protein: newOption.protein || 0,
         carbs: newOption.carbs || 0,

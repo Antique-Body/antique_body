@@ -220,6 +220,32 @@ export default function ClientDashboard({ params }) {
     }
   };
 
+  // Handle remove training plan
+  const handleRemoveTrainingPlan = async (assignmentId) => {
+    try {
+      const response = await fetch(
+        `/api/coaching-requests/${client.id}/remove-training-plan`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ assignmentId }),
+        }
+      );
+
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to remove training plan");
+      }
+
+      // Refresh client data after removing the plan
+      await fetchClientData();
+      return true;
+    } catch (err) {
+      console.error("Error removing training plan:", err);
+      throw err;
+    }
+  };
+
   useEffect(() => {
     fetchClientData();
   }, [clientId, fetchClientData]);
@@ -298,6 +324,7 @@ export default function ClientDashboard({ params }) {
             assignedNutritionPlans={client.assignedNutritionPlans || []}
             setActiveTab={setActiveTab}
             onRemoveNutritionPlan={handleRemoveNutritionPlan}
+            onRemoveTrainingPlan={handleRemoveTrainingPlan}
             clientHasMockPlan={clientHasMockPlan}
           />
         )}
@@ -311,6 +338,8 @@ export default function ClientDashboard({ params }) {
               setPlanPreviewOpen(true);
             }}
             onStartPlan={handleStartPlan}
+            onAssignPlan={handleAssignPlan}
+            onRemoveTrainingPlan={handleRemoveTrainingPlan}
             startingPlanId={startingPlanId}
             startPlanError={startPlanError}
           />

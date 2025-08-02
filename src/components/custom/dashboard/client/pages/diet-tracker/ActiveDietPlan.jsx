@@ -57,11 +57,16 @@ export const ActiveDietPlan = ({
 
   const currentDay = getCurrentDay();
 
-  // Get the selected day's data
-  const selectedDayData = useMemo(
-    () => activePlan?.nutritionPlan?.days?.[selectedDay - 1],
-    [activePlan, selectedDay]
-  );
+  // Get the selected day's data, prioritizing customized planData from trainer updates
+  const selectedDayData = useMemo(() => {
+    // First check if there's customized plan data from trainer updates
+    const customPlanData = activePlan?.planData;
+    if (customPlanData?.days?.[selectedDay - 1]) {
+      return customPlanData.days[selectedDay - 1];
+    }
+    // Fall back to original nutrition plan data
+    return activePlan?.nutritionPlan?.days?.[selectedDay - 1];
+  }, [activePlan, selectedDay]);
 
   // Get daily log for selected day
   const selectedDayLog = useMemo(() => {
@@ -356,7 +361,7 @@ export const ActiveDietPlan = ({
 
       {/* Day Navigation */}
       <DayNavigation
-        days={activePlan.nutritionPlan.days}
+        days={activePlan?.planData?.days || activePlan.nutritionPlan.days}
         selectedDay={selectedDay}
         currentDay={currentDay}
         onSelectDay={setSelectedDay}

@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { Card, Modal, FormField, Button } from "@/components/common";
+import { DIETARY_PREFERENCES } from "@/enums";
 
 import { MealLibrarySelector } from "../../../../meals/components";
 import { MealModal } from "../../../../meals/components/MealModal";
@@ -16,6 +17,7 @@ const isYouTubeUrl = (url) => {
   if (!url) return false;
   return /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//.test(url);
 };
+
 
 export const MealPlanning = ({ data, onChange }) => {
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
@@ -406,6 +408,7 @@ export const MealPlanning = ({ data, onChange }) => {
           protein: mealData.protein,
           carbs: mealData.carbs,
           fat: mealData.fat,
+          dietary: mealData.dietary || [],
           imageUrl: mealData.imageUrl,
           videoUrl: mealData.videoUrl, // Fixed: was mealData.video
         };
@@ -453,6 +456,7 @@ export const MealPlanning = ({ data, onChange }) => {
       protein: libraryMeal.protein,
       carbs: libraryMeal.carbs,
       fat: libraryMeal.fat,
+      dietary: libraryMeal.dietary || [],
       imageUrl: libraryMeal.imageUrl,
       videoUrl: libraryMeal.videoUrl,
     };
@@ -1142,6 +1146,38 @@ export const MealPlanning = ({ data, onChange }) => {
                                                       />
                                                     </div>
 
+                                                    {/* Dietary Information */}
+                                                    <div className="mb-3">
+                                                      <label className="block text-sm font-medium text-white mb-2">
+                                                        Dietary Information
+                                                      </label>
+                                                      <div className="flex flex-wrap gap-1.5">
+                                                        {DIETARY_PREFERENCES.map((dietaryPref) => {
+                                                          const isSelected = option.dietary && option.dietary.includes(dietaryPref.value);
+                                                          return (
+                                                            <button
+                                                              key={dietaryPref.value}
+                                                              type="button"
+                                                              onClick={() => {
+                                                                const currentDietary = option.dietary || [];
+                                                                const newDietary = isSelected
+                                                                  ? currentDietary.filter(d => d !== dietaryPref.value)
+                                                                  : [...currentDietary, dietaryPref.value];
+                                                                updateMealOption(mealIndex, optionIndex, "dietary", newDietary);
+                                                              }}
+                                                              className={`text-xs font-medium px-2 py-1 rounded-full border transition-all duration-200 ${
+                                                                isSelected
+                                                                  ? "bg-gradient-to-r from-orange-900/60 to-orange-800/60 text-orange-200 border-orange-600/60 shadow-md"
+                                                                  : "bg-zinc-700/40 text-zinc-300 border-zinc-600/40 hover:bg-zinc-600/50 hover:text-white hover:border-zinc-500/60"
+                                                              }`}
+                                                            >
+                                                              {dietaryPref.label}
+                                                            </button>
+                                                          );
+                                                        })}
+                                                      </div>
+                                                    </div>
+
                                                     {/* Ingredients and Instructions */}
                                                     <div className="space-y-3">
                                                       <FormField
@@ -1497,6 +1533,38 @@ export const MealPlanning = ({ data, onChange }) => {
                                                         placeholder="g"
                                                         className="text-center"
                                                       />
+                                                    </div>
+
+                                                    {/* Dietary Information */}
+                                                    <div className="mb-3">
+                                                      <label className="block text-sm font-medium text-white mb-2">
+                                                        Dietary Information
+                                                      </label>
+                                                      <div className="flex flex-wrap gap-1.5">
+                                                        {DIETARY_PREFERENCES.map((dietaryPref) => {
+                                                          const isSelected = option.dietary && option.dietary.includes(dietaryPref.value);
+                                                          return (
+                                                            <button
+                                                              key={dietaryPref.value}
+                                                              type="button"
+                                                              onClick={() => {
+                                                                const currentDietary = option.dietary || [];
+                                                                const newDietary = isSelected
+                                                                  ? currentDietary.filter(d => d !== dietaryPref.value)
+                                                                  : [...currentDietary, dietaryPref.value];
+                                                                updateMealOption(mealIndex, optionIndex, "dietary", newDietary);
+                                                              }}
+                                                              className={`text-xs font-medium px-2 py-1 rounded-full border transition-all duration-200 ${
+                                                                isSelected
+                                                                  ? "bg-gradient-to-r from-orange-900/60 to-orange-800/60 text-orange-200 border-orange-600/60 shadow-md"
+                                                                  : "bg-zinc-700/40 text-zinc-300 border-zinc-600/40 hover:bg-zinc-600/50 hover:text-white hover:border-zinc-500/60"
+                                                              }`}
+                                                            >
+                                                              {dietaryPref.label}
+                                                            </button>
+                                                          );
+                                                        })}
+                                                      </div>
                                                     </div>
 
                                                     {/* Ingredients and Instructions */}

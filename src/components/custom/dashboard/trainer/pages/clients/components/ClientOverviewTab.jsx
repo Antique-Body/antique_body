@@ -18,11 +18,16 @@ export function ClientOverviewTab({
   assignedNutritionPlans,
   setActiveTab,
   onRemoveNutritionPlan,
+  onRemoveTrainingPlan,
   clientHasMockPlan,
 }) {
   const [showConfirmRemoveModal, setShowConfirmRemoveModal] = useState(false);
+  const [showConfirmRemoveTrainingModal, setShowConfirmRemoveTrainingModal] =
+    useState(false);
   const [removingPlan, setRemovingPlan] = useState(false);
+  const [removingTrainingPlan, setRemovingTrainingPlan] = useState(false);
   const [removeError, setRemoveError] = useState(null);
+  const [removeTrainingError, setRemoveTrainingError] = useState(null);
 
   const getExperienceText = (level) => {
     if (!level) return "Unknown";
@@ -72,6 +77,21 @@ export function ClientOverviewTab({
       setRemoveError(err.message || "Failed to remove nutrition plan");
     } finally {
       setRemovingPlan(false);
+    }
+  };
+
+  const handleRemoveTrainingPlan = async () => {
+    if (!activeTrainingPlan || !onRemoveTrainingPlan) return;
+
+    try {
+      setRemovingTrainingPlan(true);
+      setRemoveTrainingError(null);
+      await onRemoveTrainingPlan(activeTrainingPlan.id);
+      setShowConfirmRemoveTrainingModal(false);
+    } catch (err) {
+      setRemoveTrainingError(err.message || "Failed to remove training plan");
+    } finally {
+      setRemovingTrainingPlan(false);
     }
   };
 
@@ -152,11 +172,10 @@ export function ClientOverviewTab({
               <Icon icon="mdi:eye" width={16} height={16} />
             </Button>
             {activeNutritionPlan.startDate && (
-              <Link href={`/trainer/dashboard/clients/${client.id}/nutrition/${activeNutritionPlan.id}`}>
-                <Button
-                  variant="success"
-                  size="small"
-                >
+              <Link
+                href={`/trainer/dashboard/clients/${client.id}/nutrition/${activeNutritionPlan.id}`}
+              >
+                <Button variant="success" size="small">
                   <Icon icon="mdi:chart-line" width={16} height={16} />
                   <span className="hidden sm:inline ml-1">Track</span>
                 </Button>
@@ -296,27 +315,43 @@ export function ClientOverviewTab({
                   />
                   <h4 className="text-white font-medium">Training Plan</h4>
                 </div>
-                <Button
-                  variant="primary"
-                  size="small"
-                  leftIcon={<Icon icon="mdi:plus" width={16} height={16} />}
-                  onClick={() => onAssignPlan("training")}
-                >
-                  {!activeTrainingPlan ? "Replace" : "Assign"}
-                </Button>
+                <div className="flex gap-2">
+                  {activeTrainingPlan && onRemoveTrainingPlan && (
+                    <Button
+                      variant="danger"
+                      size="small"
+                      leftIcon={
+                        <Icon icon="mdi:delete" width={16} height={16} />
+                      }
+                      onClick={() => setShowConfirmRemoveTrainingModal(true)}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                  <Button
+                    variant="primary"
+                    size="small"
+                    leftIcon={<Icon icon="mdi:plus" width={16} height={16} />}
+                    onClick={() => onAssignPlan("training")}
+                  >
+                    {activeTrainingPlan ? "Replace" : "Assign"}
+                  </Button>
+                </div>
               </div>
 
               {activeTrainingPlan ? (
-                <div className="flex items-center justify-between p-3 bg-orange-900/20 rounded-lg border border-orange-700/30">
-                  <div className="flex items-center gap-3">
-                    <Icon
-                      icon="mdi:dumbbell"
-                      className="text-orange-400"
-                      width={20}
-                      height={20}
-                    />
-                    <div>
-                      <p className="text-white font-medium">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-orange-900/20 rounded-lg border border-orange-700/30 gap-3">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className="flex-shrink-0 mt-1">
+                      <Icon
+                        icon="mdi:dumbbell"
+                        className="text-orange-400"
+                        width={20}
+                        height={20}
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-white font-medium truncate">
                         {activeTrainingPlan.planData?.title || "Untitled Plan"}
                       </p>
                       <p className="text-zinc-400 text-sm">
@@ -324,9 +359,20 @@ export function ClientOverviewTab({
                         {activeTrainingPlan.planData?.durationType ?? ""} •
                         Active
                       </p>
+                      <div className="flex items-center gap-1 mt-1">
+                        <Icon
+                          icon="mdi:check-circle"
+                          className="text-orange-400"
+                          width={14}
+                          height={14}
+                        />
+                        <span className="text-orange-400 text-xs">
+                          Assigned by you
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-shrink-0 ml-auto sm:ml-0">
                     <Button
                       variant="secondary"
                       size="small"
@@ -334,16 +380,18 @@ export function ClientOverviewTab({
                     >
                       <Icon icon="mdi:eye" width={16} height={16} />
                     </Button>
+                    <Link
+                      href={`/trainer/dashboard/clients/${client.id}/training/${activeTrainingPlan.id}`}
+                    >
+                      <Button variant="success" size="small">
+                        <Icon icon="mdi:chart-line" width={16} height={16} />
+                        <span className="hidden sm:inline ml-1">Track</span>
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               ) : (
                 <div className="text-center py-4 bg-zinc-800/30 rounded-lg border border-zinc-700/50">
-                  <Icon
-                    icon="mdi:dumbbell-off"
-                    className="text-zinc-600 mx-auto mb-2"
-                    width={24}
-                    height={24}
-                  />
                   <p className="text-zinc-400 text-sm">
                     No training plan assigned
                   </p>
@@ -685,7 +733,7 @@ export function ClientOverviewTab({
         </Card>
       </div>
 
-      {/* Confirm Remove Plan Modal */}
+      {/* Confirm Remove Nutrition Plan Modal */}
       {showConfirmRemoveModal && (
         <Modal
           isOpen={showConfirmRemoveModal}
@@ -722,6 +770,49 @@ export function ClientOverviewTab({
           secondaryButtonText="Cancel"
           primaryButtonAction={handleRemoveNutritionPlan}
           primaryButtonDisabled={removingPlan}
+          hideButtons={false}
+        />
+      )}
+
+      {/* Confirm Remove Training Plan Modal */}
+      {showConfirmRemoveTrainingModal && (
+        <Modal
+          isOpen={showConfirmRemoveTrainingModal}
+          onClose={() => setShowConfirmRemoveTrainingModal(false)}
+          title={
+            <div className="flex items-center gap-2">
+              <Icon
+                icon="mdi:alert-circle"
+                width={24}
+                height={24}
+                className="text-red-400"
+              />
+              Remove Training Plan
+            </div>
+          }
+          message={
+            <div className="space-y-4">
+              {removeTrainingError && (
+                <div className="bg-red-900/20 rounded-lg p-4 border border-red-700/30">
+                  <p className="text-red-400 text-sm">{removeTrainingError}</p>
+                </div>
+              )}
+              <p className="text-white">
+                Are you sure you want to remove the current training plan from
+                this client?
+              </p>
+              <p className="text-zinc-400 text-sm">
+                This will deactivate the plan assignment. The client will no
+                longer have access to this plan.
+              </p>
+            </div>
+          }
+          primaryButtonText={
+            removingTrainingPlan ? "Removing..." : "Remove Plan"
+          }
+          secondaryButtonText="Cancel"
+          primaryButtonAction={handleRemoveTrainingPlan}
+          primaryButtonDisabled={removingTrainingPlan}
           hideButtons={false}
         />
       )}

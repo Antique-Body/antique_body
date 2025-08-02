@@ -264,6 +264,7 @@ model ClientProfile {
   description         String?
   medicalConditions   String?
   allergies           String?
+  dietaryPreferences  Json?            // Array of dietary preferences (vegan, vegetarian, etc.)
   createdAt           DateTime         @default(now())
   updatedAt           DateTime         @updatedAt
   preferredActivities ClientActivity[]
@@ -533,6 +534,7 @@ model DietPlanAssignment {
   clientId        String
   nutritionPlanId String
   assignedById    String                    // trainer who assigned the plan
+  planData        Json?                     // Customized plan data for this assignment
   status          DietPlanAssignmentStatus  @default(assigned)
   startDate       DateTime?                 // When client starts the plan (null until started)
   endDate         DateTime?                 // When plan should end (calculated)
@@ -582,6 +584,8 @@ model DailyDietLog {
   targetFat           Float    @default(0) // Expected fat for this day
   calorieVariance     Float    @default(0) // Difference from target calories
   proteinVariance     Float    @default(0) // Difference from target protein
+  waterIntake         Float    @default(0) // Water intake in ml
+  waterGoal           Float    @default(4000) // Daily water goal in ml
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
   

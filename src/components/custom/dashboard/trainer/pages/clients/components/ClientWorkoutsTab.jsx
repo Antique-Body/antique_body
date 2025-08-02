@@ -1,35 +1,60 @@
 import { Icon } from "@iconify/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
+import { Card } from "@/components/common/Card";
+import { Modal } from "@/components/common/Modal";
 
 export function ClientWorkoutsTab({
   assignedTrainingPlans,
   client,
   onViewPlan,
   onStartPlan,
+  onAssignPlan,
+  onRemoveTrainingPlan,
   startingPlanId,
   startPlanError,
 }) {
+  const [showConfirmRemoveModal, setShowConfirmRemoveModal] = useState(false);
+  const [removingPlan, setRemovingPlan] = useState(false);
+  const [removeError, setRemoveError] = useState(null);
+  const [planToRemove, setPlanToRemove] = useState(null);
+
+  const handleRemoveTrainingPlan = async () => {
+    if (!planToRemove || !onRemoveTrainingPlan) return;
+
+    try {
+      setRemovingPlan(true);
+      setRemoveError(null);
+      await onRemoveTrainingPlan(planToRemove.id);
+      setShowConfirmRemoveModal(false);
+      setPlanToRemove(null);
+    } catch (err) {
+      setRemoveError(err.message || "Failed to remove training plan");
+    } finally {
+      setRemovingPlan(false);
+    }
+  };
   return (
     <div className="space-y-6">
       {/* Header Actions */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-white">
-          Training Plans ({assignedTrainingPlans.length})
-        </h2>
+        <h2 className="text-xl font-semibold text-white">Training Plans</h2>
         <Button
           variant="primary"
           leftIcon={<Icon icon="mdi:plus" width={20} height={20} />}
+          onClick={() => onAssignPlan && onAssignPlan("training")}
         >
-          Assign New Plan
+          {assignedTrainingPlans.length > 0
+            ? "Replace Plan"
+            : "Assign Training Plan"}
         </Button>
       </div>
 
-      {/* Training Plans List */}
-      <div className="space-y-4">
-        {assignedTrainingPlans.length === 0 ? (
+      {assignedTrainingPlans.length === 0 ? (
+        <Card variant="dark" className="overflow-visible">
           <div className="text-center py-12">
             <Icon
               icon="mdi:dumbbell"
@@ -38,32 +63,39 @@ export function ClientWorkoutsTab({
               height={48}
             />
             <p className="text-zinc-400 text-lg mb-2">
-              No training plans assigned yet
+              No Training Plans Assigned
             </p>
             <p className="text-zinc-500 text-sm mb-6">
-              Create and assign training plans to help your client reach their
+              Create and assign a training plan to help this client reach their
               fitness goals.
             </p>
             <Button
               variant="primary"
-              leftIcon={<Icon icon="mdi:plus" width={20} height={20} />}
+              leftIcon={<Icon icon="mdi:dumbbell" width={20} height={20} />}
+              onClick={() => onAssignPlan && onAssignPlan("training")}
             >
-              Assign Training Plan
+              Assign First Training Plan
             </Button>
           </div>
-        ) : (
-          assignedTrainingPlans.map((plan) => (
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {assignedTrainingPlans.map((plan) => (
             <TrainingPlanCard
               key={plan.id}
               plan={plan}
               client={client}
               onViewPlan={onViewPlan}
               onStartPlan={onStartPlan}
+              onRemoveTrainingPlan={(_planId) => {
+                setPlanToRemove(plan);
+                setShowConfirmRemoveModal(true);
+              }}
               startingPlanId={startingPlanId}
             />
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Error Display */}
       {startPlanError && (
@@ -80,230 +112,291 @@ export function ClientWorkoutsTab({
           <p className="text-red-300/90 text-sm mt-1">{startPlanError}</p>
         </div>
       )}
+
+      {/* Confirm Remove Plan Modal */}
+      {showConfirmRemoveModal && planToRemove && (
+        <Modal
+          isOpen={showConfirmRemoveModal}
+          onClose={() => {
+            setShowConfirmRemoveModal(false);
+            setPlanToRemove(null);
+          }}
+          title={
+            <div className="flex items-center gap-2">
+              <Icon
+                icon="mdi:alert-circle"
+                width={24}
+                height={24}
+                className="text-red-400"
+              />
+              Remove Training Plan
+            </div>
+          }
+          message={
+            <div className="space-y-4">
+              {removeError && (
+                <div className="bg-red-900/20 rounded-lg p-4 border border-red-700/30">
+                  <p className="text-red-400 text-sm">{removeError}</p>
+                </div>
+              )}
+              <p className="text-white">
+                Are you sure you want to remove{" "}
+                <span className="font-semibold">
+                  {planToRemove.planData?.title || "this training plan"}
+                </span>{" "}
+                from this client?
+              </p>
+              <p className="text-zinc-400 text-sm">
+                This will deactivate the plan assignment. The client will no
+                longer have access to this plan.
+              </p>
+            </div>
+          }
+          primaryButtonText={removingPlan ? "Removing..." : "Remove Plan"}
+          secondaryButtonText="Cancel"
+          primaryButtonAction={handleRemoveTrainingPlan}
+          primaryButtonDisabled={removingPlan}
+          hideButtons={false}
+        />
+      )}
     </div>
   );
 }
 
-// Enhanced Training Plan Card Component with Lazy Loading
+// Enhanced Training Plan Card Component
 function TrainingPlanCard({
   plan,
   client,
   onViewPlan,
   onStartPlan,
+  onRemoveTrainingPlan,
   startingPlanId,
 }) {
-  const [planDetails, setPlanDetails] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showDetails, setShowDetails] = useState(false);
   const [viewResultsLoading, setViewResultsLoading] = useState(false);
 
-  const handleViewPlan = async () => {
-    if (!planDetails && !isLoading) {
-      setIsLoading(true);
-      try {
-        const response = await fetch(
-          `/api/coaching-requests/${client.id}/assigned-training-plan/${plan.id}/progress`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setPlanDetails(data);
-        }
-      } catch (error) {
-        console.error("Error loading plan details:", error);
-      } finally {
-        setIsLoading(false);
-      }
+  // Format date helper
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  // Get status display text
+  const getPlanStatusText = (status) => {
+    switch (status) {
+      case "completed":
+        return "Completed";
+      case "active":
+        return "Active";
+      case "paused":
+        return "Paused";
+      default:
+        return "Inactive";
     }
-    setShowDetails(!showDetails);
-    onViewPlan(plan);
   };
 
-  const getCompletionStats = () => {
-    if (!planDetails || !planDetails.schedule) return null;
-
-    const totalDays = planDetails.schedule.length;
-    const completedDays = planDetails.schedule.filter(
-      (day) => day.workoutStatus === "completed"
-    ).length;
-    const totalExercises = planDetails.schedule.reduce(
-      (sum, day) => sum + (day.exercises?.length || 0),
-      0
-    );
-    const completedExercises = planDetails.schedule.reduce((sum, day) => {
-      if (day.workoutStatus === "completed") {
-        return (
-          sum +
-          (day.exercises?.filter((ex) => ex.exerciseCompleted)?.length || 0)
-        );
-      }
-      return sum;
-    }, 0);
-
-    return { totalDays, completedDays, totalExercises, completedExercises };
+  // Get status color class
+  const getPlanStatusColorClass = (status) => {
+    switch (status) {
+      case "completed":
+        return "text-green-400";
+      case "active":
+        return "text-blue-400";
+      case "paused":
+        return "text-amber-400";
+      default:
+        return "text-zinc-400";
+    }
   };
-
-  const stats = getCompletionStats();
 
   return (
-    <div
-      className={`rounded-xl border backdrop-blur-sm transition-all duration-200 ${
-        plan.status === "completed"
-          ? "bg-green-500/10 border-green-500/30"
-          : plan.status === "active"
-            ? "bg-blue-500/10 border-blue-500/30 ring-2 ring-blue-500/20"
-            : "bg-white/5 border-white/10 hover:border-white/20"
-      }`}
-    >
-      {/* Main Card Content */}
-      <div className="p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          {/* Left Side - Plan Info */}
-          <div className="flex items-start gap-3 min-w-0 flex-1">
-            {/* Status Icon */}
-            <div
-              className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                plan.status === "completed"
-                  ? "bg-green-600 shadow-lg shadow-green-600/30"
-                  : plan.status === "active"
-                    ? "bg-blue-600 shadow-lg shadow-blue-600/30"
-                    : "bg-orange-600 shadow-lg shadow-orange-600/30"
-              }`}
+    <Card variant="dark" className="overflow-visible">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Icon
+            icon={
+              plan.status === "completed"
+                ? "mdi:check-circle"
+                : plan.status === "active"
+                  ? "mdi:play-circle"
+                  : "mdi:pause-circle"
+            }
+            className={
+              plan.status === "completed"
+                ? "text-green-400"
+                : plan.status === "active"
+                  ? "text-blue-400"
+                  : "text-orange-400"
+            }
+            width={24}
+            height={24}
+          />
+          <h3 className="text-xl font-semibold text-white">
+            {plan.status === "active"
+              ? "Active Plan"
+              : getPlanStatusText(plan.status) + " Plan"}
+          </h3>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="primary"
+            size="small"
+            leftIcon={<Icon icon="mdi:eye" width={16} height={16} />}
+            onClick={() => onViewPlan(plan)}
+          >
+            View Plan
+          </Button>
+          {plan.status === "active" && (
+            <Link
+              href={`/trainer/dashboard/clients/${client.id}/training/${plan.id}`}
             >
-              <Icon
-                icon={
-                  plan.status === "completed"
-                    ? "mdi:check"
-                    : plan.status === "active"
-                      ? "mdi:play"
-                      : "mdi:pause"
+              <Button
+                variant="success"
+                size="small"
+                leftIcon={<Icon icon="mdi:chart-line" width={16} height={16} />}
+              >
+                Track Progress
+              </Button>
+            </Link>
+          )}
+          {plan.status === "completed" && (
+            <Button
+              variant="secondary"
+              size="small"
+              className="bg-green-600/20 border-green-500/30 text-green-300 hover:bg-green-600/30"
+              disabled={viewResultsLoading}
+              onClick={async () => {
+                setViewResultsLoading(true);
+                try {
+                  window.location.href = `/trainer/dashboard/clients/${client.id}/training/${plan.id}?mode=review`;
+                } finally {
+                  // Keep loading true until navigation
                 }
-                className="text-white"
-                width={18}
-                height={18}
+              }}
+              leftIcon={
+                viewResultsLoading ? (
+                  <span className="w-3 h-3 border-2 border-green-300 border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  <Icon icon="mdi:chart-line" width={16} height={16} />
+                )
+              }
+            >
+              {viewResultsLoading ? "Loading..." : "View Results"}
+            </Button>
+          )}
+          {plan.status !== "completed" && plan.status !== "active" && (
+            <Button
+              variant="primary"
+              size="small"
+              onClick={() => onStartPlan(plan.id)}
+              loading={startingPlanId === plan.id}
+              leftIcon={<Icon icon="mdi:play" width={16} height={16} />}
+            >
+              Start Plan
+            </Button>
+          )}
+          {onRemoveTrainingPlan && (
+            <Button
+              variant="danger"
+              size="small"
+              leftIcon={<Icon icon="mdi:delete" width={16} height={16} />}
+              onClick={() => onRemoveTrainingPlan(plan.id)}
+            >
+              Remove Plan
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <div
+        className={`flex items-center justify-between p-4 rounded-lg border ${
+          plan.status === "completed"
+            ? "bg-green-900/20 border-green-700/30"
+            : plan.status === "active"
+              ? "bg-blue-900/20 border-blue-700/30"
+              : "bg-orange-900/20 border-orange-700/30"
+        }`}
+      >
+        <div className="flex items-center gap-4">
+          {plan.planData?.coverImage ? (
+            <div className="w-16 h-16 rounded-lg overflow-hidden relative flex-shrink-0">
+              <Image
+                src={plan.planData.coverImage}
+                alt={plan.planData?.title || "Training Plan"}
+                fill
+                className="object-cover"
               />
             </div>
-
-            {/* Plan Details */}
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                <h3 className="text-lg font-semibold text-white truncate">
-                  {plan.planData.title}
-                </h3>
-                {plan.status === "active" && (
-                  <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs font-medium rounded-full border border-blue-500/30">
-                    Active
-                  </span>
-                )}
-                {plan.status === "completed" && (
-                  <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-medium rounded-full border border-green-500/30">
-                    Completed
-                  </span>
-                )}
-              </div>
-
-              <div className="flex items-center gap-4 text-sm text-slate-400 mb-2">
-                <span className="flex items-center gap-1">
-                  <Icon icon="mdi:clock" width={14} height={14} />
-                  {plan.planData.duration} {plan.planData.durationType}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Icon icon="mdi:calendar" width={14} height={14} />
-                  {plan.status}
-                </span>
-              </div>
-
-              {/* Completion Stats for Completed Plans */}
-              {plan.status === "completed" && stats && (
-                <div className="flex items-center gap-4 text-xs text-slate-400">
-                  <span className="flex items-center gap-1">
-                    <Icon icon="mdi:check-circle" width={12} height={12} />
-                    {stats?.completedDays || 0}/{stats?.totalDays || 0} days
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Icon icon="mdi:dumbbell" width={12} height={12} />
-                    {stats?.completedExercises || 0}/
-                    {stats?.totalExercises || 0} exercises
-                  </span>
-                </div>
-              )}
-
-              {/* Loading State */}
-              {isLoading && (
-                <div className="flex items-center gap-2 text-slate-400 text-xs mt-2">
-                  <div className="w-3 h-3 border border-slate-400 border-t-transparent rounded-full animate-spin"></div>
-                  Loading details...
-                </div>
-              )}
+          ) : (
+            <div className="w-16 h-16 rounded-lg overflow-hidden relative bg-zinc-800/50 flex items-center justify-center flex-shrink-0">
+              <Icon
+                icon="mdi:dumbbell"
+                className={
+                  plan.status === "completed"
+                    ? "text-green-400"
+                    : plan.status === "active"
+                      ? "text-blue-400"
+                      : "text-orange-400"
+                }
+                width={32}
+                height={32}
+              />
+            </div>
+          )}
+          <div className="min-w-0">
+            <h4 className="text-white font-semibold text-lg truncate">
+              {plan.planData?.title || "Untitled Plan"}
+            </h4>
+            <p className="text-zinc-400 text-sm mb-1 line-clamp-2">
+              {plan.planData?.description || "No description available"}
+            </p>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-zinc-500">
+              <span>
+                Started:{" "}
+                {plan.startDate
+                  ? formatDate(plan.startDate)
+                  : "Not started yet"}
+              </span>
+              <span>
+                Duration: {plan.planData?.duration || "?"}{" "}
+                {plan.planData?.durationType || ""}
+              </span>
             </div>
           </div>
+        </div>
 
-          {/* Right Side - Actions */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleViewPlan}
-              className="px-3 py-2"
+        <div className="text-right flex-shrink-0 ml-4">
+          <div
+            className={`font-medium mb-1 ${getPlanStatusColorClass(plan.status)}`}
+          >
+            {getPlanStatusText(plan.status)}
+          </div>
+          <div className="flex items-center gap-1 mt-1">
+            <Icon
+              icon="mdi:check-circle"
+              className={
+                plan.status === "completed"
+                  ? "text-green-400"
+                  : plan.status === "active"
+                    ? "text-blue-400"
+                    : "text-orange-400"
+              }
+              width={14}
+              height={14}
+            />
+            <span
+              className={`text-xs ${
+                plan.status === "completed"
+                  ? "text-green-400"
+                  : plan.status === "active"
+                    ? "text-blue-400"
+                    : "text-orange-400"
+              }`}
             >
-              <Icon icon="mdi:eye" width={16} height={16} />
-              <span className="hidden sm:inline ml-1">View</span>
-            </Button>
-
-            {plan.status === "completed" && (
-              <Button
-                variant="secondary"
-                size="sm"
-                className="px-3 py-2 bg-green-600/20 border-green-500/30 text-green-300 hover:bg-green-600/30"
-                disabled={viewResultsLoading}
-                onClick={async () => {
-                  setViewResultsLoading(true);
-                  try {
-                    window.location.href = `/trainer/dashboard/clients/${client.id}/plans/${plan.id}?mode=review`;
-                  } finally {
-                    // Optionally keep loading true until navigation
-                  }
-                }}
-              >
-                {viewResultsLoading ? (
-                  <span className="flex items-center">
-                    <span className="w-3 h-3 border-2 border-green-300 border-t-transparent rounded-full animate-spin mr-2"></span>
-                    Loading...
-                  </span>
-                ) : (
-                  <>
-                    <Icon icon="mdi:chart-line" width={16} height={16} />
-                    <span className="hidden sm:inline ml-1">View Results</span>
-                  </>
-                )}
-              </Button>
-            )}
-
-            {plan.status !== "completed" && plan.status !== "active" && (
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => onStartPlan(plan.id)}
-                loading={startingPlanId === plan.id}
-                className="px-3 py-2"
-              >
-                <Icon icon="mdi:play" width={16} height={16} />
-                <span className="hidden sm:inline ml-1">Start</span>
-              </Button>
-            )}
-
-            {plan.status === "active" && (
-              <Link
-                href={`/trainer/dashboard/clients/${client.id}/plans/${plan.id}`}
-              >
-                <Button variant="primary" size="sm" className="px-3 py-2">
-                  <Icon icon="mdi:open-in-new" width={16} height={16} />
-                  <span className="hidden sm:inline ml-1">Track</span>
-                </Button>
-              </Link>
-            )}
+              Assigned by you
+            </span>
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

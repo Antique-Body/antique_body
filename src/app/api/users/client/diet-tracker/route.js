@@ -446,6 +446,55 @@ export async function POST(req) {
           ? await completeMeal(mealLogId)
           : await uncompleteMeal(mealLogId);
 
+        // Sync meal completion status back to trainer's view
+        try {
+          // Get the meal log to find the associated diet plan assignment
+          const mealLog = await prisma.mealLog.findUnique({
+            where: { id: mealLogId },
+            include: {
+              dailyLog: {
+                include: {
+                  dietPlanAssignment: {
+                    include: {
+                      assignedBy: true,
+                    },
+                  },
+                },
+              },
+            },
+          });
+
+          if (mealLog?.dailyLog?.dietPlanAssignment) {
+            console.log(`Syncing meal completion status to trainer view: ${isCompleted ? 'completed' : 'uncompleted'}`);
+            
+            // Update the lastUpdated timestamp on the diet plan assignment to notify trainer of changes
+            await prisma.dietPlanAssignment.update({
+              where: { id: mealLog.dailyLog.dietPlanAssignment.id },
+              data: {
+                updatedAt: new Date(),
+                // Optionally add a sync flag to indicate client made changes
+                planData: {
+                  ...mealLog.dailyLog.dietPlanAssignment.planData,
+                  lastClientUpdate: new Date().toISOString(),
+                  clientUpdateType: isCompleted ? 'meal_completed' : 'meal_uncompleted',
+                  lastUpdatedMeal: {
+                    id: mealLogId,
+                    name: mealLog.name,
+                    time: mealLog.time,
+                    dayIndex: mealLog.dailyLog.dayIndex,
+                    mealIndex: mealLog.mealIndex,
+                  },
+                },
+              },
+            });
+
+            console.log('Successfully synced meal completion to trainer view');
+          }
+        } catch (syncError) {
+          console.error('Error syncing meal completion to trainer:', syncError);
+          // Don't fail the main request if sync fails
+        }
+
         return NextResponse.json({
           success: true,
           message: `Meal ${
@@ -487,6 +536,56 @@ export async function POST(req) {
         );
 
         const result = await changeMealOption(mealLogId, newOption);
+
+        // Sync meal option change back to trainer's view
+        try {
+          // Get the meal log to find the associated diet plan assignment
+          const mealLog = await prisma.mealLog.findUnique({
+            where: { id: mealLogId },
+            include: {
+              dailyLog: {
+                include: {
+                  dietPlanAssignment: {
+                    include: {
+                      assignedBy: true,
+                    },
+                  },
+                },
+              },
+            },
+          });
+
+          if (mealLog?.dailyLog?.dietPlanAssignment) {
+            console.log('Syncing meal option change to trainer view');
+            
+            // Update the lastUpdated timestamp on the diet plan assignment to notify trainer of changes
+            await prisma.dietPlanAssignment.update({
+              where: { id: mealLog.dailyLog.dietPlanAssignment.id },
+              data: {
+                updatedAt: new Date(),
+                // Add sync flag to indicate client made changes
+                planData: {
+                  ...mealLog.dailyLog.dietPlanAssignment.planData,
+                  lastClientUpdate: new Date().toISOString(),
+                  clientUpdateType: 'meal_option_changed',
+                  lastUpdatedMeal: {
+                    id: mealLogId,
+                    name: mealLog.name,
+                    time: mealLog.time,
+                    dayIndex: mealLog.dailyLog.dayIndex,
+                    mealIndex: mealLog.mealIndex,
+                    newOption: newOption,
+                  },
+                },
+              },
+            });
+
+            console.log('Successfully synced meal option change to trainer view');
+          }
+        } catch (syncError) {
+          console.error('Error syncing meal option change to trainer:', syncError);
+          // Don't fail the main request if sync fails
+        }
 
         return NextResponse.json({
           success: true,

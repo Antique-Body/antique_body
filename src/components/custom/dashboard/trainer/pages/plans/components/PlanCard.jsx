@@ -3,6 +3,7 @@
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -33,9 +34,16 @@ export const PlanCard = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showTrackModal, setShowTrackModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [detailedPlanData, setDetailedPlanData] = useState(null);
   const [deleteError, setDeleteError] = useState("");
+  const [clients, setClients] = useState([]);
+  const [loadingClients, setLoadingClients] = useState(false);
+  const [assignments, setAssignments] = useState([]);
+  const [loadingAssignments, setLoadingAssignments] = useState(false);
+  const [assigningClient, setAssigningClient] = useState(null);
   const copyTimeoutRef = useRef(null);
   const editTimeoutRef = useRef(null);
   const router = useRouter();
@@ -147,70 +155,100 @@ export const PlanCard = ({
     );
   };
 
-  const handleTrackClick = async () => {
+  // Fetch clients for assignment
+  const fetchClients = async () => {
     try {
-      // Fetch active assignments for this specific plan
-      const response = await fetch(
-        `/api/users/trainer/plans/${id}/assignments`
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("API Error Response:", errorText);
-
-        // If unauthorized, redirect to login
-        if (response.status === 401) {
-          router.push("/auth/login");
-          return;
-        }
-
-        throw new Error(
-          `Failed to fetch plan assignments: ${response.status} ${response.statusText}`
-        );
-      }
-
+      setLoadingClients(true);
+      const response = await fetch("/api/coaching-requests?status=accepted");
+      if (!response.ok) throw new Error("Failed to fetch clients");
+      
       const data = await response.json();
-
-      if (!data.success)
-        throw new Error(data.error || "Failed to fetch plan assignments");
-
-      const assignments = data.data || [];
-
-      if (assignments.length === 0) {
-        // No assigned plans found - navigate to client selection page to assign the plan
-        router.push(
-          `/trainer/dashboard/clients?planId=${id}&type=${type}&action=assign`
-        );
-      } else if (assignments.length === 1) {
-        // Only one client has this plan - navigate directly to their plan page
-        const assignment = assignments[0];
-        // Use assignedPlanId directly with the new API - no need for coachingRequestId
-        router.push(
-          `/trainer/dashboard/assigned-plans/${assignment.assignedPlanId}?type=${type}`
-        );
-      } else {
-        // Multiple clients have this plan - navigate to tracking overview page
-        router.push(
-          `/trainer/dashboard/plans/${id}/track?type=${type}&assignments=${encodeURIComponent(
-            JSON.stringify(assignments)
-          )}`
-        );
+      if (data.success) {
+        setClients(data.data || []);
       }
     } catch (error) {
-      console.error("Error in handleTrackClick:", error);
-      // Fallback to original behavior - go to clients page for assignment
-      router.push(
-        `/trainer/dashboard/clients?planId=${id}&type=${type}&action=assign`
-      );
+      console.error("Error fetching clients:", error);
+      setClients([]);
+    } finally {
+      setLoadingClients(false);
     }
   };
 
-  const handleEditClick = () => {
-    // Use the correct edit URL based on plan type
-    if (isNutrition) {
-      router.push(`/trainer/dashboard/plans/nutrition/edit/${id}`);
+
+  // Handle assign plan to client
+  const handleAssignToClient = async (clientId) => {
+    try {
+      setAssigningClient(clientId);
+      const endpoint = type === "nutrition" 
+        ? `/api/coaching-requests/${clientId}/assign-nutrition-plan`
+        : `/api/coaching-requests/${clientId}/assign-training-plan`;
+      
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planId: id }),
+      });
+
+      if (!response.ok) throw new Error("Failed to assign plan");
+      
+      const data = await response.json();
+      if (data.success) {
+        setShowAssignModal(false);
+        // Refresh the page or update client count
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error assigning plan:", error);
+      alert("Failed to assign plan. Please try again.");
+    } finally {
+      setAssigningClient(null);
+    }
+  };
+
+  const handleTrackClick = async () => {
+    if (clientCount === 0) {
+      // No clients assigned - show assign modal
+      setShowAssignModal(true);
+      fetchClients();
     } else {
-      router.push(`/trainer/dashboard/plans/training/edit/${id}`);
+      // Fetch assignments to determine what to do
+      try {
+        setLoadingAssignments(true);
+        const response = await fetch(`/api/users/trainer/plans/${id}/assignments`);
+        if (!response.ok) throw new Error("Failed to fetch assignments");
+        
+        const data = await response.json();
+        const currentAssignments = data.success ? data.data || [] : [];
+        setAssignments(currentAssignments);
+        
+        if (currentAssignments.length === 1) {
+          // Only one client - redirect directly to track
+          const assignment = currentAssignments[0];
+          const trackUrl = type === "nutrition" 
+            ? `/trainer/dashboard/clients/${assignment.clientId}/nutrition/${assignment.assignedPlanId}`
+            : `/trainer/dashboard/clients/${assignment.clientId}/training/${assignment.assignedPlanId}`;
+          router.push(trackUrl);
+        } else if (currentAssignments.length > 1) {
+          // Multiple clients - show selection modal
+          setShowTrackModal(true);
+        }
+      } catch (error) {
+        console.error("Error fetching assignments:", error);
+        // Fallback to assign modal
+        setShowAssignModal(true);
+        fetchClients();
+      } finally {
+        setLoadingAssignments(false);
+      }
+    }
+  };
+
+  const getEditUrl = () => {
+    // Return the correct edit URL based on plan type
+    if (isNutrition) {
+      return `/trainer/dashboard/plans/nutrition/edit/${id}`;
+    } else {
+      return `/trainer/dashboard/plans/training/edit/${id}`;
     }
   };
 
@@ -353,15 +391,16 @@ export const PlanCard = ({
                   </span>
                 </Button>
 
-                <Button
-                  variant="ghost"
-                  size="small"
-                  leftIcon={<Icon icon="mdi:pencil" className="w-4 h-4" />}
-                  onClick={handleEditClick}
-                  className="text-xs px-3 py-1.5 text-gray-400 hover:text-blue-300 hover:bg-blue-900/20 flex-shrink-0"
-                >
-                  <span className="hidden sm:inline">Edit</span>
-                </Button>
+                <Link href={getEditUrl()}>
+                  <Button
+                    variant="ghost"
+                    size="small"
+                    leftIcon={<Icon icon="mdi:pencil" className="w-4 h-4" />}
+                    className="text-xs px-3 py-1.5 text-gray-400 hover:text-blue-300 hover:bg-blue-900/20 flex-shrink-0"
+                  >
+                    <span className="hidden sm:inline">Edit</span>
+                  </Button>
+                </Link>
 
                 <div className="hidden md:flex items-center gap-2">
                   <Button
@@ -459,6 +498,241 @@ export const PlanCard = ({
         footerBorder
         size="small"
       />
+
+      {/* Assign Modal */}
+      {showAssignModal && (
+        <Modal
+          isOpen={showAssignModal}
+          onClose={() => setShowAssignModal(false)}
+          title={
+            <div className="flex items-center gap-2">
+              <Icon
+                icon={type === "nutrition" ? "mdi:food-apple" : "mdi:dumbbell"}
+                width={24}
+                height={24}
+                className="text-[#3E92CC]"
+              />
+              Assign {type === "nutrition" ? "Nutrition" : "Training"} Plan
+            </div>
+          }
+          hideButtons={true}
+          className="max-w-2xl"
+        >
+          <div className="space-y-4">
+            <p className="text-zinc-400">
+              Select a client to assign <span className="text-white font-medium">{title}</span> to:
+            </p>
+            
+            {loadingClients ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#3E92CC] border-t-transparent" />
+                <p className="ml-2 text-zinc-400">Loading clients...</p>
+              </div>
+            ) : clients.length === 0 ? (
+              <div className="text-center py-8">
+                <Icon
+                  icon="mdi:account-off"
+                  className="text-zinc-600 mx-auto mb-4"
+                  width={48}
+                  height={48}
+                />
+                <p className="text-zinc-400">No active clients found</p>
+              </div>
+            ) : (
+              <div className="max-h-96 overflow-y-auto space-y-2">
+                {clients.map((client) => (
+                  <div
+                    key={client.id}
+                    className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-zinc-700 rounded-full flex items-center justify-center">
+                        <Icon icon="mdi:account" className="text-zinc-400" width={20} height={20} />
+                      </div>
+                      <div>
+                        <p className="text-white font-medium">
+                          {client.client?.clientProfile?.firstName} {client.client?.clientProfile?.lastName}
+                        </p>
+                        <p className="text-zinc-400 text-sm">
+                          Client since {new Date(client.respondedAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="primary"
+                      size="small"
+                      onClick={() => handleAssignToClient(client.id)}
+                      loading={assigningClient === client.id}
+                      disabled={assigningClient && assigningClient !== client.id}
+                    >
+                      {assigningClient === client.id ? "Assigning..." : "Assign"}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            <div className="flex gap-3 pt-4 border-t border-zinc-700">
+              <Button
+                variant="secondary"
+                onClick={() => setShowAssignModal(false)}
+                fullWidth
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Track Modal - Multiple Clients */}
+      {showTrackModal && (
+        <Modal
+          isOpen={showTrackModal}
+          onClose={() => setShowTrackModal(false)}
+          title={
+            <div className="flex items-center gap-2">
+              <Icon
+                icon="mdi:chart-line"
+                width={24}
+                height={24}
+                className="text-[#3E92CC]"
+              />
+              Track Progress
+            </div>
+          }
+          hideButtons={true}
+          className="max-w-2xl"
+        >
+          <div className="space-y-4">
+            <p className="text-zinc-400">
+              Multiple clients are using <span className="text-white font-medium">{title}</span>. 
+              Select a client to track their progress:
+            </p>
+            
+            {loadingAssignments ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#3E92CC] border-t-transparent" />
+                <p className="ml-2 text-zinc-400">Loading assignments...</p>
+              </div>
+            ) : (
+              <div className="max-h-96 overflow-y-auto space-y-3">
+                {assignments.map((assignment) => (
+                  <Link
+                    key={assignment.assignedPlanId}
+                    href={
+                      type === "nutrition" 
+                        ? `/trainer/dashboard/clients/${assignment.clientId}/nutrition/${assignment.assignedPlanId}`
+                        : `/trainer/dashboard/clients/${assignment.clientId}/training/${assignment.assignedPlanId}`
+                    }
+                    className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors group"
+                  >
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      {/* Profile Image or Avatar */}
+                      <div className="w-12 h-12 bg-zinc-700 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {assignment.clientProfile?.profileImage ? (
+                          <Image 
+                            src={assignment.clientProfile.profileImage} 
+                            alt={assignment.clientName}
+                            fill
+                            className="object-cover"
+                            sizes="48px"
+                          />
+                        ) : (
+                          <Icon icon="mdi:account" className="text-zinc-400" width={24} height={24} />
+                        )}
+                      </div>
+                      
+                      {/* Client Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="text-white font-medium group-hover:text-[#3E92CC] truncate">
+                            {assignment.clientName}
+                          </p>
+                          {assignment.clientProfile?.age && (
+                            <span className="text-zinc-500 text-sm">({assignment.clientProfile.age}y)</span>
+                          )}
+                          {assignment.clientProfile?.gender && (
+                            <span className={`px-2 py-0.5 text-xs rounded-full ${
+                              assignment.clientProfile.gender === 'male' 
+                                ? 'bg-blue-900/30 text-blue-400' 
+                                : 'bg-pink-900/30 text-pink-400'
+                            }`}>
+                              {assignment.clientProfile.gender}
+                            </span>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center gap-4 text-sm text-zinc-400">
+                          <span className="flex items-center gap-1">
+                            <Icon icon="mdi:calendar" width={14} height={14} />
+                            Started {new Date(assignment.assignedAt).toLocaleDateString()}
+                          </span>
+                          
+                          {assignment.progressInfo && (
+                            <span className="flex items-center gap-1">
+                              <Icon icon="mdi:chart-line" width={14} height={14} />
+                              {assignment.progressInfo.completedDays}/{assignment.progressInfo.totalDays} days
+                            </span>
+                          )}
+                        </div>
+                        
+                        {assignment.clientProfile?.experienceLevel && (
+                          <div className="mt-1">
+                            <span className="text-xs text-zinc-500 capitalize">
+                              {assignment.clientProfile.experienceLevel} level
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Status and Arrow */}
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <div className="text-right">
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          assignment.status === 'active' 
+                            ? 'bg-green-900/30 text-green-400' 
+                            : assignment.status === 'completed'
+                              ? 'bg-blue-900/30 text-blue-400'
+                              : 'bg-zinc-700/50 text-zinc-400'
+                        }`}>
+                          {assignment.status === 'active' ? 'Active' : 
+                           assignment.status === 'completed' ? 'Completed' : 
+                           assignment.status}
+                        </span>
+                        
+                        {assignment.progressInfo && assignment.progressInfo.successRate > 0 && (
+                          <div className="text-xs text-zinc-500 mt-1">
+                            {Math.round(assignment.progressInfo.successRate)}% success
+                          </div>
+                        )}
+                      </div>
+                      
+                      <Icon 
+                        icon="mdi:chevron-right" 
+                        className="text-zinc-400 group-hover:text-[#3E92CC]" 
+                        width={20} 
+                        height={20} 
+                      />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+            
+            <div className="flex gap-3 pt-4 border-t border-zinc-700">
+              <Button
+                variant="secondary"
+                onClick={() => setShowTrackModal(false)}
+                fullWidth
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </>
   );
 };

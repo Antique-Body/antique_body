@@ -151,24 +151,24 @@ export const NewMealCard = ({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="text-white font-medium text-sm truncate">
-                        {mealLog.selectedOption.name}
+                        {mealLog.selectedOption?.currentOption?.name || mealLog.selectedOption?.name}
                       </h4>
-                      {mealLog.selectedOption.isCustom && (
+                      {(mealLog.selectedOption?.currentOption?.isCustom || mealLog.selectedOption?.isCustom) && (
                         <span className="text-xs bg-purple-500/15 text-purple-400 px-1.5 py-0.5 rounded">
                           Custom
                         </span>
                       )}
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 text-xs text-green-300 flex-wrap">
-                      <span>{mealLog.selectedOption.calories || 0} cal</span>
+                      <span>{(mealLog.selectedOption?.currentOption?.calories || mealLog.selectedOption?.calories || 0)} cal</span>
                       <span>
-                        {mealLog.selectedOption.protein || 0}g protein
+                        {(mealLog.selectedOption?.currentOption?.protein || mealLog.selectedOption?.protein || 0)}g protein
                       </span>
                       <span className="hidden sm:inline">
-                        {mealLog.selectedOption.carbs || 0}g carbs
+                        {(mealLog.selectedOption?.currentOption?.carbs || mealLog.selectedOption?.carbs || 0)}g carbs
                       </span>
                       <span className="hidden sm:inline">
-                        {mealLog.selectedOption.fat || 0}g fat
+                        {(mealLog.selectedOption?.currentOption?.fat || mealLog.selectedOption?.fat || 0)}g fat
                       </span>
                     </div>
                   </div>
@@ -191,7 +191,7 @@ export const NewMealCard = ({
         )}
 
         {/* Trainer Suggestions (for incomplete meals) */}
-        {!isCompleted && meal.options && (
+        {!isCompleted && (meal.options || mealLog?.selectedOption?.allOptions) && (
           <div className="space-y-3">
             {/* Subtle header for trainer suggestions */}
             <div className="flex items-center justify-between">
@@ -203,7 +203,7 @@ export const NewMealCard = ({
                       : "text-zinc-400"
                   }`}
                 >
-                  {meal.options.length} suggested options
+                  {(meal.options || mealLog?.selectedOption?.allOptions || []).length} suggested options
                 </h4>
               </div>
               {!isEditable && isDayEditable && (
@@ -216,7 +216,7 @@ export const NewMealCard = ({
 
             {/* Clickable Options List */}
             <div className="space-y-2">
-              {meal.options.map((option, index) => (
+              {(meal.options || mealLog?.selectedOption?.allOptions || []).map((option, index) => (
                 <div
                   key={index}
                   className={`relative bg-zinc-800/15 p-3 rounded-lg transition-all duration-200 ${
