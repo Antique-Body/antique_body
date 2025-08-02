@@ -7,7 +7,7 @@ import { parseChatId, isValidChatId } from "@/utils/chatUtils";
 export async function POST(request) {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -121,13 +121,13 @@ export async function POST(request) {
           };
         }
       }
-      
+
       return null;
     })();
 
     // Check if there's an existing conversation (not deleted)
     const existingConversation = await prisma.conversation.findFirst({
-      where: { 
+      where: {
         chatId,
         deletedAt: null,
       },
@@ -145,4 +145,4 @@ export async function POST(request) {
       { status: 500 }
     );
   }
-} 
+}

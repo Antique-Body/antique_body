@@ -16,13 +16,15 @@ import { isValidChatId } from "@/utils/chatUtils";
 // Avatar component with fallback
 const Avatar = ({ src, alt, size = "md", className = "" }) => {
   const [imageError, setImageError] = useState(false);
-  
+
   // Generate initials from name
   const getInitials = (name) => {
     if (!name) return "?";
     const parts = name.trim().split(" ");
     if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    return (
+      parts[0].charAt(0) + parts[parts.length - 1].charAt(0)
+    ).toUpperCase();
   };
 
   // Size classes
@@ -30,14 +32,16 @@ const Avatar = ({ src, alt, size = "md", className = "" }) => {
     sm: "h-8 w-8 text-xs",
     md: "h-10 w-10 text-sm",
     lg: "h-12 w-12 text-base",
-    xl: "h-16 w-16 text-lg"
+    xl: "h-16 w-16 text-lg",
   };
 
   const sizeClass = sizeClasses[size] || sizeClasses.md;
 
   if (!src || imageError) {
     return (
-      <div className={`${sizeClass} ${className} rounded-full bg-gradient-to-br from-[#3E92CC] to-[#2D7EB8] flex items-center justify-center font-semibold text-white`}>
+      <div
+        className={`${sizeClass} ${className} rounded-full bg-gradient-to-br from-[#3E92CC] to-[#2D7EB8] flex items-center justify-center font-semibold text-white`}
+      >
         {getInitials(alt)}
       </div>
     );
@@ -59,7 +63,7 @@ import { TypingIndicator } from "./TypingIndicator";
 
 const ConversationItem = ({ conversation, isSelected, onClick, isOnline }) => {
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       onClick?.(conversation);
     }
@@ -75,61 +79,71 @@ const ConversationItem = ({ conversation, isSelected, onClick, isOnline }) => {
       role="button"
       tabIndex={0}
     >
-    <div className="flex items-center">
-      {/* Avatar with online indicator */}
-      <div className="relative">
-        <Avatar
-          src={conversation.avatar}
-          alt={conversation.name}
-          size="lg"
-        />
-        {isOnline && (
-          <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-[#0f0f0f] bg-green-500"></div>
-        )}
-        {conversation.isNewChat && (
-          <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-green-500 flex items-center justify-center">
-            <span className="text-white text-xs">+</span>
-          </div>
-        )}
-      </div>
-
-      {/* Contact info */}
-      <div className="ml-3 flex-1">
-        <div className="flex items-center justify-between">
-          <h3 className="font-medium text-gray-100">{conversation.name}</h3>
-          <span className="text-xs text-gray-400">
-            {conversation.lastMessageAt
-              ? new Date(conversation.lastMessageAt).toLocaleDateString()
-              : conversation.isNewChat ? "New" : ""}
-          </span>
+      <div className="flex items-center">
+        {/* Avatar with online indicator */}
+        <div className="relative">
+          <Avatar src={conversation.avatar} alt={conversation.name} size="lg" />
+          {isOnline && (
+            <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-[#0f0f0f] bg-green-500"></div>
+          )}
+          {conversation.isNewChat && (
+            <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-green-500 flex items-center justify-center">
+              <span className="text-white text-xs">+</span>
+            </div>
+          )}
         </div>
-        <div className="mt-1 flex items-center justify-between">
-          <p className="max-w-[150px] truncate text-sm text-gray-400">
-            {conversation.isBlocked 
-              ? "Blocked chat" 
-              : conversation.isNewChat 
-                ? "Start conversation" 
-                : "Chat active"}
-          </p>
-          <div className="flex items-center gap-2">
-            {conversation.isBlocked && (
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-500">
-                <svg className="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <title>Blocked</title>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
-                </svg>
-              </span>
-            )}
-            {conversation.unreadCount > 0 && (
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs text-white">
-                {conversation.unreadCount > 9 ? "9+" : conversation.unreadCount}
-              </span>
-            )}
+
+        {/* Contact info */}
+        <div className="ml-3 flex-1">
+          <div className="flex items-center justify-between">
+            <h3 className="font-medium text-gray-100">{conversation.name}</h3>
+            <span className="text-xs text-gray-400">
+              {conversation.lastMessageAt
+                ? new Date(conversation.lastMessageAt).toLocaleDateString()
+                : conversation.isNewChat
+                  ? "New"
+                  : ""}
+            </span>
+          </div>
+          <div className="mt-1 flex items-center justify-between">
+            <p className="max-w-[150px] truncate text-sm text-gray-400">
+              {conversation.isBlocked
+                ? "Blocked chat"
+                : conversation.isNewChat
+                  ? "Start conversation"
+                  : "Chat active"}
+            </p>
+            <div className="flex items-center gap-2">
+              {conversation.isBlocked && (
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-500">
+                  <svg
+                    className="h-3 w-3 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <title>Blocked</title>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"
+                    />
+                  </svg>
+                </span>
+              )}
+              {conversation.unreadCount > 0 && (
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs text-white">
+                  {conversation.unreadCount > 9
+                    ? "9+"
+                    : conversation.unreadCount}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
   );
 };
 
@@ -153,7 +167,9 @@ const MessageBubble = ({ message }) => {
         )}
         {message.messageType === "file" && (
           <div className="break-words">
-            <p className="mb-2 break-words whitespace-pre-wrap">{message.content}</p>
+            <p className="mb-2 break-words whitespace-pre-wrap">
+              {message.content}
+            </p>
             <a
               href={message.fileUrl}
               target="_blank"
@@ -171,9 +187,7 @@ const MessageBubble = ({ message }) => {
         >
           <span>{formatTime(message.createdAt)}</span>
           {message.isMine && (
-            <span className="ml-2">
-              {message.isRead ? "✓✓" : "✓"}
-            </span>
+            <span className="ml-2">{message.isRead ? "✓✓" : "✓"}</span>
           )}
         </div>
       </div>
@@ -181,22 +195,33 @@ const MessageBubble = ({ message }) => {
   );
 };
 
-const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isOnline, onDeleteChat }) => {
+const ChatHistory = ({
+  conversation,
+  onClose,
+  onRefreshConversations = null,
+  isOnline,
+  onDeleteChat,
+}) => {
   const { data: session } = useSession();
   const pathname = usePathname();
-  
+
   // Determine if user is trainer based on current path (fallback if session role is not available)
-  const isTrainer = pathname?.includes('/trainer/') || session?.user?.role === 'trainer';
+  const isTrainer =
+    pathname?.includes("/trainer/") || session?.user?.role === "trainer";
   const [reply, setReply] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showBlockConfirm, setShowBlockConfirm] = useState(false);
   const [showUnblockConfirm, setShowUnblockConfirm] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
-  
 
   const messagesEndRef = useRef(null);
-  const { blockChat, unblockChat, checkChatBlockedStatus, loading: blockLoading } = useChatBlock();
-  
+  const {
+    blockChat,
+    unblockChat,
+    checkChatBlockedStatus,
+    loading: blockLoading,
+  } = useChatBlock();
+
   const {
     messages,
     loading,
@@ -208,11 +233,8 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
     deleteChat,
   } = useChat(conversation?.id);
 
-  const {
-    isOtherUserTyping,
-    typingUserNames,
-    setTypingStatus,
-  } = useChatPresence(conversation?.id);
+  const { isOtherUserTyping, typingUserNames, setTypingStatus } =
+    useChatPresence(conversation?.id);
 
   useEffect(() => {
     if (conversation && !conversation.isNewChat) {
@@ -225,13 +247,16 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
   useEffect(() => {
     if (conversation) {
       // First check if the conversation already has blocked status
-      if (conversation.hasOwnProperty('isBlocked')) {
+      if (conversation.hasOwnProperty("isBlocked")) {
         setIsBlocked(conversation.isBlocked);
       } else if (!conversation.isNewChat && isTrainer) {
         // Fall back to API check for older conversations
         const checkBlockedStatus = async () => {
           try {
-            const result = await checkChatBlockedStatus(conversation.participantId, conversation.id);
+            const result = await checkChatBlockedStatus(
+              conversation.participantId,
+              conversation.id
+            );
             setIsBlocked(result.isBlocked);
           } catch (error) {
             console.error("Error checking blocked status:", error);
@@ -260,15 +285,18 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
       if (conversation.isNewChat) {
         // For new chats, we need to send message and then refresh conversations
         // The API will automatically create the conversation when first message is sent
-        const response = await fetch(`/api/messages/direct/${conversation.id}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            content: reply.trim(),
-          }),
-        });
+        const response = await fetch(
+          `/api/messages/direct/${conversation.id}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              content: reply.trim(),
+            }),
+          }
+        );
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -277,19 +305,19 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
 
         await response.json();
         setReply("");
-        
-                 // Update the conversation to mark it as no longer new
-         // and trigger a refresh of the conversation list
-         if (onRefreshConversations) {
-           onRefreshConversations();
-         }
+
+        // Update the conversation to mark it as no longer new
+        // and trigger a refresh of the conversation list
+        if (onRefreshConversations) {
+          onRefreshConversations();
+        }
       } else {
         await sendMessage(reply);
         setReply("");
       }
     } catch (error) {
       console.error("Failed to send message:", error);
-      
+
       // Handle blocked chat error specifically
       if (error.message.includes("blocked")) {
         setIsBlocked(true);
@@ -311,8 +339,6 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
       </div>
     );
   }
-
-
 
   return (
     <div className="flex h-full flex-col">
@@ -349,7 +375,6 @@ const ChatHistory = ({ conversation, onClose, onRefreshConversations = null, isO
           {/* Block/Unblock Chat button - only for trainers */}
           {isTrainer && !conversation.isNewChat && (
             <div className="relative">
-
               {isBlocked ? (
                 <button
                   type="button"
@@ -677,9 +702,10 @@ export const RealTimeChatInterface = ({ conversationId }) => {
   const router = useRouter();
   const pathname = usePathname();
   const { data: session } = useSession();
-  
+
   // Determine if user is trainer based on current path (fallback if session role is not available)
-  const isTrainer = pathname?.includes('/trainer/') || session?.user?.role === 'trainer';
+  const isTrainer =
+    pathname?.includes("/trainer/") || session?.user?.role === "trainer";
   const [activeConversation, setActiveConversation] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
@@ -688,14 +714,13 @@ export const RealTimeChatInterface = ({ conversationId }) => {
   const [validatedChatIds, setValidatedChatIds] = useState(new Set()); // Cache validated chat IDs
   const [sessionStorageProcessed, setSessionStorageProcessed] = useState(false);
 
-
-
-  const { conversations, loading, error, fetchConversations } = useConversations();
+  const { conversations, loading, error, fetchConversations } =
+    useConversations();
   const { isUserOnline } = useGlobalPresence();
 
   useEffect(() => {
     fetchConversations();
-    
+
     // Cleanup function to clear validation cache when component unmounts
     return () => {
       setValidatedChatIds(new Set());
@@ -713,11 +738,14 @@ export const RealTimeChatInterface = ({ conversationId }) => {
           setShowMobileChat(false);
           return;
         }
-        
+
         setInvalidChatId(false);
-        
+
         // Only check for existing conversation if conversations are loaded
-        const conversation = conversations.length > 0 ? conversations.find(conv => conv.id === conversationId) : null;
+        const conversation =
+          conversations.length > 0
+            ? conversations.find((conv) => conv.id === conversationId)
+            : null;
         if (conversation) {
           // Existing conversation found - no validation needed
           setActiveConversation(conversation);
@@ -727,47 +755,65 @@ export const RealTimeChatInterface = ({ conversationId }) => {
           // Try session storage for new conversation
           let participantName = "New Conversation";
           let participantAvatar = null;
-          
+
           // Try to get participant info from session storage first (only if not already processed)
           let participantInfoFound = false;
           if (!sessionStorageProcessed) {
             try {
               // Check if sessionStorage is available (privacy mode, quota issues, etc.)
-              if (typeof Storage === "undefined" || typeof sessionStorage === "undefined") {
-                console.warn("SessionStorage is not available in this environment");
+              if (
+                typeof Storage === "undefined" ||
+                typeof sessionStorage === "undefined"
+              ) {
+                console.warn(
+                  "SessionStorage is not available in this environment"
+                );
                 setSessionStorageProcessed(true); // Skip future attempts
               } else {
-                const tempConversationData = sessionStorage.getItem('tempConversation');
+                const tempConversationData =
+                  sessionStorage.getItem("tempConversation");
                 if (tempConversationData) {
                   let participantInfo;
                   try {
                     participantInfo = JSON.parse(tempConversationData);
                   } catch (parseError) {
-                    console.error("Failed to parse participant info from sessionStorage:", parseError);
+                    console.error(
+                      "Failed to parse participant info from sessionStorage:",
+                      parseError
+                    );
                     // Clear corrupted data
                     try {
-                      sessionStorage.removeItem('tempConversation');
+                      sessionStorage.removeItem("tempConversation");
                     } catch (removeError) {
-                      console.error("Failed to remove corrupted sessionStorage data:", removeError);
+                      console.error(
+                        "Failed to remove corrupted sessionStorage data:",
+                        removeError
+                      );
                     }
                     setSessionStorageProcessed(true);
                     return;
                   }
-                  
+
                   // Verify this is for the current chat ID and not expired (5 minutes)
-                  const isExpired = Date.now() - participantInfo.timestamp > 5 * 60 * 1000;
-                  const isForCurrentChat = participantInfo.chatId === conversationId;
-                  
+                  const isExpired =
+                    Date.now() - participantInfo.timestamp > 5 * 60 * 1000;
+                  const isForCurrentChat =
+                    participantInfo.chatId === conversationId;
+
                   if (!isExpired && isForCurrentChat) {
-                    participantName = participantInfo.name || "New Conversation";
+                    participantName =
+                      participantInfo.name || "New Conversation";
                     participantAvatar = participantInfo.avatar || null;
                     participantInfoFound = true;
-                    
+
                     // Clear the session storage after using it
                     try {
-                      sessionStorage.removeItem('tempConversation');
+                      sessionStorage.removeItem("tempConversation");
                     } catch (removeError) {
-                      console.error("Failed to remove sessionStorage data:", removeError);
+                      console.error(
+                        "Failed to remove sessionStorage data:",
+                        removeError
+                      );
                     }
                     // Mark as processed to prevent future accesses
                     setSessionStorageProcessed(true);
@@ -779,17 +825,21 @@ export const RealTimeChatInterface = ({ conversationId }) => {
               console.error("SessionStorage access error:", {
                 message: error.message,
                 name: error.name,
-                stack: error.stack
+                stack: error.stack,
               });
-              
+
               // Mark as processed to prevent repeated failures
               setSessionStorageProcessed(true);
-              
+
               // Optionally notify user if sessionStorage is critical for functionality
-              if (error.name === 'QuotaExceededError') {
-                console.warn("SessionStorage quota exceeded. Some features may not work properly.");
-              } else if (error.message && error.message.includes('privacy')) {
-                console.warn("SessionStorage blocked by privacy settings. Some features may not work properly.");
+              if (error.name === "QuotaExceededError") {
+                console.warn(
+                  "SessionStorage quota exceeded. Some features may not work properly."
+                );
+              } else if (error.message && error.message.includes("privacy")) {
+                console.warn(
+                  "SessionStorage blocked by privacy settings. Some features may not work properly."
+                );
               }
             }
           }
@@ -797,10 +847,10 @@ export const RealTimeChatInterface = ({ conversationId }) => {
           // Only do server validation if session storage didn't work and we haven't validated this chat ID
           if (!participantInfoFound && !validatedChatIds.has(conversationId)) {
             try {
-              const response = await fetch('/api/messages/validate-chat', {
-                method: 'POST',
+              const response = await fetch("/api/messages/validate-chat", {
+                method: "POST",
                 headers: {
-                  'Content-Type': 'application/json',
+                  "Content-Type": "application/json",
                 },
                 body: JSON.stringify({ chatId: conversationId }),
               });
@@ -811,16 +861,18 @@ export const RealTimeChatInterface = ({ conversationId }) => {
                   participantName = data.participantInfo.name;
                   participantAvatar = data.participantInfo.avatar;
                   participantInfoFound = true;
-                  
+
                   // Cache this validation result
-                  setValidatedChatIds(prev => new Set([...prev, conversationId]));
+                  setValidatedChatIds(
+                    (prev) => new Set([...prev, conversationId])
+                  );
                 }
               }
             } catch (error) {
               console.error("Error validating chat access:", error);
             }
           }
-          
+
           // Only allow creating temp conversations if participant info is provided
           if (participantName !== "New Conversation") {
             const tempConversation = {
@@ -846,13 +898,15 @@ export const RealTimeChatInterface = ({ conversationId }) => {
     // Reset session storage processed flag when conversation ID changes
     setSessionStorageProcessed(false);
     handleConversationId();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId, validatedChatIds]);
 
   // Handle when conversations are loaded and we have a conversation ID
   useEffect(() => {
     if (conversationId && conversations.length > 0 && !activeConversation) {
-      const existingConversation = conversations.find(conv => conv.id === conversationId);
+      const existingConversation = conversations.find(
+        (conv) => conv.id === conversationId
+      );
       if (existingConversation) {
         setActiveConversation(existingConversation);
         setShowMobileChat(true);
@@ -873,11 +927,13 @@ export const RealTimeChatInterface = ({ conversationId }) => {
     const matchesSearch = conversation.name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
-    
+
     const matchesFilter =
       filter === "all" ||
       (filter === "unread" && conversation.unreadCount > 0) ||
-      (filter === "active" && !conversation.isNewChat && !conversation.isBlocked) ||
+      (filter === "active" &&
+        !conversation.isNewChat &&
+        !conversation.isBlocked) ||
       (filter === "blocked" && conversation.isBlocked);
 
     return matchesSearch && matchesFilter;
@@ -899,16 +955,20 @@ export const RealTimeChatInterface = ({ conversationId }) => {
     setShowMobileChat(false);
     setActiveConversation(null);
     fetchConversations();
-    
+
     // Redirect to messages page without chat ID
-    const basePath = isTrainer ? '/trainer/dashboard/messages' : '/client/dashboard/messages';
+    const basePath = isTrainer
+      ? "/trainer/dashboard/messages"
+      : "/client/dashboard/messages";
     router.push(basePath);
   };
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       {/* Conversations list */}
-      <div className={`lg:col-span-1 ${showMobileChat ? "hidden lg:block" : ""}`}>
+      <div
+        className={`lg:col-span-1 ${showMobileChat ? "hidden lg:block" : ""}`}
+      >
         <div className="mb-4">
           <FormField
             type="text"
@@ -958,9 +1018,11 @@ export const RealTimeChatInterface = ({ conversationId }) => {
 
         <div className="h-[500px] grow overflow-y-auto rounded-lg bg-[#0f0f0f]">
           {loading && (
-            <div className="p-4 text-center text-gray-400">Loading conversations...</div>
+            <div className="p-4 text-center text-gray-400">
+              Loading conversations...
+            </div>
           )}
-          
+
           {error && (
             <div className="p-4 text-center text-red-400">Error: {error}</div>
           )}
@@ -971,13 +1033,16 @@ export const RealTimeChatInterface = ({ conversationId }) => {
             </div>
           )}
 
-          {!loading && !error && !invalidChatId && filteredConversations.length === 0 && (
-            <div className="p-4 text-center text-gray-400">
-              {conversations.length === 0 
-                ? "No conversations found. Accept a coaching request to start chatting."
-                : "No conversations match your filters."}
-            </div>
-          )}
+          {!loading &&
+            !error &&
+            !invalidChatId &&
+            filteredConversations.length === 0 && (
+              <div className="p-4 text-center text-gray-400">
+                {conversations.length === 0
+                  ? "No conversations found. Accept a coaching request to start chatting."
+                  : "No conversations match your filters."}
+              </div>
+            )}
 
           {!loading && !error && filteredConversations.length > 0 && (
             <>
@@ -996,17 +1061,23 @@ export const RealTimeChatInterface = ({ conversationId }) => {
       </div>
 
       {/* Chat area */}
-      <div className={`lg:col-span-2 ${!showMobileChat ? "hidden lg:block" : ""}`}>
+      <div
+        className={`lg:col-span-2 ${!showMobileChat ? "hidden lg:block" : ""}`}
+      >
         <div className="h-[600px] overflow-hidden rounded-lg bg-[#0f0f0f]">
           <ChatHistory
             conversation={activeConversation}
             onClose={handleCloseMobileChat}
             onRefreshConversations={handleRefreshConversations}
             onDeleteChat={handleDeleteChat}
-            isOnline={activeConversation ? isUserOnline(activeConversation.participantId) : false}
+            isOnline={
+              activeConversation
+                ? isUserOnline(activeConversation.participantId)
+                : false
+            }
           />
         </div>
       </div>
     </div>
   );
-}; 
+};

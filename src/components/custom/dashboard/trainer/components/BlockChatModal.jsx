@@ -6,12 +6,12 @@ import { Button } from "@/components/common/Button";
 import { Modal } from "@/components/common/Modal";
 import { useChatBlock } from "@/hooks/useChatBlock";
 
-export const BlockChatModal = ({ 
-  isOpen, 
-  onClose, 
-  userToBlock, 
+export const BlockChatModal = ({
+  isOpen,
+  onClose,
+  userToBlock,
   chatId,
-  onSuccess 
+  onSuccess,
 }) => {
   const [reason, setReason] = useState("");
   const { blockChat, loading, error } = useChatBlock();
@@ -43,17 +43,15 @@ export const BlockChatModal = ({
       <div className="p-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-            <Icon 
-              icon="mdi:message-off" 
-              className="text-orange-600" 
-              width={24} 
-              height={24} 
+            <Icon
+              icon="mdi:message-off"
+              className="text-orange-600"
+              width={24}
+              height={24}
             />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">
-              Block Chat
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-900">Block Chat</h2>
             <p className="text-gray-600">
               This will prevent this user from sending you messages
             </p>
@@ -71,12 +69,18 @@ export const BlockChatModal = ({
                 />
               ) : (
                 <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                  <Icon icon="mdi:account" className="text-gray-600" width={20} height={20} />
+                  <Icon
+                    icon="mdi:account"
+                    className="text-gray-600"
+                    width={20}
+                    height={20}
+                  />
                 </div>
               )}
               <div>
                 <p className="font-medium text-gray-900">
-                  {userToBlock.clientProfile?.firstName} {userToBlock.clientProfile?.lastName}
+                  {userToBlock.clientProfile?.firstName}{" "}
+                  {userToBlock.clientProfile?.lastName}
                 </p>
                 <p className="text-sm text-gray-600">
                   {userToBlock.user?.email}
@@ -88,7 +92,10 @@ export const BlockChatModal = ({
 
         <div className="space-y-4">
           <div>
-            <label htmlFor="reason" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="reason"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Reason for blocking chat (optional)
             </label>
             <textarea
@@ -113,14 +120,21 @@ export const BlockChatModal = ({
 
           <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
             <div className="flex items-start gap-3">
-              <Icon icon="mdi:information" className="text-blue-600 mt-0.5" width={20} height={20} />
+              <Icon
+                icon="mdi:information"
+                className="text-blue-600 mt-0.5"
+                width={20}
+                height={20}
+              />
               <div>
                 <h3 className="text-sm font-medium text-blue-800">
                   What happens when you block chat?
                 </h3>
                 <ul className="mt-2 text-sm text-blue-700 space-y-1">
                   <li>• They cannot send you messages</li>
-                  <li>• They can still see your profile and request coaching</li>
+                  <li>
+                    • They can still see your profile and request coaching
+                  </li>
                   <li>• You can unblock chat at any time</li>
                   <li>• This only affects messaging, not other interactions</li>
                 </ul>
@@ -150,4 +164,4 @@ export const BlockChatModal = ({
       </div>
     </Modal>
   );
-}; 
+};

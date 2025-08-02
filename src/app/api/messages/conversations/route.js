@@ -7,7 +7,7 @@ import { generateChatId } from "@/utils/chatUtils";
 export async function GET() {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -32,12 +32,12 @@ export async function GET() {
     // Dynamic query configuration based on user role
     const isTrainer = user.role === "trainer" && user.trainerInfo;
     const isClient = user.role === "client" && user.clientInfo;
-    
+
     if (isTrainer || isClient) {
-      const whereClause = isTrainer 
+      const whereClause = isTrainer
         ? { trainerId: user.trainerInfo.id }
         : { clientId: user.clientInfo.id };
-      
+
       const includeClause = isTrainer
         ? {
             client: {
@@ -110,27 +110,27 @@ export async function GET() {
           where: { blockerId: session.user.id },
           select: { chatId: true },
         });
-        
-        const blockedChatIdSet = new Set(blockedChatIds.map(block => block.chatId));
-        
+
+        const blockedChatIdSet = new Set(
+          blockedChatIds.map((block) => block.chatId)
+        );
+
         // Add isBlocked flag to conversations instead of filtering them out
-        conversations = conversations.map(conversation => ({
+        conversations = conversations.map((conversation) => ({
           ...conversation,
-          isBlocked: blockedChatIdSet.has(conversation.chatId)
+          isBlocked: blockedChatIdSet.has(conversation.chatId),
         }));
       }
-
-
     }
 
     // Get available users to chat with (only those with coaching requests or existing conversations)
     let availableChats = [];
-    
+
     if (isTrainer || isClient) {
       const coachingRequestWhere = isTrainer
         ? { trainerId: user.trainerInfo.id }
         : { clientId: user.clientInfo.id };
-      
+
       const coachingRequestSelect = isTrainer
         ? {
             client: {
@@ -179,21 +179,21 @@ export async function GET() {
         where: {
           ...coachingRequestWhere,
           status: {
-            in: ["pending", "accepted"]
-          }
+            in: ["pending", "accepted"],
+          },
         },
         select: coachingRequestSelect,
         take: 50, // Add pagination limit
       });
 
       // Filter out users that already have conversations
-      const existingIds = conversations.map(conv => 
-        isTrainer ? conv.clientId : conv.trainerId
-      ).filter(Boolean); // Remove any null/undefined values
-      
+      const existingIds = conversations
+        .map((conv) => (isTrainer ? conv.clientId : conv.trainerId))
+        .filter(Boolean); // Remove any null/undefined values
+
       let availableUsers = coachingRequests
-        .map(cr => isTrainer ? cr.client : cr.trainer)
-        .filter(user => user && !existingIds.includes(user.id));
+        .map((cr) => (isTrainer ? cr.client : cr.trainer))
+        .filter((user) => user && !existingIds.includes(user.id));
 
       // Filter out blocked chats from available users for trainers
       if (isTrainer) {
@@ -201,33 +201,34 @@ export async function GET() {
           where: { blockerId: session.user.id },
           select: { chatId: true },
         });
-        
-        const blockedChatIdSet = new Set(blockedChatIds.map(block => block.chatId));
-        
-        availableUsers = availableUsers.filter(participant => {
-          const chatId = generateChatId(
-            user.trainerInfo.id,
-            participant.id
-          );
+
+        const blockedChatIdSet = new Set(
+          blockedChatIds.map((block) => block.chatId)
+        );
+
+        availableUsers = availableUsers.filter((participant) => {
+          const chatId = generateChatId(user.trainerInfo.id, participant.id);
           return !blockedChatIdSet.has(chatId);
         });
       }
 
-
-
       availableChats = availableUsers.map((participant) => {
-        const profile = isTrainer ? participant.clientProfile : participant.trainerProfile;
-        const participantId = isTrainer ? user.trainerInfo.id : user.clientInfo.id;
-        
+        const profile = isTrainer
+          ? participant.clientProfile
+          : participant.trainerProfile;
+        const participantId = isTrainer
+          ? user.trainerInfo.id
+          : user.clientInfo.id;
+
         return {
           id: generateChatId(
             isTrainer ? participantId : participant.id,
             isTrainer ? participant.id : participantId
           ),
           participantId: participant.user.id,
-          name: profile 
-            ? `${profile.firstName} ${profile.lastName || ""}`.trim() 
-            : `Unknown ${isTrainer ? 'Client' : 'Trainer'}`,
+          name: profile
+            ? `${profile.firstName} ${profile.lastName || ""}`.trim()
+            : `Unknown ${isTrainer ? "Client" : "Trainer"}`,
           avatar: profile?.profileImage || null,
           lastMessageAt: null,
           unreadCount: 0,
@@ -240,17 +241,21 @@ export async function GET() {
     const formattedConversations = conversations.map((conv) => {
       const isTrainer = user.role === "trainer";
       const participant = isTrainer ? conv.client : conv.trainer;
-      const profile = isTrainer 
-        ? participant.clientProfile 
+      const profile = isTrainer
+        ? participant.clientProfile
         : participant.trainerProfile;
 
       return {
         id: conv.chatId,
         participantId: participant.user.id,
-        name: profile ? `${profile.firstName} ${profile.lastName || ""}`.trim() : "Unknown User",
+        name: profile
+          ? `${profile.firstName} ${profile.lastName || ""}`.trim()
+          : "Unknown User",
         avatar: profile?.profileImage || null,
         lastMessageAt: conv.lastMessageAt,
-        unreadCount: isTrainer ? conv.trainerUnreadCount : conv.clientUnreadCount,
+        unreadCount: isTrainer
+          ? conv.trainerUnreadCount
+          : conv.clientUnreadCount,
         isNewChat: false,
         isBlocked: conv.isBlocked || false,
       };
@@ -258,7 +263,7 @@ export async function GET() {
 
     // Combine existing conversations with available new chats
     const allConversations = [...formattedConversations, ...availableChats];
-    
+
     // Sort by last message time (existing conversations first, then new chats)
     allConversations.sort((a, b) => {
       if (a.lastMessageAt && b.lastMessageAt) {
@@ -274,12 +279,13 @@ export async function GET() {
     console.error("Error fetching conversations:", error);
     console.error("Error stack:", error.stack);
     return NextResponse.json(
-      { 
-        error: "Failed to fetch conversations", 
-        details: process.env.NODE_ENV === "development" ? error.message : undefined,
-        stack: process.env.NODE_ENV === "development" ? error.stack : undefined 
+      {
+        error: "Failed to fetch conversations",
+        details:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
+        stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
       },
       { status: 500 }
     );
   }
-} 
+}

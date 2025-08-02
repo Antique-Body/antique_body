@@ -2,7 +2,13 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 
-import { joinGlobalPresence, leaveGlobalPresence, updateGlobalPresence, joinChatPresence, updateTypingStatus } from "@/lib/ably";
+import {
+  joinGlobalPresence,
+  leaveGlobalPresence,
+  updateGlobalPresence,
+  joinChatPresence,
+  updateTypingStatus,
+} from "@/lib/ably";
 
 export const useGlobalPresence = () => {
   const [onlineUsers, setOnlineUsers] = useState([]);
@@ -20,27 +26,27 @@ export const useGlobalPresence = () => {
       if (!response.ok) {
         throw new Error("Failed to get current user");
       }
-      
+
       const user = await response.json();
       currentUserRef.current = user;
 
       // Fetch token from backend
-      const tokenResponse = await fetch('/api/auth/ably-token', {
-        method: 'POST',
+      const tokenResponse = await fetch("/api/auth/ably-token", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ clientId: user.id }),
       });
 
       if (!tokenResponse.ok) {
-        throw new Error('Failed to get Ably token');
+        throw new Error("Failed to get Ably token");
       }
 
       const { tokenRequest } = await tokenResponse.json();
 
       // Dynamically import Ably and create instance with token
-      const { default: Ably } = await import('ably');
+      const { default: Ably } = await import("ably");
       ablyRef.current = new Ably.Realtime({
         authCallback: async (tokenParams, callback) => {
           callback(null, tokenRequest);
@@ -49,25 +55,27 @@ export const useGlobalPresence = () => {
       });
 
       // Get global presence channel
-      channelRef.current = ablyRef.current.channels.get('presence:global');
-      
+      channelRef.current = ablyRef.current.channels.get("presence:global");
+
       // Subscribe to presence events
-      channelRef.current.presence.subscribe('enter', (member) => {
-        setOnlineUsers(prev => {
-          const exists = prev.some(u => u.clientId === member.clientId);
+      channelRef.current.presence.subscribe("enter", (member) => {
+        setOnlineUsers((prev) => {
+          const exists = prev.some((u) => u.clientId === member.clientId);
           if (exists) return prev;
           return [...prev, member];
         });
       });
 
-      channelRef.current.presence.subscribe('leave', (member) => {
-        setOnlineUsers(prev => prev.filter(u => u.clientId !== member.clientId));
+      channelRef.current.presence.subscribe("leave", (member) => {
+        setOnlineUsers((prev) =>
+          prev.filter((u) => u.clientId !== member.clientId)
+        );
       });
 
-      channelRef.current.presence.subscribe('update', (member) => {
-        setOnlineUsers(prev => prev.map(u => 
-          u.clientId === member.clientId ? member : u
-        ));
+      channelRef.current.presence.subscribe("update", (member) => {
+        setOnlineUsers((prev) =>
+          prev.map((u) => (u.clientId === member.clientId ? member : u))
+        );
       });
 
       // Get current presence members
@@ -77,15 +85,19 @@ export const useGlobalPresence = () => {
       // Join global presence
       const userData = {
         id: user.id,
-        name: user.trainerInfo?.trainerProfile?.firstName || user.clientInfo?.clientProfile?.firstName || 'Unknown User',
-        avatar: user.trainerInfo?.trainerProfile?.profileImage || user.clientInfo?.clientProfile?.profileImage,
-        role: user.role
+        name:
+          user.trainerInfo?.trainerProfile?.firstName ||
+          user.clientInfo?.clientProfile?.firstName ||
+          "Unknown User",
+        avatar:
+          user.trainerInfo?.trainerProfile?.profileImage ||
+          user.clientInfo?.clientProfile?.profileImage,
+        role: user.role,
       };
-      
+
       await joinGlobalPresence(userData);
       setMyPresence(userData);
       setLoading(false);
-
     } catch (error) {
       console.error("Failed to initialize presence:", error);
       setLoading(false);
@@ -99,7 +111,11 @@ export const useGlobalPresence = () => {
         await leaveGlobalPresence();
         channelRef.current.presence.unsubscribe();
       }
-      if (ablyRef.current && ablyRef.current.connection && ablyRef.current.connection.state !== 'closed') {
+      if (
+        ablyRef.current &&
+        ablyRef.current.connection &&
+        ablyRef.current.connection.state !== "closed"
+      ) {
         ablyRef.current.connection.close();
       }
     } catch (error) {
@@ -108,16 +124,22 @@ export const useGlobalPresence = () => {
   }, []);
 
   // Update presence data
-  const updatePresence = useCallback(async (data) => {
-    if (!myPresence) return;
-    
-    const updatedData = { ...myPresence, ...data };
-    await updateGlobalPresence(updatedData);
-    setMyPresence(updatedData);
-  }, [myPresence]);
+  const updatePresence = useCallback(
+    async (data) => {
+      if (!myPresence) return;
+
+      const updatedData = { ...myPresence, ...data };
+      await updateGlobalPresence(updatedData);
+      setMyPresence(updatedData);
+    },
+    [myPresence]
+  );
 
   // Check if user is online
-  const isUserOnline = useCallback((userId) => onlineUsers.some(user => user.data?.userId === userId), [onlineUsers]);
+  const isUserOnline = useCallback(
+    (userId) => onlineUsers.some((user) => user.data?.userId === userId),
+    [onlineUsers]
+  );
 
   useEffect(() => {
     initializePresence();
@@ -132,15 +154,15 @@ export const useGlobalPresence = () => {
             // Ignore errors during page unload
           });
         }
-              } catch {
-          // Ignore errors during page unload
-        }
+      } catch {
+        // Ignore errors during page unload
+      }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
       cleanup();
     };
   }, [initializePresence, cleanup]);
@@ -170,27 +192,27 @@ export const useChatPresence = (chatId) => {
         // Get current user
         const response = await fetch("/api/users/me");
         if (!response.ok) return;
-        
+
         const user = await response.json();
         currentUserRef.current = user;
 
         // Fetch token from backend
-        const tokenResponse = await fetch('/api/auth/ably-token', {
-          method: 'POST',
+        const tokenResponse = await fetch("/api/auth/ably-token", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ clientId: user.id }),
         });
 
         if (!tokenResponse.ok) {
-          throw new Error('Failed to get Ably token');
+          throw new Error("Failed to get Ably token");
         }
 
         const { tokenRequest } = await tokenResponse.json();
 
         // Dynamically import Ably and create instance with token
-        const { default: Ably } = await import('ably');
+        const { default: Ably } = await import("ably");
         const ably = new Ably.Realtime({
           authCallback: async (tokenParams, callback) => {
             callback(null, tokenRequest);
@@ -201,29 +223,33 @@ export const useChatPresence = (chatId) => {
         // Get chat channel
         const channelName = `chat:${chatId}`;
         channelRef.current = ably.channels.get(channelName);
-        
+
         // Subscribe to presence events
-        channelRef.current.presence.subscribe('enter', (member) => {
-          setPresenceMembers(prev => {
-            const exists = prev.some(u => u.clientId === member.clientId);
+        channelRef.current.presence.subscribe("enter", (member) => {
+          setPresenceMembers((prev) => {
+            const exists = prev.some((u) => u.clientId === member.clientId);
             if (exists) return prev;
             return [...prev, member];
           });
         });
 
-        channelRef.current.presence.subscribe('leave', (member) => {
-          setPresenceMembers(prev => prev.filter(u => u.clientId !== member.clientId));
-          setTypingUsers(prev => prev.filter(u => u.clientId !== member.clientId));
+        channelRef.current.presence.subscribe("leave", (member) => {
+          setPresenceMembers((prev) =>
+            prev.filter((u) => u.clientId !== member.clientId)
+          );
+          setTypingUsers((prev) =>
+            prev.filter((u) => u.clientId !== member.clientId)
+          );
         });
 
-        channelRef.current.presence.subscribe('update', (member) => {
-          setPresenceMembers(prev => prev.map(u => 
-            u.clientId === member.clientId ? member : u
-          ));
-          
+        channelRef.current.presence.subscribe("update", (member) => {
+          setPresenceMembers((prev) =>
+            prev.map((u) => (u.clientId === member.clientId ? member : u))
+          );
+
           // Update typing users
-          setTypingUsers(prev => {
-            const filtered = prev.filter(u => u.clientId !== member.clientId);
+          setTypingUsers((prev) => {
+            const filtered = prev.filter((u) => u.clientId !== member.clientId);
             if (member.data?.typing && member.clientId !== user.id) {
               return [...filtered, member];
             }
@@ -238,11 +264,13 @@ export const useChatPresence = (chatId) => {
         // Join chat presence
         const userData = {
           id: user.id,
-          name: user.trainerInfo?.trainerProfile?.firstName || user.clientInfo?.clientProfile?.firstName || 'Unknown User'
+          name:
+            user.trainerInfo?.trainerProfile?.firstName ||
+            user.clientInfo?.clientProfile?.firstName ||
+            "Unknown User",
         };
-        
-        await joinChatPresence(chatId, userData);
 
+        await joinChatPresence(chatId, userData);
       } catch (error) {
         console.error("Failed to initialize chat presence:", error);
       }
@@ -259,33 +287,36 @@ export const useChatPresence = (chatId) => {
   }, [chatId]);
 
   // Set typing status
-  const setTypingStatus = useCallback(async (isTyping) => {
-    if (!chatId) return;
+  const setTypingStatus = useCallback(
+    async (isTyping) => {
+      if (!chatId) return;
 
-    try {
-      await updateTypingStatus(chatId, isTyping);
-      
-      // Auto-clear typing after 3 seconds of inactivity
-      if (isTyping) {
-        if (typingTimeoutRef.current) {
-          clearTimeout(typingTimeoutRef.current);
+      try {
+        await updateTypingStatus(chatId, isTyping);
+
+        // Auto-clear typing after 3 seconds of inactivity
+        if (isTyping) {
+          if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+          }
+
+          typingTimeoutRef.current = setTimeout(() => {
+            updateTypingStatus(chatId, false);
+          }, 3000);
         }
-        
-        typingTimeoutRef.current = setTimeout(() => {
-          updateTypingStatus(chatId, false);
-        }, 3000);
+      } catch (error) {
+        console.error("Failed to update typing status:", error);
       }
-    } catch (error) {
-      console.error("Failed to update typing status:", error);
-    }
-  }, [chatId]);
+    },
+    [chatId]
+  );
 
   // Check if someone is typing (excluding current user)
   const isOtherUserTyping = typingUsers.length > 0;
   const typingUserNames = typingUsers
-    .filter(user => user.clientId !== currentUserRef.current?.id)
-    .map(user => user.data?.name || 'Someone')
-    .join(', ');
+    .filter((user) => user.clientId !== currentUserRef.current?.id)
+    .map((user) => user.data?.name || "Someone")
+    .join(", ");
 
   return {
     presenceMembers,
@@ -294,4 +325,4 @@ export const useChatPresence = (chatId) => {
     typingUserNames,
     setTypingStatus,
   };
-}; 
+};

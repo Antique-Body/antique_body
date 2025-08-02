@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 
-
-
 export const useChat = (chatId) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -50,22 +48,22 @@ export const useChat = (chatId) => {
       isInitializing = true;
       try {
         // Fetch token from backend
-        const tokenResponse = await fetch('/api/auth/ably-token', {
-          method: 'POST',
+        const tokenResponse = await fetch("/api/auth/ably-token", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ clientId: currentUserId }),
         });
 
         if (!tokenResponse.ok) {
-          throw new Error('Failed to get Ably token');
+          throw new Error("Failed to get Ably token");
         }
 
         const { tokenRequest } = await tokenResponse.json();
 
         // Dynamically import Ably and create instance with token
-        const { default: Ably } = await import('ably');
+        const { default: Ably } = await import("ably");
         const ably = new Ably.Realtime({
           authCallback: async (tokenParams, callback) => {
             callback(null, tokenRequest);
@@ -78,29 +76,31 @@ export const useChat = (chatId) => {
         const channelName = `chat:${chatId}`;
         const channel = ably.channels.get(channelName);
         channelRef.current = channel;
-        
+
         // Create a specific callback function to avoid duplicates
         const messageCallback = (message) => {
           // Only add messages for the current conversation
           if (message.data.chatId === chatId) {
             setMessages((prev) => {
               // Check if message already exists to prevent duplicates
-              const messageExists = prev.some(msg => msg.id === message.data.id);
+              const messageExists = prev.some(
+                (msg) => msg.id === message.data.id
+              );
               if (messageExists) {
                 return prev;
               }
-              
+
               // Add isMine property based on current user
               const messageWithIsMine = {
                 ...message.data,
-                isMine: message.data.senderId === currentUserId
+                isMine: message.data.senderId === currentUserId,
               };
-              
+
               return [...prev, messageWithIsMine];
             });
           }
         };
-        
+
         // Subscribe to new messages
         channel.subscribe("message", messageCallback);
       } catch (err) {
@@ -155,19 +155,19 @@ export const useChat = (chatId) => {
 
     try {
       const response = await fetch(`/api/messages/direct/${chatId}`);
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch messages");
       }
 
       const data = await response.json();
-      
+
       // Add isMine property to fetched messages
-      const messagesWithIsMine = (data.messages || []).map(message => ({
+      const messagesWithIsMine = (data.messages || []).map((message) => ({
         ...message,
-        isMine: message.senderId === currentUserId
+        isMine: message.senderId === currentUserId,
       }));
-      
+
       setMessages(messagesWithIsMine);
     } catch (err) {
       console.error("Error fetching messages:", err);
@@ -178,49 +178,52 @@ export const useChat = (chatId) => {
   }, [chatId, currentUserId]);
 
   // Send a message
-  const sendMessage = useCallback(async (content, messageType = "text", fileData = null) => {
-    if (!chatId || !content.trim()) return;
+  const sendMessage = useCallback(
+    async (content, messageType = "text", fileData = null) => {
+      if (!chatId || !content.trim()) return;
 
-    setSending(true);
-    setError(null);
+      setSending(true);
+      setError(null);
 
-    try {
-      const requestBody = {
-        content: content.trim(),
-        messageType,
-        ...(fileData && {
-          fileUrl: fileData.url,
-          fileName: fileData.name,
-        }),
-      };
+      try {
+        const requestBody = {
+          content: content.trim(),
+          messageType,
+          ...(fileData && {
+            fileUrl: fileData.url,
+            fileName: fileData.name,
+          }),
+        };
 
-      const response = await fetch(`/api/messages/direct/${chatId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      });
+        const response = await fetch(`/api/messages/direct/${chatId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to send message");
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to send message");
+        }
+
+        const data = await response.json();
+
+        // Don't add the message here - let Ably handle it for consistency
+        // This prevents duplicate messages
+
+        return data.message;
+      } catch (err) {
+        console.error("Error sending message:", err);
+        setError(err.message || "Failed to send message");
+        throw err;
+      } finally {
+        setSending(false);
       }
-
-      const data = await response.json();
-      
-      // Don't add the message here - let Ably handle it for consistency
-      // This prevents duplicate messages
-      
-      return data.message;
-    } catch (err) {
-      console.error("Error sending message:", err);
-      setError(err.message || "Failed to send message");
-      throw err;
-    } finally {
-      setSending(false);
-    }
-  }, [chatId]);
+    },
+    [chatId]
+  );
 
   // Mark messages as read (called when conversation is opened)
   const markAsRead = useCallback(async () => {
@@ -228,9 +231,9 @@ export const useChat = (chatId) => {
 
     try {
       const response = await fetch(`/api/messages/direct/${chatId}/mark-read`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
@@ -250,9 +253,9 @@ export const useChat = (chatId) => {
 
     try {
       const response = await fetch(`/api/messages/direct/${chatId}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
@@ -291,7 +294,7 @@ export const useConversations = () => {
 
     try {
       const response = await fetch("/api/messages/conversations");
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch conversations");
       }
@@ -312,4 +315,4 @@ export const useConversations = () => {
     error,
     fetchConversations,
   };
-}; 
+};

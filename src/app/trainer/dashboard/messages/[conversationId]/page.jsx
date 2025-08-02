@@ -13,4 +13,4 @@ export default function ConversationPage() {
       <RealTimeChatInterface conversationId={conversationId} />
     </div>
   );
-} 
+}

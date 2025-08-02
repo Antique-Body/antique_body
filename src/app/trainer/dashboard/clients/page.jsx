@@ -23,7 +23,6 @@ export default function ClientsPage() {
   const [sortOrder, setSortOrder] = useState("asc");
   const searchInputRef = useRef(null);
 
-
   // Pagination settings
   const CLIENTS_PER_PAGE = 12;
 
@@ -168,8 +167,6 @@ export default function ClientsPage() {
       router.push(`/trainer/dashboard/clients/${clientRequest.id}`);
     }
   };
-
-
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -320,7 +317,7 @@ export default function ClientsPage() {
         totalPages={totalPages}
         handlePageChange={handlePageChange}
         handleSearchClear={handleClearFilters}
-                searchQuery={searchQuery}
+        searchQuery={searchQuery}
         loading={loading}
       />
     </div>

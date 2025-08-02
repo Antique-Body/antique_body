@@ -48,4 +48,4 @@ export const useCurrentUser = () => {
     getTrainerId,
     getRole,
   };
-}; 
+};

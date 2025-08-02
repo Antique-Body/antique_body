@@ -21,7 +21,12 @@ import { mapSpecialtyToLabel } from "@/utils/specialtyMapper";
 export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
   const [activeTab, setActiveTab] = useState("about");
   const router = useRouter();
-  const { getClientId, getTrainerId, getRole, loading: userLoading } = useCurrentUser();
+  const {
+    getClientId,
+    getTrainerId,
+    getRole,
+    loading: userLoading,
+  } = useCurrentUser();
 
   const hasHighlightedImages =
     trainer?.galleryImages?.some((img) => img.isHighlighted) || false;
@@ -71,8 +76,6 @@ export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
     const clientId = getClientId();
     const trainerId = getTrainerId();
 
-
-
     if (!role || !trainer?.id) {
       console.error("Missing user role or trainer ID");
       return;
@@ -97,22 +100,23 @@ export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
       return;
     }
 
-
-
     // Store participant info in session storage for secure access
     const participantInfo = {
       name: trainer.name || "Unknown Trainer",
       avatar: trainer.profileImage || null,
       id: trainer.id,
       chatId: chatId,
-      timestamp: Date.now() // Add timestamp for security
+      timestamp: Date.now(), // Add timestamp for security
     };
-    
+
     // Store in session storage (cleared when browser/tab closes)
-    sessionStorage.setItem('tempConversation', JSON.stringify(participantInfo));
-    
+    sessionStorage.setItem("tempConversation", JSON.stringify(participantInfo));
+
     // Navigate to the appropriate messages page
-    const basePath = role === "client" ? "/client/dashboard/messages" : "/trainer/dashboard/messages";
+    const basePath =
+      role === "client"
+        ? "/client/dashboard/messages"
+        : "/trainer/dashboard/messages";
     router.push(`${basePath}/${encodeURIComponent(chatId)}`);
     onClose(); // Close the modal
   };
@@ -247,7 +251,11 @@ export const TrainerProfileModal = ({ trainer, onClose, isOpen }) => {
             <Button variant="orangeFilled" className="px-3 py-1.5 text-sm">
               Book Session
             </Button>
-            <Button onClick={handleMessageClick} variant="secondary" className="px-3 py-1.5 text-sm">
+            <Button
+              onClick={handleMessageClick}
+              variant="secondary"
+              className="px-3 py-1.5 text-sm"
+            >
               Message
             </Button>
             <Button

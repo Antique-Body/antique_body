@@ -24,7 +24,7 @@ export default function RequestCoachingModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [messageStatus, setMessageStatus] = useState(""); // "sending", "sent", "error"
-  
+
   const { getClientId, getRole, loading: userLoading } = useCurrentUser();
   const router = useRouter();
 
@@ -72,7 +72,7 @@ export default function RequestCoachingModal({
 
       setMessageStatus("sent");
       setMessage("");
-      
+
       // Redirect to the chat after a brief delay to show success feedback
       setTimeout(() => {
         setMessageStatus("");
@@ -80,7 +80,6 @@ export default function RequestCoachingModal({
         // Navigate to the messages page with the chat ID
         router.push(`/client/dashboard/messages/${encodeURIComponent(chatId)}`);
       }, 1500);
-
     } catch (error) {
       console.error("Error sending message:", error);
       setSubmitError(error.message);
@@ -512,8 +511,9 @@ export default function RequestCoachingModal({
                   Send a direct message
                 </p>
                 <p className="mt-2 text-sm leading-relaxed text-zinc-300">
-                  Start a conversation with {trainer.firstName} by sending them a message. 
-                  This will create a new conversation that you can continue in your messages.
+                  Start a conversation with {trainer.firstName} by sending them
+                  a message. This will create a new conversation that you can
+                  continue in your messages.
                 </p>
               </div>
             </div>

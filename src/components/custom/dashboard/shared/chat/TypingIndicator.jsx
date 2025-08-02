@@ -19,4 +19,4 @@ export const TypingIndicator = ({ isTyping, userName }) => {
       </div>
     </div>
   );
-}; 
+};

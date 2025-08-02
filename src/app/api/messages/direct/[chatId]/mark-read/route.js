@@ -7,7 +7,7 @@ import { parseChatId, isValidChatId } from "@/utils/chatUtils";
 export async function POST(request, { params }) {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -23,7 +23,7 @@ export async function POST(request, { params }) {
     }
 
     const { trainerId, clientId } = parseChatId(chatId);
-    
+
     if (!trainerId || !clientId) {
       return NextResponse.json(
         { error: "Invalid chat ID format" },
@@ -88,9 +88,9 @@ export async function POST(request, { params }) {
       return { updatedMessages, conversation };
     });
 
-    return NextResponse.json({ 
-      success: true, 
-      markedAsRead: result.updatedMessages.count 
+    return NextResponse.json({
+      success: true,
+      markedAsRead: result.updatedMessages.count,
     });
   } catch (error) {
     console.error("Error marking messages as read:", error);
@@ -99,4 +99,4 @@ export async function POST(request, { params }) {
       { status: 500 }
     );
   }
-} 
+}

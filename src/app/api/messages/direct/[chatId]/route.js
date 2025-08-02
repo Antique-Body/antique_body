@@ -5,7 +5,7 @@ import { auth } from "#/auth";
 let Ably = null;
 const getServerAbly = async () => {
   if (!Ably) {
-    Ably = (await import('ably')).default;
+    Ably = (await import("ably")).default;
   }
   return Ably;
 };
@@ -15,7 +15,7 @@ import { parseChatId, isValidChatId } from "@/utils/chatUtils";
 export async function GET(request, { params }) {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -35,7 +35,7 @@ export async function GET(request, { params }) {
     }
 
     const { trainerId, clientId } = parseChatId(chatId);
-    
+
     if (!trainerId || !clientId) {
       return NextResponse.json(
         { error: "Invalid chat ID format" },
@@ -116,7 +116,7 @@ export async function GET(request, { params }) {
 export async function POST(request, { params }) {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -136,7 +136,9 @@ export async function POST(request, { params }) {
     const MAX_MESSAGE_LENGTH = 500;
     if (content.length > MAX_MESSAGE_LENGTH) {
       return NextResponse.json(
-        { error: `Message content cannot exceed ${MAX_MESSAGE_LENGTH} characters` },
+        {
+          error: `Message content cannot exceed ${MAX_MESSAGE_LENGTH} characters`,
+        },
         { status: 400 }
       );
     }
@@ -150,7 +152,7 @@ export async function POST(request, { params }) {
     }
 
     const { trainerId, clientId } = parseChatId(chatId);
-    
+
     if (!trainerId || !clientId) {
       return NextResponse.json(
         { error: "Invalid chat ID format" },
@@ -211,31 +213,29 @@ export async function POST(request, { params }) {
       },
     });
 
-          if (chatBlock) {
-        if (isClient) {
-          return NextResponse.json(
-            {
-              error: "You have been blocked.",
-              blocked: true
-            },
-            { status: 403 }
-          );
-        } else if (isTrainer) {
-          return NextResponse.json(
-            {
-              error: "You have blocked this chat. Unblock to send messages.",
-              blocked: true,
-              isTrainerBlocked: true
-            },
-            { status: 403 }
-          );
-        }
+    if (chatBlock) {
+      if (isClient) {
+        return NextResponse.json(
+          {
+            error: "You have been blocked.",
+            blocked: true,
+          },
+          { status: 403 }
+        );
+      } else if (isTrainer) {
+        return NextResponse.json(
+          {
+            error: "You have blocked this chat. Unblock to send messages.",
+            blocked: true,
+            isTrainerBlocked: true,
+          },
+          { status: 403 }
+        );
       }
+    }
 
     // Determine receiver
-    const receiverId = isTrainer 
-      ? client.user.id 
-      : trainer.user.id;
+    const receiverId = isTrainer ? client.user.id : trainer.user.id;
 
     // Create message and update/create conversation in a single transaction
     const { message } = await prisma.$transaction(async (tx) => {
@@ -273,10 +273,9 @@ export async function POST(request, { params }) {
           data: {
             lastMessageAt: message.createdAt,
             deletedAt: null, // Reactivate if it was soft-deleted
-            ...(isTrainer 
+            ...(isTrainer
               ? { clientUnreadCount: { increment: 1 } }
-              : { trainerUnreadCount: { increment: 1 } }
-            ),
+              : { trainerUnreadCount: { increment: 1 } }),
           },
         });
       } else {
@@ -313,10 +312,12 @@ export async function POST(request, { params }) {
 
     // Publish message to Ably for real-time delivery (server-side)
     const Ably = await getServerAbly();
-          const ablyClient = new Ably.Rest({
-        key: process.env.ABLY_API_KEY
-      });
-    await ablyClient.channels.get(`chat:${chatId}`).publish('message', formattedMessage);
+    const ablyClient = new Ably.Rest({
+      key: process.env.ABLY_API_KEY,
+    });
+    await ablyClient.channels
+      .get(`chat:${chatId}`)
+      .publish("message", formattedMessage);
 
     return NextResponse.json({ message: formattedMessage });
   } catch (error) {
@@ -326,12 +327,12 @@ export async function POST(request, { params }) {
       { status: 500 }
     );
   }
-} 
+}
 
 export async function DELETE(request, { params }) {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -347,7 +348,7 @@ export async function DELETE(request, { params }) {
     }
 
     const { trainerId, clientId } = parseChatId(chatId);
-    
+
     if (!trainerId || !clientId) {
       return NextResponse.json(
         { error: "Invalid chat ID format" },
@@ -407,9 +408,9 @@ export async function DELETE(request, { params }) {
       },
     });
 
-    return NextResponse.json({ 
-      success: true, 
-      message: "Chat deleted successfully" 
+    return NextResponse.json({
+      success: true,
+      message: "Chat deleted successfully",
     });
   } catch (error) {
     console.error("Error deleting chat:", error);
@@ -418,4 +419,4 @@ export async function DELETE(request, { params }) {
       { status: 500 }
     );
   }
-} 
+}

@@ -8,7 +8,7 @@ export const generateChatId = (trainerId, clientId) => {
   if (!trainerId || !clientId) {
     throw new Error("Both trainerId and clientId are required");
   }
-  
+
   // Sort IDs to ensure consistent chat ID regardless of who initiates
   const sortedIds = [trainerId, clientId].sort();
   return `${sortedIds[0]}${sortedIds[1]}`;
@@ -20,7 +20,7 @@ export const generateChatId = (trainerId, clientId) => {
  * @returns {object} Object containing trainerId and clientId
  */
 export const parseChatId = (chatId) => {
-  if (!chatId || typeof chatId !== 'string') {
+  if (!chatId || typeof chatId !== "string") {
     throw new Error("Invalid chat ID");
   }
 
@@ -28,11 +28,11 @@ export const parseChatId = (chatId) => {
   // This is a simplified approach - in a real app you might want to validate against the database
   // For now, we'll assume the first part is always the trainer ID and second is client ID
   // This works because we sort them when generating
-  
+
   // Since CUIDs are 25 characters, we can split at the 25th character
   const trainerId = chatId.substring(0, 25);
   const clientId = chatId.substring(25);
-  
+
   return { trainerId, clientId };
 };
 
@@ -42,10 +42,10 @@ export const parseChatId = (chatId) => {
  * @returns {boolean} True if valid, false otherwise
  */
 export const isValidChatId = (chatId) => {
-  if (!chatId || typeof chatId !== 'string') {
+  if (!chatId || typeof chatId !== "string") {
     return false;
   }
-  
+
   // CUIDs are 25 characters, so a valid chat ID should be 50 characters
   return chatId.length === 50;
-}; 
+};
